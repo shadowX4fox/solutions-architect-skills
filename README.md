@@ -40,11 +40,11 @@ Phase 3: Compliance Documents (11 contracts)
 
 ### Installation
 
-**Method 1: Using Claude Code Commands (Recommended)**
+**Method 1: Using Claude Code Marketplace (Recommended)**
 
 ```bash
-# Add the GitHub repository as a marketplace
-/plugin marketplace add https://github.com/shadowX4fox/solutions-architect-skills
+# Add the shadowX4fox marketplace
+/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
 
 # Install the plugin
 /plugin install solutions-architect-skills
@@ -52,6 +52,8 @@ Phase 3: Compliance Documents (11 contracts)
 # Verify installation
 /plugin list
 ```
+
+**Note:** The marketplace repository (`shadowx4fox-marketplace`) contains a catalog of plugins. You add the marketplace once, then can install any plugin listed in it.
 
 **Method 2: Direct Git Clone**
 

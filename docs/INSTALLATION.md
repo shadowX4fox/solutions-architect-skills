@@ -17,7 +17,7 @@ Complete guide to installing the Solutions Architect Skills plugin for Claude Co
 
 ## Installation Methods
 
-### Method 1: Using Claude Code Commands (Recommended)
+### Method 1: Using Claude Code Marketplace (Recommended)
 
 This is the easiest and official method for installing plugins in Claude Code.
 
@@ -26,10 +26,10 @@ This is the easiest and official method for installing plugins in Claude Code.
 In Claude Code, run:
 
 ```
-/plugin marketplace add https://github.com/shadowX4fox/solutions-architect-skills
+/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
 ```
 
-This adds the GitHub repository as a marketplace source.
+This adds the shadowX4fox marketplace which contains a catalog of available plugins.
 
 #### Step 2: Install Plugin
 
@@ -55,6 +55,8 @@ solutions-architect-skills v1.0.0
 - No manual file operations needed
 - Integrated with Claude Code plugin system
 - Automatic updates available
+
+**Note:** The marketplace repository (`shadowx4fox-marketplace`) contains a catalog of plugins. You add the marketplace once, then can install any plugin listed in it.
 
 ---
 
