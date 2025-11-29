@@ -1,0 +1,230 @@
+# Solutions Architect Skills
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
+
+Professional architecture documentation workflow for Claude Code: Transform business requirements into technical architecture and compliance documents.
+
+## Overview
+
+This Claude Code plugin provides a complete three-phase workflow for enterprise architecture documentation:
+
+```
+Phase 1: Business Requirements (PO Spec)
+    ↓
+Phase 2: Technical Architecture (ARCHITECTURE.md)
+    ↓
+Phase 3: Compliance Documents (11 contracts)
+```
+
+### What's Included
+
+- **3 Integrated Skills**
+  - `architecture-readiness`: Product Owner Specifications
+  - `architecture-docs`: ARCHITECTURE.md creation and maintenance
+  - `architecture-compliance`: Generate 11 compliance contracts
+
+- **11 Compliance Templates**
+  - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
+
+- **Automatic Validation**
+  - 26-item stack validation checklist
+  - Metric consistency checking
+  - Design Drivers calculation
+
+- **Complete Documentation**
+  - Installation guide, Quick Start tutorial, Workflow guide, Troubleshooting
+
+## Quick Start
+
+### Installation
+
+1. **Download** the latest release:
+   ```bash
+   # Download from GitHub Releases
+   wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v1.0.0/solutions-architect-skills-v1.0.0.zip
+   ```
+
+2. **Extract** the ZIP file:
+   ```bash
+   unzip solutions-architect-skills-v1.0.0.zip
+   ```
+
+3. **Install** to Claude Code plugins directory:
+   ```bash
+   mv solutions-architect-skills ~/.claude/plugins/
+   ```
+
+4. **Verify** installation:
+   ```bash
+   # Restart Claude Code, then check:
+   /plugin list
+   ```
+
+You should see `solutions-architect-skills v1.0.0` in the list.
+
+### First Workflow
+
+```bash
+# Phase 1: Create Product Owner Spec
+/skill architecture-readiness
+
+# Phase 2: Create ARCHITECTURE.md
+/skill architecture-docs
+
+# Phase 3: Generate compliance documents
+/skill architecture-compliance
+```
+
+## Features
+
+### Phase 1: Architecture Readiness (Product Owner)
+
+Create comprehensive Product Owner Specifications before technical design begins.
+
+**Key Features:**
+- 8-section template (Business Context, User Personas, Use Cases, Success Criteria, etc.)
+- Weighted scoring methodology (0-10 scale)
+- Readiness threshold: ≥7.5 for architecture handoff
+- Focus: Business requirements, no technical implementation
+
+**Output:** `PRODUCT_OWNER_SPEC.md`
+
+### Phase 2: Architecture Documentation
+
+Create and maintain technical architecture documentation following enterprise standards.
+
+**Key Features:**
+- 12-section standardized structure (Executive Summary → ADRs)
+- Automatic Document Index (lines 1-50)
+- Metric consistency validation across document
+- Design Drivers calculation (Value Delivery %, Scale, Impacts)
+- 9 mandatory Architecture Principles + 1 optional
+- ADR (Architecture Decision Record) templates
+
+**Output:** `ARCHITECTURE.md` (2,000-3,000 lines typically)
+
+### Phase 3: Compliance Documentation
+
+Generate 11 compliance contracts from ARCHITECTURE.md with full traceability.
+
+**Key Features:**
+- Context-efficient generation (70-80% reduction in loaded content)
+- 11 contract types covering all architectural domains
+- Automatic stack validation (Development Architecture)
+- Source traceability (section + line number references)
+- [PLACEHOLDER] markers for missing data with completion guidance
+- Compliance manifest (index of all generated documents)
+
+**Output:** `/compliance-docs/` directory with 11 contracts + manifest
+
+#### 11 Compliance Contract Types
+
+1. **Business Continuity** (Continuidad de Negocio) - RTO/RPO, disaster recovery, backup strategy
+2. **SRE** (Arquitectura SRE) - SLOs, error budgets, monitoring, incident management
+3. **Cloud Architecture** - Deployment model, cloud provider, connectivity, security
+4. **Data & Analytics/AI** - Data quality, governance, ML models, analytics
+5. **Development Architecture** - Technology stack, coding standards, technical debt, **automatic 26-item validation**
+6. **Process Transformation** - Automation, efficiency, ROI analysis
+7. **Security Architecture** - API security, authentication, encryption, compliance
+8. **IT Platforms & Infrastructure** - Environments, databases, capacity, naming conventions
+9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first
+10. **Integration Architecture** - Integration catalog, patterns, security, standards
+11. **Risk Management** - Risk identification, assessment, mitigation, monitoring
+
+## Documentation
+
+- **[Installation Guide](docs/INSTALLATION.md)** - Detailed installation instructions
+- **[Quick Start](docs/QUICK_START.md)** - 5-minute getting started tutorial
+- **[Workflow Guide](docs/WORKFLOW_GUIDE.md)** - Complete end-to-end workflow
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - FAQ and common issues
+
+## Examples
+
+The `examples/` directory contains realistic demonstrations:
+
+- **PRODUCT_OWNER_SPEC_example.md** - Complete PO Spec (Job Scheduling Platform)
+- **ARCHITECTURE_example.md** - Full ARCHITECTURE.md based on PO Spec
+- **compliance-docs/** - All 11 generated compliance contracts
+
+## Requirements
+
+- **Claude Code** (latest version)
+- **Platform:** macOS, Linux, or Windows
+- **No dependencies** - Pure markdown-based plugin
+
+## Use Cases
+
+Perfect for:
+- Enterprise architects documenting solution designs
+- Product Owners preparing requirements for architecture teams
+- Compliance teams generating organizational contracts
+- Technical leads maintaining architecture documentation
+- Teams needing standardized architecture workflows
+
+## Workflow Integration
+
+```mermaid
+graph LR
+    A[Product Owner] -->|Creates| B[PO Spec]
+    B -->|Input to| C[Architecture Team]
+    C -->|Creates| D[ARCHITECTURE.md]
+    D -->|Generates| E[11 Compliance Contracts]
+    E -->|Review by| F[Compliance Team]
+```
+
+## Technology Stack Validation
+
+The Development Architecture contract includes **automatic validation** against a 26-item checklist:
+
+- **Java Backend** (6 items): Version, framework, tools, containers, libraries, naming
+- **.NET Backend** (6 items): Version, framework, tools, containers, libraries, naming
+- **Frontend** (6 items): Framework, language, tools, architecture, libraries, naming
+- **Other Stacks** (5 items): Automation, IaC, databases, APIs, CI/CD
+- **Exceptions** (3 items): Deviations, documentation, action plans
+
+**Validation States:**
+- ✅ **PASS**: Complies with authorized catalog → Approval unblocked
+- ❌ **FAIL**: Non-compliant or deprecated → Approval blocked with remediation guidance
+- ❓ **UNKNOWN**: Insufficient data → Requires documentation completion
+- ⚪ **N/A**: Not applicable to architecture
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+### Reporting Issues
+
+If you encounter problems:
+1. Check the [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+2. Search [existing issues](https://github.com/shadowx4fox/solutions-architect-skills/issues)
+3. Open a new issue with detailed description
+
+### Feature Requests
+
+Have an idea for improvement? Open an issue with the `enhancement` label.
+
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+**shadowx4fox**
+- GitHub: [@shadowx4fox](https://github.com/shadowx4fox)
+- Repository: [solutions-architect-skills](https://github.com/shadowx4fox/solutions-architect-skills)
+
+## Acknowledgments
+
+- Built for [Claude Code](https://claude.com/claude-code) by Anthropic
+- Follows enterprise architecture best practices
+- Inspired by organizational compliance frameworks
+
+---
+
+**Get Started:** Download the [latest release](https://github.com/shadowx4fox/solutions-architect-skills/releases) and transform your architecture workflow today!
