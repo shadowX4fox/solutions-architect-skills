@@ -24,18 +24,15 @@
   "skills": [
     {
       "name": "architecture-readiness",
-      "description": "Create Product Owner Specifications for business requirements",
-      "source": "./skills/architecture-readiness/SKILL.md"
+      "description": "Create Product Owner Specifications for business requirements"
     },
     {
       "name": "architecture-docs",
-      "description": "Create and maintain ARCHITECTURE.md documentation",
-      "source": "./skills/architecture-docs/SKILL.md"
+      "description": "Create and maintain ARCHITECTURE.md documentation"
     },
     {
       "name": "architecture-compliance",
-      "description": "Generate compliance documents from ARCHITECTURE.md",
-      "source": "./skills/architecture-compliance/SKILL.md"
+      "description": "Generate compliance documents from ARCHITECTURE.md"
     }
   ]
 }
