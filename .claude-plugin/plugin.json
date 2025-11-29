@@ -8,6 +8,7 @@
     "url": "https://github.com/shadowX4fox"
   },
   "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
   "license": "MIT",
   "keywords": [
     "architecture",
@@ -20,19 +21,5 @@
     "cloud",
     "governance",
     "technical-writing"
-  ],
-  "skills": [
-    {
-      "name": "architecture-readiness",
-      "description": "Create Product Owner Specifications for business requirements"
-    },
-    {
-      "name": "architecture-docs",
-      "description": "Create and maintain ARCHITECTURE.md documentation"
-    },
-    {
-      "name": "architecture-compliance",
-      "description": "Generate compliance documents from ARCHITECTURE.md"
-    }
   ]
 }
