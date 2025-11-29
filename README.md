@@ -40,25 +40,44 @@ Phase 3: Compliance Documents (11 contracts)
 
 ### Installation
 
-1. **Download** the latest release:
+**Method 1: Using Claude Code Commands (Recommended)**
+
+```bash
+# Add the GitHub repository as a marketplace
+/plugin marketplace add https://github.com/shadowX4fox/solutions-architect-skills
+
+# Install the plugin
+/plugin install solutions-architect-skills
+
+# Verify installation
+/plugin list
+```
+
+**Method 2: Direct Git Clone**
+
+```bash
+# Clone directly to plugins directory
+git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claude/plugins/solutions-architect-skills
+
+# Restart Claude Code and verify
+/plugin list
+```
+
+**Method 3: Download Release ZIP**
+
+1. Download the latest release:
    ```bash
-   # Download from GitHub Releases
    wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v1.0.0/solutions-architect-skills-v1.0.0.zip
    ```
 
-2. **Extract** the ZIP file:
+2. Extract and install:
    ```bash
    unzip solutions-architect-skills-v1.0.0.zip
-   ```
-
-3. **Install** to Claude Code plugins directory:
-   ```bash
    mv solutions-architect-skills ~/.claude/plugins/
    ```
 
-4. **Verify** installation:
+3. Restart Claude Code and verify:
    ```bash
-   # Restart Claude Code, then check:
    /plugin list
    ```
 

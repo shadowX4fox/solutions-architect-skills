@@ -17,9 +17,93 @@ Complete guide to installing the Solutions Architect Skills plugin for Claude Co
 
 ## Installation Methods
 
-### Method 1: Download from GitHub Releases (Recommended)
+### Method 1: Using Claude Code Commands (Recommended)
 
-This is the easiest and recommended method for most users.
+This is the easiest and official method for installing plugins in Claude Code.
+
+#### Step 1: Add Marketplace
+
+In Claude Code, run:
+
+```
+/plugin marketplace add https://github.com/shadowX4fox/solutions-architect-skills
+```
+
+This adds the GitHub repository as a marketplace source.
+
+#### Step 2: Install Plugin
+
+```
+/plugin install solutions-architect-skills
+```
+
+Claude Code will automatically clone and install the plugin.
+
+#### Step 3: Verify Installation
+
+```
+/plugin list
+```
+
+You should see:
+```
+solutions-architect-skills v1.0.0
+```
+
+**Advantages:**
+- Official Claude Code installation method
+- No manual file operations needed
+- Integrated with Claude Code plugin system
+- Automatic updates available
+
+---
+
+### Method 2: Direct Git Clone
+
+Clone the repository directly to your plugins directory.
+
+#### Step 1: Clone Repository
+
+```bash
+git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claude/plugins/solutions-architect-skills
+```
+
+This clones the repository directly to the correct location.
+
+#### Step 2: Restart Claude Code
+
+Completely restart Claude Code to load the new plugin.
+
+#### Step 3: Verify Installation
+
+In Claude Code, run:
+
+```
+/plugin list
+```
+
+You should see:
+```
+solutions-architect-skills v1.0.0
+```
+
+**To Update Later:**
+```bash
+cd ~/.claude/plugins/solutions-architect-skills
+git pull origin main
+# Restart Claude Code
+```
+
+**Advantages:**
+- No ZIP download or extraction needed
+- Easy to update with `git pull`
+- Maintains Git connection for contributors
+
+---
+
+### Method 3: Download from GitHub Releases
+
+Download and install from a release ZIP file.
 
 #### Step 1: Download Release Package
 
@@ -68,28 +152,13 @@ You should see:
 solutions-architect-skills v1.0.0
 ```
 
-### Method 2: Clone from GitHub Repository
+**Advantages:**
+- Familiar download and extract process
+- Works without Git installed
+- Official release packages
+- Includes SHA256 checksum for verification
 
-For developers who want to contribute or stay on the latest development version.
-
-#### Step 1: Clone Repository
-
-```bash
-cd ~/.claude/plugins
-git clone https://github.com/shadowx4fox/solutions-architect-skills.git
-```
-
-#### Step 2: Restart Claude Code
-
-Completely restart Claude Code.
-
-#### Step 3: Verify Installation
-
-```
-/plugin list
-```
-
-Should show `solutions-architect-skills v1.0.0`.
+---
 
 ## Verification Checklist
 
