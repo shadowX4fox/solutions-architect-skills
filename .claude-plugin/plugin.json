@@ -1,5 +1,6 @@
 {
   "name": "solutions-architect-skills",
+  "source": "./",
   "version": "1.0.0",
   "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → Compliance documents",
   "author": {
@@ -8,7 +9,6 @@
     "url": "https://github.com/shadowX4fox"
   },
   "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
-  "source": "./",
   "license": "MIT",
   "keywords": [
     "architecture",
