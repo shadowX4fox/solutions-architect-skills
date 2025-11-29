@@ -1,0 +1,21 @@
+{
+  "name": "shadowx4fox-solution-architect-marketplace",
+  "owner": {
+    "name": "shadowX4fox",
+    "url": "https://github.com/shadowX4fox"
+  },
+  "plugins": [
+    {
+      "name": "solutions-architect-skills",
+      "source": "./",
+      "description": "Professional architecture documentation workflow: Business requirements, technical architecture, and compliance documentation",
+      "version": "1.0.0",
+      "author": {
+        "name": "shadowX4fox"
+      }
+    }
+  ],
+  "metadata": {
+    "description": "Official plugin marketplace by shadowX4fox"
+  }
+}
