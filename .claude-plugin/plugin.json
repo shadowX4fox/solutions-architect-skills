@@ -8,7 +8,7 @@
     "url": "https://github.com/shadowX4fox"
   },
   "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
-  "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "source": "./",
   "license": "MIT",
   "keywords": [
     "architecture",
