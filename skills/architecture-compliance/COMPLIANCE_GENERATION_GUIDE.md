@@ -4,9 +4,9 @@
 
 This guide provides comprehensive reference for generating compliance documents from ARCHITECTURE.md files. These compliance documents ensure that architectural decisions align with organizational standards, regulatory requirements, and best practices.
 
-### What are Contratos de Adherencia?
+### What are Compliance Contracts?
 
-**Contratos de Adherencia** (Adherence Contracts) are organizational compliance documents that define guidelines, standards, and requirements for different architectural domains. Each contract type focuses on a specific aspect of architecture (security, cloud, SRE, etc.) and ensures consistency across projects.
+**Compliance Contracts** (Adherence Contracts) are organizational compliance documents that define guidelines, standards, and requirements for different architectural domains. Each contract type focuses on a specific aspect of architecture (security, cloud, SRE, etc.) and ensures consistency across projects.
 
 ### Why Generate from ARCHITECTURE.md?
 
@@ -28,7 +28,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ## Document Types (11 Compliance Contracts)
 
-### 1. Continuidad de Negocio (Business Continuity)
+### 1. Business Continuity (Business Continuity)
 
 **Purpose**: Define guidelines for business continuity, disaster recovery, and resilience to ensure solution availability during disruptions.
 
@@ -53,7 +53,7 @@ This guide provides comprehensive reference for generating compliance documents 
 - **Secondary**: Section 10 (Performance Requirements) - 20% of content
   - 10.2: Availability SLAs
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Impact to critical business processes must be documented
 - RTO and RPO must be defined based on business criticality
 - Disaster recovery procedures must be automated where possible
@@ -64,7 +64,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 2. Arquitectura SRE (Site Reliability Engineering)
+### 2. SRE Architecture (Site Reliability Engineering)
 
 **Purpose**: Define guidelines for site reliability, observability, and operational excellence to ensure solution resilience and performance.
 
@@ -94,7 +94,7 @@ This guide provides comprehensive reference for generating compliance documents 
 - **Secondary**: Section 5 (System Components) - 10% of content
   - Component-level reliability requirements
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - All services must define availability SLOs (minimum 99.9%)
 - Error budgets must be calculated and tracked monthly
 - Monitoring must include metrics, logs, and traces (observability triad)
@@ -137,7 +137,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 9 (Security Considerations) - 5% of content
   - Section 10 (Performance Requirements) - 5% of content
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Cloud deployment model must be documented (IaaS/PaaS/SaaS)
 - Multi-region deployment required for Tier 1 applications
 - Cloud-native services preferred over custom solutions
@@ -149,7 +149,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 4. Arquitectura Datos y Analítica - IA
+### 4. Data & Analytics - AI Architecture
 
 **Purpose**: Define guidelines for data management, analytics, and artificial intelligence including data quality, governance, and AI model lifecycle.
 
@@ -184,7 +184,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 10 (Performance Requirements) - 10% of content
     - Data processing SLAs
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Data quality metrics must be defined and monitored
 - Data lineage must be tracked from source to consumption
 - PII data must be encrypted and masked appropriately
@@ -196,7 +196,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 5. Arquitectura Desarrollo (Development Architecture)
+### 5. Development Architecture (Development Architecture)
 
 **Purpose**: Define guidelines for software development including technology stack, development practices, and technical debt management.
 
@@ -229,7 +229,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 11 (Operational Considerations) - 10% of content
     - Deployment, CI/CD
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Technology stack must use supported, non-deprecated versions
 - Code coverage minimum: 80% for critical paths
 - All code changes require peer review
@@ -243,7 +243,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 6. Transformación de Procesos y Automatización
+### 6. Process Transformation and Automation
 
 **Purpose**: Define guidelines for process automation, efficiency improvements, and digital transformation initiatives.
 
@@ -276,7 +276,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 7 (Integration Points) - 10% of content
     - Integration with existing systems
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Manual processes > 10 hours/month should be evaluated for automation
 - Automation ROI must be positive within 12 months
 - Reusable capabilities must be designed as shared services
@@ -288,7 +288,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 7. Arquitectura Seguridad (Security Architecture)
+### 7. Security Architecture (Security Architecture)
 
 **Purpose**: Define guidelines for security including API security, authentication, encryption, and secure communication.
 
@@ -318,7 +318,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 11 (Operational Considerations) - 10% of content
     - Security monitoring
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - All APIs must require authentication and authorization
 - Encryption required: TLS 1.3 for transit, AES-256 for rest
 - Secrets must never be stored in code or configuration files
@@ -330,7 +330,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 8. Plataformas e Infraestructura TI
+### 8. Platform & IT Infrastructure
 
 **Purpose**: Define guidelines for platform design, infrastructure deployment, and operational environments.
 
@@ -361,7 +361,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 10 (Performance Requirements) - 10% of content
     - Capacity requirements
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Production environments must be isolated (network, IAM)
 - Only authorized OS versions may be used (security patches current)
 - Database capacity must support 3x current transaction volume
@@ -373,7 +373,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 9. Arquitectura Empresarial (Enterprise Architecture)
+### 9. Enterprise Architecture (Enterprise Architecture)
 
 **Purpose**: Define guidelines for strategic alignment, modularity, cloud-first approach, and business-technology alignment.
 
@@ -406,7 +406,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 12 (Architecture Decision Records) - 10% of content
     - Strategic decisions
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - Solutions must align with enterprise business capabilities
 - Modularity: services should be bounded by business domains
 - Cloud-first: prefer cloud-native over on-premise solutions
@@ -419,7 +419,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 10. Arquitectura de Integración
+### 10. Integration Architecture
 
 **Purpose**: Define guidelines for integration of microservices, APIs, and event-driven systems ensuring security, standards compliance, and best practices.
 
@@ -450,7 +450,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 8 (Technology Stack) - 10% of content
     - Integration technologies
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - All integrations must be cataloged and documented
 - REST APIs must follow OpenAPI 3.0 specification
 - Asynchronous integrations must use event-driven patterns
@@ -498,7 +498,7 @@ This guide provides comprehensive reference for generating compliance documents 
   - Section 5 (System Components) - 5% of content
     - Technical risks
 
-**Example Lineamientos (Guidelines)**:
+**Example Guidelines**:
 - All identified risks must have mitigation strategies
 - Critical and High risks require executive approval
 - Risk assessment must be reviewed quarterly
@@ -578,11 +578,11 @@ Action:
 
 **Option B: Generate Specific Contract Type**
 ```
-User: "Generate Arquitectura SRE contract"
+User: "Generate SRE Architecture contract"
 
 Action:
 - Parse contract name from request
-- Match to contract type: "Arquitectura SRE"
+- Match to contract type: "SRE Architecture"
 - Confirm selection
 - Proceed to data extraction
 ```
@@ -592,14 +592,14 @@ Action:
 User: "Generate security compliance documents"
 
 Category Mapping:
-- "security" → Arquitectura Seguridad, Risk Management
+- "security" → Security Architecture, Risk Management
 - "cloud" → Cloud Architecture, Plataformas Infraestructura
-- "data" → Arquitectura Datos y Analítica - IA
-- "development" → Arquitectura Desarrollo
-- "integration" → Arquitectura de Integración
-- "SRE" or "reliability" → Arquitectura SRE, Continuidad de Negocio
-- "enterprise" → Arquitectura Empresarial
-- "automation" → Transformación de Procesos y Automatización
+- "data" → Data & Analytics - AI Architecture
+- "development" → Development Architecture
+- "integration" → Integration Architecture
+- "SRE" or "reliability" → SRE Architecture, Business Continuity
+- "enterprise" → Enterprise Architecture
+- "automation" → Process Transformation and Automation
 
 Action:
 - Map category to contract types
@@ -617,7 +617,7 @@ Action:
 ```
 Consult SECTION_MAPPING_GUIDE.md for contract type
 
-Example: Arquitectura SRE
+Example: SRE Architecture
 - Primary: Sections 10, 11 (70% of content)
 - Secondary: Section 5 (10% of content)
 
@@ -669,7 +669,7 @@ Four extraction strategies:
 Store extracted data with metadata:
 
 {
-  "contract_type": "Arquitectura SRE",
+  "contract_type": "SRE Architecture",
   "data_points": [
     {
       "key": "availability_slo",
@@ -753,7 +753,7 @@ Cache Structure:
 ```
 Template file: templates/TEMPLATE_[CONTRACT_TYPE].md
 
-Example: templates/TEMPLATE_ARQUITECTURA_SRE.md
+Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
 
 If template not found:
 - Warn user
@@ -827,7 +827,7 @@ For each missing data point:
    Add RTO/RPO values to complete this section.]
 
 4. Track for completion report
-   Contract: Arquitectura SRE
+   Contract: SRE Architecture
    Missing data points: 3
    - Incident response team contacts
    - On-call rotation schedule
@@ -885,8 +885,8 @@ Content:
 
 | Contract Type | Filename | Completeness | Placeholders |
 |---------------|----------|--------------|--------------|
-| Arquitectura SRE | ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md | 85% | 3 |
-| Continuidad de Negocio | CONTINUIDAD_NEGOCIO_JobSchedulingPlatform_2025-11-26.md | 90% | 2 |
+| SRE Architecture | ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md | 85% | 3 |
+| Business Continuity | CONTINUIDAD_NEGOCIO_JobSchedulingPlatform_2025-11-26.md | 90% | 2 |
 | ... | ... | ... | ... |
 
 ## Summary
@@ -903,7 +903,7 @@ Update manifest after each contract generation (append or update)
 For each generated contract:
 
 ---
-Contract: Arquitectura SRE
+Contract: SRE Architecture
 Filename: ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md
 Status: ✓ Generated
 Completeness: 85% (17/20 data points)
@@ -956,16 +956,16 @@ Output Directory: /compliance-docs/
 Contracts Generated: 11 / 11 ✓
 
 Individual Contract Status:
-✓ Continuidad de Negocio          (90% complete, 2 placeholders)
-✓ Arquitectura SRE                (85% complete, 3 placeholders)
+✓ Business Continuity          (90% complete, 2 placeholders)
+✓ SRE Architecture                (85% complete, 3 placeholders)
 ✓ Cloud Architecture              (80% complete, 4 placeholders)
-✓ Arquitectura Datos y Analítica  (75% complete, 5 placeholders)
-✓ Arquitectura Desarrollo         (88% complete, 2 placeholders)
-✓ Transformación de Procesos      (70% complete, 6 placeholders)
-✓ Arquitectura Seguridad          (92% complete, 1 placeholder)
-✓ Plataformas e Infraestructura   (85% complete, 3 placeholders)
-✓ Arquitectura Empresarial        (78% complete, 4 placeholders)
-✓ Arquitectura de Integración     (82% complete, 3 placeholders)
+✓ Data & Analytics - AI Architecture  (75% complete, 5 placeholders)
+✓ Development Architecture         (88% complete, 2 placeholders)
+✓ Process Transformation and Automation      (70% complete, 6 placeholders)
+✓ Security Architecture          (92% complete, 1 placeholder)
+✓ Platform & IT Infrastructure   (85% complete, 3 placeholders)
+✓ Enterprise Architecture        (78% complete, 4 placeholders)
+✓ Integration Architecture     (82% complete, 3 placeholders)
 ✓ Risk Management                 (65% complete, 7 placeholders)
 
 Overall Statistics:
@@ -1287,11 +1287,11 @@ Run architecture-docs skill first:
 **3. Review Section 11 (Critical for Most Contracts)**
 ```
 Section 11 subsections needed by contracts:
-- 11.1 Monitoring → Arquitectura SRE, Cloud Architecture
-- 11.2 Incidents → Arquitectura SRE
-- 11.3 Backup & Recovery → Continuidad de Negocio, Cloud Architecture
-- 11.4 DR → Continuidad de Negocio
-- 11.5 Capacity Planning → Plataformas e Infraestructura
+- 11.1 Monitoring → SRE Architecture, Cloud Architecture
+- 11.2 Incidents → SRE Architecture
+- 11.3 Backup & Recovery → Business Continuity, Cloud Architecture
+- 11.4 DR → Business Continuity
+- 11.5 Capacity Planning → Platform & IT Infrastructure
 ```
 
 **4. Check for Quantified Metrics**

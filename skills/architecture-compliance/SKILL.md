@@ -11,8 +11,8 @@ This skill is **manually activated** when users request compliance document gene
 
 **Activation Triggers:**
 - "Generate compliance documents"
-- "Create Contratos de Adherencia"
-- "Generate [specific contract type]" (e.g., "Generate Arquitectura SRE contract")
+- "Create Compliance Contracts"
+- "Generate [specific contract type]" (e.g., "Generate SRE Architecture contract")
 - "Create compliance documentation"
 - `/skill architecture-compliance`
 - "Generate all compliance docs"
@@ -27,17 +27,17 @@ This skill is **manually activated** when users request compliance document gene
 
 This skill generates compliance documents from ARCHITECTURE.md, producing 11 separate documents:
 
-**10 Contratos de Adherencia (Adherence Contracts):**
-1. Continuidad de Negocio (Business Continuity)
-2. Arquitectura SRE (Site Reliability Engineering)
+**10 Compliance Contracts:**
+1. Business Continuity
+2. SRE Architecture (Site Reliability Engineering)
 3. Cloud Architecture
-4. Arquitectura Datos y Analítica - IA
-5. Arquitectura Desarrollo (Development Architecture)
-6. Transformación de Procesos y Automatización
-7. Arquitectura Seguridad (Security Architecture)
-8. Plataformas e Infraestructura TI
-9. Arquitectura Empresarial (Enterprise Architecture)
-10. Arquitectura de Integración
+4. Data & Analytics - AI Architecture
+5. Development Architecture
+6. Process Transformation and Automation
+7. Security Architecture
+8. Platform & IT Infrastructure
+9. Enterprise Architecture
+10. Integration Architecture
 
 **Plus:**
 11. Risk Management (custom organizational format)
@@ -60,13 +60,13 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 11 sep
 ```
 
 **Examples:**
-- `ARQUITECTURA_SRE_JobScheduler_2025-11-26.md`
-- `CONTINUIDAD_NEGOCIO_PaymentGateway_2025-11-26.md`
+- `SRE_ARCHITECTURE_JobScheduler_2025-11-26.md`
+- `BUSINESS_CONTINUITY_PaymentGateway_2025-11-26.md`
 - `RISK_MANAGEMENT_JobScheduler_2025-11-26.md`
 
 **Handling Existing Files:**
 - If file exists, append timestamp: `_HHMM`
-- Example: `ARQUITECTURA_SRE_JobScheduler_2025-11-26_1430.md`
+- Example: `SRE_ARCHITECTURE_JobScheduler_2025-11-26_1430.md`
 
 **Additional Outputs:**
 - `COMPLIANCE_MANIFEST.md`: Index of all generated compliance documents with metadata
@@ -98,7 +98,7 @@ For each contract type, consult SECTION_MAPPING_GUIDE.md to determine:
 **Step 3: Load Sections Incrementally**
 ```
 Load only required sections with ±10 line buffer
-Example for Arquitectura SRE:
+Example for SRE Architecture:
 - Section 10: Performance (lines 1550-1750, ~200 lines)
 - Section 11: Operational (lines 1750-1950, ~200 lines)
 Total: ~400 lines vs 2000+ (80% reduction)
@@ -110,7 +110,7 @@ Extract data once, cache for contract generation
 Avoid re-loading same sections for multiple contracts
 ```
 
-### Example: Arquitectura SRE Contract Generation
+### Example: SRE Architecture Contract Generation
 
 **Traditional Approach:**
 ```
@@ -173,9 +173,9 @@ Based on user intent:
 - Specific: Parse contract name from request
 - Category: Map category to relevant contracts
   Examples:
-  - "security" → Arquitectura Seguridad, Risk Management
-  - "cloud" → Cloud Architecture, Plataformas Infraestructura
-  - "SRE" → Arquitectura SRE, Continuidad de Negocio
+  - "security" → Security Architecture, Risk Management
+  - "cloud" → Cloud Architecture, Platform & IT Infrastructure
+  - "SRE" → SRE Architecture, Business Continuity
 ```
 
 **Step 2.2: Output Directory Configuration**
@@ -215,7 +215,7 @@ Read ARCHITECTURE.md lines 1-50:
 **Step 3.2: For Each Contract, Identify Required Sections**
 ```
 Consult SECTION_MAPPING_GUIDE.md:
-Example for Continuidad de Negocio:
+Example for Business Continuity:
 - Primary: Section 11 (Operational Considerations)
 - Secondary: Section 10 (Performance Requirements)
 ```
@@ -258,7 +258,7 @@ For Development Architecture contract generation:
 **Step 4.1: Load Template**
 ```
 Load template file for contract type from templates/
-Example: templates/TEMPLATE_ARQUITECTURA_SRE.md
+Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
 ```
 
 **Step 4.2: Apply Extracted Data to Placeholders**
@@ -300,7 +300,7 @@ For each missing data point:
 **Step 5.1: Generate Filename**
 ```
 Pattern: [CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md
-Example: ARQUITECTURA_SRE_JobScheduler_2025-11-26.md
+Example: SRE_ARCHITECTURE_JobScheduler_2025-11-26.md
 If exists: append _HHMM timestamp
 ```
 
@@ -342,12 +342,12 @@ Overall summary:
 
 ## Contract Types and Required Sections
 
-### 1. Continuidad de Negocio (Business Continuity)
+### 1. Business Continuity
 **Primary Sections:** 11 (Operational Considerations)
 **Secondary Sections:** 10 (Performance Requirements)
 **Key Extractions:** RTO, RPO, backup strategy, DR procedures
 
-### 2. Arquitectura SRE (Site Reliability Engineering)
+### 2. SRE Architecture
 **Primary Sections:** 10 (Performance), 11 (Operational)
 **Secondary Sections:** 5 (System Components)
 **Key Extractions:** SLOs, SLIs, error budgets, monitoring, incident management
@@ -357,38 +357,38 @@ Overall summary:
 **Secondary Sections:** 9 (Security), 10 (Performance)
 **Key Extractions:** Cloud model, connectivity, security, monitoring, backup, best practices
 
-### 4. Arquitectura Datos y Analítica - IA
+### 4. Data & Analytics - AI Architecture
 **Primary Sections:** 5 (System Components), 6 (Data Flow), 7 (Integration Points)
 **Secondary Sections:** 8 (Technology Stack), 10 (Performance)
 **Key Extractions:** Data quality, governance, AI models, compliance, scalability
 
-### 5. Arquitectura Desarrollo (Development Architecture)
+### 5. Development Architecture
 **Primary Sections:** 3 (Architecture Patterns), 5 (System Components), 8 (Technology Stack), 12 (ADRs)
 **Secondary Sections:** 11 (Operational)
 **Key Extractions:** Technology stack, development practices, technical debt
 **Automatic Validation:** Stack validation checklist (26 items) automatically evaluated during generation. Results: PASS (approval unblocked) or FAIL (detailed failure report with remediation guidance)
 
-### 6. Transformación de Procesos y Automatización
+### 6. Process Transformation and Automation
 **Primary Sections:** 1 (System Overview), 2 (Business Context), 6 (Data Flow)
 **Secondary Sections:** 5 (System Components), 7 (Integration Points)
 **Key Extractions:** Automation practices, process improvements, efficiency metrics
 
-### 7. Arquitectura Seguridad (Security Architecture)
+### 7. Security Architecture
 **Primary Sections:** 9 (Security Considerations)
 **Secondary Sections:** 7 (Integration Points), 11 (Operational)
 **Key Extractions:** API security, authentication, encryption, communication security
 
-### 8. Plataformas e Infraestructura TI
+### 8. Platform & IT Infrastructure
 **Primary Sections:** 4 (Deployment Architecture), 8 (Technology Stack), 11 (Operational)
 **Secondary Sections:** 10 (Performance)
 **Key Extractions:** Environments, OS, databases, capacity, retention, naming
 
-### 9. Arquitectura Empresarial (Enterprise Architecture)
+### 9. Enterprise Architecture
 **Primary Sections:** 1 (System Overview), 2 (Business Context), 3 (Architecture Patterns), 4 (Deployment)
 **Secondary Sections:** 12 (ADRs)
 **Key Extractions:** Modularity, cloud-first, API-first, business alignment
 
-### 10. Arquitectura de Integración
+### 10. Integration Architecture
 **Primary Sections:** 7 (Integration Points)
 **Secondary Sections:** 5 (System Components), 6 (Data Flow), 8 (Technology Stack)
 **Key Extractions:** Integration catalog, patterns, security, standards compliance
@@ -511,7 +511,7 @@ Validate with stakeholders and update ARCHITECTURE.md.]
 
 **For Each Contract:**
 ```
-Contract: Arquitectura SRE
+Contract: SRE Architecture
 Completeness: 85% (17/20 data points)
 Placeholders:
 1. Incident response team contacts (Section 11.2 missing)
@@ -660,21 +660,21 @@ User: "Generate all compliance documents for this project"
 
 **User Request:**
 ```
-User: "Create Arquitectura SRE contract"
+User: "Create SRE Architecture contract"
 ```
 
 **Skill Actions:**
 ```
 1. Locate ARCHITECTURE.md
 2. Load Document Index (lines 1-50)
-3. Identify contract: Arquitectura SRE
+3. Identify contract: SRE Architecture
 4. Required sections: 10, 11
 5. Load Section 10 (lines 1550-1760)
 6. Extract: SLOs (p95 < 100ms, p99 < 200ms), throughput (450 TPS)
 7. Load Section 11 (lines 1760-1950)
 8. Extract: Monitoring (Prometheus, Grafana), incidents (PagerDuty)
-9. Apply template: templates/TEMPLATE_ARQUITECTURA_SRE.md
-10. Generate: ARQUITECTURA_SRE_JobScheduler_2025-11-26.md
+9. Apply template: templates/TEMPLATE_SRE_ARCHITECTURE.md
+10. Generate: SRE_ARCHITECTURE_JobScheduler_2025-11-26.md
 11. Report: "SRE contract generated. 2 placeholders (on-call rotation, runbooks)."
 ```
 
@@ -689,10 +689,10 @@ User: "Generate security compliance documentation"
 ```
 1. Locate ARCHITECTURE.md
 2. Parse category: "security"
-3. Map to contracts: Arquitectura Seguridad, Risk Management
+3. Map to contracts: Security Architecture, Risk Management
 4. Confirm: "Generate Security and Risk Management contracts?"
 5. User confirms
-6. Generate Arquitectura Seguridad:
+6. Generate Security Architecture:
    - Load Section 9 (Security Considerations)
    - Extract: API security, authentication, encryption
    - Apply template
@@ -728,7 +728,7 @@ User: "Generate security compliance documentation"
 ### Example Template Excerpt
 
 ```markdown
-# Contrato de Adherencia: Arquitectura SRE
+# Contrato de Adherencia: SRE Architecture
 
 **Project**: [PROJECT_NAME]
 **Generated**: [GENERATION_DATE]

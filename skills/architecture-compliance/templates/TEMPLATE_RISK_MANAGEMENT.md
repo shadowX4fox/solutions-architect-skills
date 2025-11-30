@@ -1,81 +1,81 @@
-# Gestión de Riesgos
+# Risk Management
 
-**Proyecto**: [PROJECT_NAME]
-**Fecha de Generación**: [GENERATION_DATE]
-**Fuente**: ARCHITECTURE.md (Secciones 9, 10, 11, 12)
-**Versión**: 1.0
+**Project**: [PROJECT_NAME]
+**Generation Date**: [GENERATION_DATE]
+**Source**: ARCHITECTURE.md (Sections 9, 10, 11, 12)
+**Version**: 1.0
 
 ---
 
-## Control del Documento
+## Document Control
 
-| Campo | Valor |
+| Field | Value |
 |-------|-------|
-| Propietario del Documento | [PLACEHOLDER: Asignar propietario] |
-| Fecha de Revisión | [GENERATION_DATE + 90 days] |
-| Estado | Borrador - Generado Automáticamente |
+| Document Owner | [PLACEHOLDER: Assign owner] |
+| Review Date | [GENERATION_DATE + 90 days] |
+| Status | Draft - Auto-Generated |
 
 ---
 
-[PLACEHOLDER: Usuario debe proporcionar formato organizacional personalizado para Gestión de Riesgos]
+[PLACEHOLDER: User must provide customized organizational format for Risk Management]
 
 ---
 
-## Registro de Riesgos (Ejemplo de Estructura)
+## Risk Register (Example Structure)
 
-### RIESGO-001: [Título del Riesgo]
-**Categoría**: [Seguridad/Disponibilidad/Rendimiento/Operacional]
-**Descripción**: [EXTRACTED or INFERRED from Sections 9, 10, 11, 12]
-**Probabilidad**: [1-5]
-**Impacto**: [1-5]
-**Puntuación de Riesgo**: [Probabilidad × Impacto]
-**Fuente**: [SOURCE_REFERENCE]
+### RISK-001: [Risk Title]
+**Category**: [Security/Availability/Performance/Operational]
+**Description**: [EXTRACTED or INFERRED from Sections 9, 10, 11, 12]
+**Likelihood**: [1-5]
+**Impact**: [1-5]
+**Risk Score**: [Likelihood × Impact]
+**Source**: [SOURCE_REFERENCE]
 
-**Estrategias de Mitigación**:
+**Mitigation Strategies**:
 1. [EXTRACTED or INFERRED]
 2. [...]
 
-**Riesgo Residual**: [1-5]
-**Propietario**: [PLACEHOLDER: Asignar propietario]
-**Fecha Objetivo**: [PLACEHOLDER]
+**Residual Risk**: [1-5]
+**Owner**: [PLACEHOLDER: Assign owner]
+**Target Date**: [PLACEHOLDER]
 
 ---
 
-### Ejemplos de Riesgos Comunes a Extraer:
+### Examples of Common Risks to Extract:
 
-**De Sección 9 (Seguridad)**:
-- Riesgos de rotación manual de llaves
-- Riesgos de autenticación débil
-- Vulnerabilidades de exposición de APIs
+**From Section 9 (Security)**:
+- Manual key rotation risks
+- Weak authentication risks
+- API exposure vulnerabilities
 
-**De Sección 10 (Rendimiento)**:
-- Riesgos de capacidad insuficiente
-- Riesgos de violación de SLA
-- Riesgos de latencia
+**From Section 10 (Performance)**:
+- Insufficient capacity risks
+- SLA violation risks
+- Latency risks
 
-**De Sección 11 (Operacional)**:
-- Riesgos de DR de región única
-- Riesgos de falla de backup
-- Riesgos de gestión de incidentes
+**From Section 11 (Operational)**:
+- Single-region DR risks
+- Backup failure risks
+- Incident management risks
 
-**De Sección 12 (ADRs)**:
-- Riesgos de decisiones arquitectónicas
-- Trade-offs y compromisos
-- Deuda técnica
+**From Section 12 (ADRs)**:
+- Architectural decision risks
+- Trade-offs and compromises
+- Technical debt
 
 ---
 
-## Resumen de Riesgos
+## Risk Summary
 
-| Riesgo ID | Categoría | Puntuación | Estado | Propietario |
-|-----------|-----------|-----------|--------|-------------|
+| Risk ID | Category | Score | Status | Owner |
+|---------|----------|-------|--------|-------|
 | [EXTRACTED] | [CATEGORY] | [SCORE] | [STATUS] | [OWNER] |
 
 ---
 
-## Apéndice: Trazabilidad de Fuentes
+## Appendix: Source Traceability
 
-**Datos Extraídos de**: [SOURCE_REFERENCES]
-**Última Generación**: [GENERATION_DATE]
+**Data Extracted From**: [SOURCE_REFERENCES]
+**Last Generated**: [GENERATION_DATE]
 
-**Nota**: Este template es un ejemplo. El usuario debe proporcionar el formato organizacional específico para Gestión de Riesgos.
+**Note**: This template is an example. User must provide the specific organizational format for Risk Management.

@@ -1,377 +1,377 @@
-# Tipos de Contratos de Adherencia - Referencia
+# Compliance Contract Types - Reference
 
-## Propósito
+## Purpose
 
-Este documento proporciona una descripción completa de los 10 tipos de Contratos de Adherencia basados en los estándares organizacionales. Sirve como referencia para la creación y validación de plantillas.
+This document provides a comprehensive description of the 10 types of Compliance Contracts based on organizational standards. It serves as a reference for creating and validating templates.
 
 ---
 
-## 1. Continuidad de Negocio
+## 1. Business Continuity
 
-**Propósito**: Lineamientos para asegurar la resiliencia, recuperación ante desastres y respaldo de la solución.
+**Purpose**: Guidelines to ensure solution resilience, disaster recovery, and backup.
 
-**Lineamientos Principales**:
-- **Impacto a procesos críticos**: Documentar el impacto a procesos críticos del negocio y procedimientos de recuperación
-- **Recuperación ante desastres**: Definir procedimientos automatizados de recuperación ante desastres
-- **Automatización de DR**: Implementar automatización donde sea posible para minimizar RTO
+**Main Guidelines**:
+- **Impact to critical processes**: Document impact to critical business processes and recovery procedures
+- **Disaster recovery**: Define automated disaster recovery procedures
+- **DR Automation**: Implement automation where possible to minimize RTO
 
-**Ejemplos de Lineamientos**:
-- Impacto a procesos críticos debe estar documentado
-- RTO y RPO deben definirse basados en criticidad del negocio
-- Procedimientos de recuperación ante desastres deben estar automatizados
-- Restauración de backups debe probarse trimestralmente
-- Redundancia geográfica requerida para aplicaciones Tier 1
+**Guideline Examples**:
+- Impact to critical processes must be documented
+- RTO and RPO must be defined based on business criticality
+- Disaster recovery procedures must be automated
+- Backup restoration must be tested quarterly
+- Geographic redundancy required for Tier 1 applications
 
 **Stakeholders**:
-- Equipo de continuidad de negocio
-- Equipo de operaciones
-- Equipo de infraestructura
-- Liderazgo ejecutivo
+- Business continuity team
+- Operations team
+- Infrastructure team
+- Executive leadership
 
-**Métricas Clave**:
+**Key Metrics**:
 - RTO (Recovery Time Objective)
 - RPO (Recovery Point Objective)
-- Frecuencia de backups
-- Tiempo de retención
-- Frecuencia de pruebas de DR
+- Backup frequency
+- Retention time
+- DR testing frequency
 
 ---
 
-## 2. Arquitectura SRE (Site Reliability Engineering)
+## 2. SRE Architecture (Site Reliability Engineering)
 
-**Propósito**: Lineamientos enfocados en resiliencia, observabilidad y automatización de la solución.
+**Purpose**: Guidelines focused on solution resilience, observability, and automation.
 
-**Lineamientos Principales**:
-- **Evaluación de resiliencia**: Evaluar la resiliencia de la solución y componentes
-- **Observabilidad de componentes**: Asegurar observabilidad de componentes críticos (métricas, logs, trazas)
+**Main Guidelines**:
+- **Resilience assessment**: Evaluate solution and component resilience
+- **Component observability**: Ensure critical component observability (metrics, logs, traces)
 
-**Ejemplos de Lineamientos**:
-- Todos los servicios deben definir SLOs de disponibilidad (mínimo 99.9%)
-- Presupuestos de error deben calcularse y monitorearse mensualmente
-- Monitoreo debe incluir métricas, logs y trazas (tríada de observabilidad)
-- Tiempo de respuesta a incidentes: P1 < 15min, P2 < 1hr, P3 < 4hr
-- Postmortems requeridos para todos los incidentes P1/P2
-- Runbooks deben existir para todos los procedimientos operacionales
+**Guideline Examples**:
+- All services must define availability SLOs (minimum 99.9%)
+- Error budgets must be calculated and monitored monthly
+- Monitoring must include metrics, logs, and traces (observability triad)
+- Incident response time: P1 < 15min, P2 < 1hr, P3 < 4hr
+- Postmortems required for all P1/P2 incidents
+- Runbooks must exist for all operational procedures
 
 **Stakeholders**:
-- Equipo SRE
-- Equipo DevOps
-- Ingeniería de plataforma
-- Ingenieros de on-call
+- SRE team
+- DevOps team
+- Platform engineering
+- On-call engineers
 
-**Métricas Clave**:
+**Key Metrics**:
 - SLOs (Service Level Objectives)
 - SLIs (Service Level Indicators)
-- Presupuesto de error
+- Error budget
 - MTTR (Mean Time To Recovery)
 - MTBF (Mean Time Between Failures)
-- Cobertura de runbooks
+- Runbook coverage
 
 ---
 
 ## 3. Cloud Architecture
 
-**Propósito**: Lineamientos para soluciones desplegadas en la nube (Cloud).
+**Purpose**: Guidelines for solutions deployed in the cloud.
 
-**Lineamientos Principales**:
-- **Modelo de despliegue**: Documentar modelo de despliegue (IaaS, PaaS, SaaS)
-- **Conectividad**: Definir arquitectura de red, VPN, latencia
-- **Seguridad**: Implementar IAM, encriptación, seguridad de red
-- **Monitoreo**: Utilizar herramientas cloud-native, seguimiento de costos
-- **Backup**: Estrategia de backup cloud, replicación multi-región
-- **Best practices cloud**: Aplicar frameworks como Well-Architected
+**Main Guidelines**:
+- **Deployment model**: Document deployment model (IaaS, PaaS, SaaS)
+- **Connectivity**: Define network architecture, VPN, latency
+- **Security**: Implement IAM, encryption, network security
+- **Monitoring**: Use cloud-native tools, cost tracking
+- **Backup**: Cloud backup strategy, multi-region replication
+- **Cloud best practices**: Apply frameworks like Well-Architected
 
-**Ejemplos de Lineamientos**:
-- Modelo de despliegue cloud debe estar documentado (IaaS/PaaS/SaaS)
-- Despliegue multi-región requerido para aplicaciones Tier 1
-- Servicios cloud-native preferidos sobre soluciones custom
-- Optimización de costos: instancias reservadas, auto-scaling, right-sizing
-- Seguridad cloud: encriptación en reposo/tránsito, IAM con privilegio mínimo
-- Monitoreo: integración con CloudWatch/Azure Monitor/Stackdriver
+**Guideline Examples**:
+- Cloud deployment model must be documented (IaaS/PaaS/SaaS)
+- Multi-region deployment required for Tier 1 applications
+- Cloud-native services preferred over custom solutions
+- Cost optimization: reserved instances, auto-scaling, right-sizing
+- Cloud security: encryption at rest/in-transit, IAM with least privilege
+- Monitoring: integration with CloudWatch/Azure Monitor/Stackdriver
 
 **Stakeholders**:
-- Arquitectos cloud
-- Equipo de infraestructura
-- Equipo de seguridad
-- FinOps/Optimización de costos
+- Cloud architects
+- Infrastructure team
+- Security team
+- FinOps/Cost optimization
 
-**Métricas Clave**:
-- Cobertura multi-región
-- Costos cloud (mensual)
-- Uso de servicios cloud-native vs. custom
-- Tiempo de aprovisionamiento
-- Cobertura de IaC (Infrastructure as Code)
+**Key Metrics**:
+- Multi-region coverage
+- Cloud costs (monthly)
+- Cloud-native vs. custom services usage
+- Provisioning time
+- IaC (Infrastructure as Code) coverage
 
 ---
 
-## 4. Arquitectura Datos y Analítica - IA
+## 4. Data & Analytics - AI Architecture
 
-**Propósito**: Lineamientos para la gestión de datos, analítica y uso de inteligencia artificial.
+**Purpose**: Guidelines for data management, analytics, and artificial intelligence use.
 
-**Lineamientos Principales**:
-- **Calidad de datos**: Validación, limpieza, precisión, completitud
-- **Reutilización**: Promover reutilización de datos y componentes
-- **Recuperación**: Estrategias de backup y recuperación de datos
-- **Escalabilidad**: Diseñar para crecimiento de volumen (3x sin rediseño)
-- **Integración**: Conectar fuentes y destinos de datos
-- **Cumplimiento normativo**: GDPR, residencia de datos
-- **Gobernanza de modelos IA**: Entrenamiento, despliegue, monitoreo, re-entrenamiento
+**Main Guidelines**:
+- **Data quality**: Validation, cleansing, accuracy, completeness
+- **Reusability**: Promote data and component reuse
+- **Recovery**: Data backup and recovery strategies
+- **Scalability**: Design for volume growth (3x without redesign)
+- **Integration**: Connect data sources and destinations
+- **Regulatory compliance**: GDPR, data residency
+- **AI model governance**: Training, deployment, monitoring, re-training
 
-**Ejemplos de Lineamientos**:
-- Métricas de calidad de datos deben definirse y monitorearse
-- Linaje de datos debe rastrearse desde fuente hasta consumo
-- Datos PII deben encriptarse y enmascararse apropiadamente
-- Modelos IA deben tener cronogramas de re-entrenamiento definidos
-- Políticas de retención deben cumplir con regulaciones
-- Escalabilidad de datos debe manejar 3x crecimiento sin rediseño
+**Guideline Examples**:
+- Data quality metrics must be defined and monitored
+- Data lineage must be tracked from source to consumption
+- PII data must be encrypted and masked appropriately
+- AI models must have defined re-training schedules
+- Retention policies must comply with regulations
+- Data scalability must handle 3x growth without redesign
 
 **Stakeholders**:
-- Arquitectos de datos
-- Ingenieros de datos
-- Científicos de datos
-- Ingenieros ML
-- Equipo de gobernanza de datos
+- Data architects
+- Data engineers
+- Data scientists
+- ML engineers
+- Data governance team
 
-**Métricas Clave**:
-- Cobertura de calidad de datos
-- Cobertura de linaje de datos
-- Volumen de datos (TB)
-- Latencia de pipelines de datos
-- Precisión de modelos ML
-- Frecuencia de re-entrenamiento
+**Key Metrics**:
+- Data quality coverage
+- Data lineage coverage
+- Data volume (TB)
+- Data pipeline latency
+- ML model accuracy
+- Re-training frequency
 
 ---
 
-## 5. Arquitectura Desarrollo
+## 5. Development Architecture
 
-**Propósito**: Lineamientos para el desarrollo de software y gestión de deuda técnica.
+**Purpose**: Guidelines for software development and technical debt management.
 
-**Lineamientos Principales**:
-- **Stack tecnológico**: Documentar lenguajes, frameworks, versiones
-- **Planes de acción para excepciones**: Justificar desviaciones de estándares
+**Main Guidelines**:
+- **Technology stack**: Document languages, frameworks, versions
+- **Exception action plans**: Justify deviations from standards
 
-**Ejemplos de Lineamientos**:
-- Stack tecnológico debe usar versiones soportadas, no deprecadas
-- Cobertura de código mínima: 80% para rutas críticas
-- Todos los cambios de código requieren peer review
-- Deuda técnica debe rastrearse y atenderse trimestralmente
-- Vulnerabilidades de dependencias deben parchearse dentro de SLA
-- Planes de excepción requeridos para elecciones de tecnología no estándar
+**Guideline Examples**:
+- Technology stack must use supported versions, not deprecated
+- Minimum code coverage: 80% for critical paths
+- All code changes require peer review
+- Technical debt must be tracked and addressed quarterly
+- Dependency vulnerabilities must be patched within SLA
+- Exception plans required for non-standard technology choices
 
 **Stakeholders**:
-- Equipos de desarrollo
+- Development teams
 - Tech leads
-- Gerentes de ingeniería
-- Equipo DevOps
+- Engineering managers
+- DevOps team
 
-**Métricas Clave**:
-- Cobertura de código
-- Deuda técnica (story points)
-- Velocidad de desarrollo
-- Tiempo de build
-- Vulnerabilidades de dependencias (count por severidad)
+**Key Metrics**:
+- Code coverage
+- Technical debt (story points)
+- Development velocity
+- Build time
+- Dependency vulnerabilities (count by severity)
 
 ---
 
-## 6. Transformación de Procesos y Automatización
+## 6. Process Transformation and Automation
 
-**Propósito**: Lineamientos para soluciones de automatización y gestión documental.
+**Purpose**: Guidelines for automation solutions and document management.
 
-**Lineamientos Principales**:
-- **Best practices de automatización**: Herramientas, frameworks, patrones
-- **Análisis de impacto**: Ganancias de eficiencia, reducción de costos, ahorro de tiempo
-- **Consumo eficiente de licencias**: Optimización de licenciamiento
-- **Reutilización de capacidades**: Servicios compartidos, componentes reutilizables
+**Main Guidelines**:
+- **Automation best practices**: Tools, frameworks, patterns
+- **Impact analysis**: Efficiency gains, cost reduction, time savings
+- **Efficient license consumption**: License optimization
+- **Capability reuse**: Shared services, reusable components
 
-**Ejemplos de Lineamientos**:
-- Procesos manuales >10 horas/mes deben evaluarse para automatización
-- ROI de automatización debe ser positivo dentro de 12 meses
-- Capacidades reutilizables deben diseñarse como servicios compartidos
-- Costos de licencias deben optimizarse (usuarios concurrentes vs. nombrados)
-- Automatización de procesos debe incluir manejo de errores y monitoreo
-- Análisis de impacto requerido antes de cambios de procesos
+**Guideline Examples**:
+- Manual processes >10 hours/month must be evaluated for automation
+- Automation ROI must be positive within 12 months
+- Reusable capabilities must be designed as shared services
+- License costs must be optimized (concurrent vs. named users)
+- Process automation must include error handling and monitoring
+- Impact analysis required before process changes
 
 **Stakeholders**:
-- Equipo de mejora de procesos
-- Ingenieros de automatización
-- Analistas de negocio
-- Oficina de transformación digital
+- Process improvement team
+- Automation engineers
+- Business analysts
+- Digital transformation office
 
-**Métricas Clave**:
-- Horas ahorradas por automatización
-- ROI de automatización
-- Número de procesos automatizados
-- Reducción de costos
-- Tasa de adopción
+**Key Metrics**:
+- Hours saved by automation
+- Automation ROI
+- Number of automated processes
+- Cost reduction
+- Adoption rate
 
 ---
 
-## 7. Arquitectura Seguridad
+## 7. Security Architecture
 
-**Propósito**: Lineamientos para la seguridad de la solución.
+**Purpose**: Guidelines for solution security.
 
-**Lineamientos Principales**:
-- **Exposición de APIs**: Protección, autenticación, autorización, rate limiting
-- **Autenticación**: OAuth, SAML, JWT, MFA
-- **Encriptación**: TLS para tránsito, AES para reposo, gestión de llaves
-- **Comunicación intra/inter microservicios**: Mutual TLS, cifrado
+**Main Guidelines**:
+- **API exposure**: Protection, authentication, authorization, rate limiting
+- **Authentication**: OAuth, SAML, JWT, MFA
+- **Encryption**: TLS for transit, AES for rest, key management
+- **Intra/inter microservice communication**: Mutual TLS, encryption
 
-**Ejemplos de Lineamientos**:
-- Todas las APIs deben requerir autenticación y autorización
-- Encriptación requerida: TLS 1.3 para tránsito, AES-256 para reposo
-- Secretos nunca deben almacenarse en código o archivos de configuración
-- Comunicación de microservicios debe usar mutual TLS (mTLS)
-- Vulnerabilidades de seguridad: Crítico < 24hr, Alto < 7 días
-- Todos los eventos de autenticación deben registrarse y monitorearse
+**Guideline Examples**:
+- All APIs must require authentication and authorization
+- Encryption required: TLS 1.3 for transit, AES-256 for rest
+- Secrets must never be stored in code or configuration files
+- Microservice communication must use mutual TLS (mTLS)
+- Security vulnerabilities: Critical < 24hr, High < 7 days
+- All authentication events must be logged and monitored
 
 **Stakeholders**:
-- Arquitectos de seguridad
-- Operaciones de seguridad (SecOps)
-- Equipo de seguridad de aplicaciones
-- Equipo de cumplimiento
+- Security architects
+- Security operations (SecOps)
+- Application security team
+- Compliance team
 
-**Métricas Clave**:
-- Cobertura de autenticación (% de APIs)
-- Vulnerabilidades abiertas (por severidad)
-- Tiempo de remediación de vulnerabilidades
-- Intentos de acceso no autorizado
-- Cobertura de encriptación
+**Key Metrics**:
+- Authentication coverage (% of APIs)
+- Open vulnerabilities (by severity)
+- Vulnerability remediation time
+- Unauthorized access attempts
+- Encryption coverage
 
 ---
 
-## 8. Plataformas e Infraestructura TI
+## 8. Platform & IT Infrastructure
 
-**Propósito**: Lineamientos para el diseño y despliegue sobre plataformas e infraestructura tecnológica.
+**Purpose**: Guidelines for design and deployment on technology platforms and infrastructure.
 
-**Lineamientos Principales**:
-- **Ambientes únicos en producción**: Aislamiento, propósito
-- **Sistemas operativos autorizados**: Versiones, parcheo
-- **Capacidad y retención de bases de datos**: Dimensionamiento, políticas
-- **Nomenclatura**: Convenciones para recursos, ambientes
-- **Dimensionamiento transaccional**: Capacidad TPS, límites de escalamiento
+**Main Guidelines**:
+- **Unique production environments**: Isolation, purpose
+- **Authorized operating systems**: Versions, patching
+- **Database capacity and retention**: Sizing, policies
+- **Nomenclature**: Conventions for resources, environments
+- **Transactional sizing**: TPS capacity, scaling limits
 
-**Ejemplos de Lineamientos**:
-- Ambientes de producción deben estar aislados (red, IAM)
-- Solo versiones autorizadas de OS pueden usarse (parches de seguridad actuales)
-- Capacidad de base de datos debe soportar 3x volumen de transacciones actual
-- Políticas de retención deben cumplir con requisitos regulatorios
-- Convenciones de nomenclatura deben ser consistentes y documentadas
-- Infraestructura debe definirse como código (IaC)
+**Guideline Examples**:
+- Production environments must be isolated (network, IAM)
+- Only authorized OS versions can be used (current security patches)
+- Database capacity must support 3x current transaction volume
+- Retention policies must comply with regulatory requirements
+- Naming conventions must be consistent and documented
+- Infrastructure must be defined as code (IaC)
 
 **Stakeholders**:
-- Ingenieros de plataforma
-- Equipo de infraestructura
-- Administradores de bases de datos
-- Equipo de operaciones
+- Platform engineers
+- Infrastructure team
+- Database administrators
+- Operations team
 
-**Métricas Clave**:
-- Número de ambientes
-- Capacidad de infraestructura (CPU, memoria, almacenamiento)
-- Utilización de capacidad
-- Cobertura de IaC
-- Cumplimiento de nomenclatura
+**Key Metrics**:
+- Number of environments
+- Infrastructure capacity (CPU, memory, storage)
+- Capacity utilization
+- IaC coverage
+- Naming convention compliance
 
 ---
 
-## 9. Arquitectura Empresarial
+## 9. Enterprise Architecture
 
-**Propósito**: Lineamientos para la alineación estratégica, modularidad, gestión de datos y enfoque cloud first.
+**Purpose**: Guidelines for strategic alignment, modularity, data management, and cloud-first approach.
 
-**Lineamientos Principales**:
-- **Modularidad**: Bounded contexts, límites de servicios
-- **Personalización de aplicaciones de terceros**: Límite máximo 20%
-- **Cloud first**: Preferir cloud-native sobre on-premise
-- **Alineación con estrategia de negocio**: Mapeo de capacidades
-- **Obsolescencia cero**: Evitar tecnologías EOL dentro de 3 años
-- **API First/Event Driven**: Diseño de APIs primero, arquitectura dirigida por eventos
+**Main Guidelines**:
+- **Modularity**: Bounded contexts, service boundaries
+- **Third-party application customization**: Maximum limit 20%
+- **Cloud first**: Prefer cloud-native over on-premise
+- **Business strategy alignment**: Capability mapping
+- **Zero obsolescence**: Avoid technologies EOL within 3 years
+- **API First/Event Driven**: API-first design, event-driven architecture
 
-**Ejemplos de Lineamientos**:
-- Soluciones deben alinearse con capacidades de negocio empresarial
-- Modularidad: servicios deben limitarse por dominios de negocio
-- Cloud-first: preferir soluciones cloud-native sobre on-premise
-- Personalización de apps de terceros máximo: 20% de funcionalidad
-- Sin tecnologías obsoletas (EOL dentro de 3 años)
-- Diseño API-first para todas las interfaces de servicio
-- Event-driven para procesos asíncronos
+**Guideline Examples**:
+- Solutions must align with enterprise business capabilities
+- Modularity: services must be bounded by business domains
+- Cloud-first: prefer cloud-native solutions over on-premise
+- Third-party app customization maximum: 20% of functionality
+- No obsolete technologies (EOL within 3 years)
+- API-first design for all service interfaces
+- Event-driven for asynchronous processes
 
 **Stakeholders**:
-- Arquitectos empresariales
-- Arquitectos de negocio
-- Oficina CTO/CIO
-- Gestión de portafolio
+- Enterprise architects
+- Business architects
+- CTO/CIO office
+- Portfolio management
 
-**Métricas Clave**:
-- Alineación con capacidades de negocio
-- % de personalización de apps de terceros
-- Cobertura cloud-native
-- Edad de tecnologías (años hasta EOL)
-- Cobertura API-first
+**Key Metrics**:
+- Business capability alignment
+- % third-party app customization
+- Cloud-native coverage
+- Technology age (years to EOL)
+- API-first coverage
 
 ---
 
-## 10. Arquitectura de Integración
+## 10. Integration Architecture
 
-**Propósito**: Lineamientos para la integración de microservicios, APIs y eventos.
+**Purpose**: Guidelines for microservice, API, and event integration.
 
-**Lineamientos Principales**:
-- **Adopción de mejores prácticas**: Diseño de API, versionamiento, manejo de errores
-- **Integraciones seguras**: Autenticación, encriptación
-- **Evitar tecnologías obsoletas**: No usar protocolos deprecados
-- **Trazabilidad y auditoría**: Correlation IDs, logging
-- **Cumplimiento de estándares de integración**: OpenAPI, AsyncAPI
+**Main Guidelines**:
+- **Best practices adoption**: API design, versioning, error handling
+- **Secure integrations**: Authentication, encryption
+- **Avoid obsolete technologies**: Don't use deprecated protocols
+- **Traceability and audit**: Correlation IDs, logging
+- **Integration standards compliance**: OpenAPI, AsyncAPI
 
-**Ejemplos de Lineamientos**:
-- Todas las integraciones deben catalogarse y documentarse
-- APIs REST deben seguir especificación OpenAPI 3.0
-- Integraciones asíncronas deben usar patrones event-driven
-- Seguridad de integración: OAuth 2.0, mutual TLS, API keys
-- Evitar protocolos obsoletos (SOAP 1.1, XML-RPC, etc.)
-- Todas las integraciones deben incluir correlation IDs para trazabilidad
-- Estrategia de versionamiento de API debe ser consistente (URI vs. header)
+**Guideline Examples**:
+- All integrations must be cataloged and documented
+- REST APIs must follow OpenAPI 3.0 specification
+- Asynchronous integrations must use event-driven patterns
+- Integration security: OAuth 2.0, mutual TLS, API keys
+- Avoid obsolete protocols (SOAP 1.1, XML-RPC, etc.)
+- All integrations must include correlation IDs for traceability
+- API versioning strategy must be consistent (URI vs. header)
 
 **Stakeholders**:
-- Arquitectos de integración
-- Equipo de plataforma API
-- Equipos de microservicios
-- Equipo de integración empresarial
+- Integration architects
+- API platform team
+- Microservice teams
+- Enterprise integration team
 
-**Métricas Clave**:
-- Número de integraciones
-- Cumplimiento de estándares (% OpenAPI)
-- Latencia de integración
-- Tasa de errores de integración
-- Cobertura de correlation IDs
-
----
-
-## Mapeo de Contratos a Secciones ARCHITECTURE.md
-
-| Contrato | Secciones Primarias | Secciones Secundarias | Complejidad |
-|----------|---------------------|----------------------|-------------|
-| 1. Continuidad de Negocio | 11 | 10 | Media |
-| 2. Arquitectura SRE | 10, 11 | 5 | Alta |
-| 3. Cloud Architecture | 4, 8, 11 | 9, 10 | Alta |
-| 4. Arquitectura Datos/IA | 5, 6, 7 | 8, 10 | Alta |
-| 5. Arquitectura Desarrollo | 3, 5, 8, 12 | 11 | Media |
-| 6. Transformación Procesos | 1, 2, 6 | 5, 7 | Baja |
-| 7. Arquitectura Seguridad | 9 | 7, 11 | Alta |
-| 8. Plataformas Infraestructura | 4, 8, 11 | 10 | Media |
-| 9. Arquitectura Empresarial | 1, 2, 3, 4 | 12 | Media |
-| 10. Arquitectura Integración | 7 | 5, 6, 8 | Alta |
+**Key Metrics**:
+- Number of integrations
+- Standards compliance (% OpenAPI)
+- Integration latency
+- Integration error rate
+- Correlation ID coverage
 
 ---
 
-## Uso de Este Documento
+## Contract Mapping to ARCHITECTURE.md Sections
 
-Este documento de referencia debe usarse para:
-
-1. **Crear plantillas**: Asegurar que las plantillas cubran todos los lineamientos
-2. **Validar compliance**: Verificar que ARCHITECTURE.md tenga información suficiente
-3. **Generar documentos**: Extraer datos relevantes de ARCHITECTURE.md
-4. **Identificar gaps**: Detectar información faltante en arquitectura
-5. **Entrenar equipos**: Educar sobre requisitos de compliance
+| Contract | Primary Sections | Secondary Sections | Complexity |
+|----------|------------------|-------------------|------------|
+| 1. Business Continuity | 11 | 10 | Medium |
+| 2. SRE Architecture | 10, 11 | 5 | High |
+| 3. Cloud Architecture | 4, 8, 11 | 9, 10 | High |
+| 4. Data/AI Architecture | 5, 6, 7 | 8, 10 | High |
+| 5. Development Architecture | 3, 5, 8, 12 | 11 | Medium |
+| 6. Process Transformation | 1, 2, 6 | 5, 7 | Low |
+| 7. Security Architecture | 9 | 7, 11 | High |
+| 8. Platform Infrastructure | 4, 8, 11 | 10 | Medium |
+| 9. Enterprise Architecture | 1, 2, 3, 4 | 12 | Medium |
+| 10. Integration Architecture | 7 | 5, 6, 8 | High |
 
 ---
 
-**Última Actualización**: [GENERATION_DATE]
-**Fuente**: Documentos organizacionales de Contratos de Adherencia
+## Document Usage
+
+This reference document should be used to:
+
+1. **Create templates**: Ensure templates cover all guidelines
+2. **Validate compliance**: Verify ARCHITECTURE.md has sufficient information
+3. **Generate documents**: Extract relevant data from ARCHITECTURE.md
+4. **Identify gaps**: Detect missing architecture information
+5. **Train teams**: Educate about compliance requirements
+
+---
+
+**Last Updated**: [GENERATION_DATE]
+**Source**: Organizational Compliance Contract Documents

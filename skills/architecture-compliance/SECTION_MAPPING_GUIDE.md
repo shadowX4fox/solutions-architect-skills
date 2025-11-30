@@ -46,15 +46,15 @@ This guide provides detailed mapping between ARCHITECTURE.md sections and compli
 
 | Contract Type | Primary Sections | Secondary | Complexity | Templates Priority |
 |---------------|------------------|-----------|------------|-------------------|
-| **1. Continuidad de Negocio** | 11 | 10 | Medium | High (#2) |
-| **2. Arquitectura SRE** | 10, 11 | 5 | High | High (#1) |
+| **1. Business Continuity** | 11 | 10 | Medium | High (#2) |
+| **2. SRE Architecture** | 10, 11 | 5 | High | High (#1) |
 | **3. Cloud Architecture** | 4, 8, 11 | 9, 10 | High | Medium (#3) |
-| **4. Arquitectura Datos/IA** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
-| **5. Arquitectura Desarrollo** | 3, 5, 8, 12 | 11 | Medium | Medium (#5) |
+| **4. Data & Analytics - AI Architecture** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
+| **5. Development Architecture** | 3, 5, 8, 12 | 11 | Medium | Medium (#5) |
 | **6. Transformación Procesos** | 1, 2, 6 | 5, 7 | Low | Low (#6) |
-| **7. Arquitectura Seguridad** | 9 | 7, 11 | High | High (#3) |
+| **7. Security Architecture** | 9 | 7, 11 | High | High (#3) |
 | **8. Plataformas Infraestructura** | 4, 8, 11 | 10 | Medium | Medium (#8) |
-| **9. Arquitectura Empresarial** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
+| **9. Enterprise Architecture** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
 | **10. Arquitectura Integración** | 7 | 5, 6, 8 | High | Medium (#10) |
 | **11. Risk Management** | 9, 10, 11, 12 | 1, 5 | High | High (#4) |
 
@@ -62,7 +62,7 @@ This guide provides detailed mapping between ARCHITECTURE.md sections and compli
 
 ## Detailed Contract Mappings
 
-### Contract 1: Continuidad de Negocio (Business Continuity)
+### Contract 1: Business Continuity (Business Continuity)
 
 #### Document Purpose
 Ensure business continuity through disaster recovery, backup strategies, and resilience measures.
@@ -214,7 +214,7 @@ Action: [PLACEHOLDER: Implement backup restoration testing.
 
 ---
 
-### Contract 2: Arquitectura SRE (Site Reliability Engineering)
+### Contract 2: SRE Architecture (Site Reliability Engineering)
 
 #### Document Purpose
 Define site reliability practices including SLOs, monitoring, incident management, and operational excellence.
@@ -482,7 +482,7 @@ Action: [PLACEHOLDER: Define error budget policy.
 
 ---
 
-### Contract 4: Arquitectura Datos y Analítica - IA
+### Contract 4: Data & Analytics - AI Architecture
 
 #### Section Mapping Summary
 **Primary**: Sections 5, 6, 7 (80%)
@@ -497,7 +497,7 @@ Action: [PLACEHOLDER: Define error budget policy.
 
 ---
 
-### Contract 5: Arquitectura Desarrollo
+### Contract 5: Development Architecture
 
 #### Document Purpose
 Define development architecture standards including design patterns, technology stack validation, component design, and development best practices.
@@ -771,7 +771,7 @@ Step 3.5 Validation Process:
 
 Contract Output (LADES1.6 Validation Summary):
 
-## LADES1.6: Validación del Stack Tecnológico
+## LADES1.6: Technology Stack Validation
 
 **Validation Status**: ✅ **PASS** (Compliant)
 **Validation Date**: 2025-11-27
@@ -971,7 +971,7 @@ Action: Mark items as FAIL
 
 ---
 
-### Contract 6: Transformación de Procesos y Automatización
+### Contract 6: Process Transformation and Automation
 
 #### Section Mapping Summary
 **Primary**: Sections 1, 2, 6 (75%)
@@ -986,7 +986,7 @@ Action: Mark items as FAIL
 
 ---
 
-### Contract 7: Arquitectura Seguridad
+### Contract 7: Security Architecture
 
 #### Section Mapping Summary
 **Primary**: Section 9 (70%)
@@ -1073,16 +1073,16 @@ All templates with Section 9 references must use this standard:
 | Template | Section 9 Usage | Compliance Status |
 |----------|----------------|-------------------|
 | TEMPLATE_CLOUD_ARCHITECTURE.md | 5 references (LAC3) | ✅ Updated (2025-11-27) |
-| TEMPLATE_ARQUITECTURA_SEGURIDAD.md | 8 references (primary) | ⚠️ Needs review |
-| TEMPLATE_ARQUITECTURA_DATOS_IA.md | 2 references | ⚠️ Needs review |
-| TEMPLATE_ARQUITECTURA_INTEGRACION.md | 2 references | ⚠️ Needs review |
+| TEMPLATE_SECURITY_ARCHITECTURE.md | 8 references (primary) | ⚠️ Needs review |
+| TEMPLATE_DATA_AI_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
+| TEMPLATE_INTEGRATION_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
 | TEMPLATE_RISK_MANAGEMENT.md | Implicit references | ⚠️ Needs review |
 
 **Action Required**: Review and update templates marked ⚠️ to ensure compliance with this standard.
 
 ---
 
-### Contract 8: Plataformas e Infraestructura TI
+### Contract 8: Platform & IT Infrastructure
 
 #### Section Mapping Summary
 **Primary**: Sections 4, 8, 11 (90%)
@@ -1096,7 +1096,7 @@ All templates with Section 9 references must use this standard:
 
 ---
 
-### Contract 9: Arquitectura Empresarial
+### Contract 9: Enterprise Architecture
 
 #### Section Mapping Summary
 **Primary**: Sections 1, 2, 3, 4 (85%)
@@ -1111,7 +1111,7 @@ All templates with Section 9 references must use this standard:
 
 ---
 
-### Contract 10: Arquitectura de Integración
+### Contract 10: Integration Architecture
 
 #### Section Mapping Summary
 **Primary**: Section 7 (50%)
@@ -1244,11 +1244,11 @@ Many data points appear in multiple contracts. Extract once, cache, and reuse:
 ```
 Source: Section 10.2
 Used in:
-- Continuidad de Negocio (RTO/RPO justification)
-- Arquitectura SRE (SLO, error budget)
+- Business Continuity (RTO/RPO justification)
+- SRE Architecture (SLO, error budget)
 - Cloud Architecture (cloud SLA requirements)
 - Plataformas Infraestructura (infrastructure availability)
-- Arquitectura Empresarial (business criticality)
+- Enterprise Architecture (business criticality)
 - Risk Management (availability risks)
 
 Extract once: "99.99% SLA"
@@ -1260,11 +1260,11 @@ Reuse in all 6 contracts with appropriate transformations
 ```
 Source: Section 8
 Used in:
-- Arquitectura Desarrollo (technology choices)
+- Development Architecture (technology choices)
 - Cloud Architecture (cloud services)
 - Plataformas Infraestructura (infrastructure tech)
 - Arquitectura Integración (integration tech)
-- Arquitectura Seguridad (security tools)
+- Security Architecture (security tools)
 
 Extract once: Full technology inventory
 Cache as structured data
@@ -1276,8 +1276,8 @@ Apply different filters per contract
 Source: Section 7
 Used in:
 - Arquitectura Integración (full catalog)
-- Arquitectura Seguridad (integration security)
-- Arquitectura Datos/IA (data sources/sinks)
+- Security Architecture (integration security)
+- Data & Analytics - AI Architecture (data sources/sinks)
 
 Extract once: All integrations with details
 Cache as structured list
@@ -1313,10 +1313,10 @@ def extract_with_caching(architecture_md, section, pattern, cache_key):
 # Usage across contracts
 sla_data = extract_with_caching(arch_md, 10.2, r"SLA: ([0-9.]+%)", "availability_sla")
 
-# Reuse in Contract 1 (Continuidad de Negocio)
+# Reuse in Contract 1 (Business Continuity)
 continuidad_contract["sla"] = sla_data["value"]
 
-# Reuse in Contract 2 (Arquitectura SRE) with transformation
+# Reuse in Contract 2 (SRE Architecture) with transformation
 sre_contract["error_budget"] = calculate_error_budget(sla_data["value"])
 
 # Reuse in Contract 11 (Risk Management)

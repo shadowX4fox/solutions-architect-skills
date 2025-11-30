@@ -2,63 +2,63 @@
 
 ## 1. Java Backend
 
-- [ ] ¿El lenguaje Java está en versión soportada? (Java 11, Java 17)
-- [ ] ¿Se utiliza Spring Boot en versión soportada?
-- [ ] ¿Se emplean herramientas oficiales? (Maven, Gradle, SonarQube, JUnit, OpenAPI/Swagger)
-- [ ] ¿El despliegue se realiza en contenedores autorizados? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)
-- [ ] ¿Solo se usan librerías aprobadas por el chapter?
-- [ ] ¿Se cumple la nomenclatura estándar para repositorios y recursos?
+- [ ] Is the Java language in a supported version? (Java 11, Java 17)
+- [ ] Is Spring Boot used in a supported version?
+- [ ] Are official tools employed? (Maven, Gradle, SonarQube, JUnit, OpenAPI/Swagger)
+- [ ] Is deployment performed in authorized containers? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)
+- [ ] Are only chapter-approved libraries used?
+- [ ] Does it comply with standard naming conventions for repositories and resources?
 
 ## 2. .NET Backend
 
-- [ ] ¿El lenguaje C# está en versión soportada? (.NET Core 3.1, .NET 6, .NET 7)
-- [ ] ¿Se utiliza ASP.NET Core como framework principal?
-- [ ] ¿Se emplean herramientas oficiales? (NuGet, xUnit/NUnit, SonarQube)
-- [ ] ¿El despliegue se realiza en contenedores autorizados? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)
-- [ ] ¿Solo se usan librerías aprobadas por el chapter?
-- [ ] ¿Se cumple la nomenclatura estándar para repositorios y recursos?
+- [ ] Is the C# language in a supported version? (.NET Core 3.1, .NET 6, .NET 7)
+- [ ] Is ASP.NET Core used as the main framework?
+- [ ] Are official tools employed? (NuGet, xUnit/NUnit, SonarQube)
+- [ ] Is deployment performed in authorized containers? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)
+- [ ] Are only chapter-approved libraries used?
+- [ ] Does it comply with standard naming conventions for repositories and resources?
 
 ## 3. Frontend
 
-- [ ] ¿Se utiliza un framework aprobado? (Angular v12+, React v17+, Vue.js v3+)
-- [ ] ¿Se emplea TypeScript o JavaScript (ES6+)?
-- [ ] ¿Se usan herramientas oficiales? (NPM/Yarn, Webpack, Jest, Cypress)
-- [ ] ¿La arquitectura es SPA o Micro-Frontends según lineamientos?
-- [ ] ¿Solo se usan librerías aprobadas por el chapter?
-- [ ] ¿Se cumple la nomenclatura estándar para repositorios y recursos?
+- [ ] Is an approved framework used? (Angular v12+, React v17+, Vue.js v3+)
+- [ ] Is TypeScript or JavaScript (ES6+) employed?
+- [ ] Are official tools used? (NPM/Yarn, Webpack, Jest, Cypress)
+- [ ] Is the architecture SPA or Micro-Frontends according to guidelines?
+- [ ] Are only chapter-approved libraries used?
+- [ ] Does it comply with standard naming conventions for repositories and resources?
 
-## 4. Otros Stacks y Componentes
+## 4. Other Stacks and Components
 
-- [ ] ¿Automatización con Python 3.x, Shell Script, RPA (UiPath, Automation Anywhere) está alineada al stack?
-- [ ] ¿Infraestructura como Código con Terraform, Ansible, Azure DevOps Pipelines está aprobada?
-- [ ] ¿Bases de datos utilizadas están en el catálogo autorizado? (PostgreSQL, SQL Server, Oracle, MongoDB)
-- [ ] ¿APIs cumplen con OpenAPI 3.0, REST, gRPC?
-- [ ] ¿Integración Continua con Azure DevOps, Jenkins, GitHub Actions?
+- [ ] Is automation with Python 3.x, Shell Script, RPA (UiPath, Automation Anywhere) aligned with the stack?
+- [ ] Is Infrastructure as Code with Terraform, Ansible, Azure DevOps Pipelines approved?
+- [ ] Are the databases used in the authorized catalog? (PostgreSQL, SQL Server, Oracle, MongoDB)
+- [ ] Do APIs comply with OpenAPI 3.0, REST, gRPC?
+- [ ] Continuous Integration with Azure DevOps, Jenkins, GitHub Actions?
 
-## 5. Excepciones y Plan de Acción
+## 5. Exceptions and Action Plan
 
-- [ ] ¿Existe alguna desviación del stack tecnológico oficial?
-- [ ] Si la respuesta es sí, ¿Se documentó el excepcionamiento y el plan de acción correspondiente?
-- [ ] ¿El plan de acción está aprobado por el chapter y registrado en el Contrato de Adherencia?
+- [ ] Is there any deviation from the official technology stack?
+- [ ] If yes, has the exception and corresponding action plan been documented?
+- [ ] Is the action plan approved by the chapter and registered in the Compliance Contract?
 
 ---
 
-## Notas Importantes
+## Important Notes
 
-- Si algún punto no aplica, justifica detalladamente el motivo en el Contrato de Adherencia.
-- El uso de tecnologías fuera del stack requiere excepcionamiento y plan de acción documentado.
+- If any item does not apply, provide detailed justification in the Compliance Contract.
+- The use of technologies outside the stack requires exception and documented action plan.
 
-## Proyecto Evaluado
+## Project Evaluated
 
-**Nombre del Proyecto:** _________________
+**Project Name:** _________________
 
-**Fecha de Evaluación:** _________________
+**Evaluation Date:** _________________
 
-**Evaluador:** _________________
+**Evaluator:** _________________
 
-**Estado:** [ ] Aprobado [ ] Requiere Acciones [ ] Rechazado
+**Status:** [ ] Pass [ ] Requires Action [ ] Rejected
 
-## Observaciones
+## Observations
 
 _________________________________________________________________________________
 
