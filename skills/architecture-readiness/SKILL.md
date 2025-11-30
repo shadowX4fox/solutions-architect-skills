@@ -1,3 +1,8 @@
+---
+name: architecture-readiness
+description: Use this skill to create Product Owner Specifications documenting business requirements before architecture design
+---
+
 # Architecture Readiness Skill
 
 ## Description
