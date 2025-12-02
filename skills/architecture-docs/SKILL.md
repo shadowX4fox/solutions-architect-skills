@@ -74,7 +74,7 @@ Automatically activate when:
 - [Section 1: Executive Summary](#1-executive-summary) → Lines 1-80
 - [Section 2: System Overview](#2-system-overview) → Lines 81-150
 - [Section 3: Architecture Principles](#3-architecture-principles) → Lines 151-350
-- [Section 4: Meta Architecture Layers](#4-meta-architecture-layers) → Lines 351-600
+- [Section 4: Architecture Layers](#4-architecture-layers) → Lines 351-600
 - [Section 5: Component Details](#5-component-details) → Lines 601-850
 - [Section 6: Data Flow Patterns](#6-data-flow-patterns) → Lines 851-1000
 - [Section 7: Integration Points](#7-integration-points) → Lines 1001-1150
@@ -121,189 +121,318 @@ After significant edits:
 
 ---
 
-## Automatic Index Updates
+## Architecture Type Selection Workflow
 
-**CRITICAL**: After ANY edit that significantly changes section line numbers, automatically update the Document Index.
+**PURPOSE**: When creating a new ARCHITECTURE.md, prompt the user to select their architecture type. This determines the structure and content of Section 4 (Meta Architecture) and Section 5 (Component Details).
 
-### When to Update the Index
+### When to Trigger
 
-**Update the Document Index if:**
-- ✅ You added/removed content that shifts section boundaries (>10 lines)
-- ✅ You added/removed entire subsections or major content blocks
-- ✅ You modified section headers or restructured sections
-- ✅ User explicitly requests: "update the index" or "update document index"
+**Activate this workflow when:**
+- ✅ User asks to create a NEW ARCHITECTURE.md document
+- ✅ User explicitly requests to "change architecture type" or "select architecture type"
+- ✅ User is updating an existing ARCHITECTURE.md and mentions changing from one architecture type to another
 
-**Do NOT update if:**
-- ❌ Minor edits (<10 lines) within a section that don't shift other sections
-- ❌ Only updating metadata (dates, version numbers, single values)
-- ❌ Fixing typos or formatting issues
+**Skip this workflow when:**
+- ❌ Editing an existing ARCHITECTURE.md (type already selected)
+- ❌ User is only updating specific sections unrelated to architecture type
+- ❌ Document type is already clear from context
 
-### Index Update Workflow
+### Available Architecture Types
 
-**Step 1: Detect Section Boundaries**
+1. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Integration → Domain → Core)
+2. **3-Tier Architecture** - Classic web application pattern (Presentation → Application/Business Logic → Data)
+3. **Microservices Architecture** - Cloud-native distributed systems with independent services
+4. **N-Layer Architecture** - Customizable patterns (DDD, Clean Architecture, Hexagonal)
 
-Run this bash command to find all numbered section headers:
-```bash
-grep -n "^## [0-9]" ARCHITECTURE.md
-```
+### Workflow Steps
 
-This returns output like:
-```
-25:## 1. Executive Summary
-54:## 2. System Overview
-147:## 3. Architecture Principles
-...
-```
+#### Step 1: Present Architecture Type Options
 
-**Step 2: Calculate Line Ranges**
-
-Parse the grep output to calculate ranges:
-- Each section starts at its header line
-- Each section ends at (next section's start line - 1)
-- Last section ends at "end" or last line of file
-- Use the format: `Lines START-END`
-
-**Example Calculation:**
-```
-Section 1: Lines 25-53  (from line 25 to 54-1)
-Section 2: Lines 54-146 (from line 54 to 147-1)
-Section 3: Lines 147-300 (from line 147 to 301-1)
-...
-Section 12: Lines 1917-1940 (or "1917-end" if last section)
-```
-
-**Step 3: Update the Document Index**
-
-Use the Edit tool to update the Document Index section (typically lines 5-21):
-1. Update line ranges for all sections that changed
-2. Verify anchor links match section headers exactly
-3. Update `**Index Last Updated:**` to current date (YYYY-MM-DD format)
-4. Preserve the exact formatting and structure
-
-**Step 4: Inform the User**
-
-Report which sections had their line ranges updated:
-```
-✅ Document Index updated:
-   - Section 8: Lines 906-980 → Lines 912-996
-   - Section 9: Lines 982-1228 → Lines 998-1244
-   - Index Last Updated: 2025-01-16
-```
-
-### Automation Template
-
-**When completing a section edit, automatically:**
-
-1. **Check if index update needed**:
-   - Ask: "Did my edit add/remove >10 lines?"
-   - Ask: "Did I modify section headers or structure?"
-
-2. **If YES, run the update workflow:**
-   ```bash
-   # Get current section positions
-   grep -n "^## [0-9]" ARCHITECTURE.md
-   ```
-
-3. **Parse grep output to extract section line numbers**
-   - Store each section number and its starting line
-   - Calculate end line (next section start - 1)
-
-4. **Build new index content:**
-   ```markdown
-   - [Section N: Title](#anchor) → Lines START-END
-   ```
-
-5. **Update the index (typically lines 5-21):**
-   - Use Edit tool to replace the Quick Navigation list
-   - Update "Index Last Updated" date
-
-6. **Notify user:**
-   - Report updated sections
-   - Confirm index is current
-
-### Example: Complete Index Update
-
-**Scenario:** After adding Confluent Kafka to Section 8 (Technology Stack), the section grew from lines 906-980 to lines 912-996.
-
-**Automated Workflow:**
+When creating a new ARCHITECTURE.md, present the user with architecture type selection:
 
 ```markdown
-1. Detect change: Section 8 grew by 10 lines
-2. Run: grep -n "^## [0-9]" ARCHITECTURE.md
-3. Parse output:
-   - Section 1: Line 25
-   - Section 2: Line 54
-   ...
-   - Section 8: Line 912
-   - Section 9: Line 998
-   - Section 10: Line 1244
-   ...
-   - Section 12: Line 1923
+📐 **Architecture Type Selection**
 
-4. Calculate ranges:
-   - Section 8: Lines 912-997 (912 to 998-1)
-   - Section 9: Lines 998-1243 (998 to 1244-1)
-   - Section 10: Lines 1244-1417 (1244 to next-1)
-   ...
+Before creating your ARCHITECTURE.md, please select the architecture type that best describes your system:
 
-5. Update index:
-   - [Section 8: Technology Stack](#8-technology-stack) → Lines 912-997
-   - [Section 9: Security Architecture](#9-security-architecture) → Lines 998-1243
-   - [Section 10: Scalability & Performance](#10-scalability--performance) → Lines 1244-1417
-   - **Index Last Updated:** 2025-01-16
+**1. META Architecture** (6-Layer Enterprise)
+   - Best for: Large enterprise systems, financial services, complex integrations
+   - Layers: Channels → UX → Business Scenarios → Integration → Domain → Core
+   - Complexity: Very High
+   - Team Size: Large (10+)
 
-6. Report to user:
-   "✅ Document Index updated - Sections 8-12 line ranges adjusted after Technology Stack expansion"
+**2. 3-Tier Architecture** (Classic Web Application)
+   - Best for: Web apps, REST APIs, standard CRUD systems
+   - Tiers: Presentation → Application/Business Logic → Data
+   - Complexity: Low
+   - Team Size: Small-Medium (2-8)
+
+**3. Microservices Architecture** (Cloud-Native Distributed)
+   - Best for: Cloud-native systems, independently deployable services
+   - Components: API Gateway → Services → Data Stores → Event Bus
+   - Complexity: High
+   - Team Size: Large (10+)
+
+**4. N-Layer Architecture** (Customizable Patterns)
+   - Best for: DDD, Clean Architecture, Hexagonal Architecture
+   - Patterns: 4-Layer DDD, 5-Layer Extended, Clean Architecture, Hexagonal
+   - Complexity: Medium-High
+   - Team Size: Medium (4-10)
+
+For detailed comparison and decision guidance, refer to: `templates/ARCHITECTURE_TYPE_SELECTOR.md`
+
+**Which architecture type best describes your system? (1-4)**
 ```
 
-### Manual Index Update
+#### Step 2: Capture User Selection
 
-**User can explicitly request index update:**
-- "Update the document index"
-- "Refresh the index line numbers"
-- "Fix the index"
+Wait for user response (1, 2, 3, or 4) or architecture type name.
 
-**When requested:**
-1. Always run the full update workflow regardless of recent changes
-2. Update all section line ranges
-3. Update the timestamp
-4. Report all changes to the user
+**Valid inputs:**
+- Numeric: `1`, `2`, `3`, `4`
+- Type names: `META`, `3-Tier`, `Microservices`, `N-Layer`
+- Variations: `meta`, `three-tier`, `microservices`, `n-layer`
 
-### Common Scenarios
+**If user is unsure:**
+- Offer to load `templates/ARCHITECTURE_TYPE_SELECTOR.md` decision guide
+- Provide quick decision tree questions
+- Default to **META** if user has enterprise requirements
+- Default to **3-Tier** if user wants simplicity
 
-| Scenario | Action | Example |
-|----------|--------|---------|
-| **Added 50-line component** | ✅ Update index | Added Section 5.6, shifts Section 6-12 |
-| **Fixed 2 typos** | ❌ Skip update | Minimal impact, no section shifts |
-| **Removed subsection (30 lines)** | ✅ Update index | Section 9 shortened, shifts Section 10-12 |
-| **Updated date metadata** | ❌ Skip update | No structural changes |
-| **Restructured principles** | ✅ Update index | Section 3 reorganized, may affect length |
-| **User says "update index"** | ✅ Always update | Manual request, always honor |
+#### Step 3: Load Type-Specific Templates
 
-### Verification Checklist
+Based on user selection, load the appropriate templates:
 
-After updating the index, verify:
-- ✅ All 12 sections are listed
-- ✅ Line ranges are sequential (no gaps or overlaps)
-- ✅ Anchor links match actual section headers exactly
-- ✅ "Index Last Updated" date is current (YYYY-MM-DD)
-- ✅ Format matches the template (consistent spacing and symbols)
+| Selection | Section 4 Template | Section 5 Template |
+|-----------|-------------------|-------------------|
+| META (1) | `templates/SECTION_4_META.md` | `templates/SECTION_5_META.md` |
+| 3-Tier (2) | `templates/SECTION_4_3TIER.md` | `templates/SECTION_5_3TIER.md` |
+| Microservices (3) | `templates/SECTION_4_MICROSERVICES.md` | `templates/SECTION_5_MICROSERVICES.md` |
+| N-Layer (4) | `templates/SECTION_4_NLAYER_PATTERNS.md` | *(Use generic component template)* |
+
+**Loading Process:**
+1. Read the appropriate Section 4 template file
+2. Read the appropriate Section 5 template file (if exists)
+3. Extract template content (excluding metadata comments)
+4. Prepare for insertion into ARCHITECTURE.md at correct section boundaries
+
+#### Step 4: Add Architecture Type Metadata
+
+When creating the ARCHITECTURE.md, add an HTML comment metadata tag at the beginning of Section 4 to track the selected architecture type:
+
+```html
+<!-- ARCHITECTURE_TYPE: META -->
+```
+
+**Valid metadata values:**
+- `<!-- ARCHITECTURE_TYPE: META -->`
+- `<!-- ARCHITECTURE_TYPE: 3-TIER -->`
+- `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`
+- `<!-- ARCHITECTURE_TYPE: N-LAYER -->`
+
+**Purpose:**
+- Enables type detection for future edits
+- Used by validation rules
+- Used by Design Drivers calculation
+- Used by architecture compliance skill
+
+#### Step 5: Create ARCHITECTURE.md with Type-Specific Content
+
+Create the complete ARCHITECTURE.md using:
+- Standard sections 1-3 (same for all types)
+- Type-specific Section 4 (from loaded template)
+- Type-specific Section 5 (from loaded template)
+- Standard sections 6-12 (same for all types)
+
+**Include:**
+- Document Index (placeholder line ranges)
+- Architecture type metadata comment in Section 4
+- All template content properly formatted
+- Placeholder values for customization
+
+### Detecting Existing Architecture Type
+
+When editing an existing ARCHITECTURE.md, detect the architecture type:
+
+**Detection Method 1: Metadata Comment**
+```bash
+grep -n "<!-- ARCHITECTURE_TYPE:" ARCHITECTURE.md
+```
+
+If found, extract the type from the comment.
+
+**Detection Method 2: Section 4 Header Analysis**
+
+If no metadata comment, infer from Section 4 headers:
+
+```bash
+# Check for META indicators
+grep -E "(Layer 1: Channels|Layer 5: Domain|BIAN)" ARCHITECTURE.md
+
+# Check for 3-Tier indicators
+grep -E "(Tier 1: Presentation|Tier 3: Data)" ARCHITECTURE.md
+
+# Check for Microservices indicators
+grep -E "(API Gateway|Service Mesh|Microservices Catalog)" ARCHITECTURE.md
+
+# Check for N-Layer indicators
+grep -E "(Clean Architecture|Hexagonal|Ports & Adapters)" ARCHITECTURE.md
+```
+
+**Inference Rules:**
+- Contains "Layer 1: Channels" AND "Layer 5: Domain" → **META**
+- Contains "Tier 1: Presentation" OR "Tier 3: Data" → **3-Tier**
+- Contains "API Gateway" AND "Service Mesh" → **Microservices**
+- Contains "Clean Architecture" OR "Hexagonal" → **N-Layer**
+- Cannot determine → Ask user or default to **META**
+
+### Changing Architecture Type (Existing Document)
+
+If user requests to change architecture type of an existing ARCHITECTURE.md:
+
+**Warning Steps:**
+1. **Detect current type** using detection methods above
+2. **Warn user** about potential data loss:
+   ```
+   ⚠️  **Architecture Type Change Warning**
+
+   Current type: [DETECTED_TYPE]
+   Requested type: [NEW_TYPE]
+
+   Changing architecture type will:
+   - Replace Section 4 (Meta Architecture) with new structure
+   - Replace Section 5 (Component Details) with new organization
+   - Require manual component remapping
+
+   **Recommendation**: Review and backup current Sections 4 & 5 before proceeding.
+
+   Continue with architecture type change? (yes/no)
+   ```
+
+3. **If user confirms:**
+   - Load new type templates
+   - Replace Section 4 content
+   - Replace Section 5 content
+   - Update metadata comment
+   - Update Document Index
+   - Report changes to user
+
+4. **If user declines:**
+   - Cancel operation
+   - Suggest manual editing approach
+
+### Type-Specific Validation
+
+After selecting or detecting architecture type, apply type-specific validation rules:
+
+**META Architecture:**
+- ✅ Must have all 6 layers (Channels, UX, Business Scenarios, Integration, Domain, Core)
+- ✅ Layer 5 must include BIAN alignment section
+- ✅ Layers documented in correct order
+
+**3-Tier Architecture:**
+- ✅ Must have all 3 tiers (Presentation, Application, Data)
+- ✅ No direct database access from Presentation tier
+- ✅ Application tier should be stateless
+
+**Microservices Architecture:**
+- ✅ Must document API Gateway and Service Mesh (or justify omission)
+- ✅ Database-per-service pattern followed
+- ✅ Event bus and topics documented
+- ✅ Circuit breakers configured
+
+**N-Layer Architecture:**
+- ✅ Must specify which pattern (4-Layer, 5-Layer, Clean, Hexagonal)
+- ✅ Dependency direction documented
+- ✅ Core/domain layer is framework-free (if applicable)
+
+**For detailed validation rules**, see: `VALIDATIONS.md` § Type-Aware Validation
 
 ### Best Practices
 
 **DO:**
-- ✅ Update index immediately after significant edits
-- ✅ Run grep to get accurate line numbers (don't guess)
-- ✅ Update timestamp every time you update ranges
-- ✅ Report changes to user for transparency
-- ✅ Preserve exact markdown formatting in index
+- ✅ Always prompt for architecture type when creating new ARCHITECTURE.md
+- ✅ Add metadata comment to track architecture type
+- ✅ Load appropriate templates based on selection
+- ✅ Warn before changing architecture type of existing document
+- ✅ Apply type-specific validation rules
 
 **DON'T:**
-- ❌ Update index for every tiny change
-- ❌ Guess line ranges without running grep
-- ❌ Forget to update the timestamp
-- ❌ Change index format or structure
-- ❌ Skip notifying user about index updates
+- ❌ Assume architecture type without asking
+- ❌ Mix templates from different architecture types
+- ❌ Change architecture type without user confirmation
+- ❌ Skip metadata comment (makes future edits harder)
+
+### Example Workflow
+
+**User:** "Create architecture documentation for my microservices system"
+
+**Assistant:**
+1. Detects new ARCHITECTURE.md creation
+2. Presents architecture type options (1-4)
+3. User selects "3" (Microservices)
+4. Loads `templates/SECTION_4_MICROSERVICES.md` and `templates/SECTION_5_MICROSERVICES.md`
+5. Creates ARCHITECTURE.md with:
+   - Standard Sections 1-3
+   - Microservices Section 4 (API Gateway, Service Mesh, Services, Event Bus)
+   - Microservices Section 5 (Service catalog format)
+   - Standard Sections 6-12
+   - Metadata comment: `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`
+6. Reports completion with architecture type confirmation
+
+---
+
+## Automatic Index Updates
+
+**CRITICAL**: After ANY edit that significantly changes section line numbers (>10 lines), automatically update the Document Index.
+
+### When to Update
+
+**Update if:**
+- ✅ Added/removed content shifting section boundaries (>10 lines)
+- ✅ Modified section headers or structure
+- ✅ User requests: "update the index"
+
+**Skip if:**
+- ❌ Minor edits (<10 lines)
+- ❌ Only metadata changes
+- ❌ Typo fixes
+
+### Workflow Overview
+
+**Quick Steps:**
+1. **Detect**: Run `grep -n "^## [0-9]" ARCHITECTURE.md` to find section boundaries
+2. **Calculate**: Parse output to determine line ranges (Section_Start to Next_Section_Start - 1)
+3. **Update**: Edit Document Index (typically lines 5-21) with new ranges
+4. **Timestamp**: Update "Index Last Updated" to current date
+5. **Report**: Inform user which sections changed
+
+**Example:**
+```bash
+# After adding content to Section 8, it grew from 906-980 to 912-996
+grep -n "^## [0-9]" ARCHITECTURE.md
+# Parse: Section 8 now at line 912, Section 9 at 998
+# Calculate: Section 8 = 912-997, Section 9 = 998-1243
+# Update index and report to user
+```
+
+### Detailed Algorithm
+
+For complete line range calculation algorithm, step-by-step examples, verification checklist, and edge cases:
+→ **METRIC_CALCULATIONS.md** § Automatic Index Updates
+
+### Best Practices
+
+**DO:**
+- ✅ Update after significant edits
+- ✅ Use grep for accuracy (don't guess)
+- ✅ Update timestamp
+- ✅ Report changes to user
+
+**DON'T:**
+- ❌ Update for tiny changes
+- ❌ Skip timestamp update
+- ❌ Change index format
 
 ---
 
@@ -345,7 +474,13 @@ Parse and extract all metrics with their values using these patterns:
 
 | Metric Type | Pattern | Example Match |
 |-------------|---------|---------------|
-| **TPS Capacity** | `(\d{1,3}(?:,\d{3})*)\s*(?:TPS\|transactions per second)` | "450 TPS", "1,000 transactions per second" |
+| **Average Read TPS** | `Average\s+Read\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Average Read TPS: 1,500 transactions/second" |
+| **Peak Read TPS** | `Peak\s+Read\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Peak Read TPS: 3,000 transactions/second" |
+| **Average Processing TPS** | `Average\s+Processing\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Average Processing TPS: 450 transactions/second" |
+| **Peak Processing TPS** | `Peak\s+Processing\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Peak Processing TPS: 1,000 transactions/second" |
+| **Average Write TPS** | `Average\s+Write\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Average Write TPS: 300 transactions/second" |
+| **Peak Write TPS** | `Peak\s+Write\s+TPS:\s*(\d{1,3}(?:,\d{3})*)\s*transactions/second` | "Peak Write TPS: 800 transactions/second" |
+| **Measurement Period** | `Measurement\s+Period:\s*(.+)` | "Measurement Period: Average over last 30 days" |
 | **Percentile Latency** | `p(\d{2})\s*<\s*(\d+)ms` | "p95 < 100ms", "p99 < 200ms" |
 | **Availability SLA** | `(\d{2,3}\.\d+)\s*%` | "99.99%", "99.9%" |
 | **Concurrent Jobs** | `(\d{1,3}(?:,\d{3})*)\+?\s*concurrent` | "10,000+ concurrent", "5000 concurrent" |
@@ -354,16 +489,16 @@ Parse and extract all metrics with their values using these patterns:
 Build a metrics registry from parsed data:
 ```
 METRICS_REGISTRY = [
-  {name: "Job Creation Capacity", value: 450, unit: "TPS", line: 32},
-  {name: "Job Execution Capacity", value: 500, unit: "TPS", line: 33},
-  {name: "Peak Job Creation", value: 1000, unit: "TPS", line: 34},
-  {name: "Peak Job Execution", value: 2000, unit: "TPS", line: 34},
-  {name: "Initial Load Creation", value: 150, unit: "TPS", line: 35},
-  {name: "Initial Load Execution", value: 350, unit: "TPS", line: 35},
-  {name: "System Availability", value: 99.99, unit: "%", line: 36},
-  {name: "Latency p95", value: 100, unit: "ms", line: 37},
-  {name: "Latency p99", value: 200, unit: "ms", line: 37},
-  {name: "Concurrent Jobs", value: 10000, unit: "jobs", line: 38}
+  {name: "Read TPS", value: 1500, unit: "TPS", category: "Read", stat_type: "Average", line: 32, measurement_period: "Average over last 30 days in production"},
+  {name: "Read TPS", value: 3000, unit: "TPS", category: "Read", stat_type: "Peak", line: 33, measurement_period: "Peak observed during Black Friday 2024"},
+  {name: "Processing TPS", value: 450, unit: "TPS", category: "Processing", stat_type: "Average", line: 35, measurement_period: "Average over last quarter"},
+  {name: "Processing TPS", value: 1000, unit: "TPS", category: "Processing", stat_type: "Peak", line: 36, measurement_period: "Peak during end-of-month batch processing"},
+  {name: "Write TPS", value: 300, unit: "TPS", category: "Write", stat_type: "Average", line: 38, measurement_period: "Average over last month"},
+  {name: "Write TPS", value: 800, unit: "TPS", category: "Write", stat_type: "Peak", line: 39, measurement_period: "Peak during data migration events"},
+  {name: "System Availability", value: 99.99, unit: "%", line: 42},
+  {name: "Latency p95", value: 100, unit: "ms", line: 43},
+  {name: "Latency p99", value: 200, unit: "ms", line: 43},
+  {name: "Concurrent Jobs", value: 10000, unit: "jobs", line: 44}
 ]
 ```
 
@@ -372,13 +507,13 @@ METRICS_REGISTRY = [
 Use Grep to find all occurrences of each metric value (context-efficient, no full file load):
 
 ```bash
-# For each metric in registry, search with appropriate pattern
-Grep(pattern="450\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
-Grep(pattern="500\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
-Grep(pattern="1,?000\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
-Grep(pattern="2,?000\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
-Grep(pattern="150\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
-Grep(pattern="350\s*TPS", path="ARCHITECTURE.md", output_mode="files_with_matches")
+# For each metric in registry, search with appropriate pattern (new standardized TPS format)
+Grep(pattern="Average\s+Read\s+TPS:\s*1,?500", path="ARCHITECTURE.md", output_mode="files_with_matches")
+Grep(pattern="Peak\s+Read\s+TPS:\s*3,?000", path="ARCHITECTURE.md", output_mode="files_with_matches")
+Grep(pattern="Average\s+Processing\s+TPS:\s*450", path="ARCHITECTURE.md", output_mode="files_with_matches")
+Grep(pattern="Peak\s+Processing\s+TPS:\s*1,?000", path="ARCHITECTURE.md", output_mode="files_with_matches")
+Grep(pattern="Average\s+Write\s+TPS:\s*300", path="ARCHITECTURE.md", output_mode="files_with_matches")
+Grep(pattern="Peak\s+Write\s+TPS:\s*800", path="ARCHITECTURE.md", output_mode="files_with_matches")
 Grep(pattern="99\.99%", path="ARCHITECTURE.md", output_mode="files_with_matches")
 Grep(pattern="p95.*100ms", path="ARCHITECTURE.md", output_mode="files_with_matches")
 Grep(pattern="p99.*200ms", path="ARCHITECTURE.md", output_mode="files_with_matches")
@@ -1727,174 +1862,75 @@ When updating existing architecture docs:
 
 ## Architecture Principles Enforcement (Section 3)
 
-**CRITICAL**: Section 3 (Architecture Principles) MUST follow these requirements:
+**CRITICAL**: Section 3 must include **9 required principles** in exact order, each with Description, Implementation, and Trade-offs.
 
-### Required Principles (Strict Order)
+### Required Principles
 
-All ARCHITECTURE.md documents MUST include these **9 core principles** in this **exact order**:
+1. Separation of Concerns
+2. High Availability
+3. Scalability First
+4. Security by Design
+5. Observability
+6. Resilience
+7. Simplicity
+8. Cloud-Native
+9. Open Standards
+10. Event-Driven Architecture (OPTIONAL - only if system uses event-driven patterns)
 
-1. **Separation of Concerns**
-2. **High Availability**
-3. **Scalability First**
-4. **Security by Design**
-5. **Observability**
-6. **Resilience**
-7. **Simplicity**
-8. **Cloud-Native**
-9. **Open Standards**
+### Quick Validation
 
-### Optional Principle
+✅ All 9 core principles present in order
+✅ Each has Description + Implementation + Trade-offs
+✅ Implementation is system-specific (not generic placeholders)
+✅ Trade-offs honestly assess costs
+✅ Event-Driven (#10) only if applicable
 
-10. **Event-Driven Architecture** *(Include ONLY if the system actually uses event-driven patterns)*
+### Detailed Rules
 
-### Required Structure for Each Principle
-
-Each principle MUST include these three subsections:
-
-```markdown
-### [Number]. [Principle Name]
-
-**Description:**
-[What this principle means - 1-2 sentences]
-
-**Implementation:**
-- [System-specific implementation details]
-- [Technologies, patterns, configurations used]
-- [Concrete examples from your architecture]
-
-**Trade-offs:**
-- [Costs, downsides, complexity introduced]
-- [Performance impacts, infrastructure costs, etc.]
-```
-
-### Validation Rules
-
-When creating or updating Section 3, verify:
-
-✅ All 9 core principles are present
-✅ Principles appear in the exact order specified
-✅ Each principle has all three subsections: Description, Implementation, Trade-offs
-✅ Implementation section contains system-specific details (NOT generic placeholders)
-✅ Trade-offs section honestly assesses costs/downsides
-✅ Event-Driven Architecture (#10) is only included if system uses it
-✅ No additional custom principles beyond the standard 9-10
-
-### Common Mistakes to Avoid
-
-❌ Missing principles from the core 9
-❌ Changing the order of principles
-❌ Using generic placeholder text in Implementation sections
-❌ Omitting Trade-offs section
-❌ Including Event-Driven Architecture when system doesn't use it
-❌ Adding custom principles not in the standard list
-❌ Using single-sentence descriptions instead of structured format
-
-### When Updating Existing Documents
-
-If an existing ARCHITECTURE.md has different principles:
-
-1. **Identify missing principles**: Compare against the required 9
-2. **Reorder existing principles**: Match the standard order (1-9)
-3. **Add missing principles**: Write system-specific Implementation details
-4. **Restructure format**: Ensure each has Description/Implementation/Trade-offs
-5. **Remove non-standard principles**: Either map to standard principles or remove
-6. **Preserve content**: Migrate existing content to appropriate standard principles
+For complete principle definitions, required structure, validation checklist, common mistakes, and updating workflows:
+→ **VALIDATIONS.md** § Architecture Principles Enforcement
+→ **ARCHITECTURE_DOCUMENTATION_GUIDE.md** § Section 3: Architecture Principles
 
 ## Required Section Names (Strict Enforcement)
 
-**CRITICAL**: All ARCHITECTURE.md documents MUST use these exact section names in this exact order.
+**CRITICAL**: All ARCHITECTURE.md documents MUST use these **12 exact section names** in this **exact order**.
 
-### Standard 12-Section Structure
+### Standard Section Names
 
-All ARCHITECTURE.md documents MUST include these **12 sections** with these **exact names** in this **exact order**:
-
-1. **Executive Summary**
-2. **System Overview**
-3. **Architecture Principles**
-4. **Meta Architecture Layers**
-5. **Component Details**
-6. **Data Flow Patterns** *(Optional - include only if system has complex flows)*
-7. **Integration Points**
-8. **Technology Stack**
-9. **Security Architecture**
-10. **Scalability & Performance**
-11. **Operational Considerations**
-12. **Architecture Decision Records (ADRs)**
-
-### Markdown Header Format
-
-Each section MUST use this exact format:
-
-```markdown
-## [NUMBER]. [SECTION NAME]
-```
-
-**Examples:**
-- ✅ Correct: `## 1. Executive Summary`
-- ✅ Correct: `## 12. Architecture Decision Records (ADRs)`
-- ❌ Wrong: `## Executive Summary` (missing number)
-- ❌ Wrong: `## 1 Executive Summary` (missing period)
-- ❌ Wrong: `## 12. ADR References` (wrong section name)
-
-### Validation Rules
-
-When creating or updating ARCHITECTURE.md, verify:
-
-✅ All 12 section headers match exactly (case-sensitive)
-✅ Sections appear in the exact order specified (1-12)
-✅ Section numbers are present with period (e.g., "## 1. Executive Summary")
-✅ No custom section names unless explicitly documented as optional
-✅ Data Flow Patterns (Section 6) may be omitted for simple systems (renumber subsequent sections if omitted)
-
-**Verification Command:**
-```bash
-# Check section headers match standard names
-grep -n "^## [0-9]" ARCHITECTURE.md
-```
-
-Expected output should show all 12 sections in order with exact names.
-
-### Common Mistakes to Avoid
-
-❌ Using "ADR References" instead of "Architecture Decision Records (ADRs)"
-❌ Using "Decision References (ADRs)" instead of "Architecture Decision Records (ADRs)"
-❌ Using "Tech Stack" instead of "Technology Stack"
-❌ Using "Security" instead of "Security Architecture"
-❌ Using "Performance" instead of "Scalability & Performance"
-❌ Reordering sections (e.g., putting Technology Stack before Integration Points)
-❌ Omitting section numbers (e.g., "## Executive Summary")
-❌ Using wrong number format (e.g., "## 1 Executive Summary" without period)
-❌ Adding custom sections between standard sections without guidance
-
-### Optional Sections
-
-**Data Flow Patterns (Section 6):**
-- Include if system has complex data flows requiring visualization
-- Omit for simple systems with straightforward request/response patterns
-- If omitted, renumber subsequent sections (7→6, 8→7, etc.)
-
-**Additional subsections are encouraged:**
-- Section 5 (Component Details) should have subsections per component
-- Section 11 (Operational Considerations) should include deployment, monitoring, backup, and disaster recovery
-
-### Section Renumbering
-
-**If Data Flow Patterns (Section 6) is omitted:**
-
-The 11-section structure becomes:
 1. Executive Summary
 2. System Overview
 3. Architecture Principles
-4. Meta Architecture Layers
+4. Architecture Layers
 5. Component Details
-6. Integration Points (was 7)
-7. Technology Stack (was 8)
-8. Security Architecture (was 9)
-9. Scalability & Performance (was 10)
-10. Operational Considerations (was 11)
-11. Architecture Decision Records (ADRs) (was 12)
+6. Data Flow Patterns (OPTIONAL - omit for simple systems, renumber 7→6, 8→7, etc.)
+7. Integration Points
+8. Technology Stack
+9. Security Architecture
+10. Scalability & Performance
+11. Operational Considerations
+12. Architecture Decision Records (ADRs)
 
-**Document Index must be updated** to reflect the 11-section structure.
+### Format Requirement
+
+Use exact format: `## [NUMBER]. [SECTION NAME]`
+
+**Examples**:
+- ✅ `## 1. Executive Summary`
+- ✅ `## 12. Architecture Decision Records (ADRs)`
+- ❌ `## Executive Summary` (missing number)
+- ❌ `## 12. ADR References` (wrong name)
+
+### Verification Command
+
+```bash
+grep -n "^## [0-9]" ARCHITECTURE.md
+```
+
+### Detailed Rules
+
+For complete section name list, common mistakes, optional sections, renumbering workflow, and validation checklist:
+→ **VALIDATIONS.md** § Section Name Enforcement
+→ **ARCHITECTURE_DOCUMENTATION_GUIDE.md** § Document Structure Overview
 
 ## Optional Enhancements
 

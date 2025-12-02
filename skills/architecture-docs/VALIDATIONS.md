@@ -244,7 +244,7 @@ All ARCHITECTURE.md documents MUST include these **12 sections** with these **ex
 1. **Executive Summary**
 2. **System Overview**
 3. **Architecture Principles**
-4. **Meta Architecture Layers**
+4. **Architecture Layers**
 5. **Component Details**
 6. **Data Flow Patterns** *(Optional - may be omitted for simple systems)*
 7. **Integration Points**
@@ -314,7 +314,7 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 25:## 1. Executive Summary
 54:## 2. System Overview
 147:## 3. Architecture Principles
-301:## 4. Meta Architecture Layers
+301:## 4. Architecture Layers
 456:## 5. Component Details
 676:## 6. Data Flow Patterns
 851:## 7. Integration Points
@@ -330,7 +330,7 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 25:## 1. Executive Summary
 54:## 2. System Overview
 147:## 3. Architecture Principles
-301:## 4. Meta Architecture Layers
+301:## 4. Architecture Layers
 456:## 5. Component Details
 676:## 6. Integration Points         ← Was 7, renumbered
 851:## 7. Technology Stack          ← Was 8, renumbered
@@ -422,7 +422,7 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 - [Section 1: Executive Summary](#1-executive-summary) → Lines 25-53
 - [Section 2: System Overview](#2-system-overview) → Lines 54-146
 - [Section 3: Architecture Principles](#3-architecture-principles) → Lines 147-300
-- [Section 4: Meta Architecture Layers](#4-meta-architecture-layers) → Lines 301-455
+- [Section 4: Architecture Layers](#4-architecture-layers) → Lines 301-455
 - [Section 5: Component Details](#5-component-details) → Lines 456-675
 - [Section 6: Integration Points](#6-integration-points) → Lines 676-850
   <!-- Note: Data Flow Patterns omitted, sections renumbered -->
@@ -640,9 +640,9 @@ grep -n "^### [0-9]" ARCHITECTURE.md | grep -A5 "## 4\."
 
 ✅ **Layers appear in correct order (1-6)**
 
-✅ **Section 4 must NOT be named "Meta Architecture Layers"**
-- **Correct**: `## 4. Meta Architecture - META 6-Layer Enterprise Model` or `## 4. Meta Architecture`
-- **Incorrect**: `## 4. Meta Architecture Layers` (old default name)
+✅ **Section 4 should be named "Architecture Layers"**
+- **Correct**: `## 4. Architecture Layers` or `## 4. Meta Architecture` (legacy)
+- **Incorrect**: `## 4. Meta Architecture` (missing "Layers" suffix)
 
 **Verification Command:**
 ```bash
@@ -720,8 +720,8 @@ grep -A20 "Layer 5: Domain" ARCHITECTURE.md | grep "BIAN"
 ✅ **Tiers appear in correct order (1-3)**
 
 ✅ **Section 4 header should reflect 3-Tier pattern:**
-- **Correct**: `## 4. Meta Architecture - 3-Tier Classic Web Application` or `## 4. Meta Architecture`
-- **Incorrect**: `## 4. Meta Architecture Layers` (wrong terminology for 3-tier)
+- **Correct**: `## 4. Architecture Layers - 3-Tier Classic Web Application` or `## 4. Architecture Layers`
+- **Incorrect**: `## 4. Meta Architecture` (missing "Layers" suffix)
 
 **Verification Command:**
 ```bash
