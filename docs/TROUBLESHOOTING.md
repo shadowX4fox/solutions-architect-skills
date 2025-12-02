@@ -4,12 +4,149 @@ Common issues and solutions for Solutions Architect Skills plugin.
 
 ## Table of Contents
 
-1. [Installation Issues](#installation-issues)
-2. [Skill Activation Issues](#skill-activation-issues)
-3. [Generation Issues](#generation-issues)
-4. [Validation Issues](#validation-issues)
-5. [Performance Issues](#performance-issues)
-6. [FAQ](#frequently-asked-questions)
+1. [Marketplace & Plugin Issues](#marketplace--plugin-issues)
+2. [Installation Issues](#installation-issues)
+3. [Skill Activation Issues](#skill-activation-issues)
+4. [Generation Issues](#generation-issues)
+5. [Validation Issues](#validation-issues)
+6. [Performance Issues](#performance-issues)
+7. [FAQ](#frequently-asked-questions)
+
+---
+
+## Marketplace & Plugin Issues
+
+### Q: Plugin Not Appearing After Marketplace Installation
+
+**Symptoms:**
+- Ran `/plugin install solutions-architect-skills` but plugin doesn't appear in `/plugin list`
+- No error messages shown
+
+**Diagnosis:**
+```bash
+# Check if marketplace is added
+/plugin marketplace list
+
+# Check if plugin is in marketplace catalog
+/plugin marketplace show shadowx4fox-marketplace
+```
+
+**Solutions:**
+
+**Solution 1: Verify Marketplace Added**
+```bash
+# Add marketplace if missing
+/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
+
+# Refresh marketplace catalog
+/plugin marketplace refresh
+```
+
+**Solution 2: Restart Claude Code**
+```bash
+# Completely close and restart Claude Code
+# Wait 10 seconds after restart
+/plugin list
+```
+
+**Solution 3: Check Claude Code Logs**
+```bash
+# Check for installation errors
+tail -f ~/.claude/logs/plugin-install.log
+```
+
+**Reference:** [Claude Code Marketplace Troubleshooting](https://docs.anthropic.com/claude/docs/claude-code-troubleshooting)
+
+---
+
+### Q: Skills Not Available After Installation
+
+**Symptoms:**
+- Plugin installed successfully (`/plugin list` shows it)
+- But `/skill architecture-docs` shows "skill not found"
+
+**Diagnosis:**
+```bash
+# Verify plugin directory structure
+ls ~/.claude/plugins/solutions-architect-skills/skills/
+
+# Check SKILL.md files have YAML frontmatter
+head -n 5 ~/.claude/plugins/solutions-architect-skills/skills/architecture-docs/SKILL.md
+```
+
+**Expected Output:**
+```yaml
+---
+name: architecture-docs
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files
+---
+```
+
+**Solutions:**
+
+**Solution 1: Verify SKILL.md Frontmatter**
+All SKILL.md files must have YAML frontmatter (lines 1-4). If missing:
+```bash
+# Reinstall plugin
+/plugin uninstall solutions-architect-skills
+/plugin install solutions-architect-skills
+```
+
+**Solution 2: Restart Claude Code**
+```bash
+# Skills are loaded at startup
+# Complete restart required
+/plugin list  # Verify plugin present after restart
+```
+
+**Solution 3: Check File Permissions**
+```bash
+chmod -R 755 ~/.claude/plugins/solutions-architect-skills
+find ~/.claude/plugins/solutions-architect-skills/skills -name "SKILL.md" -exec chmod 644 {} \;
+```
+
+---
+
+### Q: Marketplace URL Issues
+
+**Symptoms:**
+- `/plugin marketplace add` fails with URL error
+- Error: "Invalid marketplace repository"
+
+**Diagnosis:**
+```bash
+# Test marketplace URL accessibility
+curl -I https://github.com/shadowX4fox/shadowx4fox-marketplace
+```
+
+**Solutions:**
+
+**Solution 1: Verify Correct URL**
+```bash
+# Correct URL (note capitalization)
+/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
+
+# Common mistakes:
+# ❌ shadowx4fox (lowercase 'x')
+# ❌ solutions-architect-skills (that's the plugin, not marketplace)
+# ✓ shadowX4fox (correct capitalization)
+```
+
+**Solution 2: Check Network Connectivity**
+```bash
+# Test GitHub connectivity
+ping github.com
+
+# Test with different network (e.g., switch from VPN to direct)
+```
+
+**Solution 3: Refresh Marketplace Cache**
+```bash
+/plugin marketplace refresh
+/plugin marketplace list
+```
+
+**Reference:** [Plugin Installation Guide](https://docs.anthropic.com/claude/docs/claude-code-plugins#installation)
 
 ---
 

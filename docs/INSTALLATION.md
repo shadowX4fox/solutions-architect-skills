@@ -15,6 +15,22 @@ Complete guide to installing the Solutions Architect Skills plugin for Claude Co
 - **Internet connection** (for downloading release)
 - **~2 MB disk space** for plugin files
 
+## Understanding Marketplaces & Plugins
+
+**What is a Marketplace?**
+
+A Claude Code Marketplace is a catalog repository containing metadata about available plugins. You add a marketplace once, then can discover and install any plugins listed in it.
+
+**What is a Plugin?**
+
+A Claude Code Plugin is a repository containing skills and tools that extend Claude Code's functionality. This plugin contains 3 architecture documentation skills.
+
+**Learn More:**
+- [Claude Code Marketplace Documentation](https://docs.anthropic.com/claude/docs/claude-code-marketplaces)
+- [Plugin Development Guide](https://docs.anthropic.com/claude/docs/claude-code-plugins)
+
+---
+
 ## Installation Methods
 
 ### Method 1: Using Claude Code Marketplace (Recommended)

@@ -18,6 +18,18 @@ Phase 2: Technical Architecture (ARCHITECTURE.md)
 Phase 3: Compliance Documents (11 contracts)
 ```
 
+## Claude Code Marketplace & Plugin System
+
+This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Marketplace**:
+
+- **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
+- **Plugin**: This repository, installable from the marketplace
+- **Skills**: Three specialized tools within the plugin
+
+For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
+
+---
+
 ### What's Included
 
 - **3 Integrated Skills**
@@ -163,7 +175,18 @@ Generate 11 compliance contracts from ARCHITECTURE.md with full traceability.
 
 ## Examples
 
-The `examples/` directory contains realistic demonstrations:
+> **Note**: Example repositories demonstrating real-world usage will be added here. Check back soon or see [Issues](https://github.com/shadowx4fox/solutions-architect-skills/issues) for updates.
+
+**Planned Examples:**
+- Enterprise architecture documentation workflow
+- Multi-project compliance generation
+- Integration with existing documentation systems
+
+To request specific examples, [open an issue](https://github.com/shadowx4fox/solutions-architect-skills/issues/new).
+
+**Current Examples in Repository:**
+
+The `examples/` directory contains basic demonstrations:
 
 - **PRODUCT_OWNER_SPEC_example.md** - Complete PO Spec (Job Scheduling Platform)
 - **ARCHITECTURE_example.md** - Full ARCHITECTURE.md based on PO Spec

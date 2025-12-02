@@ -2,6 +2,12 @@
 
 Get started with Solutions Architect Skills in 5 minutes. This tutorial walks you through creating your first complete architecture documentation workflow.
 
+> **Prerequisites**: This guide assumes you have already installed the plugin. If not, see [Installation Guide](INSTALLATION.md).
+
+This plugin is distributed via the Claude Code marketplace system. See [Claude Code Documentation](https://docs.anthropic.com/claude/docs/claude-code) for general information.
+
+---
+
 ## Prerequisites
 
 - Solutions Architect Skills plugin installed ([Installation Guide](INSTALLATION.md))

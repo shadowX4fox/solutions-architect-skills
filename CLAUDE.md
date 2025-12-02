@@ -1,5 +1,22 @@
 # Project Guidelines
 
+> **Note**: This is a Claude Code Plugin. For plugin development documentation, see [Claude Code Plugin Development Guide](https://docs.anthropic.com/claude/docs/claude-code-plugins).
+
+## Plugin Structure
+
+This repository follows the Claude Code plugin structure:
+
+- `.claude-plugin/` - Plugin configuration and marketplace metadata
+  - `plugin.json` - Plugin manifest (name, version, description)
+  - `marketplace.json` - Marketplace registry configuration
+- `skills/` - Three skill directories (architecture-readiness, architecture-docs, architecture-compliance)
+- `docs/` - User-facing documentation
+- `CLAUDE.md` - This file (development guidelines)
+
+For more on plugin structure, see [Plugin Directory Structure](https://docs.anthropic.com/claude/docs/claude-code-plugins#directory-structure).
+
+---
+
 ## Architecture Documentation
 
 This project maintains architecture documentation using standardized templates and guidelines.

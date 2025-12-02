@@ -2,6 +2,14 @@
 
 Comprehensive guide to the three-phase architecture documentation workflow using Solutions Architect Skills.
 
+> **Prerequisites**: Ensure the solutions-architect-skills plugin is installed. See [Installation Guide](INSTALLATION.md).
+
+This guide covers the complete three-phase architecture workflow provided by this Claude Code plugin.
+
+For background on Claude Code plugins, see [official documentation](https://docs.anthropic.com/claude/docs/claude-code-plugins).
+
+---
+
 ## Table of Contents
 
 1. [Workflow Overview](#workflow-overview)
