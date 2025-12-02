@@ -13,6 +13,50 @@ This guide provides a structured approach to documenting complex system architec
 - Onboarding teams to a new system
 - Communicating architecture decisions to stakeholders
 
+## Related Documentation
+
+This guide focuses on **what to write** and **how to structure** architecture documentation content.
+
+For supporting operations and algorithms:
+- **→ SKILL.md**: Operational workflows, when to trigger actions, context-efficient editing strategies
+- **→ METRIC_CALCULATIONS.md**: Algorithms for index updates and metric consistency detection
+- **→ DESIGN_DRIVER_CALCULATIONS.md**: Implementation details for Design Drivers calculation
+- **→ VALIDATIONS.md**: Structure enforcement rules, required principles, section name validation
+- **→ ADR_GUIDE.md**: Architectural Decision Record format and creation guidelines
+
+## Architecture Type Selection
+
+**Before creating your ARCHITECTURE.md, choose your architecture type.** The architecture type determines the structure and content of **Section 4 (Meta Architecture)** and **Section 5 (Component Details)**.
+
+### Available Architecture Types
+
+1. **META Architecture** - 6-layer enterprise model for large systems with complex integrations
+2. **3-Tier Architecture** - Classic web application pattern (Presentation → Application → Data)
+3. **Microservices Architecture** - Cloud-native distributed systems with independent services
+4. **N-Layer Architecture** - Customizable patterns (DDD, Clean Architecture, Hexagonal)
+
+### How to Select
+
+When creating a new ARCHITECTURE.md, the skill will prompt you to select your architecture type. Refer to:
+- **`templates/ARCHITECTURE_TYPE_SELECTOR.md`** - Decision guide with comparison matrix
+
+### Type-Specific Templates
+
+Each architecture type has dedicated templates:
+- **Section 4 Templates**: `templates/SECTION_4_*.md` (layer/tier structure)
+- **Section 5 Templates**: `templates/SECTION_5_*.md` (component organization)
+
+The skill automatically loads the appropriate templates based on your selection.
+
+### Changing Architecture Type
+
+To change the architecture type of an existing ARCHITECTURE.md:
+1. Re-invoke the skill and specify the new type
+2. The skill will detect the change and update Sections 4 and 5
+3. **Manual review required** to ensure component mappings align with new structure
+
+---
+
 ## Document Structure Overview
 
 A comprehensive architecture document should follow this hierarchical structure:
@@ -167,9 +211,26 @@ Read(file_path="ARCHITECTURE.md", offset=1136, limit=179)
 [System description paragraph]
 
 **Key Metrics:**
-- **Metric 1**: [Value and context]
-- **Metric 2**: [Value and context]
-- **Metric 3**: [Value and context]
+
+#### Read TPS
+- **Average Read TPS**: [Value] transactions/second
+- **Peak Read TPS**: [Value] transactions/second
+- **Measurement Period**: [Time frame for measurements, e.g., "Average over last 30 days in production; Peak observed during Black Friday 2024"]
+
+#### Processing TPS
+- **Average Processing TPS**: [Value] transactions/second
+- **Peak Processing TPS**: [Value] transactions/second
+- **Measurement Period**: [Time frame for measurements, e.g., "Average over last quarter; Peak during end-of-month batch processing"]
+
+#### Write TPS
+- **Average Write TPS**: [Value] transactions/second
+- **Peak Write TPS**: [Value] transactions/second
+- **Measurement Period**: [Time frame for measurements, e.g., "Average over last month; Peak during data migration events"]
+
+**Additional Metrics:**
+- **Availability SLA**: [Value]% uptime
+- **Latency Targets**: p95 < [Value]ms, p99 < [Value]ms
+- **[Other Metric]**: [Value and context]
 
 **Technology Stack:** [Primary technologies: language, framework, cloud platform]
 
@@ -243,28 +304,159 @@ This architecture is driven by the following key factors:
 
 **Design Drivers Guidance:**
 
-The Design Drivers subsection provides a quantifiable assessment of the architecture's impact across three dimensions:
+The Design Drivers subsection provides a quantifiable assessment of the architecture's impact across three dimensions. This helps justify architecture complexity and communicate value to stakeholders.
 
-1. **Value Delivery**: Measures the effectiveness of the change from a customer experience perspective. Look for percentage improvements in Section 1's business value bullets (cost reduction, efficiency gains, time savings). If any metric exceeds 50%, classify as HIGH.
+### What Design Drivers Measure
 
-2. **Scale**: Measures the breadth of impact by counting affected customers or transactions. Extract volume metrics from Section 2.3 Use Cases success metrics. Thresholds of 100K+ customers or transactions indicate HIGH scale impact.
+Design Drivers assess architecture impact using three quantifiable dimensions:
 
-3. **Impacts**: Measures implementation complexity by counting the number of components and technologies. Sum the component headers in Section 5 with technology table rows in Section 8. More than 5 total indicates HIGH complexity impact.
+**1. Value Delivery - Effectiveness of Change**
 
-**When to Calculate**:
-- During initial architecture documentation (manual assessment)
-- After significant architecture changes (prompted by skill during reviews)
-- When validating architecture decisions against business goals
+Measures the effectiveness of the change from a customer experience perspective.
 
-**Automation Support**:
-The architecture-docs skill includes a Design Drivers calculation workflow that:
-- Automatically extracts metrics from relevant sections
-- Applies threshold rules to determine impact levels
-- Generates justifications with source line numbers
+- **Threshold**: >50% = HIGH Impact, ≤50% = LOW Impact
+- **Data Source**: Section 1 Executive Summary, Business Value bullets
+- **What to Look For**: Percentage improvements in cost reduction, efficiency gains, time savings, productivity increases, or customer satisfaction metrics
+- **Examples**:
+  - "70% cost reduction" → HIGH (70% > 50%)
+  - "45% time savings" → LOW (45% ≤ 50%)
+  - "60% efficiency improvement" → HIGH (60% > 50%)
+
+**Calculation Approach**:
+1. Review Section 1 Business Value bullets for percentage metrics
+2. Identify the maximum percentage value
+3. Compare to 50% threshold
+4. Include source line number in justification
+
+**2. Scale - Breadth of Impact**
+
+Measures the estimated number of customers or transactions impacted by the system.
+
+- **Threshold**: >100,000 = HIGH Impact, ≤100,000 = LOW Impact
+- **Data Source**: Section 2.3 Use Cases, Success Metrics subsections
+- **What to Look For**: Daily/monthly volumes for customers, users, transactions, payments, jobs, or events processed
+- **Examples**:
+  - "500,000+ reminders per day" → HIGH (500,000 > 100,000)
+  - "50,000 customers" → LOW (50,000 ≤ 100,000)
+  - "1,000,000 transactions/month" → HIGH (1M > 100K)
+
+**Calculation Approach**:
+1. Review Section 2.3 Success Metrics for volume indicators
+2. Extract customer counts, transaction volumes, daily/monthly throughput
+3. Identify the maximum volume
+4. Compare to 100,000 threshold
+5. Include source line number in justification
+
+**3. Impacts - Implementation Complexity**
+
+Measures implementation complexity by counting architectural components and technologies.
+
+- **Threshold**: >5 total = HIGH Impact, ≤5 total = LOW Impact
+- **Data Sources**: Section 5 (Component Details) + Section 8 (Technology Stack)
+- **What to Count**:
+  - Components: Count ### subsection headers in Section 5 (e.g., ### 5.1, 5.2, 5.3)
+  - Technologies: Count technology table rows in Section 8 (excluding headers)
+  - Total: Component count + Technology count
+- **Examples**:
+  - 5 components + 3 technologies = 8 total → HIGH (8 > 5)
+  - 3 components + 2 technologies = 5 total → LOW (5 ≤ 5)
+  - 6 components + 0 technologies = 6 total → HIGH (6 > 5)
+
+**Calculation Approach**:
+1. Count component subsections in Section 5 (pattern: `^###\s+\d+\.\d+`)
+2. Count technology table rows in Section 8 (exclude headers and separators)
+3. Sum the counts
+4. Compare to 5 threshold
+5. Provide breakdown in justification
+
+### Why Design Drivers Matter
+
+Design Drivers provide quantifiable justification for:
+- **Architecture Complexity**: "8 components/technologies" explains why the solution is sophisticated
+- **Investment Level**: "500,000 customers/day" justifies infrastructure costs and engineering resources
+- **Business Value**: "70% cost reduction" demonstrates ROI and strategic importance
+
+**Use Cases**:
+- Architecture reviews and audits
+- Stakeholder presentations and buy-in
+- Budget justification and resource allocation
+- Validating architecture decisions against business goals
+- Quarterly architecture assessments
+
+### When to Calculate
+
+**Manual Assessment** (Initial Documentation):
+- When creating Section 2 during initial architecture documentation
+- Review Section 1, Section 2.3, Section 5, and Section 8
+- Manually extract metrics and apply thresholds
+- Document assessment with source line numbers
+
+**Automatic Calculation** (Architecture Reviews):
+- During architecture reviews or audits
+- After significant architecture changes
+- When explicitly requested: "calculate design drivers"
+- Skill automatically extracts metrics and applies thresholds
 - Presents results for user review and approval
-- Updates Section 2.2.1 with calculated values
 
-To trigger calculation, request an "architecture review" or explicitly ask to "calculate design drivers".
+### Automation Support
+
+The architecture-docs skill includes a Design Drivers calculation workflow that:
+
+**What It Does**:
+1. **Extracts Metrics**: Automatically reads Section 1, 2.3, 5, and 8
+2. **Applies Algorithms**: Uses regex patterns and counting logic to extract percentages, volumes, and component counts
+3. **Determines Impact Levels**: Compares extracted values to thresholds (50%, 100K, 5)
+4. **Generates Justifications**: Creates human-readable justifications with source line numbers
+5. **Presents for Review**: Shows calculation report before making any changes
+6. **Updates Document**: After user approval, updates Section 2.2.1 with calculated values
+
+**Context Efficiency**:
+- Loads only required sections (not entire document)
+- Achieves 75-80% context reduction vs. full document load
+- Sequential section loading for minimal memory footprint
+
+**How to Trigger**:
+- Request "architecture review"
+- Explicitly ask to "calculate design drivers"
+- Skill automatically prompts during architecture audits
+
+**Implementation Details**:
+For detailed extraction algorithms, edge case handling, and calculation logic, see:
+→ **DESIGN_DRIVER_CALCULATIONS.md** § Algorithm 1, 2, 3
+
+For operational workflows and when to trigger calculations, see:
+→ **SKILL.md** § Design Drivers Workflow
+
+### Threshold Edge Cases
+
+**Exactly at Threshold**:
+- 50% exactly → LOW Impact (threshold is >50%, not ≥50%)
+- 100,000 exactly → LOW Impact (threshold is >100K, not ≥100K)
+- 5 exactly → LOW Impact (threshold is >5, not ≥5)
+- These cases are flagged for user review with a note
+
+**Multiple Metrics**:
+- If multiple percentages exist (e.g., 70%, 45%, 60%), use the maximum (70%)
+- If multiple volumes exist (e.g., 500K customers, 1M transactions), use the maximum (1M)
+- Rationale: Assess overall impact based on strongest metric
+
+**Missing Data**:
+- If no percentage metrics found in Section 1 → Default to LOW with note "No quantifiable metrics found"
+- If no volume metrics in Section 2.3 → Default to LOW with note "No volume metrics found"
+- If Section 5 or 8 missing → Calculate with available data, note missing section
+
+### Manual Override
+
+Users can override any calculated value:
+- Change impact level (HIGH ↔ LOW)
+- Provide custom justification
+- Specify different threshold or metric
+- Mark as "Manual Override" with reason and date
+
+When manual override exists:
+- Subsequent automatic calculations prompt before overwriting
+- Preserve manual override unless user explicitly approves change
+- Document override reason in "Calculation Method" field
 
 ---
 
@@ -457,9 +649,23 @@ Loose coupling via domain events instead of synchronous coupling, enabling async
 
 ---
 
-## Section 4: Meta Architecture Layers
+## Section 4: Meta Architecture
 
-**Purpose**: Define the layered architecture model that organizes system components according to their responsibilities and functions.
+**Purpose**: Define the architecture model that organizes system components according to their responsibilities and functions.
+
+**Architecture Type**: This section's structure depends on your chosen architecture type. The skill automatically loads the appropriate template based on your selection.
+
+**Available Templates**:
+- `templates/SECTION_4_META.md` - 6-layer enterprise model (Channels → UX → Business Scenarios → Integration → Domain → Core)
+- `templates/SECTION_4_3TIER.md` - Classic 3-tier (Presentation → Application/Business Logic → Data)
+- `templates/SECTION_4_MICROSERVICES.md` - Microservices with API Gateway, Service Mesh, Services, Event Bus
+- `templates/SECTION_4_NLAYER_PATTERNS.md` - Customizable N-layer patterns (DDD, Clean Architecture, Hexagonal)
+
+**Note**: The META Architecture template is shown below as the default example. When creating your ARCHITECTURE.md, the skill will prompt for architecture type selection and load the corresponding template.
+
+---
+
+## META Architecture Layers (Default Template)
 
 ## Layers
 
@@ -783,11 +989,22 @@ For each layer, document the following information:
 
 ---
 
-## Section 5: Component Details (Per Layer)
+## Section 5: Component Details
 
-**Purpose**: Deep dive into each component within every layer.
+**Purpose**: Deep dive into each component within the architecture, organized according to your chosen architecture type.
 
-**For Each Component, Document:**
+**Architecture Type**: This section's organization depends on your chosen architecture type. The skill automatically loads the appropriate template based on your selection.
+
+**Available Templates**:
+- `templates/SECTION_5_META.md` - Components grouped by 6 META layers
+- `templates/SECTION_5_3TIER.md` - Components grouped by 3 tiers (Presentation, Application, Data)
+- `templates/SECTION_5_MICROSERVICES.md` - Microservice catalog with comprehensive service details
+
+**Note**: The generic component template is shown below. When creating your ARCHITECTURE.md, the skill will load the type-specific template that matches your Section 4 architecture type.
+
+---
+
+## Generic Component Template (All Architecture Types)
 
 ### Component Template
 ```markdown
@@ -1141,10 +1358,14 @@ Manages user identity, authentication, and profile information.
 | Batch Job | N/A | N/A | <30min |
 
 **Throughput**:
-| Operation | Target | Peak | Limit |
-|-----------|--------|------|-------|
-| Read API | 10K req/s | 50K req/s | 100K req/s |
-| Write API | 5K req/s | 20K req/s | 50K req/s |
+
+| Category | Average TPS | Peak TPS | Measurement Period |
+|----------|-------------|----------|--------------------|
+| Read TPS | [Value] transactions/second | [Value] transactions/second | [Time frame, e.g., "Average over last 30 days; Peak during event X"] |
+| Processing TPS | [Value] transactions/second | [Value] transactions/second | [Time frame, e.g., "Average over last quarter; Peak during batch processing"] |
+| Write TPS | [Value] transactions/second | [Value] transactions/second | [Time frame, e.g., "Average over last month; Peak during migration"] |
+
+**Note**: These TPS metrics should match the values documented in Section 1: Executive Summary, Key Metrics.
 
 **Capacity Planning**:
 - Current load: [Metrics]
