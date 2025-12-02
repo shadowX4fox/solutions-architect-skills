@@ -12,12 +12,12 @@ This template follows the **META 6-Layer Enterprise Architecture** model, design
 
 | Layer | Function |
 |-------|----------|
-| **Channels** | Manages touchpoints and interaction with users (internal and external): web, mobile, ATMs, call center, etc. |
-| **User Experience** | Orchestrates the experience and presentation of services, ensuring consistent and accessible interaction. |
-| **Business Scenarios** | Defines and manages cross-cutting business flows and processes, integrating capabilities from different domains. |
-| **Integration** | Consolidates core business capabilities and services, aligned with the organization's functional domains. |
-| **Domain** | Implements Service Domains under the BIAN v12 model, ensuring functional consistency and alignment with financial sector standards. |
-| **Core** | Includes central and legacy systems that support critical operations, such as core banking and transactional systems. |
+| **Channels** | Manages interaction with end users through various channels (web, mobile, chatbots, IVR, etc.). |
+| **User Experience** | Centralizes user experience and personalization logic, managing user journeys and flows. |
+| **Business Scenarios** | Defines and orchestrates transversal business processes and scenarios. |
+| **Business** | Implements main business capabilities, aligned with strategic objectives, ensuring BIAN N2 compliance. |
+| **Domain** | Represents the functional core of the business, modeled under BIAN v12 standard. |
+| **Core** | Manages central and legacy systems that support critical operations. |
 
 ---
 
@@ -27,7 +27,7 @@ For each layer, document the following information:
 
 ### Layer 1: Channels
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Manage interaction with end users through various channels (web, mobile, chatbots, IVR, etc.)
 
 **Components**:
 - Component 1: [Name and brief description]
@@ -39,9 +39,10 @@ For each layer, document the following information:
 - Supporting: [Additional technologies, frameworks]
 
 **Key Responsibilities**:
-- Responsibility 1
-- Responsibility 2
-- Responsibility 3
+- Orchestrate omnichannel experience
+- Adapt presentation and flow according to the channel
+- Encapsulate presentation and access logic
+- Manage channel-specific user interactions
 
 **Communication Patterns**:
 - Inbound: [How this layer receives requests]
@@ -57,7 +58,7 @@ For each layer, document the following information:
 
 ### Layer 2: User Experience
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Centralize user experience and personalization logic
 
 **Components**:
 - BFF (Backend for Frontend): [Description]
@@ -69,6 +70,8 @@ For each layer, document the following information:
 - Supporting: [Additional technologies, frameworks]
 
 **Key Responsibilities**:
+- Manage user journeys and flows
+- Apply personalization and context rules
 - Service orchestration and composition
 - User session management
 - Experience personalization
@@ -76,7 +79,7 @@ For each layer, document the following information:
 
 **Communication Patterns**:
 - Inbound: [From Channels layer]
-- Outbound: [To Business Scenarios and Integration layers]
+- Outbound: [To Business Scenarios and Business layers]
 - Protocols: [REST, GraphQL, etc.]
 
 **Non-Functional Requirements**:
@@ -88,7 +91,7 @@ For each layer, document the following information:
 
 ### Layer 3: Business Scenarios
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Define and orchestrate transversal business processes and scenarios
 
 **Components**:
 - Scenario Orchestrator: [Description]
@@ -100,6 +103,9 @@ For each layer, document the following information:
 - Supporting: [Rules engine, process automation]
 
 **Key Responsibilities**:
+- Model end-to-end business processes
+- Integrate business and domain capabilities
+- Adapt flows to regulatory or market requirements
 - Cross-domain business process orchestration
 - Business rule execution
 - Transaction coordination
@@ -107,7 +113,7 @@ For each layer, document the following information:
 
 **Communication Patterns**:
 - Inbound: [From User Experience layer]
-- Outbound: [To Integration and Domain layers]
+- Outbound: [To Business and Domain layers]
 - Protocols: [Sync/async patterns, events]
 
 **Non-Functional Requirements**:
@@ -117,24 +123,24 @@ For each layer, document the following information:
 
 ---
 
-### Layer 4: Integration
+### Layer 4: Business
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Implement main business capabilities, aligned with strategic objectives
 
 **Components**:
-- Enterprise Service Bus (ESB): [Description]
-- API Management: [Description]
-- Integration Adapters: [Description]
+- Business Capability Services: [Description]
+- Business API Layer: [Description]
+- Business Rules Management: [Description]
 
 **Technologies**:
-- Primary: [Integration platform]
-- Supporting: [Message brokers, adapters]
+- Primary: [Business services platform]
+- Supporting: [API management, business rules engine]
 
 **Key Responsibilities**:
-- Service routing and mediation
-- Protocol transformation
-- Message translation
-- Integration with external systems
+- Manage business rules and logic
+- Expose business services through APIs
+- Ensure interoperability and compliance with BIAN N2 standard
+- Implement business capability orchestration
 
 **Communication Patterns**:
 - Inbound: [From Business Scenarios layer]
@@ -150,7 +156,7 @@ For each layer, document the following information:
 
 ### Layer 5: Domain
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Represent the functional core of the business, modeled under BIAN v12 standard
 
 **Service Domains** (BIAN v12):
 - Service Domain 1: [Name, BIAN ID, description]
@@ -163,12 +169,14 @@ For each layer, document the following information:
 
 **Key Responsibilities**:
 - Implementation of BIAN Service Domains
+- Ensure functional consistency across domains
 - Domain-specific business logic
 - Data ownership and management
 - Domain event publishing
+- Allow customization under ISO20022 if necessary
 
 **Communication Patterns**:
-- Inbound: [From Integration layer]
+- Inbound: [From Business layer]
 - Outbound: [To Core systems and other domains]
 - Protocols: [REST, gRPC, domain events]
 
@@ -186,7 +194,7 @@ For each layer, document the following information:
 
 ### Layer 6: Core
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Manage central and legacy systems that support critical operations
 
 **Systems**:
 - Core Banking System: [Name, vendor, version]
@@ -198,6 +206,9 @@ For each layer, document the following information:
 - Supporting: [Databases, interfaces]
 
 **Key Responsibilities**:
+- Provide fundamental services (core banking, ERP, etc.)
+- Integrate legacy capabilities with modern ecosystem
+- Ensure operational continuity and resilience
 - Account management
 - Transaction processing
 - Balance and ledger management
@@ -211,7 +222,8 @@ For each layer, document the following information:
 **Modernization Strategy**:
 - Current State: [Assessment of current systems]
 - Target State: [Modernization goals]
-- Migration Approach: [Strangler pattern, lift-and-shift, etc.]
+- Migration Approach: [Progressive modernization - Strangler pattern, lift-and-shift, etc.]
+- Gradual Evolution: [How legacy systems evolve while ensuring continuity]
 
 **Non-Functional Requirements**:
 - Performance: [Transaction processing rate]
@@ -257,22 +269,25 @@ For each layer, document the following information:
 ## Guidelines
 
 1. **All 6 layers are required** in META architecture
-2. **Document layers in order**: Channels → UX → Business Scenarios → Integration → Domain → Core
+2. **Document layers in order**: Channels → UX → Business Scenarios → Business → Domain → Core
 3. **Each layer must include all subsections**: Purpose, Components, Technologies, Key Responsibilities, Communication Patterns, Non-Functional Requirements
 4. **Flow direction**: Requests typically flow top-down (Channels → Core), responses flow bottom-up
 5. **Integration points**: Clearly define how each layer communicates with adjacent layers
-6. **BIAN compliance**: Layer 5 (Domain) should align with BIAN v12 Service Domain model for financial services
-7. **Modernization strategy**: Layer 6 (Core) should include plans for legacy system evolution
+6. **BIAN compliance**: Layer 4 (Business) should ensure BIAN N2 compliance; Layer 5 (Domain) should align with BIAN v12 Service Domain model
+7. **ISO20022 customization**: Layer 5 (Domain) should allow customization under ISO20022 standard if necessary
+8. **Modernization strategy**: Layer 6 (Core) should include plans for progressive legacy system evolution
 
 ---
 
 ## Validation Checklist
 
-- [ ] All 6 layers documented (Channels, UX, Business Scenarios, Integration, Domain, Core)
+- [ ] All 6 layers documented (Channels, UX, Business Scenarios, Business, Domain, Core)
 - [ ] Each layer has all required subsections
 - [ ] Communication patterns defined for inter-layer communication
 - [ ] Technologies specified for each layer
 - [ ] Non-functional requirements quantified (not just placeholders)
-- [ ] BIAN alignment documented in Layer 5 (Domain)
+- [ ] BIAN N2 compliance documented in Layer 4 (Business)
+- [ ] BIAN v12 alignment documented in Layer 5 (Domain)
+- [ ] ISO20022 customization mentioned in Layer 5 (Domain) if applicable
 - [ ] Modernization strategy included in Layer 6 (Core)
 - [ ] Flow diagrams or architecture diagrams referenced (optional but recommended)

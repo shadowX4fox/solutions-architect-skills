@@ -27,9 +27,9 @@ This guide helps you choose the right architecture type for your ARCHITECTURE.md
 - Regulated industries requiring clear separation of concerns
 
 **Characteristics:**
-- 6 distinct layers: Channels → UX → Business Scenarios → Integration → Domain → Core
-- Clear separation between presentation, orchestration, integration, and business logic
-- Strong emphasis on integration patterns and external system connectivity
+- 6 distinct layers: Channels → UX → Business Scenarios → Business → Domain → Core
+- Clear separation between presentation, orchestration, business capabilities, and domain logic
+- Strong emphasis on business capability management and BIAN compliance
 - Designed for high complexity and regulatory compliance
 
 **Layer Structure:**
@@ -37,9 +37,9 @@ This guide helps you choose the right architecture type for your ARCHITECTURE.md
 Layer 1: Channels (External Access Points)
 Layer 2: UX (User Experience)
 Layer 3: Business Scenarios (Orchestration)
-Layer 4: Integration (External Systems)
-Layer 5: Domain (Business Logic)
-Layer 6: Core (Shared Services)
+Layer 4: Business (Business Capabilities)
+Layer 5: Domain (BIAN Service Domains)
+Layer 6: Core (Legacy Systems)
 ```
 
 **Use META when:**

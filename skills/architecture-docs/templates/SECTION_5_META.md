@@ -4,7 +4,7 @@
 
 **Purpose**: Deep dive into each component within every META layer, providing detailed technical specifications and operational characteristics.
 
-This template organizes components by their META layer assignment (Channels → UX → Business Scenarios → Integration → Domain → Core).
+This template organizes components by their META layer assignment (Channels → UX → Business Scenarios → Business → Domain → Core).
 
 ---
 
@@ -80,7 +80,7 @@ For each component in your system, document using the template below. **Group co
 - API 2: [Description, endpoints]
 
 **Dependencies**:
-- Depends on: [Layer 3 (Business Scenarios) and Layer 4 (Integration) components]
+- Depends on: [Layer 3 (Business Scenarios) and Layer 4 (Business) components]
 - Depended by: [Layer 1 (Channels) components]
 
 **Configuration**:
@@ -124,7 +124,7 @@ For each component in your system, document using the template below. **Group co
 - API 2: [Description, endpoints]
 
 **Dependencies**:
-- Depends on: [Layer 4 (Integration) and Layer 5 (Domain) components]
+- Depends on: [Layer 4 (Business) and Layer 5 (Domain) components]
 - Depended by: [Layer 2 (UX) components]
 
 **Configuration**:
@@ -146,11 +146,11 @@ For each component in your system, document using the template below. **Group co
 
 ---
 
-## Layer 4: Integration - Components
+## Layer 4: Business - Components
 
 ### [Component Name]
 
-**Type**: ESB | API Management | Integration Adapter | Message Router
+**Type**: Business Service | API Layer | Business Rules Engine | Capability Service
 **Technology**: [Specific technology used]
 **Version**: [Version number]
 **Location**: [Package/directory path]
@@ -215,7 +215,7 @@ For each component in your system, document using the template below. **Group co
 
 **Dependencies**:
 - Depends on: [Layer 6 (Core) systems, other Service Domains]
-- Depended by: [Layer 4 (Integration) components]
+- Depended by: [Layer 4 (Business) components]
 
 **BIAN Alignment**:
 - Service Domain Model: [BIAN version]
