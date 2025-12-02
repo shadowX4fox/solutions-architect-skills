@@ -1,6 +1,6 @@
 # Architecture Type Selection Guide
 
-This guide helps you choose the right architecture type for your ARCHITECTURE.md document. The architecture type determines the structure and content of **Section 4 (Meta Architecture)** and **Section 5 (System Components)**.
+This guide helps you choose the right architecture type for your ARCHITECTURE.md document. The architecture type determines the structure and content of **Section 4 (Architecture Layers)** and **Section 5 (Component Details)**.
 
 ---
 
