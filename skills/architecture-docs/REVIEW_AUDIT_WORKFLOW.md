@@ -224,6 +224,46 @@ Phase 2 issues are categorized into three levels based on impact to the document
 
 ---
 
+## Phase 2: Standards Compliance Framework
+
+### How Phase 2 Recommendations Reference Standards
+
+Every Phase 2 recommendation in this workflow explicitly references the architecture-docs skill standards to ensure all proposed changes are grounded in documented best practices.
+
+**Enhanced Recommendation Structure**:
+
+1. **Issue Title** with location in user's document
+2. **What It Is**: Problem description and category
+3. **Standard Violated**: Guide document, section, and line numbers
+4. **Standard Requirement**: Direct quote from ARCHITECTURE_DOCUMENTATION_GUIDE.md
+5. **Guide Example**: Reference to example showing proper implementation
+6. **Current State**: What the user's document shows now
+7. **Recommended Fix**: How to comply with the standard (references guide template)
+8. **Compliance Checklist**: Items to verify that fix matches template requirements
+9. **Location**: Specific lines in user's document
+
+**Why This Matters**:
+- **Traceability**: Users can look up the exact standard being enforced
+- **Authority**: Recommendations backed by official guide, not arbitrary opinions
+- **Learning**: Users learn architecture-docs skill standards while fixing issues
+- **Consistency**: All reviews follow the same standards framework
+
+---
+
+### Standards Referenced by Phase 2 Issues
+
+| Standard | Location in Guide | Referenced By |
+|----------|-------------------|---------------|
+| **Component Template** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §5, lines 1007-1050 | HIGH.1, HIGH.4 |
+| **Integration Template** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §7, lines 1133-1179 | HIGH.5 |
+| **Architecture Principles Structure** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §3, lines 467-649 | HIGH.2 |
+| **Trade-off Quality Standards** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §3, lines 280-286, 641-648 | HIGH.2 |
+| **Metrics Specification** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §1 (lines 213-243), §10 (lines 1351-1368) | HIGH.3 |
+| **Component Formatting** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §5, lines 1010-1050 | MEDIUM.3 |
+| **Document Index Standard** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171 | LOW.5 |
+
+---
+
 ## HIGH Criticality (Blocks Publication/Production Use)
 
 ### Definition
@@ -243,6 +283,13 @@ HIGH criticality issues prevent the document from serving as a trustworthy refer
 **What It Is**:
 Critical components lack technical specifications necessary for implementation, deployment, or operations.
 
+**Standard Violated**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, Section 5 (lines 1007-1050)
+
+**Standard Requirement**:
+> Component Template requires: **Type**, **Technology**, **Version**, **Location**, **Purpose**, **Responsibilities**, **APIs/Interfaces**, **Dependencies**, **Configuration**, **Scaling**, **Failure Modes**, **Monitoring**
+
+**Guide Example**: See ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 1052-1101 for complete OrderService component example showing all required fields
+
 **Examples of Missing Details**:
 - Component has no technology stack specified (language, framework, runtime)
 - No scaling strategy defined for components handling high load
@@ -256,11 +303,20 @@ Critical components lack technical specifications necessary for implementation, 
 
 1. **Missing Implementation Details - OrderService** (Section 5.2)
    - Issue: No failure mode analysis provided
+   - Standard Violated: ARCHITECTURE_DOCUMENTATION_GUIDE.md, §5, lines 1007-1050 (Component Template)
+   - Standard Requirement: Component Template requires **Failure Modes** field documenting what happens when dependencies fail
+   - Guide Example: Lines 1052-1101 show OrderService with complete failure mode analysis
+   - Current: OrderService documented but **Failure Modes** subsection missing
    - Impact: Engineers cannot design error handling, retry logic, or monitoring alerts
-   - Recommendation: Add failure modes for:
-     - InventoryService unavailable (circuit breaker, fallback behavior)
-     - PaymentService timeout (retry strategy, compensation logic)
-     - Database connection failure (connection pool exhaustion handling)
+   - Recommendation: Follow Component Template by adding **Failure Modes** subsection:
+     - InventoryService unavailable: Circuit breaker pattern, return 503 Service Unavailable
+     - PaymentService timeout (>10s): Retry 3 times with exponential backoff, mark order as pending
+     - Database connection failure: Connection pool exhaustion, queue requests, timeout after 5s
+   - Compliance Checklist:
+     - [ ] Includes **Failure Modes** subsection heading (bold)
+     - [ ] Documents behavior for each critical dependency failure
+     - [ ] Specifies mitigation strategies (circuit breaker, retry, fallback)
+     - [ ] Follows guide example structure
    - Location: Section 5.2, lines 293-341
 ```
 
@@ -270,6 +326,15 @@ Critical components lack technical specifications necessary for implementation, 
 
 **What It Is**:
 Architecture Principles (Section 3) list trade-offs that are vague, generic, or only mention positive aspects without real downsides.
+
+**Standard Violated**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, Section 3 (lines 467-649)
+
+**Standard Requirement**:
+> - "Each principle requires 3 subsections: **Description**, **Implementation**, **Trade-offs**" (lines 487-507)
+> - "Trade-offs must be **honest and substantive** (not superficial or generic)" (lines 641-648)
+> - "Minimum 3 trade-offs per principle"
+
+**Guide Example**: See ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 280-286 for examples of good vs. bad trade-offs
 
 **Characteristics of Superficial Trade-offs**:
 - Generic statements: "More complexity", "Higher costs", "Additional overhead"
@@ -288,14 +353,22 @@ Architecture Principles (Section 3) list trade-offs that are vague, generic, or 
 **Example Issue**:
 ```markdown
 2. **Dishonest Trade-off - High Availability Principle** (Section 3.2)
-   - Issue: Trade-off states "More complexity" without specifics
+   - Issue: Trade-off is vague and non-quantified
+   - Standard Violated: ARCHITECTURE_DOCUMENTATION_GUIDE.md, §3, lines 641-648
+   - Standard Requirement: "Trade-offs must be honest and substantive (not superficial or generic)"
+   - Guide Example: Lines 280-286 show good trade-offs with specific quantification
    - Current: "Increased operational complexity managing multiple instances"
    - Impact: Cannot assess true operational burden, staffing requirements, or cost implications
-   - Recommendation: Quantify specific costs:
-     - "Requires 24/7 on-call rotation (2 engineers minimum)"
-     - "3x infrastructure costs: $15K/month vs $5K/month"
-     - "10-minute manual database failover RTO (not automated)"
-     - "Quarterly disaster recovery drills: 8 hours per drill"
+   - Recommendation: Follow guide example by quantifying specific costs:
+     - On-call requirements: "24/7 rotation, minimum 2 engineers"
+     - Infrastructure costs: "$15K/month (3x vs single instance $5K/month)"
+     - Failover time: "10-minute manual database failover RTO (not automated)"
+     - Operational tasks: "Quarterly disaster recovery drills (8 hours per drill)"
+   - Compliance Checklist:
+     - [ ] Includes specific staffing numbers (not "more people")
+     - [ ] Includes cost quantification with dollar amounts (not "higher costs")
+     - [ ] Includes time-based metrics (RTO, drill duration)
+     - [ ] Follows guide example structure for honest trade-offs
    - Location: Section 3.2, lines 110-115
 ```
 
@@ -306,6 +379,15 @@ Architecture Principles (Section 3) list trade-offs that are vague, generic, or 
 **What It Is**:
 Key performance metrics are either missing from Executive Summary or inconsistent beyond what Phase 1 catches.
 
+**Standard Violated**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, Section 1 (lines 213-243) and Section 10 (lines 1351-1368)
+
+**Standard Requirement**:
+> - Executive Summary must specify: **Read TPS**, **Processing TPS**, **Write TPS**, **Availability SLA**, **Latency Targets** (p95, p99)
+> - Include "**Measurement Period**" context (e.g., "measured over last 30 days")
+> - Metrics must be consistent between Section 1 and Section 10
+
+**Guide Example**: See ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 213-243 for proper metrics documentation format
+
 **Examples**:
 - No Read TPS specified in Section 1 (cannot assess scalability requirements)
 - Latency targets undefined (p95, p99 not documented)
@@ -315,11 +397,20 @@ Key performance metrics are either missing from Executive Summary or inconsisten
 **Example Issue**:
 ```markdown
 3. **Missing Metrics - Executive Summary** (Section 1)
-   - Issue: No Read TPS specified in Section 1
+   - Issue: No Read TPS or Write TPS specified in Section 1
+   - Standard Violated: ARCHITECTURE_DOCUMENTATION_GUIDE.md, §1, lines 213-243
+   - Standard Requirement: Executive Summary must include Read TPS, Write TPS with measurement period context
+   - Guide Example: Lines 213-243 show format: "Read TPS: 500 TPS (average), 1,200 TPS (peak) - measured over last 30 days"
+   - Current: Section 1 Key Metrics subsection missing TPS metrics entirely
    - Impact: Cannot assess whether architecture supports expected load, cannot design scaling strategy
-   - Recommendation: Add metrics based on Section 9 analysis:
-     - "Read TPS: 500 TPS (average), 1,200 TPS (peak)"
-     - "Write TPS: 50 TPS (average), 150 TPS (peak)"
+   - Recommendation: Follow guide format by adding:
+     - "Read TPS: 500 TPS (average), 1,200 TPS (peak) - measured over last 30 days"
+     - "Write TPS: 50 TPS (average), 150 TPS (peak) - measured over last 30 days"
+   - Compliance Checklist:
+     - [ ] Includes Read TPS (average and peak)
+     - [ ] Includes Write TPS (average and peak)
+     - [ ] Includes measurement period context ("measured over last X days")
+     - [ ] Matches values in Section 10 (Scalability & Performance)
    - Location: Section 1, lines 34-40
 ```
 
@@ -329,6 +420,14 @@ Key performance metrics are either missing from Executive Summary or inconsisten
 
 **What It Is**:
 Critical components in Section 5 (Component Details) are missing essential information required for implementation or operations.
+
+**Standard Violated**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, Section 5 (lines 1007-1050)
+
+**Standard Requirement**:
+> Component Template requires: **Type**, **Technology**, **Version**, **Location**, **Purpose**, **Responsibilities**, **APIs/Interfaces**, **Dependencies**, **Configuration**, **Scaling**, **Failure Modes**, **Monitoring**
+> (Same as HIGH.1 - uses Component Template standard)
+
+**Guide Example**: See ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 1052-1101 for complete OrderService component example
 
 **Required Component Information**:
 - **Purpose**: What the component does and why it exists
@@ -343,13 +442,20 @@ Critical components in Section 5 (Component Details) are missing essential infor
 **Example Issue**:
 ```markdown
 4. **Incomplete Component Documentation - PaymentService** (Section 5.4)
-   - Issue: No error handling, retry logic, or circuit breaker documentation
-   - Impact: Engineers cannot implement resilient payment processing, risk payment failures without recovery
-   - Recommendation: Add:
-     - Error handling: Stripe API errors (card declined, insufficient funds, network timeout)
-     - Retry logic: 3 retries with exponential backoff (1s, 2s, 4s), idempotency keys
-     - Circuit breaker: Open after 50% error rate over 10 requests, 30s timeout
-     - Compensation: How to handle partial failures (order created but payment failed)
+   - Issue: Missing **Failure Modes** and **Monitoring** subsections
+   - Standard Violated: ARCHITECTURE_DOCUMENTATION_GUIDE.md, §5, lines 1007-1050 (Component Template)
+   - Standard Requirement: Component Template requires **Failure Modes** (dependency failures, mitigation) and **Monitoring** (metrics, alerts, SLOs)
+   - Guide Example: Lines 1052-1101 show OrderService with complete failure modes and monitoring
+   - Current: PaymentService documented but missing critical operational details
+   - Impact: Engineers cannot implement resilient payment processing, no monitoring strategy, risk payment failures without recovery
+   - Recommendation: Follow Component Template by adding:
+     - **Failure Modes**: Stripe API errors (card declined, insufficient funds, network timeout), retry logic (3 retries, exponential backoff 1s/2s/4s), circuit breaker (open after 50% error rate), compensation logic
+     - **Monitoring**: Key metrics (payment success rate, processing time p95/p99), alerts (error rate >2%, processing time >5s), SLO (99.9% success rate)
+   - Compliance Checklist:
+     - [ ] Includes **Failure Modes** subsection with dependency failures
+     - [ ] Includes **Monitoring** subsection with metrics and alerts
+     - [ ] Specifies mitigation strategies (retry, circuit breaker)
+     - [ ] Follows guide example structure
    - Location: Section 5.4, lines 380-420
 ```
 
@@ -358,7 +464,14 @@ Critical components in Section 5 (Component Details) are missing essential infor
 ### HIGH.5: Critical Integration Missing Details
 
 **What It Is**:
-External integrations (Section 6) lack essential details for secure, reliable communication.
+External integrations (Section 7) lack essential details for secure, reliable communication.
+
+**Standard Violated**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, Section 7 (lines 1133-1179)
+
+**Standard Requirement**:
+> Integration documentation requires: **Type**, **Provider**, **Purpose**, **Protocol & Authentication**, **Rate Limits & SLA**, **Error Handling**, **Data Exchanged**, **Failure Behavior**, **Monitoring & Health Checks**, **Security**, **Cost**
+
+**Guide Example**: See ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 1180-1230 for complete Stripe integration example
 
 **Required Integration Information**:
 - **Authentication**: How system authenticates (API keys, OAuth, JWT)
@@ -370,15 +483,22 @@ External integrations (Section 6) lack essential details for secure, reliable co
 
 **Example Issue**:
 ```markdown
-5. **Critical Integration Missing Details - Stripe Payment Gateway** (Section 6.1)
-   - Issue: No timeout, retry logic, or circuit breaker defined
-   - Impact: Payment processing can hang indefinitely, no resilience if Stripe experiences degraded performance
-   - Recommendation: Add:
-     - Timeout: 10 seconds per request
-     - Retry logic: 3 retries with exponential backoff (1s, 2s, 4s)
-     - Circuit breaker: Open after 50% error rate over 10 requests, 30s timeout before retry
-     - Rate limiting: Max 100 requests/second (Stripe limit)
-   - Location: Section 6.1, lines 412-432
+5. **Critical Integration Missing Details - Stripe Payment Gateway** (Section 7.1)
+   - Issue: Missing **Error Handling** and **Rate Limits & SLA** fields
+   - Standard Violated: ARCHITECTURE_DOCUMENTATION_GUIDE.md, §7, lines 1133-1179 (Integration Template)
+   - Standard Requirement: Integration Template requires **Error Handling** (timeout, retry, circuit breaker) and **Rate Limits & SLA** (request limits, uptime guarantees)
+   - Guide Example: Lines 1180-1230 show Stripe integration with complete error handling and rate limits
+   - Current: Stripe integration documented but missing resilience and performance details
+   - Impact: Payment processing can hang indefinitely, no resilience if Stripe experiences degraded performance, risk exceeding rate limits
+   - Recommendation: Follow Integration Template by adding:
+     - **Error Handling**: Timeout (10s per request), retry logic (3 retries, exponential backoff 1s/2s/4s), circuit breaker (open after 50% error rate over 10 requests, 30s timeout before retry)
+     - **Rate Limits & SLA**: Max 100 requests/second (Stripe limit), 99.99% uptime SLA, <500ms response time (p95)
+   - Compliance Checklist:
+     - [ ] Includes **Error Handling** with timeout, retry, circuit breaker
+     - [ ] Includes **Rate Limits & SLA** with request limits and uptime guarantees
+     - [ ] Specifies backoff strategy for rate limiting
+     - [ ] Follows guide example structure
+   - Location: Section 7.1, lines 412-432
 ```
 
 ---
@@ -556,6 +676,34 @@ Duplicate information across sections that could be consolidated for easier main
      - Section 5.3: "Connection pool: See Section 8 (Database Configuration)"
    - Impact: Single source of truth, easier to update
    - Locations: Section 5.3 (line 383), Section 8 (line 625)
+```
+
+---
+
+### LOW.5: Document Index Maintenance
+
+**What It Is**:
+Document Index line ranges may be outdated or inaccurate after content additions/deletions.
+
+**Best Practice Reference**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171
+
+**Standard Requirement**:
+- Every ARCHITECTURE.md must include Document Index before Section 1
+- Index must list all 12 sections with accurate line number ranges
+- Update after significant section changes (>10 lines added/removed)
+
+**Example Issue**:
+```markdown
+5. **Outdated Document Index** (lines 11-23)
+   - Observation: Document Index shows "Section 5: Component Details → Lines 351-550" but Section 5 actually starts at line 420
+   - Best Practice: ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171 (Document Index standard)
+   - Current: Index line ranges haven't been updated in 3 months (30+ lines added to Section 4)
+   - Recommendation: Update Document Index line ranges to reflect current content:
+     - Verify each section's actual start and end lines
+     - Update index entries for all sections affected by recent changes
+     - Consider adding "Index Last Updated" timestamp
+   - Impact: Improves navigation, enables context-efficient editing, prevents confusion
+   - Location: Document Index, lines 11-23
 ```
 
 ---
@@ -779,13 +927,19 @@ All structural validation checks passed. Proceeding to Phase 2: Content Improvem
 
 ### ARCHITECTURE_DOCUMENTATION_GUIDE.md Integration
 
-**Relationship**: Phase 2 content improvement suggestions reference quality standards from ARCHITECTURE_DOCUMENTATION_GUIDE.md
+**Relationship**: Phase 2 content improvement suggestions **explicitly reference** quality standards from ARCHITECTURE_DOCUMENTATION_GUIDE.md
 
 **Purpose**:
 - ARCHITECTURE_DOCUMENTATION_GUIDE.md defines **content quality standards** (what makes good content)
-- REVIEW_AUDIT_WORKFLOW.md provides **prioritization framework** (categorizes issues by criticality)
+- REVIEW_AUDIT_WORKFLOW.md provides **prioritization framework** (categorizes issues by criticality) and **explicit standard references**
 
-**No Duplication**: This workflow does not duplicate content guidance, only references it
+**How Phase 2 References Standards**:
+- Each HIGH/MEDIUM issue includes **"Standard Violated"** field with specific guide section and line numbers
+- Recommendations quote **"Standard Requirement"** directly from guide
+- Examples point to **"Guide Example"** showing proper implementation (with line numbers)
+- Compliance checklists help users verify fixes match template requirements
+
+**No Duplication**: This workflow does not duplicate content guidance, only references it with explicit citations to ensure all proposed changes are grounded in documented standards
 
 ---
 
