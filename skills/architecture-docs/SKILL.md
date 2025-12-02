@@ -1597,16 +1597,29 @@ Method will be marked as: "Manual Override (2025-01-26)"
 - Update index before final completion report
 
 **Architecture Review Integration**:
-- When user requests "architecture review", present checklist:
-  ```
-  Architecture Review Checklist:
-  ☐ Metric consistency check (Section 1 vs rest of document)
-  ☐ Design Drivers calculation (Section 2.2.1 update)
-  ☐ Architecture Principles validation (all 9 required)
-  ☐ Document Index accuracy (line ranges current)
-  ☐ ADR references up to date (Section 12)
+- When user requests "review", "audit", or "validate" for ARCHITECTURE.md, follow the **Two-Phase Review & Audit Workflow**
+- Workflow is documented in: **REVIEW_AUDIT_WORKFLOW.md**
+- Phase 1 (Form Validation) must pass before Phase 2 (Content Improvement) runs
+- Workflow provides prioritized feedback: HIGH → MEDIUM → LOW criticality
 
-  Would you like me to run all checks? [Yes] [Select Individually]
+**Two-Phase Workflow Overview**:
+  ```
+  Phase 1: Form Validation (Blocking)
+  ☐ Section structure compliance (12 required sections)
+  ☐ Architecture type validation (META/3-TIER/MICROSERVICES/N-LAYER)
+  ☐ Architecture Principles enforcement (9 required principles)
+  ☐ Markdown formatting validation
+  ☐ Metric consistency check (Section 1 vs rest of document)
+
+  If Phase 1 passes → Proceed to Phase 2
+  If Phase 1 fails → User must fix ❌ issues before Phase 2 runs
+
+  Phase 2: Content Improvement (Prioritized)
+  ☐ HIGH: Missing implementation details, dishonest trade-offs, incomplete components
+  ☐ MEDIUM: Weak justifications, outdated references, missing cross-references
+  ☐ LOW: Formatting suggestions, clarity improvements, redundancy reduction
+
+  For complete workflow details, see: REVIEW_AUDIT_WORKFLOW.md
   ```
 
 ### Example: Complete Design Drivers Calculation
