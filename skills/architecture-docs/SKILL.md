@@ -1948,7 +1948,12 @@ For complete section name list, common mistakes, optional sections, renumbering 
 ## Optional Enhancements
 
 - Data Flow Patterns (for complex flows)
-- Diagrams (C4 Model, PlantUML, Mermaid)
+- **Architecture Diagrams**: Create visual representations using Mermaid (recommended)
+  - Section 4 templates include Mermaid examples for each architecture type
+  - See MERMAID_DIAGRAMS_GUIDE.md for complete instructions
+  - Supported diagram types: Layer diagrams, service topology, data flow, sequence diagrams
+  - Benefits: Interactive, version-control friendly, renders in GitHub/GitLab
+  - Alternative formats: C4 Model, PlantUML also supported
 - Cost breakdown tables
 - Disaster recovery procedures
 - Runbooks (common operations and incident response procedures)

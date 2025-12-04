@@ -339,6 +339,160 @@ List all microservices in the system:
 
 ---
 
+## Architecture Diagram (Mermaid)
+
+This section provides a visual representation of the microservices architecture using Mermaid diagrams.
+
+**Purpose**: Visualize the service topology, API Gateway, service mesh, and communication patterns.
+
+### Microservices Architecture Diagram Example
+
+The following diagram shows a cloud-native microservices architecture with API Gateway, service mesh, and event-driven communication:
+
+````markdown
+```mermaid
+graph TB
+    %% Clients
+    WebClient["Web Client<br/>(Browser)"]
+    MobileClient["Mobile Client<br/>(iOS/Android)"]
+
+    %% API Gateway
+    APIGateway["API Gateway<br/>(Kong/Nginx)<br/>Rate Limiting, Auth, Routing"]
+
+    %% Service Mesh
+    subgraph ServiceMesh["Service Mesh (Istio)"]
+        %% Microservices
+        subgraph Services["Microservices"]
+            UserService["User Service<br/>gRPC + REST<br/>PostgreSQL"]
+            OrderService["Order Service<br/>gRPC + REST<br/>PostgreSQL"]
+            PaymentService["Payment Service<br/>gRPC + REST<br/>PostgreSQL"]
+            InventoryService["Inventory Service<br/>gRPC + REST<br/>MongoDB"]
+            NotificationService["Notification Service<br/>Event Consumer<br/>Redis"]
+        end
+    end
+
+    %% Event Bus
+    EventBus["Event Bus<br/>(Kafka)<br/>3 Topics: order-events,<br/>payment-events, notification-events"]
+
+    %% Databases (Database-per-Service)
+    UserDB["User DB<br/>(PostgreSQL)"]
+    OrderDB["Order DB<br/>(PostgreSQL)"]
+    PaymentDB["Payment DB<br/>(PostgreSQL)"]
+    InventoryDB["Inventory DB<br/>(MongoDB)"]
+    Cache["Cache<br/>(Redis)"]
+
+    %% Supporting Infrastructure
+    ServiceDiscovery["Service Discovery<br/>(Consul/Kubernetes DNS)"]
+    ConfigServer["Config Server<br/>(Spring Cloud Config)"]
+    LogAggregator["Log Aggregator<br/>(ELK Stack)"]
+
+    %% Client to API Gateway
+    WebClient -->|HTTPS/REST<br/>OAuth 2.0 + JWT| APIGateway
+    MobileClient -->|HTTPS/REST<br/>OAuth 2.0 + JWT| APIGateway
+
+    %% API Gateway to Services (Sync)
+    APIGateway -->|HTTP/gRPC<br/>mTLS| UserService
+    APIGateway -->|HTTP/gRPC<br/>mTLS| OrderService
+    APIGateway -->|HTTP/gRPC<br/>mTLS| PaymentService
+    APIGateway -->|HTTP/gRPC<br/>mTLS| InventoryService
+
+    %% Inter-Service Communication (Sync via Service Mesh)
+    OrderService -->|gRPC<br/>Circuit Breaker<br/>mTLS| PaymentService
+    OrderService -->|gRPC<br/>Circuit Breaker<br/>mTLS| InventoryService
+    PaymentService -->|gRPC<br/>Circuit Breaker<br/>mTLS| UserService
+
+    %% Event-Driven Communication (Async)
+    OrderService -.->|Publish<br/>order-created,<br/>order-completed| EventBus
+    PaymentService -.->|Publish<br/>payment-processed,<br/>payment-failed| EventBus
+    EventBus -.->|Subscribe<br/>Consumer Group| NotificationService
+    EventBus -.->|Subscribe<br/>Consumer Group| OrderService
+    EventBus -.->|Subscribe<br/>Consumer Group| InventoryService
+
+    %% Services to Databases (Database-per-Service)
+    UserService -->|SQL<br/>Connection Pool| UserDB
+    OrderService -->|SQL<br/>Connection Pool| OrderDB
+    PaymentService -->|SQL<br/>Connection Pool| PaymentDB
+    InventoryService -->|NoSQL<br/>MongoDB Driver| InventoryDB
+    NotificationService -->|Redis Protocol| Cache
+
+    %% Services to Infrastructure
+    UserService -.->|Register| ServiceDiscovery
+    OrderService -.->|Register| ServiceDiscovery
+    PaymentService -.->|Register| ServiceDiscovery
+    InventoryService -.->|Register| ServiceDiscovery
+    NotificationService -.->|Register| ServiceDiscovery
+
+    UserService -.->|Fetch Config| ConfigServer
+    OrderService -.->|Fetch Config| ConfigServer
+    PaymentService -.->|Fetch Config| ConfigServer
+
+    UserService -.->|Logs| LogAggregator
+    OrderService -.->|Logs| LogAggregator
+    PaymentService -.->|Logs| LogAggregator
+    InventoryService -.->|Logs| LogAggregator
+    NotificationService -.->|Logs| LogAggregator
+
+    %% Styling
+    classDef client fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
+    classDef service fill:#F5A623,stroke:#B8791A,stroke-width:2px,color:#fff
+    classDef eventBus fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
+    classDef database fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#000
+    classDef infrastructure fill:#50E3C2,stroke:#3AA893,stroke-width:2px,color:#000
+
+    class WebClient,MobileClient client
+    class APIGateway gateway
+    class UserService,OrderService,PaymentService,InventoryService,NotificationService service
+    class EventBus eventBus
+    class UserDB,OrderDB,PaymentDB,InventoryDB,Cache database
+    class ServiceDiscovery,ConfigServer,LogAggregator infrastructure
+```
+````
+
+### Legend
+
+**Arrow Types**:
+- **Solid arrows (`-->`)**: Synchronous calls (HTTP/REST, gRPC, SQL)
+- **Dashed arrows (`-.->`)**: Asynchronous operations (events, service registration, logging, config fetch)
+
+**Colors**:
+- **Blue**: Clients (web, mobile)
+- **Gray**: API Gateway and load balancers
+- **Orange**: Microservices
+- **Purple**: Event Bus (Kafka, message brokers)
+- **Green**: Databases (PostgreSQL, MongoDB, Redis)
+- **Teal**: Supporting infrastructure (service discovery, config, logging)
+
+**Communication Patterns**:
+- **Client → API Gateway**: HTTPS/REST with OAuth 2.0 + JWT authentication
+- **API Gateway → Services**: HTTP/gRPC with mTLS (mutual TLS)
+- **Service → Service (Sync)**: gRPC with circuit breakers and mTLS (via service mesh)
+- **Service → Event Bus**: Kafka protocol for publish/subscribe patterns
+- **Service → Database**: Database-per-service pattern (no shared databases)
+- **Service → Infrastructure**: Service discovery registration, config fetch, log streaming
+
+**Service Mesh Benefits**:
+- Automatic mTLS between services
+- Load balancing and traffic management
+- Circuit breaker and retry policies
+- Distributed tracing (Jaeger/Zipkin integration)
+- Observability (metrics, logs, traces)
+
+### Customization Instructions
+
+To customize this diagram for your specific architecture:
+
+1. **Update Services**: Replace example services (User, Order, Payment, Inventory, Notification) with your actual microservices
+2. **Update Databases**: Modify database technologies based on your data storage choices
+3. **Update Event Bus**: Replace Kafka with your message broker (RabbitMQ, AWS SQS, Azure Service Bus, etc.)
+4. **Update Service Mesh**: Change Istio to your service mesh (Linkerd, Consul Connect, AWS App Mesh) or remove if not using one
+5. **Add/Remove Communication Flows**: Update arrows based on your actual service dependencies
+6. **Adjust Colors**: Modify the `classDef` styling to match your organization's standards
+
+**For detailed diagram creation and update instructions**, see [MERMAID_DIAGRAMS_GUIDE.md](../MERMAID_DIAGRAMS_GUIDE.md).
+
+---
+
 ## Guidelines
 
 1. **Service independence**: Each microservice must be independently deployable
@@ -363,3 +517,4 @@ List all microservices in the system:
 - [ ] Observability stack documented (logging, metrics, tracing)
 - [ ] Resilience patterns implemented (circuit breakers, retries)
 - [ ] Each service has defined SLA and scaling strategy
+- [ ] Service topology diagram included showing services and communication patterns (Mermaid format recommended, see MERMAID_DIAGRAMS_GUIDE.md)

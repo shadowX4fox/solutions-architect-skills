@@ -258,6 +258,122 @@ Data → Application → Presentation → User
 
 ---
 
+## Architecture Diagram (Mermaid)
+
+This section provides a visual representation of the 3-tier architecture using Mermaid diagrams.
+
+**Purpose**: Visualize the tier structure, component placement, and data flow between tiers.
+
+### 3-Tier Architecture Diagram Example
+
+The following diagram shows a typical 3-tier web application architecture:
+
+````markdown
+```mermaid
+graph TB
+    %% Tier 1: Presentation Layer
+    subgraph Tier1["Tier 1: Presentation Layer"]
+        WebApp["Web Application<br/>(React SPA)"]
+        MobileApp["Mobile App<br/>(React Native)"]
+        APIClient["API Client"]
+    end
+
+    %% Tier 2: Application/Business Logic Layer
+    subgraph Tier2["Tier 2: Application/Business Logic<br/>(Stateless Services)"]
+        APIGateway["API Gateway<br/>(Kong)"]
+        AuthService["Authentication Service<br/>JWT Token Management"]
+        UserService["User Service<br/>User Management"]
+        OrderService["Order Service<br/>Order Processing"]
+        PaymentService["Payment Service<br/>Payment Processing"]
+    end
+
+    %% Tier 3: Data Layer
+    subgraph Tier3["Tier 3: Data Layer"]
+        PrimaryDB["Primary Database<br/>(PostgreSQL)<br/>Read/Write"]
+        ReadReplica["Read Replica<br/>(PostgreSQL)<br/>Read-Only"]
+        Cache["Cache Layer<br/>(Redis)<br/>Session & Data Cache"]
+    end
+
+    %% Data Flows - Tier 1 to Tier 2
+    WebApp -->|HTTPS/REST<br/>OAuth 2.0 + JWT| APIGateway
+    MobileApp -->|HTTPS/REST<br/>OAuth 2.0 + JWT| APIGateway
+    APIClient -->|HTTPS/REST<br/>API Key| APIGateway
+
+    %% Data Flows - Within Tier 2
+    APIGateway -->|HTTP<br/>Route & Auth| AuthService
+    APIGateway -->|HTTP<br/>Route & Auth| UserService
+    APIGateway -->|HTTP<br/>Route & Auth| OrderService
+    APIGateway -->|HTTP<br/>Route & Auth| PaymentService
+
+    %% Data Flows - Tier 2 to Tier 3 (Writes)
+    AuthService -->|SQL<br/>Connection Pool<br/>Write Operations| PrimaryDB
+    UserService -->|SQL<br/>Connection Pool<br/>Write Operations| PrimaryDB
+    OrderService -->|SQL<br/>Connection Pool<br/>Write Operations| PrimaryDB
+    PaymentService -->|SQL<br/>Connection Pool<br/>Write Operations| PrimaryDB
+
+    %% Data Flows - Tier 2 to Tier 3 (Reads)
+    AuthService -.->|SQL<br/>Read Operations| ReadReplica
+    UserService -.->|SQL<br/>Read Operations| ReadReplica
+    OrderService -.->|SQL<br/>Read Operations| ReadReplica
+    PaymentService -.->|SQL<br/>Read Operations| ReadReplica
+
+    %% Data Flows - Tier 2 to Cache
+    AuthService -.->|Redis Protocol<br/>Session Cache| Cache
+    UserService -.->|Redis Protocol<br/>User Data Cache| Cache
+    OrderService -.->|Redis Protocol<br/>Query Cache| Cache
+
+    %% Database Replication
+    PrimaryDB -.->|Async Replication| ReadReplica
+
+    %% Styling
+    classDef presentation fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    classDef application fill:#F5A623,stroke:#B8791A,stroke-width:2px,color:#fff
+    classDef data fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
+    classDef cache fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
+    classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
+
+    class WebApp,MobileApp,APIClient presentation
+    class AuthService,UserService,OrderService,PaymentService application
+    class PrimaryDB,ReadReplica data
+    class Cache cache
+    class APIGateway gateway
+```
+````
+
+### Legend
+
+**Arrow Types**:
+- **Solid arrows (`-->`)**: Synchronous calls (HTTPS/REST, SQL writes)
+- **Dashed arrows (`-.->`)**: Read operations or asynchronous updates (SQL reads, cache, replication)
+
+**Colors**:
+- **Blue**: Presentation layer (web, mobile, API clients)
+- **Orange**: Application/Business logic services
+- **Green**: Data layer (databases)
+- **Purple**: Cache layer (Redis)
+- **Gray**: Infrastructure (API Gateway, load balancers)
+
+**Data Flow Patterns**:
+- **Tier 1 → Tier 2**: HTTPS/REST with OAuth 2.0 authentication
+- **Tier 2 → Tier 3 (Writes)**: SQL connection pool to primary database
+- **Tier 2 → Tier 3 (Reads)**: SQL queries to read replicas for query offloading
+- **Tier 2 ↔ Cache**: Redis protocol for session and data caching
+- **Database Replication**: Asynchronous replication from primary to read replicas
+
+### Customization Instructions
+
+To customize this diagram for your specific architecture:
+
+1. **Update Tier 1 Components**: Replace example clients with your actual front-end applications
+2. **Update Tier 2 Services**: Modify business logic services based on your domain (e.g., Inventory, Shipping, Notification)
+3. **Update Tier 3 Technologies**: Replace PostgreSQL/Redis with your actual database technologies
+4. **Update Protocols**: Modify data flow labels with your actual protocols and security mechanisms
+5. **Adjust Colors**: Modify the `classDef` styling to match your organization's standards
+
+**For detailed diagram creation and update instructions**, see [MERMAID_DIAGRAMS_GUIDE.md](../MERMAID_DIAGRAMS_GUIDE.md).
+
+---
+
 ## Guidelines
 
 1. **All 3 tiers are required** in 3-Tier architecture
@@ -276,6 +392,6 @@ Data → Application → Presentation → User
 - [ ] Communication patterns clearly define tier boundaries
 - [ ] Technologies specified for each tier
 - [ ] Non-functional requirements quantified (not just placeholders)
-- [ ] Data flow diagram included or referenced
+- [ ] Architecture diagram included showing tier interactions (Mermaid format recommended, see MERMAID_DIAGRAMS_GUIDE.md)
 - [ ] Separation of concerns maintained (no direct DB access from Presentation)
 - [ ] Stateless design for Application tier documented
