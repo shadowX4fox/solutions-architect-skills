@@ -1,10 +1,10 @@
-# Mermaid Architecture Diagram Instructions
+# Mermaid Architecture Diagram Guide
 
-## For: solutions-architect-skills Plugin Enhancement
+**Purpose**: Comprehensive guide for creating Mermaid architecture diagrams for any system architecture (META, 3-Tier, Microservices, N-Layer)
 
-**Version**: 1.0
-**Date**: 2025-12-03
-**Purpose**: Enable Mermaid architecture diagram generation and updates in the `solutions-architect-skills:architecture-docs` skill
+**Applies To**: All architecture types supported by architecture-docs skill
+**Version**: 2.0 (Generic)
+**Last Updated**: 2025-12-03
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### Purpose
 
-This document provides comprehensive instructions for adding Mermaid diagram generation capabilities to the `solutions-architect-skills` plugin. It includes templates, guidelines, and examples based on a successful implementation in a task scheduling system architecture.
+This document provides comprehensive instructions for creating Mermaid architecture diagrams for any system architecture. It includes templates, guidelines, and generic examples applicable to META, 3-Tier, Microservices, and N-Layer architectures.
 
 ### Why Mermaid Over ASCII Art?
 
@@ -74,114 +74,111 @@ mmdc -i ARCHITECTURE.md -o architecture-diagram.png
 
 ### Full Working Example
 
-This example shows a 6-layer META architecture with Layer 3 (Business Scenarios) event-driven components in detail:
+This example shows a generic 6-layer META architecture with Layer 3 (Business Scenarios) event-driven components in detail:
 
 ````markdown
 ```mermaid
 graph TB
     %% Layer 1: Channels
     subgraph Layer1["Layer 1: Channels"]
-        Mobile["Mobile App"]
-        Web["Internet Banking"]
-        Contact["Contact Center"]
+        WebClient["Web Client"]
+        MobileClient["Mobile Client"]
+        APIClient["API Client"]
     end
 
     %% Layer 2: User Experience
     subgraph Layer2["Layer 2: User Experience"]
-        APIGateway["API Gateway<br/>(Azure API Management)"]
-        BFF["BFF Services"]
+        APIGateway["API Gateway"]
+        BFF["Backend for Frontend<br/>(BFF Services)"]
     end
 
     %% Layer 3: Business Scenarios (DETAILED)
-    subgraph Layer3["Layer 3: Business Scenarios<br/>(Task Scheduling System)"]
-        %% Job Scheduler
-        Scheduler["Job Scheduler Service<br/>REST API: /api/v1/jobs"]
+    subgraph Layer3["Layer 3: Business Scenarios<br/>(Event-Driven Architecture)"]
+        %% Orchestrator Service
+        OrchestratorService["Orchestrator Service<br/>REST API: /api/v1/resources"]
 
-        %% Kafka Topics
-        Kafka1["Kafka Topic:<br/>job-execution-events<br/>18 partitions, 3-day retention"]
-        Kafka2["Kafka Topic:<br/>job-lifecycle-events<br/>12 partitions, 14-day retention"]
+        %% Event Topics
+        EventTopicA["Event Topic:<br/>event-stream-alpha<br/>18 partitions, 3-day retention"]
+        EventTopicB["Event Topic:<br/>event-stream-beta<br/>12 partitions, 14-day retention"]
 
         %% Workers
-        TransferWorker["TransferWorker<br/>Filter: SCHEDULED_TRANSFER"]
-        ReminderWorker["ReminderWorker<br/>Filter: REMINDER"]
-        RecurringWorker["RecurringPaymentWorker<br/>Filter: RECURRING_PAYMENT"]
+        WorkerA["Worker Service A<br/>Event Handler: TYPE_A"]
+        WorkerB["Worker Service B<br/>Event Handler: TYPE_B"]
 
-        %% History Service
-        HistoryService["History Service<br/>Query API: /api/v1/history/*<br/>8 Materialized States"]
+        %% Query Service
+        QueryService["Query Service<br/>Query API: /api/v1/query/*<br/>Materialized Views"]
     end
 
     %% Layer 4: Business
     subgraph Layer4["Layer 4: Business"]
-        BusinessIntegration["Business Service Integration"]
-        APIManagement["API Management"]
+        BusinessServiceA["Business Service A"]
+        BusinessServiceB["Business Service B"]
     end
 
-    %% Layer 5: Domain (BIAN v12)
-    subgraph Layer5["Layer 5: Domain (BIAN v12)"]
-        PaymentService["Payment Execution<br/>(SD-003)"]
-        TransferService["Account Transfer<br/>(SD-045)"]
-        CRMService["CRM Service"]
-        NotificationService["Notification Service"]
+    %% Layer 5: Domain
+    subgraph Layer5["Layer 5: Domain Services"]
+        DomainServiceA["Domain Service A"]
+        DomainServiceB["Domain Service B"]
+        DomainServiceC["Domain Service C"]
+        DomainServiceD["Domain Service D"]
     end
 
     %% Layer 6: Core
-    subgraph Layer6["Layer 6: Core"]
-        CoreBanking["Core Banking System"]
+    subgraph Layer6["Layer 6: Core Systems"]
+        CoreSystemA["Core System A"]
+        CoreSystemB["Core System B"]
     end
 
     %% Data Flows - Layer 1 to Layer 2
-    Mobile -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
-    Web -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
-    Contact -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    WebClient -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    MobileClient -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    APIClient -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
 
     %% Data Flows - Layer 2 to Layer 3
-    APIGateway -->|REST/GraphQL<br/>mTLS, 30s timeout<br/>Job Creation| Scheduler
-    APIGateway -.->|REST<br/>mTLS<br/>Query API| HistoryService
+    APIGateway -->|REST/GraphQL<br/>mTLS, 30s timeout<br/>Resource Creation| OrchestratorService
+    APIGateway -.->|REST<br/>mTLS<br/>Query API| QueryService
 
-    %% Data Flows - Layer 3 Internal (Job Execution)
-    Scheduler -.->|Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish| Kafka1
-    Scheduler -.->|Kafka Protocol<br/>JOB_CREATED event| Kafka2
+    %% Data Flows - Layer 3 Internal (Event-Driven Flow)
+    OrchestratorService -.->|Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish| EventTopicA
+    OrchestratorService -.->|Kafka Protocol<br/>CREATED event| EventTopicB
 
-    Kafka1 -.->|Consumer Group:<br/>transfer-worker-group| TransferWorker
-    Kafka1 -.->|Consumer Group:<br/>reminder-worker-group| ReminderWorker
-    Kafka1 -.->|Consumer Group:<br/>recurring-payment-worker-group| RecurringWorker
+    EventTopicA -.->|Consumer Group:<br/>worker-a-group| WorkerA
+    EventTopicA -.->|Consumer Group:<br/>worker-b-group| WorkerB
 
-    TransferWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
-    ReminderWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
-    RecurringWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
+    WorkerA -.->|STARTED<br/>COMPLETED<br/>FAILED| EventTopicB
+    WorkerB -.->|STARTED<br/>COMPLETED<br/>FAILED| EventTopicB
 
-    Kafka2 -.->|Consumer Group:<br/>history-service-group<br/>Materialize States| HistoryService
-    Kafka2 -.->|Consumer Groups:<br/>audit, notification, analytics| BusinessIntegration
+    EventTopicB -.->|Consumer Group:<br/>query-service-group<br/>Materialize Views| QueryService
+    EventTopicB -.->|Consumer Groups:<br/>audit, notification, analytics| BusinessServiceA
 
     %% Data Flows - Layer 3 to Layer 5 (Domain Calls)
-    TransferWorker -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| TransferService
-    ReminderWorker -->|gRPC/mTLS<br/>30s timeout| CRMService
-    ReminderWorker -->|gRPC/mTLS<br/>30s timeout| NotificationService
-    RecurringWorker -->|gRPC/mTLS<br/>30s timeout<br/>3 retries| PaymentService
+    WorkerA -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| DomainServiceA
+    WorkerB -->|gRPC/mTLS<br/>30s timeout| DomainServiceC
+    WorkerB -->|gRPC/mTLS<br/>30s timeout| DomainServiceD
 
     %% Data Flows - Layer 4 to Layer 5
-    BusinessIntegration -->|gRPC/REST<br/>mTLS| PaymentService
-    BusinessIntegration -->|gRPC/REST<br/>mTLS| TransferService
-    APIManagement -->|gRPC/REST<br/>mTLS| CRMService
-    APIManagement -->|gRPC/REST<br/>mTLS| NotificationService
+    BusinessServiceA -->|gRPC/REST<br/>mTLS| DomainServiceA
+    BusinessServiceA -->|gRPC/REST<br/>mTLS| DomainServiceB
+    BusinessServiceB -->|gRPC/REST<br/>mTLS| DomainServiceC
+    BusinessServiceB -->|gRPC/REST<br/>mTLS| DomainServiceD
 
     %% Data Flows - Layer 5 to Layer 6
-    PaymentService -->|REST APIs<br/>Legacy protocols| CoreBanking
-    TransferService -->|REST APIs<br/>Legacy protocols| CoreBanking
+    DomainServiceA -->|REST APIs<br/>mTLS| CoreSystemA
+    DomainServiceB -->|REST APIs<br/>mTLS| CoreSystemB
 
     %% Styling
-    classDef scheduler fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    classDef orchestrator fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef worker fill:#F5A623,stroke:#B8791A,stroke-width:2px,color:#fff
-    classDef history fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
-    classDef kafka fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
+    classDef query fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
+    classDef events fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
     classDef domain fill:#50E3C2,stroke:#3AA893,stroke-width:2px,color:#000
     classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
 
-    class Scheduler scheduler
-    class TransferWorker,ReminderWorker,RecurringWorker worker
-    class HistoryService history
-    class Kafka1,Kafka2 kafka
-    class PaymentService,TransferService,CRMService,NotificationService domain
+    class OrchestratorService orchestrator
+    class WorkerA,WorkerB worker
+    class QueryService query
+    class EventTopicA,EventTopicB events
+    class DomainServiceA,DomainServiceB,DomainServiceC,DomainServiceD domain
     class APIGateway,BFF gateway
 ```
 ````
@@ -215,12 +212,12 @@ ComponentName["Display Name<br/>Additional Info"]
 
 **Examples**:
 ```mermaid
-Scheduler["Job Scheduler Service<br/>REST API: /api/v1/jobs"]
-TransferWorker["TransferWorker<br/>Filter: SCHEDULED_TRANSFER"]
+OrchestratorService["Orchestrator Service<br/>REST API: /api/v1/resources"]
+WorkerA["Worker Service A<br/>Event Handler: TYPE_A"]
 ```
 
 **Guidelines**:
-- Use PascalCase for component IDs (e.g., `TransferWorker`)
+- Use PascalCase for component IDs (e.g., `WorkerA`, `ServiceB`)
 - Use descriptive display names
 - Add key info with `<br/>` line breaks
 - Keep descriptions concise (1-2 lines max)
@@ -234,7 +231,7 @@ TopicName["Kafka Topic:<br/>topic-name<br/>partitions, retention"]
 
 **Example**:
 ```mermaid
-Kafka1["Kafka Topic:<br/>job-execution-events<br/>18 partitions, 3-day retention"]
+EventTopicA["Event Topic:<br/>event-stream-alpha<br/>18 partitions, 3-day retention"]
 ```
 
 **Guidelines**:
@@ -251,7 +248,7 @@ DBName[("Database Name<br/>Type")]
 
 **Example**:
 ```mermaid
-JobStore[("Azure SQL<br/>Job Store")]
+DataStoreA[("PostgreSQL<br/>Primary Data Store")]
 ```
 
 **Guidelines**:
@@ -267,7 +264,7 @@ SystemName["System Name<br/>(External)"]
 
 **Example**:
 ```mermaid
-CoreBanking["Core Banking System"]
+CoreSystemA["Core System A<br/>(External)"]
 ```
 
 **Guidelines**:
@@ -277,14 +274,14 @@ CoreBanking["Core Banking System"]
 ### Naming Conventions
 
 **Component IDs** (internal references):
-- PascalCase: `JobScheduler`, `TransferWorker`, `HistoryService`
+- PascalCase: `OrchestratorService`, `WorkerA`, `QueryService`
 - No spaces, no special characters
 - Descriptive but concise
 
 **Display Names** (visible labels):
 - Title Case or Sentence case
-- Include context (e.g., "TransferWorker" not just "Worker")
-- Add clarifying info (API endpoints, filters, pod counts)
+- Include context (e.g., "Worker Service A" not just "Worker")
+- Add clarifying info (API endpoints, event handlers, pod counts)
 
 ---
 
@@ -299,8 +296,8 @@ SourceComponent -->|Protocol<br/>Security<br/>Timeout| TargetComponent
 
 **Examples**:
 ```mermaid
-APIGateway -->|REST/GraphQL<br/>mTLS, 30s timeout<br/>Job Creation| Scheduler
-TransferWorker -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| TransferService
+APIGateway -->|REST/GraphQL<br/>mTLS, 30s timeout<br/>Resource Creation| OrchestratorService
+ServiceA -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| ServiceB
 ```
 
 **Guidelines**:
@@ -325,9 +322,9 @@ SourceComponent -.->|Event Type<br/>Protocol| TargetComponent
 
 **Examples**:
 ```mermaid
-Scheduler -.->|Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish| Kafka1
-Kafka1 -.->|Consumer Group:<br/>transfer-worker-group| TransferWorker
-TransferWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
+PublisherService -.->|Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish| EventTopicA
+EventTopicA -.->|Consumer Group:<br/>worker-a-group| WorkerA
+WorkerA -.->|STARTED<br/>COMPLETED<br/>FAILED| EventTopicB
 ```
 
 **Guidelines**:
@@ -340,7 +337,7 @@ TransferWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
 **Standard Labels**:
 - `Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish` (publisher to topic)
 - `Consumer Group:<br/>group-name` (topic to consumer)
-- `JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED` (event types)
+- `STARTED<br/>COMPLETED<br/>FAILED` (event types)
 
 ### Bidirectional Flows
 
@@ -351,7 +348,7 @@ Component1 <-->|Request/Response| Component2
 
 **Example**:
 ```mermaid
-APIGateway <-->|REST<br/>mTLS<br/>Query API| HistoryService
+APIGateway <-->|REST<br/>mTLS<br/>Request/Response| BackendService
 ```
 
 **Guidelines**:
@@ -365,23 +362,23 @@ APIGateway <-->|REST<br/>mTLS<br/>Query API| HistoryService
 
 ### Color Palette
 
-**Blue - Entry Points / Schedulers**:
+**Blue - Entry Points / Orchestrators**:
 - Fill: `#4A90E2`
 - Stroke: `#2E5C8A`
 - Text: White (`#fff`)
-- **Use for**: Job schedulers, cron services, entry point services
+- **Use for**: Orchestrator services, coordinators, entry point services
 
 **Orange - Workers / Executors**:
 - Fill: `#F5A623`
 - Stroke: `#B8791A`
 - Text: White (`#fff`)
-- **Use for**: Worker microservices, executors, processors
+- **Use for**: Worker microservices, executors, processors, event handlers
 
 **Green - Query Services / CQRS Read Models**:
 - Fill: `#7ED321`
 - Stroke: `#5A9B18`
 - Text: White (`#fff`)
-- **Use for**: History services, query APIs, CQRS read models, reporting services
+- **Use for**: Query services, CQRS read models, reporting services
 
 **Purple - Event Streaming**:
 - Fill: `#BD10E0`
@@ -405,21 +402,21 @@ APIGateway <-->|REST<br/>mTLS<br/>Query API| HistoryService
 
 **Step 1: Define Color Classes**:
 ```mermaid
-classDef scheduler fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+classDef orchestrator fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
 classDef worker fill:#F5A623,stroke:#B8791A,stroke-width:2px,color:#fff
-classDef history fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
-classDef kafka fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
+classDef query fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
+classDef events fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
 classDef domain fill:#50E3C2,stroke:#3AA893,stroke-width:2px,color:#000
 classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
 ```
 
 **Step 2: Assign Classes to Components**:
 ```mermaid
-class Scheduler scheduler
-class TransferWorker,ReminderWorker,RecurringWorker worker
-class HistoryService history
-class Kafka1,Kafka2 kafka
-class PaymentService,TransferService,CRMService,NotificationService domain
+class OrchestratorService orchestrator
+class WorkerA,WorkerB worker
+class QueryService query
+class EventTopicA,EventTopicB events
+class DomainServiceA,DomainServiceB,DomainServiceC,DomainServiceD domain
 class APIGateway,BFF gateway
 ```
 
@@ -455,11 +452,11 @@ Include this legend after every Mermaid architecture diagram:
 - **Circuit Breaker**: Opens after 5 consecutive failures
 
 **Component Colors**:
-- **Blue**: Entry points (schedulers, cron services)
-- **Orange**: Worker microservices (execution layer)
+- **Blue**: Entry points (orchestrators, coordinators)
+- **Orange**: Worker microservices (event handlers, executors)
 - **Green**: Query services (CQRS read models, reporting)
-- **Purple**: Event streaming (Kafka topics, message queues)
-- **Teal**: Domain services (BIAN service domains, business logic)
+- **Purple**: Event streaming (event topics, message queues)
+- **Teal**: Domain services (business logic, domain APIs)
 - **Gray**: Infrastructure (API Gateway, load balancers)
 
 **[Optional] Kafka Consumer Groups**:
@@ -646,7 +643,7 @@ Before committing Mermaid diagram changes, verify:
 
 ### Scenario 1: Add New Microservice
 
-**Task**: Add a new "NotificationWorker" microservice that consumes events from Kafka.
+**Task**: Add a new "ServiceC" microservice that consumes events from an event topic.
 
 **Steps**:
 
@@ -656,87 +653,87 @@ subgraph Layer3["Layer 3: Business Scenarios"]
     %% Existing components...
 
     %% New component
-    NotificationWorker["NotificationWorker<br/>Filter: NOTIFICATION"]
+    ServiceC["Service C<br/>Event Handler: TYPE_C"]
 end
 ```
 
-2. **Add data flow from Kafka topic**:
+2. **Add data flow from event topic**:
 ```mermaid
-Kafka1 -.->|Consumer Group:<br/>notification-worker-group| NotificationWorker
+EventTopicA -.->|Consumer Group:<br/>service-c-group| ServiceC
 ```
 
 3. **Add data flow to domain service**:
 ```mermaid
-NotificationWorker -->|gRPC/mTLS<br/>30s timeout| NotificationService
+ServiceC -->|gRPC/mTLS<br/>30s timeout| DomainServiceB
 ```
 
 4. **Add lifecycle event publishing**:
 ```mermaid
-NotificationWorker -.->|JOB_STARTED<br/>JOB_COMPLETED<br/>JOB_FAILED| Kafka2
+ServiceC -.->|STARTED<br/>COMPLETED<br/>FAILED| EventTopicB
 ```
 
 5. **Apply color styling**:
 ```mermaid
-class NotificationWorker worker
+class ServiceC worker
 ```
 
 6. **Update legend** (add to consumer groups section):
 ```markdown
-- `notification-worker-group`: Consume job-execution-events filtered by NOTIFICATION type
+- `service-c-group`: Consumes event-stream-alpha filtered by TYPE_C
 ```
 
 ---
 
-### Scenario 2: Add New Kafka Topic
+### Scenario 2: Add New Event Topic
 
-**Task**: Add a new "job-retry-events" Kafka topic for retry management.
+**Task**: Add a new "notification-events" event topic for notification management.
 
 **Steps**:
 
 1. **Add topic component to Layer 3**:
 ```mermaid
-Kafka3["Kafka Topic:<br/>job-retry-events<br/>6 partitions, 7-day retention"]
+EventTopicC["Event Topic:<br/>notification-events<br/>6 partitions, 7-day retention"]
 ```
 
 2. **Add producer flow**:
 ```mermaid
-TransferWorker -.->|Retry Event<br/>Kafka Protocol| Kafka3
+ServiceD -.->|Notification Event<br/>Kafka Protocol| EventTopicC
 ```
 
 3. **Add consumer flow**:
 ```mermaid
-Kafka3 -.->|Consumer Group:<br/>retry-handler-group| RetryHandler
+EventTopicC -.->|Consumer Group:<br/>notification-handler-group| ServiceE
 ```
 
 4. **Apply color styling**:
 ```mermaid
-class Kafka3 kafka
+class EventTopicC events
 ```
 
 5. **Update legend** (add to description):
 ```markdown
-**Kafka Topics**:
-- job-execution-events: Job dispatch events
-- job-lifecycle-events: Job state changes
-- job-retry-events: Failed job retry attempts (new)
+**Event Topics**:
+- event-stream-alpha: Primary event stream
+- event-stream-beta: Lifecycle events
+- notification-events: Notification events (new)
 ```
 
 ---
 
 ### Scenario 3: Update Data Flow (Change Security Protocol)
 
-**Task**: Change Worker → Domain Service calls from gRPC/mTLS to REST/mTLS.
+**Task**: Change ServiceB → Domain Service calls from gRPC/mTLS to REST/mTLS.
 
 **Steps**:
 
 1. **Locate existing data flow arrows**:
 ```mermaid
-TransferWorker -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| TransferService
+ServiceB -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| DomainServiceA
 ```
 
 2. **Update arrow labels**:
 ```mermaid
-TransferWorker -->|REST/mTLS<br/>30s timeout<br/>3 retries| TransferService
+ServiceB -->|REST/mTLS<br/>30s timeout<br/>3 retries| DomainServiceA
 ```
 
 3. **Update legend** (if protocol change is significant):
@@ -784,42 +781,42 @@ class PaymentGateway,CreditBureau external
 
 ### Scenario 5: Replace Existing Component
 
-**Task**: Replace "StatusTrackingService" with "HistoryService".
+**Task**: Replace "DomainServiceA" with "DomainServiceX".
 
 **Steps**:
 
 1. **Find and delete old component**:
 ```mermaid
 %% DELETE THIS:
-StatusTrackingService["Status Tracking Service"]
+DomainServiceA["Domain Service A"]
 ```
 
 2. **Add new component**:
 ```mermaid
-HistoryService["History Service<br/>Query API: /api/v1/history/*<br/>8 Materialized States"]
+DomainServiceX["Domain Service X<br/>Enhanced API: /api/v2/resources"]
 ```
 
 3. **Update all arrows referencing old component**:
 ```mermaid
 %% OLD:
-Kafka2 -.->|Consumer Group:<br/>status-tracker-group| StatusTrackingService
+WorkerA -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| DomainServiceA
 
 %% NEW:
-Kafka2 -.->|Consumer Group:<br/>history-service-group<br/>Materialize States| HistoryService
+WorkerA -->|gRPC/mTLS<br/>HTTP/2, 30s timeout<br/>3 retries| DomainServiceX
 ```
 
 4. **Update class assignments**:
 ```mermaid
 %% OLD:
-class StatusTrackingService worker
+class DomainServiceA domain
 
 %% NEW:
-class HistoryService history
+class DomainServiceX domain
 ```
 
-5. **Update legend** (consumer groups):
+5. **Update legend** (if needed):
 ```markdown
-- `history-service-group`: Consumes job-lifecycle-events for state materialization (replaces status-tracker-group)
+- Domain Service X: Enhanced version replacing Domain Service A with additional capabilities
 ```
 
 ---
@@ -864,8 +861,8 @@ class HistoryService history
 - Explain all symbols and colors used
 
 ❌ **Don't use ambiguous labels**:
-- "Service A" → "Job Scheduler Service"
-- "DB" → "Azure SQL Job Store"
+- "Svc1" → "Orchestrator Service"
+- "DB" → "PostgreSQL Primary Data Store"
 
 ❌ **Don't mix ASCII and Mermaid**:
 - Choose one format per document
@@ -932,53 +929,70 @@ class HistoryService history
 
 ---
 
-## 13. Reference Implementation
+## 13. Reference Examples
 
-**Source Project**: Task Scheduling System
-**File**: `/home/shadowx4fox/task-scheduling/ARCHITECTURE.md` (Section 4, lines 550-695)
+For complete, working Mermaid diagram examples, see the Section 4 templates:
 
-**Summary Document**: `/home/shadowx4fox/task-scheduling/MERMAID_DIAGRAM_UPDATE_SUMMARY.md`
+**Section 4 Templates**:
+- **META Architecture**: `templates/SECTION_4_META.md` (6-layer enterprise pattern)
+- **3-Tier Architecture**: `templates/SECTION_4_3TIER.md` (classic web application pattern)
+- **Microservices Architecture**: `templates/SECTION_4_MICROSERVICES.md` (cloud-native distributed pattern)
 
-**Key Highlights**:
-- 6-layer META architecture
-- Layer 3 event-driven components in detail
-- 2 Kafka topics with 4 consumer groups
-- Color-coded: Blue (scheduler), Orange (workers), Green (history service), Purple (Kafka), Teal (domain services)
-- Complete legend with arrow types, security protocols, timeouts, consumer groups
-- Successfully replaced ASCII diagram
+Each template includes:
+- Complete Mermaid diagram example with realistic component names
+- Layer/Tier-specific component organization
+- Communication patterns (synchronous/asynchronous)
+- Legend and customization instructions
+- Color coding appropriate for architecture type
+- Security protocols and data flow patterns
 
-**Results**:
-- ✅ 145 lines of Mermaid code + legend
-- ✅ Renders in GitHub/GitLab natively
-- ✅ Interactive, color-coded, maintainable
-- ✅ Professional appearance
+**Usage**:
+1. Choose the template that matches your architecture type
+2. Copy the Mermaid diagram from Section 4 of the template
+3. Customize component names and flows for your specific system
+4. Update the legend to reflect your actual components and patterns
+5. Validate rendering in your documentation platform
+
+**Benefits**:
+- ✅ Realistic examples show patterns in context
+- ✅ Architecture-specific best practices
+- ✅ Ready-to-use diagrams that render in GitHub/GitLab
+- ✅ Professional, maintainable, interactive visualizations
 
 ---
 
 ## 14. Conclusion
 
-This document provides everything needed to add Mermaid architecture diagram generation to the `solutions-architect-skills` plugin:
+This document provides everything needed to create Mermaid architecture diagrams for any system architecture:
 
-- ✅ Complete working template
-- ✅ Component guidelines
-- ✅ Data flow patterns
+- ✅ Generic working template applicable to all architecture types
+- ✅ Component guidelines with architecture-agnostic examples
+- ✅ Data flow patterns for synchronous and asynchronous communication
 - ✅ Standard color scheme
-- ✅ Reusable legend
-- ✅ Step-by-step instructions
-- ✅ Common scenarios with examples
-- ✅ Best practices
-- ✅ Reference implementation
+- ✅ Reusable legend template
+- ✅ Step-by-step instructions for creating and updating diagrams
+- ✅ Common scenarios with generic examples
+- ✅ Best practices for maintainable visualizations
+- ✅ Reference to architecture-specific templates (META, 3-Tier, Microservices)
 
-**Next Steps**:
-1. Review this document with plugin developers
-2. Implement Mermaid generation capability in the skill
-3. Test with sample architectures
-4. Roll out to all `solutions-architect-skills` users
+**How to Use This Guide**:
+1. Read through the guide to understand Mermaid diagram patterns
+2. Choose the appropriate Section 4 template for your architecture type
+3. Copy and customize the diagram for your specific system
+4. Follow the step-by-step instructions for updates
+5. Refer to common scenarios for typical modification tasks
+
+**Benefits**:
+- Works for any system type (e-commerce, CRM, IoT, financial services, etc.)
+- Supports all architecture patterns (META, 3-Tier, Microservices, N-Layer)
+- Technology-agnostic (Kafka, RabbitMQ, REST, gRPC, etc.)
+- Professional, maintainable, version-control-friendly diagrams
 
 **Questions or Feedback**:
-Contact the architecture documentation team or submit issues to the plugin repository.
+Contact the architecture documentation team or submit issues to the solutions-architect-skills repository.
 
 ---
 
 **Version History**:
-- **v1.0 (2025-12-03)**: Initial release with complete Mermaid diagram template and guidelines based on task scheduling system implementation
+- **v2.0 (2025-12-03)**: Genericized version with architecture-agnostic examples applicable to any system type
+- **v1.0 (2025-12-03)**: Initial release with complete Mermaid diagram template and guidelines
