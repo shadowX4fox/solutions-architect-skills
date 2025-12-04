@@ -460,6 +460,105 @@ When manual override exists:
 
 ---
 
+## Visualizing Your Architecture
+
+**Purpose**: Create visual representations of your architecture using Mermaid diagrams for improved clarity and communication.
+
+### Why Use Mermaid Diagrams?
+
+**Benefits over ASCII art or external diagram tools**:
+- ✅ **Interactive**: Zoom, pan, and click components in rendered view
+- ✅ **Maintainable**: Text-based, easy to update without manual alignment
+- ✅ **Version Control Friendly**: Git diffs work seamlessly
+- ✅ **GitHub/GitLab Native**: Renders automatically in markdown viewers
+- ✅ **Professional**: Modern, polished appearance with color-coding
+- ✅ **Accessible**: Screen readers can parse the underlying text
+
+### When to Add Diagrams
+
+**Section 4 (Architecture Layers/Tiers)**:
+- **Required for**: Visual representation of layer/tier structure
+- **Diagram Type**: Layer flow diagram using `graph TB` (top-to-bottom)
+- **Shows**: Components grouped by layers, data flow between layers
+- **Benefit**: Helps stakeholders quickly understand system organization
+
+**Section 6 (Data Flow Patterns)**:
+- **Recommended for**: Complex request/response flows
+- **Diagram Type**: Sequence diagrams or flowcharts
+- **Shows**: Step-by-step data movement through components
+- **Benefit**: Clarifies integration patterns and communication protocols
+
+### Quick Mermaid Syntax Reference
+
+**Basic Structure** (Layer/Tier Diagram):
+````markdown
+```mermaid
+graph TB
+    %% Layer 1
+    subgraph Layer1["Layer 1: Name"]
+        Component1["Component Name<br/>Details"]
+        Component2["Component Name<br/>Details"]
+    end
+
+    %% Layer 2
+    subgraph Layer2["Layer 2: Name"]
+        Component3["Component Name"]
+    end
+
+    %% Data flows
+    Component1 -->|Protocol<br/>Security| Component3
+    Component2 -.->|Async Event| Component3
+```
+````
+
+**Arrow Types**:
+- **Solid arrows (`-->`)**: Synchronous calls (REST, gRPC, SOAP)
+- **Dashed arrows (`-.->`)**: Asynchronous events (Kafka, message queues)
+
+**Color Styling** (Optional but Recommended):
+````markdown
+```mermaid
+graph TB
+    Component1["Service"]
+
+    %% Define colors
+    classDef blue fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+
+    %% Apply colors
+    class Component1 blue
+```
+````
+
+**Standard Color Palette**:
+- **Blue** (`#4A90E2`): Entry points, schedulers
+- **Orange** (`#F5A623`): Workers, executors
+- **Green** (`#7ED321`): Query services, read models
+- **Purple** (`#BD10E0`): Event streaming (Kafka, queues)
+- **Teal** (`#50E3C2`): Domain services
+- **Gray** (`#9B9B9B`): Infrastructure (API Gateway, load balancers)
+
+### Section 4 Template Examples
+
+Each Section 4 template (META, 3-Tier, Microservices) includes a complete Mermaid diagram example that you can copy and customize:
+
+- **SECTION_4_META.md**: 6-layer architecture with business capabilities and domain services
+- **SECTION_4_3TIER.md**: Classic 3-tier showing presentation → business → data layers
+- **SECTION_4_MICROSERVICES.md**: Service mesh topology with API Gateway and independent services
+
+### Complete Instructions
+
+For comprehensive Mermaid diagram guidance, including:
+- Detailed component guidelines and naming conventions
+- Data flow labeling (protocols, security, timeouts, retries)
+- Legend templates
+- Step-by-step creation and update instructions
+- Common scenarios (adding services, topics, changing protocols)
+- Best practices and validation checklists
+
+**See**: [MERMAID_DIAGRAMS_GUIDE.md](MERMAID_DIAGRAMS_GUIDE.md)
+
+---
+
 ## Section 3: Architecture Principles
 
 **Purpose**: Guiding principles that drive architectural decisions.
@@ -1503,6 +1602,7 @@ Architectural decisions are documented in ADRs. See [ADR_GUIDE.md](ADR_GUIDE.md)
 
 **Related Guides:**
 - [ADR_GUIDE.md](ADR_GUIDE.md) - Complete guide for Architecture Decision Records
+- [MERMAID_DIAGRAMS_GUIDE.md](MERMAID_DIAGRAMS_GUIDE.md) - Complete Mermaid architecture diagram instructions
 
 **External Resources:**
 - [C4 Model](https://c4model.com/) - Architecture diagram approach
