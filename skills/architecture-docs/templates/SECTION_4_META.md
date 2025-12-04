@@ -266,6 +266,126 @@ For each layer, document the following information:
 
 ---
 
+## Architecture Diagram (Mermaid)
+
+This section provides a visual representation of the 6-layer META architecture using Mermaid diagrams.
+
+**Purpose**: Visualize the layer structure, component placement, and data flow between layers.
+
+### META Architecture Diagram Example
+
+The following diagram shows a complete 6-layer META architecture with detailed Layer 3 (Business Scenarios) event-driven components:
+
+````markdown
+```mermaid
+graph TB
+    %% Layer 1: Channels
+    subgraph Layer1["Layer 1: Channels"]
+        Mobile["Mobile App"]
+        Web["Internet Banking"]
+        Contact["Contact Center"]
+    end
+
+    %% Layer 2: User Experience
+    subgraph Layer2["Layer 2: User Experience"]
+        APIGateway["API Gateway<br/>(Azure API Management)"]
+        BFF["BFF Services"]
+    end
+
+    %% Layer 3: Business Scenarios
+    subgraph Layer3["Layer 3: Business Scenarios<br/>(Task Scheduling System)"]
+        Scheduler["Job Scheduler Service<br/>REST API: /api/v1/jobs"]
+        Kafka1["Kafka Topic:<br/>job-execution-events"]
+        Kafka2["Kafka Topic:<br/>job-lifecycle-events"]
+        TransferWorker["TransferWorker"]
+        ReminderWorker["ReminderWorker"]
+        HistoryService["History Service<br/>Query API: /api/v1/history/*"]
+    end
+
+    %% Layer 4: Business
+    subgraph Layer4["Layer 4: Business"]
+        BusinessIntegration["Business Service Integration"]
+        APIManagement["API Management"]
+    end
+
+    %% Layer 5: Domain (BIAN v12)
+    subgraph Layer5["Layer 5: Domain (BIAN v12)"]
+        PaymentService["Payment Execution<br/>(SD-003)"]
+        TransferService["Account Transfer<br/>(SD-045)"]
+        CRMService["CRM Service"]
+        NotificationService["Notification Service"]
+    end
+
+    %% Layer 6: Core
+    subgraph Layer6["Layer 6: Core"]
+        CoreBanking["Core Banking System"]
+    end
+
+    %% Data Flows
+    Mobile -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    Web -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    Contact -->|OAuth 2.0 + JWT<br/>TLS 1.2+| APIGateway
+    APIGateway -->|REST/GraphQL<br/>mTLS| Scheduler
+    Scheduler -.->|Kafka<br/>Async Publish| Kafka1
+    Scheduler -.->|Kafka<br/>JOB_CREATED event| Kafka2
+    Kafka1 -.->|Consumer Group| TransferWorker
+    Kafka1 -.->|Consumer Group| ReminderWorker
+    TransferWorker -.->|JOB_COMPLETED<br/>JOB_FAILED| Kafka2
+    ReminderWorker -.->|JOB_COMPLETED| Kafka2
+    Kafka2 -.->|Consumer Group<br/>Materialize States| HistoryService
+    TransferWorker -->|gRPC/mTLS<br/>3 retries| TransferService
+    ReminderWorker -->|gRPC/mTLS| CRMService
+    ReminderWorker -->|gRPC/mTLS| NotificationService
+    BusinessIntegration -->|gRPC/REST<br/>mTLS| PaymentService
+    BusinessIntegration -->|gRPC/REST<br/>mTLS| TransferService
+    PaymentService -->|REST APIs<br/>Legacy protocols| CoreBanking
+    TransferService -->|REST APIs<br/>Legacy protocols| CoreBanking
+
+    %% Styling
+    classDef scheduler fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    classDef worker fill:#F5A623,stroke:#B8791A,stroke-width:2px,color:#fff
+    classDef history fill:#7ED321,stroke:#5A9B18,stroke-width:2px,color:#fff
+    classDef kafka fill:#BD10E0,stroke:#8A0CA3,stroke-width:2px,color:#fff
+    classDef domain fill:#50E3C2,stroke:#3AA893,stroke-width:2px,color:#000
+    classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
+
+    class Scheduler scheduler
+    class TransferWorker,ReminderWorker worker
+    class HistoryService history
+    class Kafka1,Kafka2 kafka
+    class PaymentService,TransferService,CRMService,NotificationService domain
+    class APIGateway,BFF gateway
+```
+````
+
+### Legend
+
+**Arrow Types**:
+- **Solid arrows (`-->`)**: Synchronous calls (REST, gRPC, SOAP)
+- **Dashed arrows (`-.->`)**: Asynchronous events (Kafka, message queues)
+
+**Colors**:
+- **Blue**: Entry points, schedulers
+- **Orange**: Workers, executors
+- **Green**: Query services, read models
+- **Purple**: Event streaming (Kafka, message queues)
+- **Teal**: Domain services (BIAN Service Domains)
+- **Gray**: Infrastructure (API Gateway, load balancers)
+
+### Customization Instructions
+
+To customize this diagram for your specific architecture:
+
+1. **Update Layer Components**: Replace example components with your actual services
+2. **Update Protocols**: Modify data flow labels with your actual protocols and security
+3. **Update BIAN Service Domains**: Replace SD-003, SD-045 with your BIAN identifiers
+4. **Adjust Colors**: Modify the `classDef` styling to match your organization's standards
+5. **Add/Remove Flows**: Update arrow connections based on your integration patterns
+
+**For detailed diagram creation and update instructions**, see [MERMAID_DIAGRAMS_GUIDE.md](../MERMAID_DIAGRAMS_GUIDE.md).
+
+---
+
 ## Guidelines
 
 1. **All 6 layers are required** in META architecture
@@ -290,4 +410,4 @@ For each layer, document the following information:
 - [ ] BIAN v12 alignment documented in Layer 5 (Domain)
 - [ ] ISO20022 customization mentioned in Layer 5 (Domain) if applicable
 - [ ] Modernization strategy included in Layer 6 (Core)
-- [ ] Flow diagrams or architecture diagrams referenced (optional but recommended)
+- [ ] Architecture diagram included (Mermaid format recommended, see MERMAID_DIAGRAMS_GUIDE.md)
