@@ -64,12 +64,30 @@ The Architecture Team translates PO requirements into technical design.
 /skill architecture-docs
 ```
 
+#### Step 1.5: Choose Architecture Type
+
+Before creating ARCHITECTURE.md, determine which architecture type fits your system:
+
+**Quick Decision**:
+- **Large enterprise with 5+ integrations?** → META (6-Layer)
+- **Cloud-native with independent services?** → Microservices
+- **Domain-Driven Design approach?** → N-Layer (DDD)
+- **Standard web application?** → 3-Tier
+
+**Architecture Types**:
+1. **META (6-Layer Enterprise)**: Financial services, complex integrations, regulatory compliance
+2. **3-Tier (Classic Web)**: Web apps, REST APIs, line-of-business applications
+3. **Microservices (Cloud-Native)**: Distributed systems, event-driven, independent deployability
+4. **N-Layer (DDD/Clean Arch)**: Domain-Driven Design, Hexagonal Architecture, testable design
+
+See [Architecture Type Selector](../skills/architecture-docs/templates/ARCHITECTURE_TYPE_SELECTOR.md) for detailed comparison and decision tree.
+
 #### Step 2: Create ARCHITECTURE.md
 
 The skill will prompt for:
 - **Use PO Spec as input?** → Yes (if you have PRODUCT_OWNER_SPEC.md)
 - **Project Name:** Same as PO Spec
-- **Architecture Type:** Microservices, Monolith, Serverless, etc.
+- **Architecture Type:** Choose one: META, 3-Tier, Microservices, or N-Layer (from Step 1.5)
 
 The skill creates a 12-section ARCHITECTURE.md:
 
@@ -77,6 +95,7 @@ The skill creates a 12-section ARCHITECTURE.md:
 2. **System Overview** - Purpose, scope, stakeholders
 3. **Architecture Principles** - 9 core principles
 4. **Meta Architecture** - Layers, deployment model
+   - **Note**: Includes interactive Mermaid diagram with color-coded components
 5. **System Components** - Detailed components
 6. **Data Flow** - How data moves through system
 7. **Integration Points** - External systems
@@ -220,6 +239,20 @@ Let's walk through a real example.
 /help
 ```
 
+### Architecture Visualization
+
+**Mermaid Diagrams**:
+- Section 4 includes an interactive Mermaid architecture diagram
+- Color-coded components (Blue=Orchestrators, Orange=Workers, Green=Query, Purple=Events)
+- Renders automatically in GitHub/GitLab (no plugins required)
+- See [MERMAID_DIAGRAMS_GUIDE.md](../skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md) for customization
+
+**Benefits**:
+- Interactive (zoom, pan, clickable)
+- Maintainable (text-based, easy to update)
+- Professional appearance
+- Version control friendly
+
 ### File Organization
 
 Recommended project structure:
@@ -258,6 +291,8 @@ my-project/
 - **Output:** `ARCHITECTURE.md`
 - **Owner:** Architecture Team
 - **Focus:** Technical design, components, decisions
+- **Architecture Types:** META (6-Layer), 3-Tier, Microservices, N-Layer (DDD)
+- **Diagrams:** Interactive Mermaid diagrams in Section 4
 
 ### Phase 3: Architecture Compliance
 - **Command:** `/skill architecture-compliance`

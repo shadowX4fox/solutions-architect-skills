@@ -131,6 +131,8 @@ Create and maintain technical architecture documentation following enterprise st
 **Key Features:**
 - 12-section standardized structure (Executive Summary → ADRs)
 - Automatic Document Index (lines 1-50)
+- 4 architecture type templates (META, 3-Tier, Microservices, N-Layer)
+- Interactive Mermaid diagrams in Section 4
 - Metric consistency validation across document
 - Design Drivers calculation (Value Delivery %, Scale, Impacts)
 - 9 mandatory Architecture Principles + 1 optional
@@ -165,6 +167,48 @@ Generate 11 compliance contracts from ARCHITECTURE.md with full traceability.
 9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first
 10. **Integration Architecture** - Integration catalog, patterns, security, standards
 11. **Risk Management** - Risk identification, assessment, mitigation, monitoring
+
+## Architecture Types & Visualization
+
+### 4 Supported Architecture Types
+
+Choose the architecture type that best fits your system:
+
+**1. META (6-Layer Enterprise)** - Large enterprise systems with complex integrations
+- Layers: Channels → UX → Business Scenarios → Business → Domain → Core
+- Best for: Financial services, regulated industries, enterprise platforms
+- Template: Section 4 META with BIAN v12 alignment
+
+**2. 3-Tier (Classic Web Application)** - Standard web applications and REST APIs
+- Tiers: Presentation → Application/Business Logic → Data
+- Best for: Web apps, line-of-business applications, standard CRUD systems
+- Template: Section 4 3-Tier with tier separation enforcement
+
+**3. Microservices (Cloud-Native)** - Distributed systems with independent services
+- Components: API Gateway, Service Mesh, Event Bus, independent services
+- Best for: Cloud-native systems, event-driven architectures, polyglot environments
+- Template: Section 4 Microservices with service catalog
+
+**4. N-Layer (DDD/Clean Architecture)** - Flexible custom patterns
+- Patterns: Classic DDD (4-Layer), Extended (5-Layer), Clean Architecture
+- Best for: Domain-Driven Design, Hexagonal Architecture, testable systems
+- Template: Section 4 N-Layer with dependency inversion
+
+**How to Choose**: See [ARCHITECTURE_TYPE_SELECTOR.md](skills/architecture-docs/templates/ARCHITECTURE_TYPE_SELECTOR.md) for decision tree and comparison matrix.
+
+### Interactive Mermaid Diagrams
+
+All ARCHITECTURE.md documents include **Mermaid architecture diagrams** integrated into Section 4:
+
+**Capabilities**:
+- ✅ Interactive visualization (zoom, pan, clickable components)
+- ✅ Color-coded components (Blue=Orchestrators, Orange=Workers, Green=Query, Purple=Events)
+- ✅ Data flow patterns (solid arrows=synchronous, dashed arrows=asynchronous)
+- ✅ Security protocol visualization (OAuth 2.0, JWT, mTLS, TLS 1.2+, SASL)
+- ✅ GitHub/GitLab native rendering (no plugins required)
+- ✅ Professional, maintainable, version-control-friendly
+
+**Comprehensive Guide**: See [MERMAID_DIAGRAMS_GUIDE.md](skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md) for templates, color schemes, and examples.
 
 ## Documentation
 

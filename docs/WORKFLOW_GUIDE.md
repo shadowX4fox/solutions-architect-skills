@@ -346,6 +346,55 @@ Translate business requirements into technical architecture design. This phase e
 - **Maintenance:** Keep documentation current
 - **Architecture Reviews:** Prepare for governance reviews
 
+### Selecting Architecture Type
+
+**Critical Decision**: Choose the architecture type that determines Section 4 and Section 5 structure.
+
+**4 Supported Architecture Types**:
+
+#### 1. META (6-Layer Enterprise)
+**Best for**: Large enterprise systems, financial services, complex integrations
+**Structure**: Channels → UX → Business Scenarios → Business → Domain → Core
+**When to use**: 5+ external integrations, regulatory compliance, enterprise platforms
+**Template**: `templates/SECTION_4_META.md`
+
+#### 2. 3-Tier (Classic Web Application)
+**Best for**: Web applications, REST APIs, standard CRUD systems
+**Structure**: Presentation → Application/Business Logic → Data
+**When to use**: Straightforward web apps, familiar patterns, low-to-moderate complexity
+**Template**: `templates/SECTION_4_3TIER.md`
+
+#### 3. Microservices (Cloud-Native)
+**Best for**: Cloud-native distributed systems, event-driven architectures
+**Structure**: API Gateway, Service Mesh, Event Bus, independent services
+**When to use**: Independent scaling, multiple teams, polyglot environments, fault isolation
+**Template**: `templates/SECTION_4_MICROSERVICES.md`
+
+#### 4. N-Layer (DDD/Clean Architecture)
+**Best for**: Domain-Driven Design, Hexagonal Architecture, testable systems
+**Structure**: Flexible (4-Layer DDD, 5-Layer Extended, Clean Architecture concentric)
+**When to use**: Complex domain logic, dependency inversion, framework-free core
+**Template**: `templates/SECTION_4_NLAYER_PATTERNS.md`
+
+**Decision Tree**:
+```
+Does your system have 5+ external integrations AND regulatory compliance?
+  → YES: META Architecture
+
+Is your system a distributed cloud-native application with independent services?
+  → YES: Microservices Architecture
+
+Are you implementing Domain-Driven Design or Clean Architecture?
+  → YES: N-Layer Architecture
+
+Is your system a standard web application or API?
+  → YES: 3-Tier Architecture
+```
+
+**Detailed Guide**: See `ARCHITECTURE_TYPE_SELECTOR.md` for comparison matrix and selection criteria.
+
+---
+
 ### Workflow Steps
 
 #### Step 1: Activate Skill
@@ -449,15 +498,29 @@ Service with PostgreSQL (jobs) and Redis (caching).
 **Trade-offs:** More services to manage vs simpler components
 ```
 
-##### Section 4: Meta Architecture
+##### Section 4: Architecture Layers
 
-**Purpose:** Deployment layers and patterns
+**Purpose:** Define the layered architecture model with visual diagrams
 
-**Content:**
-- Architectural style (microservices, monolith, serverless, etc.)
-- Deployment architecture (diagram)
-- Environments (dev, staging, production)
-- Network architecture
+**Content (Architecture-Type Specific)**:
+- **META**: 6 layers (Channels → UX → Business Scenarios → Business → Domain → Core)
+- **3-Tier**: 3 tiers (Presentation → Application/Business Logic → Data)
+- **Microservices**: Service mesh topology with infrastructure components
+- **N-Layer**: Custom layers with dependency rules (4-Layer DDD, 5-Layer Extended, or Clean Architecture)
+
+**Interactive Mermaid Diagram**:
+- Color-coded components (Blue=Orchestrators, Orange=Workers, Green=Query, Purple=Events, Teal=Domain, Gray=Gateway)
+- Data flow visualization (solid arrows=synchronous REST/gRPC, dashed arrows=asynchronous events)
+- Security protocols (OAuth 2.0 + JWT, mTLS, TLS 1.2+, SASL)
+- Renders automatically in GitHub/GitLab
+
+**Templates**:
+- META: `templates/SECTION_4_META.md`
+- 3-Tier: `templates/SECTION_4_3TIER.md`
+- Microservices: `templates/SECTION_4_MICROSERVICES.md`
+- N-Layer: `templates/SECTION_4_NLAYER_PATTERNS.md`
+
+**Comprehensive Guide**: See `MERMAID_DIAGRAMS_GUIDE.md` for diagram creation, color schemes, and update instructions.
 
 ##### Section 5: System Components
 
@@ -1134,6 +1197,30 @@ ARCHITECTURE.md → Generate SRE + Security contracts only
 - Set up CI/CD to regenerate compliance docs on ARCHITECTURE.md changes
 - Ensure documentation stays current
 - Reduce manual maintenance
+
+### 8. Leverage Interactive Diagrams
+
+**Mermaid Advantages**:
+- Use Mermaid diagrams in Section 4 instead of ASCII art
+- Interactive visualization (zoom, pan) in GitHub/GitLab
+- Maintainable text-based format (easy updates)
+- Professional appearance with color-coding
+
+**Standard Color Scheme**:
+- Blue: Orchestrators and entry points
+- Orange: Worker microservices and executors
+- Green: Query services and CQRS read models
+- Purple: Event streaming (Kafka topics, message queues)
+- Teal: Domain services and business logic
+- Gray: Infrastructure (API Gateway, load balancers)
+
+**How to Update**:
+1. Locate Mermaid diagram in Section 4
+2. Update component definitions or data flows
+3. Validate rendering in GitHub preview or https://mermaid.live/
+4. Update legend to reflect changes
+
+**Full Guide**: `MERMAID_DIAGRAMS_GUIDE.md` includes templates, examples, and step-by-step instructions for all architecture types.
 
 ---
 
