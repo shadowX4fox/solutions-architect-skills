@@ -139,10 +139,12 @@ After significant edits:
 
 ### Available Architecture Types
 
-1. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Integration → Domain → Core)
+1. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Business → Domain → Core) with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 Domain service domains
 2. **3-Tier Architecture** - Classic web application pattern (Presentation → Application/Business Logic → Data)
 3. **Microservices Architecture** - Cloud-native distributed systems with independent services
 4. **N-Layer Architecture** - Customizable patterns (DDD, Clean Architecture, Hexagonal)
+
+**BIAN Standard for META**: BIAN V12.0 is the default and recommended version for META architecture. Use the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify and define service domains for Layer 5 (Domain).
 
 ### Workflow Steps
 
@@ -267,7 +269,7 @@ If no metadata comment, infer from Section 4 headers:
 
 ```bash
 # Check for META indicators
-grep -E "(Layer 1: Channels|Layer 5: Domain|BIAN)" ARCHITECTURE.md
+grep -E "(Layer 1: Channels|Layer 5: Domain|BIAN V12.0)" ARCHITECTURE.md
 
 # Check for 3-Tier indicators
 grep -E "(Tier 1: Presentation|Tier 3: Data)" ARCHITECTURE.md
@@ -326,8 +328,11 @@ If user requests to change architecture type of an existing ARCHITECTURE.md:
 After selecting or detecting architecture type, apply type-specific validation rules:
 
 **META Architecture:**
-- ✅ Must have all 6 layers (Channels, UX, Business Scenarios, Integration, Domain, Core)
+- ✅ Must have all 6 layers (Channels, UX, Business Scenarios, Business, Domain, Core)
 - ✅ Layer 5 must include BIAN alignment section
+- ✅ Verify BIAN V12.0 is documented as the default version
+- ✅ Ensure BIAN service domain IDs are referenced from official [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- ✅ Validate Layer 5 (Domain) components include BIAN alignment subsection with official URLs
 - ✅ Layers documented in correct order
 
 **3-Tier Architecture:**

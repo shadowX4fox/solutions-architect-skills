@@ -177,7 +177,8 @@ Choose the architecture type that best fits your system:
 **1. META (6-Layer Enterprise)** - Large enterprise systems with complex integrations
 - Layers: Channels → UX → Business Scenarios → Business → Domain → Core
 - Best for: Financial services, regulated industries, enterprise platforms
-- Template: Section 4 META with BIAN v12 alignment
+- Template: Section 4 META with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment (default version)
+- **BIAN Standard**: Uses [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) for Layer 5 Domain service domains
 
 **2. 3-Tier (Classic Web Application)** - Standard web applications and REST APIs
 - Tiers: Presentation → Application/Business Logic → Data

@@ -6,6 +6,8 @@
 
 This template follows the **META 6-Layer Enterprise Architecture** model, designed for large enterprise systems with complex integrations and regulatory compliance requirements.
 
+**BIAN Standard**: This template uses **BIAN V12.0** as the default and recommended version for Layer 5 (Domain) service domain modeling. See the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) for official service domain definitions.
+
 ---
 
 ## Layers Overview
@@ -16,7 +18,7 @@ This template follows the **META 6-Layer Enterprise Architecture** model, design
 | **User Experience** | Centralizes user experience and personalization logic, managing user journeys and flows. |
 | **Business Scenarios** | Defines and orchestrates transversal business processes and scenarios. |
 | **Business** | Implements main business capabilities, aligned with strategic objectives, ensuring BIAN N2 compliance. |
-| **Domain** | Represents the functional core of the business, modeled under BIAN v12 standard. |
+| **Domain** | Represents the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard. |
 | **Core** | Manages central and legacy systems that support critical operations. |
 
 ---
@@ -156,12 +158,17 @@ For each layer, document the following information:
 
 ### Layer 5: Domain
 
-**Purpose**: Represent the functional core of the business, modeled under BIAN v12 standard
+**Purpose**: Represent the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard
 
-**Service Domains** (BIAN v12):
-- Service Domain 1: [Name, BIAN ID, description]
-- Service Domain 2: [Name, BIAN ID, description]
-- Service Domain 3: [Name, BIAN ID, description]
+**Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+
+Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify appropriate service domains for your system.
+
+- Service Domain 1: [Name, BIAN ID (e.g., SD-001), description - verify against official landscape]
+- Service Domain 2: [Name, BIAN ID (e.g., SD-003), description - verify against official landscape]
+- Service Domain 3: [Name, BIAN ID (e.g., SD-045), description - verify against official landscape]
+
+**Note**: Each service domain should map to an official BIAN V12.0 service domain definition. Use the landscape to ensure accurate alignment.
 
 **Technologies**:
 - Primary: [Microservices framework]
@@ -181,9 +188,17 @@ For each layer, document the following information:
 - Protocols: [REST, gRPC, domain events]
 
 **BIAN Alignment**:
-- Service Domain Model: [Version, compliance level]
-- Control Records: [How implemented]
-- Service Operations: [Activation, configuration, feedback]
+- **Service Domain Model**: BIAN V12.0 (default and recommended version)
+- **Official Reference**: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Control Records**: [How implemented - document control record structure per BIAN spec]
+- **Service Operations**: [Activation, configuration, feedback - reference official BIAN operations]
+- **Compliance Level**: [Document alignment level - Full/Partial/Custom]
+
+**Implementation Guidance**:
+1. Select service domains from the official BIAN V12.0 landscape
+2. Document BIAN SD IDs (e.g., SD-001, SD-003) for each domain
+3. Implement service operations according to BIAN V12.0 specifications
+4. Maintain control records as defined in BIAN standards
 
 **Non-Functional Requirements**:
 - Performance: [Service response time]
@@ -272,6 +287,8 @@ This section provides a visual representation of the 6-layer META architecture u
 
 **Purpose**: Visualize the layer structure, component placement, and data flow between layers.
 
+**Diagram Note**: Layer 5 components should reference official [BIAN V12.0 Service Domains](https://bian.org/servicelandscape-12-0-0/views/view_51891.html). Example services shown: Payment Execution (SD-003), Account Transfer (SD-045).
+
 ### META Architecture Diagram Example
 
 The following diagram shows a complete 6-layer META architecture with detailed Layer 3 (Business Scenarios) event-driven components:
@@ -308,8 +325,8 @@ graph TB
         APIManagement["API Management"]
     end
 
-    %% Layer 5: Domain (BIAN v12)
-    subgraph Layer5["Layer 5: Domain (BIAN v12)"]
+    %% Layer 5: Domain (BIAN V12.0)
+    subgraph Layer5["Layer 5: Domain (BIAN V12.0)"]
         PaymentService["Payment Execution<br/>(SD-003)"]
         TransferService["Account Transfer<br/>(SD-045)"]
         CRMService["CRM Service"]
@@ -407,7 +424,9 @@ To customize this diagram for your specific architecture:
 - [ ] Technologies specified for each layer
 - [ ] Non-functional requirements quantified (not just placeholders)
 - [ ] BIAN N2 compliance documented in Layer 4 (Business)
-- [ ] BIAN v12 alignment documented in Layer 5 (Domain)
+- [ ] BIAN V12.0 alignment documented in Layer 5 (Domain)
+- [ ] BIAN service domain IDs verified against [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- [ ] BIAN reference URLs included for service domain definitions
 - [ ] ISO20022 customization mentioned in Layer 5 (Domain) if applicable
 - [ ] Modernization strategy included in Layer 6 (Core)
 - [ ] Architecture diagram included (Mermaid format recommended, see MERMAID_DIAGRAMS_GUIDE.md)

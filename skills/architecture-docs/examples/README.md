@@ -9,9 +9,11 @@ This directory contains example ARCHITECTURE.md files demonstrating each support
 
 Demonstrates:
 - 6-layer META model (Channels → UX → Business Scenarios → Integration → Domain → Core)
-- BIAN v12 alignment for Layer 5 (Domain) components
+- [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 (Domain) components (default version)
 - Complex enterprise integration patterns
 - Regulatory compliance considerations
+
+**BIAN V12.0 Default**: All META architecture examples use BIAN V12.0 as the default service domain model. Service domains are referenced from the [official BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html).
 
 **Best for**: Large enterprise systems, financial services, complex integrations
 

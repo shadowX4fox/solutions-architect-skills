@@ -6,6 +6,8 @@
 
 This template organizes components by their META layer assignment (Channels → UX → Business Scenarios → Business → Domain → Core).
 
+**BIAN V12.0 Standard**: For Layer 5 (Domain) components, use [BIAN V12.0](https://bian.org/) as the default service domain model. Reference the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) for official service domain definitions and IDs.
+
 ---
 
 ## Component Documentation Guidelines
@@ -190,54 +192,85 @@ For each component in your system, document using the template below. **Group co
 
 ---
 
-## Layer 5: Domain - Components
+## Layer 5: Domain - Components (BIAN V12.0 Service Domains)
 
-### [Service Domain Name] (BIAN v12)
+### [Service Domain Name] (BIAN V12.0)
 
-**Type**: Microservice | Service Domain
+**BIAN Information**:
+- **BIAN ID**: [e.g., SD-001, SD-003, SD-045 - verify in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)]
+- **BIAN Name**: [Official BIAN service domain name]
+- **BIAN Version**: V12.0 (default)
+- **Official Definition**: [Link to specific service domain in BIAN landscape]
+
+**Type**: Service Domain | Microservice
 **Technology**: [Specific technology used]
 **Version**: [Version number]
-**Location**: [Package/directory path]
-**BIAN ID**: [BIAN Service Domain ID, e.g., SD-001]
+**Location**: [Package/directory path or repository]
 
 **Purpose**:
-[1-2 sentence description of BIAN service domain]
+[1-2 sentence description aligned with BIAN V12.0 service domain definition]
+
+**BIAN Alignment Details**:
+
+**Service Domain Characteristics** (per BIAN V12.0):
+- **Domain Type**: [Operational/Enabling/Support - from BIAN taxonomy]
+- **Control Record**: [Structure of the control record]
+- **Functional Patterns**: [List applicable BIAN functional patterns]
+
+**Service Operations** (BIAN V12.0):
+- **Initiate**: [Description of initiation operation]
+- **Update**: [Description of update operation]
+- **Retrieve**: [Description of retrieval operation]
+- **Activate/Configure**: [Configuration operations]
+- **Provide Feedback**: [Feedback mechanisms]
+
+**Behavior Qualifiers**:
+- Qualifier 1: [Description]
+- Qualifier 2: [Description]
 
 **Responsibilities**:
-- BIAN service operation 1 (e.g., Initiate)
-- BIAN service operation 2 (e.g., Update)
-- BIAN service operation 3 (e.g., Retrieve)
+- Implement BIAN V12.0 service domain [name]
+- Maintain control records per BIAN specifications
+- Expose service operations as defined in BIAN model
+- [Additional domain-specific responsibilities]
 
 **APIs/Interfaces**:
-- BIAN API: [BIAN-compliant endpoints]
-- Control Record: [Aggregate root description]
-- Service Operations: [Initiate, Update, Execute, Request, Retrieve, etc.]
+- BIAN Service Operations API: [Endpoints aligned with BIAN V12.0]
+- Domain Events: [Event-driven integration points]
+- Control Record API: [CRUD operations on control records]
 
 **Dependencies**:
-- Depends on: [Layer 6 (Core) systems, other Service Domains]
-- Depended by: [Layer 4 (Business) components]
+- **Depends on**: [Other BIAN service domains or Layer 6 Core systems]
+- **Depended by**: [Layer 4 Business components]
+- **BIAN References**: [Link to official BIAN V12.0 dependencies]
 
-**BIAN Alignment**:
-- Service Domain Model: [BIAN version]
-- Behavior Qualifiers: [List behavior qualifiers]
-- Functional Patterns: [Which BIAN patterns apply]
+**Data Model**:
+- **Control Record Structure**: [Main entity/aggregate]
+- **BIAN Alignment**: Maps to BIAN V12.0 [Service Domain] control record
+- **Persistence**: [Database, storage approach]
+
+**Compliance**:
+- **BIAN Version**: V12.0
+- **Compliance Level**: [Full/Partial/Extended]
+- **Deviations**: [Document any deviations from BIAN standard]
+- **Verification**: Service domain verified in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
 
 **Configuration**:
 - Config param 1: [Description, default]
 - Config param 2: [Description, default]
 
 **Scaling**:
-- Horizontal: [Yes/No, approach]
-- Vertical: [Limits, approach]
+- Horizontal: [Approach for scaling service domain instances]
+- Vertical: [Limits based on domain complexity]
 
 **Failure Modes**:
-- Failure 1: [Impact, mitigation]
-- Failure 2: [Impact, mitigation]
+- [Failure scenario 1 and recovery approach]
+- [Failure scenario 2 and recovery approach]
 
 **Monitoring**:
-- Key metrics: [Metrics to track]
-- Alerts: [Alert conditions]
-- Logs: [What is logged]
+- Key metrics: [Domain-specific KPIs]
+- Health checks: [BIAN service operation health]
+- Alerting: [Alert conditions and thresholds]
 
 ---
 

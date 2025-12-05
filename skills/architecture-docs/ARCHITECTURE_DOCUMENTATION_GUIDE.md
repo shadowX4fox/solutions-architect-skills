@@ -774,7 +774,7 @@ Loose coupling via domain events instead of synchronous coupling, enabling async
 | **User Experience** | Orchestrates the experience and presentation of services, ensuring consistent and accessible interaction. |
 | **Business Scenarios** | Defines and manages cross-cutting business flows and processes, integrating capabilities from different domains. |
 | **Integration** | Consolidates core business capabilities and services, aligned with the organization's functional domains. |
-| **Domain** | Implements Service Domains under the BIAN v12 model, ensuring functional consistency and alignment with financial sector standards. |
+| **Domain** | Implements Service Domains under the [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) model (default and recommended version), ensuring functional consistency and alignment with financial sector standards. |
 | **Core** | Includes central and legacy systems that support critical operations, such as core banking and transactional systems. |
 
 ---
@@ -914,7 +914,10 @@ For each layer, document the following information:
 
 **Purpose**: [What this layer provides to the business/users]
 
-**Service Domains** (BIAN v12):
+**Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+
+Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to select appropriate service domains.
+
 - Service Domain 1: [Name, BIAN ID, description]
 - Service Domain 2: [Name, BIAN ID, description]
 - Service Domain 3: [Name, BIAN ID, description]
@@ -1052,13 +1055,15 @@ For each layer, document the following information:
 
 ### Layer 5: Domain
 
-**Purpose**: Implement core banking capabilities as BIAN v12 Service Domains.
+**Purpose**: Implement core banking capabilities as [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) Service Domains (default version).
 
-**Service Domains** (BIAN v12):
-- Customer Agreement (SD-001): Manages customer agreements and terms
-- Current Account (SD-002): Handles current account operations
-- Payment Execution (SD-003): Processes payment transactions
-- Card Management (SD-004): Manages card lifecycle and operations
+**Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+- **Customer Agreement (SD-001)**: Manages customer agreements and terms - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Current Account (SD-002)**: Handles current account operations - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Payment Execution (SD-003)**: Processes payment transactions - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Card Management (SD-004)**: Manages card lifecycle and operations - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+
+**Note**: All BIAN service domain IDs should be verified against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment.
 
 **Technologies**:
 - Primary: Java Spring Boot microservices, PostgreSQL
@@ -1076,7 +1081,7 @@ For each layer, document the following information:
 - Protocols: REST (synchronous), Kafka (asynchronous events)
 
 **BIAN Alignment**:
-- Service Domain Model: BIAN v12.0
+- Service Domain Model: [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) (default and recommended version)
 - Control Records: Implemented as aggregate roots
 - Service Operations: Initiate, Update, Execute, Request, Retrieve
 
@@ -1607,7 +1612,9 @@ Architectural decisions are documented in ADRs. See [ADR_GUIDE.md](ADR_GUIDE.md)
 **External Resources:**
 - [C4 Model](https://c4model.com/) - Architecture diagram approach
 - [arc42](https://arc42.org/) - Architecture documentation template
-- [BIAN v12](https://bian.org/) - Banking Industry Architecture Network
+- [BIAN](https://bian.org/) - Banking Industry Architecture Network (General Overview)
+- [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) - Official Service Domain Definitions (Default Version for META Architecture)
+- **BIAN V12.0 Default**: V12.0 is the default and recommended version for all META architecture implementations
 
 ---
 

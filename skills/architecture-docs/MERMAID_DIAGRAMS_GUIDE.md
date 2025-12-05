@@ -392,6 +392,10 @@ APIGateway <-->|REST<br/>mTLS<br/>Request/Response| BackendService
 - Text: Black (`#000`)
 - **Use for**: BIAN service domains, business logic services, domain APIs
 
+**BIAN Service Domain IDs in Diagrams**: When including Layer 5 (Domain) services in META architecture diagrams, use official BIAN V12.0 service domain IDs. Reference the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify correct SD IDs (e.g., SD-003 for Payment Execution, SD-045 for Account Transfer).
+
+**Default BIAN Version**: BIAN V12.0 is the default and recommended version for all META architecture diagrams.
+
 **Gray - Infrastructure**:
 - Fill: `#9B9B9B`
 - Stroke: `#6B6B6B`
