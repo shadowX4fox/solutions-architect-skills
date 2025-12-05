@@ -770,12 +770,12 @@ Loose coupling via domain events instead of synchronous coupling, enabling async
 
 | Layer | Function |
 |-------|----------|
-| **Channels** | Manages touchpoints and interaction with users (internal and external): web, mobile, ATMs, call center, etc. |
-| **User Experience** | Orchestrates the experience and presentation of services, ensuring consistent and accessible interaction. |
-| **Business Scenarios** | Defines and manages cross-cutting business flows and processes, integrating capabilities from different domains. |
-| **Integration** | Consolidates core business capabilities and services, aligned with the organization's functional domains. |
-| **Domain** | Implements Service Domains under the [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) model (default and recommended version), ensuring functional consistency and alignment with financial sector standards. |
-| **Core** | Includes central and legacy systems that support critical operations, such as core banking and transactional systems. |
+| **Channels** | Manages interaction with end users through various channels (web, mobile, chatbots, IVR, etc.). |
+| **User Experience** | Centralizes user experience and personalization logic, managing user journeys and flows. |
+| **Business Scenarios** | Defines and orchestrates transversal business processes and scenarios. |
+| **Business** | Implements main business capabilities, aligned with strategic objectives and organizational standards. |
+| **Domain** | Represents the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard. |
+| **Core** | Manages central and legacy systems that support critical operations. |
 
 ---
 
@@ -801,9 +801,10 @@ For each layer, document the following information:
 - Supporting: [Additional technologies, frameworks]
 
 **Key Responsibilities**:
-- Responsibility 1
-- Responsibility 2
-- Responsibility 3
+- Orchestrate omnichannel experience
+- Adapt presentation and flow according to the channel
+- Encapsulate presentation and access logic
+- Manage channel-specific user interactions
 
 **Communication Patterns**:
 - Inbound: [How this layer receives requests]
@@ -831,6 +832,8 @@ For each layer, document the following information:
 - Supporting: [Additional technologies, frameworks]
 
 **Key Responsibilities**:
+- Manage user journeys and flows
+- Apply personalization and context rules
 - Service orchestration and composition
 - User session management
 - Experience personalization
@@ -838,7 +841,7 @@ For each layer, document the following information:
 
 **Communication Patterns**:
 - Inbound: [From Channels layer]
-- Outbound: [To Business Scenarios and Integration layers]
+- Outbound: [To Business Scenarios and Business layers]
 - Protocols: [REST, GraphQL, etc.]
 
 **Non-Functional Requirements**:
@@ -862,6 +865,9 @@ For each layer, document the following information:
 - Supporting: [Rules engine, process automation]
 
 **Key Responsibilities**:
+- Model end-to-end business processes
+- Integrate business and domain capabilities
+- Adapt flows to regulatory or market requirements
 - Cross-domain business process orchestration
 - Business rule execution
 - Transaction coordination
@@ -869,7 +875,7 @@ For each layer, document the following information:
 
 **Communication Patterns**:
 - Inbound: [From User Experience layer]
-- Outbound: [To Integration and Domain layers]
+- Outbound: [To Business and Domain layers]
 - Protocols: [Sync/async patterns, events]
 
 **Non-Functional Requirements**:
@@ -879,24 +885,24 @@ For each layer, document the following information:
 
 ---
 
-### Layer 4: Integration
+### Layer 4: Business
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: Implement main business capabilities, aligned with strategic objectives
 
 **Components**:
-- Enterprise Service Bus (ESB): [Description]
-- API Management: [Description]
-- Integration Adapters: [Description]
+- Business Capability Services: [Description]
+- Business API Layer: [Description]
+- Business Rules Management: [Description]
 
 **Technologies**:
-- Primary: [Integration platform]
-- Supporting: [Message brokers, adapters]
+- Primary: [Business services platform]
+- Supporting: [API management, business rules engine]
 
 **Key Responsibilities**:
-- Service routing and mediation
-- Protocol transformation
-- Message translation
-- Integration with external systems
+- Manage business rules and logic
+- Expose business services through APIs
+- Ensure interoperability and API standards compliance
+- Implement business capability orchestration
 
 **Communication Patterns**:
 - Inbound: [From Business Scenarios layer]
@@ -1043,7 +1049,7 @@ Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/
 
 **Communication Patterns**:
 - Inbound: REST/GraphQL from Channels layer
-- Outbound: REST/gRPC to Business Scenarios and Integration layers
+- Outbound: REST/gRPC to Business Scenarios and Business layers
 - Protocols: REST, GraphQL, gRPC
 
 **Non-Functional Requirements**:
