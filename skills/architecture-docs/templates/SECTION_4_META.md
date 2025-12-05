@@ -17,7 +17,7 @@ This template follows the **META 6-Layer Enterprise Architecture** model, design
 | **Channels** | Manages interaction with end users through various channels (web, mobile, chatbots, IVR, etc.). |
 | **User Experience** | Centralizes user experience and personalization logic, managing user journeys and flows. |
 | **Business Scenarios** | Defines and orchestrates transversal business processes and scenarios. |
-| **Business** | Implements main business capabilities, aligned with strategic objectives, ensuring BIAN N2 compliance. |
+| **Business** | Implements main business capabilities, aligned with strategic objectives and organizational standards. |
 | **Domain** | Represents the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard. |
 | **Core** | Manages central and legacy systems that support critical operations. |
 
@@ -141,7 +141,7 @@ For each layer, document the following information:
 **Key Responsibilities**:
 - Manage business rules and logic
 - Expose business services through APIs
-- Ensure interoperability and compliance with BIAN N2 standard
+- Ensure interoperability and API standards compliance
 - Implement business capability orchestration
 
 **Communication Patterns**:
@@ -410,7 +410,7 @@ To customize this diagram for your specific architecture:
 3. **Each layer must include all subsections**: Purpose, Components, Technologies, Key Responsibilities, Communication Patterns, Non-Functional Requirements
 4. **Flow direction**: Requests typically flow top-down (Channels → Core), responses flow bottom-up
 5. **Integration points**: Clearly define how each layer communicates with adjacent layers
-6. **BIAN compliance**: Layer 4 (Business) should ensure BIAN N2 compliance; Layer 5 (Domain) should align with BIAN v12 Service Domain model
+6. **BIAN compliance**: BIAN V12.0 compliance applies only to Layer 5 (Domain) - align with BIAN V12.0 Service Domain model
 7. **ISO20022 customization**: Layer 5 (Domain) should allow customization under ISO20022 standard if necessary
 8. **Modernization strategy**: Layer 6 (Core) should include plans for progressive legacy system evolution
 
@@ -423,7 +423,6 @@ To customize this diagram for your specific architecture:
 - [ ] Communication patterns defined for inter-layer communication
 - [ ] Technologies specified for each layer
 - [ ] Non-functional requirements quantified (not just placeholders)
-- [ ] BIAN N2 compliance documented in Layer 4 (Business)
 - [ ] BIAN V12.0 alignment documented in Layer 5 (Domain)
 - [ ] BIAN service domain names (Capabilities) validated against [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
 - [ ] BIAN IDs (SD-XXX) used for internal document tracking only
