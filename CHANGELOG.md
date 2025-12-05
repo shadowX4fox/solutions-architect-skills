@@ -5,6 +5,39 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-04
+
+### Added
+- 3 ready-to-use compliance contracts:
+  - Cloud Architecture contract
+  - Development Architecture contract (with 26-item stack validation)
+  - IT Platforms & Infrastructure contract
+- Roadmap section in README documenting v1.1.0, v1.2.0, and v2.0.0 milestones
+- Clear status indicators for ready vs in-development compliance contracts
+- 4 architecture types with Mermaid diagram support (META, 3-Tier, Microservices, N-Layer)
+- Interactive Mermaid diagrams in ARCHITECTURE.md Section 4
+- MERMAID_DIAGRAMS_GUIDE.md with comprehensive diagram creation instructions
+
+### Changed
+- Updated README to clarify compliance contract availability (3 ready, 8 in development)
+- BIAN compliance now exclusively for Layer 5 (Domain) - removed Layer 4 BIAN N2 references
+- BIAN validation focus shifted to capability names instead of IDs
+- BIAN V12.0 set as explicit default version with official landscape URLs
+- BIAN IDs (SD-XXX) clarified as internal document tracking only
+
+### Improved
+- Compliance contract documentation structure
+- Version information clarity across all documentation
+- BIAN Service Landscape integration with official URLs
+- Architecture type selection guidance
+
+### Planned for v1.2.0
+- Remaining 8 compliance contracts (Business Continuity, SRE, Data & Analytics/AI, Process Transformation, Security, Enterprise Architecture, Integration, Risk Management)
+- Enhanced validation rules
+- Additional architecture patterns
+
+---
+
 ## [1.0.0] - 2025-11-28
 
 ### Added

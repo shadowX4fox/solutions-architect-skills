@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,12 +81,12 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 
 1. Download the latest release:
    ```bash
-   wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v1.0.0/solutions-architect-skills-v1.0.0.zip
+   wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v1.1.0/solutions-architect-skills-v1.1.0.zip
    ```
 
 2. Extract and install:
    ```bash
-   unzip solutions-architect-skills-v1.0.0.zip
+   unzip solutions-architect-skills-v1.1.0.zip
    mv solutions-architect-skills ~/.claude/plugins/
    ```
 
@@ -95,7 +95,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
    /plugin list
    ```
 
-You should see `solutions-architect-skills v1.0.0` in the list.
+You should see `solutions-architect-skills v1.1.0` in the list.
 
 ### First Workflow
 
@@ -142,31 +142,39 @@ Create and maintain technical architecture documentation following enterprise st
 
 ### Phase 3: Compliance Documentation
 
-Generate 11 compliance contracts from ARCHITECTURE.md with full traceability.
+Generate compliance contracts from ARCHITECTURE.md with full traceability.
 
 **Key Features:**
 - Context-efficient generation (70-80% reduction in loaded content)
-- 11 contract types covering all architectural domains
-- Automatic stack validation (Development Architecture)
+- **v1.1.0**: 3 ready-to-use contracts (Cloud, Development, IT Infrastructure)
+- **v1.2.0 (planned)**: 11 total contracts covering all architectural domains
+- Automatic stack validation (Development Architecture - 26 items)
 - Source traceability (section + line number references)
 - [PLACEHOLDER] markers for missing data with completion guidance
 - Compliance manifest (index of all generated documents)
 
-**Output:** `/compliance-docs/` directory with 11 contracts + manifest
+**Output:** `/compliance-docs/` directory with 3 contracts + manifest (v1.1.0)
 
-#### 11 Compliance Contract Types
+#### Compliance Contract Types
 
-1. **Business Continuity** (Continuidad de Negocio) - RTO/RPO, disaster recovery, backup strategy
-2. **SRE** (Arquitectura SRE) - SLOs, error budgets, monitoring, incident management
-3. **Cloud Architecture** - Deployment model, cloud provider, connectivity, security
-4. **Data & Analytics/AI** - Data quality, governance, ML models, analytics
-5. **Development Architecture** - Technology stack, coding standards, technical debt, **automatic 26-item validation**
-6. **Process Transformation** - Automation, efficiency, ROI analysis
-7. **Security Architecture** - API security, authentication, encryption, compliance
-8. **IT Platforms & Infrastructure** - Environments, databases, capacity, naming conventions
+**✅ Ready to Use (v1.1.0)** - 3 contracts:
+
+1. **Cloud Architecture** - Deployment model, cloud provider, connectivity, security
+2. **Development Architecture** - Technology stack, coding standards, technical debt, **automatic 26-item validation**
+3. **IT Platforms & Infrastructure** - Environments, databases, capacity, naming conventions
+
+**🚧 In Development (Planned for v1.2.0)** - 8 contracts:
+
+4. **Business Continuity** (Continuidad de Negocio) - RTO/RPO, disaster recovery, backup strategy
+5. **SRE** (Arquitectura SRE) - SLOs, error budgets, monitoring, incident management
+6. **Data & Analytics/AI** - Data quality, governance, ML models, analytics
+7. **Process Transformation** - Automation, efficiency, ROI analysis
+8. **Security Architecture** - API security, authentication, encryption, compliance
 9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first
 10. **Integration Architecture** - Integration catalog, patterns, security, standards
 11. **Risk Management** - Risk identification, assessment, mitigation, monitoring
+
+**Note**: v1.1.0 delivers the 3 most commonly used compliance contracts. All 11 contracts will be fully implemented in v1.2.0 release.
 
 ## Architecture Types & Visualization
 
@@ -278,6 +286,41 @@ The Development Architecture contract includes **automatic validation** against 
 - ❌ **FAIL**: Non-compliant or deprecated → Approval blocked with remediation guidance
 - ❓ **UNKNOWN**: Insufficient data → Requires documentation completion
 - ⚪ **N/A**: Not applicable to architecture
+
+## Roadmap
+
+### v1.1.0 (Current Release) ✅
+- ✅ 3 integrated skills (architecture-readiness, architecture-docs, architecture-compliance)
+- ✅ 4 architecture types with Mermaid diagrams (META, 3-Tier, Microservices, N-Layer)
+- ✅ BIAN V12.0 integration for META architecture
+- ✅ 3 ready-to-use compliance contracts:
+  - Cloud Architecture
+  - Development Architecture (with 26-item auto validation)
+  - IT Platforms & Infrastructure
+- ✅ Complete ARCHITECTURE.md generation workflow
+- ✅ Product Owner Specification workflow
+
+### v1.2.0 (Planned) 🚀
+- 🔄 Complete compliance contract suite (11 total):
+  - Business Continuity
+  - SRE Architecture
+  - Data & Analytics/AI
+  - Process Transformation
+  - Security Architecture
+  - Enterprise Architecture
+  - Integration Architecture
+  - Risk Management
+- 🔄 Enhanced validation rules
+- 🔄 Additional architecture patterns
+- 🔄 Improved traceability reporting
+
+### v2.0.0 (Future)
+- Multi-project support
+- Custom compliance contract templates
+- Integration with CI/CD pipelines
+- Advanced reporting and dashboards
+
+---
 
 ## Contributing
 
