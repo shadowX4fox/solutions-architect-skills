@@ -331,7 +331,8 @@ After selecting or detecting architecture type, apply type-specific validation r
 - ✅ Must have all 6 layers (Channels, UX, Business Scenarios, Business, Domain, Core)
 - ✅ Layer 5 must include BIAN alignment section
 - ✅ Verify BIAN V12.0 is documented as the default version
-- ✅ Ensure BIAN service domain IDs are referenced from official [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- ✅ Validate BIAN service domain **names (Capabilities)** against the official [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- ✅ Ensure BIAN IDs (SD-XXX) are used for internal document tracking only
 - ✅ Validate Layer 5 (Domain) components include BIAN alignment subsection with official URLs
 - ✅ Layers documented in correct order
 

@@ -666,7 +666,8 @@ grep -n "^### [0-9]\.[1-6]" ARCHITECTURE.md | grep -A2 "## 4\."
 - Use headers like: `## Layer 1: Channels - Components` or `### [Component Name] (Layer 5: Domain)`
 
 ✅ **Layer 5 (Domain) components MUST include BIAN V12.0 alignment (default version):**
-- **BIAN ID**: Service Domain ID (e.g., SD-001) verified in [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **BIAN Capability Name**: Official service domain name validated in [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **BIAN ID**: Internal document tracking ID (e.g., SD-001, SD-002) - for counting service domains only
 - **BIAN Alignment** subsection with official BIAN reference URLs
 - Service Domain Model version must be documented as "BIAN V12.0" (default and recommended version)
 - Must link to official BIAN V12.0 service domain definition
@@ -685,7 +686,8 @@ grep -n "^### [0-9]\.[1-6]" ARCHITECTURE.md | grep -A2 "## 4\."
 
 **BIAN Alignment**:
 - Service Domain Model: [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) (default version)
-- BIAN ID: SD-047 - verify in [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- BIAN Capability Name: [Payment Execution] - validated in [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- BIAN ID: SD-047 - internal tracking ID only
 - Official Definition: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
 - Control Record: Customer Contact Record
 - Service Operations: Initiate, Update, Retrieve
@@ -1032,7 +1034,8 @@ Section 5 - Component Details:
 ☐ Layer 5 (Domain) components include BIAN alignment
 ☐ BIAN ID specified for Layer 5 components
 ☐ BIAN V12.0 documented as default version in Section 4
-☐ All BIAN service domain IDs verified in [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+☐ All BIAN service domain **names (Capabilities)** validated in [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+☐ BIAN IDs (SD-XXX) used for internal document tracking only
 ☐ BIAN reference URLs included for all Layer 5 service domains
 ☐ BIAN alignment subsection includes official V12.0 landscape link
 ☐ BIAN Service Domain Model version documented as "BIAN V12.0" (default and recommended version)

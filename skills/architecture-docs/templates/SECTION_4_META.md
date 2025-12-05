@@ -164,11 +164,11 @@ For each layer, document the following information:
 
 Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify appropriate service domains for your system.
 
-- Service Domain 1: [Name, BIAN ID (e.g., SD-001), description - verify against official landscape]
-- Service Domain 2: [Name, BIAN ID (e.g., SD-003), description - verify against official landscape]
-- Service Domain 3: [Name, BIAN ID (e.g., SD-045), description - verify against official landscape]
+- Service Domain 1: [BIAN Capability Name, BIAN ID (e.g., SD-001 - internal tracking), description]
+- Service Domain 2: [BIAN Capability Name, BIAN ID (e.g., SD-003 - internal tracking), description]
+- Service Domain 3: [BIAN Capability Name, BIAN ID (e.g., SD-045 - internal tracking), description]
 
-**Note**: Each service domain should map to an official BIAN V12.0 service domain definition. Use the landscape to ensure accurate alignment.
+**Note**: Validate each service domain **name (Capability)** against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment. BIAN IDs (SD-XXX) are for internal document tracking only to count how many service domains are used.
 
 **Technologies**:
 - Primary: [Microservices framework]
@@ -195,9 +195,9 @@ Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/
 - **Compliance Level**: [Document alignment level - Full/Partial/Custom]
 
 **Implementation Guidance**:
-1. Select service domains from the official BIAN V12.0 landscape
-2. Document BIAN SD IDs (e.g., SD-001, SD-003) for each domain
-3. Implement service operations according to BIAN V12.0 specifications
+1. Validate service domain **names (Capabilities)** against the official BIAN V12.0 landscape
+2. Assign internal BIAN IDs (e.g., SD-001, SD-002) for document tracking purposes only
+3. Implement service operations according to BIAN V12.0 specifications for the validated capability
 4. Maintain control records as defined in BIAN standards
 
 **Non-Functional Requirements**:
@@ -425,7 +425,8 @@ To customize this diagram for your specific architecture:
 - [ ] Non-functional requirements quantified (not just placeholders)
 - [ ] BIAN N2 compliance documented in Layer 4 (Business)
 - [ ] BIAN V12.0 alignment documented in Layer 5 (Domain)
-- [ ] BIAN service domain IDs verified against [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- [ ] BIAN service domain names (Capabilities) validated against [official landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- [ ] BIAN IDs (SD-XXX) used for internal document tracking only
 - [ ] BIAN reference URLs included for service domain definitions
 - [ ] ISO20022 customization mentioned in Layer 5 (Domain) if applicable
 - [ ] Modernization strategy included in Layer 6 (Core)

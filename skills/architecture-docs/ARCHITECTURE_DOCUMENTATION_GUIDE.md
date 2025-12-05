@@ -1058,12 +1058,12 @@ Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/
 **Purpose**: Implement core banking capabilities as [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) Service Domains (default version).
 
 **Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
-- **Customer Agreement (SD-001)**: Manages customer agreements and terms - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
-- **Current Account (SD-002)**: Handles current account operations - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
-- **Payment Execution (SD-003)**: Processes payment transactions - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
-- **Card Management (SD-004)**: Manages card lifecycle and operations - [Verify in BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Customer Agreement** (SD-001 - internal ID): Manages customer agreements and terms
+- **Current Account** (SD-002 - internal ID): Handles current account operations
+- **Payment Execution** (SD-003 - internal ID): Processes payment transactions
+- **Card Management** (SD-004 - internal ID): Manages card lifecycle and operations
 
-**Note**: All BIAN service domain IDs should be verified against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment.
+**Note**: Validate all BIAN service domain **names (Capabilities)** against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment. BIAN IDs (SD-XXX) are for internal document tracking only to count service domains.
 
 **Technologies**:
 - Primary: Java Spring Boot microservices, PostgreSQL

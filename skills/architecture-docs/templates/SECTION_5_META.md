@@ -197,10 +197,12 @@ For each component in your system, document using the template below. **Group co
 ### [Service Domain Name] (BIAN V12.0)
 
 **BIAN Information**:
-- **BIAN ID**: [e.g., SD-001, SD-003, SD-045 - verify in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)]
-- **BIAN Name**: [Official BIAN service domain name]
+- **BIAN Capability Name**: [Official BIAN service domain name - validate in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)]
+- **BIAN ID**: [e.g., SD-001, SD-003, SD-045 - internal document tracking ID only]
 - **BIAN Version**: V12.0 (default)
 - **Official Definition**: [Link to specific service domain in BIAN landscape]
+
+**Note**: The BIAN Capability Name must match the official BIAN V12.0 Service Landscape definition. The BIAN ID is for internal tracking to count service domains in this document.
 
 **Type**: Service Domain | Microservice
 **Technology**: [Specific technology used]
