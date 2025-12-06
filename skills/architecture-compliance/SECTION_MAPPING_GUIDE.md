@@ -40,6 +40,394 @@ This guide provides detailed mapping between ARCHITECTURE.md sections and compli
 3. **Transformation**: Calculate or reformat (e.g., SLA → error budget)
 4. **Inference**: Derive from context (e.g., 99.99% → Tier 1)
 
+### Document Index-Based Section Loading
+
+#### Overview
+
+All section references and data extractions use the **Document Index** from ARCHITECTURE.md (typically lines 5-21) to determine exact line ranges. This enables context-efficient loading and precise source traceability, minimizing token usage while maintaining accuracy.
+
+The Document Index is a standardized navigation structure maintained in all ARCHITECTURE.md files following the architecture-docs skill template. It maps each of the 12 standard sections to their exact line ranges within the document.
+
+#### Document Index Structure
+
+The Document Index appears at the beginning of ARCHITECTURE.md (lines 5-21) with this format:
+
+```markdown
+## Document Index
+
+**Quick Navigation:**
+- [Section 1: Executive Summary](#1-executive-summary) → Lines 25-53
+- [Section 2: System Overview](#2-system-overview) → Lines 54-146
+- [Section 3: Architecture Principles](#3-architecture-principles) → Lines 147-300
+- [Section 4: Deployment Architecture](#4-deployment-architecture) → Lines 301-450
+- [Section 5: System Components](#5-system-components) → Lines 451-600
+- [Section 6: Data Flow](#6-data-flow) → Lines 601-750
+- [Section 7: Integration Points](#7-integration-points) → Lines 751-900
+- [Section 8: Technology Stack](#8-technology-stack) → Lines 901-1050
+- [Section 9: Security Considerations](#9-security-considerations) → Lines 1051-1250
+- [Section 10: Performance Requirements](#10-performance-requirements) → Lines 1251-1400
+- [Section 11: Operational Considerations](#11-operational-considerations) → Lines 1401-1650
+- [Section 12: Architecture Decision Records](#12-architecture-decision-records) → Lines 1651-EOF
+
+**Index Last Updated:** YYYY-MM-DD
+```
+
+**Key Elements:**
+- **Section names**: Clickable markdown anchors for navigation
+- **Line ranges**: Exact start and end line numbers (`Lines X-Y`)
+- **Timestamp**: Last update date for tracking index freshness
+
+#### Three-Step Section Loading Workflow
+
+##### Step 1: Load Document Index
+
+First, read the Document Index to extract section line ranges:
+
+```python
+# Load Document Index (first 50 lines typically contain it)
+index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
+
+# Parse to extract section ranges
+doc_index = parse_document_index(index_content)
+# Returns: {
+#   "1": {"start": 25, "end": 53, "name": "Executive Summary"},
+#   "2": {"start": 54, "end": 146, "name": "System Overview"},
+#   ...
+#   "last_updated": "2025-11-27"
+# }
+```
+
+##### Step 2: Lookup Target Section
+
+For a target section (e.g., Section 11 - Operational Considerations), extract its line range:
+
+```python
+section_11_range = doc_index.get_section_range(section=11)
+# Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
+```
+
+##### Step 3: Calculate Load Parameters with Buffer
+
+Calculate `offset` and `limit` parameters for the Read tool with context buffer:
+
+```python
+section_start = 1401  # From Document Index
+section_end = 1650    # From Document Index
+buffer = 10           # Context buffer (5-20 lines recommended)
+
+# Calculate Read parameters
+offset = section_start - buffer - 1  # -1 for zero-indexed offset
+limit = (section_end - section_start) + (2 * buffer)
+
+# Result: offset=1390, limit=259
+section_content = Read(file_path="ARCHITECTURE.md", offset=1390, limit=259)
+# Reads lines 1391-1649 (Section 11 with ±10-line buffer)
+```
+
+**Buffer Purpose:**
+- Captures context around section boundaries
+- Ensures subsection headers are included
+- Prevents data loss at edges
+- Standard sizes: minimal (5-10), standard (10-20), extended (20-50 lines)
+
+#### Buffer Size Guidelines
+
+| Extraction Type | Buffer Size | Use Case | Example |
+|----------------|-------------|----------|---------|
+| **Minimal** | 5-10 lines | Single value extraction (RTO, SLA) | Extract "RTO: 4 hours" |
+| **Standard** | 10-20 lines | Subsection extraction (Section 11.3) | Extract full backup strategy |
+| **Extended** | 20-50 lines | Full section or complex patterns | Extract all monitoring tools + config |
+
+**Selection Criteria:**
+- **Minimal**: Known value location, simple regex patterns
+- **Standard**: Subsection-level data, multiple related values
+- **Extended**: Cross-subsection relationships, aggregate data
+
+#### Subsection Detection and Loading
+
+For subsections (e.g., Section 11.3 - Backup & Recovery), use a two-step approach:
+
+**Step 1: Locate Subsection Within Section**
+
+After loading the full section (Step 3 above), use grep to find subsection boundaries:
+
+```python
+# Use Grep tool to find subsection within section range
+grep_result = grep_subsection(
+    file_path="ARCHITECTURE.md",
+    pattern="^### 11\.3",  # Subsection pattern (note escaped dot)
+    start_line=1401,       # Section 11 start (from index)
+    end_line=1650          # Section 11 end (from index)
+)
+# Returns: {"line_number": 1523, "header": "### 11.3 Backup & Recovery"}
+```
+
+**Step 2: Calculate Subsection Line Range**
+
+Find the next subsection to determine where 11.3 ends:
+
+```python
+# Grep for next subsection (11.4)
+next_subsection = grep_subsection(
+    pattern="^### 11\.4",
+    start_line=1523,       # Current subsection start
+    end_line=1650          # Section end
+)
+# Returns: {"line_number": 1575}
+
+# Calculate subsection bounds
+subsection_start = 1523
+subsection_end = next_subsection["line_number"] - 1  # 1574 (line before 11.4)
+```
+
+**Step 3: Load Subsection with Buffer**
+
+```python
+buffer = 10
+offset = subsection_start - buffer - 1  # 1512
+limit = (subsection_end - subsection_start) + (2 * buffer)  # 71
+
+subsection_content = Read(file_path="ARCHITECTURE.md", offset=1512, limit=71)
+# Reads lines 1513-1583 (Section 11.3 + 10-line buffer)
+```
+
+#### Section Boundary Detection Algorithm
+
+When the Document Index is unavailable, outdated, or needs regeneration, use this algorithm:
+
+##### Step 1: Detect All Primary Section Headers
+
+Use grep to find all numbered section headers:
+
+```bash
+grep -n "^## [0-9]" ARCHITECTURE.md
+```
+
+**Output Example:**
+```
+25:## 1. Executive Summary
+54:## 2. System Overview
+147:## 3. Architecture Principles
+301:## 4. Deployment Architecture
+451:## 5. System Components
+601:## 6. Data Flow
+751:## 7. Integration Points
+901:## 8. Technology Stack
+1051:## 9. Security Considerations
+1251:## 10. Performance Requirements
+1401:## 11. Operational Considerations
+1651:## 12. Architecture Decision Records
+```
+
+##### Step 2: Parse Grep Output to Build Index
+
+```python
+import re
+
+section_boundaries = {}
+grep_lines = grep_output.strip().split('\n')
+
+for i, line in enumerate(grep_lines):
+    # Parse: "25:## 1. Executive Summary"
+    line_num, header = line.split(':', 1)
+
+    # Extract section number (1, 2, 3, ..., 12)
+    match = re.search(r'^## (\d+)\.', header)
+    section_num = match.group(1)
+
+    # Extract section name
+    section_name = header.split('. ', 1)[1].strip()
+
+    # Calculate end line (next section start - 1, or EOF for last section)
+    if i + 1 < len(grep_lines):
+        next_line_num = int(grep_lines[i+1].split(':')[0])
+        end_line = next_line_num - 1
+    else:
+        end_line = "EOF"  # Or get file line count
+
+    section_boundaries[section_num] = {
+        "start": int(line_num),
+        "end": end_line,
+        "name": section_name
+    }
+
+# Result: Same structure as parsed Document Index
+```
+
+##### Step 3: Generate or Update Document Index
+
+Use the parsed boundaries to create/update the Document Index section:
+
+```python
+from datetime import date
+
+index_content = "## Document Index\n\n**Quick Navigation:**\n"
+
+for section_num in sorted(section_boundaries.keys(), key=int):
+    section = section_boundaries[section_num]
+    anchor = f"#{section_num}-{section['name'].lower().replace(' ', '-')}"
+    end_display = section['end'] if section['end'] != 'EOF' else 'EOF'
+
+    index_content += f"- [Section {section_num}: {section['name']}]({anchor}) → Lines {section['start']}-{end_display}\n"
+
+index_content += f"\n**Index Last Updated:** {date.today().isoformat()}\n"
+
+# Write to ARCHITECTURE.md lines 5-21 (replace existing index)
+```
+
+#### Line Number Calculation for Source References
+
+All extracted values must include precise line number references. Calculate using this formula:
+
+**Formula:**
+```
+absolute_line_number = subsection_start_line + relative_offset
+```
+
+**Implementation:**
+
+```python
+# After loading subsection content and finding a match
+rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', subsection_content)
+
+if rto_match:
+    # Calculate relative offset (newline count before match)
+    relative_offset = subsection_content[:rto_match.start()].count('\n')
+
+    # Calculate absolute line number
+    absolute_line_number = subsection_start + relative_offset
+    # Example: 1523 (subsection start) + 5 (offset) = 1528
+
+    # Store with source reference
+    rto_value = rto_match.group(1)
+    rto_source = f"Section 11.3, line {absolute_line_number}"
+
+# Return structured data
+return {
+    "rto": rto_value,
+    "rto_source": rto_source,
+    "rto_line": absolute_line_number
+}
+```
+
+**Why This Matters:**
+- **Traceability**: Compliance audits require exact source locations
+- **Consistency**: Same value must have same line reference across contracts
+- **Validation**: Enables automated consistency checking
+- **Updates**: Easy to re-extract if ARCHITECTURE.md changes
+
+#### Context-Efficient Loading Strategy
+
+Follow this hierarchy to minimize token usage:
+
+1. **Document Index First** (50 lines): Always start by loading the index
+2. **Section-Level Loading** (100-300 lines): Load full section for multiple subsections
+3. **Subsection-Level Loading** (30-100 lines): Load specific subsection when possible
+4. **Targeted Extraction** (10-30 lines): Use grep + minimal buffer for single values
+
+**Example Optimization:**
+
+```python
+# INEFFICIENT: Load entire file (2000+ lines)
+full_content = Read(file_path="ARCHITECTURE.md")  # DON'T DO THIS
+
+# EFFICIENT: Document Index + targeted section
+index = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)  # 50 lines
+section_11 = Read(file_path="ARCHITECTURE.md", offset=1390, limit=259)  # 259 lines
+# Total: 309 lines (vs 2000+ lines)
+
+# MOST EFFICIENT: Index + subsection only
+index = Read(offset=1, limit=50)  # 50 lines
+subsection_11_3 = Read(offset=1512, limit=71)  # 71 lines
+# Total: 121 lines (6x more efficient than full file read)
+```
+
+#### Complete Workflow Example
+
+Extracting RTO/RPO from Section 11.3 using index-based methodology:
+
+```python
+def extract_rto_rpo_from_architecture(architecture_md_path):
+    # Step 1: Load Document Index
+    index_content = Read(file_path=architecture_md_path, offset=1, limit=50)
+    doc_index = parse_document_index(index_content)
+
+    # Step 2: Get Section 11 range
+    section_11 = doc_index["11"]
+    # Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
+
+    # Step 3: Find subsection 11.3 within Section 11
+    grep_result_11_3 = grep_subsection(
+        file_path=architecture_md_path,
+        pattern="^### 11\.3",
+        start_line=section_11["start"],
+        end_line=section_11["end"]
+    )
+    subsection_start = grep_result_11_3["line_number"]  # 1523
+
+    # Step 4: Find next subsection to determine end
+    grep_result_11_4 = grep_subsection(
+        pattern="^### 11\.4",
+        start_line=subsection_start,
+        end_line=section_11["end"]
+    )
+    subsection_end = grep_result_11_4["line_number"] - 1  # 1574
+
+    # Step 5: Load subsection with buffer
+    buffer = 10
+    offset = subsection_start - buffer - 1  # 1512
+    limit = (subsection_end - subsection_start) + (2 * buffer)  # 71
+
+    subsection_content = Read(
+        file_path=architecture_md_path,
+        offset=1512,
+        limit=71
+    )
+
+    # Step 6: Extract values with line number tracking
+    rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', subsection_content)
+    rpo_match = re.search(r'RPO:?\s*([0-9]+\s*hours?)', subsection_content)
+
+    results = {}
+
+    if rto_match:
+        relative_offset = subsection_content[:rto_match.start()].count('\n')
+        results["rto"] = {
+            "value": rto_match.group(1),
+            "line": subsection_start + relative_offset,
+            "source": f"Section 11.3, line {subsection_start + relative_offset}"
+        }
+
+    if rpo_match:
+        relative_offset = subsection_content[:rpo_match.start()].count('\n')
+        results["rpo"] = {
+            "value": rpo_match.group(1),
+            "line": subsection_start + relative_offset,
+            "source": f"Section 11.3, line {subsection_start + relative_offset}"
+        }
+
+    return results
+
+# Example return value:
+# {
+#     "rto": {
+#         "value": "4 hours",
+#         "line": 1528,
+#         "source": "Section 11.3, line 1528"
+#     },
+#     "rpo": {
+#         "value": "1 hour",
+#         "line": 1529,
+#         "source": "Section 11.3, line 1529"
+#     }
+# }
+```
+
+**Tokens Saved:**
+- Full file read: ~2000 lines
+- This approach: 121 lines (index + subsection)
+- **Efficiency: 94% reduction** in context usage
+
 ---
 
 ## Contract Summary Matrix
@@ -85,7 +473,7 @@ Ensure business continuity through disaster recovery, backup strategies, and res
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 11.3, line 1823):
+ARCHITECTURE.md Input (Section 11.3, lines {subsection_start}+):
 "Backup Strategy:
 - Incremental backups: Daily at 2 AM UTC
 - Full backups: Weekly on Sunday
@@ -94,12 +482,19 @@ ARCHITECTURE.md Input (Section 11.3, line 1823):
 - RTO: 4 hours
 - RPO: 1 hour"
 
+Line Number Calculation:
+1. Document Index: Section 11 (Operational Considerations) → Lines 1401-1650
+2. Grep within Section 11: "^### 11\.3" found at line 1523
+3. subsection_start = 1523
+4. Extract RTO at relative offset +5 → absolute line 1528 (1523 + 5)
+5. Extract RPO at relative offset +6 → absolute line 1529 (1523 + 6)
+
 Contract Output:
 ## 1. Recovery Objectives
 **Recovery Time Objective (RTO)**: 4 hours
 **Recovery Point Objective (RPO)**: 1 hour
 **Business Criticality**: Tier 1 (inferred from RTO)
-**Source**: ARCHITECTURE.md Section 11.3, lines 1823-1828
+**Source**: ARCHITECTURE.md Section 11.3 (Backup & Recovery), lines {rto_line}-{rpo_line}
 
 ## 2. Backup Strategy
 | Backup Type | Frequency | Retention | Storage Location |
@@ -108,7 +503,7 @@ Contract Output:
 | Full | Weekly (Sunday) | 12 months | AWS S3 + Glacier |
 
 **Backup Testing**: [PLACEHOLDER: Add backup restoration test schedule]
-**Source**: ARCHITECTURE.md Section 11.3, lines 1823-1826
+**Source**: ARCHITECTURE.md Section 11.3 (Backup & Recovery), lines {subsection_start}-{subsection_start + 3}
 ```
 
 ##### Subsection 11.4: Disaster Recovery
@@ -117,12 +512,18 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 11.4, line 1850):
+ARCHITECTURE.md Input (Section 11.4, lines {subsection_start}+):
 "Disaster Recovery:
 - DR Site: AWS us-west-2 (primary: us-east-1)
 - Failover: Automated via Route 53 health checks
 - RTO Target: 4 hours
 - DR Drills: Quarterly"
+
+Line Number Calculation:
+1. Document Index: Section 11 → Lines 1401-1650
+2. Grep for "^### 11\.4" within Section 11 → line 1575
+3. subsection_start = 1575
+4. DR details span lines 1575-1579 (subsection header + 4 lines)
 
 Contract Output:
 ## 3. Disaster Recovery
@@ -132,7 +533,7 @@ Contract Output:
 **RTO Target**: 4 hours
 **DR Testing**: Quarterly drills
 **Last DR Test**: [PLACEHOLDER: Add last DR drill date and results]
-**Source**: ARCHITECTURE.md Section 11.4, lines 1850-1854
+**Source**: ARCHITECTURE.md Section 11.4 (Disaster Recovery), lines {subsection_start}-{subsection_start + 4}
 ```
 
 **Secondary Source: Section 10 (Performance Requirements) - 20%**
@@ -143,57 +544,166 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 10.2, line 1576):
+ARCHITECTURE.md Input (Section 10.2, lines {subsection_start}+):
 "Availability SLA: 99.99% uptime"
+
+Line Number Calculation:
+1. Document Index: Section 10 (Performance Requirements) → Lines 1251-1400
+2. Grep for "^### 10\.2" within Section 10 → line 1305
+3. SLA value found at relative offset +2 → absolute line 1307 (1305 + 2)
 
 Contract Output:
 ## 4. Business Impact Analysis
 **Availability Requirement**: 99.99% uptime
-**Allowable Downtime**: 43.2 minutes/month
-**Business Criticality**: Tier 1 (Mission Critical - inferred)
+**Allowable Downtime**: 43.2 minutes/month (calculated from SLA)
+**Business Criticality**: Tier 1 (Mission Critical - inferred from 99.99% SLA)
 **Estimated Downtime Cost**: [PLACEHOLDER: Add hourly revenue impact]
-**Source**: ARCHITECTURE.md Section 10.2, line 1576
+**Source**: ARCHITECTURE.md Section 10.2 (Availability SLA), line {sla_line}
 ```
 
 #### Extraction Logic (Pseudo-code)
 ```python
 def extract_business_continuity(architecture_md):
-    # Load Section 11.3 (Backup & Recovery)
-    backup_section = load_section(architecture_md, section=11.3)
+    # Step 1: Load Document Index
+    index_content = Read(file_path=architecture_md, offset=1, limit=50)
+    doc_index = parse_document_index(index_content)
+    # Returns: {"11": {"start": 1401, "end": 1650, ...}, "10": {"start": 1251, "end": 1400, ...}}
 
-    # Extract RTO/RPO (Direct)
-    rto = extract_value(backup_section, pattern="RTO:? ([0-9]+ hours?)")
-    rpo = extract_value(backup_section, pattern="RPO:? ([0-9]+ hours?)")
+    # Step 2: Get Section 11 range
+    section_11_range = doc_index["11"]
+    # Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
 
-    # Extract backup details (Direct)
-    backup_frequency = extract_value(backup_section, pattern="Incremental.*: (.+)")
-    retention = extract_value(backup_section, pattern="Retention: (.+)")
+    # Step 3: Find Subsection 11.3 (Backup & Recovery) within Section 11
+    grep_result_11_3 = grep_subsection(
+        file_path=architecture_md,
+        pattern="^### 11\.3",
+        start_line=section_11_range["start"],
+        end_line=section_11_range["end"]
+    )
+    subsection_11_3_start = grep_result_11_3["line_number"]  # e.g., 1523
 
-    # Load Section 11.4 (DR)
-    dr_section = load_section(architecture_md, section=11.4)
+    # Find next subsection to determine end boundary
+    grep_result_11_4 = grep_subsection(
+        pattern="^### 11\.4",
+        start_line=subsection_11_3_start,
+        end_line=section_11_range["end"]
+    )
+    subsection_11_3_end = grep_result_11_4["line_number"] - 1  # e.g., 1574
 
-    # Extract DR details (Direct)
-    dr_site = extract_value(dr_section, pattern="DR Site: (.+)")
-    failover = extract_value(dr_section, pattern="Failover: (.+)")
+    # Step 4: Calculate load parameters for Section 11.3
+    buffer = 10
+    offset_11_3 = subsection_11_3_start - buffer - 1  # e.g., 1512
+    limit_11_3 = (subsection_11_3_end - subsection_11_3_start) + (2 * buffer)  # e.g., 71
 
-    # Load Section 10.2 (Availability)
-    perf_section = load_section(architecture_md, section=10.2)
+    # Step 5: Load Section 11.3 with buffer
+    backup_section = Read(
+        file_path=architecture_md,
+        offset=offset_11_3,
+        limit=limit_11_3
+    )
 
-    # Extract SLA (Direct + Transformation)
-    sla = extract_value(perf_section, pattern="SLA:? ([0-9.]+%)")
-    downtime = calculate_downtime(sla)  # Transformation
-    criticality = infer_criticality(sla)  # Inference
+    # Step 6: Extract RTO/RPO with line number tracking
+    rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', backup_section)
+    rpo_match = re.search(r'RPO:?\s*([0-9]+\s*hours?)', backup_section)
 
+    rto_data = {}
+    if rto_match:
+        relative_offset = backup_section[:rto_match.start()].count('\n')
+        rto_data = {
+            "value": rto_match.group(1),
+            "line": subsection_11_3_start + relative_offset,
+            "source": f"Section 11.3, line {subsection_11_3_start + relative_offset}"
+        }
+
+    rpo_data = {}
+    if rpo_match:
+        relative_offset = backup_section[:rpo_match.start()].count('\n')
+        rpo_data = {
+            "value": rpo_match.group(1),
+            "line": subsection_11_3_start + relative_offset,
+            "source": f"Section 11.3, line {subsection_11_3_start + relative_offset}"
+        }
+
+    # Extract backup details
+    backup_frequency = extract_with_line_tracking(
+        backup_section,
+        pattern=r"Incremental.*:\s*(.+)",
+        subsection_start=subsection_11_3_start
+    )
+    retention = extract_with_line_tracking(
+        backup_section,
+        pattern=r"Retention:\s*(.+)",
+        subsection_start=subsection_11_3_start
+    )
+
+    # Step 7: Load Section 11.4 (Disaster Recovery) using same methodology
+    subsection_11_4_start = grep_result_11_4["line_number"]  # e.g., 1575
+
+    # Find next subsection (11.5 or section end)
+    grep_result_11_5 = grep_subsection(
+        pattern="^### 11\.5",
+        start_line=subsection_11_4_start,
+        end_line=section_11_range["end"]
+    )
+    subsection_11_4_end = (grep_result_11_5["line_number"] - 1
+                           if grep_result_11_5 else section_11_range["end"])
+
+    offset_11_4 = subsection_11_4_start - buffer - 1
+    limit_11_4 = (subsection_11_4_end - subsection_11_4_start) + (2 * buffer)
+
+    dr_section = Read(file_path=architecture_md, offset=offset_11_4, limit=limit_11_4)
+
+    # Extract DR details
+    dr_site = extract_with_line_tracking(dr_section, r"DR Site:\s*(.+)", subsection_11_4_start)
+    failover = extract_with_line_tracking(dr_section, r"Failover:\s*(.+)", subsection_11_4_start)
+
+    # Step 8: Load Section 10.2 (Availability SLA)
+    section_10_range = doc_index["10"]
+    grep_result_10_2 = grep_subsection(
+        pattern="^### 10\.2",
+        start_line=section_10_range["start"],
+        end_line=section_10_range["end"]
+    )
+    subsection_10_2_start = grep_result_10_2["line_number"]
+
+    # Find next subsection for boundary
+    grep_result_10_3 = grep_subsection(
+        pattern="^### 10\.3",
+        start_line=subsection_10_2_start,
+        end_line=section_10_range["end"]
+    )
+    subsection_10_2_end = (grep_result_10_3["line_number"] - 1
+                           if grep_result_10_3 else section_10_range["end"])
+
+    offset_10_2 = subsection_10_2_start - buffer - 1
+    limit_10_2 = (subsection_10_2_end - subsection_10_2_start) + (2 * buffer)
+
+    perf_section = Read(file_path=architecture_md, offset=offset_10_2, limit=limit_10_2)
+
+    # Extract SLA with transformation
+    sla_match = re.search(r'SLA:?\s*([0-9.]+%)', perf_section)
+    sla_data = {}
+    if sla_match:
+        relative_offset = perf_section[:sla_match.start()].count('\n')
+        sla_value = sla_match.group(1)
+        sla_data = {
+            "value": sla_value,
+            "line": subsection_10_2_start + relative_offset,
+            "source": f"Section 10.2, line {subsection_10_2_start + relative_offset}",
+            "downtime": calculate_downtime(sla_value),  # Transformation
+            "criticality": infer_criticality(sla_value)  # Inference
+        }
+
+    # Return structured data with full traceability
     return {
-        "rto": rto,
-        "rpo": rpo,
-        "backup": backup_frequency,
+        "rto": rto_data,
+        "rpo": rpo_data,
+        "backup_frequency": backup_frequency,
         "retention": retention,
         "dr_site": dr_site,
         "failover": failover,
-        "sla": sla,
-        "downtime": downtime,
-        "criticality": criticality
+        "sla": sla_data,
+        "document_index_version": doc_index["last_updated"]
     }
 ```
 
@@ -238,7 +748,7 @@ Define site reliability practices including SLOs, monitoring, incident managemen
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 10.1, lines 1558-1564):
+ARCHITECTURE.md Input (Section 10.1, lines {subsection_start}+):
 "Performance Targets:
 - p50 latency: < 50ms
 - p95 latency: < 100ms
@@ -246,15 +756,23 @@ ARCHITECTURE.md Input (Section 10.1, lines 1558-1564):
 - Throughput: 450 TPS (design capacity)
 - Peak capacity: 1000 TPS"
 
+Line Number Calculation:
+1. Document Index: Section 10 (Performance Requirements) → Lines 1251-1400
+2. Grep for "^### 10\.1" within Section 10 → line 1253
+3. subsection_start = 1253
+4. p50 latency at relative offset +2 → absolute line 1255
+5. p95 latency at relative offset +3 → absolute line 1256
+6. p99 latency at relative offset +4 → absolute line 1257
+
 Contract Output:
 ## 1. Service Level Objectives (SLOs)
 
 ### 1.1 Latency SLOs
 | Percentile | Target | Measurement Method | Source |
 |------------|--------|-------------------|--------|
-| p50 | < 50ms | API response time | Section 10.1, line 1558 |
-| p95 | < 100ms | API response time | Section 10.1, line 1559 |
-| p99 | < 200ms | API response time | Section 10.1, line 1560 |
+| p50 | < 50ms | API response time | Section 10.1, line {p50_line} |
+| p95 | < 100ms | API response time | Section 10.1, line {p95_line} |
+| p99 | < 200ms | API response time | Section 10.1, line {p99_line} |
 
 **Monitoring Tool**: [PLACEHOLDER: Specify monitoring tool]
 **Alert Threshold**: p95 > 110ms (10% over target)
@@ -263,7 +781,7 @@ Contract Output:
 **Design Capacity**: 450 TPS
 **Peak Capacity**: 1,000 TPS (2.2× design)
 **Headroom**: 550 TPS (122% over design)
-**Source**: ARCHITECTURE.md Section 10.1, lines 1562-1564
+**Source**: ARCHITECTURE.md Section 10.1, lines {throughput_line_start}-{throughput_line_end}
 ```
 
 ##### Subsection 10.2: Availability SLA
@@ -272,21 +790,27 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 10.2, line 1576):
+ARCHITECTURE.md Input (Section 10.2, lines {subsection_start}+):
 "Availability SLA: 99.99% uptime"
+
+Line Number Calculation:
+1. Document Index: Section 10 → Lines 1251-1400
+2. Grep for "^### 10\.2" within Section 10 → line 1305
+3. subsection_start = 1305
+4. SLA value at relative offset +2 → absolute line 1307
 
 Contract Output:
 ### 1.3 Availability SLO
 **Target**: 99.99% uptime
 **Measurement Window**: Monthly
 **Measurement Method**: Uptime monitoring (synthetic checks every 60s)
-**Source**: ARCHITECTURE.md Section 10.2, line 1576
+**Source**: ARCHITECTURE.md Section 10.2 (Availability SLA), line {sla_line}
 
 ## 3. Error Budgets
 
 ### 3.1 Monthly Error Budget
 **SLA**: 99.99%
-**Error Budget**: 43.2 minutes/month
+**Error Budget**: 43.2 minutes/month (calculated from SLA)
 **Calculation**: (100% - 99.99%) × 43,200 min = 43.2 min/month
 
 ### 3.2 Error Budget Breakdown
@@ -307,13 +831,19 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 11.1, lines 1780-1785):
+ARCHITECTURE.md Input (Section 11.1, lines {subsection_start}+):
 "Monitoring:
 - Metrics: Prometheus
 - Visualization: Grafana
 - Logging: ELK Stack (Elasticsearch, Logstash, Kibana)
 - Tracing: Jaeger
 - Alerting: PagerDuty"
+
+Line Number Calculation:
+1. Document Index: Section 11 (Operational Considerations) → Lines 1401-1650
+2. Grep for "^### 11\.1" within Section 11 → line 1405
+3. subsection_start = 1405
+4. Monitoring tools span lines 1405-1410
 
 Contract Output:
 ## 4. Monitoring & Observability
@@ -333,7 +863,7 @@ Contract Output:
 - Resource utilization (CPU, memory, disk)
 
 **Dashboard Links**: [PLACEHOLDER: Add Grafana dashboard URLs]
-**Source**: ARCHITECTURE.md Section 11.1, lines 1780-1785
+**Source**: ARCHITECTURE.md Section 11.1 (Monitoring and Logging), lines {subsection_start}-{subsection_start + 5}
 ```
 
 ##### Subsection 11.2: Incident Management
@@ -342,13 +872,19 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 11.2, lines 1810-1820):
+ARCHITECTURE.md Input (Section 11.2, lines {subsection_start}+):
 "Incident Management:
 - Alerting: PagerDuty
 - Response SLA: P1 < 15 min, P2 < 1 hour, P3 < 4 hours
 - Escalation: L1 (5 min) → L2 (15 min) → L3 (30 min)
 - Postmortems: Required for all P1/P2 incidents
 - Incident Commander: On-call SRE"
+
+Line Number Calculation:
+1. Document Index: Section 11 → Lines 1401-1650
+2. Grep for "^### 11\.2" within Section 11 → line 1458
+3. subsection_start = 1458
+4. Incident management details span lines 1458-1468
 
 Contract Output:
 ## 5. Incident Management
@@ -376,7 +912,7 @@ Contract Output:
 **Distribution**: Engineering team, stakeholders
 **Template**: [PLACEHOLDER: Link to postmortem template]
 
-**Source**: ARCHITECTURE.md Section 11.2, lines 1810-1820
+**Source**: ARCHITECTURE.md Section 11.2 (Incident Management), lines {subsection_start}-{subsection_start + 10}
 ```
 
 **Secondary Source: Section 5 (System Components) - 10%**
@@ -387,8 +923,13 @@ Contract Output:
 
 **Pattern Example**:
 ```
-ARCHITECTURE.md Input (Section 5.2, line 720):
+ARCHITECTURE.md Input (Section 5.2, lines {subsection_start}+):
 "API Gateway: NGINX (3 instances, load balanced)"
+
+Line Number Calculation:
+1. Document Index: Section 5 (System Components) → Lines 451-600
+2. Grep for "^### 5\.2" within Section 5 → line 475
+3. Component details at relative offset +3 → absolute line 478
 
 Contract Output:
 ## 2. Service Level Indicators (SLIs)
@@ -399,53 +940,154 @@ Contract Output:
 | API Gateway | 3 instances (NGINX) | Health checks | 99.99% |
 | [Other components...] | [...] | [...] | [...] |
 
-**Source**: ARCHITECTURE.md Section 5.2, line 720
+**Source**: ARCHITECTURE.md Section 5.2 (API Gateway), line {component_line}
 ```
 
 #### Extraction Logic (Pseudo-code)
 ```python
 def extract_sre_architecture(architecture_md):
-    # Load Section 10.1 (Performance Metrics)
-    perf_section = load_section(architecture_md, section=10.1)
+    # Step 1: Load Document Index
+    index_content = Read(file_path=architecture_md, offset=1, limit=50)
+    doc_index = parse_document_index(index_content)
 
-    # Extract latency SLOs (Direct)
-    p50 = extract_value(perf_section, pattern="p50.*: < ([0-9]+ms)")
-    p95 = extract_value(perf_section, pattern="p95.*: < ([0-9]+ms)")
-    p99 = extract_value(perf_section, pattern="p99.*: < ([0-9]+ms)")
-    throughput = extract_value(perf_section, pattern="Throughput: ([0-9]+ TPS)")
+    # Step 2: Load Section 10.1 (Performance Metrics)
+    section_10_range = doc_index["10"]
+    grep_result_10_1 = grep_subsection(
+        pattern="^### 10\.1",
+        start_line=section_10_range["start"],
+        end_line=section_10_range["end"]
+    )
+    subsection_10_1_start = grep_result_10_1["line_number"]
 
-    # Load Section 10.2 (Availability)
-    avail_section = load_section(architecture_md, section=10.2)
+    # Find next subsection
+    grep_result_10_2 = grep_subsection(
+        pattern="^### 10\.2",
+        start_line=subsection_10_1_start,
+        end_line=section_10_range["end"]
+    )
+    subsection_10_1_end = grep_result_10_2["line_number"] - 1
 
-    # Extract SLA (Direct + Transformation)
-    sla = extract_value(avail_section, pattern="SLA:? ([0-9.]+%)")
-    error_budget = calculate_error_budget(sla)  # Transformation
+    # Load Section 10.1 with buffer
+    buffer = 10
+    perf_section = Read(
+        file_path=architecture_md,
+        offset=subsection_10_1_start - buffer - 1,
+        limit=(subsection_10_1_end - subsection_10_1_start) + (2 * buffer)
+    )
 
-    # Load Section 11.1 (Monitoring)
-    monitor_section = load_section(architecture_md, section=11.1)
+    # Extract latency SLOs with line tracking
+    p50_match = re.search(r'p50.*:<\s*([0-9]+ms)', perf_section)
+    p95_match = re.search(r'p95.*:<\s*([0-9]+ms)', perf_section)
+    p99_match = re.search(r'p99.*:<\s*([0-9]+ms)', perf_section)
+
+    latency_slos = {}
+    if p50_match:
+        offset = perf_section[:p50_match.start()].count('\n')
+        latency_slos["p50"] = {
+            "value": p50_match.group(1),
+            "line": subsection_10_1_start + offset,
+            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
+        }
+
+    if p95_match:
+        offset = perf_section[:p95_match.start()].count('\n')
+        latency_slos["p95"] = {
+            "value": p95_match.group(1),
+            "line": subsection_10_1_start + offset,
+            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
+        }
+
+    if p99_match:
+        offset = perf_section[:p99_match.start()].count('\n')
+        latency_slos["p99"] = {
+            "value": p99_match.group(1),
+            "line": subsection_10_1_start + offset,
+            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
+        }
+
+    # Step 3: Load Section 10.2 (Availability)
+    subsection_10_2_start = grep_result_10_2["line_number"]
+    grep_result_10_3 = grep_subsection(
+        pattern="^### 10\.3",
+        start_line=subsection_10_2_start,
+        end_line=section_10_range["end"]
+    )
+    subsection_10_2_end = (grep_result_10_3["line_number"] - 1
+                           if grep_result_10_3 else section_10_range["end"])
+
+    avail_section = Read(
+        file_path=architecture_md,
+        offset=subsection_10_2_start - buffer - 1,
+        limit=(subsection_10_2_end - subsection_10_2_start) + (2 * buffer)
+    )
+
+    # Extract SLA with transformation
+    sla_match = re.search(r'SLA:?\s*([0-9.]+%)', avail_section)
+    sla_data = {}
+    if sla_match:
+        offset = avail_section[:sla_match.start()].count('\n')
+        sla_value = sla_match.group(1)
+        sla_data = {
+            "value": sla_value,
+            "line": subsection_10_2_start + offset,
+            "source": f"Section 10.2, line {subsection_10_2_start + offset}",
+            "error_budget": calculate_error_budget(sla_value)
+        }
+
+    # Step 4: Load Section 11.1 (Monitoring)
+    section_11_range = doc_index["11"]
+    grep_result_11_1 = grep_subsection(
+        pattern="^### 11\.1",
+        start_line=section_11_range["start"],
+        end_line=section_11_range["end"]
+    )
+    subsection_11_1_start = grep_result_11_1["line_number"]
+
+    grep_result_11_2 = grep_subsection(
+        pattern="^### 11\.2",
+        start_line=subsection_11_1_start,
+        end_line=section_11_range["end"]
+    )
+    subsection_11_1_end = grep_result_11_2["line_number"] - 1
+
+    monitor_section = Read(
+        file_path=architecture_md,
+        offset=subsection_11_1_start - buffer - 1,
+        limit=(subsection_11_1_end - subsection_11_1_start) + (2 * buffer)
+    )
 
     # Extract monitoring tools (Aggregation)
-    metrics_tool = extract_value(monitor_section, pattern="Metrics: (.+)")
-    viz_tool = extract_value(monitor_section, pattern="Visualization: (.+)")
-    logging_tool = extract_value(monitor_section, pattern="Logging: (.+)")
+    monitoring_tools = {
+        "metrics": extract_with_line_tracking(monitor_section, r"Metrics:\s*(.+)", subsection_11_1_start),
+        "visualization": extract_with_line_tracking(monitor_section, r"Visualization:\s*(.+)", subsection_11_1_start),
+        "logging": extract_with_line_tracking(monitor_section, r"Logging:\s*(.+)", subsection_11_1_start)
+    }
 
-    # Load Section 11.2 (Incidents)
-    incident_section = load_section(architecture_md, section=11.2)
+    # Step 5: Load Section 11.2 (Incidents)
+    subsection_11_2_start = grep_result_11_2["line_number"]
+    grep_result_11_3 = grep_subsection(
+        pattern="^### 11\.3",
+        start_line=subsection_11_2_start,
+        end_line=section_11_range["end"]
+    )
+    subsection_11_2_end = grep_result_11_3["line_number"] - 1
 
-    # Extract incident SLAs (Direct)
-    p1_response = extract_value(incident_section, pattern="P1.*< ([0-9]+ min)")
+    incident_section = Read(
+        file_path=architecture_md,
+        offset=subsection_11_2_start - buffer - 1,
+        limit=(subsection_11_2_end - subsection_11_2_start) + (2 * buffer)
+    )
 
+    # Extract incident SLAs
+    p1_response = extract_with_line_tracking(incident_section, r"P1.*<\s*([0-9]+\s*min)", subsection_11_2_start)
+
+    # Return structured data with full traceability
     return {
-        "latency_slos": {"p50": p50, "p95": p95, "p99": p99},
-        "throughput": throughput,
-        "availability_slo": sla,
-        "error_budget": error_budget,
-        "monitoring": {
-            "metrics": metrics_tool,
-            "visualization": viz_tool,
-            "logging": logging_tool
-        },
-        "incident_response": {"p1": p1_response}
+        "latency_slos": latency_slos,
+        "availability_slo": sla_data,
+        "monitoring": monitoring_tools,
+        "incident_response": {"p1": p1_response},
+        "document_index_version": doc_index["last_updated"]
     }
 ```
 
@@ -1057,6 +1699,200 @@ Based on standard ARCHITECTURE.md templates, Section 9 typically contains:
 5. **Security Monitoring** (lines ~1259-1281)
    - Reference: `Section 9 (Security Architecture → Security Monitoring)`
 
+### Dynamic Section 9 Subsection Discovery (Index-Based)
+
+To dynamically find Section 9 subsections and their line ranges in any ARCHITECTURE.md file:
+
+#### Step 1: Load Document Index and Section 9 Range
+
+```python
+# Load Document Index
+index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
+doc_index = parse_document_index(index_content)
+
+# Get Section 9 range
+section_9_range = doc_index["9"]
+# Returns: {"start": 1051, "end": 1250, "name": "Security Considerations"}
+```
+
+#### Step 2: Load Section 9 with Buffer
+
+```python
+buffer = 20  # Extended buffer for security section
+offset = section_9_range["start"] - buffer - 1
+limit = (section_9_range["end"] - section_9_range["start"]) + (2 * buffer)
+
+section_9_content = Read(file_path="ARCHITECTURE.md", offset=offset, limit=limit)
+```
+
+#### Step 3: Detect All Subsections Within Section 9
+
+```python
+import re
+
+# Find all level-3 headers (###) in Section 9
+subsection_pattern = r'^###\s+(.+)$'
+subsections = []
+
+for match in re.finditer(subsection_pattern, section_9_content, re.MULTILINE):
+    subsection_name = match.group(1).strip()
+    relative_offset = section_9_content[:match.start()].count('\n')
+    absolute_line = section_9_range["start"] + relative_offset
+
+    subsections.append({
+        "name": subsection_name,
+        "line_start": absolute_line,
+        "relative_offset": relative_offset
+    })
+
+# Calculate end lines (next subsection start - 1, or section end)
+for i, subsection in enumerate(subsections):
+    if i + 1 < len(subsections):
+        subsection["line_end"] = subsections[i+1]["line_start"] - 1
+    else:
+        subsection["line_end"] = section_9_range["end"]
+
+# Example result:
+# [
+#   {"name": "Security Principles", "line_start": 1053, "line_end": 1060},
+#   {"name": "Threat Model", "line_start": 1062, "line_end": 1088},
+#   {"name": "Authentication & Authorization", "line_start": 1090, "line_end": 1114},
+#   {"name": "Network Security", "line_start": 1115, "line_end": 1172},
+#   ...
+# ]
+```
+
+#### Step 4: Generate Section 9 References Dynamically
+
+```python
+def generate_section_9_reference(subsection_name, subsection_data):
+    """Generate standardized Section 9 reference with line numbers"""
+    return (
+        f"Section 9 (Security Architecture → {subsection_name}), "
+        f"lines {subsection_data['line_start']}-{subsection_data['line_end']}"
+    )
+
+# Usage examples:
+auth_ref = generate_section_9_reference("Authentication & Authorization", subsections[2])
+# Returns: "Section 9 (Security Architecture → Authentication & Authorization), lines 1090-1114"
+
+network_ref = generate_section_9_reference("Network Security", subsections[3])
+# Returns: "Section 9 (Security Architecture → Network Security), lines 1115-1172"
+```
+
+#### Step 5: Nested Subsection Support
+
+For nested subsections (e.g., "Data Security → Encryption in Transit"):
+
+```python
+def find_nested_subsections(section_9_content, parent_subsection_range):
+    """Find level-4 headers (####) within a level-3 subsection"""
+
+    # Extract parent subsection content
+    parent_start_offset = parent_subsection_range["relative_offset"]
+    if parent_subsection_range == subsections[-1]:
+        parent_content = section_9_content[parent_start_offset:]
+    else:
+        next_subsection_offset = subsections[subsections.index(parent_subsection_range) + 1]["relative_offset"]
+        parent_content = section_9_content[parent_start_offset:next_subsection_offset]
+
+    # Find level-4 headers
+    nested_pattern = r'^####\s+(.+)$'
+    nested_subsections = []
+
+    for match in re.finditer(nested_pattern, parent_content, re.MULTILINE):
+        nested_name = match.group(1).strip()
+        relative_offset = parent_content[:match.start()].count('\n')
+        absolute_line = parent_subsection_range["line_start"] + relative_offset
+
+        nested_subsections.append({
+            "name": nested_name,
+            "line_start": absolute_line,
+            "parent": parent_subsection_range["name"]
+        })
+
+    # Calculate end lines
+    for i, nested in enumerate(nested_subsections):
+        if i + 1 < len(nested_subsections):
+            nested["line_end"] = nested_subsections[i+1]["line_start"] - 1
+        else:
+            nested["line_end"] = parent_subsection_range["line_end"]
+
+    return nested_subsections
+
+# Example: Find nested subsections under "Data Security"
+data_security_subsection = subsections[4]  # Assuming index 4
+nested = find_nested_subsections(section_9_content, data_security_subsection)
+
+# Generate nested reference:
+encryption_ref = (
+    f"Section 9 (Security Architecture → {data_security_subsection['name']} → "
+    f"{nested[0]['name']}), lines {nested[0]['line_start']}-{nested[0]['line_end']}"
+)
+# Returns: "Section 9 (Security Architecture → Data Security → Encryption in Transit), lines 1168-1172"
+```
+
+#### Complete Workflow Example
+
+```python
+def extract_section_9_subsections(architecture_md):
+    """Complete workflow: Extract all Section 9 subsections with line ranges"""
+
+    # Step 1: Load Document Index
+    index = Read(file_path=architecture_md, offset=1, limit=50)
+    doc_index = parse_document_index(index)
+
+    # Step 2: Get Section 9 range
+    section_9 = doc_index["9"]
+
+    # Step 3: Load Section 9
+    buffer = 20
+    section_9_content = Read(
+        file_path=architecture_md,
+        offset=section_9["start"] - buffer - 1,
+        limit=(section_9["end"] - section_9["start"]) + (2 * buffer)
+    )
+
+    # Step 4: Extract all subsections
+    subsections = []
+    for match in re.finditer(r'^###\s+(.+)$', section_9_content, re.MULTILINE):
+        name = match.group(1).strip()
+        offset = section_9_content[:match.start()].count('\n')
+        subsections.append({
+            "name": name,
+            "line_start": section_9["start"] + offset
+        })
+
+    # Calculate end lines
+    for i, sub in enumerate(subsections):
+        sub["line_end"] = (subsections[i+1]["line_start"] - 1
+                          if i+1 < len(subsections) else section_9["end"])
+
+    # Step 5: Return structured data
+    return {
+        "section_9_range": section_9,
+        "subsections": subsections,
+        "document_index_version": doc_index["last_updated"]
+    }
+
+# Usage:
+section_9_data = extract_section_9_subsections("ARCHITECTURE.md")
+
+# Generate references dynamically:
+for subsection in section_9_data["subsections"]:
+    ref = (
+        f"Section 9 (Security Architecture → {subsection['name']}), "
+        f"lines {subsection['line_start']}-{subsection['line_end']}"
+    )
+    print(ref)
+```
+
+**Benefits of Dynamic Discovery:**
+- **Adaptability**: Works with any ARCHITECTURE.md structure
+- **Accuracy**: Line numbers always correct via Document Index
+- **No Hardcoding**: No need to update mappings when sections change
+- **Full Traceability**: Every reference includes exact line ranges
+
 ### Validation Checklist
 
 When reviewing generated compliance documents, verify:
@@ -1284,34 +2120,89 @@ Cache as structured list
 Filter by contract focus
 ```
 
-### Caching Strategy
+### Caching Strategy (Index-Based)
 
 ```python
-# Global cache for cross-contract data
+# Global cache for cross-contract data with full traceability
 contract_data_cache = {}
 
-def extract_with_caching(architecture_md, section, pattern, cache_key):
-    """Extract data with caching for reuse across contracts"""
+def extract_with_caching(architecture_md, section_num, subsection_num, pattern, cache_key):
+    """Extract data with index-based caching for reuse across contracts"""
 
     # Check cache first
     if cache_key in contract_data_cache:
         return contract_data_cache[cache_key]
 
-    # Extract if not cached
-    section_content = load_section(architecture_md, section)
-    value = extract_value(section_content, pattern)
+    # Step 1: Load Document Index (if not already cached)
+    if "document_index" not in contract_data_cache:
+        index_content = Read(file_path=architecture_md, offset=1, limit=50)
+        contract_data_cache["document_index"] = parse_document_index(index_content)
 
-    # Cache with metadata
+    doc_index = contract_data_cache["document_index"]
+
+    # Step 2: Get section range from index
+    section_range = doc_index[str(section_num)]
+
+    # Step 3: Find subsection within section
+    subsection_pattern = f"^### {section_num}\.{subsection_num}"
+    grep_result = grep_subsection(
+        file_path=architecture_md,
+        pattern=subsection_pattern,
+        start_line=section_range["start"],
+        end_line=section_range["end"]
+    )
+    subsection_start = grep_result["line_number"]
+
+    # Find next subsection for boundary
+    next_subsection_num = subsection_num + 1
+    next_grep_result = grep_subsection(
+        pattern=f"^### {section_num}\.{next_subsection_num}",
+        start_line=subsection_start,
+        end_line=section_range["end"]
+    )
+    subsection_end = (next_grep_result["line_number"] - 1
+                     if next_grep_result else section_range["end"])
+
+    # Step 4: Load subsection with buffer
+    buffer = 10
+    offset = subsection_start - buffer - 1
+    limit = (subsection_end - subsection_start) + (2 * buffer)
+
+    section_content = Read(file_path=architecture_md, offset=offset, limit=limit)
+
+    # Step 5: Extract value with line number tracking
+    match = re.search(pattern, section_content)
+    if not match:
+        return None
+
+    relative_offset = section_content[:match.start()].count('\n')
+    absolute_line = subsection_start + relative_offset
+
+    # Cache with enhanced metadata including index-based traceability
     contract_data_cache[cache_key] = {
-        "value": value,
-        "source": f"Section {section}, line {get_line_number(value)}",
-        "extracted_at": current_timestamp()
+        "value": match.group(1),
+        "source": {
+            "section": section_num,
+            "subsection": f"{section_num}.{subsection_num}",
+            "line_start": absolute_line,
+            "line_end": absolute_line + section_content[match.start():match.end()].count('\n'),
+            "document_index_version": doc_index["last_updated"]
+        },
+        "extraction_method": "index_lookup",
+        "extracted_at": current_timestamp(),
+        "raw_source_string": f"Section {section_num}.{subsection_num}, line {absolute_line}"
     }
 
     return contract_data_cache[cache_key]
 
-# Usage across contracts
-sla_data = extract_with_caching(arch_md, 10.2, r"SLA: ([0-9.]+%)", "availability_sla")
+# Usage across contracts with index-based extraction
+sla_data = extract_with_caching(
+    arch_md,
+    section_num=10,
+    subsection_num=2,
+    pattern=r"SLA:?\s*([0-9.]+%)",
+    cache_key="availability_sla"
+)
 
 # Reuse in Contract 1 (Business Continuity)
 continuidad_contract["sla"] = sla_data["value"]
@@ -1412,6 +2303,198 @@ After extracting data for each contract:
 - [ ] Transformations are consistent (e.g., all error budgets calculated same way)
 - [ ] Terminology is consistent
 - [ ] Formatting is uniform
+
+---
+
+## Index-Based Mapping Validation Checklist
+
+This checklist ensures full compliance with the index-based section mapping methodology documented in this guide. Use this before generating any compliance documents.
+
+### Document Index Validation
+
+**Index Availability**:
+- [ ] Document Index exists in ARCHITECTURE.md (typically lines 5-21)
+- [ ] Index contains all 12 standard sections
+- [ ] Each section entry includes: section number, name, and line range
+- [ ] Index timestamp ("Index Last Updated") is present and recent
+- [ ] Index format matches standard template (markdown list with anchors)
+
+**Index Accuracy**:
+- [ ] Grep validation: Run `grep -n "^## [0-9]" ARCHITECTURE.md` and compare with index
+- [ ] Line ranges are sequential (no overlaps, no gaps)
+- [ ] Section 12 ends with "EOF" or actual final line number
+- [ ] Index last updated within 30 days (if architecture recently modified)
+
+### Section Loading Validation
+
+**Offset/Limit Parameters**:
+- [ ] Every section load uses `Read(offset=X, limit=Y)` format
+- [ ] No full-file reads (`Read(file_path)` without offset/limit)
+- [ ] Offset calculated as: `section_start - buffer - 1` (zero-indexed)
+- [ ] Limit calculated as: `(section_end - section_start) + (2 * buffer)`
+- [ ] Buffer sizes appropriate:
+  - Minimal extraction (5-10 lines)
+  - Standard extraction (10-20 lines)
+  - Extended extraction (20-50 lines)
+
+**Section Range Validation**:
+- [ ] Document Index loaded first (offset=1, limit=50)
+- [ ] Section ranges extracted from parsed index
+- [ ] Grep used to find subsection boundaries within sections
+- [ ] Subsection end calculated via next subsection start - 1
+- [ ] Last subsection ends at parent section end
+
+### Line Number Calculation Validation
+
+**Absolute Line Number Formula**:
+- [ ] All line numbers calculated as: `subsection_start + relative_offset`
+- [ ] Relative offset calculated via: `content[:match.start()].count('\n')`
+- [ ] No hardcoded line numbers in extraction logic
+- [ ] Line numbers stored with extracted values for traceability
+
+**Source Reference Format**:
+- [ ] All sources follow format: `"Section N.M, line X"` or `"Section N.M, lines X-Y"`
+- [ ] Section 9 references use: `"Section 9 (Security Architecture → Subsection Name), lines X-Y"`
+- [ ] Source references include subsection names (e.g., "Backup & Recovery", "Availability SLA")
+- [ ] Line ranges accurate (extracted value spans declared lines)
+
+### Subsection Detection Validation
+
+**Grep Patterns**:
+- [ ] Primary sections detected with: `^## [0-9]`
+- [ ] Subsections detected with: `^### N\.M` (escaped dot)
+- [ ] Nested subsections (level 4) detected with: `^####`
+- [ ] Grep searches constrained to parent section ranges (start_line, end_line)
+
+**Boundary Calculation**:
+- [ ] Subsection start: grep match line number
+- [ ] Subsection end: next subsection start - 1 (or parent section end)
+- [ ] No assumptions about subsection count or structure
+- [ ] Dynamic discovery works with variable subsection counts
+
+### Caching and Reuse Validation
+
+**Cache Structure**:
+- [ ] Global cache initialized: `contract_data_cache = {}`
+- [ ] Document Index cached with key: `"document_index"`
+- [ ] Common data points cached (SLA, technology stack, integrations)
+- [ ] Cache entries include:
+  - `value`: Extracted data
+  - `source`: Dict with section, subsection, line_start, line_end
+  - `document_index_version`: Timestamp from index
+  - `extraction_method`: "index_lookup"
+  - `extracted_at`: Current timestamp
+
+**Cache Consistency**:
+- [ ] Same cache key returns identical data across contracts
+- [ ] Cache hits preserve original line numbers
+- [ ] Transformations applied after cache retrieval (not cached)
+- [ ] Document Index cached once and reused for all contracts
+
+### Pattern Example Validation
+
+**Dynamic Line Numbers**:
+- [ ] Pattern examples use `{subsection_start}+` instead of hardcoded lines
+- [ ] Line number calculation steps documented in examples
+- [ ] Examples show: Document Index lookup → Grep → Offset calculation
+- [ ] Variable syntax explained: `{rto_line}`, `{sla_line}`, etc.
+
+**Calculation Documentation**:
+- [ ] Each pattern example includes "Line Number Calculation" section
+- [ ] Calculation shows:
+  1. Document Index section range
+  2. Grep result for subsection
+  3. Relative offset calculation
+  4. Absolute line number formula
+- [ ] Examples demonstrate buffer usage
+
+### Extraction Logic Validation
+
+**Pseudo-Code Structure**:
+- [ ] All extraction functions start with: Load Document Index
+- [ ] Section ranges retrieved from parsed index (not hardcoded)
+- [ ] Grep used to find subsections dynamically
+- [ ] Offset/limit calculated for each Read operation
+- [ ] Line number tracking implemented for all extractions
+- [ ] Return values include `document_index_version`
+
+**No Old-Style References**:
+- [ ] No `load_section(architecture_md, section=11.3)` calls
+- [ ] No `get_line_number(value)` calls (use offset calculation)
+- [ ] No assumptions about section line numbers
+- [ ] All section discovery via Document Index + Grep
+
+### Context Efficiency Validation
+
+**Token Usage Optimization**:
+- [ ] Document Index loaded once (50 lines)
+- [ ] Sections loaded individually (100-300 lines each)
+- [ ] Subsections loaded when possible (30-100 lines)
+- [ ] No full-file reads (avoid loading 2000+ lines)
+- [ ] Efficiency target: 70-94% reduction vs full file read
+
+**Loading Hierarchy**:
+- [ ] Level 1: Document Index (always first)
+- [ ] Level 2: Full section (when multiple subsections needed)
+- [ ] Level 3: Single subsection (when targeted extraction)
+- [ ] Level 4: Grep + minimal buffer (for single values)
+
+### Cross-Contract Consistency Validation
+
+**Shared Data Points**:
+- [ ] Availability SLA: Same value in all 6 contracts (Business Continuity, SRE, Cloud, Platform, Enterprise, Risk)
+- [ ] Technology Stack: Same inventory in 5 contracts (Development, Cloud, Platform, Integration, Security)
+- [ ] Integration Catalog: Same list in 3 contracts (Integration, Security, Data/AI)
+- [ ] Same line numbers for same data across all contracts
+
+**Transformation Consistency**:
+- [ ] Error budget calculation: Same formula in SRE and Business Continuity
+- [ ] Downtime calculation: Same formula across all contracts
+- [ ] Criticality inference: Same rules (99.99% → Tier 1)
+- [ ] All transformations documented and replicable
+
+### Section 9 Special Handling
+
+**Dynamic Discovery**:
+- [ ] Section 9 subsections discovered via regex `^###\s+(.+)$`
+- [ ] Nested subsections (level 4) detected when present
+- [ ] No hardcoded subsection names or line numbers
+- [ ] Reference format: `Section 9 (Security Architecture → Subsection), lines X-Y`
+
+**Validation**:
+- [ ] No references to "Section 9.1", "9.2", "9.3" (numbered subsections)
+- [ ] All Section 9 references include subsection path
+- [ ] Line numbers point to actual subsection content
+- [ ] Nested subsections formatted as: `Parent → Child`
+
+### Implementation Checklist
+
+Before generating compliance documents:
+
+**Preparation**:
+- [ ] ARCHITECTURE.md has valid Document Index
+- [ ] Index timestamp is current
+- [ ] All 12 sections present in ARCHITECTURE.md
+- [ ] Grep tool available for subsection detection
+
+**Execution**:
+- [ ] Load Document Index first
+- [ ] Parse index to extract section ranges
+- [ ] Use index-based loading for all sections
+- [ ] Calculate line numbers for all extracted values
+- [ ] Cache common data points with full metadata
+
+**Validation**:
+- [ ] All source references include line numbers
+- [ ] Line numbers verified against ARCHITECTURE.md
+- [ ] Cross-contract data has identical line numbers
+- [ ] No hardcoded assumptions about document structure
+
+**Output Quality**:
+- [ ] Every contract section has source traceability
+- [ ] Line ranges are accurate and verifiable
+- [ ] Document Index version included in metadata
+- [ ] Extraction method documented (index_lookup)
 
 ---
 

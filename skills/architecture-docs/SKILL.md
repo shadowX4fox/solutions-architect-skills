@@ -1,6 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files or when the user asks about architecture documentation
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when the user asks about architecture documentation, or when answering questions about the documented architecture
 ---
 
 # Architecture Documentation Skill
@@ -18,6 +18,11 @@ Automatically activate when:
 - User asks about architecture documentation structure or best practices
 - User edits Section 1 Executive Summary Key Metrics (triggers metric consistency check)
 - User requests metric consistency check, verify metrics, or audit metrics
+- **User asks informational questions about the documented architecture** (if ARCHITECTURE.md exists)
+  - "What is our [authentication/scaling/data flow/etc.] approach?"
+  - "How does [component/system/integration] work?"
+  - "What technologies do we use for [purpose]?"
+  - "Tell me about the architecture of [system]"
 
 ## File Naming Convention
 
@@ -1950,6 +1955,638 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 For complete section name list, common mistakes, optional sections, renumbering workflow, and validation checklist:
 → **VALIDATIONS.md** § Section Name Enforcement
 → **ARCHITECTURE_DOCUMENTATION_GUIDE.md** § Document Structure Overview
+
+---
+
+## Workflow 7: Informational Query (Answer Questions About Architecture)
+
+### When to Use
+
+This workflow is activated when users ask questions about the architecture documented in ARCHITECTURE.md:
+- Understanding how the system works
+- Learning about specific architectural decisions
+- Querying technology choices, patterns, or principles
+- Understanding data flows, integrations, or components
+
+### Automatic Invocation Conditions
+
+This workflow is **automatically invoked** when:
+1. User asks an architectural question (authentication, scaling, components, tech stack, etc.)
+2. **AND** an ARCHITECTURE.md file exists in the current project
+
+If ARCHITECTURE.md does not exist, this workflow is NOT invoked, allowing general architectural guidance.
+
+**Detection Logic**:
+```python
+# Check if ARCHITECTURE.md exists before answering architectural questions
+architecture_file_exists = file_exists("ARCHITECTURE.md")
+
+if architecture_file_exists:
+    # Invoke Workflow 7: Use ARCHITECTURE.md as source of truth
+    load_architecture_and_answer()
+else:
+    # Don't invoke skill - provide general guidance
+    pass
+```
+
+### Prerequisites
+
+- ARCHITECTURE.md file exists in the project
+- Document has valid structure (12 sections)
+- Document Index is present (lines 5-21 typically)
+
+### Process
+
+#### Step 1: Detect Query Intent
+
+Classify the user's question to determine which section(s) to reference:
+
+- **Authentication/Security** → Section 9 (Security Considerations)
+- **Data flow/pipelines** → Section 6 (Data Flow)
+- **Components/services** → Section 5 (Component Details)
+- **Technology stack** → Section 8 (Technology Stack)
+- **Integrations** → Section 7 (Integration Points)
+- **Scaling/performance** → Section 10 (Scalability & Performance)
+- **Deployment** → Section 4 (Architecture Layers/Deployment)
+- **Patterns/principles** → Section 3 (Architecture Principles)
+- **Problem/solution** → Section 2 (System Overview)
+- **Operations** → Section 11 (Operational Considerations)
+- **Decisions/trade-offs** → Section 12 (Architecture Decision Records)
+- **General overview** → Section 1 (Executive Summary)
+
+**See QUERY_SECTION_MAPPING.md for detailed query-to-section mapping guide.**
+
+#### Step 2: Load Document Index
+
+Use context-efficient loading to get the Document Index:
+
+```python
+# Load Document Index (lines 1-50)
+index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
+doc_index = parse_document_index(index_content)
+```
+
+**Expected Index Format**:
+```markdown
+## Document Index
+
+**Quick Navigation:**
+- [Section 1: Executive Summary](#1-executive-summary) → Lines 1-80
+- [Section 2: System Overview](#2-system-overview) → Lines 81-150
+...
+- [Section 12: Architecture Decision Records](#12-architecture-decision-records-adrs) → Lines 1951-end
+
+**Index Last Updated:** YYYY-MM-DD
+```
+
+#### Step 3: Load Relevant Section(s)
+
+Using index-based loading for efficiency:
+
+```python
+# Get section range from Document Index
+section_range = doc_index[section_number]
+
+# Calculate load parameters
+buffer = 20  # Standard buffer for context
+offset = section_range["start"] - buffer - 1  # -1 for zero-indexing
+limit = (section_range["end"] - section_range["start"]) + (2 * buffer)
+
+# Load section
+section_content = Read(file_path="ARCHITECTURE.md", offset=offset, limit=limit)
+```
+
+**Example**:
+```python
+# User asks: "What technologies do we use for the backend?"
+# Detected section: Section 8 (Technology Stack)
+
+# Index shows: Section 8 → Lines 912-998
+buffer = 20
+offset = 912 - 20 - 1 = 891
+limit = (998 - 912) + (2 * 20) = 86 + 40 = 126
+
+# Load: Read(file_path="ARCHITECTURE.md", offset=891, limit=126)
+# This reads lines 891-1017 (Section 8 with 20-line buffers)
+```
+
+**Multi-Section Queries**:
+
+For questions requiring multiple sections:
+
+```python
+# User asks: "How does authentication work with external systems?"
+# Detected sections: Section 9 (Security) + Section 7 (Integrations)
+
+# Load Section 9 first
+section_9_content = Read(file_path="ARCHITECTURE.md", offset=section_9_start-20-1, limit=section_9_length+40)
+
+# Load Section 7 second
+section_7_content = Read(file_path="ARCHITECTURE.md", offset=section_7_start-20-1, limit=section_7_length+40)
+
+# Synthesize answer from both sections
+```
+
+#### Step 4: Extract Relevant Information
+
+- Search for keywords from user query within the loaded section
+- Identify specific subsections that address the question
+- Calculate line numbers for citations
+
+**Line Number Calculation**:
+```python
+# Calculate absolute line numbers for citations
+subsection_start = section_range["start"] + relative_offset
+subsection_end = subsection_start + content_length
+
+# Example: Found answer in Section 9.2 Authentication
+# Section 9 starts at line 1301
+# Subsection 9.2 is at relative offset 42 lines into the section
+# Absolute line: 1301 + 42 = 1343
+```
+
+#### Step 5: Respond with Citations
+
+**Standard Format**: Answer first, then footer citation
+
+**Template**:
+```
+[Answer content based on ARCHITECTURE.md]
+
+**Source**: ARCHITECTURE.md Section N (Section Name), lines X-Y
+```
+
+**Single-Section Answer Example**:
+```
+User: "How do we handle authentication?"
+
+Response:
+The system uses OAuth 2.0 for authentication with JWT tokens for API access.
+Multi-factor authentication (MFA) is required for administrative users, and
+session tokens expire after 24 hours of inactivity.
+
+**Source**: ARCHITECTURE.md Section 9 (Security Considerations → Authentication &
+Authorization), lines 1090-1114
+```
+
+**Multi-Section Answer Example**:
+```
+User: "What's the backend tech stack and how is it deployed?"
+
+Response:
+The backend is built with Java 17 and Spring Boot 3.2, using PostgreSQL 15 for the
+primary database and Redis 7.0 for caching. The system is deployed on AWS using
+containerized services via ECS with auto-scaling enabled for high availability.
+
+**Sources**:
+- ARCHITECTURE.md Section 8 (Technology Stack → Backend), lines 901-925
+- ARCHITECTURE.md Section 8 (Technology Stack → Data Tier), lines 960-970
+- ARCHITECTURE.md Section 4 (Architecture Layers → Cloud Infrastructure), lines 350-375
+```
+
+#### Step 6: Handle Missing Information
+
+If the question cannot be answered from ARCHITECTURE.md:
+
+**Response Format**:
+1. Provide general architectural guidance from knowledge base
+2. Clearly tag that it's NOT from the documented architecture
+3. Recommend documenting it in the appropriate section
+
+**Example**:
+```
+User: "What's our disaster recovery RTO?"
+
+Response:
+Based on the 99.99% availability SLA documented in Section 10, a typical RTO would be
+4 hours for Tier 1 systems. Common industry practice for this availability tier includes:
+- RTO: 4 hours
+- RPO: 1 hour
+- Quarterly DR testing
+
+⚠️ **Recommendation**: This information is not currently documented in ARCHITECTURE.md.
+Consider adding disaster recovery procedures to Section 11.4 (Operational Considerations →
+Disaster Recovery) including:
+- Recovery Time Objective (RTO)
+- Recovery Point Objective (RPO)
+- Backup strategies
+- Failover procedures
+- DR testing schedule
+
+Would you like me to help document these DR procedures?
+
+**Source**: General architectural guidance (not documented in ARCHITECTURE.md)
+```
+
+**Missing Information Template**:
+```
+[General architectural answer based on industry best practices]
+
+⚠️ **Recommendation**: This information is not documented in ARCHITECTURE.md.
+Consider adding to Section N.M ([Section Name → Subsection Name]).
+
+Would you like me to help document this?
+
+**Source**: General architectural guidance (not documented in ARCHITECTURE.md)
+```
+
+### Context Efficiency Guidelines
+
+**Buffer Sizes**:
+- Standard queries: ±20 lines
+- Narrow queries (specific config): ±10 lines
+- Cross-section queries: ±20 lines per section
+
+**Loading Strategy**:
+- Load Document Index once, cache in memory
+- Load only relevant sections, not full document
+- Use sequential loading (one section at a time) for multi-section queries
+- Minimize total lines loaded (aim for <300 lines per query)
+
+**Performance Comparison**:
+
+| Approach | Lines Loaded | Context Usage |
+|----------|-------------|---------------|
+| Full Document Load | 2,000+ | 100% |
+| Workflow 7 (Single Section) | ~100-150 | 5-7.5% |
+| Workflow 7 (Multi-Section) | ~200-300 | 10-15% |
+| **Savings** | **~1,700-1,800** | **85-90%** |
+
+### Best Practices
+
+**DO:**
+- ✅ Always check if ARCHITECTURE.md exists before invoking this workflow
+- ✅ Use Document Index for exact section ranges
+- ✅ Load only relevant sections with minimal buffers
+- ✅ Include line number citations in all responses
+- ✅ Explicitly state when information is not documented
+- ✅ Offer to help update documentation when gaps are found
+- ✅ Use footer citations (answer first, source last)
+
+**DON'T:**
+- ❌ Load full document for simple queries
+- ❌ Provide answers without citations when ARCHITECTURE.md exists
+- ❌ Guess or assume content without reading the document
+- ❌ Mix documented architecture with general guidance (clearly separate)
+- ❌ Skip buffer context (always load ±10-20 lines)
+
+### Example Workflows
+
+#### Example 1: Question Fully Answered (Single Section)
+
+**User**: "What databases do we use?"
+
+**Process**:
+1. Detect query intent → Section 8 (Technology Stack)
+2. Load Document Index → Section 8: Lines 912-998
+3. Load Section 8 with buffer → Read(offset=891, limit=126)
+4. Extract database information → PostgreSQL 15, Redis 7.0, Elasticsearch 8.x
+5. Calculate line numbers → Lines 960-970
+
+**Response**:
+```
+The system uses three database technologies:
+
+**Relational Database**: PostgreSQL 15 for primary transactional data
+**Caching**: Redis 7.0 for session management and query caching
+**Search**: Elasticsearch 8.x for full-text search and analytics
+
+**Source**: ARCHITECTURE.md Section 8 (Technology Stack → Data Tier), lines 960-970
+```
+
+#### Example 2: Information Missing (With Recommendation)
+
+**User**: "What's our backup retention policy?"
+
+**Process**:
+1. Detect query intent → Section 11 (Operational Considerations)
+2. Load Document Index → Section 11: Lines 1751-1950
+3. Load Section 11 with buffer → Read(offset=1730, limit=239)
+4. Search for backup/retention information → Not found
+5. Provide general guidance + recommendation
+
+**Response**:
+```
+Based on industry best practices for systems with 99.99% availability, typical backup
+retention policies include:
+- Daily backups: Retained for 30 days
+- Weekly backups: Retained for 90 days
+- Monthly backups: Retained for 1 year
+- Annual backups: Retained for 7 years (compliance)
+
+⚠️ **Recommendation**: This information is not currently documented in ARCHITECTURE.md.
+Consider adding backup retention policies to Section 11.3 (Operational Considerations →
+Backup & Recovery) including:
+- Backup frequency (full vs. incremental)
+- Retention periods by backup type
+- Storage location and redundancy
+- Recovery testing schedule
+
+Would you like me to help document the backup retention policy?
+
+**Source**: General architectural guidance (not documented in ARCHITECTURE.md)
+```
+
+#### Example 3: Multi-Section Query
+
+**User**: "How does user authentication integrate with our external systems?"
+
+**Process**:
+1. Detect query intent → Section 9 (Security) + Section 7 (Integrations)
+2. Load Document Index
+3. Load Section 9 → Read(offset=1280, limit=269)
+4. Load Section 7 → Read(offset=980, limit=189)
+5. Synthesize answer from both sections
+6. Calculate line numbers for both citations
+
+**Response**:
+```
+User authentication uses OAuth 2.0 with JWT tokens, requiring MFA for administrative
+users. External system integrations leverage this authentication framework through
+API Gateway integration.
+
+For external systems, authentication tokens are validated at the API Gateway layer
+before requests are forwarded to downstream services. Integration with Salesforce
+uses OAuth 2.0 client credentials flow, while the payment gateway integration uses
+mutual TLS certificates for secure communication.
+
+**Sources**:
+- ARCHITECTURE.md Section 9 (Security Considerations → Authentication), lines 1090-1114
+- ARCHITECTURE.md Section 7 (Integration Points → External Systems), lines 1025-1048
+```
+
+### Query-to-Section Mapping Reference
+
+For detailed query-to-section mapping, including:
+- Common question patterns for each section
+- Example queries and expected section targets
+- Multi-section query scenarios
+- Edge cases and ambiguous queries
+
+**See: QUERY_SECTION_MAPPING.md**
+
+### Example Conversations
+
+#### Example 1: Informational Query - Single Section
+
+**User**: "What technologies do we use for the backend?"
+
+**Skill Response**:
+
+*Step 1: Detect query intent → Section 8 (Technology Stack)*
+*Step 2: Load Document Index (lines 1-50)*
+*Step 3: Load Section 8 with buffer (lines 891-1017)*
+*Step 4: Extract backend technologies*
+
+According to ARCHITECTURE.md Section 8 (Technology Stack):
+
+**Backend Stack**:
+- Language: Java 17 (LTS)
+- Framework: Spring Boot 3.2
+- Build Tool: Maven 3.9
+- Testing: JUnit 5, Mockito, Spring Test
+- Code Quality: SonarQube
+
+**Data Tier**:
+- Relational Database: PostgreSQL 15
+- Caching: Redis 7.0
+- Search: Elasticsearch 8.x
+
+**Source**: ARCHITECTURE.md Section 8 (Technology Stack → Backend & Data Tier), lines 901-970
+
+---
+
+#### Example 2: Informational Query - Information Missing
+
+**User**: "What's our disaster recovery plan?"
+
+**Skill Response**:
+
+*Step 1: Detect query intent → Section 11 (Operational Considerations)*
+*Step 2: Load Document Index*
+*Step 3: Load Section 11 (lines 1730-1969)*
+*Step 4: Search for disaster recovery information → Not found*
+*Step 5: Provide general guidance + recommendation*
+
+Based on the 99.99% availability SLA documented in Section 10, typical disaster recovery procedures for this tier include:
+
+- **RTO (Recovery Time Objective)**: 4 hours
+- **RPO (Recovery Point Objective)**: 1 hour
+- **Backup frequency**: Continuous replication + daily snapshots
+- **Failover**: Automated multi-region failover
+- **Testing**: Quarterly DR drills
+
+⚠️ **Recommendation**: This information is not currently documented in ARCHITECTURE.md.
+
+Consider adding disaster recovery procedures to Section 11.4 (Operational Considerations → Disaster Recovery) including:
+- Recovery Time Objective (RTO)
+- Recovery Point Objective (RPO)
+- Backup strategies and retention
+- Failover procedures
+- DR testing schedule
+
+Would you like me to help document these DR procedures?
+
+**Source**: General architectural guidance (not documented in ARCHITECTURE.md)
+
+---
+
+#### Example 3: Informational Query - Multi-Section
+
+**User**: "How does user authentication integrate with our external systems?"
+
+**Skill Response**:
+
+*Step 1: Detect query intent → Section 9 (Security) + Section 7 (Integrations)*
+*Step 2: Load Document Index*
+*Step 3: Load Section 9 (lines 1280-1569)*
+*Step 4: Load Section 7 (lines 980-1169)*
+*Step 5: Synthesize answer from both sections*
+
+User authentication uses OAuth 2.0 with JWT tokens for API access. Multi-factor authentication (MFA) is required for administrative users, and session tokens expire after 24 hours of inactivity.
+
+For external system integrations:
+
+**API Gateway Integration**: Authentication tokens are validated at the API Gateway layer before requests are forwarded to downstream services. The gateway enforces token expiration and refresh policies.
+
+**Salesforce Integration**: Uses OAuth 2.0 client credentials flow for service-to-service authentication. Tokens are cached for 30 minutes to reduce authentication overhead.
+
+**Payment Gateway Integration**: Uses mutual TLS certificates for secure communication. Certificate rotation is automated and occurs every 90 days.
+
+All external integrations log authentication events to the central security monitoring system for audit and threat detection.
+
+**Sources**:
+- ARCHITECTURE.md Section 9 (Security Architecture → Authentication & Authorization), lines 1090-1114
+- ARCHITECTURE.md Section 7 (Integration Points → External Systems), lines 1025-1075
+
+---
+
+#### Example 4: Standard Workflow - Creating Architecture Documentation
+
+**User**: "Create architecture documentation for my microservices system"
+
+**Skill Response**:
+
+*Detects new ARCHITECTURE.md creation → Invokes Architecture Type Selection Workflow*
+
+I'll help you create architecture documentation for your microservices system.
+
+📐 **Architecture Type Selection**
+
+Before creating your ARCHITECTURE.md, please select the architecture type that best describes your system:
+
+**1. META Architecture** (6-Layer Enterprise)
+   - Best for: Large enterprise systems, financial services, complex integrations
+   - Layers: Channels → UX → Business Scenarios → Integration → Domain → Core
+   - Complexity: Very High
+   - Team Size: Large (10+)
+
+**2. 3-Tier Architecture** (Classic Web Application)
+   - Best for: Web apps, REST APIs, standard CRUD systems
+   - Tiers: Presentation → Application/Business Logic → Data
+   - Complexity: Low
+   - Team Size: Small-Medium (2-8)
+
+**3. Microservices Architecture** (Cloud-Native Distributed)
+   - Best for: Cloud-native systems, independently deployable services
+   - Components: API Gateway → Services → Data Stores → Event Bus
+   - Complexity: High
+   - Team Size: Large (10+)
+
+**4. N-Layer Architecture** (Customizable Patterns)
+   - Best for: DDD, Clean Architecture, Hexagonal Architecture
+   - Patterns: 4-Layer DDD, 5-Layer Extended, Clean Architecture, Hexagonal
+   - Complexity: Medium-High
+   - Team Size: Medium (4-10)
+
+**Which architecture type best describes your system? (1-4)**
+
+*User selects: "3" (Microservices)*
+
+Perfect! I'll create your ARCHITECTURE.md using the Microservices Architecture template.
+
+*Loads templates/SECTION_4_MICROSERVICES.md and templates/SECTION_5_MICROSERVICES.md*
+*Creates ARCHITECTURE.md with:*
+- *Standard Sections 1-3*
+- *Microservices Section 4 (API Gateway, Service Mesh, Services, Event Bus)*
+- *Microservices Section 5 (Service catalog format)*
+- *Standard Sections 6-12*
+- *Metadata comment: `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`*
+
+✓ Created ARCHITECTURE.md with Microservices Architecture structure
+
+The document includes:
+- Document Index (lines 5-21) for context-efficient navigation
+- Section 4: Microservices architecture layers (API Gateway, Service Mesh, Services, Event Bus)
+- Section 5: Service catalog template (ready for your services)
+- Architecture type metadata for future validation
+
+Next steps:
+1. Fill in Section 1 (Executive Summary) with your system overview
+2. Document your microservices in Section 5
+3. Add your technology stack to Section 8
+4. Define integration points in Section 7
+
+Would you like help filling in any specific section?
+
+---
+
+#### Example 5: Metric Consistency Workflow
+
+**User**: "Update the job execution capacity to 700 TPS in the Executive Summary"
+
+**Skill Response**:
+
+*Uses Edit tool to change line 33: "500 TPS" → "700 TPS"*
+
+✓ Updated line 33: Design Capacity - Job Execution: 700 TPS
+
+*Automatic audit triggered because Section 1 Key Metrics was edited*
+
+Now checking for metric consistency across the document...
+
+*Scans document for references to old value (500 TPS)*
+*Found at: Line 787, Line 1368*
+*Loads context around each match*
+
+═══════════════════════════════════════════════════════════
+   METRIC CONSISTENCY AUDIT REPORT
+═══════════════════════════════════════════════════════════
+Triggered by: Executive Summary edit (Line 33)
+Metric Changed: Job Execution Capacity (500 TPS → 700 TPS)
+═══════════════════════════════════════════════════════════
+
+## ⚠️ Outdated References Found
+
+| Location | Section | Current Value | Should Be | Context |
+|----------|---------|---------------|-----------|---------|
+| Line 787 | Section 6: Data Flow Patterns | 500 TPS capacity | 700 TPS | "Performance: p50 = 40ms, p95 = 100ms, p99 = 200ms \| 500 TPS capacity" |
+| Line 1368 | Section 10: Scalability & Performance | 500 | 700 | Throughput table: "Job Execution (TPS) \| 500 \| 1000 \| 2000" |
+
+═══════════════════════════════════════════════════════════
+SUMMARY: Found 2 locations with outdated metric value
+═══════════════════════════════════════════════════════════
+
+Would you like me to update both locations to 700 TPS?
+
+Options:
+1. [Yes - Update All] - Apply changes to both locations
+2. [Preview Changes] - Show me exactly what will change
+3. [Manual Selection] - Let me choose individually
+4. [No Thanks] - I'll handle this manually
+
+*User selects: "Preview changes first"*
+
+Here's a preview of the changes I'll make:
+
+════════════════════════════════════════════════════════════
+CHANGE 1 of 2: Line 787 (Section 6: Data Flow Patterns)
+════════════════════════════════════════════════════════════
+
+Current:
+**Performance**: p50 = 40ms, p95 = 100ms, p99 = 200ms | 500 TPS capacity
+
+Will become:
+**Performance**: p50 = 40ms, p95 = 100ms, p99 = 200ms | 700 TPS capacity
+
+════════════════════════════════════════════════════════════
+CHANGE 2 of 2: Line 1368 (Section 10: Throughput Table)
+════════════════════════════════════════════════════════════
+
+Current:
+| Job Execution (TPS) | 500 | 1000 | 2000 | Downstream domain services |
+
+Will become:
+| Job Execution (TPS) | 700 | 1000 | 2000 | Downstream domain services |
+
+════════════════════════════════════════════════════════════
+
+Proceed with both changes? [Yes/No/Choose Individually]
+
+*User approves: "Yes"*
+
+Applying metric consistency updates...
+
+✓ Updated line 787: "500 TPS capacity" → "700 TPS capacity"
+✓ Updated line 1368: Throughput table "500" → "700"
+✓ Document Index is still accurate (no update needed)
+
+═══════════════════════════════════════════════════════════
+   METRIC CONSISTENCY UPDATE COMPLETE
+═══════════════════════════════════════════════════════════
+
+Summary of Changes:
+✓ Executive Summary (Line 33): 500 TPS → 700 TPS
+✓ Section 6 Data Flow (Line 787): 500 TPS → 700 TPS
+✓ Section 10 Throughput Table (Line 1368): 500 → 700
+
+Total Locations Updated: 3
+Document Index: No update needed
+All references to Job Execution Capacity are now consistent.
+
+═══════════════════════════════════════════════════════════
+
+---
 
 ## Optional Enhancements
 
