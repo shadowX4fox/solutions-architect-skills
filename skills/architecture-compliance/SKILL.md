@@ -871,13 +871,14 @@ User: "Generate security compliance documentation"
 - `[EXTRACTED_VALUE]` - Actual data from ARCHITECTURE.md with source reference
 - `[SOURCE_REFERENCE]` - Format: "Section X, line Y" or "Sections X-Y, lines A-B"
 
-**Missing Data:**
-- `[PLACEHOLDER: description]` - Data not found, needs manual input
-- `[PLACEHOLDER: guidance]` - Missing data with recommendation
+**Calculated Values (Transformation):**
+- `[CALCULATED: formula]` - Mathematical calculation from explicit source data
+- Must show source data + calculation formula + source reference
+- Example: `[CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from Section 10.2, line 1576]`
 
-**Derived Values:**
-- `[INFERRED: explanation]` - Calculated or inferred from other data
-- Shows calculation or reasoning
+**Missing Data:**
+- `[PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]` - Data not found, needs manual input
+- Must include: section reference + optional industry standard + note with subsection path
 
 ### Example Template Excerpt
 
@@ -887,7 +888,7 @@ User: "Generate security compliance documentation"
 **Project**: [PROJECT_NAME]
 **Generated**: [GENERATION_DATE]
 **Source**: ARCHITECTURE.md (Sections 10, 11)
-**Version**: 1.0
+**Version**: 2.0
 
 ---
 
@@ -895,7 +896,7 @@ User: "Generate security compliance documentation"
 
 ### 1.1 Availability SLO
 **Target**: [EXTRACTED_VALUE from Section 10.2, line 1576]
-**Error Budget**: [INFERRED: Calculated from SLA]
+**Error Budget**: [CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from Section 10.2, line 1576]
 **Monitoring**: [EXTRACTED_VALUE from Section 11.1, line 1780]
 
 ### 1.2 Latency SLOs
@@ -903,7 +904,9 @@ User: "Generate security compliance documentation"
 **p99**: [EXTRACTED_VALUE from Section 10.1, line 1559]
 
 [If missing]
-**p95**: [PLACEHOLDER: Define p95 latency target. Recommended: < 100ms for user-facing APIs]
+**p95**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 10.1]
+Optional Reference: Industry standard for user-facing APIs: p95 < 100ms
+Note: Add p95 latency target to ARCHITECTURE.md Section 10.1 (Scalability & Performance → Performance Targets)
 ```
 
 ## Automatic Stack Validation (Development Architecture)

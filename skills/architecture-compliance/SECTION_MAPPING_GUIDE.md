@@ -2263,15 +2263,17 @@ Reference: ITIL Incident Management framework]
 Expected: "RTO: 4 hours"
 Found: "Recovery time is generally within half a business day"
 
-Action:
-1. Attempt interpretation with confidence score
-2. Flag as [INFERRED] rather than [EXTRACTED]
-3. Request clarification in completion report
+Action (Strict Source Traceability):
+1. DO NOT attempt interpretation or inference
+2. Flag as [PLACEHOLDER] - data format too ambiguous
+3. Request explicit value in completion report
 
 Example:
-RTO: [INFERRED: ~4 hours (interpreted from "half a business day")]
-Confidence: Medium
-Recommendation: Update ARCHITECTURE.md Section 11.3 with explicit RTO value
+RTO: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
+Note: Update ARCHITECTURE.md Section 11.3 with explicit RTO value (e.g., "RTO: 4 hours").
+Current text "generally within half a business day" is too ambiguous for compliance documentation.
+Source: ARCHITECTURE.md Section 11.3, line X (ambiguous format)
 ```
 
 ---
