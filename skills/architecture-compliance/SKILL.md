@@ -42,6 +42,53 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 11 sep
 **Plus:**
 11. Risk Management (custom organizational format)
 
+## Strict Source Traceability Policy
+
+**CRITICAL REQUIREMENT**: All compliance contracts must maintain strict source traceability to ARCHITECTURE.md.
+
+**Rules:**
+1. ✅ **ONLY extract data** that explicitly exists in ARCHITECTURE.md
+2. ✅ **ALWAYS cite** actual section numbers and line numbers
+3. ✅ **NEVER infer, derive, or guess** values not stated in ARCHITECTURE.md
+4. ❌ **NO INFERENCE** - even if industry standards suggest correlation
+
+**Allowed Extraction Methods:**
+- **Direct**: Extract exact values as-is from ARCHITECTURE.md
+- **Aggregation**: Consolidate multiple related values from different sections
+- **Transformation**: Calculate or reformat values using explicit source data with formula shown
+
+**When Data is Missing:**
+- Mark as `[PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]`
+- Provide optional industry standard reference (informational, not prescriptive)
+- Include guidance on which ARCHITECTURE.md section should contain the data
+
+**Example:**
+```
+**RTO**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
+Note: Add RTO value to ARCHITECTURE.md Section 11.3 (Operational Considerations → Backup and Recovery)
+```
+
+**Audit Compliance**: This policy ensures all generated compliance documents are fully auditable with verifiable sources, meeting regulatory requirements for documentation traceability.
+
+### Contract Type Aliases and Keywords
+
+To support flexible contract selection and validation, the following aliases and keywords are recognized:
+
+| Contract Type | Aliases | Keywords |
+|---------------|---------|----------|
+| Business Continuity | continuity, bcm, disaster recovery, continuidad | business, continuity, recovery, rto, rpo, backup |
+| SRE | site reliability, sre, reliability | sre, slo, sli, error budget, monitoring, observability |
+| Cloud Architecture | cloud, infrastructure as code, iac | cloud, aws, azure, gcp, deployment, regions |
+| Data & AI Architecture | data, ai, ml, analytics, machine learning, data ai | data, ai, ml, analytics, pipeline, model, hallucination |
+| Development Architecture | development, dev, coding standards, desarrollo | development, coding, stack, framework, languages, tools |
+| Process Transformation | automation, process, transformation, transformacion | process, automation, rpa, efficiency, workflow |
+| Security Architecture | security, infosec, cybersecurity, seguridad | security, authentication, encryption, compliance, oauth |
+| IT Infrastructure | infrastructure, platforms, it, plataformas | infrastructure, platform, database, compute, capacity |
+| Enterprise Architecture | enterprise, ea, strategic, empresarial | enterprise, strategic, modularity, governance, alignment |
+| Integration Architecture | integration, api, middleware, integracion | integration, api, messaging, event, microservices |
+| Risk Management | risk, governance, compliance | risk, governance, mitigation, threat, controls |
+
 ## Files in This Skill
 
 - **SKILL.md**: This file - activation triggers and workflows
@@ -166,7 +213,7 @@ If ambiguous, ask:
 
 ### Phase 2: Configuration
 
-**Step 2.1: Contract Selection**
+**Step 2.1: Contract Selection with Validation**
 ```
 Based on user intent:
 - All: Generate all 11 contracts
@@ -176,6 +223,31 @@ Based on user intent:
   - "security" → Security Architecture, Risk Management
   - "cloud" → Cloud Architecture, Platform & IT Infrastructure
   - "SRE" → SRE Architecture, Business Continuity
+
+Validation Process:
+1. Normalize user input: Convert to lowercase, trim whitespace
+2. Check for exact match against contract type names and aliases (see Aliases table above)
+   - If match found → Proceed to Step 2.2
+3. Check for "all" keyword → Generate all 11 contracts
+4. If no match found:
+   - Calculate similarity scores using:
+     * Keyword matching (40% weight): Count matching words between user input and contract names/keywords
+     * Substring matching (30% weight): Check if user input is substring of contract name or vice versa
+     * Fuzzy matching (30% weight): Calculate edit distance for typo tolerance
+   - Select top 3 contract types with highest similarity scores
+   - Use AskUserQuestion to offer alternatives:
+     ```
+     The contract type "[USER_INPUT]" is not recognized.
+
+     Did you mean one of these?
+     - [Alternative 1 Name]: [Brief description]
+     - [Alternative 2 Name]: [Brief description]
+     - [Alternative 3 Name]: [Brief description]
+     ```
+   - If user selects alternative → Use selected contract type
+   - If user selects "Other" → List all 11 contract types with descriptions and let user choose
+
+Output: Validated contract type(s)
 ```
 
 **Step 2.2: Output Directory Configuration**
@@ -201,6 +273,62 @@ Offer user preview of what will be generated:
 - Source sections to be used
 - Estimated placeholders (missing data)
 ```
+
+#### Phase 2.1 Example Scenarios
+
+**Scenario 1: Exact Match**
+- User input: "Cloud Architecture"
+- Validation: Exact match found
+- Output: Cloud Architecture contract selected
+
+**Scenario 2: Alias Match**
+- User input: "sre"
+- Validation: Alias match found ("sre" → "SRE Architecture")
+- Output: SRE Architecture contract selected
+
+**Scenario 3: Typo with Fuzzy Match**
+- User input: "securtiy architecture"
+- Validation: No exact match
+- Similarity scores:
+  - Security Architecture: 95% (high keyword + fuzzy match)
+  - Enterprise Architecture: 45% (keyword "architecture")
+  - Cloud Architecture: 42% (keyword "architecture")
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects: "Security Architecture"
+- Output: Security Architecture contract selected
+
+**Scenario 4: Conceptual Match**
+- User input: "ml governance"
+- Validation: No exact match
+- Similarity scores:
+  - Data & AI Architecture: 75% (keywords "ml", "governance" related to AI)
+  - Risk Management: 50% (keyword "governance")
+  - Enterprise Architecture: 45% (keyword "governance")
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects: "Data & AI Architecture"
+- Output: Data & AI Architecture contract selected
+
+**Scenario 5: Ambiguous Input**
+- User input: "platform"
+- Validation: No exact match
+- Similarity scores:
+  - IT Infrastructure: 70% (alias "platforms")
+  - Data & AI Architecture: 45% (data platform concept)
+  - Cloud Architecture: 40% (cloud platform concept)
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects "Other" and requests: "Show me all options"
+- Action: List all 11 contract types with descriptions
+- User selects: "IT Infrastructure"
+- Output: IT Infrastructure contract selected
+
+**Scenario 6: Completely Unrelated Input**
+- User input: "banana"
+- Validation: No exact match
+- Similarity scores: All very low
+- Action: Offer 3 most common contracts (Enterprise Architecture, Cloud Architecture, Risk Management)
+- Note: "Your input didn't match any contract types. Here are some common options."
+- User selects "Other" → Shows all 11 contract types
+- Output: User selects appropriate contract type
 
 ### Phase 3: Data Extraction (Context-Efficient)
 
@@ -430,12 +558,17 @@ Overall summary:
 **Prompt:** "Review [X] documents in /compliance-docs/. [Y] placeholders require manual review."
 **Next Steps:** List sections needing completion, suggest ARCHITECTURE.md improvements
 
-## Data Extraction Strategies
+## Data Extraction Strategies (Strict Source Traceability)
+
+The skill uses ONLY three extraction strategies that reference actual ARCHITECTURE.md content:
 
 ### 1. Direct Mapping (1:1)
+- Extract exact values from ARCHITECTURE.md without transformation
+- Source Reference Format: `Section X.Y, line Z`
+
 ```
 ARCHITECTURE.md Input:
-"RTO: 4 hours, RPO: 1 hour"
+"RTO: 4 hours, RPO: 1 hour" (Section 11.3, line 1823)
 
 Contract Output:
 **RTO**: 4 hours
@@ -444,10 +577,13 @@ Contract Output:
 ```
 
 ### 2. Aggregation (Multiple Sources)
+- Collect related items from multiple locations and consolidate
+- Source Reference Format: `Sections X-Y, lines A-B` (consolidated)
+
 ```
 ARCHITECTURE.md Input:
-Section 7.1: "Integration: User Management (REST API)"
-Section 7.2: "Integration: Payment Gateway (SOAP)"
+Section 7.1, line 1005: "Integration: User Management (REST API)"
+Section 7.2, line 1020: "Integration: Payment Gateway (SOAP)"
 
 Contract Output:
 ## Integration Catalog
@@ -457,55 +593,73 @@ Contract Output:
 | Payment Gateway | SOAP | Section 7.2, line 1020 |
 ```
 
-### 3. Transformation (Reformatting)
+### 3. Transformation (Reformatting/Calculation)
+- Convert, calculate, or reformat data from ARCHITECTURE.md
+- Source Reference Format: `Section X.Y, line Z (calculated: [formula])`
+- IMPORTANT: Transformations must show source data + calculation formula
+
 ```
 ARCHITECTURE.md Input:
-"SLA: 99.99% uptime"
+"SLA: 99.99% uptime" (Section 10.2, line 1576)
 
 Contract Output:
 **Availability SLO**: 99.99%
 **Error Budget**: 43.2 minutes/month
 **Calculation**: (100% - 99.99%) × 43,200 min = 43.2 min
-**Source**: Section 10.2, line 1576
+**Source**: Section 10.2, line 1576 (calculated)
 ```
 
-### 4. Inference (Derived Values)
-```
-ARCHITECTURE.md Input:
-"SLA: 99.99% uptime"
+**Strict Validation Rule:**
+- If value CANNOT be found using Direct, Aggregation, or Transformation → mark as [PLACEHOLDER]
+- NO INFERENCE ALLOWED: Do not derive, guess, or infer values not explicitly stated in ARCHITECTURE.md
+- Exception: None. All data must trace back to actual ARCHITECTURE.md content.
 
-Contract Output:
-**Business Criticality**: Tier 1 (Mission Critical)
-**Rationale**: 99.99% SLA indicates high-availability requirement
-**Source**: Inferred from Section 10.2, line 1576
-```
-
-## Missing Data Handling
+## Missing Data Handling - Strict Placeholder Format
 
 ### When Data Cannot Be Extracted
 
-**Option 1: Flag with [PLACEHOLDER]**
+When data CANNOT be extracted using Direct, Aggregation, or Transformation strategies, use the following placeholder format:
+
+**Standard Placeholder Template:**
 ```markdown
-**RTO**: [PLACEHOLDER: Not specified in ARCHITECTURE.md]
+**[Field Name]**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]
+Optional Reference: [Industry standard or framework guidance - informational only]
+Note: Add [specific data point] to ARCHITECTURE.md Section X.Y ([Section Name] → [Subsection Name])
 ```
 
-**Option 2: Provide Guidance**
+**Example 1: Missing RTO**
 ```markdown
-[PLACEHOLDER: Define RTO based on business criticality.
-Recommended: Tier 1 = 4 hours, Tier 2 = 8 hours, Tier 3 = 24 hours]
+**RTO (Recovery Time Objective)**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
+Note: Add RTO value to ARCHITECTURE.md Section 11.3 (Operational Considerations → Backup and Recovery)
 ```
 
-**Option 3: Reference Source Section**
+**Example 2: Missing Authentication Method**
 ```markdown
-[PLACEHOLDER: See ARCHITECTURE.md Section 11.3 for backup strategy details.
-Add RTO/RPO values to complete this section.]
+**Authentication Method**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 9.1]
+Optional Reference: Common patterns: OAuth 2.0 + JWT (IETF RFC 6749), SAML 2.0, or mTLS
+Note: Add authentication approach to ARCHITECTURE.md Section 9.1 (Security Architecture → Authentication & Authorization)
 ```
 
-**Option 4: Suggest Inferred Value**
+**Example 3: Missing Encryption Standard**
 ```markdown
-[INFERRED: Based on 99.99% SLA, recommended RTO is 4 hours.
-Validate with stakeholders and update ARCHITECTURE.md.]
+**Data Encryption at Rest**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 9.2]
+Optional Reference: Industry standards: AES-256, TLS 1.3+ (FIPS 140-2 compliant)
+Note: Add encryption standards to ARCHITECTURE.md Section 9.2 (Security Architecture → Data Encryption)
 ```
+
+**Placeholder Components:**
+1. **[PLACEHOLDER: ...]** - Clearly marks missing data
+2. **Section Reference** - Which ARCHITECTURE.md section should contain the data (Section X.Y)
+3. **Optional Reference** - Industry standard or framework guidance (informational, not prescriptive)
+4. **Note** - Specific guidance on where to add the data in ARCHITECTURE.md (Section → Subsection path)
+
+**Critical Rules:**
+- ❌ NEVER infer or derive values not in ARCHITECTURE.md
+- ❌ NEVER suggest specific values as if they were extracted
+- ✅ ALWAYS reference actual section locations (Section X.Y)
+- ✅ ALWAYS provide industry standards as optional reference (not requirements)
+- ✅ ALWAYS include subsection path for adding missing data
 
 ### Completion Report
 

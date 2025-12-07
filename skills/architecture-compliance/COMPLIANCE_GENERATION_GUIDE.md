@@ -1193,69 +1193,65 @@ Contract Output:
 
 ---
 
-### Inference (Derived Values)
+### Strict Source Traceability Rules
 
-**Definition**: Infer or derive values based on context and architectural patterns.
+**Principle**: Every data point in compliance contracts must trace back to actual ARCHITECTURE.md content. No inference, derivation, or guessing is permitted.
 
-**When to Use**:
-- Value not explicitly stated
-- Can be reasonably inferred from other data
-- Industry standards apply
+**Allowed Extraction Methods:**
 
-**Examples**:
+1. **Direct Extraction**: Value explicitly stated in ARCHITECTURE.md
+   - Example: "RTO: 4 hours" in Section 11.3, line 1842
+   - Extract as-is with source reference
 
-**Example 1: Business Criticality from SLA**
+2. **Aggregation**: Multiple related values consolidated from different sections
+   - Example: Integration catalog from Section 7.1, 7.2, 7.3
+   - Source reference includes all sections
+
+3. **Transformation**: Mathematical calculation or format conversion from explicit source data
+   - Example: 99.99% SLA → Error budget: (100% - 99.99%) × 43,200 min = 43.2 min/month
+   - MUST show: source data + calculation formula + source reference
+
+**Prohibited Actions:**
+
+❌ **NEVER infer values** from context
+- Example: Do NOT infer "Tier 1" criticality from 99.99% SLA
+- Even if correlation is industry-standard, do not assume
+
+❌ **NEVER derive values** from architectural patterns
+- Example: Do NOT derive RTO from SLA percentages
+- Even if formula exists, do not apply without explicit source data
+
+❌ **NEVER guess section locations**
+- Example: Do NOT cite "Section 10.2" if you didn't read that section
+- All section references must be from actual Document Index or section reads
+
+❌ **NEVER create placeholder sections**
+- Example: Do NOT suggest "Add Section 12.5" if Section 12 doesn't exist
+- Only reference existing ARCHITECTURE.md sections
+
+**Validation Checklist (Before Caching Data):**
+
+For each extracted data point, verify:
+1. ✅ Value exists in ARCHITECTURE.md? (If NO → [PLACEHOLDER])
+2. ✅ Source section and line number documented?
+3. ✅ Extraction type is Direct, Aggregation, or Transformation?
+4. ✅ If Transformation: calculation formula shown with source data?
+5. ✅ No inference or derivation occurred?
+
+If ANY check fails → Mark as [PLACEHOLDER] with section guidance.
+
+**Missing Data Placeholder Format:**
+```markdown
+**[Field Name]**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]
+Optional Reference: [Industry standard or framework guidance - informational only]
+Note: Add [specific data point] to ARCHITECTURE.md Section X.Y ([Section Name] → [Subsection Name])
 ```
-ARCHITECTURE.md Input (Section 10.2, line 1576):
-"SLA: 99.99% uptime"
 
-Contract Output:
-**Business Criticality**: Tier 1 (Mission Critical)
-**Rationale**: 99.99% SLA indicates high-availability requirement typically associated with mission-critical systems
-**Downtime Tolerance**: 43.2 minutes/month
-**Business Impact**: High - Revenue-generating or customer-facing system
-
-**Source**: Inferred from ARCHITECTURE.md Section 10.2, line 1576
-**Industry Standard**: 99.99% = Tier 1, 99.9% = Tier 2, 99.5% = Tier 3
-```
-
-**Example 2: Disaster Recovery Tier**
-```
-ARCHITECTURE.md Input:
-Section 11.3 (line 1823): "RTO: 4 hours, RPO: 1 hour"
-Section 10.2 (line 1576): "SLA: 99.99%"
-
-Contract Output:
-**DR Tier**: Tier 1 (Hot Site / Active-Active)
-**Rationale**: RTO of 4 hours with 99.99% SLA requires hot standby or active-active configuration
-**Recommended Architecture**: Multi-region active-active deployment with real-time replication
-
-**Source**: Inferred from Sections 11.3 and 10.2
-**DR Tier Standards**:
-- Tier 0 (RTO < 1hr): Active-active required
-- Tier 1 (RTO 1-4hr): Hot site recommended
-- Tier 2 (RTO 4-24hr): Warm site acceptable
-- Tier 3 (RTO > 24hr): Cold site sufficient
-```
-
-**Example 3: Security Classification**
-```
-ARCHITECTURE.md Input:
-Section 9.1 (line 1450): "Encryption: TLS 1.3 for all traffic, AES-256 for data at rest"
-Section 9.2 (line 1465): "Authentication: OAuth 2.0 with MFA required"
-
-Contract Output:
-**Data Classification**: Confidential
-**Rationale**: Strong encryption (AES-256) and MFA requirement indicate handling of confidential or sensitive data
-**Compliance Requirements**: Likely PCI-DSS, GDPR, or HIPAA applicable
-**Security Controls**: Enterprise-grade
-
-**Source**: Inferred from ARCHITECTURE.md Section 9, lines 1450-1465
-**Classification Indicators**:
-- Public: Basic encryption optional
-- Internal: TLS + standard auth
-- Confidential: Strong encryption + MFA
-- Restricted: HSM + advanced controls
+**Example Placeholder:**
+```markdown
+**Business Criticality**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 2.2]
+Optional Reference: Industry tiers based on availability - Tier 1: 99.99%+, Tier 2: 99.9%+, Tier 3: 99.5%+
+Note: Add business criticality classification to ARCHITECTURE.md Section 2.2 (System Overview → Solution Overview)
 ```
 
 ---

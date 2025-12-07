@@ -21,7 +21,9 @@
 
 **RTO (Recovery Time Objective)**: [EXTRACTED from Section 11.3 or PLACEHOLDER]
 **RPO (Recovery Point Objective)**: [EXTRACTED from Section 11.3 or PLACEHOLDER]
-**Business Criticality**: [INFERRED from SLA or PLACEHOLDER]
+**Business Criticality**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 2.2]
+Optional Reference: Industry tiers - Tier 1: 99.99%+, Tier 2: 99.9%+, Tier 3: 99.5%+
+Note: Add business criticality classification to ARCHITECTURE.md Section 2.2 (System Overview → Solution Overview)
 **Source**: [SOURCE_REFERENCE]
 
 ---
@@ -54,7 +56,9 @@
 
 **Availability Requirement**: [EXTRACTED from Section 10.2]
 **Allowed Downtime**: [CALCULATED from SLA]
-**Business Criticality**: [INFERRED from SLA]
+**Business Criticality**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 2.2]
+Optional Reference: Industry tiers - Tier 1: 99.99%+, Tier 2: 99.9%+, Tier 3: 99.5%+
+Note: Add business criticality classification to ARCHITECTURE.md Section 2.2 (System Overview → Solution Overview)
 **Estimated Downtime Cost**: [PLACEHOLDER: Add revenue impact per hour]
 
 **Source**: [SOURCE_REFERENCE]

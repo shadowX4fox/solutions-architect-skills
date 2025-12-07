@@ -25,14 +25,15 @@
 
 ### RISK-001: [Risk Title]
 **Category**: [Security/Availability/Performance/Operational]
-**Description**: [EXTRACTED or INFERRED from Sections 9, 10, 11, 12]
-**Likelihood**: [1-5]
-**Impact**: [1-5]
+**Description**: [EXTRACTED from Sections 9, 10, 11, 12 or PLACEHOLDER]
+Note: If risk not documented in ARCHITECTURE.md, add to Section 12 (ADRs) or create Risk Assessment section
+**Likelihood**: [1-5 based on documented evidence or PLACEHOLDER]
+**Impact**: [1-5 based on documented business impact or PLACEHOLDER]
 **Risk Score**: [Likelihood × Impact]
 **Source**: [SOURCE_REFERENCE]
 
 **Mitigation Strategies**:
-1. [EXTRACTED or INFERRED]
+1. [EXTRACTED from documented controls or PLACEHOLDER]
 2. [...]
 
 **Residual Risk**: [1-5]
