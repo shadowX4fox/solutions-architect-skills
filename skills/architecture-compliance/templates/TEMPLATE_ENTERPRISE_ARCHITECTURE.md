@@ -11,8 +11,21 @@
 
 | Field | Value |
 |-------|-------|
-| Owner | [PLACEHOLDER] |
-| Status | Draft - Auto-Generated |
+| Document Owner | [SOLUTION_ARCHITECT or N/A] |
+| Last Review Date | [GENERATION_DATE] |
+| Next Review Date | [NEXT_REVIEW_DATE] |
+| Status | [DOCUMENT_STATUS] |
+| Stack Validation Status | [VALIDATION_STATUS] - MANDATORY for approval |
+| Validation Date | [VALIDATION_DATE] |
+| Validation Evaluator | [VALIDATION_EVALUATOR] |
+| Approval Authority | [APPROVAL_AUTHORITY] |
+
+**Dynamic Field Instructions**:
+- `[DOCUMENT_STATUS]`: If `validation_results.overall_status == "PASS"` → "In Review" (ready for approval), else → "Draft" (blocked)
+- `[VALIDATION_STATUS]`: From `validation_results.overall_status` → "PASS" or "FAIL"
+- `[VALIDATION_DATE]`: From `validation_results.validation_date` → "YYYY-MM-DD" or "Not performed"
+- `[VALIDATION_EVALUATOR]`: From `validation_results.validation_evaluator` → "Claude Code (Automated)" or "N/A"
+- `[APPROVAL_AUTHORITY]`: "Enterprise Architecture Review Board" or contract-specific authority
 
 ---
 
