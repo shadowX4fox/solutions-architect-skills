@@ -222,22 +222,46 @@ All ARCHITECTURE.md documents include **Mermaid architecture diagrams** integrat
 
 ## Examples
 
-> **Note**: Example repositories demonstrating real-world usage will be added here. Check back soon or see [Issues](https://github.com/shadowx4fox/solutions-architect-skills/issues) for updates.
+### Real-World Example Repository
 
-**Planned Examples:**
-- Enterprise architecture documentation workflow
-- Multi-project compliance generation
-- Integration with existing documentation systems
+**[Task Scheduling Platform Example](https://github.com/shadowX4fox/task-scheduling-example)** ⭐
 
-To request specific examples, [open an issue](https://github.com/shadowx4fox/solutions-architect-skills/issues/new).
+Complete end-to-end demonstration of the three-phase workflow:
 
-**Current Examples in Repository:**
+**Phase 1: Product Owner Specification**
+- Business requirements and user personas
+- Use cases and success criteria
+- Weighted readiness scoring (8.3/10)
 
-The `examples/` directory contains basic demonstrations:
+**Phase 2: Technical Architecture (ARCHITECTURE.md)**
+- 12-section comprehensive architecture document
+- Microservices architecture pattern
+- Interactive Mermaid diagrams
+- Technology stack documentation
+- Complete with metrics, SLOs, and ADRs
 
-- **PRODUCT_OWNER_SPEC_example.md** - Complete PO Spec (Job Scheduling Platform)
-- **ARCHITECTURE_example.md** - Full ARCHITECTURE.md based on PO Spec
-- **compliance-docs/** - All 11 generated compliance contracts
+**Phase 3: Compliance Documentation**
+- All 11 generated compliance contracts with v1.3.0 validation
+- Development Architecture with 26-item stack validation
+- Security, Cloud, SRE, and Enterprise Architecture contracts
+- Full source traceability to ARCHITECTURE.md
+
+**Repository**: https://github.com/shadowX4fox/task-scheduling-example
+
+---
+
+**Additional Examples in This Repository:**
+
+The `examples/` directory contains reference templates:
+
+- **PRODUCT_OWNER_SPEC_example.md** - PO Spec template (Job Scheduling Platform)
+- **ARCHITECTURE_example.md** - Full ARCHITECTURE.md template (2000+ lines)
+
+---
+
+**Want More Examples?**
+
+To request specific examples or use cases, [open an issue](https://github.com/shadowx4fox/solutions-architect-skills/issues/new).
 
 ## Requirements
 
