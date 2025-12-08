@@ -692,55 +692,93 @@ Cache benefits:
 - Maintain source traceability
 ```
 
-**Step 3.5: Automatic Stack Validation** (Development Architecture only)
+**Step 3.5: Automatic Validation** (All Contract Types)
 ```
-For Development Architecture contract generation ONLY:
+For ALL contract types:
 
-Input: Cached Section 8 content (technology stack)
-Process: LLM-assisted validation against 26 checklist items
+Input: Cached section content from ARCHITECTURE.md
+Process: Load external validation config and validate against criteria
 Output: ValidationResults object → cache for Phase 4
 
 Validation Workflow:
-1. Load STACK_VALIDATION_CHECKLIST.md (26 items, 5 sections)
-2. Analyze Section 8 to detect:
-   - Stack type (Java, .NET, both, neither)
-   - Frontend presence (React, Angular, Vue, none)
-   - Technologies, versions, tools, libraries
-3. Evaluate each of 26 checklist items:
-   - PASS: Complies with authorized catalog
-   - FAIL: Deprecated version, unapproved tech, missing docs
-   - N/A: Not applicable to this architecture
-   - UNKNOWN: Insufficient data in Section 8
-4. Collect evidence with source references (line numbers)
-5. Calculate overall status: PASS or FAIL
-6. Generate failure report (if FAIL) with recommendations
+1. Load validation config file from /skills/architecture-compliance/validation/
+   - Format: {contract_name}_validation.json
+   - Example: development_architecture_validation.json
+
+2. Parse validation configuration:
+   - Scoring thresholds (auto_approve: 8.5, ready_for_review: 7.0, needs_work: 5.0)
+   - Weights (completeness, compliance, quality)
+   - Validation sections and items
+   - Approval authority
+
+3. Evaluate validation items from config:
+   - PASS (10 points): Complies with requirements
+   - FAIL (0 points): Non-compliant or deprecated
+   - N/A (10 points): Not applicable to this architecture
+   - UNKNOWN (0 points): Missing data in ARCHITECTURE.md
+   - EXCEPTION (10 points): Documented exception via LADES2
+
+4. Calculate scores:
+   - Item Score: Based on status (PASS=10, FAIL=0, N/A=10, UNKNOWN=0, EXCEPTION=10)
+   - Section Score: Weighted average of item scores
+   - Completeness Score: (Filled required fields / Total required) × 10
+   - Compliance Score: (PASS + N/A + EXCEPTION items / Total applicable) × 10
+   - Quality Score: Source traceability coverage (0-10)
+   - Final Score: (Completeness × weight) + (Compliance × weight) + (Quality × weight)
+
+5. Determine outcome based on final score:
+   - 8.5-10.0: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
+   - 7.0-8.4: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
+   - 5.0-6.9: NEEDS_WORK → Status: "Draft", Actor: "Architecture Team"
+   - 0.0-4.9: REJECT → Status: "Rejected", Actor: "N/A (Blocked)"
+
+6. Collect evidence with source references (Section X.Y, line Z)
+
+7. Generate recommendations for FAIL/UNKNOWN items
 
 Validation States:
-- PASS: All applicable items PASS or N/A → Approval unblocked
-- FAIL: Any FAIL or UNKNOWN items → Approval blocked
+- PASS (score ≥ 7.0): Approval pathway open
+- CONDITIONAL (5.0-6.9): Must address gaps before review
+- FAIL (< 5.0): Contract rejected, cannot proceed
 
-Context Overhead: ~5,500 tokens (3K prompt + 2K response)
+Context Overhead: ~6,000 tokens (3.5K prompt + 2.5K response)
 
 Cache Structure:
 {
   "validation_results": {
-    "overall_status": "PASS" | "FAIL",
-    "validation_date": "2025-11-27",
-    "validation_evaluator": "Claude Code (Automated)",
-    "total_items": 26,
-    "pass_count": 11,
-    "fail_count": 0,
-    "na_count": 12,
-    "unknown_count": 3,
-    "sections": {
-      "java_backend": {...},
-      "dotnet_backend": {...},
-      "frontend": {...},
-      "other_stacks": {...},
-      "exceptions": {...}
+    "final_score": 8.7,
+    "outcome": {
+      "overall_status": "PASS" | "CONDITIONAL" | "FAIL",
+      "document_status": "Approved" | "In Review" | "Draft" | "Rejected",
+      "review_actor": "System (Auto-Approved)" | "[Approval Authority]" | "Architecture Team" | "N/A (Blocked)",
+      "action": "AUTO_APPROVE" | "MANUAL_REVIEW" | "NEEDS_WORK" | "REJECT",
+      "message": "Validation passed with high confidence..."
     },
-    "failures": [...],
-    "deviations": [...]
+    "validation_date": "2025-12-07",
+    "validation_evaluator": "Claude Code (Automated Validation Engine)",
+    "scores": {
+      "completeness": 9.2,
+      "compliance": 8.5,
+      "quality": 8.0
+    },
+    "validation_sections": [
+      {
+        "section_id": "stack_compliance",
+        "section_score": 8.5,
+        "items": [
+          {
+            "item_id": "java_version",
+            "status": "PASS",
+            "score": 10,
+            "evidence": "Java 17 LTS (Section 8.1, line 1234)",
+            "source": "Section 8.1, line 1234"
+          }
+        ]
+      }
+    ],
+    "failures": [],
+    "unknowns": [],
+    "recommendations": []
   }
 }
 ```
@@ -766,13 +804,67 @@ If template not found:
 Replace standard placeholders:
 
 [PROJECT_NAME] → "Job Scheduling Platform" (from Document Index)
-[GENERATION_DATE] → "2025-11-26" (current date)
+[GENERATION_DATE] → "2025-12-07" (current date)
 [EXTRACTED_VALUE] → Actual value from cached data
 [SOURCE_REFERENCE] → "Section X, line Y" (from cache)
 
 Example:
 Template: **Availability SLO**: [EXTRACTED_VALUE]
 Output: **Availability SLO**: 99.99% (Section 10.2, line 1576)
+```
+
+**Step 4.2.1: Populate Document Control Section**
+```
+Using validation_results from Step 3.5, populate Document Control fields:
+
+Standard Placeholders:
+[SOLUTION_ARCHITECT] → Extract from ARCHITECTURE.md Section 1 metadata
+[GENERATION_DATE] → Current date (YYYY-MM-DD)
+[NEXT_REVIEW_DATE] → GENERATION_DATE + 6 months (or per policy)
+
+Validation-Driven Placeholders:
+[DOCUMENT_STATUS] → From validation_results.outcome.document_status
+  - "Approved" (score 8.5-10.0)
+  - "In Review" (score 7.0-8.4)
+  - "Draft" (score 5.0-6.9)
+  - "Rejected" (score 0.0-4.9)
+
+[VALIDATION_SCORE] → From validation_results.final_score
+  - Format: "8.7/10"
+
+[VALIDATION_STATUS] → From validation_results.outcome.overall_status
+  - "PASS" (score ≥ 7.0)
+  - "CONDITIONAL" (score 5.0-6.9)
+  - "FAIL" (score < 5.0)
+
+[VALIDATION_DATE] → From validation_results.validation_date
+  - Format: "2025-12-07" or "Not performed"
+
+[VALIDATION_EVALUATOR] → "Claude Code (Automated Validation Engine)"
+
+[REVIEW_ACTOR] → From validation_results.outcome.review_actor
+  - "System (Auto-Approved)" (score 8.5-10.0)
+  - Template-specific approval authority (score 7.0-8.4)
+  - "Architecture Team" (score 5.0-6.9)
+  - "N/A (Blocked)" (score 0.0-4.9)
+
+[APPROVAL_AUTHORITY] → From validation config approval_authority field
+  - Example: "Technical Architecture Review Board"
+  - Example: "Security Review Board"
+
+Example Document Control Output:
+| Field | Value |
+|-------|-------|
+| Document Owner | Solutions Architect Team |
+| Last Review Date | 2025-12-07 |
+| Next Review Date | 2026-06-07 |
+| Status | In Review |
+| Validation Score | 7.8/10 |
+| Validation Status | PASS |
+| Validation Date | 2025-12-07 |
+| Validation Evaluator | Claude Code (Automated Validation Engine) |
+| Review Actor | Technical Architecture Review Board |
+| Approval Authority | Technical Architecture Review Board |
 ```
 
 **Step 4.3: Calculate Derived Values**

@@ -1,0 +1,245 @@
+{
+  "template_name": "Risk Management",
+  "template_id": "TEMPLATE_RISK_MANAGEMENT",
+  "version": "1.0.0",
+  "approval_authority": "Risk Management Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.45,
+      "compliance": 0.45,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "risk_identification",
+      "section_name": "Risk Identification",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "risk_catalog",
+          "question": "Are all identified risks cataloged?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Risk register with all identified risks (technical, security, operational, business)",
+            "fail_criteria": "No risk identification or incomplete catalog",
+            "na_criteria": "N/A (risk identification generally required)",
+            "unknown_criteria": "Risk catalog not documented in Section 11.5"
+          }
+        },
+        {
+          "item_id": "risk_categories",
+          "question": "Are risks categorized by type (technical, security, operational, business)?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Risks categorized with clear taxonomy",
+            "fail_criteria": "Risks not categorized",
+            "na_criteria": "N/A (categorization required)",
+            "unknown_criteria": "Risk categories not defined"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "risk_assessment",
+      "section_name": "Risk Assessment",
+      "weight": 0.35,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "likelihood_impact",
+          "question": "Are likelihood and impact scores assigned to each risk?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All risks have likelihood (1-5) and impact (1-5) scores",
+            "fail_criteria": "Risks not scored",
+            "na_criteria": "N/A (risk scoring required)",
+            "unknown_criteria": "Risk scores not documented"
+          }
+        },
+        {
+          "item_id": "risk_score",
+          "question": "Is risk score calculated (Likelihood × Impact)?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Risk score calculated with classification (Critical/High/Medium/Low)",
+            "fail_criteria": "Risk scores not calculated",
+            "na_criteria": "N/A (scoring required)",
+            "unknown_criteria": "Risk scores not calculated"
+          }
+        },
+        {
+          "item_id": "risk_prioritization",
+          "question": "Are risks prioritized for treatment?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Risks prioritized with treatment order",
+            "fail_criteria": "No risk prioritization",
+            "na_criteria": "N/A (prioritization required)",
+            "unknown_criteria": "Risk prioritization not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "risk_treatment",
+      "section_name": "Risk Treatment",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "mitigation_strategy",
+          "question": "Is risk treatment strategy defined for each risk (accept/mitigate/transfer/avoid)?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Accept", "Mitigate", "Transfer", "Avoid"],
+            "pass_criteria": "Risk treatment strategy documented for all risks",
+            "fail_criteria": "Treatment strategy missing for risks",
+            "na_criteria": "N/A (treatment strategy required)",
+            "unknown_criteria": "Treatment strategy not documented"
+          }
+        },
+        {
+          "item_id": "mitigation_actions",
+          "question": "Are mitigation actions defined with owners and timelines?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Mitigation actions with responsible owners and target dates",
+            "fail_criteria": "Mitigation actions missing owners or timelines",
+            "na_criteria": "All risks accepted with no mitigation",
+            "unknown_criteria": "Mitigation actions not documented"
+          }
+        },
+        {
+          "item_id": "residual_risk",
+          "question": "Is residual risk calculated after mitigation?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Residual risk scores calculated for mitigated risks",
+            "fail_criteria": "Residual risk not calculated",
+            "na_criteria": "All risks avoided or transferred",
+            "unknown_criteria": "Residual risk not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "risk_monitoring",
+      "section_name": "Risk Monitoring",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "monitoring_plan",
+          "question": "Is risk monitoring and review schedule defined?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Review frequency (e.g., monthly, quarterly)",
+            "pass_criteria": "Risk review schedule with responsible parties",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "N/A (monitoring required)",
+            "unknown_criteria": "Monitoring schedule not documented"
+          }
+        },
+        {
+          "item_id": "escalation_criteria",
+          "question": "Are risk escalation criteria defined?",
+          "architecture_md_section": "11.5",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Escalation criteria with thresholds and escalation paths",
+            "fail_criteria": "No escalation criteria",
+            "na_criteria": "N/A (escalation criteria required)",
+            "unknown_criteria": "Escalation criteria not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Risk Management Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Risk management incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must complete risk identification and assessment",
+        "Must define mitigation strategies with owners and timelines"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient risk management. Cannot proceed.",
+      "blockers": [
+        "Risk identification and assessment missing",
+        "No mitigation strategies or monitoring plan"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Complete risk assessment with likelihood/impact scoring and define mitigation strategies",
+    "UNKNOWN_items": "Add risk management details to ARCHITECTURE.md Section 11.5 (Operational Considerations → Risk Management)",
+    "completeness_below_threshold": "Complete all risk management sections: identification, assessment, treatment, and monitoring",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all risk management data"
+  }
+}

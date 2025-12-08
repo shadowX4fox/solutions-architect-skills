@@ -1,0 +1,236 @@
+{
+  "template_name": "Business Continuity",
+  "template_id": "TEMPLATE_BUSINESS_CONTINUITY",
+  "version": "1.0.0",
+  "approval_authority": "Business Continuity Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.5,
+      "compliance": 0.4,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "recovery_objectives",
+      "section_name": "Recovery Objectives",
+      "weight": 0.35,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "rto_defined",
+          "question": "Is Recovery Time Objective (RTO) defined?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Duration (e.g., 4 hours, 24 hours, 2 business days)",
+            "pass_criteria": "RTO value specified with time unit in Section 9.3",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Business continuity not applicable to this system",
+            "unknown_criteria": "RTO not specified in ARCHITECTURE.md Section 9.3"
+          }
+        },
+        {
+          "item_id": "rpo_defined",
+          "question": "Is Recovery Point Objective (RPO) defined?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Duration (e.g., 15 minutes, 1 hour, 24 hours)",
+            "pass_criteria": "RPO value specified with time unit in Section 9.3",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Business continuity not applicable to this system",
+            "unknown_criteria": "RPO not specified in ARCHITECTURE.md Section 9.3"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "backup_strategy",
+      "section_name": "Backup and Recovery Strategy",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "backup_frequency",
+          "question": "Is backup frequency defined and aligned with RPO?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Frequency (e.g., hourly, daily, continuous)",
+            "pass_criteria": "Backup frequency documented and consistent with RPO requirements",
+            "fail_criteria": "Backup frequency does not meet RPO requirements",
+            "na_criteria": "No data persistence requirements",
+            "unknown_criteria": "Backup frequency not specified in Section 9.3"
+          }
+        },
+        {
+          "item_id": "backup_retention",
+          "question": "Is backup retention policy defined?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Retention period (e.g., 30 days, 1 year, 7 years)",
+            "pass_criteria": "Backup retention period documented with compliance requirements",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "No data persistence requirements",
+            "unknown_criteria": "Backup retention policy not specified"
+          }
+        },
+        {
+          "item_id": "recovery_procedures",
+          "question": "Are recovery procedures documented?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Step-by-step recovery procedures documented with responsible roles",
+            "fail_criteria": "Recovery procedures incomplete or missing critical steps",
+            "na_criteria": "Business continuity not applicable",
+            "unknown_criteria": "Recovery procedures not documented in Section 9.3"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "disaster_recovery",
+      "section_name": "Disaster Recovery",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "dr_site_defined",
+          "question": "Is disaster recovery site/region defined?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Geographic location or cloud region (e.g., Azure East US 2, AWS eu-west-1)",
+            "pass_criteria": "DR site/region documented with geographic separation from primary",
+            "fail_criteria": "DR site same as primary site (no geographic separation)",
+            "na_criteria": "Non-critical system with no DR requirements",
+            "unknown_criteria": "DR site/region not specified"
+          }
+        },
+        {
+          "item_id": "failover_process",
+          "question": "Is failover process documented?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Failover process documented with triggers, steps, and success criteria",
+            "fail_criteria": "Failover process incomplete or untested",
+            "na_criteria": "No DR requirements",
+            "unknown_criteria": "Failover process not documented"
+          }
+        },
+        {
+          "item_id": "dr_testing",
+          "question": "Is DR testing schedule defined?",
+          "architecture_md_section": "9.3",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Testing frequency (e.g., quarterly, semi-annually, annually)",
+            "pass_criteria": "DR testing schedule documented with success criteria",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "No DR requirements",
+            "unknown_criteria": "DR testing schedule not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "data_protection",
+      "section_name": "Data Protection",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "data_classification",
+          "question": "Is data classified with retention requirements?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data classification levels defined with corresponding retention and backup requirements",
+            "fail_criteria": "Data not classified or retention requirements missing",
+            "na_criteria": "Stateless system with no persistent data",
+            "unknown_criteria": "Data classification not documented in Section 6"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Business Continuity Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Validation incomplete. Address missing data before approval.",
+      "blockers": [
+        "Must define RTO/RPO in ARCHITECTURE.md Section 9.3",
+        "Must document backup strategy and recovery procedures"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient business continuity planning. Cannot proceed.",
+      "blockers": [
+        "Critical recovery objectives missing",
+        "No disaster recovery strategy documented",
+        "Completeness below 50%"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document failover process with testing results or register exception if DR not required for this system criticality level",
+    "UNKNOWN_items": "Add missing recovery objectives and backup strategy to ARCHITECTURE.md Section 9.3 (Operational Considerations → Business Continuity)",
+    "completeness_below_threshold": "Complete all required sections: RTO/RPO definition, backup strategy, disaster recovery site, and testing schedule",
+    "low_quality_score": "Improve source traceability by referencing specific line numbers in ARCHITECTURE.md Section 9.3"
+  }
+}

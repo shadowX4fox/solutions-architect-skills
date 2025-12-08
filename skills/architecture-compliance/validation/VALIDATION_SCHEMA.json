@@ -1,0 +1,340 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/shadowx4fox/solutions-architect-skills/validation-schema",
+  "title": "Compliance Template Validation Configuration",
+  "description": "Schema for external validation configuration files used to validate compliance contracts generated from ARCHITECTURE.md",
+  "type": "object",
+  "required": ["template_name", "template_id", "version", "approval_authority", "scoring", "validation_sections", "outcome_mapping"],
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "Human-readable name of the compliance template",
+      "examples": ["Development Architecture", "Security Architecture", "Business Continuity"]
+    },
+    "template_id": {
+      "type": "string",
+      "description": "Unique identifier matching the template filename",
+      "pattern": "^TEMPLATE_[A-Z_]+$",
+      "examples": ["TEMPLATE_DEVELOPMENT_ARCHITECTURE", "TEMPLATE_SECURITY_ARCHITECTURE"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the validation configuration",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0", "1.2.3"]
+    },
+    "approval_authority": {
+      "type": "string",
+      "description": "The organizational body responsible for approving this contract type",
+      "examples": ["Technical Architecture Review Board", "Security Review Board", "SRE Leadership"]
+    },
+    "scoring": {
+      "type": "object",
+      "description": "Scoring configuration including scale, thresholds, and weights",
+      "required": ["scale", "thresholds", "weights", "status_codes"],
+      "properties": {
+        "scale": {
+          "type": "number",
+          "description": "Maximum score value (always 10)",
+          "const": 10
+        },
+        "thresholds": {
+          "type": "object",
+          "description": "Score thresholds that determine outcome tiers",
+          "required": ["auto_approve", "ready_for_review", "needs_work", "reject"],
+          "properties": {
+            "auto_approve": {
+              "type": "number",
+              "description": "Minimum score for automatic approval (8.5)",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "ready_for_review": {
+              "type": "number",
+              "description": "Minimum score for manual review pathway (7.0)",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "needs_work": {
+              "type": "number",
+              "description": "Minimum score for needs work status (5.0)",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "reject": {
+              "type": "number",
+              "description": "Minimum score (always 0)",
+              "const": 0
+            }
+          }
+        },
+        "weights": {
+          "type": "object",
+          "description": "Weights for calculating final score (must sum to 1.0)",
+          "required": ["completeness", "compliance", "quality"],
+          "properties": {
+            "completeness": {
+              "type": "number",
+              "description": "Weight for completeness score (0.0-1.0)",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "compliance": {
+              "type": "number",
+              "description": "Weight for compliance score (0.0-1.0)",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "quality": {
+              "type": "number",
+              "description": "Weight for quality/traceability score (0.0-1.0)",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "status_codes": {
+          "type": "object",
+          "description": "Score mapping for validation status codes",
+          "required": ["PASS", "FAIL", "N/A", "UNKNOWN", "EXCEPTION"],
+          "properties": {
+            "PASS": {
+              "type": "number",
+              "description": "Score for items that pass validation (10)",
+              "const": 10
+            },
+            "FAIL": {
+              "type": "number",
+              "description": "Score for items that fail validation (0)",
+              "const": 0
+            },
+            "N/A": {
+              "type": "number",
+              "description": "Score for items not applicable to this architecture (10)",
+              "const": 10
+            },
+            "UNKNOWN": {
+              "type": "number",
+              "description": "Score for items with missing data in ARCHITECTURE.md (0)",
+              "const": 0
+            },
+            "EXCEPTION": {
+              "type": "number",
+              "description": "Score for properly documented exceptions (10)",
+              "const": 10
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation_sections": {
+      "type": "array",
+      "description": "Array of validation sections, each containing validation items",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["section_id", "section_name", "weight", "required", "validation_items"],
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "description": "Unique identifier for this validation section",
+            "pattern": "^[a-z_]+$",
+            "examples": ["stack_compliance", "recovery_objectives", "security_controls"]
+          },
+          "section_name": {
+            "type": "string",
+            "description": "Human-readable name for this validation section",
+            "examples": ["Technology Stack Compliance", "Recovery Objectives", "Security Controls"]
+          },
+          "weight": {
+            "type": "number",
+            "description": "Weight of this section relative to other sections (0.0-1.0)",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this section is required for compliance"
+          },
+          "validation_items": {
+            "type": "array",
+            "description": "Array of individual validation items in this section",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["item_id", "question", "architecture_md_section", "required", "weight", "validation_rules"],
+              "properties": {
+                "item_id": {
+                  "type": "string",
+                  "description": "Unique identifier for this validation item",
+                  "pattern": "^[a-z_0-9]+$",
+                  "examples": ["java_version", "rto_defined", "tls_version"]
+                },
+                "question": {
+                  "type": "string",
+                  "description": "Validation question to be evaluated",
+                  "examples": ["Is Java in a supported version?", "Is RTO defined?"]
+                },
+                "architecture_md_section": {
+                  "type": "string",
+                  "description": "Section number in ARCHITECTURE.md where data should be found",
+                  "pattern": "^\\d+(\\.\\d+)?$",
+                  "examples": ["8.1", "9.3", "10"]
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether this item is required for compliance"
+                },
+                "weight": {
+                  "type": "number",
+                  "description": "Weight of this item within its section (0.0-1.0)",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "validation_rules": {
+                  "type": "object",
+                  "description": "Rules for validating this item",
+                  "required": ["type", "pass_criteria", "fail_criteria", "na_criteria", "unknown_criteria"],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Type of validation to perform",
+                      "enum": ["version_check", "presence_check", "value_check", "format_check", "custom"]
+                    },
+                    "approved_versions": {
+                      "type": "array",
+                      "description": "List of approved versions (for version_check type)",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "deprecated_versions": {
+                      "type": "array",
+                      "description": "List of deprecated versions (for version_check type)",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "required_format": {
+                      "type": "string",
+                      "description": "Description of required format (for format_check type)"
+                    },
+                    "approved_values": {
+                      "type": "array",
+                      "description": "List of approved values (for value_check type)",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "pass_criteria": {
+                      "type": "string",
+                      "description": "Criteria for PASS status"
+                    },
+                    "fail_criteria": {
+                      "type": "string",
+                      "description": "Criteria for FAIL status"
+                    },
+                    "na_criteria": {
+                      "type": "string",
+                      "description": "Criteria for N/A status"
+                    },
+                    "unknown_criteria": {
+                      "type": "string",
+                      "description": "Criteria for UNKNOWN status"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "outcome_mapping": {
+      "type": "object",
+      "description": "Mapping of score ranges to outcome tiers",
+      "required": ["8.5-10.0", "7.0-8.4", "5.0-6.9", "0.0-4.9"],
+      "properties": {
+        "8.5-10.0": {
+          "$ref": "#/definitions/outcome"
+        },
+        "7.0-8.4": {
+          "$ref": "#/definitions/outcome"
+        },
+        "5.0-6.9": {
+          "$ref": "#/definitions/outcome"
+        },
+        "0.0-4.9": {
+          "$ref": "#/definitions/outcome"
+        }
+      },
+      "additionalProperties": false
+    },
+    "remediation_guidance": {
+      "type": "object",
+      "description": "Guidance for remediating validation failures",
+      "properties": {
+        "FAIL_items": {
+          "type": "string",
+          "description": "Guidance for addressing FAIL items"
+        },
+        "UNKNOWN_items": {
+          "type": "string",
+          "description": "Guidance for addressing UNKNOWN items"
+        },
+        "completeness_below_threshold": {
+          "type": "string",
+          "description": "Guidance for low completeness scores"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "outcome": {
+      "type": "object",
+      "description": "Outcome definition for a score range",
+      "required": ["overall_status", "document_status", "action", "message"],
+      "properties": {
+        "overall_status": {
+          "type": "string",
+          "description": "Overall validation status",
+          "enum": ["PASS", "CONDITIONAL", "FAIL"]
+        },
+        "document_status": {
+          "type": "string",
+          "description": "Document status in workflow",
+          "enum": ["Approved", "In Review", "Draft", "Rejected"]
+        },
+        "action": {
+          "type": "string",
+          "description": "Recommended action",
+          "enum": ["AUTO_APPROVE", "MANUAL_REVIEW", "NEEDS_WORK", "REJECT"]
+        },
+        "message": {
+          "type": "string",
+          "description": "User-facing message explaining the outcome"
+        },
+        "review_actor": {
+          "type": "string",
+          "description": "Actor responsible for next step"
+        },
+        "blockers": {
+          "type": "array",
+          "description": "List of blocking issues",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

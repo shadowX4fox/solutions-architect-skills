@@ -1,0 +1,231 @@
+{
+  "template_name": "Process Transformation and Automation",
+  "template_id": "TEMPLATE_PROCESS_TRANSFORMATION",
+  "version": "1.0.0",
+  "approval_authority": "Process Transformation Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.5,
+      "compliance": 0.4,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "process_documentation",
+      "section_name": "Process Documentation",
+      "weight": 0.40,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "as_is_process",
+          "question": "Is current (as-is) process documented?",
+          "architecture_md_section": "3.2",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Current process documented with steps, roles, and pain points",
+            "fail_criteria": "Current process not documented",
+            "na_criteria": "Net-new process with no as-is state",
+            "unknown_criteria": "As-is process not documented in Section 3.2"
+          }
+        },
+        {
+          "item_id": "to_be_process",
+          "question": "Is target (to-be) process documented?",
+          "architecture_md_section": "3.2",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Target process documented with automation points identified",
+            "fail_criteria": "Target process not documented",
+            "na_criteria": "N/A (to-be process required)",
+            "unknown_criteria": "To-be process not documented"
+          }
+        },
+        {
+          "item_id": "roi_analysis",
+          "question": "Is ROI analysis documented (time/cost savings)?",
+          "architecture_md_section": "3.3",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Quantified savings (hours/week, cost reduction %)",
+            "pass_criteria": "ROI quantified with baseline and projected metrics",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Regulatory requirement with no direct ROI",
+            "unknown_criteria": "ROI analysis not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "automation_design",
+      "section_name": "Automation Design",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "automation_tool",
+          "question": "Is automation tool/platform defined?",
+          "architecture_md_section": "8.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["UiPath", "Automation Anywhere", "Power Automate", "Python", "Azure Logic Apps"],
+            "pass_criteria": "Approved automation tool documented",
+            "fail_criteria": "Unapproved tool or manual process",
+            "na_criteria": "Non-automated process improvement",
+            "unknown_criteria": "Automation tool not specified"
+          }
+        },
+        {
+          "item_id": "error_handling",
+          "question": "Is error handling and exception management defined?",
+          "architecture_md_section": "9.6",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Error handling with retry logic and manual fallback",
+            "fail_criteria": "No error handling strategy",
+            "na_criteria": "Non-automated process",
+            "unknown_criteria": "Error handling not documented"
+          }
+        },
+        {
+          "item_id": "audit_trail",
+          "question": "Is audit trail/logging configured?",
+          "architecture_md_section": "10.5",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Audit logging for all automated actions",
+            "fail_criteria": "No audit trail",
+            "na_criteria": "N/A (audit trail generally required)",
+            "unknown_criteria": "Audit trail not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "change_management",
+      "section_name": "Change Management",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "stakeholder_communication",
+          "question": "Is stakeholder communication plan defined?",
+          "architecture_md_section": "11.4",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Communication plan with affected stakeholders identified",
+            "fail_criteria": "No communication plan",
+            "na_criteria": "Internal-only process change",
+            "unknown_criteria": "Communication plan not documented"
+          }
+        },
+        {
+          "item_id": "training_plan",
+          "question": "Is user training plan documented?",
+          "architecture_md_section": "11.4",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Training plan with materials and schedule",
+            "fail_criteria": "No training plan",
+            "na_criteria": "Fully automated with no user interaction",
+            "unknown_criteria": "Training plan not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "compliance_controls",
+      "section_name": "Compliance and Controls",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "segregation_of_duties",
+          "question": "Is segregation of duties maintained in automated process?",
+          "architecture_md_section": "10.3",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Segregation of duties preserved with approvals",
+            "fail_criteria": "Automation bypasses required controls",
+            "na_criteria": "Non-critical process with no SOD requirements",
+            "unknown_criteria": "SOD controls not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Process Transformation Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Process transformation incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must document as-is and to-be processes",
+        "Must define ROI and automation design"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient process transformation documentation. Cannot proceed.",
+      "blockers": [
+        "Process documentation missing",
+        "No ROI justification"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document process flows, automation design, and change management plans",
+    "UNKNOWN_items": "Add process transformation details to ARCHITECTURE.md Section 3 (Business Context) and Section 11 (Operational Considerations)",
+    "completeness_below_threshold": "Complete all sections: process documentation, ROI analysis, automation design, and change management",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections"
+  }
+}

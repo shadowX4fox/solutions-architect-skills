@@ -1,0 +1,335 @@
+{
+  "template_name": "Security Architecture",
+  "template_id": "TEMPLATE_SECURITY_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Security Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.2,
+      "compliance": 0.7,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "api_security",
+      "section_name": "API Security",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "api_authentication",
+          "question": "Is API authentication mechanism defined and secure?",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OAuth 2.0", "OpenID Connect", "JWT", "API Keys with rotation", "Mutual TLS"],
+            "pass_criteria": "Secure authentication mechanism documented (OAuth 2.0, OIDC, JWT, mTLS)",
+            "fail_criteria": "Basic authentication or no authentication",
+            "na_criteria": "No external APIs",
+            "unknown_criteria": "API authentication not specified in Section 10.1"
+          }
+        },
+        {
+          "item_id": "api_authorization",
+          "question": "Is API authorization model defined (RBAC/ABAC)?",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["RBAC", "ABAC", "Role-Based Access Control", "Attribute-Based Access Control", "Policy-Based"],
+            "pass_criteria": "Authorization model documented with role/policy definitions",
+            "fail_criteria": "No authorization model or all-or-nothing access",
+            "na_criteria": "No APIs or public read-only APIs",
+            "unknown_criteria": "Authorization model not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "encryption",
+      "section_name": "Data Encryption",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "data_in_transit",
+          "question": "Is data encrypted in transit with TLS 1.2+?",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "format_check",
+            "required_format": "TLS 1.2 or TLS 1.3",
+            "pass_criteria": "TLS 1.2 or TLS 1.3 enforced for all external communications",
+            "fail_criteria": "TLS 1.0/1.1 in use or unencrypted communications",
+            "na_criteria": "No external network communications",
+            "unknown_criteria": "TLS version not specified in Section 10.2"
+          }
+        },
+        {
+          "item_id": "data_at_rest",
+          "question": "Is sensitive data encrypted at rest?",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["AES-256", "AES-128", "Transparent Data Encryption", "TDE", "Database encryption", "Disk encryption"],
+            "pass_criteria": "Encryption at rest documented with algorithm (AES-256 recommended)",
+            "fail_criteria": "Sensitive data stored unencrypted",
+            "na_criteria": "No sensitive data storage",
+            "unknown_criteria": "Encryption at rest not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "authentication",
+      "section_name": "User Authentication",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "user_auth_method",
+          "question": "Is user authentication method secure and centralized?",
+          "architecture_md_section": "10.3",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["SSO", "Single Sign-On", "Azure AD", "Okta", "SAML 2.0", "OpenID Connect", "OAuth 2.0"],
+            "pass_criteria": "Centralized authentication with SSO/SAML/OIDC",
+            "fail_criteria": "Custom authentication or local user databases without SSO",
+            "na_criteria": "No user authentication (system-to-system only)",
+            "unknown_criteria": "Authentication method not specified"
+          }
+        },
+        {
+          "item_id": "mfa_required",
+          "question": "Is Multi-Factor Authentication (MFA) required?",
+          "architecture_md_section": "10.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "MFA enforcement policy",
+            "pass_criteria": "MFA required for all users or risk-based authentication",
+            "fail_criteria": "MFA optional or not implemented",
+            "na_criteria": "No user authentication",
+            "unknown_criteria": "MFA requirements not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "secrets_management",
+      "section_name": "Secrets and Key Management",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "secrets_vault",
+          "question": "Are secrets stored in a secure vault (not in code)?",
+          "architecture_md_section": "10.4",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure Key Vault", "HashiCorp Vault", "AWS Secrets Manager", "Google Secret Manager"],
+            "pass_criteria": "Secrets stored in approved vault solution",
+            "fail_criteria": "Secrets in code, config files, or environment variables without vault",
+            "na_criteria": "No secrets/credentials required",
+            "unknown_criteria": "Secrets management approach not specified"
+          }
+        },
+        {
+          "item_id": "key_rotation",
+          "question": "Is cryptographic key rotation policy defined?",
+          "architecture_md_section": "10.4",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Rotation frequency (e.g., 90 days, annually)",
+            "pass_criteria": "Key rotation policy documented with frequency",
+            "fail_criteria": "No key rotation or manual rotation only",
+            "na_criteria": "No cryptographic keys managed",
+            "unknown_criteria": "Key rotation policy not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "logging_monitoring",
+      "section_name": "Security Logging and Monitoring",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "security_logging",
+          "question": "Are security events logged (authentication, authorization, access)?",
+          "architecture_md_section": "10.5",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Security events logged with sufficient detail for audit and forensics",
+            "fail_criteria": "Security events not logged or insufficient detail",
+            "na_criteria": "N/A (all systems require security logging)",
+            "unknown_criteria": "Security logging not documented"
+          }
+        },
+        {
+          "item_id": "siem_integration",
+          "question": "Are logs sent to SIEM for security monitoring?",
+          "architecture_md_section": "10.5",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Splunk", "Azure Sentinel", "ELK Stack", "QRadar", "ArcSight"],
+            "pass_criteria": "Security logs integrated with organizational SIEM",
+            "fail_criteria": "No SIEM integration or logs not centralized",
+            "na_criteria": "N/A (SIEM integration generally required)",
+            "unknown_criteria": "SIEM integration not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "vulnerability_management",
+      "section_name": "Vulnerability Management",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "vulnerability_scanning",
+          "question": "Is automated vulnerability scanning configured?",
+          "architecture_md_section": "10.6",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["SonarQube", "Snyk", "Dependabot", "OWASP Dependency Check", "Trivy"],
+            "pass_criteria": "Automated vulnerability scanning in CI/CD pipeline",
+            "fail_criteria": "No automated scanning or manual-only scanning",
+            "na_criteria": "Third-party managed service with vendor responsibility",
+            "unknown_criteria": "Vulnerability scanning not documented"
+          }
+        },
+        {
+          "item_id": "patch_management",
+          "question": "Is patch management process defined?",
+          "architecture_md_section": "10.6",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Patch management process with SLA for critical vulnerabilities",
+            "fail_criteria": "No patch management process or undefined SLAs",
+            "na_criteria": "Fully managed PaaS with vendor patch responsibility",
+            "unknown_criteria": "Patch management not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "network_security",
+      "section_name": "Network Security",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "network_segmentation",
+          "question": "Is network segmentation implemented (VNets, subnets, NSGs)?",
+          "architecture_md_section": "10.7",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Network segmentation with isolated subnets and security groups",
+            "fail_criteria": "Flat network with no segmentation",
+            "na_criteria": "Serverless architecture with managed networking",
+            "unknown_criteria": "Network segmentation not documented"
+          }
+        },
+        {
+          "item_id": "firewall_waf",
+          "question": "Are firewalls/WAF configured for public endpoints?",
+          "architecture_md_section": "10.7",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Azure Firewall", "AWS WAF", "Cloudflare", "Akamai", "Application Gateway WAF"],
+            "pass_criteria": "WAF/Firewall protecting public-facing applications",
+            "fail_criteria": "Public endpoints without WAF protection",
+            "na_criteria": "No public endpoints",
+            "unknown_criteria": "WAF/Firewall configuration not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Security Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Security controls incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must document all required security controls in ARCHITECTURE.md Section 10",
+        "Must address FAIL items (insecure configurations) or register approved exceptions"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Critical security failures. Cannot proceed.",
+      "blockers": [
+        "Critical security controls missing or misconfigured",
+        "Non-compliant security architecture",
+        "Insufficient security documentation"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Implement required security controls (TLS 1.2+, encryption at rest, MFA, SIEM) or document approved security exceptions with risk acceptance",
+    "UNKNOWN_items": "Add missing security documentation to ARCHITECTURE.md Section 10 (Security Architecture)",
+    "completeness_below_threshold": "Complete all security sections: API security, encryption, authentication, secrets management, logging, vulnerability management, and network security",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers for all security controls"
+  }
+}

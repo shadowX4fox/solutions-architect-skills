@@ -1,0 +1,256 @@
+{
+  "template_name": "Cloud Architecture",
+  "template_id": "TEMPLATE_CLOUD_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Cloud Architecture Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.35,
+      "compliance": 0.55,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "cloud_provider",
+      "section_name": "Cloud Provider and Regions",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "cloud_provider_approved",
+          "question": "Is cloud provider in approved list?",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["AWS", "Azure", "Google Cloud Platform", "GCP"],
+            "pass_criteria": "Cloud provider is AWS, Azure, or GCP",
+            "fail_criteria": "Unapproved cloud provider",
+            "na_criteria": "On-premises deployment only",
+            "unknown_criteria": "Cloud provider not specified"
+          }
+        },
+        {
+          "item_id": "regions_defined",
+          "question": "Are deployment regions defined with data residency compliance?",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Region names with geographic locations",
+            "pass_criteria": "Deployment regions documented with data residency requirements",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "On-premises deployment",
+            "unknown_criteria": "Regions not specified"
+          }
+        },
+        {
+          "item_id": "multi_region",
+          "question": "Is multi-region architecture defined for high availability?",
+          "architecture_md_section": "4.3",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Multi-region deployment with failover strategy",
+            "fail_criteria": "Single region without DR plan",
+            "na_criteria": "Non-critical system with single-region approval",
+            "unknown_criteria": "Multi-region strategy not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "cloud_services",
+      "section_name": "Cloud Services Model",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "service_model",
+          "question": "Is cloud service model defined (IaaS/PaaS/SaaS)?",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["IaaS", "PaaS", "SaaS", "FaaS", "Serverless", "Hybrid"],
+            "pass_criteria": "Service model documented with justification",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "On-premises deployment",
+            "unknown_criteria": "Service model not specified"
+          }
+        },
+        {
+          "item_id": "managed_services",
+          "question": "Are managed services used where appropriate?",
+          "architecture_md_section": "8.3",
+          "required": false,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Managed services used for non-differentiating capabilities",
+            "fail_criteria": "Unnecessary custom implementations instead of managed services",
+            "na_criteria": "On-premises or IaaS-only architecture",
+            "unknown_criteria": "Managed services strategy not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "cost_optimization",
+      "section_name": "Cost Optimization",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "cost_monitoring",
+          "question": "Is cost monitoring and budgeting configured?",
+          "architecture_md_section": "9.5",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Budget alerts and cost allocation tags",
+            "pass_criteria": "Cost monitoring with budget alerts configured",
+            "fail_criteria": "No cost monitoring",
+            "na_criteria": "Third-party managed with fixed pricing",
+            "unknown_criteria": "Cost monitoring not documented"
+          }
+        },
+        {
+          "item_id": "rightsizing",
+          "question": "Is resource rightsizing strategy defined?",
+          "architecture_md_section": "9.5",
+          "required": false,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Rightsizing strategy with review schedule",
+            "fail_criteria": "N/A (optional optimization)",
+            "na_criteria": "Serverless with automatic scaling",
+            "unknown_criteria": "Rightsizing strategy not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "governance",
+      "section_name": "Cloud Governance",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "resource_tagging",
+          "question": "Is resource tagging strategy defined?",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Tagging strategy with required tags (environment, cost center, owner)",
+            "fail_criteria": "No tagging strategy or inconsistent tagging",
+            "na_criteria": "N/A (tagging generally required)",
+            "unknown_criteria": "Tagging strategy not documented"
+          }
+        },
+        {
+          "item_id": "iam_policies",
+          "question": "Are IAM policies following least privilege principle?",
+          "architecture_md_section": "10.3",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Least privilege IAM with role-based access",
+            "fail_criteria": "Overly permissive IAM policies or root/admin access",
+            "na_criteria": "N/A (IAM generally required)",
+            "unknown_criteria": "IAM policies not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "compliance",
+      "section_name": "Regulatory Compliance",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "compliance_requirements",
+          "question": "Are regulatory compliance requirements identified?",
+          "architecture_md_section": "10.8",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["GDPR", "HIPAA", "PCI-DSS", "SOC 2", "ISO 27001"],
+            "pass_criteria": "Compliance requirements identified with controls mapped",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "No regulatory compliance requirements",
+            "unknown_criteria": "Compliance requirements not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Cloud Architecture Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Cloud architecture incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must define cloud provider and regions",
+        "Must document cloud governance and cost controls"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient cloud architecture documentation. Cannot proceed.",
+      "blockers": [
+        "Critical cloud architecture decisions missing",
+        "Governance and compliance controls not defined"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document cloud architecture decisions in ARCHITECTURE.md Section 4.3 and implement governance controls",
+    "UNKNOWN_items": "Add cloud provider, regions, service model, and governance details to ARCHITECTURE.md",
+    "completeness_below_threshold": "Complete cloud architecture sections: provider/regions, service model, cost optimization, governance, and compliance",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all cloud decisions"
+  }
+}

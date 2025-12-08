@@ -1,0 +1,497 @@
+{
+  "template_name": "Development Architecture",
+  "template_id": "TEMPLATE_DEVELOPMENT_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Technical Architecture Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.4,
+      "compliance": 0.5,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "java_backend",
+      "section_name": "Java Backend",
+      "weight": 0.20,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "java_version",
+          "question": "Is the Java language in a supported version?",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "version_check",
+            "approved_versions": ["Java 11", "Java 11 LTS", "Java 17", "Java 17 LTS", "Java 21", "Java 21 LTS"],
+            "deprecated_versions": ["Java 8", "Java 1.8"],
+            "pass_criteria": "Version found in approved list (Java 11 or Java 17 or Java 21)",
+            "fail_criteria": "Deprecated version (Java 8) or unapproved version",
+            "na_criteria": "Java not used in architecture (e.g., .NET-only or Python-only backend)",
+            "unknown_criteria": "Java mentioned but version not specified in ARCHITECTURE.md Section 8.1"
+          }
+        },
+        {
+          "item_id": "spring_boot_version",
+          "question": "Is Spring Boot used in a supported version?",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.18,
+          "validation_rules": {
+            "type": "version_check",
+            "approved_versions": ["Spring Boot 2.7", "Spring Boot 2.7+", "Spring Boot 3.0", "Spring Boot 3.x", "Spring Boot 3"],
+            "deprecated_versions": ["Spring Boot 2.6", "Spring Boot 2.5", "Spring Boot 2.4", "Spring Boot 1.x"],
+            "pass_criteria": "Spring Boot 2.7+ or Spring Boot 3.x specified",
+            "fail_criteria": "Deprecated Spring Boot version (< 2.7)",
+            "na_criteria": "Spring Boot not used (e.g., .NET backend or non-Spring Java framework)",
+            "unknown_criteria": "Spring Boot mentioned but version not specified"
+          }
+        },
+        {
+          "item_id": "java_official_tools",
+          "question": "Are official tools employed? (Maven, Gradle, SonarQube, JUnit, OpenAPI/Swagger)",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Maven", "Gradle", "SonarQube", "JUnit", "JUnit 5", "OpenAPI", "Swagger"],
+            "pass_criteria": "Build tool (Maven or Gradle) + testing (JUnit) + code quality (SonarQube) documented",
+            "fail_criteria": "Unapproved build tool or missing code quality tools",
+            "na_criteria": "Java not used in architecture",
+            "unknown_criteria": "Java tools mentioned but specific tools not identified"
+          }
+        },
+        {
+          "item_id": "java_container_deployment",
+          "question": "Is deployment performed in authorized containers? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Docker", "Kubernetes", "AKS", "EKS", "GKE", "OpenShift", "Azure Kubernetes Service", "Amazon EKS", "Google Kubernetes Engine"],
+            "pass_criteria": "Docker + Kubernetes variant (AKS/EKS/GKE/OpenShift) documented",
+            "fail_criteria": "Non-containerized deployment or unapproved container platform",
+            "na_criteria": "Java not used or different deployment model approved",
+            "unknown_criteria": "Containerization mentioned but platform not specified"
+          }
+        },
+        {
+          "item_id": "java_approved_libraries",
+          "question": "Are only chapter-approved libraries used?",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.17,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All third-party libraries documented and in approved catalog",
+            "fail_criteria": "Unapproved libraries detected or libraries not documented",
+            "na_criteria": "Java not used in architecture",
+            "unknown_criteria": "Libraries mentioned but approval status not verified"
+          }
+        },
+        {
+          "item_id": "java_naming_conventions",
+          "question": "Does it comply with standard naming conventions for repositories and resources?",
+          "architecture_md_section": "8.1",
+          "required": false,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Repository and resource naming follows organizational standards",
+            "fail_criteria": "Naming conventions violated",
+            "na_criteria": "Java not used in architecture",
+            "unknown_criteria": "Naming conventions not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "dotnet_backend",
+      "section_name": ".NET Backend",
+      "weight": 0.20,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "csharp_version",
+          "question": "Is the C# language in a supported version? (.NET Core 3.1, .NET 6, .NET 7)",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "version_check",
+            "approved_versions": [".NET Core 3.1", ".NET 6", ".NET 7", ".NET 8", "C# 9", "C# 10", "C# 11", "C# 12"],
+            "deprecated_versions": [".NET Core 2.1", ".NET Core 2.2", ".NET Framework 4.x"],
+            "pass_criteria": "Version found in approved list (.NET Core 3.1 or .NET 6/7/8)",
+            "fail_criteria": "Deprecated version (.NET Core 2.x or .NET Framework 4.x)",
+            "na_criteria": ".NET not used in architecture (e.g., Java-only or Python-only backend)",
+            "unknown_criteria": ".NET mentioned but version not specified in ARCHITECTURE.md Section 8.1"
+          }
+        },
+        {
+          "item_id": "aspnet_core",
+          "question": "Is ASP.NET Core used as the main framework?",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.18,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["ASP.NET Core", "ASP.NET Core 3.1", "ASP.NET Core 6", "ASP.NET Core 7", "ASP.NET Core 8"],
+            "pass_criteria": "ASP.NET Core documented as main web framework",
+            "fail_criteria": "ASP.NET Framework (legacy) or non-approved framework",
+            "na_criteria": ".NET not used or .NET used for non-web applications",
+            "unknown_criteria": ".NET framework type not specified"
+          }
+        },
+        {
+          "item_id": "dotnet_official_tools",
+          "question": "Are official tools employed? (NuGet, xUnit/NUnit, SonarQube)",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["NuGet", "xUnit", "NUnit", "SonarQube", "MSTest"],
+            "pass_criteria": "Package manager (NuGet) + testing (xUnit/NUnit) + code quality (SonarQube) documented",
+            "fail_criteria": "Unapproved package manager or missing code quality tools",
+            "na_criteria": ".NET not used in architecture",
+            "unknown_criteria": ".NET tools mentioned but specific tools not identified"
+          }
+        },
+        {
+          "item_id": "dotnet_container_deployment",
+          "question": "Is deployment performed in authorized containers? (Docker, Kubernetes: AKS/EKS/GKE/OpenShift)",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Docker", "Kubernetes", "AKS", "EKS", "GKE", "OpenShift"],
+            "pass_criteria": "Docker + Kubernetes variant (AKS/EKS/GKE/OpenShift) documented",
+            "fail_criteria": "Non-containerized deployment or unapproved container platform",
+            "na_criteria": ".NET not used or different deployment model approved",
+            "unknown_criteria": "Containerization mentioned but platform not specified"
+          }
+        },
+        {
+          "item_id": "dotnet_approved_libraries",
+          "question": "Are only chapter-approved libraries used?",
+          "architecture_md_section": "8.1",
+          "required": true,
+          "weight": 0.17,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All third-party libraries documented and in approved catalog",
+            "fail_criteria": "Unapproved libraries detected or libraries not documented",
+            "na_criteria": ".NET not used in architecture",
+            "unknown_criteria": "Libraries mentioned but approval status not verified"
+          }
+        },
+        {
+          "item_id": "dotnet_naming_conventions",
+          "question": "Does it comply with standard naming conventions for repositories and resources?",
+          "architecture_md_section": "8.1",
+          "required": false,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Repository and resource naming follows organizational standards",
+            "fail_criteria": "Naming conventions violated",
+            "na_criteria": ".NET not used in architecture",
+            "unknown_criteria": "Naming conventions not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "frontend",
+      "section_name": "Frontend",
+      "weight": 0.20,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "frontend_framework",
+          "question": "Is an approved framework used? (Angular v12+, React v17+, Vue.js v3+)",
+          "architecture_md_section": "8.2",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "version_check",
+            "approved_versions": ["Angular 12", "Angular 13", "Angular 14", "Angular 15", "Angular 16", "Angular 17", "React 17", "React 18", "Vue.js 3", "Vue 3"],
+            "deprecated_versions": ["Angular 11", "Angular 10", "React 16", "Vue.js 2", "Vue 2"],
+            "pass_criteria": "Framework version in approved list (Angular v12+, React v17+, Vue.js v3+)",
+            "fail_criteria": "Deprecated framework version or unapproved framework",
+            "na_criteria": "No frontend component (backend-only or mobile-only architecture)",
+            "unknown_criteria": "Frontend framework mentioned but version not specified"
+          }
+        },
+        {
+          "item_id": "frontend_language",
+          "question": "Is TypeScript or JavaScript (ES6+) employed?",
+          "architecture_md_section": "8.2",
+          "required": true,
+          "weight": 0.18,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["TypeScript", "JavaScript ES6", "JavaScript ES6+", "ECMAScript 6", "ES6", "ES2015", "ES2020"],
+            "pass_criteria": "TypeScript or JavaScript ES6+ documented",
+            "fail_criteria": "ES5 or older JavaScript version",
+            "na_criteria": "No frontend component",
+            "unknown_criteria": "Frontend language specified but version not clear"
+          }
+        },
+        {
+          "item_id": "frontend_official_tools",
+          "question": "Are official tools used? (NPM/Yarn, Webpack, Jest, Cypress)",
+          "architecture_md_section": "8.2",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["NPM", "Yarn", "Webpack", "Jest", "Cypress", "Vite", "Vitest"],
+            "pass_criteria": "Package manager (NPM/Yarn) + bundler (Webpack/Vite) + testing (Jest/Cypress) documented",
+            "fail_criteria": "Unapproved tools or missing testing frameworks",
+            "na_criteria": "No frontend component",
+            "unknown_criteria": "Frontend tools mentioned but specific tools not identified"
+          }
+        },
+        {
+          "item_id": "frontend_architecture_pattern",
+          "question": "Is the architecture SPA or Micro-Frontends according to guidelines?",
+          "architecture_md_section": "4.1",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["SPA", "Single Page Application", "Micro-Frontends", "Module Federation"],
+            "pass_criteria": "Architecture pattern documented as SPA or Micro-Frontends with justification",
+            "fail_criteria": "Multi-page application (MPA) without justification",
+            "na_criteria": "No frontend component",
+            "unknown_criteria": "Frontend architecture pattern not specified"
+          }
+        },
+        {
+          "item_id": "frontend_approved_libraries",
+          "question": "Are only chapter-approved libraries used?",
+          "architecture_md_section": "8.2",
+          "required": true,
+          "weight": 0.17,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All third-party libraries documented and in approved catalog",
+            "fail_criteria": "Unapproved libraries detected or libraries not documented",
+            "na_criteria": "No frontend component",
+            "unknown_criteria": "Libraries mentioned but approval status not verified"
+          }
+        },
+        {
+          "item_id": "frontend_naming_conventions",
+          "question": "Does it comply with standard naming conventions for repositories and resources?",
+          "architecture_md_section": "8.2",
+          "required": false,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Repository and resource naming follows organizational standards",
+            "fail_criteria": "Naming conventions violated",
+            "na_criteria": "No frontend component",
+            "unknown_criteria": "Naming conventions not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "other_stacks",
+      "section_name": "Other Stacks and Components",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "automation_stack",
+          "question": "Is automation with Python 3.x, Shell Script, RPA (UiPath, Automation Anywhere) aligned with the stack?",
+          "architecture_md_section": "8.3",
+          "required": false,
+          "weight": 0.18,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Python 3", "Python 3.x", "Shell Script", "Bash", "UiPath", "Automation Anywhere", "Power Automate"],
+            "pass_criteria": "Automation tools documented and in approved list",
+            "fail_criteria": "Python 2.x or unapproved RPA tools",
+            "na_criteria": "No automation component",
+            "unknown_criteria": "Automation mentioned but tools not specified"
+          }
+        },
+        {
+          "item_id": "infrastructure_as_code",
+          "question": "Is Infrastructure as Code with Terraform, Ansible, Azure DevOps Pipelines approved?",
+          "architecture_md_section": "8.3",
+          "required": false,
+          "weight": 0.22,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Terraform", "Ansible", "Azure DevOps Pipelines", "ARM Templates", "Bicep", "CloudFormation"],
+            "pass_criteria": "IaC tool documented and in approved list (Terraform, Ansible, Azure DevOps Pipelines)",
+            "fail_criteria": "Unapproved IaC tool or manual infrastructure management",
+            "na_criteria": "No IaC usage (e.g., PaaS-only architecture)",
+            "unknown_criteria": "IaC mentioned but tool not specified"
+          }
+        },
+        {
+          "item_id": "database_platform",
+          "question": "Are the databases used in the authorized catalog? (PostgreSQL, SQL Server, Oracle, MongoDB)",
+          "architecture_md_section": "8.3",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["PostgreSQL", "SQL Server", "Oracle", "MongoDB", "Azure SQL", "Amazon RDS", "Cosmos DB"],
+            "pass_criteria": "Database platform in approved catalog with supported version",
+            "fail_criteria": "Unapproved database or EOL version",
+            "na_criteria": "Stateless application with no database",
+            "unknown_criteria": "Database mentioned but platform or version not specified"
+          }
+        },
+        {
+          "item_id": "api_standards",
+          "question": "Do APIs comply with OpenAPI 3.0, REST, gRPC?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["OpenAPI 3.0", "REST", "gRPC", "GraphQL"],
+            "pass_criteria": "API specification format documented (OpenAPI 3.0 for REST, protobuf for gRPC)",
+            "fail_criteria": "Swagger 2.0 or non-standard API design",
+            "na_criteria": "No APIs exposed",
+            "unknown_criteria": "APIs mentioned but specification format not documented"
+          }
+        },
+        {
+          "item_id": "cicd_platform",
+          "question": "Continuous Integration with Azure DevOps, Jenkins, GitHub Actions?",
+          "architecture_md_section": "11",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure DevOps", "Jenkins", "GitHub Actions", "GitLab CI", "CircleCI"],
+            "pass_criteria": "CI/CD platform documented and in approved list",
+            "fail_criteria": "Unapproved CI/CD platform or manual deployment",
+            "na_criteria": "Third-party managed service with no custom CI/CD",
+            "unknown_criteria": "CI/CD mentioned but platform not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "exceptions",
+      "section_name": "Exceptions and Action Plan",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "deviation_exists",
+          "question": "Is there any deviation from the official technology stack?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "No deviations detected OR all deviations documented with exceptions",
+            "fail_criteria": "Deviations detected without proper exception documentation",
+            "na_criteria": "N/A (not applicable to exception detection)",
+            "unknown_criteria": "Unable to determine if deviations exist due to incomplete documentation"
+          }
+        },
+        {
+          "item_id": "exception_documented",
+          "question": "If yes, has the exception and corresponding action plan been documented?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All deviations have ADR (Architecture Decision Record) with business justification, technical rationale, alternatives, risk assessment",
+            "fail_criteria": "Deviations exist but not documented in Section 12 ADRs",
+            "na_criteria": "No deviations detected",
+            "unknown_criteria": "Deviations exist but ADR completeness cannot be verified"
+          }
+        },
+        {
+          "item_id": "exception_approved",
+          "question": "Is the action plan approved by the chapter and registered in the Compliance Contract?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All exceptions have chapter/architecture review board approval and are registered",
+            "fail_criteria": "Exceptions exist but not approved or not registered",
+            "na_criteria": "No deviations detected",
+            "unknown_criteria": "Approval status of exceptions cannot be verified"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Technical Architecture Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Validation incomplete. Address missing data before approval.",
+      "blockers": [
+        "Must resolve UNKNOWN items by adding data to ARCHITECTURE.md",
+        "Must address FAIL items by migrating to approved stack or registering exceptions via LADES2"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient information or critical compliance failures. Cannot proceed.",
+      "blockers": [
+        "Critical data missing from ARCHITECTURE.md Section 8",
+        "Non-compliant technology stack without exception documentation",
+        "Completeness below 50% - comprehensive documentation required"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Register exception via LADES2 process (create ADR in Section 12 with business justification, technical rationale, alternatives, risk assessment, and obtain chapter approval) OR migrate to approved technology stack",
+    "UNKNOWN_items": "Add missing data to ARCHITECTURE.md Section 8 (Technology Stack). Include specific versions, tools, and deployment platforms.",
+    "completeness_below_threshold": "Complete all required sections in ARCHITECTURE.md before submitting for approval. Focus on Section 8 (Technology Stack) and Section 12 (ADRs) for Development Architecture compliance.",
+    "low_quality_score": "Improve source traceability by ensuring all data points reference specific ARCHITECTURE.md sections and line numbers."
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "template_name": "Platform & IT Infrastructure",
+  "template_id": "TEMPLATE_PLATFORM_IT_INFRASTRUCTURE",
+  "version": "1.0.0",
+  "approval_authority": "Infrastructure Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.4,
+      "compliance": 0.5,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "infrastructure_architecture",
+      "section_name": "Infrastructure Architecture",
+      "weight": 0.35,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "infrastructure_platform",
+          "question": "Is infrastructure platform defined (cloud/on-prem/hybrid)?",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Cloud", "On-Premises", "Hybrid", "Multi-Cloud"],
+            "pass_criteria": "Infrastructure platform documented with justification",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "SaaS-only with no infrastructure responsibility",
+            "unknown_criteria": "Infrastructure platform not specified"
+          }
+        },
+        {
+          "item_id": "compute_resources",
+          "question": "Are compute resources defined (VMs, containers, serverless)?",
+          "architecture_md_section": "8.3",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Compute resources with sizing and scaling strategy",
+            "fail_criteria": "Compute resources not sized or no scaling plan",
+            "na_criteria": "SaaS with no compute management",
+            "unknown_criteria": "Compute resources not documented"
+          }
+        },
+        {
+          "item_id": "storage_architecture",
+          "question": "Is storage architecture defined (capacity, performance, retention)?",
+          "architecture_md_section": "8.3",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Storage capacity, performance tier, and retention documented",
+            "fail_criteria": "Storage not sized or retention policy missing",
+            "na_criteria": "Stateless or SaaS application",
+            "unknown_criteria": "Storage architecture not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "naming_standards",
+      "section_name": "Naming and Tagging Standards",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "naming_convention",
+          "question": "Does infrastructure follow organizational naming conventions?",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Naming conventions documented and compliant",
+            "fail_criteria": "Naming conventions not followed or inconsistent",
+            "na_criteria": "Managed service with provider naming",
+            "unknown_criteria": "Naming conventions not documented"
+          }
+        },
+        {
+          "item_id": "resource_tagging",
+          "question": "Is resource tagging strategy defined?",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Tagging strategy with required tags (environment, cost center, owner)",
+            "fail_criteria": "No tagging or inconsistent tags",
+            "na_criteria": "On-premises with no tagging capability",
+            "unknown_criteria": "Tagging strategy not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "network_architecture",
+      "section_name": "Network Architecture",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "network_topology",
+          "question": "Is network topology documented (VNets, subnets, routing)?",
+          "architecture_md_section": "4.3",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Network topology with VNets/subnets and routing documented",
+            "fail_criteria": "Network topology not documented",
+            "na_criteria": "Serverless with managed networking",
+            "unknown_criteria": "Network topology not specified"
+          }
+        },
+        {
+          "item_id": "connectivity",
+          "question": "Is connectivity to corporate network defined (VPN/ExpressRoute)?",
+          "architecture_md_section": "7",
+          "required": false,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["VPN", "ExpressRoute", "Direct Connect", "Interconnect", "Site-to-Site"],
+            "pass_criteria": "Corporate connectivity documented with redundancy",
+            "fail_criteria": "No connectivity or single point of failure",
+            "na_criteria": "Internet-only application",
+            "unknown_criteria": "Connectivity not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "patching_maintenance",
+      "section_name": "Patching and Maintenance",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "patching_strategy",
+          "question": "Is OS/platform patching strategy defined?",
+          "architecture_md_section": "11.2",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Patching schedule with maintenance windows defined",
+            "fail_criteria": "No patching strategy or ad-hoc patching",
+            "na_criteria": "Fully managed PaaS with vendor patching",
+            "unknown_criteria": "Patching strategy not documented"
+          }
+        },
+        {
+          "item_id": "maintenance_windows",
+          "question": "Are maintenance windows defined?",
+          "architecture_md_section": "11.2",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Day/time windows (e.g., Sunday 2-6 AM)",
+            "pass_criteria": "Maintenance windows documented with stakeholder approval",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Always-on HA architecture with rolling updates",
+            "unknown_criteria": "Maintenance windows not specified"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Infrastructure Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Infrastructure architecture incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must document infrastructure platform and sizing",
+        "Must define naming/tagging standards"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient infrastructure documentation. Cannot proceed.",
+      "blockers": [
+        "Critical infrastructure decisions missing",
+        "No capacity planning or patching strategy"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document infrastructure architecture, sizing, and operational procedures",
+    "UNKNOWN_items": "Add infrastructure details to ARCHITECTURE.md Section 4.3 (Deployment) and Section 11 (Operations)",
+    "completeness_below_threshold": "Complete infrastructure architecture, naming standards, network topology, and maintenance strategy",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections"
+  }
+}

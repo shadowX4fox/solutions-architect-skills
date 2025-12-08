@@ -1,0 +1,237 @@
+{
+  "template_name": "Enterprise Architecture",
+  "template_id": "TEMPLATE_ENTERPRISE_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Enterprise Architecture Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.45,
+      "compliance": 0.45,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "strategic_alignment",
+      "section_name": "Strategic Alignment",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "business_capability",
+          "question": "Is business capability mapping documented?",
+          "architecture_md_section": "3.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Business capabilities mapped to architecture components",
+            "fail_criteria": "No business capability mapping",
+            "na_criteria": "Tactical project with no enterprise scope",
+            "unknown_criteria": "Business capability mapping not documented"
+          }
+        },
+        {
+          "item_id": "strategic_fit",
+          "question": "Is alignment with enterprise strategy documented?",
+          "architecture_md_section": "3.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Strategic alignment with enterprise goals documented",
+            "fail_criteria": "No strategic alignment justification",
+            "na_criteria": "Regulatory/compliance-driven project",
+            "unknown_criteria": "Strategic alignment not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "domain_driven_design",
+      "section_name": "Domain-Driven Design",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "bounded_contexts",
+          "question": "Are bounded contexts defined?",
+          "architecture_md_section": "5.1",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Bounded contexts with clear boundaries and ownership",
+            "fail_criteria": "No bounded contexts or unclear boundaries",
+            "na_criteria": "Simple single-domain application",
+            "unknown_criteria": "Bounded contexts not documented"
+          }
+        },
+        {
+          "item_id": "domain_model",
+          "question": "Is domain model documented with ubiquitous language?",
+          "architecture_md_section": "5",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Domain model with ubiquitous language documented",
+            "fail_criteria": "No domain model or inconsistent terminology",
+            "na_criteria": "Technical infrastructure project",
+            "unknown_criteria": "Domain model not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "modularity_reusability",
+      "section_name": "Modularity and Reusability",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "component_reusability",
+          "question": "Are reusable components identified?",
+          "architecture_md_section": "5.2",
+          "required": false,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Reusable components identified with shared service catalog",
+            "fail_criteria": "Duplicate capabilities not leveraging existing components",
+            "na_criteria": "Unique domain-specific solution",
+            "unknown_criteria": "Component reusability not documented"
+          }
+        },
+        {
+          "item_id": "api_contracts",
+          "question": "Are API contracts defined for inter-service communication?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "API contracts with versioning strategy documented",
+            "fail_criteria": "No API contracts or versioning",
+            "na_criteria": "Monolithic application with no service boundaries",
+            "unknown_criteria": "API contracts not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "governance_standards",
+      "section_name": "Governance and Standards",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "architecture_patterns",
+          "question": "Do architecture patterns align with enterprise standards?",
+          "architecture_md_section": "4",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Architecture patterns consistent with enterprise reference architectures",
+            "fail_criteria": "Non-standard patterns without justification",
+            "na_criteria": "N/A (alignment generally required)",
+            "unknown_criteria": "Architecture patterns not documented"
+          }
+        },
+        {
+          "item_id": "decision_records",
+          "question": "Are Architecture Decision Records (ADRs) documented?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "ADRs documented for significant decisions",
+            "fail_criteria": "No ADRs or key decisions undocumented",
+            "na_criteria": "Simple application with no significant decisions",
+            "unknown_criteria": "ADRs not documented in Section 12"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "integration_patterns",
+      "section_name": "Integration Patterns",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "integration_catalog",
+          "question": "Are external system integrations cataloged?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All external integrations cataloged with patterns (REST, messaging, batch)",
+            "fail_criteria": "Integrations not cataloged",
+            "na_criteria": "Standalone system with no integrations",
+            "unknown_criteria": "Integration catalog not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Enterprise Architecture Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Enterprise architecture incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must document strategic alignment and business capabilities",
+        "Must define bounded contexts and domain model"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient enterprise architecture alignment. Cannot proceed.",
+      "blockers": [
+        "Strategic alignment missing",
+        "No domain-driven design or modularity"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document enterprise alignment, bounded contexts, and reusability strategy",
+    "UNKNOWN_items": "Add enterprise architecture details to ARCHITECTURE.md Sections 3 (Business Context), 5 (Logical Architecture), and 12 (ADRs)",
+    "completeness_below_threshold": "Complete strategic alignment, domain model, modularity, governance, and integration sections",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections"
+  }
+}

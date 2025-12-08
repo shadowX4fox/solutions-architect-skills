@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -40,8 +40,10 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 - **11 Compliance Templates**
   - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
 
-- **Automatic Validation**
-  - 26-item stack validation checklist
+- **Automatic Validation** ⭐ NEW v1.3.0
+  - External validation system (0-10 scoring) for all 11 contracts
+  - 4-tier approval workflow (Auto-approve, Manual review, Needs work, Rejected)
+  - Template-specific validation configurations
   - Metric consistency checking
   - Design Drivers calculation
 
@@ -77,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v1.2.0` in the list.
+You should see `solutions-architect-skills v1.3.0` in the list.
 
 ### First Workflow
 
@@ -128,40 +130,45 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 
 **Key Features:**
 - Context-efficient generation (70-80% reduction in loaded content)
-- **v1.2.0**: 4 ready-to-use contracts (Cloud, Development, IT Infrastructure, Data & AI)
-- Automatic stack validation (Development Architecture - 26 items)
-- **NEW**: Enhanced Data & AI Architecture compliance (Version 2.0)
+- **v1.3.0**: 11 complete compliance contracts with external validation system ⭐ NEW
+- **Automatic Validation (0-10 scoring)**: All contracts validated with granular scoring ⭐ NEW
+- **4-Tier Approval Workflow**: Auto-approve (8.5-10), Manual review (7.0-8.4), Needs work (5.0-6.9), Rejected (0-4.9) ⭐ NEW
 - Source traceability (section + line number references)
 - [PLACEHOLDER] markers for missing data with completion guidance
 - Compliance manifest (index of all generated documents)
 
-**Output:** `/compliance-docs/` directory with 4 contracts + manifest (v1.2.0)
+**Output:** `/compliance-docs/` directory with all 11 contracts + manifest (v1.3.0)
 
-#### Compliance Contract Types
+#### Compliance Contract Types ⭐ v1.3.0: All 11 Contracts Complete
 
-**✅ Ready to Use (v1.2.0)** - 4 contracts:
+**✅ All 11 Contracts with External Validation System**:
 
-1. **Cloud Architecture** - Deployment model, cloud provider, connectivity, security
-2. **Development Architecture** - Technology stack, coding standards, technical debt, **automatic 26-item validation**
-3. **IT Platforms & Infrastructure** - Environments, databases, capacity, naming conventions
-4. **Data & Analytics/AI Architecture (NEW)** - **Version 2.0 template** with 11 comprehensive requirements:
-   - **Data Requirements (LAD1-LAD8)**: Quality, reuse, recovery, decoupling, scalability, integration, compliance, standards
-   - **AI Requirements (LAIA1-LAIA3)**: Model governance, security & reputation, hallucination control
-   - **48 granular data points** with 4-status compliance tracking (Compliant/Non-Compliant/Not Applicable/Unknown)
-   - **Full source traceability** to ARCHITECTURE.md sections with line numbers
-   - **Advanced features**: Evaluation metrics (F1, BLEU, ROUGE, perplexity), RAG architecture, guardrail implementation
-
-**🚧 In Development (Planned for future releases)** - 7 contracts:
-
-5. **Business Continuity** (Continuidad de Negocio) - RTO/RPO, disaster recovery, backup strategy
-6. **SRE** (Arquitectura SRE) - SLOs, error budgets, monitoring, incident management
-7. **Process Transformation** - Automation, efficiency, ROI analysis
-8. **Security Architecture** - API security, authentication, encryption, compliance
-9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first
-10. **Integration Architecture** - Integration catalog, patterns, security, standards
+1. **Business Continuity** - RTO/RPO, disaster recovery, backup strategy, resilience
+2. **SRE Architecture** - SLOs, error budgets, monitoring, incident management, observability
+3. **Cloud Architecture** - Deployment model, cloud provider, connectivity, security
+4. **Security Architecture** - API security, authentication, encryption, compliance, controls
+5. **Data & Analytics/AI Architecture** - Data quality, AI governance, model validation, hallucination control
+6. **Development Architecture** - Technology stack, coding standards, technical debt, **26-item validation**
+7. **Process Transformation** - Automation, efficiency, ROI analysis, workflow optimization
+8. **Platform & IT Infrastructure** - Environments, databases, capacity, naming conventions
+9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first, governance
+10. **Integration Architecture** - Integration catalog, patterns, API security, standards
 11. **Risk Management** - Risk identification, assessment, mitigation, monitoring
 
-**Note**: v1.2.0 delivers the 4 most commonly used compliance contracts with enhanced Data & AI Architecture compliance featuring Version 2.0 template aligned with Cloud Architecture format.
+**🎯 New in v1.3.0: External Validation System**
+
+All 11 contracts now include automatic validation with:
+- **Scoring (0-10 scale)**: Granular feedback on compliance completeness
+- **4-Tier Approval**:
+  - **8.5-10.0**: Auto-approved by system (high confidence)
+  - **7.0-8.4**: Manual review required by approval authority
+  - **5.0-6.9**: Draft status - must address gaps
+  - **0.0-4.9**: Rejected - cannot proceed
+- **Template-Specific Rules**: Each contract has customized validation criteria
+- **Full Traceability**: All scores link back to ARCHITECTURE.md sources
+- **Actionable Feedback**: Clear recommendations for improving scores
+
+**Validation Configuration Files**: 11 JSON configs in `/skills/architecture-compliance/validation/`
 
 ## Architecture Types & Visualization
 
@@ -258,57 +265,85 @@ graph LR
     E -->|Review by| F[Compliance Team]
 ```
 
-## Technology Stack Validation
+## External Validation System (v1.3.0)
 
-The Development Architecture contract includes **automatic validation** against a 26-item checklist:
+All 11 compliance contracts use an **external validation system** with standardized 0-10 scoring:
 
-- **Java Backend** (6 items): Version, framework, tools, containers, libraries, naming
-- **.NET Backend** (6 items): Version, framework, tools, containers, libraries, naming
-- **Frontend** (6 items): Framework, language, tools, architecture, libraries, naming
+### Validation States & Scoring
+- ✅ **PASS (10 points)**: Complies with requirements
+- ❌ **FAIL (0 points)**: Non-compliant or deprecated technology
+- ⚪ **N/A (10 points)**: Not applicable to this architecture
+- ❓ **UNKNOWN (0 points)**: Missing data in ARCHITECTURE.md
+- 🔓 **EXCEPTION (10 points)**: Documented exception via LADES2 process
+
+### Scoring Formula
+```
+Final Score = (Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)
+
+Where:
+- Completeness = (Filled required fields / Total required) × 10
+- Compliance = (PASS + N/A + EXCEPTION items / Total applicable) × 10
+- Quality = Source traceability coverage (0-10)
+```
+
+### Approval Workflow
+| Score | Status | Review Actor | Outcome |
+|-------|--------|--------------|---------|
+| 8.5-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
+| 7.0-8.4 | In Review | [Approval Authority] | Manual review required |
+| 5.0-6.9 | Draft | Architecture Team | Address gaps before review |
+| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed to review |
+
+### Validation Configuration
+- **11 JSON config files**: One per contract type in `/skills/architecture-compliance/validation/`
+- **Template-specific weights**: Each contract can customize Completeness/Compliance/Quality weights
+- **Validation schema**: `VALIDATION_SCHEMA.json` defines standard structure
+- **Example scenarios**: `VALIDATION_EXAMPLES.md` shows all 4 outcome tiers
+
+### Example: Development Architecture Validation
+The Development Architecture contract validates against a **26-item checklist**:
+- **Java Backend** (6 items): Version, Spring Boot, tools, containers, libraries, naming
+- **.NET Backend** (6 items): C# version, ASP.NET Core, tools, containers, libraries, naming
+- **Frontend** (6 items): Framework, TypeScript/JavaScript, tools, architecture, libraries, naming
 - **Other Stacks** (5 items): Automation, IaC, databases, APIs, CI/CD
-- **Exceptions** (3 items): Deviations, documentation, action plans
-
-**Validation States:**
-- ✅ **PASS**: Complies with authorized catalog → Approval unblocked
-- ❌ **FAIL**: Non-compliant or deprecated → Approval blocked with remediation guidance
-- ❓ **UNKNOWN**: Insufficient data → Requires documentation completion
-- ⚪ **N/A**: Not applicable to architecture
+- **Exceptions** (3 items): Deviations exist?, Documented?, Approved?
 
 ## Roadmap
 
-### v1.2.0 (Current Release) ✅
+### v1.3.0 (Current Release) ✅
+**Major Release: Complete Validation System**
+
+- ✅ **All 11 compliance contracts** with templates and validation ⭐ MAJOR
+- ✅ **External validation system** (0-10 scoring, 4-tier approval) ⭐ MAJOR
+- ✅ **11 validation configuration files** (JSON-based, template-specific)
+- ✅ **Validation documentation**:
+  - `VALIDATION_SCHEMA.json` - Schema definition
+  - `VALIDATION_EXAMPLES.md` - 4-tier outcome examples
+  - Updated COMPLIANCE_GENERATION_GUIDE.md
+  - Updated SKILL.md workflow
+- ✅ **Document Control standardization** across all 11 templates
+- ✅ **Automated approval workflow**:
+  - Auto-approve: Score ≥ 8.5
+  - Manual review: Score 7.0-8.4
+  - Needs work: Score 5.0-6.9
+  - Rejected: Score < 5.0
+
+### v1.2.2 (Previous Release)
+- ✅ Document Control format standardization
+- ✅ Strict source traceability enforcement
+
+### v1.2.0
 - ✅ 3 integrated skills (architecture-readiness, architecture-docs, architecture-compliance)
 - ✅ 4 architecture types with Mermaid diagrams (META, 3-Tier, Microservices, N-Layer)
 - ✅ BIAN V12.0 integration for META architecture
-- ✅ 4 ready-to-use compliance contracts:
-  - Cloud Architecture
-  - Development Architecture (with 26-item auto validation)
-  - IT Platforms & Infrastructure
-  - **Data & Analytics/AI Architecture (Version 2.0)** ⭐ NEW
-- ✅ Enhanced Data & AI Architecture compliance:
-  - 11 comprehensive requirements (8 Data + 3 AI)
-  - 48 granular data points with 4-status tracking
-  - Category labels (Data vs AI requirements)
-  - Advanced AI compliance: Guardrails, hallucination control, evaluation metrics
-- ✅ Complete ARCHITECTURE.md generation workflow
-- ✅ Product Owner Specification workflow
+- ✅ 4 ready-to-use compliance contracts
+- ✅ Enhanced Data & AI Architecture compliance (Version 2.0)
 
-### v1.1.0 (Previous Release)
+### v1.1.0
 - ✅ Initial release with 3 compliance contracts
 - ✅ Foundation for architecture documentation workflow
 
 ### Future Releases 🚀
-- 🔄 Additional compliance contracts (7 remaining):
-  - Business Continuity
-  - SRE Architecture
-  - Process Transformation
-  - Security Architecture
-  - Enterprise Architecture
-  - Integration Architecture
-  - Risk Management
-- 🔄 Enhanced validation rules
-- 🔄 Additional architecture patterns
-- 🔄 Improved traceability reporting
 
 ### v2.0.0 (Future)
 - Multi-project support

@@ -1,0 +1,250 @@
+{
+  "template_name": "SRE Architecture",
+  "template_id": "TEMPLATE_SRE_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "SRE Leadership/Operations",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.3,
+      "compliance": 0.6,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "slo_sli",
+      "section_name": "Service Level Objectives and Indicators",
+      "weight": 0.40,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "slo_defined",
+          "question": "Are Service Level Objectives (SLOs) defined?",
+          "architecture_md_section": "9.1",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Percentage and time window (e.g., 99.9% availability over 30 days)",
+            "pass_criteria": "SLO defined with target percentage and measurement window",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Non-production environment without SLO requirements",
+            "unknown_criteria": "SLO not specified in Section 9.1"
+          }
+        },
+        {
+          "item_id": "sli_defined",
+          "question": "Are Service Level Indicators (SLIs) defined?",
+          "architecture_md_section": "9.1",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "Metrics (e.g., request success rate, latency p95, error rate)",
+            "pass_criteria": "SLI metrics defined with measurement methodology",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Non-production environment without SLI requirements",
+            "unknown_criteria": "SLI not specified"
+          }
+        },
+        {
+          "item_id": "error_budget",
+          "question": "Is error budget defined and tracked?",
+          "architecture_md_section": "9.1",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Error budget calculated from SLO (e.g., 0.1% = 43 minutes/month for 99.9% SLO)",
+            "fail_criteria": "Error budget not defined or not tracked",
+            "na_criteria": "Non-production environment",
+            "unknown_criteria": "Error budget not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "monitoring_observability",
+      "section_name": "Monitoring and Observability",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "monitoring_platform",
+          "question": "Is monitoring platform defined with metrics collection?",
+          "architecture_md_section": "9.2",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Prometheus", "Grafana", "Azure Monitor", "Datadog", "New Relic", "Dynatrace"],
+            "pass_criteria": "Monitoring platform configured with metric dashboards",
+            "fail_criteria": "No monitoring or manual-only monitoring",
+            "na_criteria": "Third-party fully managed service with vendor monitoring",
+            "unknown_criteria": "Monitoring platform not specified"
+          }
+        },
+        {
+          "item_id": "logging_infrastructure",
+          "question": "Is centralized logging configured?",
+          "architecture_md_section": "9.2",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["ELK Stack", "Splunk", "Azure Log Analytics", "CloudWatch Logs", "Google Cloud Logging"],
+            "pass_criteria": "Centralized logging with retention policy",
+            "fail_criteria": "Logs stored locally only or no centralization",
+            "na_criteria": "N/A (centralized logging generally required)",
+            "unknown_criteria": "Logging infrastructure not documented"
+          }
+        },
+        {
+          "item_id": "distributed_tracing",
+          "question": "Is distributed tracing implemented for microservices?",
+          "architecture_md_section": "9.2",
+          "required": false,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Jaeger", "Zipkin", "Application Insights", "X-Ray", "OpenTelemetry"],
+            "pass_criteria": "Distributed tracing configured for request flows",
+            "fail_criteria": "N/A (optional enhancement)",
+            "na_criteria": "Monolithic architecture or simple single-service application",
+            "unknown_criteria": "Distributed tracing not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "alerting_incident",
+      "section_name": "Alerting and Incident Response",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "alerting_configured",
+          "question": "Are alerts configured for SLO breaches?",
+          "architecture_md_section": "9.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Alerts configured for SLO violations with escalation paths",
+            "fail_criteria": "No alerting or alerts not linked to SLOs",
+            "na_criteria": "Non-production environment without alerting requirements",
+            "unknown_criteria": "Alerting configuration not documented"
+          }
+        },
+        {
+          "item_id": "oncall_rotation",
+          "question": "Is on-call rotation defined?",
+          "architecture_md_section": "9.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "On-call schedule with team members",
+            "pass_criteria": "On-call rotation documented with escalation procedures",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Non-production or best-effort support model",
+            "unknown_criteria": "On-call rotation not specified"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "capacity_scalability",
+      "section_name": "Capacity and Scalability",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "capacity_planning",
+          "question": "Is capacity planning documented?",
+          "architecture_md_section": "9.4",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Capacity requirements and scaling thresholds documented",
+            "fail_criteria": "No capacity planning or reactive-only scaling",
+            "na_criteria": "Serverless architecture with automatic scaling",
+            "unknown_criteria": "Capacity planning not documented"
+          }
+        },
+        {
+          "item_id": "auto_scaling",
+          "question": "Is auto-scaling configured?",
+          "architecture_md_section": "9.4",
+          "required": false,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Horizontal Pod Autoscaler", "Azure Autoscale", "AWS Auto Scaling", "Kubernetes HPA"],
+            "pass_criteria": "Auto-scaling configured with metrics-based triggers",
+            "fail_criteria": "Manual scaling only",
+            "na_criteria": "Static capacity sufficient for workload",
+            "unknown_criteria": "Auto-scaling configuration not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "SRE Leadership/Operations"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "SRE practices incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must define SLO/SLI and error budgets",
+        "Must configure monitoring and alerting"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient reliability engineering. Cannot proceed.",
+      "blockers": [
+        "Critical SRE practices missing",
+        "No observability or incident response capability"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Implement missing SRE practices (SLO/SLI, monitoring, alerting) or register exception for non-production environments",
+    "UNKNOWN_items": "Add SRE documentation to ARCHITECTURE.md Section 9 (Operational Considerations)",
+    "completeness_below_threshold": "Complete all SRE sections: SLO/SLI definition, monitoring platform, alerting configuration, and capacity planning",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all SRE metrics and configurations"
+  }
+}

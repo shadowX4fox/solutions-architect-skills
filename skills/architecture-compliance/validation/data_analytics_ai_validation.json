@@ -1,0 +1,232 @@
+{
+  "template_name": "Data & Analytics - AI Architecture",
+  "template_id": "TEMPLATE_DATA_AI_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Data & AI Architecture Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.4,
+      "compliance": 0.5,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "data_governance",
+      "section_name": "Data Governance",
+      "weight": 0.35,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "data_catalog",
+          "question": "Is data catalog defined with metadata management?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["Azure Purview", "AWS Glue", "Collibra", "Alation"],
+            "pass_criteria": "Data catalog configured with metadata",
+            "fail_criteria": "No data catalog or manual metadata management",
+            "na_criteria": "No data assets",
+            "unknown_criteria": "Data catalog not documented"
+          }
+        },
+        {
+          "item_id": "data_quality",
+          "question": "Are data quality metrics defined?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data quality metrics (accuracy, completeness, consistency) defined",
+            "fail_criteria": "No data quality monitoring",
+            "na_criteria": "No data processing",
+            "unknown_criteria": "Data quality metrics not documented"
+          }
+        },
+        {
+          "item_id": "data_lineage",
+          "question": "Is data lineage tracked?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data lineage tracked from source to consumption",
+            "fail_criteria": "No data lineage tracking",
+            "na_criteria": "Simple single-source data",
+            "unknown_criteria": "Data lineage not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "ai_ml_governance",
+      "section_name": "AI/ML Model Governance",
+      "weight": 0.30,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "model_registry",
+          "question": "Is ML model registry configured?",
+          "architecture_md_section": "8.4",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "presence_check",
+            "approved_values": ["MLflow", "Azure ML Registry", "SageMaker Model Registry"],
+            "pass_criteria": "Model registry with versioning",
+            "fail_criteria": "No model registry or unversioned models",
+            "na_criteria": "No AI/ML models",
+            "unknown_criteria": "Model registry not documented"
+          }
+        },
+        {
+          "item_id": "model_monitoring",
+          "question": "Is ML model performance monitoring configured?",
+          "architecture_md_section": "9.2",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Model drift and performance monitoring configured",
+            "fail_criteria": "No model monitoring",
+            "na_criteria": "No AI/ML models",
+            "unknown_criteria": "Model monitoring not documented"
+          }
+        },
+        {
+          "item_id": "bias_fairness",
+          "question": "Are bias and fairness assessments performed?",
+          "architecture_md_section": "10.9",
+          "required": true,
+          "weight": 0.3,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Bias and fairness testing in model validation",
+            "fail_criteria": "No bias/fairness assessment",
+            "na_criteria": "No AI/ML models",
+            "unknown_criteria": "Bias assessment not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "data_privacy",
+      "section_name": "Data Privacy and Security",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "pii_handling",
+          "question": "Is PII handling and protection documented?",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "PII identification, classification, and protection controls documented",
+            "fail_criteria": "PII not identified or unprotected",
+            "na_criteria": "No PII processed",
+            "unknown_criteria": "PII handling not documented"
+          }
+        },
+        {
+          "item_id": "data_masking",
+          "question": "Is data masking/anonymization applied in non-production?",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data masking in non-production environments",
+            "fail_criteria": "Production data in non-production without masking",
+            "na_criteria": "No sensitive data or production-only",
+            "unknown_criteria": "Data masking strategy not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "data_pipeline",
+      "section_name": "Data Pipeline Architecture",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "pipeline_orchestration",
+          "question": "Is data pipeline orchestration defined?",
+          "architecture_md_section": "8.4",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure Data Factory", "Airflow", "AWS Glue", "Databricks"],
+            "pass_criteria": "Pipeline orchestration tool configured",
+            "fail_criteria": "Manual data processing or no orchestration",
+            "na_criteria": "No data pipelines",
+            "unknown_criteria": "Pipeline orchestration not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Data & AI Architecture Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Data/AI architecture incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must document data governance (catalog, quality, lineage)",
+        "Must address AI/ML model governance if applicable"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient data/AI governance. Cannot proceed.",
+      "blockers": [
+        "Critical data governance missing",
+        "Data privacy controls not defined"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Implement data governance controls (catalog, quality, lineage) and AI/ML governance for models",
+    "UNKNOWN_items": "Add data/AI documentation to ARCHITECTURE.md Section 6 (Data Model) and Section 8.4 (Data/ML Stack)",
+    "completeness_below_threshold": "Complete data governance, AI/ML governance, privacy controls, and pipeline architecture sections",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all data/AI decisions"
+  }
+}

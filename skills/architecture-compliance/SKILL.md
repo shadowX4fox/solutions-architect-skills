@@ -95,6 +95,9 @@ To support flexible contract selection and validation, the following aliases and
 - **COMPLIANCE_GENERATION_GUIDE.md**: Comprehensive guide for all 11 contract types with generation methodology
 - **SECTION_MAPPING_GUIDE.md**: Detailed mapping between ARCHITECTURE.md sections and compliance documents
 - **templates/**: 11 template files (one per compliance document type)
+- **validation/**: 11 external validation configuration files (JSON format, one per contract type)
+  - **VALIDATION_SCHEMA.json**: JSON schema defining validation config structure
+  - **README.md**: Documentation for the validation system
 - **contracts/CONTRACT_TYPES_REFERENCE.md**: Reference documentation for all contract types
 
 ## File Naming Convention
@@ -366,19 +369,45 @@ For each data point:
 - Store with source reference (section, line number)
 ```
 
-**Step 3.5: Automatic Stack Validation** (Development Architecture only)
+**Step 3.5: Automatic Validation** (All Contract Types)
 ```
-For Development Architecture contract generation:
-- Input: Cached Section 8 content (technology stack)
-- Process: LLM-assisted validation against 26 checklist items
-  - Detect stack type (Java, .NET, both, neither)
-  - Detect frontend presence (React, Angular, Vue, none)
-  - Evaluate each of 26 items: PASS, FAIL, N/A, UNKNOWN
-  - Collect evidence with source references
-  - Handle edge cases (backend-only, polyglot, deprecated versions, unapproved tech)
+For ALL contract types:
+- Input: Cached section content from ARCHITECTURE.md
+- Process: Load and apply external validation configuration
+  1. Load validation config file from /skills/architecture-compliance/validation/
+     - Format: {contract_name}_validation.json
+     - Example: development_architecture_validation.json
+
+  2. Parse validation configuration:
+     - Scoring thresholds (auto_approve: 8.5, ready_for_review: 7.0, needs_work: 5.0)
+     - Weights (completeness, compliance, quality)
+     - Validation sections and items
+     - Approval authority
+
+  3. Evaluate validation items:
+     - PASS (10 points): Complies with requirements
+     - FAIL (0 points): Non-compliant or deprecated
+     - N/A (10 points): Not applicable
+     - UNKNOWN (0 points): Missing data in ARCHITECTURE.md
+     - EXCEPTION (10 points): Documented exception via LADES2
+
+  4. Calculate scores:
+     - Final Score = (Completeness × weight) + (Compliance × weight) + (Quality × weight)
+     - Completeness: (Filled required fields / Total required) × 10
+     - Compliance: (PASS + N/A + EXCEPTION items / Total applicable) × 10
+     - Quality: Source traceability coverage (0-10)
+
+  5. Determine outcome:
+     - 8.5-10.0: AUTO_APPROVE → "Approved", Actor: "System (Auto-Approved)"
+     - 7.0-8.4: MANUAL_REVIEW → "In Review", Actor: [Approval Authority]
+     - 5.0-6.9: NEEDS_WORK → "Draft", Actor: "Architecture Team"
+     - 0.0-4.9: REJECT → "Rejected", Actor: "N/A (Blocked)"
+
+  6. Collect evidence with source references (Section X.Y, line Z)
+
 - Output: ValidationResults object → cache for Phase 4
-- Overhead: ~5,500 tokens (3K prompt + 2K response)
-- Result: PASS (approval unblocked) or FAIL (detailed failure report)
+- Overhead: ~6,000 tokens (3.5K prompt + 2.5K response)
+- Result: PASS (score ≥ 7.0) | CONDITIONAL (5.0-6.9) | FAIL (< 5.0)
 ```
 
 ### Phase 4: Document Generation
@@ -391,11 +420,20 @@ Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
 
 **Step 4.2: Apply Extracted Data to Placeholders**
 ```
-Replace placeholders:
+Replace standard placeholders:
 - [PROJECT_NAME] → from Document Index
 - [GENERATION_DATE] → current date (YYYY-MM-DD)
 - [EXTRACTED_VALUE] → from cached data
 - [SOURCE_REFERENCE] → section and line numbers
+
+Populate Document Control section with validation results:
+- [DOCUMENT_STATUS] → from validation_results.outcome.document_status
+- [VALIDATION_SCORE] → from validation_results.final_score (format: "8.7/10")
+- [VALIDATION_STATUS] → from validation_results.outcome.overall_status
+- [VALIDATION_DATE] → from validation_results.validation_date
+- [VALIDATION_EVALUATOR] → "Claude Code (Automated Validation Engine)"
+- [REVIEW_ACTOR] → from validation_results.outcome.review_actor
+- [APPROVAL_AUTHORITY] → from validation config approval_authority field
 ```
 
 **Step 4.3: Calculate Derived Values**
@@ -909,86 +947,124 @@ Optional Reference: Industry standard for user-facing APIs: p95 < 100ms
 Note: Add p95 latency target to ARCHITECTURE.md Section 10.1 (Scalability & Performance → Performance Targets)
 ```
 
-## Automatic Stack Validation (Development Architecture)
+## External Validation System (All Contract Types)
 
 ### Overview
 
-The Development Architecture contract includes **automatic stack validation** that evaluates the technology stack against a 26-item checklist during document generation. This eliminates manual validation and provides immediate feedback on stack compliance.
+All compliance contracts include **automatic validation** using external configuration files. This standardized validation system evaluates compliance against contract-specific criteria and generates a **0-10 score** that determines document approval status. This eliminates manual validation and provides consistent, auditable compliance assessment.
 
-### Validation Checklist
+### Validation Configuration Files
 
-**File**: `STACK_VALIDATION_CHECKLIST.md` (26 items across 5 sections)
+**Location**: `/skills/architecture-compliance/validation/`
 
-1. **Java Backend** (6 items): Version, Spring Boot, tools, containers, libraries, naming
-2. **.NET Backend** (6 items): C# version, ASP.NET Core, tools, containers, libraries, naming
-3. **Frontend** (6 items): Framework, TypeScript/JavaScript, tools, architecture, libraries, naming
-4. **Other Stacks** (5 items): Automation, IaC, databases, APIs, CI/CD
-5. **Exceptions** (3 items): Deviations exist?, Documented?, Plans approved?
+**Format**: JSON configuration files (one per contract type)
+
+**Examples**:
+- `development_architecture_validation.json` (26 validation items for tech stack)
+- `security_architecture_validation.json` (security controls and compliance)
+- `cloud_architecture_validation.json` (cloud best practices)
+- `sre_architecture_validation.json` (reliability and observability)
+- ...and 7 more (11 total)
+
+**Schema**: `VALIDATION_SCHEMA.json` defines the structure for all validation configs
 
 ### Validation States
 
-- **PASS**: Item complies with authorized technology catalog
-- **FAIL**: Item does not comply (deprecated version, unapproved technology, missing documentation)
-- **N/A**: Item not applicable to this architecture (e.g., frontend in backend-only system)
-- **UNKNOWN**: Insufficient data in ARCHITECTURE.md Section 8 to determine compliance
+- **PASS (10 points)**: Item complies with requirements
+- **FAIL (0 points)**: Non-compliant, deprecated, or unapproved
+- **N/A (10 points)**: Not applicable to this architecture
+- **UNKNOWN (0 points)**: Missing data in ARCHITECTURE.md (forces completeness)
+- **EXCEPTION (10 points)**: Documented exception via LADES2 process (fully compliant)
+
+### Scoring System (0-10 Scale)
+
+**Score Calculation**:
+```
+Final Score = (Completeness × weight) + (Compliance × weight) + (Quality × weight)
+
+Where:
+- Completeness = (Filled required fields / Total required) × 10
+- Compliance = (PASS + N/A + EXCEPTION items / Total applicable) × 10
+- Quality = Source traceability coverage (0-10)
+- Weights = Template-specific (default: Completeness 40%, Compliance 50%, Quality 10%)
+```
+
+**Outcome Tiers**:
+- **8.5-10.0**: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
+- **7.0-8.4**: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
+- **5.0-6.9**: NEEDS_WORK → Status: "Draft", Actor: "Architecture Team"
+- **0.0-4.9**: REJECT → Status: "Rejected", Actor: "N/A (Blocked)"
 
 ### Validation Process
 
-**Step 1: Detection**
-- Analyze Section 8 to detect stack type (Java, .NET, both, neither)
-- Detect frontend presence (React, Angular, Vue, none)
-- Identify technologies, versions, tools
+**Step 1: Load Configuration**
+- Read validation config JSON for contract type
+- Parse thresholds, weights, validation items, approval authority
 
-**Step 2: Evaluation** (LLM-assisted)
-- Evaluate each of 26 checklist items against Section 8 content
-- Collect evidence with source references (line numbers)
-- Determine status: PASS, FAIL, N/A, or UNKNOWN
-- Identify deviations from authorized catalog
+**Step 2: Evaluate Items**
+- For each validation item in config, evaluate against ARCHITECTURE.md data
+- Collect evidence with source references (Section X.Y, line Z)
+- Assign status: PASS, FAIL, N/A, UNKNOWN, or EXCEPTION
 
-**Step 3: Results**
-- Overall status: PASS (if all applicable items PASS or N/A) or FAIL (if any FAIL or UNKNOWN)
-- Detailed per-item results with evidence
-- Failure report with remediation recommendations
-- Stack deviation report with exception guidance
+**Step 3: Calculate Scores**
+- Item scores based on status (PASS=10, FAIL=0, etc.)
+- Section scores: weighted average of item scores
+- Completeness, Compliance, Quality scores
+- Final score using weighted formula
+
+**Step 4: Determine Outcome**
+- Map final score to outcome tier
+- Set document status, validation status, review actor
+- Generate recommendations for FAIL/UNKNOWN items
+
+**Step 5: Cache Results**
+- Store validation_results object for document generation
+- Include final score, outcome, breakdown, recommendations
 
 ### Template Integration
 
-Validation results populate 3 locations in the generated compliance document:
+Validation results populate the Document Control section in generated compliance documents:
 
-**1. Document Control Table**
+**Document Control Table**:
 ```markdown
-| **Stack Validation Status** | PASS/FAIL |
-| **Validation Date** | 2025-11-27 |
-| **Validation Evaluator** | Claude Code (Automated) |
+| Status | In Review |
+| Validation Score | 7.8/10 |
+| Validation Status | PASS |
+| Validation Date | 2025-12-07 |
+| Validation Evaluator | Claude Code (Automated Validation Engine) |
+| Review Actor | Technical Architecture Review Board |
+| Approval Authority | Technical Architecture Review Board |
 ```
 
-**2. LADES1.6 Subsection**
-- **PASS**: Clean summary with statistics (X PASS, Y N/A)
-- **FAIL**: Detailed failure report including:
-  - Validation Failures section (FAIL items with recommendations)
-  - Items Requiring Documentation (UNKNOWN items)
-  - Stack Deviations Detected (unauthorized technologies)
+**Validation Requirements**:
+- Validation score ≥ 7.0 MANDATORY for approval pathway
+- Score 8.5-10.0: Automatic approval (no human review required)
+- Score 7.0-8.4: Manual review by [Approval Authority] required
+- Score 5.0-6.9: Must address gaps before proceeding to review
+- Score < 5.0: Contract rejected, cannot proceed
 
-**3. Compliance Summary**
-```markdown
-**Stack Validation**: PASS (Automated: 2025-11-27)
-```
+**Contract-Specific Content**:
+- Development Architecture: LADES1.6 section with detailed stack validation results
+- Security Architecture: Security controls compliance assessment
+- SRE Architecture: SLO/SLI compliance and monitoring coverage
+- Other contracts: Domain-specific validation details as defined in their configs
 
-### Edge Cases Handled
+### Benefits of External Validation
 
-1. **Backend-only**: Frontend items marked N/A
-2. **Full-stack**: Both backend and frontend evaluated
-3. **Polyglot backend**: Both Java and .NET sections evaluated
-4. **Section 8 missing**: Overall FAIL, all items UNKNOWN
-5. **Partial documentation**: PASS for documented, UNKNOWN for missing
-6. **Deprecated versions**: FAIL with upgrade recommendations
-7. **Unapproved technology**: FAIL with exception process guidance
+1. **Maintainability**: Validation logic separated from templates and code
+2. **Consistency**: All 11 contracts use the same validation schema and scoring methodology
+3. **Transparency**: Numeric scores (0-10) provide granular feedback vs binary PASS/FAIL
+4. **Automation**: Clear thresholds for automatic approval (8.5+) vs manual review (7.0-8.4)
+5. **Extensibility**: Easy to add/modify validation items without changing templates
+6. **Auditability**: Validation configs are versioned and traceable
+7. **Flexibility**: Each contract can define custom weights while maintaining standard scoring
 
 ### Performance
 
-- **Context overhead**: ~5,500 tokens (3K prompt + 2K response)
-- **Leverages cached data**: Uses Section 8 already extracted in Step 3.4
-- **No additional loading**: Zero incremental ARCHITECTURE.md reads
+- **Context overhead**: ~6,000 tokens per contract (3.5K prompt + 2.5K response)
+- **Leverages cached data**: Uses sections already extracted in Step 3.4
+- **No additional loading**: Validation uses cached ARCHITECTURE.md content
+- **Efficient scoring**: JSON-based config parsing is fast and deterministic
 
 ### Approval Workflow
 

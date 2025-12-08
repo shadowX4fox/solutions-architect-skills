@@ -1,0 +1,242 @@
+{
+  "template_name": "Integration Architecture",
+  "template_id": "TEMPLATE_INTEGRATION_ARCHITECTURE",
+  "version": "1.0.0",
+  "approval_authority": "Integration Architecture Review Board",
+  "scoring": {
+    "scale": 10,
+    "thresholds": {
+      "auto_approve": 8.5,
+      "ready_for_review": 7.0,
+      "needs_work": 5.0,
+      "reject": 0
+    },
+    "weights": {
+      "completeness": 0.35,
+      "compliance": 0.55,
+      "quality": 0.1
+    },
+    "status_codes": {
+      "PASS": 10,
+      "FAIL": 0,
+      "N/A": 10,
+      "UNKNOWN": 0,
+      "EXCEPTION": 10
+    }
+  },
+  "validation_sections": [
+    {
+      "section_id": "integration_catalog",
+      "section_name": "Integration Catalog",
+      "weight": 0.35,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "external_systems",
+          "question": "Are all external system integrations cataloged?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All external systems listed with owner and purpose",
+            "fail_criteria": "Integrations not cataloged",
+            "na_criteria": "Standalone system with no integrations",
+            "unknown_criteria": "Integration catalog not documented in Section 7"
+          }
+        },
+        {
+          "item_id": "integration_patterns",
+          "question": "Are integration patterns defined (REST, messaging, batch)?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["REST API", "Messaging", "Event-Driven", "Batch/ETL", "gRPC", "GraphQL"],
+            "pass_criteria": "Integration patterns documented with justification",
+            "fail_criteria": "Integration patterns not specified",
+            "na_criteria": "No integrations",
+            "unknown_criteria": "Integration patterns not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "api_management",
+      "section_name": "API Management",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "api_gateway",
+          "question": "Is API Gateway configured for external APIs?",
+          "architecture_md_section": "7.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure API Management", "AWS API Gateway", "Kong", "Apigee"],
+            "pass_criteria": "API Gateway configured with policies",
+            "fail_criteria": "Direct API exposure without gateway",
+            "na_criteria": "No external APIs",
+            "unknown_criteria": "API Gateway not documented"
+          }
+        },
+        {
+          "item_id": "api_versioning",
+          "question": "Is API versioning strategy defined?",
+          "architecture_md_section": "7.1",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "API versioning strategy (URI, header, or query parameter) with deprecation policy",
+            "fail_criteria": "No versioning strategy",
+            "na_criteria": "No APIs or internal-only APIs",
+            "unknown_criteria": "API versioning not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "messaging_events",
+      "section_name": "Messaging and Events",
+      "weight": 0.20,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "message_broker",
+          "question": "Is message broker/event bus defined?",
+          "architecture_md_section": "7.2",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure Service Bus", "RabbitMQ", "Kafka", "AWS SQS/SNS", "Event Hubs"],
+            "pass_criteria": "Message broker configured with topics/queues",
+            "fail_criteria": "Messaging required but no broker defined",
+            "na_criteria": "Synchronous REST-only integrations",
+            "unknown_criteria": "Message broker not documented"
+          }
+        },
+        {
+          "item_id": "event_schema",
+          "question": "Are event schemas defined and versioned?",
+          "architecture_md_section": "7.2",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Event schemas documented with schema registry",
+            "fail_criteria": "No event schema definition",
+            "na_criteria": "No event-driven integrations",
+            "unknown_criteria": "Event schemas not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "integration_security",
+      "section_name": "Integration Security",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "authentication_method",
+          "question": "Is integration authentication method defined?",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "weight": 0.6,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OAuth 2.0", "JWT", "API Keys", "Mutual TLS", "Service Principal"],
+            "pass_criteria": "Secure authentication for all integrations",
+            "fail_criteria": "Unauthenticated integrations or basic auth",
+            "na_criteria": "No integrations",
+            "unknown_criteria": "Authentication method not documented"
+          }
+        },
+        {
+          "item_id": "data_encryption",
+          "question": "Is data encrypted in transit for integrations?",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "weight": 0.4,
+          "validation_rules": {
+            "type": "format_check",
+            "required_format": "TLS 1.2 or TLS 1.3",
+            "pass_criteria": "TLS 1.2+ for all external integrations",
+            "fail_criteria": "Unencrypted or deprecated TLS",
+            "na_criteria": "No external integrations",
+            "unknown_criteria": "Encryption not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "error_handling",
+      "section_name": "Error Handling and Resilience",
+      "weight": 0.05,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "retry_policy",
+          "question": "Is retry policy defined for failed integrations?",
+          "architecture_md_section": "9.6",
+          "required": true,
+          "weight": 1.0,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Retry policy with exponential backoff and circuit breaker",
+            "fail_criteria": "No retry policy",
+            "na_criteria": "No integrations",
+            "unknown_criteria": "Retry policy not documented"
+          }
+        }
+      ]
+    }
+  ],
+  "outcome_mapping": {
+    "8.5-10.0": {
+      "overall_status": "PASS",
+      "document_status": "Approved",
+      "action": "AUTO_APPROVE",
+      "message": "High confidence validation. Contract automatically approved.",
+      "review_actor": "System (Auto-Approved)"
+    },
+    "7.0-8.4": {
+      "overall_status": "PASS",
+      "document_status": "In Review",
+      "action": "MANUAL_REVIEW",
+      "message": "Validation passed with small gaps. Ready for human review.",
+      "review_actor": "Integration Architecture Review Board"
+    },
+    "5.0-6.9": {
+      "overall_status": "CONDITIONAL",
+      "document_status": "Draft",
+      "action": "NEEDS_WORK",
+      "message": "Integration architecture incomplete. Address gaps before approval.",
+      "blockers": [
+        "Must catalog all external integrations",
+        "Must define integration security and error handling"
+      ]
+    },
+    "0.0-4.9": {
+      "overall_status": "FAIL",
+      "document_status": "Rejected",
+      "action": "REJECT",
+      "message": "Insufficient integration architecture. Cannot proceed.",
+      "blockers": [
+        "Critical integration details missing",
+        "Security controls not defined"
+      ]
+    }
+  },
+  "remediation_guidance": {
+    "FAIL_items": "Document all external integrations, API management strategy, and security controls",
+    "UNKNOWN_items": "Add integration details to ARCHITECTURE.md Section 7 (Integration Points) and Section 10 (Security)",
+    "completeness_below_threshold": "Complete integration catalog, API management, messaging, security, and error handling sections",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all integration decisions"
+  }
+}

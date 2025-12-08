@@ -15,17 +15,48 @@
 | Last Review Date | [GENERATION_DATE] |
 | Next Review Date | [NEXT_REVIEW_DATE] |
 | Status | [DOCUMENT_STATUS] |
-| Stack Validation Status | [VALIDATION_STATUS] - MANDATORY for approval |
+| Validation Score | [VALIDATION_SCORE]/10 |
+| Validation Status | [VALIDATION_STATUS] |
 | Validation Date | [VALIDATION_DATE] |
 | Validation Evaluator | [VALIDATION_EVALUATOR] |
+| Review Actor | [REVIEW_ACTOR] |
 | Approval Authority | [APPROVAL_AUTHORITY] |
 
-**Dynamic Field Instructions**:
-- `[DOCUMENT_STATUS]`: If `validation_results.overall_status == "PASS"` → "In Review" (ready for approval), else → "Draft" (blocked)
-- `[VALIDATION_STATUS]`: From `validation_results.overall_status` → "PASS" or "FAIL"
-- `[VALIDATION_DATE]`: From `validation_results.validation_date` → "YYYY-MM-DD" or "Not performed"
-- `[VALIDATION_EVALUATOR]`: From `validation_results.validation_evaluator` → "Claude Code (Automated)" or "N/A"
-- `[APPROVAL_AUTHORITY]`: "Integration Architecture Review Board" or contract-specific authority
+**Validation Configuration**: `/skills/architecture-compliance/validation/integration_architecture_validation.json`
+
+**Dynamic Field Instructions for Document Generation**:
+
+- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
+  - Score 8.5-10.0 → "Approved" (auto-approved)
+  - Score 7.0-8.4 → "In Review" (ready for manual review)
+  - Score 5.0-6.9 → "Draft" (needs work)
+  - Score 0.0-4.9 → "Rejected" (blocked)
+
+- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
+
+- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
+  - "PASS" (score ≥ 7.0)
+  - "CONDITIONAL" (score 5.0-6.9)
+  - "FAIL" (score < 5.0)
+
+- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
+
+- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
+
+- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
+  - Score 8.5-10.0 → "System (Auto-Approved)"
+  - Score 7.0-8.4 → "Integration Architecture Review Board"
+  - Score 5.0-6.9 → "Architecture Team"
+  - Score 0.0-4.9 → "N/A (Blocked)"
+
+- `[APPROVAL_AUTHORITY]`: "Integration Architecture Review Board"
+
+**Validation Requirements**:
+- Validation score ≥ 7.0 MANDATORY for approval pathway
+- Score 8.5-10.0: Automatic approval (no human review required)
+- Score 7.0-8.4: Manual review by Integration Architecture Review Board required
+- Score 5.0-6.9: Must address gaps before proceeding to review
+- Score < 5.0: Contract rejected, cannot proceed
 
 ---
 
