@@ -397,6 +397,11 @@ For ALL contract types:
      - Compliance: (PASS + N/A + EXCEPTION items / Total applicable) × 10
      - Quality: Source traceability coverage (0-10)
 
+     **CRITICAL - N/A Scoring**: N/A items MUST be included in the compliance score numerator:
+     - N/A = "Not applicable to this architecture" = Fully compliant (10 points)
+     - UNKNOWN = "Missing required data" = Non-compliant (0 points)
+     - Example: 6 PASS + 5 N/A out of 11 items = (6+5)/11 × 10 = 10.0/10 (100%)
+
   5. Determine outcome:
      - 8.0-10.0: AUTO_APPROVE → "Approved", Actor: "System (Auto-Approved)"
      - 7.0-7.9: MANUAL_REVIEW → "In Review", Actor: [Approval Authority]

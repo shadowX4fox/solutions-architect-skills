@@ -76,6 +76,13 @@
 **Dynamic Field Instructions**:
 - `[VALIDATION_SUMMARY]`: If `validation_results.overall_status == "PASS"` → "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)", else if "FAIL" → "❌ FAIL (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN) - See LADES1.6 for details", else → "PENDING - Validation not performed"
 
+**CRITICAL - Compliance Score Calculation**:
+When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
+- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
+- N/A items count as fully compliant (10 points each)
+- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
+- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+
 ---
 
 ## 1. Best Practices Adoption - Technology Stack Alignment (LADES1)

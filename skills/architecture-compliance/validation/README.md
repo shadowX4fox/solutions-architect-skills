@@ -58,6 +58,18 @@ Where:
 - Compliance = (PASS items + N/A items + EXCEPTION items) / (Total applicable items) × 10
 - Quality = Source traceability score (0-10 based on line number coverage)
 - W₁, W₂, W₃ = Template-specific weights (must sum to 1.0)
+
+**CRITICAL - N/A Items Calculation Example:**
+
+N/A items MUST be included in the compliance score numerator:
+
+```
+Example:
+- 6 PASS items, 5 N/A items, 0 FAIL items, 0 UNKNOWN items (11 total items)
+- Compliance = (6 PASS + 5 N/A + 0 EXCEPTION) / 11 × 10 = 11/11 × 10 = 10.0/10 (100%)
+- ✅ Correct: N/A counted as fully compliant
+- ❌ Wrong: 6/11 × 10 = 6.0/10 (treating N/A as neutral)
+```
 ```
 
 ### Default Weights

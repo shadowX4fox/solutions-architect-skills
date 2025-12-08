@@ -726,6 +726,19 @@ Validation Workflow:
    - Quality Score: Source traceability coverage (0-10)
    - Final Score: (Completeness × weight) + (Compliance × weight) + (Quality × weight)
 
+   **CRITICAL - N/A Items MUST Be Included in Compliance Score:**
+
+   N/A items receive full 10 points and must be counted in the compliance score numerator.
+
+   Example calculation:
+   - Items: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN out of 11 total items
+   - Compliance Score: (6 PASS + 5 N/A + 0 EXCEPTION) / 11 × 10 = 11/11 × 10 = **10.0/10 (100%)**
+   - ❌ WRONG: 6/11 × 10 = 6.0/10 (55%)
+
+   **Rationale**: N/A means "legitimately not applicable to this architecture" - these items should
+   count as fully compliant, not neutral. Only UNKNOWN (missing required data) and FAIL (non-compliant)
+   items receive 0 points.
+
 5. Determine outcome based on final score:
    - 8.0-10.0: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
    - 7.0-7.9: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]

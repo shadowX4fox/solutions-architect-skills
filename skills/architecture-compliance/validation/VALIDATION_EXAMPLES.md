@@ -13,7 +13,7 @@ This document provides example scenarios for each of the 4 validation outcome ti
 **Validation Results**:
 ```json
 {
-  "final_score": 9.2,
+  "final_score": 9.7,
   "outcome": {
     "overall_status": "PASS",
     "document_status": "Approved",
@@ -25,7 +25,7 @@ This document provides example scenarios for each of the 4 validation outcome ti
   "validation_evaluator": "Claude Code (Automated Validation Engine)",
   "scores": {
     "completeness": 9.5,
-    "compliance": 9.0,
+    "compliance": 10.0,
     "quality": 9.0
   }
 }
@@ -33,20 +33,21 @@ This document provides example scenarios for each of the 4 validation outcome ti
 
 **Score Breakdown**:
 - **Completeness (9.5/10)**: 19 of 20 required data points present in ARCHITECTURE.md (95%)
-- **Compliance (9.0/10)**: 25 PASS, 1 N/A, 0 FAIL, 0 UNKNOWN out of 26 items
+- **Compliance (10.0/10)**: 25 PASS, 1 N/A, 0 FAIL, 0 UNKNOWN out of 26 items
+  - Calculation: (25 PASS + 1 N/A) / 26 = 26/26 = 10.0/10 (N/A counted as fully compliant)
 - **Quality (9.0/10)**: All data points have source traceability with section and line numbers
 
 **Final Calculation**:
 ```
-Final Score = (9.5 × 0.4) + (9.0 × 0.5) + (9.0 × 0.1)
-            = 3.8 + 4.5 + 0.9
-            = 9.2/10
+Final Score = (9.5 × 0.4) + (10.0 × 0.5) + (9.0 × 0.1)
+            = 3.8 + 5.0 + 0.9
+            = 9.7/10
 ```
 
 **Document Control Output**:
 ```markdown
 | Status | Approved |
-| Validation Score | 9.2/10 |
+| Validation Score | 9.7/10 |
 | Validation Status | PASS |
 | Validation Date | 2025-12-07 |
 | Validation Evaluator | Claude Code (Automated Validation Engine) |
@@ -155,6 +156,7 @@ Final Score = (8.0 × 0.4) + (7.5 × 0.5) + (8.0 × 0.1)
 - **Completeness (6.0/10)**: 12 of 20 required data points present (60%)
   - Missing: Authentication method, Authorization model, Encryption standards (data at rest), Key rotation policy, Security monitoring tools, Compliance certifications, Vulnerability scanning frequency, Security incident response plan
 - **Compliance (6.5/10)**: 8 PASS, 5 N/A, 1 FAIL, 6 UNKNOWN out of 20 items
+  - Calculation: (8 PASS + 5 N/A) / 20 = 13/20 = 6.5/10 (N/A counted as fully compliant)
   - FAIL: Using deprecated TLS 1.1 for legacy systems
   - UNKNOWN: No OAuth 2.0 configuration documented, no encryption key management details, no security audit logs defined, no penetration testing schedule, no data classification policy, no access control matrix
 - **Quality (6.0/10)**: Some source references missing or incomplete
