@@ -4,7 +4,7 @@ This document provides example scenarios for each of the 4 validation outcome ti
 
 ---
 
-## Tier 1: AUTO_APPROVE (Score 8.5-10.0)
+## Tier 1: AUTO_APPROVE (Score 8.0-10.0)
 
 ### Example: Development Architecture - Perfect Compliance
 
@@ -58,7 +58,7 @@ Final Score = (9.5 × 0.4) + (9.0 × 0.5) + (9.0 × 0.1)
 
 ---
 
-## Tier 2: MANUAL_REVIEW (Score 7.0-8.4)
+## Tier 2: MANUAL_REVIEW (Score 7.0-7.9)
 
 ### Example: SRE Architecture - Good Compliance with Minor Gaps
 
@@ -80,7 +80,7 @@ Final Score = (9.5 × 0.4) + (9.0 × 0.5) + (9.0 × 0.1)
   "scores": {
     "completeness": 8.0,
     "compliance": 7.5,
-    "quality": 8.5
+    "quality": 8.0
   }
 }
 ```
@@ -90,11 +90,11 @@ Final Score = (9.5 × 0.4) + (9.0 × 0.5) + (9.0 × 0.1)
   - Missing: Error budget calculation, On-call rotation schedule, Incident escalation matrix, Runbook repository
 - **Compliance (7.5/10)**: 12 PASS, 3 N/A, 0 FAIL, 1 UNKNOWN out of 16 items
   - UNKNOWN: Monitoring dashboard URL not specified
-- **Quality (8.5/10)**: Most data points have source traceability, a few missing line numbers
+- **Quality (8.0/10)**: Most data points have source traceability, a few missing line numbers
 
 **Final Calculation**:
 ```
-Final Score = (8.0 × 0.4) + (7.5 × 0.5) + (8.5 × 0.1)
+Final Score = (8.0 × 0.4) + (7.5 × 0.5) + (8.0 × 0.1)
             = 3.2 + 3.75 + 0.85
             = 7.8/10
 ```
@@ -297,8 +297,8 @@ Final Score = (2.5 × 0.4) + (4.0 × 0.5) + (3.0 × 0.1)
 
 | Tier | Score Range | Status | Review Actor | Example | Key Characteristics |
 |------|-------------|--------|--------------|---------|---------------------|
-| **Tier 1** | 8.5-10.0 | Approved | System (Auto-Approved) | Development Architecture (9.2/10) | Perfect/near-perfect compliance, comprehensive documentation, automatic approval |
-| **Tier 2** | 7.0-8.4 | In Review | Approval Authority | SRE Architecture (7.8/10) | Good compliance, minor gaps, requires manual review |
+| **Tier 1** | 8.0-10.0 | Approved | System (Auto-Approved) | Development Architecture (9.2/10) | Perfect/near-perfect compliance, comprehensive documentation, automatic approval |
+| **Tier 2** | 7.0-7.9 | In Review | Approval Authority | SRE Architecture (7.8/10) | Good compliance, minor gaps, requires manual review |
 | **Tier 3** | 5.0-6.9 | Draft | Architecture Team | Security Architecture (6.2/10) | Incomplete documentation, must address gaps before review |
 | **Tier 4** | 0.0-4.9 | Rejected | N/A (Blocked) | Cloud Architecture (3.5/10) | Critical failures, insufficient data, cannot proceed |
 
@@ -311,13 +311,13 @@ Final Score = (2.5 × 0.4) + (4.0 × 0.5) + (3.0 × 0.1)
 - Address **Critical FAIL items**: Fix non-compliant technologies or register exceptions
 - Achieve at least 50% completeness and resolve critical blockers
 
-### From NEEDS_WORK (5.0-6.9) to MANUAL_REVIEW (7.0-8.4)
+### From NEEDS_WORK (5.0-6.9) to MANUAL_REVIEW (7.0-7.9)
 - Resolve **UNKNOWN items**: Add missing data to ARCHITECTURE.md
 - Reduce **FAIL items**: Upgrade deprecated technologies or document exceptions
 - Improve **Quality**: Add source traceability (section and line numbers)
 - Target 70-80% completeness and minimize UNKNOWN/FAIL items
 
-### From MANUAL_REVIEW (7.0-8.4) to AUTO_APPROVE (8.5-10.0)
+### From MANUAL_REVIEW (7.0-7.9) to AUTO_APPROVE (8.0-10.0)
 - Achieve **95%+ completeness**: Fill remaining data gaps
 - Resolve **all UNKNOWN items**: Ensure all required data is documented
 - Perfect **Quality**: Full source traceability for all data points
@@ -333,7 +333,7 @@ Final Score = (2.5 × 0.4) + (4.0 × 0.5) + (3.0 × 0.1)
 4. **Address UNKNOWN items first**: Missing data scores 0 points - add it to ARCHITECTURE.md
 5. **Fix FAIL items strategically**: Upgrade deprecated tech or register exceptions
 6. **Aim for Tier 2 minimum**: Score ≥ 7.0 opens the approval pathway
-7. **Strive for Tier 1**: Score ≥ 8.5 enables automatic approval and faster delivery
+7. **Strive for Tier 1**: Score ≥ 8.0 enables automatic approval and faster delivery
 
 ---
 

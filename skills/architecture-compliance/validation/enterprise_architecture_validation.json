@@ -6,7 +6,7 @@
   "scoring": {
     "scale": 10,
     "thresholds": {
-      "auto_approve": 8.5,
+      "auto_approve": 8.0,
       "ready_for_review": 7.0,
       "needs_work": 5.0,
       "reject": 0
@@ -193,14 +193,14 @@
     }
   ],
   "outcome_mapping": {
-    "8.5-10.0": {
+    "8.0-10.0": {
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
       "message": "High confidence validation. Contract automatically approved.",
       "review_actor": "System (Auto-Approved)"
     },
-    "7.0-8.4": {
+    "7.0-7.9": {
       "overall_status": "PASS",
       "document_status": "In Review",
       "action": "MANUAL_REVIEW",

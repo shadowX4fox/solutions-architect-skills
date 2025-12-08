@@ -45,7 +45,7 @@
           "properties": {
             "auto_approve": {
               "type": "number",
-              "description": "Minimum score for automatic approval (8.5)",
+              "description": "Minimum score for automatic approval (8.0)",
               "minimum": 0,
               "maximum": 10
             },
@@ -259,12 +259,12 @@
     "outcome_mapping": {
       "type": "object",
       "description": "Mapping of score ranges to outcome tiers",
-      "required": ["8.5-10.0", "7.0-8.4", "5.0-6.9", "0.0-4.9"],
+      "required": ["8.0-10.0", "7.0-7.9", "5.0-6.9", "0.0-4.9"],
       "properties": {
-        "8.5-10.0": {
+        "8.0-10.0": {
           "$ref": "#/definitions/outcome"
         },
-        "7.0-8.4": {
+        "7.0-7.9": {
           "$ref": "#/definitions/outcome"
         },
         "5.0-6.9": {

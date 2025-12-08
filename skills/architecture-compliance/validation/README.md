@@ -107,16 +107,16 @@ The validation system maps final scores to four outcome tiers:
 
 | Score Range | Overall Status | Document Status | Action | Review Actor | Description |
 |-------------|----------------|-----------------|--------|--------------|-------------|
-| **8.5-10.0** | PASS | Approved | AUTO_APPROVE | System (Auto-Approved) | High confidence validation. Contract automatically approved without human review. |
-| **7.0-8.4** | PASS | In Review | MANUAL_REVIEW | [Approval Authority] | Validation passed with small gaps. Ready for human review by approval authority. |
+| **8.0-10.0** | PASS | Approved | AUTO_APPROVE | System (Auto-Approved) | High confidence validation. Contract automatically approved without human review. |
+| **7.0-7.9** | PASS | In Review | MANUAL_REVIEW | [Approval Authority] | Validation passed with small gaps. Ready for human review by approval authority. |
 | **5.0-6.9** | CONDITIONAL | Draft | NEEDS_WORK | Architecture Team | Validation incomplete. Must address missing data or FAIL items before approval. |
 | **0.0-4.9** | FAIL | Rejected | REJECT | N/A (Blocked) | Critical failures or insufficient data. Cannot proceed to approval. |
 
 ### Approval Gating
 
 - **Validation score ≥ 7.0** is MANDATORY for approval pathway
-- **Score 8.5-10.0**: Automatic approval (no human review required)
-- **Score 7.0-8.4**: Manual review by approval authority required
+- **Score 8.0-10.0**: Automatic approval (no human review required)
+- **Score 7.0-7.9**: Manual review by approval authority required
 - **Score 5.0-6.9**: Must address gaps before proceeding to review
 - **Score < 5.0**: Contract rejected, cannot proceed
 

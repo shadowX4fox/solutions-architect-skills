@@ -27,8 +27,8 @@
 **Dynamic Field Instructions for Document Generation**:
 
 - `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.5-10.0 → "Approved" (auto-approved)
-  - Score 7.0-8.4 → "In Review" (ready for manual review)
+  - Score 8.0-10.0 → "Approved" (auto-approved)
+  - Score 7.0-7.9 → "In Review" (ready for manual review)
   - Score 5.0-6.9 → "Draft" (needs work)
   - Score 0.0-4.9 → "Rejected" (blocked)
 
@@ -44,8 +44,8 @@
 - `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
 
 - `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.5-10.0 → "System (Auto-Approved)"
-  - Score 7.0-8.4 → "Risk Management Review Board"
+  - Score 8.0-10.0 → "System (Auto-Approved)"
+  - Score 7.0-7.9 → "Risk Management Review Board"
   - Score 5.0-6.9 → "Architecture Team"
   - Score 0.0-4.9 → "N/A (Blocked)"
 
@@ -53,8 +53,8 @@
 
 **Validation Requirements**:
 - Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.5-10.0: Automatic approval (no human review required)
-- Score 7.0-8.4: Manual review by Risk Management Review Board required
+- Score 8.0-10.0: Automatic approval (no human review required)
+- Score 7.0-7.9: Manual review by Risk Management Review Board required
 - Score 5.0-6.9: Must address gaps before proceeding to review
 - Score < 5.0: Contract rejected, cannot proceed
 

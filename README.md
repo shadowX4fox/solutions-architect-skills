@@ -132,7 +132,7 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 - Context-efficient generation (70-80% reduction in loaded content)
 - **v1.3.0**: 11 complete compliance contracts with external validation system ⭐ NEW
 - **Automatic Validation (0-10 scoring)**: All contracts validated with granular scoring ⭐ NEW
-- **4-Tier Approval Workflow**: Auto-approve (8.5-10), Manual review (7.0-8.4), Needs work (5.0-6.9), Rejected (0-4.9) ⭐ NEW
+- **4-Tier Approval Workflow**: Auto-approve (8.0-10), Manual review (7.0-7.9), Needs work (5.0-6.9), Rejected (0-4.9) ⭐ NEW
 - Source traceability (section + line number references)
 - [PLACEHOLDER] markers for missing data with completion guidance
 - Compliance manifest (index of all generated documents)
@@ -160,8 +160,8 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 All 11 contracts now include automatic validation with:
 - **Scoring (0-10 scale)**: Granular feedback on compliance completeness
 - **4-Tier Approval**:
-  - **8.5-10.0**: Auto-approved by system (high confidence)
-  - **7.0-8.4**: Manual review required by approval authority
+  - **8.0-10.0**: Auto-approved by system (high confidence)
+  - **7.0-7.9**: Manual review required by approval authority
   - **5.0-6.9**: Draft status - must address gaps
   - **0.0-4.9**: Rejected - cannot proceed
 - **Template-Specific Rules**: Each contract has customized validation criteria
@@ -313,8 +313,8 @@ Where:
 ### Approval Workflow
 | Score | Status | Review Actor | Outcome |
 |-------|--------|--------------|---------|
-| 8.5-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
-| 7.0-8.4 | In Review | [Approval Authority] | Manual review required |
+| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
+| 7.0-7.9 | In Review | [Approval Authority] | Manual review required |
 | 5.0-6.9 | Draft | Architecture Team | Address gaps before review |
 | 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed to review |
 
@@ -347,8 +347,8 @@ The Development Architecture contract validates against a **26-item checklist**:
   - Updated SKILL.md workflow
 - ✅ **Document Control standardization** across all 11 templates
 - ✅ **Automated approval workflow**:
-  - Auto-approve: Score ≥ 8.5
-  - Manual review: Score 7.0-8.4
+  - Auto-approve: Score ≥ 8.0
+  - Manual review: Score 7.0-7.9
   - Needs work: Score 5.0-6.9
   - Rejected: Score < 5.0
 

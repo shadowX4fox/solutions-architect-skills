@@ -706,7 +706,7 @@ Validation Workflow:
    - Example: development_architecture_validation.json
 
 2. Parse validation configuration:
-   - Scoring thresholds (auto_approve: 8.5, ready_for_review: 7.0, needs_work: 5.0)
+   - Scoring thresholds (auto_approve: 8.0, ready_for_review: 7.0, needs_work: 5.0)
    - Weights (completeness, compliance, quality)
    - Validation sections and items
    - Approval authority
@@ -727,8 +727,8 @@ Validation Workflow:
    - Final Score: (Completeness × weight) + (Compliance × weight) + (Quality × weight)
 
 5. Determine outcome based on final score:
-   - 8.5-10.0: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
-   - 7.0-8.4: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
+   - 8.0-10.0: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
+   - 7.0-7.9: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
    - 5.0-6.9: NEEDS_WORK → Status: "Draft", Actor: "Architecture Team"
    - 0.0-4.9: REJECT → Status: "Rejected", Actor: "N/A (Blocked)"
 
@@ -758,13 +758,13 @@ Cache Structure:
     "validation_evaluator": "Claude Code (Automated Validation Engine)",
     "scores": {
       "completeness": 9.2,
-      "compliance": 8.5,
+      "compliance": 8.0,
       "quality": 8.0
     },
     "validation_sections": [
       {
         "section_id": "stack_compliance",
-        "section_score": 8.5,
+        "section_score": 8.0,
         "items": [
           {
             "item_id": "java_version",
@@ -824,8 +824,8 @@ Standard Placeholders:
 
 Validation-Driven Placeholders:
 [DOCUMENT_STATUS] → From validation_results.outcome.document_status
-  - "Approved" (score 8.5-10.0)
-  - "In Review" (score 7.0-8.4)
+  - "Approved" (score 8.0-10.0)
+  - "In Review" (score 7.0-7.9)
   - "Draft" (score 5.0-6.9)
   - "Rejected" (score 0.0-4.9)
 
@@ -843,8 +843,8 @@ Validation-Driven Placeholders:
 [VALIDATION_EVALUATOR] → "Claude Code (Automated Validation Engine)"
 
 [REVIEW_ACTOR] → From validation_results.outcome.review_actor
-  - "System (Auto-Approved)" (score 8.5-10.0)
-  - Template-specific approval authority (score 7.0-8.4)
+  - "System (Auto-Approved)" (score 8.0-10.0)
+  - Template-specific approval authority (score 7.0-7.9)
   - "Architecture Team" (score 5.0-6.9)
   - "N/A (Blocked)" (score 0.0-4.9)
 

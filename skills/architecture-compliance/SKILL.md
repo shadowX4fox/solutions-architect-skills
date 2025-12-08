@@ -379,7 +379,7 @@ For ALL contract types:
      - Example: development_architecture_validation.json
 
   2. Parse validation configuration:
-     - Scoring thresholds (auto_approve: 8.5, ready_for_review: 7.0, needs_work: 5.0)
+     - Scoring thresholds (auto_approve: 8.0, ready_for_review: 7.0, needs_work: 5.0)
      - Weights (completeness, compliance, quality)
      - Validation sections and items
      - Approval authority
@@ -398,8 +398,8 @@ For ALL contract types:
      - Quality: Source traceability coverage (0-10)
 
   5. Determine outcome:
-     - 8.5-10.0: AUTO_APPROVE → "Approved", Actor: "System (Auto-Approved)"
-     - 7.0-8.4: MANUAL_REVIEW → "In Review", Actor: [Approval Authority]
+     - 8.0-10.0: AUTO_APPROVE → "Approved", Actor: "System (Auto-Approved)"
+     - 7.0-7.9: MANUAL_REVIEW → "In Review", Actor: [Approval Authority]
      - 5.0-6.9: NEEDS_WORK → "Draft", Actor: "Architecture Team"
      - 0.0-4.9: REJECT → "Rejected", Actor: "N/A (Blocked)"
 
@@ -990,8 +990,8 @@ Where:
 ```
 
 **Outcome Tiers**:
-- **8.5-10.0**: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
-- **7.0-8.4**: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
+- **8.0-10.0**: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
+- **7.0-7.9**: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
 - **5.0-6.9**: NEEDS_WORK → Status: "Draft", Actor: "Architecture Team"
 - **0.0-4.9**: REJECT → Status: "Rejected", Actor: "N/A (Blocked)"
 
@@ -1038,8 +1038,8 @@ Validation results populate the Document Control section in generated compliance
 
 **Validation Requirements**:
 - Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.5-10.0: Automatic approval (no human review required)
-- Score 7.0-8.4: Manual review by [Approval Authority] required
+- Score 8.0-10.0: Automatic approval (no human review required)
+- Score 7.0-7.9: Manual review by [Approval Authority] required
 - Score 5.0-6.9: Must address gaps before proceeding to review
 - Score < 5.0: Contract rejected, cannot proceed
 
@@ -1054,7 +1054,7 @@ Validation results populate the Document Control section in generated compliance
 1. **Maintainability**: Validation logic separated from templates and code
 2. **Consistency**: All 11 contracts use the same validation schema and scoring methodology
 3. **Transparency**: Numeric scores (0-10) provide granular feedback vs binary PASS/FAIL
-4. **Automation**: Clear thresholds for automatic approval (8.5+) vs manual review (7.0-8.4)
+4. **Automation**: Clear thresholds for automatic approval (8.0+) vs manual review (7.0-7.9)
 5. **Extensibility**: Easy to add/modify validation items without changing templates
 6. **Auditability**: Validation configs are versioned and traceable
 7. **Flexibility**: Each contract can define custom weights while maintaining standard scoring
