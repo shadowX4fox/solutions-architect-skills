@@ -198,48 +198,59 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### 5. Development Architecture (Development Architecture)
 
-**Purpose**: Define guidelines for software development including technology stack, development practices, and technical debt management.
+**Purpose**: Define guidelines for software development including technology stack validation, development best practices, and architecture debt management through standardized compliance requirements.
 
 **Stakeholders**:
+- Solution architects
 - Development teams
 - Tech leads
 - Engineering managers
 - DevOps team
 
-**Key Content Requirements**:
-- **Technology Stack**: Languages, frameworks, libraries, versions
-- **Development Practices**: Coding standards, code reviews, testing
-- **Technical Debt**: Tracking, prioritization, remediation plans
-- **Exception Plans**: Handling deviations from standards
-- **Development Environment**: Local setup, CI/CD, testing environments
-- **Code Quality**: Static analysis, test coverage, quality gates
-- **Dependency Management**: Package management, vulnerability scanning
+**2 LADES Requirements** (Version 2.0):
+
+**LADES1: Best Practices Adoption - Technology Stack Alignment**
+- **Backend Technology Stack Alignment**: Backend language/framework, backend tools, containerization, backend libraries, backend naming conventions
+- **Frontend Technology Stack Alignment**: Frontend framework, frontend language, frontend tools, frontend architecture pattern, frontend libraries, frontend naming conventions
+- **Other Technology Stack Alignment**: Automation/testing tools, Infrastructure as Code, databases, APIs/integrations, CI/CD pipelines
+- **Stack Validation Checklist**: Automatic 26-item validation (Java Backend: 6 items, .NET Backend: 6 items, Frontend: 6 items, Other Stacks: 5 items, Exceptions: 3 items)
+- **Requirement**: All technology choices must comply with organizational standards and authorized catalogs
+
+**LADES2: Architecture Debt Impact - Exception Handling**
+- **Stack Deviation Identification**: Document non-compliant or deprecated technologies, unapproved frameworks, missing tools
+- **Exception Documentation**: Provide business justification, technical rationale, risk assessment, mitigation plan for each deviation
+- **Remediation Action Plans**: Define upgrade timeline, migration strategy, interim risk mitigation if deviations exist
+- **Requirement**: All deviations from technology standards must be documented with approved exceptions or remediation plans
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 3 (Architecture Patterns) - 25% of content
-    - Design patterns, architectural style
-  - Section 5 (System Components) - 25% of content
-    - Component design, interfaces
-  - Section 8 (Technology Stack) - 30% of content
-    - Technologies used
-  - Section 12 (Architecture Decision Records) - 10% of content
-    - Technology choices
+  - Section 8 (Technology Stack) - 60% of content
+    - Languages, frameworks, versions, tools, libraries (LADES1)
+    - Stack validation against 26-item checklist (LADES1.6)
+  - Section 12 (Architecture Decision Records) - 15% of content
+    - Technology choice justifications (LADES2)
+    - Exception documentation for deviations (LADES2.2)
 - **Secondary**:
-  - Section 11 (Operational Considerations) - 10% of content
-    - Deployment, CI/CD
+  - Section 3 (Business Context) - 10% of content
+    - Design patterns, architectural style (LADES1)
+  - Section 5 (Component Model) - 10% of content
+    - Component design, interfaces (LADES1)
+  - Section 11 (Operational Considerations) - 5% of content
+    - CI/CD pipelines, deployment processes (LADES1)
 
 **Example Guidelines**:
-- Technology stack must use supported, non-deprecated versions
-- Code coverage minimum: 80% for critical paths
-- All code changes require peer review
-- Technical debt must be tracked and addressed quarterly
-- Dependency vulnerabilities must be patched within SLA
-- Exception plans required for non-standard technology choices
+- Technology stack must use approved versions (Java 11/17/21 LTS, .NET 6/8, React 18+) (LADES1)
+- Deprecated versions (Java 8, .NET Framework 4.x) trigger FAIL status (LADES1)
+- All deviations require documented exceptions via LADES2 process
+- Exception documentation must include business justification and remediation timeline (LADES2.2, LADES2.3)
+- Stack validation is MANDATORY - contract cannot be approved without completed 26-item checklist (LADES1.6)
+- Unapproved technologies automatically populate LADES2.1 for exception review
 
-**Automatic Stack Validation**: This contract includes automatic validation of the technology stack against a 26-item checklist during document generation. Validation evaluates Java Backend (6 items), .NET Backend (6 items), Frontend (6 items), Other Stacks (5 items), and Exceptions (3 items). Results are embedded in the document with PASS (approval unblocked) or FAIL (approval blocked) status. See Step 3.5 for validation methodology.
+**Automatic Stack Validation**: This contract includes **mandatory** automatic validation of the technology stack against a 26-item checklist during document generation (Step 3.5). Validation evaluates Java Backend (6 items), .NET Backend (6 items), Frontend (6 items), Other Stacks (5 items), and Exceptions (3 items). Results are embedded in LADES1.6 with PASS (approval unblocked) or FAIL (approval blocked) status. FAIL status requires LADES2 exception documentation before contract approval.
 
 **Template Priority**: Medium (Template #5)
+**Validation Items**: 26 items across technology stack categories + 2 LADES requirements
+**Template Version**: 2.0
 
 ---
 
