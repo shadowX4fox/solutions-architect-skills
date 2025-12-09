@@ -1,7 +1,7 @@
 {
   "template_name": "Process Transformation and Automation",
   "template_id": "TEMPLATE_PROCESS_TRANSFORMATION",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "Process Transformation Review Board",
   "scoring": {
     "scale": 10,
@@ -12,8 +12,8 @@
       "reject": 0
     },
     "weights": {
-      "completeness": 0.5,
-      "compliance": 0.4,
+      "completeness": 0.4,
+      "compliance": 0.5,
       "quality": 0.1
     },
     "status_codes": {
@@ -26,161 +26,374 @@
   },
   "validation_sections": [
     {
-      "section_id": "process_documentation",
-      "section_name": "Process Documentation",
-      "weight": 0.40,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "as_is_process",
-          "question": "Is current (as-is) process documented?",
-          "architecture_md_section": "3.2",
-          "required": true,
-          "weight": 0.35,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Current process documented with steps, roles, and pain points",
-            "fail_criteria": "Current process not documented",
-            "na_criteria": "Net-new process with no as-is state",
-            "unknown_criteria": "As-is process not documented in Section 3.2"
-          }
-        },
-        {
-          "item_id": "to_be_process",
-          "question": "Is target (to-be) process documented?",
-          "architecture_md_section": "3.2",
-          "required": true,
-          "weight": 0.35,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Target process documented with automation points identified",
-            "fail_criteria": "Target process not documented",
-            "na_criteria": "N/A (to-be process required)",
-            "unknown_criteria": "To-be process not documented"
-          }
-        },
-        {
-          "item_id": "roi_analysis",
-          "question": "Is ROI analysis documented (time/cost savings)?",
-          "architecture_md_section": "3.3",
-          "required": true,
-          "weight": 0.3,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Quantified savings (hours/week, cost reduction %)",
-            "pass_criteria": "ROI quantified with baseline and projected metrics",
-            "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Regulatory requirement with no direct ROI",
-            "unknown_criteria": "ROI analysis not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "automation_design",
-      "section_name": "Automation Design",
+      "section_id": "laa1_feasibility_impact_analysis",
+      "section_name": "Feasibility and Impact Analysis (LAA1)",
       "weight": 0.30,
       "required": true,
       "validation_items": [
         {
-          "item_id": "automation_tool",
-          "question": "Is automation tool/platform defined?",
-          "architecture_md_section": "8.3",
+          "item_id": "manual_effort_quantification",
+          "question": "Is current manual effort quantified in FTE hours/week?",
+          "architecture_md_section": "Section 3 (Business Context)",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Manual effort quantified with specific FTE hours/week",
+            "fail_criteria": "Manual effort not quantified",
+            "na_criteria": "Net-new automation with no existing manual process",
+            "unknown_criteria": "Process mentioned but effort not quantified"
+          }
+        },
+        {
+          "item_id": "process_complexity",
+          "question": "Is process complexity assessed (simple/moderate/complex)?",
+          "architecture_md_section": "Section 3 (Business Context)",
+          "required": true,
+          "weight": 0.10,
           "validation_rules": {
             "type": "value_check",
-            "approved_values": ["UiPath", "Automation Anywhere", "Power Automate", "Python", "Azure Logic Apps"],
-            "pass_criteria": "Approved automation tool documented",
-            "fail_criteria": "Unapproved tool or manual process",
-            "na_criteria": "Non-automated process improvement",
-            "unknown_criteria": "Automation tool not specified"
+            "approved_values": ["simple", "moderate", "complex"],
+            "pass_criteria": "Complexity categorized based on decision points and integrations",
+            "fail_criteria": "Complexity not assessed",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Process described but complexity unclear"
           }
         },
         {
-          "item_id": "error_handling",
-          "question": "Is error handling and exception management defined?",
-          "architecture_md_section": "9.6",
+          "item_id": "roi_justification",
+          "question": "Is automation ROI documented with time savings and cost reduction?",
+          "architecture_md_section": "Section 3 (Business Context) or Section 11 (Operational Considerations)",
           "required": true,
-          "weight": 0.35,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "ROI calculated with time savings (hours/week) and cost reduction (%)",
+            "fail_criteria": "ROI not documented",
+            "na_criteria": "Regulatory requirement (no ROI needed)",
+            "unknown_criteria": "Benefits mentioned but not quantified"
+          }
+        },
+        {
+          "item_id": "integration_points",
+          "question": "Are integration points documented with system names and protocols?",
+          "architecture_md_section": "Section 5 (Component Model) or Section 7 (Integration View)",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Integration points documented with system names, protocols (REST/SOAP), and endpoints",
+            "fail_criteria": "Integration requirements not specified",
+            "na_criteria": "Standalone automation with no integrations",
+            "unknown_criteria": "Integrations mentioned but systems not identified"
+          }
+        },
+        {
+          "item_id": "data_flows",
+          "question": "Are data flows mapped between systems?",
+          "architecture_md_section": "Section 6 (Data Model) or Section 7 (Integration View)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Data flows documented showing source → transformation → destination",
+            "fail_criteria": "Data movement not documented",
+            "na_criteria": "No cross-system data transfer",
+            "unknown_criteria": "Data mentioned but flows unclear"
+          }
+        },
+        {
+          "item_id": "user_experience_impact",
+          "question": "Are user workflow changes and training requirements documented?",
+          "architecture_md_section": "Section 3 (Business Context) or Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.15,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Error handling with retry logic and manual fallback",
-            "fail_criteria": "No error handling strategy",
-            "na_criteria": "Non-automated process",
-            "unknown_criteria": "Error handling not documented"
+            "pass_criteria": "Workflow changes and training plan documented",
+            "fail_criteria": "UX impact not assessed",
+            "na_criteria": "Back-end automation with no user-facing changes",
+            "unknown_criteria": "Automation mentioned but user impact unclear"
           }
         },
         {
-          "item_id": "audit_trail",
-          "question": "Is audit trail/logging configured?",
-          "architecture_md_section": "10.5",
+          "item_id": "data_quality_requirements",
+          "question": "Are data quality standards and validation rules defined?",
+          "architecture_md_section": "Section 6 (Data Model)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Data completeness, accuracy, and validation rules defined",
+            "fail_criteria": "Data quality not addressed",
+            "na_criteria": "No data processing required",
+            "unknown_criteria": "Quality mentioned but standards unclear"
+          }
+        },
+        {
+          "item_id": "data_sensitivity_classification",
+          "question": "Is data classified by sensitivity (public/internal/confidential/restricted)?",
+          "architecture_md_section": "Section 6 (Data Model) or Section 9 (Security Architecture)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["public", "internal", "confidential", "restricted"],
+            "pass_criteria": "Data classified with sensitivity levels",
+            "fail_criteria": "Data classification not performed",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Security mentioned but classification unclear"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "laa2_automation_factors",
+      "section_name": "Automation Factors (LAA2)",
+      "weight": 0.30,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "execution_schedule_type",
+          "question": "Is execution timing documented (real-time/batch/event-driven/scheduled)?",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements) or Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["real-time", "batch", "event-driven", "scheduled"],
+            "pass_criteria": "Timing model documented",
+            "fail_criteria": "Execution timing not defined",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Automation mentioned but timing unclear"
+          }
+        },
+        {
+          "item_id": "run_frequency",
+          "question": "Is automation run frequency specified (hourly/daily/on-demand)?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Execution frequency documented (e.g., every 4 hours, nightly at 2am)",
+            "fail_criteria": "Frequency not specified",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Automation mentioned but frequency unclear"
+          }
+        },
+        {
+          "item_id": "peak_load_capacity",
+          "question": "Are peak load handling and capacity planning documented?",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements → Scalability)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Expected transaction volumes and peak load scenarios documented",
+            "fail_criteria": "Capacity planning not addressed",
+            "na_criteria": "Minimal load variation",
+            "unknown_criteria": "Load mentioned but capacity unclear"
+          }
+        },
+        {
+          "item_id": "retry_strategy",
+          "question": "Is retry logic and backoff strategy documented?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Retry attempts, exponential backoff, and circuit breaker patterns documented",
+            "fail_criteria": "Retry strategy not defined",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Error handling mentioned but retry logic unclear"
+          }
+        },
+        {
+          "item_id": "license_costs",
+          "question": "Are automation platform license costs documented?",
+          "architecture_md_section": "Section 8 (Technology Stack) or Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "License costs quantified for automation platforms and third-party integrations",
+            "fail_criteria": "License costs not quantified",
+            "na_criteria": "Open-source solution with no license fees",
+            "unknown_criteria": "Licensing mentioned but costs unclear"
+          }
+        },
+        {
+          "item_id": "infrastructure_costs",
+          "question": "Are infrastructure costs (compute, storage, network) estimated?",
+          "architecture_md_section": "Section 4 (Meta Architecture) or Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Cloud resources or on-premise server costs estimated",
+            "fail_criteria": "Infrastructure costs not calculated",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Resources mentioned but costs unclear"
+          }
+        },
+        {
+          "item_id": "monitoring_requirements",
+          "question": "Are monitoring metrics and dashboards documented?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.15,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Automation health metrics defined (success rate, execution time, errors)",
+            "fail_criteria": "Monitoring requirements not defined",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Monitoring mentioned but specifics unclear"
+          }
+        },
+        {
+          "item_id": "support_model",
+          "question": "Is support model with SLAs documented?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.05,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "L1/L2/L3 support responsibilities and response time SLAs defined",
+            "fail_criteria": "Support responsibilities not defined",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Support mentioned but model unclear"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "laa3_license_efficiency",
+      "section_name": "Efficient License Usage (LAA3)",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "license_consumption_model",
+          "question": "Is licensing model documented (concurrent/named user/API calls)?",
+          "architecture_md_section": "Section 8 (Technology Stack)",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["concurrent", "named_user", "api_calls", "cpu_based"],
+            "pass_criteria": "Licensing model documented (e.g., UiPath attended/unattended robots)",
+            "fail_criteria": "License model not specified",
+            "na_criteria": "Open-source solution with no licensing",
+            "unknown_criteria": "Licensing mentioned but model unclear"
+          }
+        },
+        {
+          "item_id": "license_quantity",
+          "question": "Is required license count estimated?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "License quantity calculated based on concurrent executions, users, or API calls",
+            "fail_criteria": "License quantity not estimated",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Licensing mentioned but quantity unclear"
+          }
+        },
+        {
+          "item_id": "third_party_integration_licenses",
+          "question": "Are third-party integration licenses identified?",
+          "architecture_md_section": "Section 7 (Integration View) or Section 8 (Technology Stack)",
           "required": true,
           "weight": 0.25,
           "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Audit logging for all automated actions",
-            "fail_criteria": "No audit trail",
-            "na_criteria": "N/A (audit trail generally required)",
-            "unknown_criteria": "Audit trail not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "change_management",
-      "section_name": "Change Management",
-      "weight": 0.20,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "stakeholder_communication",
-          "question": "Is stakeholder communication plan defined?",
-          "architecture_md_section": "11.4",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Communication plan with affected stakeholders identified",
-            "fail_criteria": "No communication plan",
-            "na_criteria": "Internal-only process change",
-            "unknown_criteria": "Communication plan not documented"
+            "type": "presence_check",
+            "pass_criteria": "Additional licenses for integrated systems documented (Salesforce, SAP, ServiceNow API licenses)",
+            "fail_criteria": "Integration licensing not addressed",
+            "na_criteria": "No third-party integrations",
+            "unknown_criteria": "Integrations mentioned but licensing unclear"
           }
         },
         {
-          "item_id": "training_plan",
-          "question": "Is user training plan documented?",
-          "architecture_md_section": "11.4",
+          "item_id": "license_cost_optimization",
+          "question": "Are license cost reduction strategies documented?",
+          "architecture_md_section": "Section 11 (Operational Considerations) or Section 12 (ADRs)",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.15,
           "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Training plan with materials and schedule",
-            "fail_criteria": "No training plan",
-            "na_criteria": "Fully automated with no user interaction",
-            "unknown_criteria": "Training plan not documented"
+            "type": "presence_check",
+            "pass_criteria": "Cost optimization strategies like batch processing, off-peak execution, or license scheduling documented",
+            "fail_criteria": "Cost reduction not addressed",
+            "na_criteria": "Fixed licensing with no optimization options",
+            "unknown_criteria": "Cost mentioned but tactics unclear"
+          }
+        },
+        {
+          "item_id": "license_compliance_monitoring",
+          "question": "Is license usage tracking and audit procedure defined?",
+          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "required": true,
+          "weight": 0.10,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "License usage tracking and audit procedures documented",
+            "fail_criteria": "Compliance monitoring not defined",
+            "na_criteria": "N/A",
+            "unknown_criteria": "Monitoring mentioned but approach unclear"
           }
         }
       ]
     },
     {
-      "section_id": "compliance_controls",
-      "section_name": "Compliance and Controls",
-      "weight": 0.10,
+      "section_id": "laa4_document_management_alignment",
+      "section_name": "Document Management Alignment (LAA4)",
+      "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "segregation_of_duties",
-          "question": "Is segregation of duties maintained in automated process?",
-          "architecture_md_section": "10.3",
+          "item_id": "document_lifecycle_scope",
+          "question": "Is document lifecycle documented (creation/storage/retrieval/archival/deletion)?",
+          "architecture_md_section": "Section 6 (Data Model)",
           "required": true,
-          "weight": 1.0,
+          "weight": 0.35,
           "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Segregation of duties preserved with approvals",
-            "fail_criteria": "Automation bypasses required controls",
-            "na_criteria": "Non-critical process with no SOD requirements",
-            "unknown_criteria": "SOD controls not documented"
+            "type": "presence_check",
+            "pass_criteria": "Document lifecycle operations documented (upload, version, archive)",
+            "fail_criteria": "DMS scope not defined",
+            "na_criteria": "No document management required",
+            "unknown_criteria": "Documents mentioned but lifecycle unclear"
+          }
+        },
+        {
+          "item_id": "dms_licensing",
+          "question": "Are DMS licenses documented (SharePoint, Documentum, etc.)?",
+          "architecture_md_section": "Section 8 (Technology Stack)",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "DMS licenses and organizational agreement alignment verified",
+            "fail_criteria": "DMS licensing not addressed",
+            "na_criteria": "No DMS integration",
+            "unknown_criteria": "DMS mentioned but licensing unclear"
+          }
+        },
+        {
+          "item_id": "dms_integration_authentication",
+          "question": "Is DMS authentication documented (OAuth, SAML, service accounts)?",
+          "architecture_md_section": "Section 7 (Integration View) or Section 9 (Security Architecture)",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OAuth", "SAML", "service_accounts", "basic_auth"],
+            "pass_criteria": "DMS authentication method documented",
+            "fail_criteria": "Access controls not defined",
+            "na_criteria": "No DMS integration",
+            "unknown_criteria": "Security mentioned but controls unclear"
           }
         }
       ]
@@ -191,41 +404,43 @@
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
-      "message": "High confidence validation. Contract automatically approved.",
+      "message": "High confidence validation. Contract automatically approved for process automation.",
       "review_actor": "System (Auto-Approved)"
     },
     "7.0-7.9": {
       "overall_status": "PASS",
       "document_status": "In Review",
       "action": "MANUAL_REVIEW",
-      "message": "Validation passed with small gaps. Ready for human review.",
+      "message": "Validation passed with small gaps. Ready for Process Transformation Review Board review.",
       "review_actor": "Process Transformation Review Board"
     },
     "5.0-6.9": {
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "Process transformation incomplete. Address gaps before approval.",
+      "message": "Process automation analysis incomplete. Address gaps before approval.",
       "blockers": [
-        "Must document as-is and to-be processes",
-        "Must define ROI and automation design"
+        "Complete feasibility analysis (manual effort, integration points, data types)",
+        "Document automation factors (timing, costs, monitoring)",
+        "Address license efficiency and DMS alignment"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient process transformation documentation. Cannot proceed.",
+      "message": "Insufficient process automation documentation. Cannot proceed to review.",
       "blockers": [
-        "Process documentation missing",
-        "No ROI justification"
+        "Automation feasibility not established (ROI, manuality, integration complexity)",
+        "Critical automation factors missing (execution timing, costs, operability)",
+        "License efficiency not addressed"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document process flows, automation design, and change management plans",
-    "UNKNOWN_items": "Add process transformation details to ARCHITECTURE.md Section 3 (Business Context) and Section 11 (Operational Considerations)",
-    "completeness_below_threshold": "Complete all sections: process documentation, ROI analysis, automation design, and change management",
-    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections"
+    "FAIL_items": "Document automation feasibility (manual effort, ROI, integration points), automation factors (timing, frequency, costs, monitoring), license efficiency, and DMS alignment in ARCHITECTURE.md",
+    "UNKNOWN_items": "Add process automation details to ARCHITECTURE.md Section 3 (Business Context), Section 5 (Component Model), Section 6 (Data Model), Section 7 (Integration View), Section 8 (Technology Stack), Section 10 (Non-Functional Requirements), Section 11 (Operational Considerations)",
+    "completeness_below_threshold": "Complete all 4 LAA requirements: feasibility analysis, automation factors, license efficiency, and document management alignment",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers"
   }
 }
