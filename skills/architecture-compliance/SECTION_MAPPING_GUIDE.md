@@ -1126,16 +1126,74 @@ Action: [PLACEHOLDER: Define error budget policy.
 
 ### Contract 4: Data & Analytics - AI Architecture
 
-#### Section Mapping Summary
-**Primary**: Sections 5, 6, 7 (80%)
-**Secondary**: Sections 8, 10 (20%)
+#### Section Mapping Summary (Version 2.0)
+**Primary**: Sections 5, 6, 11 (65%)
+**Secondary**: Sections 4, 7, 8, 9, 10, 12 (35%)
+
+**11 Requirements: 8 LAD (Data) + 3 LAIA (AI)**:
+
+**LAD1: Data Quality**
+- Section 6 (Data Model): Quality control mechanisms, validation frameworks, accuracy metrics, data completeness
+- Section 11 (Operational Considerations): Data quality monitoring, quality assurance processes
+
+**LAD2: Data Fabric Reuse**
+- Section 6 (Data Model): Data asset catalog, shared data services, reusability analysis
+- Section 5 (Component Model): Reusable data components, data product architecture
+
+**LAD3: Data Recovery**
+- Section 11 (Operational Considerations): Backup strategy, disaster recovery, RTO/RPO for data
+- Section 6 (Data Model): Data retention policies, recovery testing
+
+**LAD4: Data Decoupling**
+- Section 5 (Component Model): Storage decoupling, processing decoupling, API abstraction
+- Section 4 (Meta Architecture): Microservices architecture, data architecture patterns
+- Section 6 (Data Model): Decoupled data storage design
+
+**LAD5: Data Scalability**
+- Section 6 (Data Model): Partitioning strategy, horizontal/vertical scalability
+- Section 10 (Non-Functional Requirements): Data volume growth projections, scalability requirements
+- Section 8 (Technology Stack): Scalable data technologies
+
+**LAD6: Data Integration**
+- Section 7 (Integration View): Integration patterns, ETL/ELT pipelines, data sources/sinks
+- Section 6 (Data Model): Data synchronization, integration testing
+- Section 5 (Component Model): Data integration components
+
+**LAD7: Regulatory Compliance**
+- Section 6 (Data Model): GDPR compliance, data residency, retention policies
+- Section 9 (Security Architecture): Data privacy, PII handling, compliance controls
+- Section 11 (Operational Considerations): Compliance reporting, audit trails
+
+**LAD8: Data Architecture Standards**
+- Section 6 (Data Model): Naming conventions, data modeling standards, metadata standards
+- Section 12 (ADRs): Data architecture decisions, standards justification
+- Section 8 (Technology Stack): Technology standards for data platforms
+
+**LAIA1: AI Model Governance**
+- Section 5 (Component Model): ML models, model registry, AI services
+- Section 11 (Operational Considerations): Model lifecycle, retraining schedules, deployment approvals
+- Section 8 (Technology Stack): ML frameworks, model versioning tools
+
+**LAIA2: AI Security and Reputation**
+- Section 5 (Component Model): Model security architecture, adversarial attack prevention
+- Section 9 (Security Architecture): AI security controls, bias detection, fairness metrics
+- Section 11 (Operational Considerations): Model monitoring, reputation risk management
+
+**LAIA3: AI Hallucination Control**
+- Section 5 (Component Model): Hallucination detection mechanisms, grounding systems
+- Section 11 (Operational Considerations): Fact verification, human oversight, confidence thresholds
+- Section 6 (Data Model): Data quality for AI training, validation datasets
 
 **Key Extractions**:
-- Section 5: Data storage components, ML models, data processing
-- Section 6: Data pipelines, ETL flows, transformations
-- Section 7: Data sources, data sinks, integration points
-- Section 8: Data technologies (databases, data warehouses, ML frameworks)
-- Section 10: Data processing SLAs, query performance
+- Section 6: Data quality (LAD1), data catalog (LAD2), retention (LAD3), scalability (LAD5), compliance (LAD7), standards (LAD8), training data (LAIA3)
+- Section 5: Data components (LAD2, LAD4), ML models (LAIA1), AI security (LAIA2), hallucination detection (LAIA3)
+- Section 11: Backup/recovery (LAD3), monitoring (LAD1), model lifecycle (LAIA1), AI oversight (LAIA3)
+- Section 7: ETL pipelines (LAD6), data sources/sinks (LAD6)
+- Section 8: Data technologies (LAD5), ML frameworks (LAIA1), standards (LAD8)
+- Section 9: Data privacy (LAD7), AI security (LAIA2)
+- Section 10: Scalability requirements (LAD5)
+- Section 4: Data architecture patterns (LAD4)
+- Section 12: Architecture decisions (LAD8, LAIA1)
 
 ---
 

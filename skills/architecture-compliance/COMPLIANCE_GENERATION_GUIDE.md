@@ -151,48 +151,106 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### 4. Data & Analytics - AI Architecture
 
-**Purpose**: Define guidelines for data management, analytics, and artificial intelligence including data quality, governance, and AI model lifecycle.
+**Purpose**: Define guidelines for data management, analytics, and artificial intelligence including data quality, governance, AI model lifecycle, and hallucination control to ensure trustworthy data and AI systems.
 
 **Stakeholders**:
 - Data architects
 - Data engineers
 - Data scientists
+- AI/ML architects
 - ML engineers
 - Data governance team
+- Compliance officers
+- Business continuity managers
 
-**Key Content Requirements**:
-- **Data Quality**: Validation, cleansing, accuracy, completeness
-- **Data Governance**: Ownership, lineage, cataloging, metadata
-- **Data Lifecycle**: Ingestion, storage, processing, retention, archival
-- **Analytics**: BI tools, reporting, data visualization
-- **AI/ML Models**: Training, deployment, monitoring, retraining
-- **Data Security**: Encryption, masking, access controls, PII handling
-- **Compliance**: GDPR, regulatory requirements, data residency
-- **Scalability**: Data volume growth, processing capacity
+**11 Requirements: 8 LAD (Data) + 3 LAIA (AI)** (Version 2.0):
+
+**Data Requirements (LAD1-LAD8)**:
+
+**LAD1: Data Quality**
+- Quality control mechanisms, data completeness, validation frameworks, accuracy metrics
+- Requirement: Implement quality control and ensure data completeness throughout lifecycle
+
+**LAD2: Data Fabric Reuse**
+- Reusability analysis, data asset catalog, shared data services, duplicate prevention
+- Requirement: Maximize data asset reuse and avoid redundant data processing
+
+**LAD3: Data Recovery**
+- Backup strategy, disaster recovery, RTO/RPO alignment, recovery testing
+- Requirement: Ensure data recovery capabilities aligned with business continuity objectives
+
+**LAD4: Data Decoupling**
+- Storage decoupling, processing decoupling, microservices architecture, API abstraction
+- Requirement: Decouple data storage from processing to enable independent scaling and evolution
+
+**LAD5: Data Scalability**
+- Horizontal scalability, vertical scalability, partitioning strategy, growth projections
+- Requirement: Ensure data architecture scales to handle projected volume growth
+
+**LAD6: Data Integration**
+- Integration patterns, ETL/ELT pipelines, data synchronization, integration testing
+- Requirement: Define robust data integration patterns for reliable data movement
+
+**LAD7: Regulatory Compliance**
+- GDPR compliance, data residency, retention policies, compliance reporting
+- Requirement: Ensure data handling complies with regulatory requirements
+
+**LAD8: Data Architecture Standards**
+- Naming conventions, data modeling standards, metadata standards, documentation requirements
+- Requirement: Adhere to organizational data architecture standards
+
+**AI Requirements (LAIA1-LAIA3)**:
+
+**LAIA1: AI Model Governance**
+- Model lifecycle management, version control, model registry, deployment approvals, retraining schedules
+- Requirement: Establish governance for AI model development, deployment, and monitoring
+
+**LAIA2: AI Security and Reputation**
+- Adversarial attack prevention, model security, bias detection, fairness metrics, reputation risk
+- Requirement: Protect AI models from security threats and ensure fair, unbiased predictions
+
+**LAIA3: AI Hallucination Control**
+- Hallucination detection, grounding mechanisms, fact verification, confidence thresholds, human oversight
+- Requirement: Implement controls to detect and prevent AI hallucinations and false information
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 5 (System Components) - 30% of content
-    - Data storage components, ML models
-  - Section 6 (Data Flow) - 30% of content
-    - Data pipelines, transformations
-  - Section 7 (Integration Points) - 20% of content
-    - Data sources, sinks
+  - Section 6 (Data Model) - 30% of content
+    - Data structures, quality, governance, compliance (LAD1, LAD2, LAD7, LAD8)
+  - Section 5 (Component Model) - 20% of content
+    - Data components, ML models, AI services (LAD4, LAIA1, LAIA2)
+  - Section 11 (Operational Considerations) - 15% of content
+    - Backup/recovery, monitoring, model retraining (LAD3, LAIA1)
 - **Secondary**:
+  - Section 7 (Integration View) - 10% of content
+    - Data sources, ETL pipelines (LAD6)
   - Section 8 (Technology Stack) - 10% of content
-    - Data technologies
-  - Section 10 (Performance Requirements) - 10% of content
-    - Data processing SLAs
+    - Data technologies, ML frameworks (LAD5, LAIA1)
+  - Section 9 (Security Architecture) - 5% of content
+    - Data security, AI security (LAD7, LAIA2)
+  - Section 10 (Non-Functional Requirements) - 5% of content
+    - Scalability, performance (LAD5)
+  - Section 4 (Meta Architecture) - 3% of content
+    - Data architecture patterns (LAD4)
+  - Section 12 (ADRs) - 2% of content
+    - Data/AI technology decisions (LAD8, LAIA1)
 
 **Example Guidelines**:
-- Data quality metrics must be defined and monitored
-- Data lineage must be tracked from source to consumption
-- PII data must be encrypted and masked appropriately
-- AI models must have defined retraining schedules
-- Data retention policies must comply with regulations
-- Data scalability must handle 3x growth without redesign
+- Data quality metrics (completeness, accuracy, timeliness) must be defined and monitored (LAD1)
+- Data asset catalog must document all reusable data products (LAD2)
+- Data backup must meet RTO ≤ 4 hours, RPO ≤ 1 hour for critical data (LAD3)
+- Data storage must be decoupled from processing using API abstraction layer (LAD4)
+- Data architecture must handle 5x volume growth without redesign (LAD5)
+- ETL/ELT pipelines must include data validation and error handling (LAD6)
+- PII data must comply with GDPR retention limits and data residency rules (LAD7)
+- Data naming conventions must follow organizational standards (LAD8)
+- AI models must have documented retraining schedules and version control (LAIA1)
+- AI models must be tested for bias and adversarial robustness (LAIA2)
+- Generative AI must implement hallucination detection with confidence thresholds (LAIA3)
 
 **Template Priority**: Medium (Template #4)
+**Validation Items**: 11 requirements (8 LAD + 3 LAIA)
+**Template Version**: 2.0
 
 ---
 
