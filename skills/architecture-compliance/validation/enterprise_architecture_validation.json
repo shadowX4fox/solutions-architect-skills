@@ -1,7 +1,7 @@
 {
   "template_name": "Enterprise Architecture",
   "template_id": "TEMPLATE_ENTERPRISE_ARCHITECTURE",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "Enterprise Architecture Review Board",
   "scoring": {
     "scale": 10,
@@ -12,8 +12,8 @@
       "reject": 0
     },
     "weights": {
-      "completeness": 0.45,
-      "compliance": 0.45,
+      "completeness": 0.4,
+      "compliance": 0.5,
       "quality": 0.1
     },
     "status_codes": {
@@ -26,167 +26,365 @@
   },
   "validation_sections": [
     {
-      "section_id": "strategic_alignment",
-      "section_name": "Strategic Alignment",
-      "weight": 0.30,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "business_capability",
-          "question": "Is business capability mapping documented?",
-          "architecture_md_section": "3.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Business capabilities mapped to architecture components",
-            "fail_criteria": "No business capability mapping",
-            "na_criteria": "Tactical project with no enterprise scope",
-            "unknown_criteria": "Business capability mapping not documented"
-          }
-        },
-        {
-          "item_id": "strategic_fit",
-          "question": "Is alignment with enterprise strategy documented?",
-          "architecture_md_section": "3.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Strategic alignment with enterprise goals documented",
-            "fail_criteria": "No strategic alignment justification",
-            "na_criteria": "Regulatory/compliance-driven project",
-            "unknown_criteria": "Strategic alignment not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "domain_driven_design",
-      "section_name": "Domain-Driven Design",
-      "weight": 0.25,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "bounded_contexts",
-          "question": "Are bounded contexts defined?",
-          "architecture_md_section": "5.1",
-          "required": true,
-          "weight": 0.6,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Bounded contexts with clear boundaries and ownership",
-            "fail_criteria": "No bounded contexts or unclear boundaries",
-            "na_criteria": "Simple single-domain application",
-            "unknown_criteria": "Bounded contexts not documented"
-          }
-        },
-        {
-          "item_id": "domain_model",
-          "question": "Is domain model documented with ubiquitous language?",
-          "architecture_md_section": "5",
-          "required": true,
-          "weight": 0.4,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Domain model with ubiquitous language documented",
-            "fail_criteria": "No domain model or inconsistent terminology",
-            "na_criteria": "Technical infrastructure project",
-            "unknown_criteria": "Domain model not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "modularity_reusability",
-      "section_name": "Modularity and Reusability",
-      "weight": 0.20,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "component_reusability",
-          "question": "Are reusable components identified?",
-          "architecture_md_section": "5.2",
-          "required": false,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Reusable components identified with shared service catalog",
-            "fail_criteria": "Duplicate capabilities not leveraging existing components",
-            "na_criteria": "Unique domain-specific solution",
-            "unknown_criteria": "Component reusability not documented"
-          }
-        },
-        {
-          "item_id": "api_contracts",
-          "question": "Are API contracts defined for inter-service communication?",
-          "architecture_md_section": "7",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "API contracts with versioning strategy documented",
-            "fail_criteria": "No API contracts or versioning",
-            "na_criteria": "Monolithic application with no service boundaries",
-            "unknown_criteria": "API contracts not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "governance_standards",
-      "section_name": "Governance and Standards",
+      "section_id": "lae1_modularity_reusability",
+      "section_name": "LAE1 - Modularity and Capability Reusability",
       "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "architecture_patterns",
-          "question": "Do architecture patterns align with enterprise standards?",
-          "architecture_md_section": "4",
+          "item_id": "lae1_capability_map",
+          "question": "Is a comprehensive capability map documented showing current and proposed capabilities?",
+          "architecture_md_section": "3",
           "required": true,
-          "weight": 0.6,
+          "weight": 0.35,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Architecture patterns consistent with enterprise reference architectures",
-            "fail_criteria": "Non-standard patterns without justification",
-            "na_criteria": "N/A (alignment generally required)",
-            "unknown_criteria": "Architecture patterns not documented"
+            "pass_criteria": "Capability map clearly identifies business capabilities with alignment to architecture components",
+            "fail_criteria": "No capability map or capabilities not mapped to architecture components",
+            "na_criteria": "Infrastructure-only project with no business capabilities",
+            "unknown_criteria": "Capability map not documented in Section 3 (Business Context)"
           }
         },
         {
-          "item_id": "decision_records",
-          "question": "Are Architecture Decision Records (ADRs) documented?",
-          "architecture_md_section": "12",
+          "item_id": "lae1_application_coverage",
+          "question": "Are all applications and services mapped to business capabilities to identify coverage and gaps?",
+          "architecture_md_section": "5",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.35,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "ADRs documented for significant decisions",
-            "fail_criteria": "No ADRs or key decisions undocumented",
-            "na_criteria": "Simple application with no significant decisions",
-            "unknown_criteria": "ADRs not documented in Section 12"
+            "pass_criteria": "Applications mapped to capabilities with gap analysis showing coverage percentage and identified gaps",
+            "fail_criteria": "No application-to-capability mapping or no gap analysis",
+            "na_criteria": "Greenfield project with no existing applications",
+            "unknown_criteria": "Application coverage analysis not documented in Section 5 (Logical Architecture)"
+          }
+        },
+        {
+          "item_id": "lae1_redundancy_assessment",
+          "question": "Are redundant or overlapping capabilities identified with rationalization plans?",
+          "architecture_md_section": "3",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Redundancy analysis completed with decommissioning or consolidation roadmap for duplicate capabilities",
+            "fail_criteria": "No redundancy assessment or overlapping capabilities not addressed",
+            "na_criteria": "Single application project with no redundancy concerns",
+            "unknown_criteria": "Redundancy assessment not documented in Section 3 (Business Context)"
           }
         }
       ]
     },
     {
-      "section_id": "integration_patterns",
-      "section_name": "Integration Patterns",
+      "section_id": "lae2_third_party_customization",
+      "section_name": "LAE2 - Third-Party Application Customization",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lae2_third_party_inventory",
+          "question": "Are all third-party applications and COTS products documented with vendor and version details?",
+          "architecture_md_section": "8",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Complete inventory of third-party products with vendor name, version, licensing model, and support status",
+            "fail_criteria": "No third-party inventory or incomplete vendor details",
+            "na_criteria": "Fully custom-built solution with no third-party products",
+            "unknown_criteria": "Third-party inventory not documented in Section 8 (Technology Stack)"
+          }
+        },
+        {
+          "item_id": "lae2_customization_justification",
+          "question": "Are all customizations to third-party applications documented with business justification?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Each customization documented with business justification, cost-benefit analysis, and alternatives considered (configuration vs. customization)",
+            "fail_criteria": "Customizations not documented or no business justification provided",
+            "na_criteria": "No third-party applications or all used out-of-the-box",
+            "unknown_criteria": "Customization justification not documented in Section 12 (Architectural Decisions)"
+          }
+        },
+        {
+          "item_id": "lae2_product_integration",
+          "question": "Are third-party products integrated using standard interfaces (APIs, webhooks) rather than core customization?",
+          "architecture_md_section": "8",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Integration strategy prioritizes standard APIs, webhooks, and configuration over code-level customization",
+            "fail_criteria": "Heavy reliance on core code customization without exploring standard integration options",
+            "na_criteria": "No third-party product integration required",
+            "unknown_criteria": "Integration approach not documented in Section 8 (Technology Stack)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lae3_cloud_first",
+      "section_name": "LAE3 - Cloud First",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lae3_cloud_deployment_model",
+          "question": "Is cloud deployment the primary hosting model with on-premise only when justified?",
+          "architecture_md_section": "4",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Cloud-first approach documented with deployment to public/private cloud; on-premise deployment requires documented exception",
+            "fail_criteria": "On-premise deployment without cloud evaluation or justification",
+            "na_criteria": "Legacy system replacement with cloud migration planned",
+            "unknown_criteria": "Deployment model not documented in Section 4 (High-Level Architecture)"
+          }
+        },
+        {
+          "item_id": "lae3_native_cloud_services",
+          "question": "Are cloud-native services (managed databases, serverless, containers) prioritized over IaaS?",
+          "architecture_md_section": "8",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Architecture leverages cloud-native PaaS/SaaS services (managed databases, serverless functions, container orchestration) with justification for any IaaS usage",
+            "fail_criteria": "Heavy reliance on IaaS (virtual machines) without evaluating managed cloud services",
+            "na_criteria": "On-premise deployment with documented exception",
+            "unknown_criteria": "Cloud service selection not documented in Section 8 (Technology Stack)"
+          }
+        },
+        {
+          "item_id": "lae3_cloud_first_compliance",
+          "question": "Does the architecture comply with cloud security, governance, and cost optimization standards?",
+          "architecture_md_section": "4",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Cloud deployment includes security controls (encryption, IAM, network isolation), governance (tagging, monitoring), and cost optimization (auto-scaling, rightsizing)",
+            "fail_criteria": "Cloud deployment lacks security, governance, or cost optimization measures",
+            "na_criteria": "On-premise deployment with documented exception",
+            "unknown_criteria": "Cloud compliance controls not documented in Section 4 (High-Level Architecture)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lae4_business_strategy_alignment",
+      "section_name": "LAE4 - Business Strategy Alignment",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lae4_strategy_alignment",
+          "question": "Is the architecture aligned with documented business strategy and enterprise goals?",
+          "architecture_md_section": "2",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Clear alignment documented between architecture and business strategy (digital transformation, customer experience, operational efficiency, etc.)",
+            "fail_criteria": "No linkage to business strategy or misalignment with enterprise goals",
+            "na_criteria": "Regulatory or compliance-driven project with no strategic component",
+            "unknown_criteria": "Strategic alignment not documented in Section 2 (Problem Statement)"
+          }
+        },
+        {
+          "item_id": "lae4_value_generation",
+          "question": "Are expected business outcomes and value metrics clearly defined?",
+          "architecture_md_section": "3",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Business outcomes documented with measurable KPIs (revenue impact, cost savings, efficiency gains, customer satisfaction, time-to-market)",
+            "fail_criteria": "No business outcomes or metrics defined",
+            "na_criteria": "Technical infrastructure project with indirect business value",
+            "unknown_criteria": "Value metrics not documented in Section 3 (Business Context)"
+          }
+        },
+        {
+          "item_id": "lae4_strategic_initiatives",
+          "question": "Is the architecture connected to specific strategic initiatives or enterprise programs?",
+          "architecture_md_section": "2",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Architecture supports identified strategic initiatives (e.g., cloud migration, data modernization, customer platform)",
+            "fail_criteria": "No connection to strategic initiatives",
+            "na_criteria": "Tactical project not tied to strategic program",
+            "unknown_criteria": "Strategic initiative linkage not documented in Section 2 (Problem Statement)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lae5_zero_obsolescence",
+      "section_name": "LAE5 - Zero Obsolescence",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lae5_component_lifecycle",
+          "question": "Are all technology components within supported lifecycle (no end-of-life or deprecated technologies)?",
+          "architecture_md_section": "8",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "All technology components have active vendor support with documented end-of-support dates at least 2+ years out; no deprecated technologies",
+            "fail_criteria": "Use of end-of-life, deprecated, or unsupported technologies without migration plan",
+            "na_criteria": "Legacy modernization project replacing obsolete technologies",
+            "unknown_criteria": "Technology lifecycle status not documented in Section 8 (Technology Stack)"
+          }
+        },
+        {
+          "item_id": "lae5_end_of_support_timeline",
+          "question": "Are end-of-support dates tracked for all components with proactive replacement planning?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "End-of-support tracking documented with proactive replacement strategy before EOL (12+ months advance planning)",
+            "fail_criteria": "No end-of-support tracking or reactive replacement approach",
+            "na_criteria": "All components using evergreen cloud services with no EOL dates",
+            "unknown_criteria": "End-of-support planning not documented in Section 12 (Architectural Decisions)"
+          }
+        },
+        {
+          "item_id": "lae5_upgrade_roadmap",
+          "question": "Is there a documented upgrade and patching strategy to maintain currency?",
+          "architecture_md_section": "12",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Upgrade roadmap documented with regular patching cadence (monthly security patches, quarterly feature updates)",
+            "fail_criteria": "No upgrade strategy or outdated patching approach",
+            "na_criteria": "Fully managed SaaS with vendor-controlled updates",
+            "unknown_criteria": "Upgrade roadmap not documented in Section 12 (Architectural Decisions)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lae6_managed_data_vision",
+      "section_name": "LAE6 - Managed Data Vision",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lae6_data_governance",
+          "question": "Are data governance policies defined including ownership, stewardship, and access controls?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data governance framework documented with data owners, stewards, classification (PII, confidential, public), and access control policies",
+            "fail_criteria": "No data governance or unclear ownership and access controls",
+            "na_criteria": "Stateless application with no persistent data storage",
+            "unknown_criteria": "Data governance not documented in Section 6 (Data Architecture)"
+          }
+        },
+        {
+          "item_id": "lae6_data_lifecycle",
+          "question": "Is data lifecycle management defined (creation, retention, archival, deletion)?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data lifecycle policies documented with retention periods, archival strategy, and deletion procedures compliant with regulations (GDPR, HIPAA, etc.)",
+            "fail_criteria": "No data lifecycle management or retention policies",
+            "na_criteria": "Stateless application with no persistent data storage",
+            "unknown_criteria": "Data lifecycle not documented in Section 9 (Non-Functional Requirements)"
+          }
+        },
+        {
+          "item_id": "lae6_data_quality",
+          "question": "Are data quality controls and validation mechanisms defined?",
+          "architecture_md_section": "6",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data quality framework documented with validation rules, data profiling, cleansing processes, and quality metrics",
+            "fail_criteria": "No data quality controls or validation mechanisms",
+            "na_criteria": "Application does not manage master or reference data",
+            "unknown_criteria": "Data quality controls not documented in Section 6 (Data Architecture)"
+          }
+        },
+        {
+          "item_id": "lae6_backup_recovery",
+          "question": "Are backup, disaster recovery, and business continuity plans documented for data?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backup strategy documented with RPO/RTO targets, disaster recovery procedures, and business continuity testing plan",
+            "fail_criteria": "No backup or disaster recovery plan for critical data",
+            "na_criteria": "Stateless application with no persistent data storage",
+            "unknown_criteria": "Backup and recovery not documented in Section 9 (Non-Functional Requirements)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lae7_api_first_event_driven",
+      "section_name": "LAE7 - API First / Event Driven",
       "weight": 0.10,
       "required": true,
       "validation_items": [
         {
-          "item_id": "integration_catalog",
-          "question": "Are external system integrations cataloged?",
+          "item_id": "lae7_api_strategy",
+          "question": "Are all integrations and service interactions designed using API-first principles?",
           "architecture_md_section": "7",
           "required": true,
-          "weight": 1.0,
+          "weight": 0.40,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "All external integrations cataloged with patterns (REST, messaging, batch)",
-            "fail_criteria": "Integrations not cataloged",
-            "na_criteria": "Standalone system with no integrations",
-            "unknown_criteria": "Integration catalog not documented"
+            "pass_criteria": "API-first design with documented RESTful/GraphQL APIs, OpenAPI/Swagger specs, versioning strategy, and developer portal",
+            "fail_criteria": "Point-to-point integrations, direct database access, or file-based integration without API layer",
+            "na_criteria": "Standalone application with no integration requirements",
+            "unknown_criteria": "API strategy not documented in Section 7 (Integration Architecture)"
+          }
+        },
+        {
+          "item_id": "lae7_event_driven_architecture",
+          "question": "Are asynchronous and real-time requirements implemented using event-driven patterns?",
+          "architecture_md_section": "4",
+          "required": false,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Event-driven architecture documented with message brokers (Kafka, RabbitMQ, Azure Service Bus), event schemas, and publish-subscribe patterns",
+            "fail_criteria": "Synchronous polling or batch processing where real-time events are more appropriate",
+            "na_criteria": "No real-time or asynchronous integration requirements",
+            "unknown_criteria": "Event-driven architecture not documented in Section 4 (High-Level Architecture)"
+          }
+        },
+        {
+          "item_id": "lae7_interoperability",
+          "question": "Do APIs and events follow enterprise interoperability standards (JSON, REST, event schemas)?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Interoperability standards documented with JSON/XML schemas, REST compliance (HTTP verbs, status codes), and enterprise event catalog",
+            "fail_criteria": "Proprietary protocols or non-standard data formats without justification",
+            "na_criteria": "Standalone application with no integration requirements",
+            "unknown_criteria": "Interoperability standards not documented in Section 7 (Integration Architecture)"
           }
         }
       ]
@@ -197,41 +395,47 @@
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
-      "message": "High confidence validation. Contract automatically approved.",
+      "message": "High confidence validation. Enterprise Architecture contract automatically approved with full LAE compliance.",
       "review_actor": "System (Auto-Approved)"
     },
     "7.0-7.9": {
       "overall_status": "PASS",
       "document_status": "In Review",
       "action": "MANUAL_REVIEW",
-      "message": "Validation passed with small gaps. Ready for human review.",
+      "message": "Validation passed with minor gaps. Ready for Enterprise Architecture Review Board evaluation.",
       "review_actor": "Enterprise Architecture Review Board"
     },
     "5.0-6.9": {
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "Enterprise architecture incomplete. Address gaps before approval.",
+      "message": "Enterprise Architecture incomplete. Address LAE compliance gaps before submission.",
       "blockers": [
-        "Must document strategic alignment and business capabilities",
-        "Must define bounded contexts and domain model"
+        "Must document modularity and capability reusability (LAE1)",
+        "Must justify third-party customizations (LAE2)",
+        "Must demonstrate cloud-first approach (LAE3)",
+        "Must align with business strategy (LAE4)",
+        "Must eliminate technology obsolescence (LAE5)",
+        "Must define managed data vision (LAE6)",
+        "Must implement API-first/event-driven patterns (LAE7)"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient enterprise architecture alignment. Cannot proceed.",
+      "message": "Insufficient Enterprise Architecture compliance. Cannot proceed without fundamental LAE adherence.",
       "blockers": [
-        "Strategic alignment missing",
-        "No domain-driven design or modularity"
+        "Critical LAE requirements not met",
+        "Multiple architectural domains missing or inadequate",
+        "Business alignment and technical standards not documented"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document enterprise alignment, bounded contexts, and reusability strategy",
-    "UNKNOWN_items": "Add enterprise architecture details to ARCHITECTURE.md Sections 3 (Business Context), 5 (Logical Architecture), and 12 (ADRs)",
-    "completeness_below_threshold": "Complete strategic alignment, domain model, modularity, governance, and integration sections",
-    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections"
+    "FAIL_items": "Document all 7 LAE requirements with comprehensive coverage: modularity, third-party strategy, cloud-first, business alignment, zero obsolescence, managed data, and API-first/event-driven architecture",
+    "UNKNOWN_items": "Add enterprise architecture details to ARCHITECTURE.md covering all LAE domains: Sections 2-3 (strategy/business), 4 (architecture), 5 (components), 6 (data), 7 (integration), 8 (technology), 9 (NFRs), 12 (decisions)",
+    "completeness_below_threshold": "Complete all 7 LAE validation sections with specific evidence from ARCHITECTURE.md sections",
+    "low_quality_score": "Improve traceability by explicitly referencing ARCHITECTURE.md sections for each LAE requirement with direct quotes and page numbers"
   }
 }
