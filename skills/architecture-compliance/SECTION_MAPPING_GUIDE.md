@@ -1615,16 +1615,47 @@ Action: Mark items as FAIL
 
 ### Contract 6: Process Transformation and Automation
 
-#### Section Mapping Summary
-**Primary**: Sections 1, 2, 6 (75%)
-**Secondary**: Sections 5, 7 (25%)
+#### Section Mapping Summary (Version 2.0)
+**Primary**: Sections 3, 10, 11 (70%)
+**Secondary**: Sections 5, 6, 7, 8, 12 (30%)
+
+**4 LAA Requirements**:
+
+**LAA1: Feasibility and Impact Analysis**
+- Section 3 (Business Context): Manual effort (FTE hours/week), process complexity, ROI justification, use cases, workflow changes
+- Section 5 (Component Model): Automation components, integration touchpoints
+- Section 6 (Data Model): Data sources, quality requirements, transformation logic, sensitivity classification
+- Section 7 (Integration View): Integration points, data flows, API dependencies
+- Section 11 (Operational Considerations): ROI analysis, training requirements, change management
+
+**LAA2: Automation Factors**
+- Section 10 (Non-Functional Requirements): Execution schedule (real-time/batch/event-driven), time-critical requirements, scalability, peak load
+- Section 11 (Operational Considerations): Run frequency, monitoring metrics, error handling/alerting, support model, maintenance windows, cost analysis
+- Section 8 (Technology Stack): Automation platforms, license costs
+- Section 4 (Meta Architecture): Infrastructure costs
+
+**LAA3: Efficient License Usage**
+- Section 8 (Technology Stack): License consumption model, automation platform licenses, license quantity
+- Section 7 (Integration View): Third-party integration licenses, connector licensing
+- Section 6 (Data Model): Database access licensing
+- Section 11 (Operational Considerations): License pooling strategy, compliance monitoring
+- Section 12 (ADRs): License cost optimization strategies
+
+**LAA4: Document Management Alignment**
+- Section 6 (Data Model): Document lifecycle scope, version control, archival/retention policies, storage licensing
+- Section 8 (Technology Stack): DMS licensing (SharePoint, Documentum)
+- Section 7 (Integration View): DMS integration points
+- Section 9 (Security Architecture): DMS authentication, document security classification
+- Section 11 (Operational Considerations): Document retention policies
 
 **Key Extractions**:
-- Section 1: Automation scope, objectives, benefits
-- Section 2: Business process context, efficiency gains
-- Section 6: Automated workflows, process flows
-- Section 5: Automation components (RPA, workflow engines)
-- Section 7: Process integrations
+- Section 3: Manual effort quantification (LAA1.1), ROI justification (LAA1.1), workflow changes (LAA1.3)
+- Section 5: Integration points (LAA1.2), automation components (LAA1.4)
+- Section 6: Data sources (LAA1.4), data quality (LAA1.4), document lifecycle (LAA4.1)
+- Section 7: API dependencies (LAA1.2), third-party licenses (LAA3.2), DMS integration (LAA4.3)
+- Section 8: License model (LAA3.1), DMS licensing (LAA4.2), automation platform licenses (LAA2.3)
+- Section 10: Execution timing (LAA2.1), peak load (LAA2.2)
+- Section 11: Run frequency (LAA2.2), monitoring (LAA2.4), support model (LAA2.4), cost analysis (LAA2.3)
 
 ---
 
