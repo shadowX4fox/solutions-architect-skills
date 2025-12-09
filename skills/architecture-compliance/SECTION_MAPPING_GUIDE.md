@@ -1951,15 +1951,54 @@ All templates with Section 9 references must use this standard:
 
 ### Contract 8: Platform & IT Infrastructure
 
-#### Section Mapping Summary
-**Primary**: Sections 4, 8, 11 (90%)
-**Secondary**: Section 10 (10%)
+#### Section Mapping Summary (Version 1.0)
+**Primary**: Sections 4, 8, 11 (85%)
+**Secondary**: Sections 7, 10 (15%)
+
+**9 LAPI Requirements**:
+
+**LAPI01: Unique Production Environments**
+- Section 4 (Meta Architecture): Deployment environments, network isolation, environment topology
+- Section 11 (Operational Considerations): Environment access controls, configuration management
+
+**LAPI02: Server Operating Systems**
+- Section 8 (Technology Stack): Operating system selection, versions, patch management
+- Section 11 (Operational Considerations): Security hardening, OS maintenance
+
+**LAPI03: Database Storage Capacity**
+- Section 8 (Technology Stack): Database platforms, storage sizing
+- Section 10 (Non-Functional Requirements): Data volume projections, growth rates
+- Section 11 (Operational Considerations): Retention policies, archival strategy
+
+**LAPI04: Database Version Authorization**
+- Section 8 (Technology Stack): Database platform selection, version specifications, compatibility
+
+**LAPI05: Database Backup and Retention**
+- Section 11 (Operational Considerations): Backup frequency, retention periods, recovery testing, RTO/RPO alignment
+
+**LAPI06: Infrastructure Capacity**
+- Section 4 (Meta Architecture): Infrastructure topology, resource allocation
+- Section 8 (Technology Stack): Compute resources, memory, network
+- Section 10 (Non-Functional Requirements): Scalability requirements, peak load
+- Section 11 (Operational Considerations): Capacity planning, scaling strategy
+
+**LAPI07: Naming Conventions**
+- Section 8 (Technology Stack): Resource naming standards
+- Section 11 (Operational Considerations): Environment prefixes, component identification patterns
+
+**LAPI08: Transaction Volume Dimensioning**
+- Section 10 (Non-Functional Requirements): TPS capacity, concurrent users, throughput limits, performance benchmarks
+
+**LAPI09: Legacy Platform Transaction Capacity**
+- Section 7 (Integration View): Legacy system integrations, transaction limits
+- Section 10 (Non-Functional Requirements): Integration capacity constraints, throttling requirements
 
 **Key Extractions**:
-- Section 4: Environments (dev, staging, prod), isolation
-- Section 8: Infrastructure technologies (OS, containers, orchestration)
-- Section 11: Infrastructure operations, capacity planning
-- Section 10: Infrastructure capacity requirements
+- Section 4: Environments (dev/staging/prod), isolation topology (LAPI01), infrastructure layout (LAPI06)
+- Section 8: Operating systems (LAPI02), databases (LAPI03, LAPI04), infrastructure tools (LAPI06), naming conventions (LAPI07)
+- Section 11: Backup/recovery (LAPI05), capacity planning (LAPI06), operations (LAPI01, LAPI02), retention policies (LAPI03)
+- Section 10: Performance requirements (LAPI06, LAPI08), capacity limits (LAPI03, LAPI09)
+- Section 7: Legacy integrations (LAPI09)
 
 ---
 

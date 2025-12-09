@@ -366,44 +366,82 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### 8. Platform & IT Infrastructure
 
-**Purpose**: Define guidelines for platform design, infrastructure deployment, and operational environments.
+**Purpose**: Define guidelines for platform design, infrastructure deployment, database management, capacity planning, and operational environments to ensure scalable and maintainable IT infrastructure.
 
 **Stakeholders**:
+- Infrastructure architects
 - Platform engineers
-- Infrastructure team
 - Database administrators
+- Integration architects
 - Operations team
+- Cloud architects
 
-**Key Content Requirements**:
-- **Production Environments**: Number, purpose, isolation
-- **Operating Systems**: Authorized OS, versions, patching
-- **Database Platforms**: RDBMS, NoSQL, capacity planning
-- **Capacity & Retention**: Storage, compute, retention policies
-- **Naming Conventions**: Resources, environments, components
-- **Transactional Dimensioning**: TPS capacity, scaling limits
-- **Infrastructure as Code**: Terraform, CloudFormation, Ansible
+**9 LAPI Requirements** (Version 1.0):
+
+**LAPI01: Unique Production Environments**
+- Environment isolation, network separation, configuration management, access controls
+- Requirement: Production must be isolated from non-production to prevent unauthorized access and configuration errors
+
+**LAPI02: Server Operating Systems**
+- OS selection, version approval, patch management, security hardening
+- Requirement: Only authorized operating system versions with current security patches
+
+**LAPI03: Database Storage Capacity**
+- Storage sizing, growth projections, retention policies, archival strategy
+- Requirement: Database capacity must support current and projected transaction volumes
+
+**LAPI04: Database Version Authorization**
+- Database platform selection, version approval, upgrade path, compatibility
+- Requirement: Only approved database versions (current or n-1) may be used
+
+**LAPI05: Database Backup and Retention**
+- Backup frequency, retention periods, recovery testing, compliance alignment
+- Requirement: Backup strategy must meet RTO/RPO and regulatory retention requirements
+
+**LAPI06: Infrastructure Capacity**
+- Compute resources, memory allocation, network bandwidth, scaling strategy
+- Requirement: Infrastructure must support peak load with headroom for growth
+
+**LAPI07: Naming Conventions**
+- Resource naming standards, environment prefixes, component identification
+- Requirement: Consistent naming conventions across all infrastructure components
+
+**LAPI08: Transaction Volume Dimensioning**
+- TPS capacity, concurrent users, throughput limits, performance benchmarks
+- Requirement: Infrastructure must support documented transaction volume requirements
+
+**LAPI09: Legacy Platform Transaction Capacity**
+- Integration with legacy systems, transaction limits, throttling, capacity constraints
+- Requirement: Legacy platform integration must respect transaction capacity limits
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 4 (Deployment Architecture) - 35% of content
-    - Environments, infrastructure
-  - Section 8 (Technology Stack) - 35% of content
-    - Platform technologies
-  - Section 11 (Operational Considerations) - 20% of content
-    - Operations, maintenance
+  - Section 4 (Meta Architecture) - 30% of content
+    - Deployment environments, infrastructure topology (LAPI01, LAPI06)
+  - Section 8 (Technology Stack) - 30% of content
+    - Operating systems, databases, infrastructure tools (LAPI02, LAPI03, LAPI04, LAPI07)
+  - Section 11 (Operational Considerations) - 25% of content
+    - Backup/recovery, capacity planning, operations (LAPI05, LAPI06)
 - **Secondary**:
-  - Section 10 (Performance Requirements) - 10% of content
-    - Capacity requirements
+  - Section 10 (Non-Functional Requirements) - 10% of content
+    - Performance, capacity requirements (LAPI06, LAPI08)
+  - Section 7 (Integration View) - 5% of content
+    - Legacy system integrations (LAPI09)
 
 **Example Guidelines**:
-- Production environments must be isolated (network, IAM)
-- Only authorized OS versions may be used (security patches current)
-- Database capacity must support 3x current transaction volume
-- Retention policies must comply with regulatory requirements
-- Naming conventions must be consistent and documented
-- Infrastructure must be defined as code (IaC)
+- Production environments must be isolated from dev/test (LAPI01)
+- Only approved OS versions: Windows Server 2019/2022, RHEL 8/9, Ubuntu 20.04/22.04 LTS (LAPI02)
+- Database capacity must support 3x current transaction volume (LAPI03)
+- Approved databases: PostgreSQL 14+, MySQL 8+, SQL Server 2019+, Oracle 19c+ (LAPI04)
+- Database backups: daily full, hourly incremental, 30-day retention minimum (LAPI05)
+- Infrastructure must handle peak load + 30% headroom (LAPI06)
+- Naming convention: [env]-[app]-[component]-[instance] (e.g., prod-crm-api-01) (LAPI07)
+- Document maximum TPS and concurrent user limits (LAPI08)
+- Legacy system integration must not exceed documented capacity limits (LAPI09)
 
 **Template Priority**: Medium (Template #8)
+**Validation Items**: 9 LAPI requirements
+**Template Version**: 1.0
 
 ---
 
