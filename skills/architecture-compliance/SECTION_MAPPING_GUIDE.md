@@ -440,10 +440,10 @@ def extract_rto_rpo_from_architecture(architecture_md_path):
 | **4. Data & Analytics - AI Architecture** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
 | **5. Development Architecture** | 3, 5, 8, 12 | 11 | Medium | Medium (#5) |
 | **6. Transformación Procesos** | 1, 2, 6 | 5, 7 | Low | Low (#6) |
-| **7. Security Architecture** | 9 | 7, 11 | High | High (#3) |
+| **7. Security Architecture v2.0** | 4, 5, 7, 9, 11 | - | High | High (#7) |
 | **8. Plataformas Infraestructura** | 4, 8, 11 | 10 | Medium | Medium (#8) |
 | **9. Enterprise Architecture** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
-| **10. Arquitectura Integración** | 7 | 5, 6, 8 | High | Medium (#10) |
+| **10. Integration Architecture v2.0** | 5, 6, 7, 9 | - | High | High (#10) |
 | **11. Risk Management** | 9, 10, 11, 12 | 1, 5 | High | High (#4) |
 
 ---
@@ -1717,19 +1717,64 @@ Action: Mark items as FAIL
 
 ---
 
-### Contract 7: Security Architecture
+### Contract 7: Security Architecture (Version 2.0)
 
 #### Section Mapping Summary
-**Primary**: Section 9 (70%)
-**Secondary**: Sections 7, 11 (30%)
+**Primary**: Sections 4, 5, 7, 9, 11 (95%)
+**Secondary**: None (5%)
+
+**Template Version**: 2.0
+**Requirement Count**: 8 LAS requirements
+**Validation Items**: 24 items
+
+#### LAS Requirement Mappings
+
+**LAS1: API Exposure**
+- Section 5 (Component Model): API Gateway implementation, gateway configuration, API catalog
+- Section 9 (Security Architecture): API authentication (OAuth 2.0, OIDC, JWT), authorization (RBAC, ABAC), rate limiting, API security policies
+- Section 7 (Integration View): External API exposure patterns, API versioning
+
+**LAS2: Intra-Microservices Communication**
+- Section 5 (Component Model): Service mesh implementation (Istio, Linkerd, Consul Connect), service catalog, service dependencies
+- Section 9 (Security Architecture): mTLS configuration, service-to-service authentication, service identity, authorization policies
+- Section 4 (Architecture Diagrams): Microservices topology, communication patterns
+
+**LAS3: Inter-Cluster Kubernetes Communication**
+- Section 4 (Architecture Diagrams): Multi-cluster architecture, cluster topology, cross-cluster networking
+- Section 9 (Security Architecture): Inter-cluster security (VPN/TLS), network policies, cluster federation security
+- Section 11 (Operational Considerations): Multi-cluster management, cluster failover
+
+**LAS4: Domain API Communication**
+- Section 7 (Integration View): Domain API design, bounded contexts, domain events, API contracts
+- Section 9 (Security Architecture): Domain API authentication, authorization, API security boundaries
+- Section 5 (Component Model): Domain services, API components
+
+**LAS5: Third-Party API Consumption**
+- Section 7 (Integration View): Third-party API inventory, vendor list, API dependencies, integration patterns
+- Section 9 (Security Architecture): API credential storage (Azure Key Vault, HashiCorp Vault), credential rotation, API key management
+- Section 11 (Operational Considerations): Vendor risk assessment, SLA monitoring, vendor security reviews
+
+**LAS6: Data Lake Communication**
+- Section 7 (Integration View): Data lake integration points, data ingestion patterns, data lake connectivity
+- Section 9 (Security Architecture): Data lake access security (RBAC, Azure AD, IAM), encryption (TLS 1.2+, at-rest), data governance, data classification
+- Section 5 (Component Model): Data lake components, data pipeline architecture
+
+**LAS7: Internal Application Authentication**
+- Section 9 (Security Architecture): Authentication strategy (SSO, Azure AD, Okta, SAML 2.0, OIDC), MFA enforcement, session management (timeout, revocation)
+- Section 5 (Component Model): Identity provider integration, authentication flows
+- Section 11 (Operational Considerations): User provisioning, identity lifecycle
+
+**LAS8: HTTP Encryption Scheme**
+- Section 9 (Security Architecture): TLS configuration (1.2/1.3 enforcement), HTTP security headers (HSTS, CSP, X-Frame-Options), cipher suites
+- Section 11 (Operational Considerations): Certificate management automation, certificate renewal, certificate authority
+- Section 5 (Component Model): Load balancer TLS termination, CDN TLS configuration
 
 **Key Extractions**:
-- Section 9.1: API security (authentication, authorization, rate limiting)
-- Section 9.2: Authentication methods (OAuth, SAML, JWT, MFA)
-- Section 9.3: Encryption (at rest, in transit, key management)
-- Section 9.4: Network security (firewalls, VPCs, security groups)
-- Section 7: Integration security (API keys, mutual TLS)
-- Section 11: Security monitoring (SIEM, audit logs)
+- Section 4: Multi-cluster topology (LAS3), deployment architecture
+- Section 5: API Gateway (LAS1), service mesh (LAS2), service catalog, identity provider, data lake components (LAS6)
+- Section 7: Domain APIs (LAS4), third-party API inventory (LAS5), data lake integration (LAS6)
+- Section 9: All 8 LAS security requirements - authentication, encryption, mTLS, authorization, credential management, TLS configuration, security headers
+- Section 11: Certificate management (LAS8), vendor risk (LAS5), multi-cluster operations (LAS3)
 
 ---
 
@@ -2075,17 +2120,57 @@ All templates with Section 9 references must use this standard:
 
 ---
 
-### Contract 10: Integration Architecture
+### Contract 10: Integration Architecture (Version 2.0)
 
 #### Section Mapping Summary
-**Primary**: Section 7 (50%)
-**Secondary**: Sections 5, 6, 8 (50%)
+**Primary**: Sections 5, 6, 7, 9 (90%)
+**Secondary**: None (10%)
+
+**Template Version**: 2.0
+**Requirement Count**: 7 LAI requirements
+**Validation Items**: 25 items
+
+#### LAI Requirement Mappings
+
+**LAI1: Best Practices Adoption**
+- Section 7 (Integration View): Domain API accessibility, API catalog, REST API design standards, API versioning strategy, error handling standards, API documentation (OpenAPI/Swagger)
+- Section 5 (Component Model): Microservice architecture, API components, domain services
+- Requirement: All domain microservices accessible via domain APIs with complete catalog
+
+**LAI2: Secure Integrations**
+- Section 9 (Security Architecture): API authentication (OAuth 2.0, JWT, mTLS), API authorization (RBAC, ABAC), TLS 1.2+ encryption, secrets management (vault storage), integration security logging
+- Section 7 (Integration View): Integration authentication patterns, security protocols
+- Requirement: Secure authentication and TLS 1.2+ for all integrations
+
+**LAI3: No Obsolete Integration Technologies**
+- Section 7 (Integration View): REST protocol version (HTTP/1.1, HTTP/2), SOAP version check, message broker technology, event streaming platform, ESB/integration platform currency
+- Section 5 (Component Model): Message brokers (Kafka, RabbitMQ), integration middleware
+- Requirement: No deprecated technologies (SOAP 1.0, WebSphere MQ, legacy ESB)
+
+**LAI4: Integration Governance Standards**
+- Section 7 (Integration View): API naming conventions, endpoint standardization, API lifecycle governance, API change control, governance playbook reference, API review process
+- Requirement: All APIs follow integration governance playbook
+
+**LAI5: Third-Party Documentation**
+- Section 7 (Integration View): Third-party API catalog, external service dependencies, API specification availability (OpenAPI), integration guides, third-party SLAs, support contact information
+- Requirement: All third-party APIs provide documentation, SLAs, and support contacts
+
+**LAI6: Traceability and Audit**
+- Section 7 (Integration View): Distributed tracing implementation (OpenTelemetry, Jaeger, Zipkin), trace context propagation (W3C Trace Context), structured logging format (JSON), log correlation IDs, centralized logging platform, trace-log integration
+- Section 5 (Component Model): Observability infrastructure, tracing systems, logging platforms
+- Requirement: Distributed tracing and structured logging with correlation IDs
+
+**LAI7: Event-Driven Integration Compliance**
+- Section 6 (Data Model): Event schema definition (JSON Schema, Avro), CloudEvents compliance, event versioning strategy, schema registry implementation, event catalog, consumer contracts, event delivery semantics, Dead Letter Queue (DLQ) handling
+- Section 7 (Integration View): Event-driven patterns, event catalog, messaging guarantees
+- Section 5 (Component Model): Schema registry, event bus, message brokers
+- Requirement: CloudEvents specification with schema registry for event-driven integrations
 
 **Key Extractions**:
-- Section 7: Integration catalog (all external systems, APIs, protocols)
-- Section 5: Integration components (API gateway, message brokers)
-- Section 6: Integration flows, data exchange patterns
-- Section 8: Integration technologies (REST, SOAP, messaging)
+- Section 5: API Gateway (LAI1), message brokers (LAI3, LAI7), schema registry (LAI7), observability infrastructure (LAI6)
+- Section 6: Event schemas (LAI7), CloudEvents format, event catalog, DLQ configuration
+- Section 7: Domain APIs (LAI1), API catalog, REST/SOAP protocols (LAI3), governance standards (LAI4), third-party APIs (LAI5), distributed tracing (LAI6), event patterns (LAI7)
+- Section 9: API authentication/authorization (LAI2), TLS encryption, secrets management, security logging
 
 **Detailed Example**:
 ```

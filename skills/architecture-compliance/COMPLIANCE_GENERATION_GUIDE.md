@@ -382,43 +382,68 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### 7. Security Architecture (Security Architecture)
 
-**Purpose**: Define guidelines for security including API security, authentication, encryption, and secure communication.
+**Purpose**: Define guidelines for API security, microservices communication security, encryption, and authentication to ensure comprehensive security architecture compliance.
 
 **Stakeholders**:
 - Security architects
 - Security operations (SecOps)
 - Application security team
 - Compliance team
+- Platform engineers
+- API architects
 
-**Key Content Requirements**:
-- **API Security**: Authentication, authorization, rate limiting, API gateway
-- **Authentication**: Methods (OAuth, SAML, JWT), MFA, SSO
-- **Encryption**: Data at rest, data in transit, key management
-- **Communication Security**: Intra-service, inter-service, external
-- **Access Controls**: RBAC, ABAC, least privilege
-- **Security Monitoring**: SIEM, intrusion detection, audit logging
-- **Vulnerability Management**: Scanning, patching, remediation
-- **Compliance**: Standards (ISO 27001, SOC 2, etc.)
+**8 LAS Requirements** (Version 2.0):
+
+**LAS1: API Exposure**
+- API Gateway implementation, authentication mechanism, authorization model, rate limiting
+- Requirement: All external APIs must be exposed through API Gateway with OAuth 2.0/OIDC authentication
+
+**LAS2: Intra-Microservices Communication**
+- Service mesh implementation, mTLS encryption, service-to-service authorization
+- Requirement: Microservices must communicate via service mesh with mTLS and service identity
+
+**LAS3: Inter-Cluster Kubernetes Communication**
+- Multi-cluster architecture, inter-cluster security (VPN/TLS, network policies)
+- Requirement: Multi-cluster Kubernetes deployments must secure inter-cluster communication
+
+**LAS4: Domain API Communication**
+- Domain API design (DDD bounded contexts), domain API security, domain events security
+- Requirement: Domain APIs must follow bounded context design with defined security models
+
+**LAS5: Third-Party API Consumption**
+- Third-party API inventory, credential security (vault storage), vendor risk management
+- Requirement: Third-party API credentials must be stored in approved vault (Azure Key Vault, HashiCorp Vault)
+
+**LAS6: Data Lake Communication**
+- Data lake access security, encryption (TLS 1.2+), data governance policies
+- Requirement: Data lake communication must use RBAC, encryption, and data classification
+
+**LAS7: Internal Application Authentication**
+- Authentication strategy (SSO/SAML/OIDC), MFA enforcement, session management
+- Requirement: Internal applications must use centralized SSO with MFA enforcement
+
+**LAS8: HTTP Encryption Scheme**
+- TLS 1.2+ configuration, certificate management automation, HTTP security headers
+- Requirement: All HTTP communications must enforce TLS 1.2+ with HSTS and security headers
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 9 (Security Considerations) - 70% of content
-    - All security subsections
+  - Section 9 (Security Architecture) - 50% of content
+    - API security, authentication, encryption, access controls (LAS1, LAS2, LAS4, LAS5, LAS6, LAS7, LAS8)
+  - Section 5 (Component Model) - 20% of content
+    - API Gateway, service mesh, component security (LAS1, LAS2)
+  - Section 7 (Integration View) - 15% of content
+    - Domain APIs, third-party integrations, data lake (LAS4, LAS5, LAS6)
 - **Secondary**:
-  - Section 7 (Integration Points) - 20% of content
-    - Integration security
-  - Section 11 (Operational Considerations) - 10% of content
-    - Security monitoring
+  - Section 4 (Architecture Diagrams) - 10% of content
+    - Multi-cluster architecture, deployment topology (LAS3)
+  - Section 11 (Operational Considerations) - 5% of content
+    - Certificate management, vendor risk (LAS5, LAS8)
 
-**Example Guidelines**:
-- All APIs must require authentication and authorization
-- Encryption required: TLS 1.3 for transit, AES-256 for rest
-- Secrets must never be stored in code or configuration files
-- Microservice communication must use mutual TLS (mTLS)
-- Security vulnerabilities: Critical < 24hr, High < 7 days
-- All authentication events must be logged and monitored
+**Validation Items**: 24 items across 8 LAS sections (4+3+2+3+3+3+3+3)
+**Template Version**: 2.0
 
-**Template Priority**: High (Template #3)
+**Template Priority**: High (Template #7)
 
 ---
 
@@ -549,47 +574,65 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 10. Integration Architecture
+### 10. Integration Architecture (Version 2.0)
 
-**Purpose**: Define guidelines for integration of microservices, APIs, and event-driven systems ensuring security, standards compliance, and best practices.
+**Purpose**: Define guidelines for API integration best practices, secure integrations, technology currency, governance compliance, third-party documentation, traceability, and event-driven architecture standards.
 
 **Stakeholders**:
 - Integration architects
 - API platform team
 - Microservices teams
 - Enterprise integration team
+- Security architects
+- SRE team
+- Event architects
 
-**Key Content Requirements**:
-- **Integration Catalog**: All external systems, APIs, protocols
-- **Integration Patterns**: REST, SOAP, messaging, events, batch
-- **Best Practices**: API design, versioning, error handling
-- **Security**: Authentication, authorization, encryption for integrations
-- **Obsolete Technologies**: Avoidance of deprecated protocols/standards
-- **Traceability & Auditing**: Integration logging, correlation IDs
-- **Standards Compliance**: OpenAPI, AsyncAPI, integration standards
+**7 LAI Requirements** (Version 2.0):
+
+**LAI1: Best Practices Adoption**
+- Domain microservice API accessibility, API catalog completeness, RESTful design, versioning strategy, error handling, OpenAPI documentation
+- Requirement: All domain microservices must be accessible via domain APIs with complete catalog
+
+**LAI2: Secure Integrations**
+- API authentication (OAuth 2.0, JWT, mTLS), authorization (RBAC/ABAC), TLS 1.2+ encryption, secrets management, security logging
+- Requirement: All integrations must use secure authentication and TLS 1.2+ encryption
+
+**LAI3: No Obsolete Integration Technologies**
+- REST protocol currency (HTTP/1.1, HTTP/2), SOAP version check, modern message brokers (Kafka, RabbitMQ), no legacy ESB
+- Requirement: No deprecated integration technologies (SOAP 1.0, WebSphere MQ, legacy ESB without upgrade path)
+
+**LAI4: Integration Governance Standards**
+- API naming conventions, API lifecycle management, change control, governance playbook compliance, API review process
+- Requirement: All APIs must follow organizational integration governance playbook
+
+**LAI5: Third-Party Documentation**
+- Third-party API inventory, API specifications (OpenAPI/Swagger), integration guides, SLAs, support contacts
+- Requirement: All third-party APIs must provide proper documentation and SLAs
+
+**LAI6: Traceability and Audit**
+- Distributed tracing (OpenTelemetry, Jaeger), trace context propagation (W3C standard), structured logging (JSON), correlation IDs, centralized logging platform
+- Requirement: All integrations must implement distributed tracing and structured logging with correlation IDs
+
+**LAI7: Event-Driven Integration Compliance**
+- Event schemas (JSON Schema/Avro), CloudEvents compliance, event versioning, schema registry, event catalog, consumer contracts, delivery guarantees, DLQ handling
+- Requirement: Event-driven integrations must follow CloudEvents specification with schema registry
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 7 (Integration Points) - 50% of content
-    - All integration details
+  - Section 7 (Integration View) - 50% of content
+    - Domain APIs, API catalog, integration patterns, third-party APIs, distributed tracing, logging standards (LAI1, LAI3, LAI4, LAI5, LAI6)
+  - Section 9 (Security Architecture) - 25% of content
+    - API authentication, authorization, TLS encryption, secrets management, security logging (LAI2)
+  - Section 6 (Data Model) - 15% of content
+    - Event schemas, CloudEvents, schema registry, event catalog, DLQ handling (LAI7)
 - **Secondary**:
-  - Section 5 (System Components) - 20% of content
-    - Integration components (API gateway, message brokers)
-  - Section 6 (Data Flow) - 20% of content
-    - Integration flows
-  - Section 8 (Technology Stack) - 10% of content
-    - Integration technologies
+  - Section 5 (Component Model) - 10% of content
+    - API Gateway, message brokers, service mesh, schema registry (LAI1, LAI3, LAI6)
 
-**Example Guidelines**:
-- All integrations must be cataloged and documented
-- REST APIs must follow OpenAPI 3.0 specification
-- Asynchronous integrations must use event-driven patterns
-- Integration security: OAuth 2.0, mutual TLS, API keys
-- Avoid obsolete protocols (SOAP 1.1, XML-RPC, etc.)
-- All integrations must include correlation IDs for tracing
-- API versioning strategy must be consistent (URI vs. header)
+**Validation Items**: 25 items across 7 LAI sections (5+4+4+4+4+4+4)
+**Template Version**: 2.0
 
-**Template Priority**: Medium (Template #10)
+**Template Priority**: High (Template #10)
 
 ---
 
@@ -1197,10 +1240,10 @@ Individual Contract Status:
 ✓ Data & Analytics - AI Architecture  (75% complete, 5 placeholders)
 ✓ Development Architecture         (88% complete, 2 placeholders)
 ✓ Process Transformation and Automation      (70% complete, 6 placeholders)
-✓ Security Architecture          (92% complete, 1 placeholder)
+✓ Security Architecture v2.0     (8 LAS requirements, 24 validation items)
 ✓ Platform & IT Infrastructure   (85% complete, 3 placeholders)
 ✓ Enterprise Architecture        (78% complete, 4 placeholders)
-✓ Integration Architecture     (82% complete, 3 placeholders)
+✓ Integration Architecture v2.0  (7 LAI requirements, 25 validation items)
 ✓ Risk Management                 (65% complete, 7 placeholders)
 
 Overall Statistics:

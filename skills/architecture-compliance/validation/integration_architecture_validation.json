@@ -1,7 +1,7 @@
 {
   "template_name": "Integration Architecture",
   "template_id": "TEMPLATE_INTEGRATION_ARCHITECTURE",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "Integration Architecture Review Board",
   "scoring": {
     "scale": 10,
@@ -12,9 +12,9 @@
       "reject": 0
     },
     "weights": {
-      "completeness": 0.35,
-      "compliance": 0.55,
-      "quality": 0.1
+      "completeness": 0.30,
+      "compliance": 0.60,
+      "quality": 0.10
     },
     "status_codes": {
       "PASS": 10,
@@ -26,172 +26,471 @@
   },
   "validation_sections": [
     {
-      "section_id": "integration_catalog",
-      "section_name": "Integration Catalog",
-      "weight": 0.35,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "external_systems",
-          "question": "Are all external system integrations cataloged?",
-          "architecture_md_section": "7",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "All external systems listed with owner and purpose",
-            "fail_criteria": "Integrations not cataloged",
-            "na_criteria": "Standalone system with no integrations",
-            "unknown_criteria": "Integration catalog not documented in Section 7"
-          }
-        },
-        {
-          "item_id": "integration_patterns",
-          "question": "Are integration patterns defined (REST, messaging, batch)?",
-          "architecture_md_section": "7",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["REST API", "Messaging", "Event-Driven", "Batch/ETL", "gRPC", "GraphQL"],
-            "pass_criteria": "Integration patterns documented with justification",
-            "fail_criteria": "Integration patterns not specified",
-            "na_criteria": "No integrations",
-            "unknown_criteria": "Integration patterns not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "api_management",
-      "section_name": "API Management",
-      "weight": 0.25,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "api_gateway",
-          "question": "Is API Gateway configured for external APIs?",
-          "architecture_md_section": "7.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["Azure API Management", "AWS API Gateway", "Kong", "Apigee"],
-            "pass_criteria": "API Gateway configured with policies",
-            "fail_criteria": "Direct API exposure without gateway",
-            "na_criteria": "No external APIs",
-            "unknown_criteria": "API Gateway not documented"
-          }
-        },
-        {
-          "item_id": "api_versioning",
-          "question": "Is API versioning strategy defined?",
-          "architecture_md_section": "7.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "API versioning strategy (URI, header, or query parameter) with deprecation policy",
-            "fail_criteria": "No versioning strategy",
-            "na_criteria": "No APIs or internal-only APIs",
-            "unknown_criteria": "API versioning not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "messaging_events",
-      "section_name": "Messaging and Events",
+      "section_id": "lai1_best_practices",
+      "section_name": "LAI1 - Best Practices Adoption",
       "weight": 0.20,
-      "required": false,
+      "required": true,
       "validation_items": [
         {
-          "item_id": "message_broker",
-          "question": "Is message broker/event bus defined?",
-          "architecture_md_section": "7.2",
+          "item_id": "domain_api_accessibility",
+          "question": "Are all domain microservices accessible via domain APIs?",
+          "architecture_md_section": "7",
           "required": true,
-          "weight": 0.6,
+          "weight": 0.20,
           "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["Azure Service Bus", "RabbitMQ", "Kafka", "AWS SQS/SNS", "Event Hubs"],
-            "pass_criteria": "Message broker configured with topics/queues",
-            "fail_criteria": "Messaging required but no broker defined",
-            "na_criteria": "Synchronous REST-only integrations",
-            "unknown_criteria": "Message broker not documented"
+            "type": "custom",
+            "pass_criteria": "All domain microservices expose domain APIs documented in integration catalog",
+            "fail_criteria": "Microservices exist without domain API exposure",
+            "na_criteria": "No domain microservices architecture",
+            "unknown_criteria": "Domain API accessibility not documented"
           }
         },
         {
-          "item_id": "event_schema",
-          "question": "Are event schemas defined and versioned?",
-          "architecture_md_section": "7.2",
+          "item_id": "api_catalog_completeness",
+          "question": "Is API catalog complete with endpoints, authentication, SLAs?",
+          "architecture_md_section": "7",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.20,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Event schemas documented with schema registry",
-            "fail_criteria": "No event schema definition",
-            "na_criteria": "No event-driven integrations",
-            "unknown_criteria": "Event schemas not documented"
+            "pass_criteria": "Complete API catalog with endpoints, methods, authentication documented",
+            "fail_criteria": "API catalog missing or incomplete",
+            "na_criteria": "No APIs",
+            "unknown_criteria": "API catalog not documented"
+          }
+        },
+        {
+          "item_id": "restful_api_design",
+          "question": "Do APIs follow RESTful design principles?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "APIs follow REST principles (resource-oriented, HTTP verbs, stateless, JSON)",
+            "fail_criteria": "Non-RESTful design or RPC-style endpoints",
+            "na_criteria": "No REST APIs (SOAP/GraphQL only)",
+            "unknown_criteria": "API design principles not documented"
+          }
+        },
+        {
+          "item_id": "api_versioning_strategy",
+          "question": "Is API versioning strategy defined?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "API versioning strategy defined (URL path, header, or query parameter)",
+            "fail_criteria": "No versioning or breaking changes without version management",
+            "na_criteria": "Internal-only APIs with controlled clients",
+            "unknown_criteria": "Versioning strategy not documented"
+          }
+        },
+        {
+          "item_id": "api_documentation",
+          "question": "Are APIs documented with OpenAPI/Swagger specifications?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "APIs documented with OpenAPI/Swagger specifications",
+            "fail_criteria": "APIs lack documentation or outdated documentation",
+            "na_criteria": "No APIs",
+            "unknown_criteria": "API documentation not specified"
           }
         }
       ]
     },
     {
-      "section_id": "integration_security",
-      "section_name": "Integration Security",
+      "section_id": "lai2_secure_integrations",
+      "section_name": "LAI2 - Secure Integrations",
+      "weight": 0.20,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "api_authentication",
+          "question": "Is API authentication secure (OAuth 2.0, JWT, mTLS)?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OAuth 2.0", "JWT", "API Keys with rotation", "mTLS", "Client Certificates"],
+            "pass_criteria": "Secure authentication for all APIs",
+            "fail_criteria": "Basic authentication, hardcoded credentials, or no authentication",
+            "na_criteria": "No external integrations",
+            "unknown_criteria": "Authentication mechanism not documented"
+          }
+        },
+        {
+          "item_id": "api_authorization",
+          "question": "Is API authorization model defined (RBAC/ABAC)?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["RBAC", "ABAC", "Scope-Based", "Policy-Based"],
+            "pass_criteria": "Authorization model with fine-grained access control",
+            "fail_criteria": "No authorization or all-or-nothing access",
+            "na_criteria": "Public read-only APIs",
+            "unknown_criteria": "Authorization not documented"
+          }
+        },
+        {
+          "item_id": "tls_encryption",
+          "question": "Is TLS 1.2+ enforced for all integrations?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "format_check",
+            "required_format": "TLS 1.2 or TLS 1.3",
+            "pass_criteria": "TLS 1.2+ for all API communications",
+            "fail_criteria": "Unencrypted communications or TLS 1.0/1.1",
+            "na_criteria": "No external communications",
+            "unknown_criteria": "Encryption not documented"
+          }
+        },
+        {
+          "item_id": "secrets_management",
+          "question": "Are API credentials stored in secure vault?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure Key Vault", "HashiCorp Vault", "AWS Secrets Manager", "Google Secret Manager"],
+            "pass_criteria": "API credentials stored in approved vault",
+            "fail_criteria": "Credentials in code, configuration files, or environment variables",
+            "na_criteria": "No secrets required",
+            "unknown_criteria": "Secrets management not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lai3_no_obsolete_tech",
+      "section_name": "LAI3 - No Obsolete Integration Technologies",
       "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "authentication_method",
-          "question": "Is integration authentication method defined?",
-          "architecture_md_section": "10.1",
+          "item_id": "rest_protocol_version",
+          "question": "Are REST APIs using HTTP/1.1 or HTTP/2 (not HTTP/1.0)?",
+          "architecture_md_section": "7",
           "required": true,
-          "weight": 0.6,
+          "weight": 0.30,
           "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["OAuth 2.0", "JWT", "API Keys", "Mutual TLS", "Service Principal"],
-            "pass_criteria": "Secure authentication for all integrations",
-            "fail_criteria": "Unauthenticated integrations or basic auth",
-            "na_criteria": "No integrations",
-            "unknown_criteria": "Authentication method not documented"
+            "type": "custom",
+            "pass_criteria": "REST APIs use HTTP/1.1 or HTTP/2, JSON format",
+            "fail_criteria": "HTTP/1.0 or deprecated XML-RPC",
+            "na_criteria": "No REST APIs",
+            "unknown_criteria": "Protocol version not documented"
           }
         },
         {
-          "item_id": "data_encryption",
-          "question": "Is data encrypted in transit for integrations?",
-          "architecture_md_section": "10.2",
-          "required": true,
-          "weight": 0.4,
+          "item_id": "soap_version",
+          "question": "If using SOAP, is it SOAP 1.2 with migration plan?",
+          "architecture_md_section": "7",
+          "required": false,
+          "weight": 0.20,
           "validation_rules": {
-            "type": "format_check",
-            "required_format": "TLS 1.2 or TLS 1.3",
-            "pass_criteria": "TLS 1.2+ for all external integrations",
-            "fail_criteria": "Unencrypted or deprecated TLS",
-            "na_criteria": "No external integrations",
-            "unknown_criteria": "Encryption not documented"
+            "type": "custom",
+            "pass_criteria": "SOAP 1.2 with documented migration path to REST",
+            "fail_criteria": "SOAP 1.0 or no migration plan",
+            "na_criteria": "No SOAP integrations",
+            "unknown_criteria": "SOAP version not specified"
+          }
+        },
+        {
+          "item_id": "message_broker_currency",
+          "question": "Is message broker modern (Kafka, RabbitMQ, cloud-native)?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Kafka", "RabbitMQ", "Azure Service Bus", "AWS SQS/SNS", "Azure Event Hubs", "AWS Kinesis", "Confluent Cloud"],
+            "pass_criteria": "Modern message broker with current version",
+            "fail_criteria": "Deprecated broker (WebSphere MQ 7.x, MSMQ) or end-of-life version",
+            "na_criteria": "No messaging middleware",
+            "unknown_criteria": "Message broker not documented"
+          }
+        },
+        {
+          "item_id": "esb_platform_currency",
+          "question": "Is integration platform current or cloud-native (no legacy ESB)?",
+          "architecture_md_section": "7",
+          "required": false,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Modern integration platform (MuleSoft, Azure Logic Apps, AWS Step Functions) or no ESB (cloud-native)",
+            "fail_criteria": "Legacy ESB (Oracle SOA Suite 11g, WebSphere ESB) without upgrade path",
+            "na_criteria": "No ESB (microservices with direct integration)",
+            "unknown_criteria": "Integration platform not documented"
           }
         }
       ]
     },
     {
-      "section_id": "error_handling",
-      "section_name": "Error Handling and Resilience",
-      "weight": 0.05,
+      "section_id": "lai4_governance_standards",
+      "section_name": "LAI4 - Integration Governance Standards",
+      "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "retry_policy",
-          "question": "Is retry policy defined for failed integrations?",
-          "architecture_md_section": "9.6",
+          "item_id": "api_naming_conventions",
+          "question": "Do APIs follow organizational naming conventions?",
+          "architecture_md_section": "7",
           "required": true,
-          "weight": 1.0,
+          "weight": 0.25,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Retry policy with exponential backoff and circuit breaker",
-            "fail_criteria": "No retry policy",
-            "na_criteria": "No integrations",
-            "unknown_criteria": "Retry policy not documented"
+            "pass_criteria": "APIs follow organizational naming conventions (resource naming, URI structure)",
+            "fail_criteria": "Inconsistent naming or non-standard URI patterns",
+            "na_criteria": "No APIs",
+            "unknown_criteria": "Naming standards not documented"
+          }
+        },
+        {
+          "item_id": "api_lifecycle_management",
+          "question": "Is API lifecycle management defined (design to deprecation)?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "API lifecycle stages defined (design, development, testing, production, deprecation)",
+            "fail_criteria": "No lifecycle management or uncontrolled API changes",
+            "na_criteria": "No APIs",
+            "unknown_criteria": "Lifecycle management not documented"
+          }
+        },
+        {
+          "item_id": "api_change_control",
+          "question": "Do API changes follow governance process?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "API changes follow governance process (change request, impact analysis, stakeholder approval)",
+            "fail_criteria": "Uncontrolled API changes causing breaking changes",
+            "na_criteria": "No APIs or single client",
+            "unknown_criteria": "Change control not documented"
+          }
+        },
+        {
+          "item_id": "governance_playbook_compliance",
+          "question": "Does architecture reference integration governance playbook?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Architecture references organizational integration governance playbook with compliance confirmation",
+            "fail_criteria": "No playbook reference or non-compliance",
+            "na_criteria": "No organizational playbook",
+            "unknown_criteria": "Playbook compliance not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lai5_third_party_docs",
+      "section_name": "LAI5 - Third-Party Documentation",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "third_party_api_inventory",
+          "question": "Is third-party API inventory complete?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Complete inventory of third-party APIs with vendor, purpose, endpoint, authentication",
+            "fail_criteria": "Third-party APIs used without central catalog",
+            "na_criteria": "No third-party API consumption",
+            "unknown_criteria": "Third-party API inventory not documented"
+          }
+        },
+        {
+          "item_id": "api_specification_availability",
+          "question": "Do third-party APIs provide OpenAPI/Swagger specifications?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Third-party APIs provide OpenAPI/Swagger specification or equivalent documentation",
+            "fail_criteria": "APIs lack formal specification",
+            "na_criteria": "No third-party APIs",
+            "unknown_criteria": "API documentation availability not confirmed"
+          }
+        },
+        {
+          "item_id": "third_party_slas",
+          "question": "Are third-party API SLAs documented?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "SLAs documented for third-party APIs (availability, response time, rate limits)",
+            "fail_criteria": "No SLA documentation or unknown service levels",
+            "na_criteria": "No third-party APIs",
+            "unknown_criteria": "SLAs not documented"
+          }
+        },
+        {
+          "item_id": "support_contacts",
+          "question": "Are third-party vendor support contacts documented?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Support contacts documented for third-party vendors (email, portal, escalation path)",
+            "fail_criteria": "No support contact information",
+            "na_criteria": "No third-party APIs",
+            "unknown_criteria": "Support contacts not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lai6_traceability_audit",
+      "section_name": "LAI6 - Traceability and Audit",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "distributed_tracing",
+          "question": "Is distributed tracing implemented (OpenTelemetry, Jaeger, Zipkin)?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OpenTelemetry", "Jaeger", "Zipkin", "Azure Application Insights", "AWS X-Ray"],
+            "pass_criteria": "Distributed tracing implemented across all integrations",
+            "fail_criteria": "No distributed tracing or siloed tracing",
+            "na_criteria": "Monolithic application with no distributed calls",
+            "unknown_criteria": "Distributed tracing not documented"
+          }
+        },
+        {
+          "item_id": "trace_context_propagation",
+          "question": "Is trace context propagated across service boundaries?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Trace context propagated (W3C Trace Context standard, correlation IDs in headers)",
+            "fail_criteria": "Trace context not propagated or broken trace chains",
+            "na_criteria": "No distributed architecture",
+            "unknown_criteria": "Trace propagation not documented"
+          }
+        },
+        {
+          "item_id": "structured_logging",
+          "question": "Is structured logging implemented with JSON format?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Structured logging with standard format (JSON, key-value pairs, consistent schema)",
+            "fail_criteria": "Unstructured text logs or inconsistent formats",
+            "na_criteria": "N/A (logging required)",
+            "unknown_criteria": "Logging format not documented"
+          }
+        },
+        {
+          "item_id": "centralized_logging",
+          "question": "Are logs sent to centralized logging platform?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["ELK Stack", "Splunk", "Azure Monitor", "AWS CloudWatch", "Datadog"],
+            "pass_criteria": "Logs sent to centralized platform",
+            "fail_criteria": "Logs stored locally or not centralized",
+            "na_criteria": "N/A (centralized logging required)",
+            "unknown_criteria": "Logging platform not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "lai7_event_driven",
+      "section_name": "LAI7 - Event-Driven Integration Compliance",
+      "weight": 0.05,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "event_schema_definition",
+          "question": "Are event schemas defined with standard format (JSON Schema/Avro)?",
+          "architecture_md_section": "6",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["JSON Schema", "Avro", "Protocol Buffers"],
+            "pass_criteria": "Event schemas defined with standard format",
+            "fail_criteria": "Unstructured events or no schema validation",
+            "na_criteria": "No event-driven architecture",
+            "unknown_criteria": "Event schemas not documented"
+          }
+        },
+        {
+          "item_id": "cloudevents_compliance",
+          "question": "Do events follow CloudEvents specification?",
+          "architecture_md_section": "6",
+          "required": false,
+          "weight": 0.20,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Events follow CloudEvents specification for metadata (id, source, type, time)",
+            "fail_criteria": "Custom event format without standard metadata",
+            "na_criteria": "No event-driven architecture",
+            "unknown_criteria": "CloudEvents compliance not documented"
+          }
+        },
+        {
+          "item_id": "event_catalog",
+          "question": "Is event catalog documenting all events?",
+          "architecture_md_section": "6",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Event catalog documenting all events (name, schema, producers, consumers, purpose)",
+            "fail_criteria": "Events lack documentation or unknown producers/consumers",
+            "na_criteria": "No events",
+            "unknown_criteria": "Event catalog not documented"
+          }
+        },
+        {
+          "item_id": "dlq_handling",
+          "question": "Is Dead Letter Queue configured for failed events?",
+          "architecture_md_section": "6",
+          "required": false,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "DLQ configured for failed event processing with monitoring and retry policies",
+            "fail_criteria": "No DLQ or unmonitored failures",
+            "na_criteria": "No asynchronous events",
+            "unknown_criteria": "DLQ handling not documented"
           }
         }
       ]
@@ -218,25 +517,31 @@
       "action": "NEEDS_WORK",
       "message": "Integration architecture incomplete. Address gaps before approval.",
       "blockers": [
-        "Must catalog all external integrations",
-        "Must define integration security and error handling"
+        "Must document all 7 LAI integration requirements in ARCHITECTURE.md Sections 5, 6, 7, 9",
+        "Must ensure domain APIs for all microservices (LAI1)",
+        "Must implement secure integrations with OAuth 2.0/mTLS and TLS 1.2+ (LAI2)",
+        "Must catalog third-party APIs with SLAs (LAI5)",
+        "Must implement distributed tracing and structured logging (LAI6)"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient integration architecture. Cannot proceed.",
+      "message": "Critical integration architecture failures. Cannot proceed.",
       "blockers": [
-        "Critical integration details missing",
-        "Security controls not defined"
+        "LAI1 Best Practices: Missing domain APIs or API catalog",
+        "LAI2 Secure Integrations: Missing authentication/authorization or using basic auth",
+        "LAI3 Obsolete Technologies: Using deprecated integration technologies (SOAP 1.0, legacy ESB, WebSphere MQ)",
+        "LAI4 Governance: No API lifecycle management or change control",
+        "LAI6 Traceability: No distributed tracing or centralized logging"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document all external integrations, API management strategy, and security controls",
-    "UNKNOWN_items": "Add integration details to ARCHITECTURE.md Section 7 (Integration Points) and Section 10 (Security)",
-    "completeness_below_threshold": "Complete integration catalog, API management, messaging, security, and error handling sections",
-    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all integration decisions"
+    "FAIL_items": "Implement required integration architecture standards for all 7 LAI requirements or document approved exceptions with risk acceptance. Critical: domain API exposure (LAI1), secure authentication (LAI2), modern integration technologies (LAI3), governance compliance (LAI4), distributed tracing (LAI6)",
+    "UNKNOWN_items": "Add missing integration architecture documentation to ARCHITECTURE.md Sections 5 (Component Model), 6 (Data Model), 7 (Integration View), and 9 (Security Architecture)",
+    "completeness_below_threshold": "Complete all 7 LAI sections: Best Practices Adoption, Secure Integrations, No Obsolete Technologies, Integration Governance Standards, Third-Party Documentation, Traceability and Audit, and Event-Driven Integration Compliance",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers for all integration architecture decisions across LAI1-LAI7 requirements"
   }
 }

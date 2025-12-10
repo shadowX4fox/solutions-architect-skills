@@ -1,7 +1,7 @@
 {
   "template_name": "Security Architecture",
   "template_id": "TEMPLATE_SECURITY_ARCHITECTURE",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "Security Review Board",
   "scoring": {
     "scale": 10,
@@ -12,9 +12,9 @@
       "reject": 0
     },
     "weights": {
-      "completeness": 0.2,
-      "compliance": 0.7,
-      "quality": 0.1
+      "completeness": 0.30,
+      "compliance": 0.60,
+      "quality": 0.10
     },
     "status_codes": {
       "PASS": 10,
@@ -26,264 +26,412 @@
   },
   "validation_sections": [
     {
-      "section_id": "api_security",
-      "section_name": "API Security",
-      "weight": 0.15,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "api_authentication",
-          "question": "Is API authentication mechanism defined and secure?",
-          "architecture_md_section": "10.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["OAuth 2.0", "OpenID Connect", "JWT", "API Keys with rotation", "Mutual TLS"],
-            "pass_criteria": "Secure authentication mechanism documented (OAuth 2.0, OIDC, JWT, mTLS)",
-            "fail_criteria": "Basic authentication or no authentication",
-            "na_criteria": "No external APIs",
-            "unknown_criteria": "API authentication not specified in Section 10.1"
-          }
-        },
-        {
-          "item_id": "api_authorization",
-          "question": "Is API authorization model defined (RBAC/ABAC)?",
-          "architecture_md_section": "10.1",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["RBAC", "ABAC", "Role-Based Access Control", "Attribute-Based Access Control", "Policy-Based"],
-            "pass_criteria": "Authorization model documented with role/policy definitions",
-            "fail_criteria": "No authorization model or all-or-nothing access",
-            "na_criteria": "No APIs or public read-only APIs",
-            "unknown_criteria": "Authorization model not specified"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "encryption",
-      "section_name": "Data Encryption",
+      "section_id": "las1_api_exposure",
+      "section_name": "LAS1 - API Exposure",
       "weight": 0.20,
       "required": true,
       "validation_items": [
         {
-          "item_id": "data_in_transit",
-          "question": "Is data encrypted in transit with TLS 1.2+?",
-          "architecture_md_section": "10.2",
+          "item_id": "api_gateway_implementation",
+          "question": "Is API Gateway implementation documented?",
+          "architecture_md_section": "5",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.25,
           "validation_rules": {
-            "type": "format_check",
-            "required_format": "TLS 1.2 or TLS 1.3",
-            "pass_criteria": "TLS 1.2 or TLS 1.3 enforced for all external communications",
-            "fail_criteria": "TLS 1.0/1.1 in use or unencrypted communications",
-            "na_criteria": "No external network communications",
-            "unknown_criteria": "TLS version not specified in Section 10.2"
+            "type": "value_check",
+            "approved_values": ["Azure API Management", "Kong", "Apigee", "AWS API Gateway", "Google Cloud API Gateway"],
+            "pass_criteria": "API Gateway documented with vendor/technology",
+            "fail_criteria": "Direct API exposure without gateway",
+            "na_criteria": "No external API exposure",
+            "unknown_criteria": "API Gateway not specified"
           }
         },
         {
-          "item_id": "data_at_rest",
-          "question": "Is sensitive data encrypted at rest?",
-          "architecture_md_section": "10.2",
+          "item_id": "api_authentication_mechanism",
+          "question": "Is API authentication mechanism secure?",
+          "architecture_md_section": "9",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["OAuth 2.0", "OpenID Connect", "JWT", "API Keys with rotation", "Client Certificates"],
+            "pass_criteria": "Secure authentication mechanism (OAuth 2.0, OIDC, JWT, Client Certs)",
+            "fail_criteria": "Basic authentication or no authentication",
+            "na_criteria": "No external APIs",
+            "unknown_criteria": "API authentication not specified"
+          }
+        },
+        {
+          "item_id": "api_authorization_model",
+          "question": "Is API authorization model defined?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["RBAC", "ABAC", "Scope-Based", "Policy-Based"],
+            "pass_criteria": "Authorization model with role/scope definitions",
+            "fail_criteria": "No authorization or all-or-nothing access",
+            "na_criteria": "No APIs requiring authorization",
+            "unknown_criteria": "Authorization model not specified"
+          }
+        },
+        {
+          "item_id": "api_rate_limiting",
+          "question": "Is API rate limiting and throttling configured?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.20,
           "validation_rules": {
             "type": "presence_check",
-            "approved_values": ["AES-256", "AES-128", "Transparent Data Encryption", "TDE", "Database encryption", "Disk encryption"],
-            "pass_criteria": "Encryption at rest documented with algorithm (AES-256 recommended)",
-            "fail_criteria": "Sensitive data stored unencrypted",
-            "na_criteria": "No sensitive data storage",
-            "unknown_criteria": "Encryption at rest not specified"
+            "required_format": "Rate limits (requests per second/minute)",
+            "pass_criteria": "Rate limiting configured with quotas",
+            "fail_criteria": "No rate limiting",
+            "na_criteria": "Internal-only APIs with controlled clients",
+            "unknown_criteria": "Rate limiting not documented"
           }
         }
       ]
     },
     {
-      "section_id": "authentication",
-      "section_name": "User Authentication",
+      "section_id": "las2_intra_microservices",
+      "section_name": "LAS2 - Intra-Microservices Communication",
       "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "user_auth_method",
-          "question": "Is user authentication method secure and centralized?",
-          "architecture_md_section": "10.3",
+          "item_id": "service_mesh_implementation",
+          "question": "Is service mesh implemented for microservices?",
+          "architecture_md_section": "5",
           "required": true,
-          "weight": 0.6,
+          "weight": 0.35,
           "validation_rules": {
             "type": "value_check",
-            "approved_values": ["SSO", "Single Sign-On", "Azure AD", "Okta", "SAML 2.0", "OpenID Connect", "OAuth 2.0"],
-            "pass_criteria": "Centralized authentication with SSO/SAML/OIDC",
-            "fail_criteria": "Custom authentication or local user databases without SSO",
-            "na_criteria": "No user authentication (system-to-system only)",
-            "unknown_criteria": "Authentication method not specified"
+            "approved_values": ["Istio", "Linkerd", "Consul Connect", "AWS App Mesh"],
+            "pass_criteria": "Service mesh documented with technology",
+            "fail_criteria": "No service mesh for multi-service architecture",
+            "na_criteria": "Monolithic architecture or single service",
+            "unknown_criteria": "Service mesh not specified"
           }
         },
         {
-          "item_id": "mfa_required",
-          "question": "Is Multi-Factor Authentication (MFA) required?",
-          "architecture_md_section": "10.3",
+          "item_id": "mtls_encryption",
+          "question": "Is mTLS enabled for service-to-service communication?",
+          "architecture_md_section": "9",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "mTLS enforced for all service-to-service communication",
+            "fail_criteria": "Unencrypted or TLS-only (not mutual) service communication",
+            "na_criteria": "Single service or external communication only",
+            "unknown_criteria": "mTLS configuration not documented"
+          }
+        },
+        {
+          "item_id": "service_authorization",
+          "question": "Is service-to-service authorization implemented?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Service identity and authorization policies defined",
+            "fail_criteria": "No service-level authorization (network-only security)",
+            "na_criteria": "Single service architecture",
+            "unknown_criteria": "Service authorization not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "las3_inter_cluster_k8s",
+      "section_name": "LAS3 - Inter-Cluster Kubernetes Communication",
+      "weight": 0.10,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "multi_cluster_architecture",
+          "question": "Is multi-cluster Kubernetes architecture documented?",
+          "architecture_md_section": "4",
+          "required": false,
+          "weight": 0.50,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Multi-cluster design with cross-cluster communication patterns",
+            "fail_criteria": "N/A (presence check for optional architecture)",
+            "na_criteria": "Single Kubernetes cluster or no Kubernetes",
+            "unknown_criteria": "Multi-cluster architecture not documented"
+          }
+        },
+        {
+          "item_id": "inter_cluster_security",
+          "question": "Is inter-cluster communication secured?",
+          "architecture_md_section": "9",
+          "required": false,
+          "weight": 0.50,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Inter-cluster security with VPN/TLS and network policies",
+            "fail_criteria": "Unencrypted inter-cluster communication",
+            "na_criteria": "Single cluster or no inter-cluster communication",
+            "unknown_criteria": "Inter-cluster security not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "las4_domain_api",
+      "section_name": "LAS4 - Domain API Communication",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "domain_api_design",
+          "question": "Are domain APIs designed following DDD bounded contexts?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Domain APIs aligned with bounded contexts",
+            "fail_criteria": "No domain boundaries or tightly coupled APIs",
+            "na_criteria": "No domain-driven design architecture",
+            "unknown_criteria": "Domain API design not documented"
+          }
+        },
+        {
+          "item_id": "domain_api_security",
+          "question": "Is domain API security model defined?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Domain API authentication and authorization defined",
+            "fail_criteria": "No security model for domain APIs",
+            "na_criteria": "No domain APIs",
+            "unknown_criteria": "Domain API security not documented"
+          }
+        },
+        {
+          "item_id": "domain_events_security",
+          "question": "Are domain events secured (if using event-driven architecture)?",
+          "architecture_md_section": "7",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Domain events with encryption and access controls",
+            "fail_criteria": "Unencrypted or unauthenticated event streams",
+            "na_criteria": "No event-driven architecture",
+            "unknown_criteria": "Domain events security not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "las5_third_party_apis",
+      "section_name": "LAS5 - Third-Party API Consumption",
+      "weight": 0.15,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "third_party_inventory",
+          "question": "Is third-party API inventory documented?",
+          "architecture_md_section": "7",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "presence_check",
+            "required_format": "List of third-party APIs with vendors",
+            "pass_criteria": "Complete inventory of third-party API dependencies",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "No third-party API consumption",
+            "unknown_criteria": "Third-party APIs not documented"
+          }
+        },
+        {
+          "item_id": "third_party_security",
+          "question": "Are third-party API credentials secured?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["Azure Key Vault", "HashiCorp Vault", "AWS Secrets Manager", "Google Secret Manager"],
+            "pass_criteria": "API credentials stored in approved vault",
+            "fail_criteria": "Credentials in code or config files",
+            "na_criteria": "No third-party APIs",
+            "unknown_criteria": "Credential storage not specified"
+          }
+        },
+        {
+          "item_id": "vendor_risk_management",
+          "question": "Is vendor risk assessment performed for third-party APIs?",
+          "architecture_md_section": "11",
+          "required": true,
+          "weight": 0.30,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Vendor risk assessment with SLA and security review",
+            "fail_criteria": "No vendor risk assessment",
+            "na_criteria": "No third-party APIs",
+            "unknown_criteria": "Vendor risk assessment not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "las6_data_lake",
+      "section_name": "LAS6 - Data Lake Communication",
+      "weight": 0.10,
+      "required": false,
+      "validation_items": [
+        {
+          "item_id": "data_lake_access_security",
+          "question": "Is data lake access security configured?",
+          "architecture_md_section": "9",
+          "required": false,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data lake access with RBAC and authentication",
+            "fail_criteria": "Open access or weak authentication",
+            "na_criteria": "No data lake integration",
+            "unknown_criteria": "Data lake security not documented"
+          }
+        },
+        {
+          "item_id": "data_lake_encryption",
+          "question": "Is data lake communication encrypted?",
+          "architecture_md_section": "9",
+          "required": false,
+          "weight": 0.35,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "TLS 1.2+ for data lake connections and encryption at rest",
+            "fail_criteria": "Unencrypted data lake communication",
+            "na_criteria": "No data lake integration",
+            "unknown_criteria": "Data lake encryption not documented"
+          }
+        },
+        {
+          "item_id": "data_governance",
+          "question": "Are data governance policies enforced for data lake access?",
+          "architecture_md_section": "9",
+          "required": false,
+          "weight": 0.25,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Data classification and access policies defined",
+            "fail_criteria": "No data governance controls",
+            "na_criteria": "No data lake integration",
+            "unknown_criteria": "Data governance not documented"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "las7_internal_auth",
+      "section_name": "LAS7 - Internal Application Authentication",
+      "weight": 0.10,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "authentication_strategy",
+          "question": "Is internal application authentication strategy defined?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.40,
+          "validation_rules": {
+            "type": "value_check",
+            "approved_values": ["SSO", "Azure AD", "Okta", "SAML 2.0", "OpenID Connect", "OAuth 2.0"],
+            "pass_criteria": "Centralized authentication with SSO/SAML/OIDC",
+            "fail_criteria": "Custom authentication or local credentials",
+            "na_criteria": "No user-facing internal applications",
+            "unknown_criteria": "Authentication strategy not specified"
+          }
+        },
+        {
+          "item_id": "mfa_enforcement",
+          "question": "Is Multi-Factor Authentication (MFA) enforced?",
+          "architecture_md_section": "9",
+          "required": true,
+          "weight": 0.35,
           "validation_rules": {
             "type": "presence_check",
             "required_format": "MFA enforcement policy",
-            "pass_criteria": "MFA required for all users or risk-based authentication",
+            "pass_criteria": "MFA required for all internal applications",
             "fail_criteria": "MFA optional or not implemented",
             "na_criteria": "No user authentication",
             "unknown_criteria": "MFA requirements not specified"
           }
-        }
-      ]
-    },
-    {
-      "section_id": "secrets_management",
-      "section_name": "Secrets and Key Management",
-      "weight": 0.15,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "secrets_vault",
-          "question": "Are secrets stored in a secure vault (not in code)?",
-          "architecture_md_section": "10.4",
-          "required": true,
-          "weight": 0.6,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["Azure Key Vault", "HashiCorp Vault", "AWS Secrets Manager", "Google Secret Manager"],
-            "pass_criteria": "Secrets stored in approved vault solution",
-            "fail_criteria": "Secrets in code, config files, or environment variables without vault",
-            "na_criteria": "No secrets/credentials required",
-            "unknown_criteria": "Secrets management approach not specified"
-          }
         },
         {
-          "item_id": "key_rotation",
-          "question": "Is cryptographic key rotation policy defined?",
-          "architecture_md_section": "10.4",
+          "item_id": "session_management",
+          "question": "Is session management secure (timeout, revocation)?",
+          "architecture_md_section": "9",
           "required": true,
-          "weight": 0.4,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Rotation frequency (e.g., 90 days, annually)",
-            "pass_criteria": "Key rotation policy documented with frequency",
-            "fail_criteria": "No key rotation or manual rotation only",
-            "na_criteria": "No cryptographic keys managed",
-            "unknown_criteria": "Key rotation policy not specified"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "logging_monitoring",
-      "section_name": "Security Logging and Monitoring",
-      "weight": 0.15,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "security_logging",
-          "question": "Are security events logged (authentication, authorization, access)?",
-          "architecture_md_section": "10.5",
-          "required": true,
-          "weight": 0.5,
+          "weight": 0.25,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Security events logged with sufficient detail for audit and forensics",
-            "fail_criteria": "Security events not logged or insufficient detail",
-            "na_criteria": "N/A (all systems require security logging)",
-            "unknown_criteria": "Security logging not documented"
-          }
-        },
-        {
-          "item_id": "siem_integration",
-          "question": "Are logs sent to SIEM for security monitoring?",
-          "architecture_md_section": "10.5",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["Splunk", "Azure Sentinel", "ELK Stack", "QRadar", "ArcSight"],
-            "pass_criteria": "Security logs integrated with organizational SIEM",
-            "fail_criteria": "No SIEM integration or logs not centralized",
-            "na_criteria": "N/A (SIEM integration generally required)",
-            "unknown_criteria": "SIEM integration not specified"
+            "pass_criteria": "Session timeout and revocation policies defined",
+            "fail_criteria": "No session management or indefinite sessions",
+            "na_criteria": "Stateless token-based authentication only",
+            "unknown_criteria": "Session management not documented"
           }
         }
       ]
     },
     {
-      "section_id": "vulnerability_management",
-      "section_name": "Vulnerability Management",
-      "weight": 0.10,
+      "section_id": "las8_http_encryption",
+      "section_name": "LAS8 - HTTP Encryption Scheme",
+      "weight": 0.05,
       "required": true,
       "validation_items": [
         {
-          "item_id": "vulnerability_scanning",
-          "question": "Is automated vulnerability scanning configured?",
-          "architecture_md_section": "10.6",
+          "item_id": "tls_configuration",
+          "question": "Is TLS 1.2+ enforced for all HTTP communications?",
+          "architecture_md_section": "9",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.40,
           "validation_rules": {
-            "type": "presence_check",
-            "approved_values": ["SonarQube", "Snyk", "Dependabot", "OWASP Dependency Check", "Trivy"],
-            "pass_criteria": "Automated vulnerability scanning in CI/CD pipeline",
-            "fail_criteria": "No automated scanning or manual-only scanning",
-            "na_criteria": "Third-party managed service with vendor responsibility",
-            "unknown_criteria": "Vulnerability scanning not documented"
+            "type": "format_check",
+            "required_format": "TLS 1.2 or TLS 1.3",
+            "pass_criteria": "TLS 1.2 or TLS 1.3 enforced, older versions disabled",
+            "fail_criteria": "TLS 1.0/1.1 in use or unencrypted HTTP",
+            "na_criteria": "No HTTP communications",
+            "unknown_criteria": "TLS version not specified"
           }
         },
         {
-          "item_id": "patch_management",
-          "question": "Is patch management process defined?",
-          "architecture_md_section": "10.6",
+          "item_id": "certificate_management",
+          "question": "Is TLS certificate management automated?",
+          "architecture_md_section": "11",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.35,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Patch management process with SLA for critical vulnerabilities",
-            "fail_criteria": "No patch management process or undefined SLAs",
-            "na_criteria": "Fully managed PaaS with vendor patch responsibility",
-            "unknown_criteria": "Patch management not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "network_security",
-      "section_name": "Network Security",
-      "weight": 0.10,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "network_segmentation",
-          "question": "Is network segmentation implemented (VNets, subnets, NSGs)?",
-          "architecture_md_section": "10.7",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Network segmentation with isolated subnets and security groups",
-            "fail_criteria": "Flat network with no segmentation",
-            "na_criteria": "Serverless architecture with managed networking",
-            "unknown_criteria": "Network segmentation not documented"
+            "pass_criteria": "Automated certificate renewal and management",
+            "fail_criteria": "Manual certificate management or expired certificates",
+            "na_criteria": "Managed PaaS with automatic certificate handling",
+            "unknown_criteria": "Certificate management not documented"
           }
         },
         {
-          "item_id": "firewall_waf",
-          "question": "Are firewalls/WAF configured for public endpoints?",
-          "architecture_md_section": "10.7",
+          "item_id": "http_security_headers",
+          "question": "Are HTTP security headers configured?",
+          "architecture_md_section": "9",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.25,
           "validation_rules": {
             "type": "presence_check",
-            "approved_values": ["Azure Firewall", "AWS WAF", "Cloudflare", "Akamai", "Application Gateway WAF"],
-            "pass_criteria": "WAF/Firewall protecting public-facing applications",
-            "fail_criteria": "Public endpoints without WAF protection",
-            "na_criteria": "No public endpoints",
-            "unknown_criteria": "WAF/Firewall configuration not documented"
+            "approved_values": ["HSTS", "Content-Security-Policy", "X-Frame-Options", "X-Content-Type-Options"],
+            "pass_criteria": "Security headers (HSTS, CSP, X-Frame-Options) configured",
+            "fail_criteria": "No security headers",
+            "na_criteria": "API-only (non-browser) communications",
+            "unknown_criteria": "Security headers not documented"
           }
         }
       ]
@@ -308,10 +456,11 @@
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "Security controls incomplete. Address gaps before approval.",
+      "message": "Security architecture incomplete. Address gaps before approval.",
       "blockers": [
-        "Must document all required security controls in ARCHITECTURE.md Section 10",
-        "Must address FAIL items (insecure configurations) or register approved exceptions"
+        "Must document all 8 LAS security requirements in ARCHITECTURE.md Sections 4, 5, 7, 9, 11",
+        "Must address FAIL items (insecure configurations) or register approved exceptions",
+        "Critical security controls: API security, microservices security, encryption, authentication"
       ]
     },
     "0.0-4.9": {
@@ -320,16 +469,18 @@
       "action": "REJECT",
       "message": "Critical security failures. Cannot proceed.",
       "blockers": [
-        "Critical security controls missing or misconfigured",
-        "Non-compliant security architecture",
-        "Insufficient security documentation"
+        "LAS1 API Exposure: Missing API gateway, authentication, or authorization",
+        "LAS2 Microservices Security: No service mesh or mTLS for service communication",
+        "LAS5 Third-Party APIs: Credentials not secured in vault",
+        "LAS7 Internal Authentication: No SSO/MFA or weak authentication",
+        "LAS8 HTTP Encryption: TLS 1.0/1.1 in use or unencrypted communications"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Implement required security controls (TLS 1.2+, encryption at rest, MFA, SIEM) or document approved security exceptions with risk acceptance",
-    "UNKNOWN_items": "Add missing security documentation to ARCHITECTURE.md Section 10 (Security Architecture)",
-    "completeness_below_threshold": "Complete all security sections: API security, encryption, authentication, secrets management, logging, vulnerability management, and network security",
-    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers for all security controls"
+    "FAIL_items": "Implement required security controls for all 8 LAS requirements or document approved security exceptions with risk acceptance. Critical: API security (LAS1), microservices mTLS (LAS2), credential vaults (LAS5), SSO/MFA (LAS7), TLS 1.2+ (LAS8)",
+    "UNKNOWN_items": "Add missing security documentation to ARCHITECTURE.md Sections 4 (Architecture Diagrams), 5 (Component Model), 7 (Integration View), 9 (Security Architecture), and 11 (Operational Considerations)",
+    "completeness_below_threshold": "Complete all 8 LAS sections: API Exposure, Intra-Microservices Communication, Inter-Cluster Kubernetes, Domain API Communication, Third-Party API Consumption, Data Lake Communication, Internal Authentication, and HTTP Encryption",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers for all security controls across LAS1-LAS8 requirements"
   }
 }
