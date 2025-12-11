@@ -1,6 +1,6 @@
 ---
 name: architecture-compliance
-description: Generate compliance documents (Compliance Contracts and Risk Management) from ARCHITECTURE.md files
+description: Generate Compliance Contracts (Contratos de Adherencia) from ARCHITECTURE.md files
 ---
 
 # Architecture Compliance Skill
@@ -29,7 +29,7 @@ This skill is **manually activated** when users request compliance document gene
 
 ## Purpose
 
-This skill generates compliance documents from ARCHITECTURE.md, producing 11 separate documents:
+This skill generates compliance documents from ARCHITECTURE.md, producing 10 separate documents:
 
 **10 Compliance Contracts:**
 1. Business Continuity
@@ -42,9 +42,6 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 11 sep
 8. Platform & IT Infrastructure
 9. Enterprise Architecture
 10. Integration Architecture
-
-**Plus:**
-11. Risk Management (custom organizational format)
 
 ## Strict Source Traceability Policy
 
@@ -92,14 +89,13 @@ To support flexible contract selection and validation, the following aliases and
 | IT Infrastructure | infrastructure, platforms, it | infrastructure, platform, database, compute, capacity |
 | Enterprise Architecture | enterprise, ea, strategic | enterprise, strategic, modularity, governance, alignment |
 | Integration Architecture | integration, api, middleware | integration, api, messaging, event, microservices |
-| Risk Management | risk, governance, compliance | risk, governance, mitigation, threat, controls |
 
 ## Files in This Skill
 
 - **SKILL.md**: This file - activation triggers and workflows
-- **COMPLIANCE_GENERATION_GUIDE.md**: Comprehensive guide for all 11 contract types with generation methodology
+- **COMPLIANCE_GENERATION_GUIDE.md**: Comprehensive guide for all 10 contract types with generation methodology
 - **SECTION_MAPPING_GUIDE.md**: Detailed mapping between ARCHITECTURE.md sections and compliance documents
-- **templates/**: 11 template files (one per compliance document type)
+- **templates/**: 10 template files (one per compliance document type)
 - **validation/**: 11 external validation configuration files (JSON format, one per contract type)
   - **VALIDATION_SCHEMA.json**: JSON schema defining validation config structure
   - **README.md**: Documentation for the validation system
@@ -117,7 +113,7 @@ To support flexible contract selection and validation, the following aliases and
 **Examples:**
 - `SRE_ARCHITECTURE_JobScheduler_2025-11-26.md`
 - `BUSINESS_CONTINUITY_PaymentGateway_2025-11-26.md`
-- `RISK_MANAGEMENT_JobScheduler_2025-11-26.md`
+- `DEVELOPMENT_ARCHITECTURE_JobScheduler_2025-11-26.md`
 
 **Handling Existing Files:**
 - If file exists, append timestamp: `_HHMM`
@@ -193,7 +189,7 @@ Total: 460 lines vs 2000+ (77% reduction)
 
 When users request a list of available contracts (e.g., "list contracts", "show contract types", "what contracts are available"), display the following summary:
 
-**Available Compliance Contracts (11 total):**
+**Available Compliance Contracts (10 total):**
 
 1. **Business Continuity** - RTO/RPO objectives, disaster recovery plans, backup strategies
 2. **SRE Architecture** - SLOs, error budgets, monitoring, incident management, runbooks
@@ -205,7 +201,6 @@ When users request a list of available contracts (e.g., "list contracts", "show 
 8. **Platform & IT Infrastructure** - Environment isolation, database capacity, naming conventions
 9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first design
 10. **Integration Architecture** - Integration catalog, API standards, event-driven patterns
-11. **Risk Management** - Risk identification, assessment, mitigation, control frameworks
 
 **To generate contracts:**
 - Single contract: "Generate [contract name]" (e.g., "Generate SRE Architecture")
@@ -223,7 +218,7 @@ After displaying the contract list, ask:
 **User Options:**
 - User specifies contract(s) → Proceed to normal generation workflow (Phase 1 below)
 - User says "tell me more about [contract]" → Show detailed info from CONTRACT_TYPES_REFERENCE.md
-- User says "all" → Generate all 11 contracts
+- User says "all" → Generate all 10 contracts
 
 ## Generation Workflow
 
@@ -262,11 +257,11 @@ If ambiguous, ask:
 **Step 2.1: Contract Selection with Validation**
 ```
 Based on user intent:
-- All: Generate all 11 contracts
+- All: Generate all 10 contracts
 - Specific: Parse contract name from request
 - Category: Map category to relevant contracts
   Examples:
-  - "security" → Security Architecture, Risk Management
+  - "security" → Security Architecture
   - "cloud" → Cloud Architecture, Platform & IT Infrastructure
   - "SRE" → SRE Architecture, Business Continuity
 
@@ -274,7 +269,7 @@ Validation Process:
 1. Normalize user input: Convert to lowercase, trim whitespace
 2. Check for exact match against contract type names and aliases (see Aliases table above)
    - If match found → Proceed to Step 2.2
-3. Check for "all" keyword → Generate all 11 contracts
+3. Check for "all" keyword → Generate all 10 contracts
 4. If no match found:
    - Calculate similarity scores using:
      * Keyword matching (40% weight): Count matching words between user input and contract names/keywords
@@ -291,7 +286,7 @@ Validation Process:
      - [Alternative 3 Name]: [Brief description]
      ```
    - If user selects alternative → Use selected contract type
-   - If user selects "Other" → List all 11 contract types with descriptions and let user choose
+   - If user selects "Other" → List all 10 contract types with descriptions and let user choose
 
 Output: Validated contract type(s)
 ```
@@ -348,8 +343,8 @@ Offer user preview of what will be generated:
 - Validation: No exact match
 - Similarity scores:
   - Data & AI Architecture: 75% (keywords "ml", "governance" related to AI)
-  - Risk Management: 50% (keyword "governance")
-  - Enterprise Architecture: 45% (keyword "governance")
+  - Enterprise Architecture: 50% (keyword "governance")
+  - Security Architecture: 45% (keyword "governance")
 - Action: Offer top 3 alternatives via AskUserQuestion
 - User selects: "Data & AI Architecture"
 - Output: Data & AI Architecture contract selected
@@ -363,7 +358,7 @@ Offer user preview of what will be generated:
   - Cloud Architecture: 40% (cloud platform concept)
 - Action: Offer top 3 alternatives via AskUserQuestion
 - User selects "Other" and requests: "Show me all options"
-- Action: List all 11 contract types with descriptions
+- Action: List all 10 contract types with descriptions
 - User selects: "IT Infrastructure"
 - Output: IT Infrastructure contract selected
 
@@ -371,9 +366,9 @@ Offer user preview of what will be generated:
 - User input: "banana"
 - Validation: No exact match
 - Similarity scores: All very low
-- Action: Offer 3 most common contracts (Enterprise Architecture, Cloud Architecture, Risk Management)
+- Action: Offer 3 most common contracts (Enterprise Architecture, Cloud Architecture, Development Architecture)
 - Note: "Your input didn't match any contract types. Here are some common options."
-- User selects "Other" → Shows all 11 contract types
+- User selects "Other" → Shows all 10 contract types
 - Output: User selects appropriate contract type
 
 ### Phase 3: Data Extraction (Context-Efficient)
@@ -601,7 +596,7 @@ Verification: X + Y + Z + W = TOTAL (counts must sum correctly)
 - [ ] Completeness metric included with percentage and fraction format
 
 **Special Cases:**
-- **Business Continuity** and **Risk Management** contracts use a different format (section-based, not table-based). Do NOT apply table format to these two contracts.
+- **Business Continuity** contract uses a different format (section-based, not table-based). Do NOT apply table format to this contract.
 - **Data & AI Architecture** uses two categories: "Data" for data requirements (LAD1-LAD5) and "AI" for AI requirements (LAIA1-LAIA5)
 
 **Step 4.5: Calculate Derived Values**
@@ -726,11 +721,6 @@ Overall summary:
 **Primary Sections:** 7 (Integration Points)
 **Secondary Sections:** 5 (System Components), 6 (Data Flow), 8 (Technology Stack)
 **Key Extractions:** Integration catalog, patterns, security, standards compliance
-
-### 11. Risk Management
-**Primary Sections:** 9 (Security), 10 (Performance), 11 (Operational), 12 (ADRs)
-**Secondary Sections:** 1 (System Overview), 5 (System Components)
-**Key Extractions:** Risks, likelihood, impact, mitigation strategies
 
 ## User Interaction Points
 
@@ -898,14 +888,14 @@ Recommendations:
 1. User creates/updates ARCHITECTURE.md (architecture-docs skill)
 2. User invokes: "Generate compliance documents" (architecture-compliance skill)
 3. Skill reads ARCHITECTURE.md sections incrementally
-4. Generates 11 compliance documents
+4. Generates 10 compliance documents
 ```
 
 ### With architecture-readiness Skill
 
 **Dependencies:**
 - Product Owner Specifications provide business context
-- Business requirements feed into Risk Management contract
+- Business requirements feed into compliance contracts
 - Success criteria map to compliance requirements
 
 **Workflow:**
@@ -928,7 +918,7 @@ Recommendations:
    → Creates: ARCHITECTURE.md
 
 3. Compliance Documentation (architecture-compliance skill)
-   → Creates: 11 compliance contracts in /compliance-docs/
+   → Creates: 10 compliance contracts in /compliance-docs/
 ```
 
 ## Edge Cases and Error Handling
@@ -1003,9 +993,9 @@ User: "Generate all compliance documents for this project"
 1. Locate ARCHITECTURE.md in current directory
 2. Load Document Index (lines 1-50)
 3. Validate 12-section structure ✓
-4. Confirm: "Generate all 11 compliance contracts?"
+4. Confirm: "Generate all 10 compliance contracts?"
 5. User confirms
-6. For each of 11 contracts:
+6. For each of 10 contracts:
    - Identify required sections
    - Load sections incrementally
    - Extract data
@@ -1013,7 +1003,7 @@ User: "Generate all compliance documents for this project"
    - Generate document
 7. Save to /compliance-docs/
 8. Generate COMPLIANCE_MANIFEST.md
-9. Report: "11 contracts generated. 23 placeholders require review."
+9. Report: "10 contracts generated. 20 placeholders require review."
 ```
 
 ### Example 2: Generate Specific Contract
@@ -1049,19 +1039,15 @@ User: "Generate security compliance documentation"
 ```
 1. Locate ARCHITECTURE.md
 2. Parse category: "security"
-3. Map to contracts: Security Architecture, Risk Management
-4. Confirm: "Generate Security and Risk Management contracts?"
+3. Map to contract: Security Architecture
+4. Confirm: "Generate Security Architecture contract?"
 5. User confirms
 6. Generate Security Architecture:
    - Load Section 9 (Security Considerations)
    - Extract: API security, authentication, encryption
    - Apply template
-7. Generate Risk Management:
-   - Load Sections 9, 10, 11, 12
-   - Extract: Risks, mitigations
-   - Apply template
-8. Save both to /compliance-docs/
-9. Report: "2 security contracts generated."
+7. Save to /compliance-docs/
+8. Report: "Security Architecture contract generated."
 ```
 
 ## Template Placeholder Conventions
@@ -1132,7 +1118,7 @@ All compliance contracts include **automatic validation** using external configu
 - `security_architecture_validation.json` (security controls and compliance)
 - `cloud_architecture_validation.json` (cloud best practices)
 - `sre_architecture_validation.json` (reliability and observability)
-- ...and 7 more (11 total)
+- ...and 7 more (10 total)
 
 **Schema**: `VALIDATION_SCHEMA.json` defines the structure for all validation configs
 
@@ -1220,7 +1206,7 @@ Validation results populate the Document Control section in generated compliance
 ### Benefits of External Validation
 
 1. **Maintainability**: Validation logic separated from templates and code
-2. **Consistency**: All 11 contracts use the same validation schema and scoring methodology
+2. **Consistency**: All 10 contracts use the same validation schema and scoring methodology
 3. **Transparency**: Numeric scores (0-10) provide granular feedback vs binary PASS/FAIL
 4. **Automation**: Clear thresholds for automatic approval (8.0+) vs manual review (7.0-7.9)
 5. **Extensibility**: Easy to add/modify validation items without changing templates

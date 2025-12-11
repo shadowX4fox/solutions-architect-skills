@@ -15,7 +15,7 @@ Phase 1: Business Requirements (PO Spec)
     ↓
 Phase 2: Technical Architecture (ARCHITECTURE.md)
     ↓
-Phase 3: Compliance Documents (11 contracts)
+Phase 3: Compliance Documents (10 contracts)
 ```
 
 ## Claude Code Marketplace & Plugin System
@@ -35,13 +35,13 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 - **3 Integrated Skills**
   - `architecture-readiness`: Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
-  - `architecture-compliance`: Generate 11 compliance contracts
+  - `architecture-compliance`: Generate 10 compliance contracts
 
-- **11 Compliance Templates**
+- **10 Compliance Templates**
   - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
 
 - **Automatic Validation** ⭐ NEW v1.3.0
-  - External validation system (0-10 scoring) for all 11 contracts
+  - External validation system (0-10 scoring) for all 10 contracts
   - 4-tier approval workflow (Auto-approve, Manual review, Needs work, Rejected)
   - Template-specific validation configurations
   - Metric consistency checking
@@ -137,11 +137,11 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 - [PLACEHOLDER] markers for missing data with completion guidance
 - Compliance manifest (index of all generated documents)
 
-**Output:** `/compliance-docs/` directory with all 11 contracts + manifest (v1.3.0)
+**Output:** `/compliance-docs/` directory with all 10 contracts + manifest (v1.3.0)
 
-#### Compliance Contract Types ⭐ v1.3.0: All 11 Contracts Complete
+#### Compliance Contract Types ⭐ v1.3.0: All 10 Contracts Complete
 
-**✅ All 11 Contracts with External Validation System**:
+**✅ All 10 Contracts with External Validation System**:
 
 1. **Business Continuity** - RTO/RPO, disaster recovery, backup strategy, resilience
 2. **SRE Architecture** - SLOs, error budgets, monitoring, incident management, observability
@@ -153,11 +153,10 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 8. **Platform & IT Infrastructure** - Environments, databases, capacity, naming conventions
 9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first, governance
 10. **Integration Architecture** - Integration catalog, patterns, API security, standards
-11. **Risk Management** - Risk identification, assessment, mitigation, monitoring
 
 **🎯 New in v1.3.0: External Validation System**
 
-All 11 contracts now include automatic validation with:
+All 10 contracts now include automatic validation with:
 - **Scoring (0-10 scale)**: Granular feedback on compliance completeness
 - **4-Tier Approval**:
   - **8.0-10.0**: Auto-approved by system (high confidence)
@@ -285,13 +284,13 @@ graph LR
     A[Product Owner] -->|Creates| B[PO Spec]
     B -->|Input to| C[Architecture Team]
     C -->|Creates| D[ARCHITECTURE.md]
-    D -->|Generates| E[11 Compliance Contracts]
+    D -->|Generates| E[10 Compliance Contracts]
     E -->|Review by| F[Compliance Team]
 ```
 
 ## External Validation System (v1.3.0)
 
-All 11 compliance contracts use an **external validation system** with standardized 0-10 scoring:
+All 10 compliance contracts use an **external validation system** with standardized 0-10 scoring:
 
 ### Validation States & Scoring
 - ✅ **PASS (10 points)**: Complies with requirements
@@ -337,9 +336,9 @@ The Development Architecture contract validates against a **26-item checklist**:
 ### v1.3.0 (Current Release) ✅
 **Major Release: Complete Validation System**
 
-- ✅ **All 11 compliance contracts** with templates and validation ⭐ MAJOR
+- ✅ **All 10 compliance contracts** with templates and validation ⭐ MAJOR
 - ✅ **External validation system** (0-10 scoring, 4-tier approval) ⭐ MAJOR
-- ✅ **11 validation configuration files** (JSON-based, template-specific)
+- ✅ **10 validation configuration files** (JSON-based, template-specific)
 - ✅ **Validation documentation**:
   - `VALIDATION_SCHEMA.json` - Schema definition
   - `VALIDATION_EXAMPLES.md` - 4-tier outcome examples

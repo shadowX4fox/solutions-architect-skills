@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains external validation configuration files for all 11 compliance contract templates. The validation system provides automated scoring (0-10 scale) to determine whether compliance contracts should be automatically approved, sent for manual review, require additional work, or be rejected.
+This directory contains external validation configuration files for all 10 compliance contract templates. The validation system provides automated scoring (0-10 scale) to determine whether compliance contracts should be automatically approved, sent for manual review, require additional work, or be rejected.
 
 ## Purpose
 
@@ -31,7 +31,6 @@ Each compliance template has a corresponding validation configuration file:
 | Platform & IT Infrastructure | `platform_infrastructure_validation.json` |
 | Enterprise Architecture | `enterprise_architecture_validation.json` |
 | Integration Architecture | `integration_architecture_validation.json` |
-| Risk Management | `risk_management_validation.json` |
 
 ## Validation Schema
 
@@ -94,7 +93,6 @@ Default weights (can be customized per template):
 | Enterprise Architecture | 45% | 45% | 10% | Strategic documentation and compliance balanced |
 | Platform & IT Infrastructure | 40% | 50% | 10% | Infrastructure standards and documentation critical |
 | Process Transformation | 50% | 40% | 10% | Detailed process documentation paramount |
-| Risk Management | 45% | 45% | 10% | Risk identification and mitigation equally important |
 
 ## Validation Status Codes
 
@@ -354,7 +352,7 @@ jsonschema -i development_architecture_validation.json VALIDATION_SCHEMA.json
 - **VALIDATION_SCHEMA.json**: JSON schema defining validation configuration structure
 - **COMPLIANCE_GENERATION_GUIDE.md**: Step-by-step guide for generating compliance contracts with validation
 - **STACK_VALIDATION_CHECKLIST.md**: 26-item checklist for Development Architecture validation
-- **Templates**: 11 compliance contract templates in `/skills/architecture-compliance/templates/`
+- **Templates**: 10 compliance contract templates in `/skills/architecture-compliance/templates/`
 
 ## Support
 

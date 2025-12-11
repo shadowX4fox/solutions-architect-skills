@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document provides a comprehensive description of the 11 compliance contract types available in the architecture-compliance skill. It serves as a reference for creating, validating, and selecting contract templates.
+This document provides a comprehensive description of the 10 compliance contract types available in the architecture-compliance skill. It serves as a reference for creating, validating, and selecting contract templates.
 
 ---
 
@@ -13,7 +13,7 @@ When generating compliance contracts, the architecture-compliance skill validate
 - **Alias recognition**: Matching against known aliases for contract types (e.g., "sre" → "SRE Architecture")
 - **Fuzzy string matching**: Calculating edit distance for typo tolerance (e.g., "securtiy" → "security")
 
-**Supported contract types** (11 total):
+**Supported contract types** (10 total):
 1. Business Continuity
 2. SRE Architecture
 3. Cloud Architecture
@@ -24,7 +24,6 @@ When generating compliance contracts, the architecture-compliance skill validate
 8. IT Infrastructure
 9. Enterprise Architecture
 10. Integration Architecture
-11. Risk Management
 
 **Aliases and shortcuts**: See SKILL.md Phase 2.1 for complete Contract Type Aliases and Keywords table.
 
@@ -32,7 +31,7 @@ When generating compliance contracts, the architecture-compliance skill validate
 - **Exact match**: Contract generated immediately
 - **Alias match**: Alias resolved to full contract type name, contract generated
 - **No match**: User presented with 3 best alternatives to choose from
-- **Ambiguous input**: User can select "Other" to see all 11 contract types with descriptions
+- **Ambiguous input**: User can select "Other" to see all 10 contract types with descriptions
 
 For detailed validation scenarios, see SKILL.md "Phase 2.1 Example Scenarios" section.
 

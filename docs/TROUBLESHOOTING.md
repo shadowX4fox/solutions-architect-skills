@@ -499,7 +499,7 @@ If only Section 8 is complete:
 ### Q: Compliance Manifest not created
 
 **Symptoms:**
-- 11 contracts generated
+- 10 contracts generated
 - COMPLIANCE_MANIFEST.md missing from /compliance-docs/
 
 **Solutions:**
@@ -754,7 +754,7 @@ If resources constrained, close other applications.
 ### Q: Compliance generation takes >5 minutes
 
 **Symptoms:**
-- Generating 11 contracts takes very long
+- Generating 10 contracts takes very long
 - High CPU usage
 - System becomes unresponsive
 

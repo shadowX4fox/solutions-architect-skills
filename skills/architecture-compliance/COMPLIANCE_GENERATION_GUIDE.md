@@ -18,7 +18,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### Benefits
 
-- **Automated Compliance**: Generate 11 compliance documents from one source
+- **Automated Compliance**: Generate 10 compliance documents from one source
 - **Gap Detection**: Identify missing requirements in ARCHITECTURE.md
 - **Continuous Alignment**: Regenerate after architecture changes
 - **Audit Trail**: Full source traceability for every data point
@@ -26,7 +26,7 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-## Document Types (11 Compliance Contracts)
+## Document Types (10 Compliance Contracts)
 
 ### 1. Business Continuity (Business Continuity)
 
@@ -676,55 +676,6 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
-### 11. Risk Management
-
-**Purpose**: Define and manage risks associated with the architecture including technical, security, operational, and business risks.
-
-**Stakeholders**:
-- Risk management team
-- Security team
-- Compliance team
-- Executive leadership
-
-**Key Content Requirements**:
-- **Risk Identification**: Technical, security, operational, business risks
-- **Risk Assessment**: Likelihood (1-5), Impact (1-5), Risk Score (L×I)
-- **Risk Classification**: Critical (20-25), High (15-19), Medium (8-14), Low (1-7)
-- **Mitigation Strategies**: Controls, action plans, ownership
-- **Residual Risk**: Risk after mitigation
-- **Risk Monitoring**: KRIs (Key Risk Indicators), review frequency
-- **Contingency Plans**: Actions if risks materialize
-
-**Source Sections from ARCHITECTURE.md**:
-- **Primary**:
-  - Section 9 (Security Considerations) - 30% of content
-    - Security risks
-  - Section 10 (Performance Requirements) - 20% of content
-    - Performance risks
-  - Section 11 (Operational Considerations) - 30% of content
-    - Operational risks
-  - Section 12 (Architecture Decision Records) - 10% of content
-    - Decision risks/trade-offs
-- **Secondary**:
-  - Section 1 (System Overview) - 5% of content
-    - Business risks
-  - Section 5 (System Components) - 5% of content
-    - Technical risks
-
-**Example Guidelines**:
-- All identified risks must have mitigation strategies
-- Critical and High risks require executive approval
-- Risk assessment must be reviewed quarterly
-- Residual risk must be within acceptable tolerance
-- Key Risk Indicators (KRIs) must be monitored continuously
-- Contingency plans required for all Critical risks
-
-**Template Priority**: High (Template #4)
-
-**Note**: This contract uses a custom organizational format that will be provided by the user incrementally.
-
----
-
 ## Generation Workflow
 
 ### Phase 1: Preparation
@@ -783,7 +734,7 @@ Questions:
 User: "Generate all compliance documents"
 
 Action:
-- Select all 11 contract types
+- Select all 10 contract types
 - Estimate time and context usage
 - Confirm with user
 - Proceed to data extraction
@@ -805,7 +756,7 @@ Action:
 User: "Generate security compliance documents"
 
 Category Mapping:
-- "security" → Security Architecture, Risk Management
+- "security" → Security Architecture
 - "cloud" → Cloud Architecture, Platform & IT Infrastructure
 - "data" → Data & Analytics - AI Architecture
 - "development" → Development Architecture
@@ -1156,7 +1107,7 @@ For each missing data point:
 
 ### Phase 4.5: Compliance Summary Table Generation
 
-**CRITICAL**: The Compliance Summary table is the most important section for stakeholders. It MUST follow the exact format specified below for ALL compliance contracts (except Business Continuity and Risk Management).
+**CRITICAL**: The Compliance Summary table is the most important section for stakeholders. It MUST follow the exact format specified below for ALL compliance contracts (except Business Continuity).
 
 #### Mandatory Table Format
 
@@ -1330,7 +1281,7 @@ Before finalizing any generated compliance contract, verify:
 
 #### Special Cases
 
-**Business Continuity and Risk Management Contracts:**
+**Business Continuity Contracts:**
 - These two contracts use a **different format** (section-based, not table-based)
 - DO NOT apply the 6-column table format to these contracts
 - Use the template's native format instead
@@ -1375,7 +1326,7 @@ Before finalizing any generated compliance contract, verify:
 4. ❌ **Missing emoji indicators**: Not using ✅ ❌ ⊘ ❓ in Overall Compliance
 5. ❌ **Missing percentages**: Only showing fractions without percentages
 6. ❌ **Incorrect sums**: X + Y + Z + W ≠ TOTAL
-7. ❌ **Applying table to wrong contracts**: Using table format for Business Continuity or Risk Management
+7. ❌ **Applying table to wrong contracts**: Using table format for Business Continuity (only contract with section-based format)
 8. ❌ **Using wrong category**: Using "Data & AI Architecture" for every row in Data/AI contract instead of "Data"/"AI"
 
 ---
@@ -1510,19 +1461,18 @@ Individual Contract Status:
 ✓ Platform & IT Infrastructure   (85% complete, 3 placeholders)
 ✓ Enterprise Architecture        (78% complete, 4 placeholders)
 ✓ Integration Architecture v2.0  (7 LAI requirements, 25 validation items)
-✓ Risk Management                 (65% complete, 7 placeholders)
 
 Overall Statistics:
-- Average Completeness: 81%
-- Total Placeholders: 40
+- Average Completeness: 83%
+- Total Placeholders: 33
 - Context Efficiency: 75% reduction (avg 450 lines loaded per contract vs 2100 total)
-- Processing Time: ~8 minutes (all 11 contracts)
+- Processing Time: ~7 minutes (all 10 contracts)
 
 Files Created:
 - /compliance-docs/COMPLIANCE_MANIFEST.md
 - /compliance-docs/CONTINUIDAD_NEGOCIO_JobSchedulingPlatform_2025-11-26.md
 - /compliance-docs/ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md
-- ... (9 more)
+- ... (8 more)
 
 Placeholders Requiring Manual Review: 40
 Top Missing Data Points:
@@ -2092,7 +2042,7 @@ Purpose: Define technical architecture, design decisions, components
 Stakeholder: Compliance Team
 Skill: architecture-compliance
 Input: ARCHITECTURE.md (required)
-Output: 11 compliance contracts
+Output: 10 compliance contracts
 
 Purpose: Generate compliance documents, ensure standards adherence
 ```
@@ -2100,7 +2050,7 @@ Purpose: Generate compliance documents, ensure standards adherence
 ### Workflow Integration Points
 
 **From architecture-readiness to architecture-compliance**:
-- Business context informs Risk Management contract
+- Business context informs compliance contracts
 - Success criteria map to compliance requirements
 - Stakeholder list feeds into contract ownership
 
@@ -2135,7 +2085,7 @@ Iterate until >90% complete
 
 This guide provides comprehensive methodology for generating compliance documentation from ARCHITECTURE.md, ensuring:
 
-- **Automation**: 11 contracts generated from single source
+- **Automation**: 10 contracts generated from single source
 - **Efficiency**: 70-80% context reduction through incremental loading
 - **Traceability**: Full source references for audit trail
 - **Quality**: Standardized templates and validation

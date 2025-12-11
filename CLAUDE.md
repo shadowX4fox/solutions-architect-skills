@@ -43,7 +43,7 @@ This project follows a three-phase documentation approach:
 
 3. **Compliance Documentation Phase** (Compliance Team)
    - Use the `architecture-compliance` skill to generate compliance documents
-   - Generates 11 compliance contracts from ARCHITECTURE.md
+   - Generates 10 compliance contracts from ARCHITECTURE.md
    - Ensures adherence to organizational standards and best practices
 
 ### Using the Architecture-Readiness Skill
@@ -78,12 +78,12 @@ The skill includes:
 
 ### Using the Architecture Compliance Skill
 
-The `architecture-compliance` skill generates compliance documents (Contratos de Adherencia and Risk Management) from ARCHITECTURE.md files. It produces 11 separate compliance documents ensuring organizational standards adherence.
+The `architecture-compliance` skill generates Compliance Contracts (Contratos de Adherencia) from ARCHITECTURE.md files. It produces 10 separate compliance documents ensuring organizational standards adherence.
 
 To manually activate the skill, use: `/skill architecture-compliance`
 
 The skill includes:
-- 11 compliance contract templates (10 Contratos de Adherencia + Risk Management)
+- 10 compliance contract templates (Contratos de Adherencia)
 - Automated data extraction from ARCHITECTURE.md
 - Context-efficient generation (70-80% reduction in loaded content)
 - Full source traceability for audit trails
@@ -100,7 +100,6 @@ The skill includes:
 8. Plataformas e Infraestructura TI
 9. Arquitectura Empresarial (Enterprise Architecture)
 10. Arquitectura de Integración
-11. Risk Management
 
 **When to use**: After ARCHITECTURE.md is complete, when compliance documentation is required, or when organizational standards validation is needed.
 

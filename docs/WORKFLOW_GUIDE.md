@@ -47,7 +47,7 @@ The Solutions Architect Skills workflow follows a sequential three-phase approac
 │  Phase 3: Compliance Documentation (Compliance Team)        │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │ architecture-compliance skill                       │   │
-│  │ Output: compliance-docs/ (11 contracts)             │   │
+│  │ Output: compliance-docs/ (10 contracts)             │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -830,7 +830,7 @@ After significant edits, the skill updates the Document Index (lines 1-50) with 
 **Owner:** Compliance Team
 **Skill:** `architecture-compliance`
 **Input:** `ARCHITECTURE.md` (required)
-**Output:** `/compliance-docs/` (11 contracts + manifest)
+**Output:** `/compliance-docs/` (10 contracts + manifest)
 
 ### Purpose
 
@@ -864,7 +864,7 @@ Generate organizational compliance contracts from technical architecture. This p
 Which contracts do you want to generate?
 > All
 
-Generating 11 compliance contracts...
+Generating 10 compliance contracts...
 ```
 
 **B. Generate Specific Contract**
@@ -880,11 +880,11 @@ Generating 1 contract...
 Which contracts?
 > Security
 
-Generating 2 contracts: Arquitectura Seguridad, Risk Management
+Generating contract: Arquitectura Seguridad
 ```
 
 **Category Mappings:**
-- `security` → Security Architecture, Risk Management
+- `security` → Security Architecture
 - `cloud` → Cloud Architecture, IT Platforms
 - `SRE` → Arquitectura SRE, Business Continuity
 - `development` → Development Architecture
@@ -970,11 +970,10 @@ Generating contracts...
 ✓ PLATFORM_IT_INFRASTRUCTURE_JobScheduling_2025-11-28.md (88% complete, 2 placeholders)
 ✓ ARQUITECTURA_EMPRESARIAL_JobScheduling_2025-11-28.md (78% complete, 4 placeholders)
 ✓ ARQUITECTURA_INTEGRACION_JobScheduling_2025-11-28.md (82% complete, 3 placeholders)
-✓ RISK_MANAGEMENT_JobScheduling_2025-11-28.md (65% complete, 7 placeholders)
 
-Generated 11 contracts in /compliance-docs/
-Average completeness: 81%
-Total placeholders: 37
+Generated 10 contracts in /compliance-docs/
+Average completeness: 83%
+Total placeholders: 30
 ```
 
 **Phase 3.5: Generate Manifest**
@@ -1086,8 +1085,7 @@ compliance-docs/
 ├── ARQUITECTURA_SEGURIDAD_JobScheduling_2025-11-28.md
 ├── PLATFORM_IT_INFRASTRUCTURE_JobScheduling_2025-11-28.md
 ├── ARQUITECTURA_EMPRESARIAL_JobScheduling_2025-11-28.md
-├── ARQUITECTURA_INTEGRACION_JobScheduling_2025-11-28.md
-└── RISK_MANAGEMENT_JobScheduling_2025-11-28.md
+└── ARQUITECTURA_INTEGRACION_JobScheduling_2025-11-28.md
 ```
 
 ---

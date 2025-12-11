@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide provides detailed mapping between ARCHITECTURE.md sections and compliance contract types, including extraction patterns, transformation rules, and examples for each of the 11 compliance documents.
+This guide provides detailed mapping between ARCHITECTURE.md sections and compliance contract types, including extraction patterns, transformation rules, and examples for each of the 10 compliance documents.
 
 ---
 
@@ -444,7 +444,6 @@ def extract_rto_rpo_from_architecture(architecture_md_path):
 | **8. Platform & IT Infrastructure** | 4, 8, 11 | 10 | Medium | Medium (#8) |
 | **9. Enterprise Architecture** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
 | **10. Integration Architecture v2.0** | 5, 6, 7, 9 | - | High | High (#10) |
-| **11. Risk Management** | 9, 10, 11, 12 | 1, 5 | High | High (#4) |
 
 ---
 
@@ -2010,7 +2009,6 @@ All templates with Section 9 references must use this standard:
 | TEMPLATE_SECURITY_ARCHITECTURE.md | 8 references (primary) | ⚠️ Needs review |
 | TEMPLATE_DATA_AI_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
 | TEMPLATE_INTEGRATION_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
-| TEMPLATE_RISK_MANAGEMENT.md | Implicit references | ⚠️ Needs review |
 
 **Action Required**: Review and update templates marked ⚠️ to ensure compliance with this standard.
 
@@ -2183,77 +2181,13 @@ Contract Output:
 
 ---
 
-### Contract 11: Risk Management
-
-#### Section Mapping Summary
-**Primary**: Sections 9, 10, 11, 12 (80%)
-**Secondary**: Sections 1, 5 (20%)
-
-**Key Extractions**:
-- Section 9: Security risks (vulnerabilities, threats, controls)
-- Section 10: Performance risks (capacity, latency, availability)
-- Section 11: Operational risks (DR, backup failures, incidents)
-- Section 12: Architectural decision risks and trade-offs
-- Section 1: Business context risks
-- Section 5: Technical/component risks
-
-**Detailed Example**:
-```
-ARCHITECTURE.md Input:
-Section 9.3 (line 1480): "Encryption: TLS 1.3, AES-256. Key rotation: manual (quarterly)"
-Section 10.2 (line 1576): "SLA: 99.99% uptime"
-Section 11.4 (line 1850): "DR Site: Single region (us-west-2)"
-
-Contract Output:
-## Risk Register
-
-### RISK-001: Manual Key Rotation
-**Category**: Security
-**Description**: Encryption keys rotated manually on quarterly basis
-**Likelihood**: Medium (3/5) - Manual process prone to delays
-**Impact**: High (4/5) - Key compromise could expose all encrypted data
-**Risk Score**: 12 (Medium-High)
-**Source**: Section 9.3, line 1480
-
-**Mitigation Strategies**:
-1. Automate key rotation using AWS KMS or similar service
-2. Implement key rotation monitoring and alerts
-3. Document key rotation procedures in runbook
-
-**Residual Risk**: Low (2/5) after automation
-**Owner**: [PLACEHOLDER: Assign security team owner]
-**Target Date**: [PLACEHOLDER: Define implementation timeline]
-
----
-
-### RISK-002: Single Region DR
-**Category**: Availability
-**Description**: DR site in single region (us-west-2); risk of regional outage
-**Likelihood**: Low (2/5) - Regional outages rare but possible
-**Impact**: Critical (5/5) - Complete service outage, violates 99.99% SLA
-**Risk Score**: 10 (Medium)
-**Source**: Section 11.4, line 1850; Section 10.2, line 1576
-
-**Mitigation Strategies**:
-1. Implement multi-region DR (add us-east-1 as secondary DR)
-2. Active-active deployment across regions
-3. Automated failover between regions
-
-**Residual Risk**: Very Low (1/5) with multi-region
-**Cost Impact**: +25% infrastructure costs
-**Owner**: [PLACEHOLDER: Assign infrastructure team owner]
-**Target Date**: [PLACEHOLDER: Define implementation timeline]
-```
-
----
-
 ## Cross-Contract Data Reuse
 
 ### Common Data Points
 
 Many data points appear in multiple contracts. Extract once, cache, and reuse:
 
-**1. Availability SLA (appears in 6 contracts)**
+**1. Availability SLA (appears in 5 contracts)**
 ```
 Source: Section 10.2
 Used in:
@@ -2262,11 +2196,10 @@ Used in:
 - Cloud Architecture (cloud SLA requirements)
 - Platform & IT Infrastructure (infrastructure availability)
 - Enterprise Architecture (business criticality)
-- Risk Management (availability risks)
 
 Extract once: "99.99% SLA"
 Cache with source: "Section 10.2, line 1576"
-Reuse in all 6 contracts with appropriate transformations
+Reuse in all 5 contracts with appropriate transformations
 ```
 
 **2. Technology Stack (appears in 5 contracts)**
@@ -2386,9 +2319,6 @@ continuidad_contract["sla"] = sla_data["value"]
 
 # Reuse in Contract 2 (SRE Architecture) with transformation
 sre_contract["error_budget"] = calculate_error_budget(sla_data["value"])
-
-# Reuse in Contract 11 (Risk Management)
-risk_contract["availability_risk"] = assess_risk(sla_data["value"])
 ```
 
 ---

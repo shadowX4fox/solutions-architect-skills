@@ -132,7 +132,7 @@ When prompted:
 - **Which contracts?** → "All" (generates all 11)
 - **ARCHITECTURE.md location:** → "./" or specify path
 
-The skill generates 11 contracts:
+The skill generates 10 contracts:
 
 1. Business Continuity
 2. SRE (Site Reliability Engineering)
@@ -144,7 +144,6 @@ The skill generates 11 contracts:
 8. IT Platforms & Infrastructure
 9. Enterprise Architecture
 10. Integration Architecture
-11. Risk Management
 
 #### Step 3: Review Generated Documents
 
@@ -156,10 +155,10 @@ You'll see:
 - `CONTINUIDAD_NEGOCIO_<project>_<date>.md`
 - `ARQUITECTURA_SRE_<project>_<date>.md`
 - `DEVELOPMENT_ARCHITECTURE_<project>_<date>.md` ← Check stack validation here
-- ... (8 more contracts)
+- ... (7 more contracts)
 - `COMPLIANCE_MANIFEST.md` ← Index of all documents
 
-**Output:** `/compliance-docs/` directory with 11 contracts + manifest
+**Output:** `/compliance-docs/` directory with 10 contracts + manifest
 
 ---
 
@@ -202,7 +201,7 @@ Let's walk through a real example.
 /skill architecture-compliance
 ```
 
-**Generated:** 11 compliance contracts including:
+**Generated:** 10 compliance contracts including:
 
 - **Development Architecture** with automatic validation:
   - ✅ Java 17 LTS (supported)
@@ -211,7 +210,7 @@ Let's walk through a real example.
   - ✅ Docker + AKS (authorized containers)
   - Overall: **PASS** (approval unblocked)
 
-**Output:** `/compliance-docs/` with all 11 contracts
+**Output:** `/compliance-docs/` with all 10 contracts
 
 ---
 
@@ -273,7 +272,7 @@ my-project/
 
 - **PO Spec creation:** 30-60 minutes (depending on project complexity)
 - **ARCHITECTURE.md creation:** 2-4 hours (initial version)
-- **Compliance generation:** 5-10 minutes (all 11 contracts)
+- **Compliance generation:** 5-10 minutes (all 10 contracts)
 - **Total workflow:** 3-5 hours for complete documentation
 
 ---
@@ -296,7 +295,7 @@ my-project/
 
 ### Phase 3: Architecture Compliance
 - **Command:** `/skill architecture-compliance`
-- **Output:** `/compliance-docs/` (11 contracts)
+- **Output:** `/compliance-docs/` (10 contracts)
 - **Owner:** Compliance Team
 - **Focus:** Organizational standards adherence
 
