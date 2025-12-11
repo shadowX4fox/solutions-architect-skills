@@ -62,12 +62,16 @@
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LADES1 | Best Practices Adoption (Technology Stack Alignment) | [STATUS] | Section 8 | Solution Architect |
-| LADES2 | Architecture Debt Impact (Exception Handling) | [STATUS] | Section 8, 12 | Technical Lead |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LADES1 | Best Practices Adoption (Technology Stack Alignment) | Development Architecture | [STATUS] | Section 8 | Solution Architect |
+| LADES2 | Architecture Debt Impact (Exception Handling) | Development Architecture | [STATUS] | Section 8, 12 | Technical Lead |
 
-**Overall Compliance**: [X/2 Compliant, Y/2 Non-Compliant, Z/2 Not Applicable, W/2 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/2 ([X/2*100]%)
+- ❌ Non-Compliant: [Y]/2 ([Y/2*100]%)
+- ⊘ Not Applicable: [Z]/2 ([Z/2*100]%)
+- ❓ Unknown: [W]/2 ([W/2*100]%)
 
 **Stack Validation**: [VALIDATION_SUMMARY] (**MANDATORY** - Contract cannot be approved without completed validation)
 

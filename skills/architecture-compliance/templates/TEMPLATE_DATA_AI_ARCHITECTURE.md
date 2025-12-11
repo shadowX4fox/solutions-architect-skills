@@ -83,7 +83,13 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAIA2 | AI Security and Reputation | AI | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [AI/ML Architect or N/A] |
 | LAIA3 | AI Hallucination Control | AI | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [AI/ML Architect or N/A] |
 
-**Overall Compliance**: [X/11 Compliant, Y/11 Non-Compliant, Z/11 Not Applicable, W/11 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/11 ([X/11*100]%)
+- ❌ Non-Compliant: [Y]/11 ([Y/11*100]%)
+- ⊘ Not Applicable: [Z]/11 ([Z/11*100]%)
+- ❓ Unknown: [W]/11 ([W/11*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

@@ -1154,6 +1154,232 @@ For each missing data point:
 
 ---
 
+### Phase 4.5: Compliance Summary Table Generation
+
+**CRITICAL**: The Compliance Summary table is the most important section for stakeholders. It MUST follow the exact format specified below for ALL compliance contracts (except Business Continuity and Risk Management).
+
+#### Mandatory Table Format
+
+**Table Structure (6 columns - MANDATORY):**
+```markdown
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| [CODE] | [Requirement name] | [Category] | [Status] | [Section] | [Role] |
+```
+
+**Column Requirements:**
+
+1. **Code**: Requirement code from template (e.g., LASRE01, LAC1, LAPI01)
+   - Extract directly from template
+   - Must match template's requirement codes exactly
+
+2. **Requirement**: Short requirement name from template
+   - Extract from template
+   - Keep concise (≤60 characters recommended)
+   - Example: "Define SLOs for all services"
+
+3. **Category**: Classification of the requirement
+   - **If template has explicit categories**: Use those (e.g., Data/AI template has "Data" and "AI")
+   - **If template has NO explicit categories**: Use the template type as category
+     - SRE Architecture → "SRE Architecture"
+     - Cloud Architecture → "Cloud Architecture"
+     - Security Architecture → "Security Architecture"
+     - Platform & IT Infrastructure → "Platform & IT Infrastructure"
+     - Development Architecture → "Development Architecture"
+     - Enterprise Architecture → "Enterprise Architecture"
+     - Integration Architecture → "Integration Architecture"
+     - Process Transformation → "Process Transformation"
+
+4. **Status**: Compliance status determined from ARCHITECTURE.md analysis
+   - MUST be exactly one of these four values:
+     - `Compliant`
+     - `Non-Compliant`
+     - `Not Applicable`
+     - `Unknown`
+
+5. **Source Section**: Reference to ARCHITECTURE.md
+   - Format: "Section X" or "Section X, Y" (comma-separated for multiple)
+   - If data not found: "Not documented"
+
+6. **Responsible Role**: Accountable role from template
+   - Extract from template (e.g., "SRE Team", "Security Architect")
+
+#### Status Determination Logic
+
+For each requirement, analyze ARCHITECTURE.md and assign the appropriate status:
+
+| Status | Criteria | When to Use |
+|--------|----------|-------------|
+| **Compliant** | Data fully documented in ARCHITECTURE.md AND meets organizational standards | Required data is present and validated |
+| **Non-Compliant** | Data missing OR does not meet organizational standards | Critical gaps found or policy violations detected |
+| **Not Applicable** | Requirement does not apply to this architecture | Cloud-only requirement for on-premise architecture, etc. |
+| **Unknown** | Data partially documented OR quality/applicability unclear | Ambiguous information that needs investigation |
+
+#### Example Scenarios
+
+**Scenario 1: SRE Architecture - LASRE01 "Define SLOs"**
+- ARCHITECTURE.md Section 10 contains: "SLO: 99.9% availability, p99 latency < 200ms"
+- **Status**: `Compliant` (SLOs are clearly defined with specific metrics)
+- **Source Section**: "Section 10"
+- **Category**: "SRE Architecture"
+
+**Scenario 2: SRE Architecture - LASRE15 "Runbook Coverage"**
+- ARCHITECTURE.md Section 11 mentions: "operational procedures documented in Confluence"
+- No specific runbook coverage percentage or systematic approach described
+- **Status**: `Unknown` (runbooks mentioned but coverage metrics unclear)
+- **Source Section**: "Section 11"
+- **Category**: "SRE Architecture"
+
+**Scenario 3: Security Architecture - LAS3 "API Rate Limiting"**
+- ARCHITECTURE.md Section 9 (Security) does not mention rate limiting at all
+- API endpoints are described in Section 7 but no rate limiting controls
+- **Status**: `Non-Compliant` (required security control is missing)
+- **Source Section**: "Not documented"
+- **Category**: "Security Architecture"
+
+**Scenario 4: Cloud Architecture - LAC4 "Multi-Region Deployment"**
+- ARCHITECTURE.md Section 4 states: "Deployment: On-premise data center, single region"
+- Architecture has no cloud deployment
+- **Status**: `Not Applicable` (cloud requirement for on-premise architecture)
+- **Source Section**: "Section 4"
+- **Category**: "Cloud Architecture"
+
+**Scenario 5: Data & AI Architecture - LAD1 "Data Quality"**
+- ARCHITECTURE.md Section 6 contains: "Data validation: Schema checks, null handling, deduplication"
+- **Status**: `Compliant` (data quality measures are documented)
+- **Source Section**: "Section 6"
+- **Category**: "Data" (template specifies "Data" category for LAD1-LAD5)
+
+**Scenario 6: Data & AI Architecture - LAIA2 "AI Model Monitoring"**
+- ARCHITECTURE.md mentions AI models but no monitoring strategy
+- **Status**: `Non-Compliant` (AI models present but monitoring missing)
+- **Source Section**: "Section 5"
+- **Category**: "AI" (template specifies "AI" category for LAIA1-LAIA5)
+
+#### Overall Compliance Summary Calculation
+
+After populating all table rows, calculate compliance statistics:
+
+**Calculation Formula:**
+```
+TOTAL = Total number of requirements for this contract type
+X (Compliant) = Count of rows with Status = "Compliant"
+Y (Non-Compliant) = Count of rows with Status = "Non-Compliant"
+Z (Not Applicable) = Count of rows with Status = "Not Applicable"
+W (Unknown) = Count of rows with Status = "Unknown"
+
+Verification: X + Y + Z + W = TOTAL (must sum correctly)
+```
+
+**Output Format (MANDATORY):**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: X/TOTAL (X/TOTAL*100%)
+- ❌ Non-Compliant: Y/TOTAL (Y/TOTAL*100%)
+- ⊘ Not Applicable: Z/TOTAL (Z/TOTAL*100%)
+- ❓ Unknown: W/TOTAL (W/TOTAL*100%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+```
+
+**Example Calculation (SRE Architecture - 57 total requirements):**
+
+Assume after analyzing ARCHITECTURE.md:
+- 42 requirements are Compliant (data fully documented)
+- 8 requirements are Non-Compliant (data missing)
+- 3 requirements are Not Applicable (doesn't apply to this architecture)
+- 4 requirements are Unknown (partially documented)
+- Total: 42 + 8 + 3 + 4 = 57 ✓
+
+**Output:**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: 42/57 (74%)
+- ❌ Non-Compliant: 8/57 (14%)
+- ⊘ Not Applicable: 3/57 (5%)
+- ❓ Unknown: 4/57 (7%)
+
+**Completeness**: 87% (124/142 data points documented)
+```
+
+**Notes:**
+- Round percentages to nearest integer (e.g., 73.68% → 74%)
+- Completeness percentage is separate from compliance status
+- Completeness measures how many data points across ALL sections are documented
+- A document can be 100% complete but have non-compliant items
+
+#### Format Enforcement Checklist
+
+Before finalizing any generated compliance contract, verify:
+
+- [ ] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
+- [ ] Table header uses proper markdown pipe syntax: `| Col1 | Col2 | Col3 | Col4 | Col5 | Col6 |`
+- [ ] Table separator line uses proper syntax: `|------|------|------|------|------|------|`
+- [ ] All requirement codes present (row count matches template's total requirements)
+- [ ] Category column is populated for every row
+  - Use explicit categories if template defines them (e.g., "Data", "AI")
+  - Use template type as category if no explicit categories (e.g., "Cloud Architecture")
+- [ ] Status values use EXACTLY one of: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
+- [ ] No placeholder status values like "[STATUS]" or "[Compliant/Non-Compliant]"
+- [ ] Source Section references actual ARCHITECTURE.md sections or "Not documented"
+- [ ] Overall Compliance line uses emoji indicators: ✅ ❌ ⊘ ❓
+- [ ] Compliance counts sum to TOTAL: X + Y + Z + W = TOTAL
+- [ ] Percentages calculated correctly and rounded to nearest integer
+- [ ] Completeness metric included with percentage and fraction format
+- [ ] No markdown formatting errors in the table
+
+#### Special Cases
+
+**Business Continuity and Risk Management Contracts:**
+- These two contracts use a **different format** (section-based, not table-based)
+- DO NOT apply the 6-column table format to these contracts
+- Use the template's native format instead
+
+**Data & AI Architecture Contract:**
+- Uses two explicit categories: "Data" and "AI"
+- LAD1-LAD5 requirements use "Data" category
+- LAIA1-LAIA5 requirements use "AI" category
+- Do NOT use "Data & AI Architecture" as category for this template
+
+#### Complete Example
+
+**SRE Architecture Contract - Compliance Summary Section:**
+
+```markdown
+## Compliance Summary
+
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LASRE01 | Define SLOs for all services | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE02 | Calculate error budgets | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE03 | Implement monitoring stack | SRE Architecture | Non-Compliant | Not documented | Platform Team |
+| LASRE04 | Incident response procedures | SRE Architecture | Unknown | Section 11 | SRE Team |
+| LASRE05 | On-call rotation schedule | SRE Architecture | Compliant | Section 11 | SRE Team |
+| ... | ... | ... | ... | ... | ... |
+| LASRE57 | Capacity planning process | SRE Architecture | Compliant | Section 10 | SRE Team |
+
+**Overall Compliance**:
+- ✅ Compliant: 42/57 (74%)
+- ❌ Non-Compliant: 8/57 (14%)
+- ⊘ Not Applicable: 3/57 (5%)
+- ❓ Unknown: 4/57 (7%)
+
+**Completeness**: 87% (124/142 data points documented)
+```
+
+#### Common Mistakes to Avoid
+
+1. ❌ **Wrong column count**: Using 5 columns instead of 6 (missing Category)
+2. ❌ **Missing Category**: Leaving Category column empty or using "[Category]" placeholder
+3. ❌ **Invalid Status values**: Using custom status like "Partial", "In Progress", etc.
+4. ❌ **Missing emoji indicators**: Not using ✅ ❌ ⊘ ❓ in Overall Compliance
+5. ❌ **Missing percentages**: Only showing fractions without percentages
+6. ❌ **Incorrect sums**: X + Y + Z + W ≠ TOTAL
+7. ❌ **Applying table to wrong contracts**: Using table format for Business Continuity or Risk Management
+8. ❌ **Using wrong category**: Using "Data & AI Architecture" for every row in Data/AI contract instead of "Data"/"AI"
+
+---
+
 ### Phase 5: Output and Verification
 
 **Step 5.1: Generate Filename**

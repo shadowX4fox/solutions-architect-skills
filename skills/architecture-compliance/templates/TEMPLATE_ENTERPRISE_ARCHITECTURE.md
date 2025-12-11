@@ -69,17 +69,23 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAE1 | Modularity and Capability Reusability | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect or N/A] |
-| LAE2 | Third-Party Application Customization | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Technical Architect / Product Manager or N/A] |
-| LAE3 | Cloud First | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Enterprise Architect or N/A] |
-| LAE4 | Business Strategy Alignment | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect / Business Analyst or N/A] |
-| LAE5 | Zero Obsolescence | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect / Technical Lead or N/A] |
-| LAE6 | Managed Data Vision | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Data Architect / Data Governance Lead or N/A] |
-| LAE7 | API First / Event Driven | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Lead or N/A] |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAE1 | Modularity and Capability Reusability | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect or N/A] |
+| LAE2 | Third-Party Application Customization | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Technical Architect / Product Manager or N/A] |
+| LAE3 | Cloud First | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Enterprise Architect or N/A] |
+| LAE4 | Business Strategy Alignment | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect / Business Analyst or N/A] |
+| LAE5 | Zero Obsolescence | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Enterprise Architect / Technical Lead or N/A] |
+| LAE6 | Managed Data Vision | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Data Architect / Data Governance Lead or N/A] |
+| LAE7 | API First / Event Driven | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Lead or N/A] |
 
-**Overall Compliance**: [X/7 Compliant, Y/7 Non-Compliant, Z/7 Not Applicable, W/7 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/7 ([X/7*100]%)
+- ❌ Non-Compliant: [Y]/7 ([Y/7*100]%)
+- ⊘ Not Applicable: [Z]/7 ([Z/7*100]%)
+- ❓ Unknown: [W]/7 ([W/7*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

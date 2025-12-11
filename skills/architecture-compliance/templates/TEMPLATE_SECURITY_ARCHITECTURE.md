@@ -69,18 +69,24 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAS1 | API Exposure | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect or N/A] |
-| LAS2 | Intra-Microservices Communication | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Platform Engineer or N/A] |
-| LAS3 | Inter-Cluster Kubernetes Communication | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Kubernetes Administrator / Security Architect or N/A] |
-| LAS4 | Domain API Communication | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [API Architect / Security Architect or N/A] |
-| LAS5 | Third-Party API Consumption | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Engineer / Security Architect or N/A] |
-| LAS6 | Data Lake Communication | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Data Architect / Security Architect or N/A] |
-| LAS7 | Internal Application Authentication | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Identity Architect / Security Architect or N/A] |
-| LAS8 | HTTP Encryption Scheme | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect or N/A] |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAS1 | API Exposure | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect or N/A] |
+| LAS2 | Intra-Microservices Communication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Platform Engineer or N/A] |
+| LAS3 | Inter-Cluster Kubernetes Communication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Kubernetes Administrator / Security Architect or N/A] |
+| LAS4 | Domain API Communication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [API Architect / Security Architect or N/A] |
+| LAS5 | Third-Party API Consumption | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Engineer / Security Architect or N/A] |
+| LAS6 | Data Lake Communication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Data Architect / Security Architect or N/A] |
+| LAS7 | Internal Application Authentication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Identity Architect / Security Architect or N/A] |
+| LAS8 | HTTP Encryption Scheme | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect or N/A] |
 
-**Overall Compliance**: [X/8 Compliant, Y/8 Non-Compliant, Z/8 Not Applicable, W/8 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/8 ([X/8*100]%)
+- ❌ Non-Compliant: [Y]/8 ([Y/8*100]%)
+- ⊘ Not Applicable: [Z]/8 ([Z/8*100]%)
+- ❓ Unknown: [W]/8 ([W/8*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

@@ -69,17 +69,23 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 This Integration Architecture compliance contract validates 7 LAI (Integration Architecture) requirements to ensure integration best practices, security, technology currency, governance compliance, third-party documentation, traceability, and event-driven architecture standards.
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAI1 | Best Practices Adoption | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect or N/A] |
-| LAI2 | Secure Integrations | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Integration Architect or N/A] |
-| LAI3 | No Obsolete Integration Technologies | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Enterprise Architect or N/A] |
-| LAI4 | Integration Governance Standards | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Governance Board or N/A] |
-| LAI5 | Third-Party Documentation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Product Owner or N/A] |
-| LAI6 | Traceability and Audit | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / SRE Team or N/A] |
-| LAI7 | Event-Driven Integration Compliance | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Event Architect or N/A] |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAI1 | Best Practices Adoption | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect or N/A] |
+| LAI2 | Secure Integrations | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Integration Architect or N/A] |
+| LAI3 | No Obsolete Integration Technologies | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Enterprise Architect or N/A] |
+| LAI4 | Integration Governance Standards | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Governance Board or N/A] |
+| LAI5 | Third-Party Documentation | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Product Owner or N/A] |
+| LAI6 | Traceability and Audit | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / SRE Team or N/A] |
+| LAI7 | Event-Driven Integration Compliance | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Event Architect or N/A] |
 
-**Overall Compliance**: [X/7 requirements compliant]
+**Overall Compliance**:
+- ✅ Compliant: [X]/7 ([X/7*100]%)
+- ❌ Non-Compliant: [Y]/7 ([Y/7*100]%)
+- ⊘ Not Applicable: [Z]/7 ([Z/7*100]%)
+- ❓ Unknown: [W]/7 ([W/7*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

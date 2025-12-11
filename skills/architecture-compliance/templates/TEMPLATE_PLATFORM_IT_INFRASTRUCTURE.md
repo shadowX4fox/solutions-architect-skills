@@ -69,19 +69,23 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAPI01 | Unique Production Environments | [STATUS] | Section 4, 11 | Infrastructure Architect |
-| LAPI02 | Server Operating Systems | [STATUS] | Section 8 | Platform Engineer |
-| LAPI03 | Database Storage Capacity | [STATUS] | Section 8, 10 | Database Administrator |
-| LAPI04 | Database Version Authorization | [STATUS] | Section 8 | Database Administrator |
-| LAPI05 | Database Backup and Retention | [STATUS] | Section 11 | Database Administrator |
-| LAPI06 | Infrastructure Capacity | [STATUS] | Section 8, 10 | Infrastructure Architect |
-| LAPI07 | Naming Conventions | [STATUS] | Section 8, 11 | Infrastructure Architect |
-| LAPI08 | Transaction Volume Dimensioning | [STATUS] | Section 10 | Integration Architect |
-| LAPI09 | Legacy Platform Transaction Capacity | [STATUS] | Section 7, 10 | Integration Architect |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAPI01 | Unique Production Environments | Platform & IT Infrastructure | [STATUS] | Section 4, 11 | Infrastructure Architect |
+| LAPI02 | Server Operating Systems | Platform & IT Infrastructure | [STATUS] | Section 8 | Platform Engineer |
+| LAPI03 | Database Storage Capacity | Platform & IT Infrastructure | [STATUS] | Section 8, 10 | Database Administrator |
+| LAPI04 | Database Version Authorization | Platform & IT Infrastructure | [STATUS] | Section 8 | Database Administrator |
+| LAPI05 | Database Backup and Retention | Platform & IT Infrastructure | [STATUS] | Section 11 | Database Administrator |
+| LAPI06 | Infrastructure Capacity | Platform & IT Infrastructure | [STATUS] | Section 8, 10 | Infrastructure Architect |
+| LAPI07 | Naming Conventions | Platform & IT Infrastructure | [STATUS] | Section 8, 11 | Infrastructure Architect |
+| LAPI08 | Transaction Volume Dimensioning | Platform & IT Infrastructure | [STATUS] | Section 10 | Integration Architect |
+| LAPI09 | Legacy Platform Transaction Capacity | Platform & IT Infrastructure | [STATUS] | Section 7, 10 | Integration Architect |
 
-**Overall Compliance**: [X/9 Compliant, Y/9 Non-Compliant, Z/9 Not Applicable, W/9 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/9 ([X/9*100]%)
+- ❌ Non-Compliant: [Y]/9 ([Y/9*100]%)
+- ⊘ Not Applicable: [Z]/9 ([Z/9*100]%)
+- ❓ Unknown: [W]/9 ([W/9*100]%)
 
 **Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 

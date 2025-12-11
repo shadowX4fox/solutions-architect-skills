@@ -69,14 +69,20 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAA1 | Feasibility and Impact Analysis | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Process Architect or N/A] |
-| LAA2 | Automation Factors | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Automation Lead / DevOps Engineer or N/A] |
-| LAA3 | Efficient License Usage | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [License Manager / Solution Architect or N/A] |
-| LAA4 | Document Management Alignment | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Information Architect / DMS Administrator or N/A] |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAA1 | Feasibility and Impact Analysis | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Process Architect or N/A] |
+| LAA2 | Automation Factors | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Automation Lead / DevOps Engineer or N/A] |
+| LAA3 | Efficient License Usage | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [License Manager / Solution Architect or N/A] |
+| LAA4 | Document Management Alignment | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Information Architect / DMS Administrator or N/A] |
 
-**Overall Compliance**: [X/4 Compliant, Y/4 Non-Compliant, Z/4 Not Applicable, W/4 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/4 ([X/4*100]%)
+- ❌ Non-Compliant: [Y]/4 ([Y/4*100]%)
+- ⊘ Not Applicable: [Z]/4 ([Z/4*100]%)
+- ❓ Unknown: [W]/4 ([W/4*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

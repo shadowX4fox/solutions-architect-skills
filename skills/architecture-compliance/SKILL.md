@@ -55,6 +55,7 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 11 sep
 2. ✅ **ALWAYS cite** actual section numbers and line numbers
 3. ✅ **NEVER infer, derive, or guess** values not stated in ARCHITECTURE.md
 4. ❌ **NO INFERENCE** - even if industry standards suggest correlation
+5. ✅ **FORMAT ENFORCEMENT** - Compliance Summary table MUST use 6-column format (see Phase 4.3)
 
 **Allowed Extraction Methods:**
 - **Direct**: Extract exact values as-is from ARCHITECTURE.md
@@ -483,7 +484,127 @@ Populate Document Control section with validation results:
 - [APPROVAL_AUTHORITY] → from validation config approval_authority field
 ```
 
-**Step 4.3: Calculate Derived Values**
+**Step 4.3: Populate Compliance Summary Table**
+
+The Compliance Summary table is the most critical section for stakeholders. It MUST follow this exact format for ALL contract types.
+
+**Table Structure (6 columns - MANDATORY):**
+```markdown
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+```
+
+**Column Definitions:**
+- **Code**: Requirement code from template (e.g., LASRE01, LAC1, LAPI01)
+- **Requirement**: Short requirement name from template (≤60 chars recommended)
+- **Category**: Classification of requirement. Use template-specific category if defined, otherwise use template type as category (e.g., "Cloud Architecture", "Security Architecture", "SRE Architecture")
+- **Status**: One of exactly four values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
+- **Source Section**: ARCHITECTURE.md section reference (e.g., "Section 10", "Section 4, 11", "Not documented")
+- **Responsible Role**: Accountable role from template (e.g., "SRE Team", "Security Architect", "Cloud Architect")
+
+**Population Logic:**
+
+1. **Extract requirement count** from contract template header
+2. **For each requirement code** (e.g., LASRE01-LASRE57 for SRE, LAC1-LAC6 for Cloud):
+
+   a. **Code**: Extract from template
+
+   b. **Requirement**: Extract requirement name from template
+
+   c. **Category**:
+      - If template defines specific category (e.g., Data/AI uses "Data" and "AI"), use that
+      - Otherwise, use template type as category:
+        - SRE Architecture → "SRE Architecture"
+        - Cloud Architecture → "Cloud Architecture"
+        - Security Architecture → "Security Architecture"
+        - Platform & IT Infrastructure → "Platform & IT Infrastructure"
+        - Development Architecture → "Development Architecture"
+        - Enterprise Architecture → "Enterprise Architecture"
+        - Integration Architecture → "Integration Architecture"
+        - Process Transformation → "Process Transformation"
+
+   d. **Status**: Determine based on ARCHITECTURE.md data availability and quality:
+      - **Compliant**: Data fully documented in ARCHITECTURE.md AND meets organizational standards
+      - **Non-Compliant**: Data missing OR does not meet organizational standards
+      - **Not Applicable**: Requirement does not apply to this architecture (e.g., cloud-only requirement for on-premise architecture)
+      - **Unknown**: Data partially documented OR quality/applicability unclear
+
+   e. **Source Section**: Extract from ARCHITECTURE.md:
+      - If data found: "Section X" or "Section X, Y" (comma-separated if multiple)
+      - If not found: "Not documented"
+
+   f. **Responsible Role**: Extract from template (usually specified per requirement)
+
+**Example Population (SRE Architecture - 57 requirements):**
+```markdown
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LASRE01 | Define SLOs for all services | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE02 | Calculate error budgets | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE03 | Implement monitoring stack | SRE Architecture | Non-Compliant | Not documented | Platform Team |
+| LASRE04 | Incident response procedures | SRE Architecture | Unknown | Section 11 | SRE Team |
+...
+```
+
+**Step 4.4: Calculate Overall Compliance Summary**
+
+After populating all rows in the Compliance Summary table, calculate compliance statistics using this MANDATORY format:
+
+**Calculation Formula:**
+```
+TOTAL = Total number of requirements for this contract type
+X (Compliant) = Count of rows with Status = "Compliant"
+Y (Non-Compliant) = Count of rows with Status = "Non-Compliant"
+Z (Not Applicable) = Count of rows with Status = "Not Applicable"
+W (Unknown) = Count of rows with Status = "Unknown"
+
+Verification: X + Y + Z + W = TOTAL (counts must sum correctly)
+```
+
+**Output Format (MANDATORY - use emoji indicators and percentages):**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: X/TOTAL (X/TOTAL*100%)
+- ❌ Non-Compliant: Y/TOTAL (Y/TOTAL*100%)
+- ⊘ Not Applicable: Z/TOTAL (Z/TOTAL*100%)
+- ❓ Unknown: W/TOTAL (W/TOTAL*100%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+```
+
+**Example (SRE Architecture - 57 total requirements):**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: 42/57 (74%)
+- ❌ Non-Compliant: 8/57 (14%)
+- ⊘ Not Applicable: 3/57 (5%)
+- ❓ Unknown: 4/57 (7%)
+
+**Completeness**: 87% (124/142 data points documented)
+```
+
+**Percentage Calculation:**
+- Round percentages to nearest integer (e.g., 73.68% → 74%)
+- Completeness percentage measures how many total data points across ALL sections are documented
+- Completeness is separate from compliance status (a document can be 100% complete but have non-compliant items)
+
+**Format Enforcement Checklist - Verify Before Finalizing:**
+- [ ] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
+- [ ] Table header uses proper markdown pipe syntax: `| Col1 | Col2 | Col3 | Col4 | Col5 | Col6 |`
+- [ ] Table separator line uses proper syntax: `|------|------|------|------|------|------|`
+- [ ] All requirement codes present (row count matches template's total requirements)
+- [ ] Category column populated (use template type if no specific category)
+- [ ] Status values use EXACTLY one of: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
+- [ ] Overall Compliance line uses emoji indicators: ✅ ❌ ⊘ ❓
+- [ ] Compliance counts sum to TOTAL: X + Y + Z + W = TOTAL
+- [ ] Percentages calculated correctly and rounded to nearest integer
+- [ ] Completeness metric included with percentage and fraction format
+
+**Special Cases:**
+- **Business Continuity** and **Risk Management** contracts use a different format (section-based, not table-based). Do NOT apply table format to these two contracts.
+- **Data & AI Architecture** uses two categories: "Data" for data requirements (LAD1-LAD5) and "AI" for AI requirements (LAIA1-LAIA5)
+
+**Step 4.5: Calculate Derived Values**
 ```
 Examples:
 - Error Budget from SLA (99.99% → 43.2 min/month)
@@ -491,7 +612,7 @@ Examples:
 - Integration Count from Section 7
 ```
 
-**Step 4.4: Format and Validate**
+**Step 4.6: Format and Validate**
 ```
 - Ensure proper markdown formatting
 - Check all sections present
@@ -499,7 +620,7 @@ Examples:
 - Add source traceability
 ```
 
-**Step 4.5: Flag Missing Data**
+**Step 4.7: Flag Missing Data**
 ```
 For each missing data point:
 - Add [PLACEHOLDER: description]

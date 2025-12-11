@@ -69,16 +69,22 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Compliance Summary
 
-| Code | Requirement | Status | Source Section | Responsible Role |
-|------|-------------|--------|----------------|------------------|
-| LAC1 | Cloud Deployment Model (IaaS, PaaS, SaaS) | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect or N/A] |
-| LAC2 | Network Connectivity and Integration | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Network Engineer / Cloud Architect or N/A] |
-| LAC3 | Security and Regulatory Compliance | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Compliance Officer or N/A] |
-| LAC4 | Resource Monitoring and Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [DevOps Engineer / SRE Lead or N/A] |
-| LAC5 | Backup and Recovery Policies | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Business Continuity Manager or N/A] |
-| LAC6 | Cloud Best Practices Adoption | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Technical Lead or N/A] |
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LAC1 | Cloud Deployment Model (IaaS, PaaS, SaaS) | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect or N/A] |
+| LAC2 | Network Connectivity and Integration | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Network Engineer / Cloud Architect or N/A] |
+| LAC3 | Security and Regulatory Compliance | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect / Compliance Officer or N/A] |
+| LAC4 | Resource Monitoring and Management | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [DevOps Engineer / SRE Lead or N/A] |
+| LAC5 | Backup and Recovery Policies | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Business Continuity Manager or N/A] |
+| LAC6 | Cloud Best Practices Adoption | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Technical Lead or N/A] |
 
-**Overall Compliance**: [X/6 Compliant, Y/6 Non-Compliant, Z/6 Not Applicable, W/6 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/6 ([X/6*100]%)
+- ❌ Non-Compliant: [Y]/6 ([Y/6*100]%)
+- ⊘ Not Applicable: [Z]/6 ([Z/6*100]%)
+- ❓ Unknown: [W]/6 ([W/6*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 ---
 

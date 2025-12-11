@@ -144,7 +144,13 @@ This template uses a two-tier scoring system for SRE requirements:
 | LASRE56 | Will have an automated process to sanitize or copy data to previous en... | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 | LASRE57 | Will have automation to remediate application failures automatically. | Automation - Auto-remediation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 
-**Overall Compliance**: [X/57 Compliant, Y/57 Non-Compliant, Z/57 Not Applicable, W/57 Unknown]
+**Overall Compliance**:
+- ✅ Compliant: [X]/57 ([X/57*100]%)
+- ❌ Non-Compliant: [Y]/57 ([Y/57*100]%)
+- ⊘ Not Applicable: [Z]/57 ([Z/57*100]%)
+- ❓ Unknown: [W]/57 ([W/57*100]%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 **Blocker Requirements**: [X/36 Compliant] (**MANDATORY** - All must pass for approval)
 **Desired Requirements**: [Y/21 Compliant] (OPTIONAL - Enhancement recommendations)
