@@ -66,43 +66,83 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ### 2. SRE Architecture (Site Reliability Engineering)
 
-**Purpose**: Define guidelines for site reliability, observability, and operational excellence to ensure solution resilience and performance.
+**Purpose**: Define guidelines for site reliability, observability, operational excellence, automation, and resilience practices to ensure production-ready solutions.
 
 **Stakeholders**:
 - SRE team
 - DevOps team
 - Platform engineering
 - On-call engineers
+- Automation engineers
 
-**Key Content Requirements**:
-- **Service Level Objectives (SLOs)**: Availability, latency, throughput, error rate targets
-- **Service Level Indicators (SLIs)**: Metrics to measure SLOs
-- **Error Budgets**: Calculated from SLOs, downtime allowances
-- **Monitoring & Observability**: Tools, metrics, dashboards, alerting
-- **Incident Management**: Response procedures, escalation, postmortems
-- **Capacity Planning**: Growth projections, scaling triggers
-- **On-Call**: Rotation schedules, runbooks, escalation paths
+**Template Version**: 2.0 (57 LASRE Requirements)
+
+**57 Requirements Organized in 3 Sections**:
+
+**Section 1: Practice Requirements (LASRE01-16)** - 16 Blocker
+- Log Management (3): Structured logging, log levels, log accessibility
+- Application Deployment (1): Automatic rollback mechanisms
+- Configuration Management (1): Secure configuration repositories
+- Operational Documentation (1): SOP documentation in repositories
+- Operational Resilience (5): Readiness probes, health checks, HA, load testing, auto-scaling
+- Recovery and Resilience Testing (1): Documented DRP
+
+**Section 2: Observability Requirements (LASRE17-42)** - 20 Blocker + 6 Desired
+- Information and Architecture (4 Blocker): C2 diagrams, portfolio registration, escalation matrix, observability requests
+- Key Metrics (3 Blocker): Availability measurement, performance measurement, threshold configuration
+- Backend Application (3 Blocker + 3 Desired): Dynatrace instrumentation, API monitoring, exception handling, labels, external APIs, advanced configurations
+- Frontend Application (1 Blocker + 1 Desired): Synthetic validation, MFA-free testing
+- User Experience (3 Blocker): RUM injection, security component compatibility, UX monitoring
+- Cost Estimation (2 Blocker): Dynatrace cost estimation, budget prerequisites
+- Infrastructure (3 Blocker + 2 Desired): Agent installation, container monitoring, dependency monitoring, cloud tagging, process health
+- Batch Processing (1 Blocker): Non-Control-M batch monitoring
+- Log Management (2 Desired): Log centralization, verbosity control
+- Configuration Management (1 Desired): Version control
+- Integration, Deployment and Delivery (2 Desired): Canary releases, traffic management
+- Operational Resilience (3 Desired): 7x24 maintenance, circuit breakers, retry mechanisms
+- Recovery and Resilience Testing (1 Desired): Chaos testing
+
+**Section 3: Automation Requirements (LASRE43-57)** - 15 Desired
+- Operational Resilience (2): Fallback mechanisms, timeout management
+- Recovery and Resilience Testing (1): Chaos engineering
+- Information and Architecture (2): Critical journey identification
+- Backend Application (3): Labels, external API validation, advanced monitoring
+- Frontend Application (1): Synthetic validation with generic user
+- Infrastructure (2): Cloud tagging, process health detection
+- Application Operational Tasks (2): Component reporting, data sanitization
+- Auto-remediation (1): Automated failure remediation
+
+**Two-Tier Scoring System**:
+- **36 Blocker Requirements**: MANDATORY - All must pass for approval (ANY failure blocks approval)
+- **21 Desired Requirements**: OPTIONAL - Enhancement recommendations (do not block approval)
+- **Final Score** = (Blocker Score × 0.7) + (Desired Score × 0.3)
+- **Approval Threshold**: Score ≥ 7.0 requires all 36 Blocker requirements pass
+- **Auto-Approval**: Score ≥ 8.0 requires all Blocker + 60% Desired
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
-  - Section 10 (Performance Requirements) - 50% of content
-    - 10.1: Performance Metrics
-    - 10.2: Availability SLAs
-  - Section 11 (Operational Considerations) - 40% of content
-    - 11.1: Monitoring and Logging
-    - 11.2: Incident Management
-- **Secondary**: Section 5 (System Components) - 10% of content
-  - Component-level reliability requirements
+  - Section 11 (Operational Considerations) - 50% of content
+    - 11.1: Monitoring, Logging, Observability
+    - 11.2: Incident Management, DR
+    - 11.3: Deployment, CI/CD
+    - 11.4: Configuration Management, Documentation
+  - Section 10 (Performance Requirements) - 30% of content
+    - 10.1: Performance Metrics, Resilience
+    - 10.2: Availability, SLAs
+- **Secondary**:
+  - Section 5 (Infrastructure) - 10% of content (Infrastructure monitoring, agents)
+  - Section 4 (System Architecture) - 5% of content (C2 diagrams)
+  - Section 2 (Project Context) - 5% of content (Portfolio, costs)
 
-**Example Guidelines**:
-- All services must define availability SLOs (minimum 99.9%)
-- Error budgets must be calculated and tracked monthly
-- Monitoring must include metrics, logs, and traces (observability triad)
-- Incident response time: P1 < 15min, P2 < 1hr, P3 < 4hr
-- Postmortems required for all P1/P2 incidents
-- Runbooks must exist for all operational procedures
+**Example LASRE Requirements**:
+- LASRE01 (Blocker): Structured logging with defined fields
+- LASRE07 (Blocker): Readiness probes for load acceptance
+- LASRE13 (Blocker): C2 diagrams in IcePanel
+- LASRE24 (Blocker): Dynatrace instrumentation validation
+- LASRE37 (Desired): Centralized log aggregation
+- LASRE45 (Desired): Chaos testing implementation
 
-**Template Priority**: High (Template #1 - serves as reference pattern)
+**Template Priority**: High (Template #1 - v2.0 serves as reference for requirement-based compliance)
 
 ---
 

@@ -724,390 +724,354 @@ Action: [PLACEHOLDER: Implement backup restoration testing.
 
 ---
 
-### Contract 2: SRE Architecture (Site Reliability Engineering)
+### Contract 2: SRE Architecture (Site Reliability Engineering) v2.0
 
 #### Document Purpose
-Define site reliability practices including SLOs, monitoring, incident management, and operational excellence.
+Define site reliability, observability, automation, and resilience practices through 57 LASRE requirements to ensure production-ready solutions.
+
+#### Template Version
+**v2.0** - Requirement-based compliance with two-tier scoring (Blocker/Desired)
 
 #### Required Content Sections
-1. Service Level Objectives (SLOs)
-2. Service Level Indicators (SLIs)
-3. Error Budgets
-4. Monitoring & Observability
-5. Incident Management
-6. Capacity Planning
-7. On-Call Management
+**3 Main Sections (57 LASRE Requirements)**:
+
+1. **Practice Requirements** (LASRE01-16): 16 Blocker
+2. **Observability Requirements** (LASRE17-42): 20 Blocker + 6 Desired
+3. **Automation Requirements** (LASRE43-57): 15 Desired
+
+#### Two-Tier Scoring System
+- **36 Blocker Requirements**: MANDATORY - All must pass (ANY failure blocks approval)
+- **21 Desired Requirements**: OPTIONAL - Enhancement recommendations
+- **Final Score** = (Blocker Score × 0.7) + (Desired Score × 0.3)
+- **Approval**: Score ≥ 7.0 requires 100% Blocker compliance
+- **Auto-Approval**: Score ≥ 8.0 requires all Blocker + 60% Desired
 
 #### ARCHITECTURE.md Section Mapping
 
-**Primary Source: Section 10 (Performance Requirements) - 50%**
+**Primary Sources (80% of content)**:
 
-##### Subsection 10.1: Performance Metrics
-**Extract**: Latency targets (p50, p95, p99), throughput (TPS), response times
-**Transform to**: Contract Section 1 (SLOs - Latency)
+##### Section 11 (Operational Considerations) - 50%
+**Maps to**: LASRE01-06, LASRE13-16, LASRE20-42, LASRE46-57
 
-**Pattern Example**:
-```
-ARCHITECTURE.md Input (Section 10.1, lines {subsection_start}+):
-"Performance Targets:
-- p50 latency: < 50ms
-- p95 latency: < 100ms
-- p99 latency: < 200ms
-- Throughput: 450 TPS (design capacity)
-- Peak capacity: 1000 TPS"
+**Subsections**:
+- **11.1 Monitoring and Logging**: LASRE01-03 (log management), LASRE13 (observability requests), LASRE20-26 (monitoring), LASRE29-32 (infrastructure monitoring), LASRE37-38 (log centralization)
+- **11.2 Incident Management, DR**: LASRE12 (DRP), LASRE15 (escalation), LASRE34-35 (DR automation), LASRE44-45 (resilience testing)
+- **11.3 Deployment, CI/CD**: LASRE04 (rollback), LASRE33 (deployment consistency), LASRE36 (service management), LASRE40-41 (deployment strategies), LASRE46 (operational tasks)
+- **11.4 Configuration, Documentation**: LASRE05 (config repos), LASRE06 (SOP documentation), LASRE39 (version control), LASRE55-56 (operational automation)
 
-Line Number Calculation:
-1. Document Index: Section 10 (Performance Requirements) → Lines 1251-1400
-2. Grep for "^### 10\.1" within Section 10 → line 1253
-3. subsection_start = 1253
-4. p50 latency at relative offset +2 → absolute line 1255
-5. p95 latency at relative offset +3 → absolute line 1256
-6. p99 latency at relative offset +4 → absolute line 1257
+**Extraction Pattern**:
+```markdown
+ARCHITECTURE.md Section 11.1:
+"Logging:
+- Format: JSON structured logs
+- Levels: DEBUG, INFO, WARN, ERROR
+- Storage: Splunk centralized logging
+- Access: Self-service dashboard"
 
-Contract Output:
-## 1. Service Level Objectives (SLOs)
-
-### 1.1 Latency SLOs
-| Percentile | Target | Measurement Method | Source |
-|------------|--------|-------------------|--------|
-| p50 | < 50ms | API response time | Section 10.1, line {p50_line} |
-| p95 | < 100ms | API response time | Section 10.1, line {p95_line} |
-| p99 | < 200ms | API response time | Section 10.1, line {p99_line} |
-
-**Monitoring Tool**: [PLACEHOLDER: Specify monitoring tool]
-**Alert Threshold**: p95 > 110ms (10% over target)
-
-### 1.2 Throughput SLOs
-**Design Capacity**: 450 TPS
-**Peak Capacity**: 1,000 TPS (2.2× design)
-**Headroom**: 550 TPS (122% over design)
-**Source**: ARCHITECTURE.md Section 10.1, lines {throughput_line_start}-{throughput_line_end}
+Maps to Contract:
+- LASRE01 (Blocker): Structured logging ✓ Compliant
+- LASRE02 (Blocker): Log levels ✓ Compliant
+- LASRE03 (Blocker): Log accessibility ✓ Compliant
+- LASRE37 (Desired): Centralized logging (Splunk) ✓ Compliant
 ```
 
-##### Subsection 10.2: Availability SLA
-**Extract**: Uptime requirements
-**Transform to**: Contract Sections 1.3 (Availability SLO) & 3 (Error Budget)
+##### Section 10 (Performance Requirements) - 30%
+**Maps to**: LASRE07-11, LASRE17-19, LASRE42-44
 
-**Pattern Example**:
-```
-ARCHITECTURE.md Input (Section 10.2, lines {subsection_start}+):
-"Availability SLA: 99.99% uptime"
+**Subsections**:
+- **10.1 Performance Metrics, Resilience**: LASRE07 (readiness probes), LASRE08 (health checks), LASRE10 (load testing), LASRE11 (auto-scaling), LASRE42-44 (resilience patterns)
+- **10.2 Availability, SLAs**: LASRE09 (HA), LASRE17-18 (availability/performance measurement), LASRE19 (thresholds)
 
-Line Number Calculation:
-1. Document Index: Section 10 → Lines 1251-1400
-2. Grep for "^### 10\.2" within Section 10 → line 1305
-3. subsection_start = 1305
-4. SLA value at relative offset +2 → absolute line 1307
+**Extraction Pattern**:
+```markdown
+ARCHITECTURE.md Section 10.1:
+"Resilience:
+- Readiness probe: /health/ready (HTTP 200)
+- Liveness probe: /health/live (HTTP 200)
+- Health check interval: 10s
+- Replicas: 3 (min), 10 (max)
+- Auto-scaling: CPU > 70%
+- Load tested: 5000 TPS peak"
 
-Contract Output:
-### 1.3 Availability SLO
-**Target**: 99.99% uptime
-**Measurement Window**: Monthly
-**Measurement Method**: Uptime monitoring (synthetic checks every 60s)
-**Source**: ARCHITECTURE.md Section 10.2 (Availability SLA), line {sla_line}
-
-## 3. Error Budgets
-
-### 3.1 Monthly Error Budget
-**SLA**: 99.99%
-**Error Budget**: 43.2 minutes/month (calculated from SLA)
-**Calculation**: (100% - 99.99%) × 43,200 min = 43.2 min/month
-
-### 3.2 Error Budget Breakdown
-| Period | Allowed Downtime | Current Usage | Remaining |
-|--------|-----------------|---------------|-----------|
-| This Month | 43.2 min | [PLACEHOLDER: Add from monitoring] | [PLACEHOLDER] |
-| Last Month | 43.2 min | [PLACEHOLDER: Add historical] | [PLACEHOLDER] |
-
-**Error Budget Policy**: [PLACEHOLDER: Define policy when budget exhausted]
-**Source**: Calculated from Section 10.2, line 1576
+Maps to Contract:
+- LASRE07 (Blocker): Readiness probes ✓ Compliant
+- LASRE08 (Blocker): Health checks ✓ Compliant
+- LASRE09 (Blocker): HA (3 replicas) ✓ Compliant
+- LASRE10 (Blocker): Load testing ✓ Compliant
+- LASRE11 (Blocker): Auto-scaling ✓ Compliant
 ```
 
-**Primary Source: Section 11 (Operational Considerations) - 40%**
+**Secondary Sources (20% of content)**:
 
-##### Subsection 11.1: Monitoring and Logging
-**Extract**: Monitoring tools, metrics, dashboards, alerting
-**Transform to**: Contract Section 4 (Monitoring & Observability)
+##### Section 5 (Infrastructure) - 10%
+**Maps to**: LASRE29-31, LASRE33, LASRE52-54
 
-**Pattern Example**:
-```
-ARCHITECTURE.md Input (Section 11.1, lines {subsection_start}+):
-"Monitoring:
-- Metrics: Prometheus
-- Visualization: Grafana
-- Logging: ELK Stack (Elasticsearch, Logstash, Kibana)
-- Tracing: Jaeger
-- Alerting: PagerDuty"
+**Extraction**: Infrastructure monitoring agents, container platforms, cloud tagging
 
-Line Number Calculation:
-1. Document Index: Section 11 (Operational Considerations) → Lines 1401-1650
-2. Grep for "^### 11\.1" within Section 11 → line 1405
-3. subsection_start = 1405
-4. Monitoring tools span lines 1405-1410
+##### Section 4 (System Architecture) - 5%
+**Maps to**: LASRE13, LASRE46-47
 
-Contract Output:
-## 4. Monitoring & Observability
+**Extraction**: C2 diagrams, critical journey identification
 
-### 4.1 Observability Stack
-**Metrics Collection**: Prometheus
-**Visualization**: Grafana
-**Log Aggregation**: ELK Stack (Elasticsearch, Logstash, Kibana)
-**Distributed Tracing**: Jaeger
-**Alerting Platform**: PagerDuty
+##### Section 2 (Project Context) - 5%
+**Maps to**: LASRE14, LASRE27-28
 
-### 4.2 Key Metrics Monitored
-- Latency (p50, p95, p99)
-- Throughput (requests/sec)
-- Error rate (%)
-- Availability (uptime %)
-- Resource utilization (CPU, memory, disk)
+**Extraction**: Portfolio registration, cost estimation
 
-**Dashboard Links**: [PLACEHOLDER: Add Grafana dashboard URLs]
-**Source**: ARCHITECTURE.md Section 11.1 (Monitoring and Logging), lines {subsection_start}-{subsection_start + 5}
-```
+#### LASRE Requirement Categories
 
-##### Subsection 11.2: Incident Management
-**Extract**: Incident response procedures, escalation paths
-**Transform to**: Contract Section 5 (Incident Management)
+**Log Management** (LASRE01-03, 37-38):
+- Source: Section 11.1 (Monitoring and Logging)
+- Blocker: Structured format, log levels, accessibility
+- Desired: Centralization, verbosity control
 
-**Pattern Example**:
-```
-ARCHITECTURE.md Input (Section 11.2, lines {subsection_start}+):
-"Incident Management:
-- Alerting: PagerDuty
-- Response SLA: P1 < 15 min, P2 < 1 hour, P3 < 4 hours
-- Escalation: L1 (5 min) → L2 (15 min) → L3 (30 min)
-- Postmortems: Required for all P1/P2 incidents
-- Incident Commander: On-call SRE"
+**Application Deployment** (LASRE04, 33):
+- Source: Section 11.3 (Deployment)
+- Blocker: Rollback mechanisms, deployment consistency
 
-Line Number Calculation:
-1. Document Index: Section 11 → Lines 1401-1650
-2. Grep for "^### 11\.2" within Section 11 → line 1458
-3. subsection_start = 1458
-4. Incident management details span lines 1458-1468
+**Configuration Management** (LASRE05, 15, 39):
+- Source: Section 11.4 (Configuration)
+- Blocker: Secure repositories
+- Desired: Version control
 
-Contract Output:
-## 5. Incident Management
+**Operational Documentation** (LASRE06):
+- Source: Section 11.4 (Documentation)
+- Blocker: SOP in official repositories
 
-### 5.1 Incident Classification
-| Priority | Description | Response Time SLA | Escalation |
-|----------|-------------|-------------------|------------|
-| P1 | Service down, revenue impact | < 15 minutes | Immediate to L2 |
-| P2 | Major functionality impaired | < 1 hour | 15 min to L2 |
-| P3 | Minor issues, workaround exists | < 4 hours | 30 min to L2 |
+**Operational Resilience** (LASRE07-11, 42-44):
+- Source: Sections 10.1, 10.2
+- Blocker: Readiness, health checks, HA, load testing, auto-scaling
+- Desired: 7x24 maintenance, circuit breakers, retries
 
-### 5.2 Incident Response
-**Alerting Platform**: PagerDuty
-**Incident Commander**: On-call SRE
-**Communication Channel**: [PLACEHOLDER: Add Slack channel or tool]
+**Recovery and Resilience Testing** (LASRE12, 45):
+- Source: Section 11.2 (DR)
+- Blocker: Documented DRP
+- Desired: Chaos testing
 
-### 5.3 Escalation Path
-1. **L1** (0-5 min): On-call engineer triages
-2. **L2** (5-15 min): Senior SRE engaged
-3. **L3** (15-30 min): Engineering manager + architect
+**Information and Architecture** (LASRE13-16, 46-47):
+- Source: Sections 2.1, 4.1
+- Blocker: C2 diagrams, portfolio registration, escalation matrix, observability requests
+- Desired: Critical journey identification
 
-### 5.4 Postmortem Requirements
-**Required For**: All P1 and P2 incidents
-**Timeline**: Within 48 hours of resolution
-**Distribution**: Engineering team, stakeholders
-**Template**: [PLACEHOLDER: Link to postmortem template]
+**Key Metrics** (LASRE17-19):
+- Source: Section 10.2
+- Blocker: Availability measurement, performance measurement, threshold configuration
 
-**Source**: ARCHITECTURE.md Section 11.2 (Incident Management), lines {subsection_start}-{subsection_start + 10}
-```
+**Backend Application** (LASRE20-22, 48-51):
+- Source: Section 11.1
+- Blocker: Dynatrace instrumentation, API monitoring, exception handling
+- Desired: Labels, external API validation, advanced monitoring, log ingestion
 
-**Secondary Source: Section 5 (System Components) - 10%**
+**Frontend Application** (LASRE23, 52):
+- Source: Section 11.1
+- Blocker: Synthetic validation
+- Desired: MFA-free testing
 
-##### Component-Level Reliability
-**Extract**: Component redundancy, failover
-**Transform to**: Contract Section 2 (SLIs)
+**User Experience** (LASRE24-26):
+- Source: Section 11.1
+- Blocker: RUM injection, security compatibility, UX monitoring
 
-**Pattern Example**:
-```
-ARCHITECTURE.md Input (Section 5.2, lines {subsection_start}+):
-"API Gateway: NGINX (3 instances, load balanced)"
+**Cost Estimation** (LASRE27-28):
+- Source: Section 2.5
+- Blocker: Dynatrace cost estimation, budget prerequisites
 
-Line Number Calculation:
-1. Document Index: Section 5 (System Components) → Lines 451-600
-2. Grep for "^### 5\.2" within Section 5 → line 475
-3. Component details at relative offset +3 → absolute line 478
+**Infrastructure** (LASRE29-31, 53-54):
+- Source: Section 5.2
+- Blocker: OneAgent installation, container monitoring, dependency monitoring
+- Desired: Cloud tagging, process health detection
 
-Contract Output:
-## 2. Service Level Indicators (SLIs)
+**Batch Processing** (LASRE32):
+- Source: Section 11.1
+- Blocker: Non-Control-M batch monitoring
 
-### 2.1 Component Availability
-| Component | Redundancy | Monitoring Method | Target |
-|-----------|------------|-------------------|--------|
-| API Gateway | 3 instances (NGINX) | Health checks | 99.99% |
-| [Other components...] | [...] | [...] | [...] |
+**Disaster Recovery** (LASRE34-35):
+- Source: Section 11.2
+- Blocker: DR automation, DR validation automation
 
-**Source**: ARCHITECTURE.md Section 5.2 (API Gateway), line {component_line}
-```
+**Application Operational Tasks** (LASRE36, 55-56):
+- Source: Section 11.3
+- Blocker: Service management automation
+- Desired: Reporting, data sanitization
 
-#### Extraction Logic (Pseudo-code)
+**Integration, Deployment and Delivery** (LASRE40-41):
+- Source: Section 11.3
+- Desired: Canary releases, traffic management
+
+**Auto-remediation** (LASRE57):
+- Source: Section 11.3
+- Desired: Automated failure remediation
+
+#### Extraction Logic (v2.0)
+
 ```python
-def extract_sre_architecture(architecture_md):
-    # Step 1: Load Document Index
-    index_content = Read(file_path=architecture_md, offset=1, limit=50)
-    doc_index = parse_document_index(index_content)
-
-    # Step 2: Load Section 10.1 (Performance Metrics)
-    section_10_range = doc_index["10"]
-    grep_result_10_1 = grep_subsection(
-        pattern="^### 10\.1",
-        start_line=section_10_range["start"],
-        end_line=section_10_range["end"]
-    )
-    subsection_10_1_start = grep_result_10_1["line_number"]
-
-    # Find next subsection
-    grep_result_10_2 = grep_subsection(
-        pattern="^### 10\.2",
-        start_line=subsection_10_1_start,
-        end_line=section_10_range["end"]
-    )
-    subsection_10_1_end = grep_result_10_2["line_number"] - 1
-
-    # Load Section 10.1 with buffer
-    buffer = 10
-    perf_section = Read(
-        file_path=architecture_md,
-        offset=subsection_10_1_start - buffer - 1,
-        limit=(subsection_10_1_end - subsection_10_1_start) + (2 * buffer)
-    )
-
-    # Extract latency SLOs with line tracking
-    p50_match = re.search(r'p50.*:<\s*([0-9]+ms)', perf_section)
-    p95_match = re.search(r'p95.*:<\s*([0-9]+ms)', perf_section)
-    p99_match = re.search(r'p99.*:<\s*([0-9]+ms)', perf_section)
-
-    latency_slos = {}
-    if p50_match:
-        offset = perf_section[:p50_match.start()].count('\n')
-        latency_slos["p50"] = {
-            "value": p50_match.group(1),
-            "line": subsection_10_1_start + offset,
-            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
-        }
-
-    if p95_match:
-        offset = perf_section[:p95_match.start()].count('\n')
-        latency_slos["p95"] = {
-            "value": p95_match.group(1),
-            "line": subsection_10_1_start + offset,
-            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
-        }
-
-    if p99_match:
-        offset = perf_section[:p99_match.start()].count('\n')
-        latency_slos["p99"] = {
-            "value": p99_match.group(1),
-            "line": subsection_10_1_start + offset,
-            "source": f"Section 10.1, line {subsection_10_1_start + offset}"
-        }
-
-    # Step 3: Load Section 10.2 (Availability)
-    subsection_10_2_start = grep_result_10_2["line_number"]
-    grep_result_10_3 = grep_subsection(
-        pattern="^### 10\.3",
-        start_line=subsection_10_2_start,
-        end_line=section_10_range["end"]
-    )
-    subsection_10_2_end = (grep_result_10_3["line_number"] - 1
-                           if grep_result_10_3 else section_10_range["end"])
-
-    avail_section = Read(
-        file_path=architecture_md,
-        offset=subsection_10_2_start - buffer - 1,
-        limit=(subsection_10_2_end - subsection_10_2_start) + (2 * buffer)
-    )
-
-    # Extract SLA with transformation
-    sla_match = re.search(r'SLA:?\s*([0-9.]+%)', avail_section)
-    sla_data = {}
-    if sla_match:
-        offset = avail_section[:sla_match.start()].count('\n')
-        sla_value = sla_match.group(1)
-        sla_data = {
-            "value": sla_value,
-            "line": subsection_10_2_start + offset,
-            "source": f"Section 10.2, line {subsection_10_2_start + offset}",
-            "error_budget": calculate_error_budget(sla_value)
-        }
-
-    # Step 4: Load Section 11.1 (Monitoring)
-    section_11_range = doc_index["11"]
-    grep_result_11_1 = grep_subsection(
-        pattern="^### 11\.1",
-        start_line=section_11_range["start"],
-        end_line=section_11_range["end"]
-    )
-    subsection_11_1_start = grep_result_11_1["line_number"]
-
-    grep_result_11_2 = grep_subsection(
-        pattern="^### 11\.2",
-        start_line=subsection_11_1_start,
-        end_line=section_11_range["end"]
-    )
-    subsection_11_1_end = grep_result_11_2["line_number"] - 1
-
-    monitor_section = Read(
-        file_path=architecture_md,
-        offset=subsection_11_1_start - buffer - 1,
-        limit=(subsection_11_1_end - subsection_11_1_start) + (2 * buffer)
-    )
-
-    # Extract monitoring tools (Aggregation)
-    monitoring_tools = {
-        "metrics": extract_with_line_tracking(monitor_section, r"Metrics:\s*(.+)", subsection_11_1_start),
-        "visualization": extract_with_line_tracking(monitor_section, r"Visualization:\s*(.+)", subsection_11_1_start),
-        "logging": extract_with_line_tracking(monitor_section, r"Logging:\s*(.+)", subsection_11_1_start)
+def extract_sre_architecture_v2(architecture_md):
+    """
+    Extract 57 LASRE requirements from ARCHITECTURE.md
+    Returns contract with compliance status for each requirement
+    """
+    
+    # Initialize contract with 57 requirements
+    contract = {
+        "version": "2.0",
+        "template": "SRE Architecture",
+        "requirements": []
     }
-
-    # Step 5: Load Section 11.2 (Incidents)
-    subsection_11_2_start = grep_result_11_2["line_number"]
-    grep_result_11_3 = grep_subsection(
-        pattern="^### 11\.3",
-        start_line=subsection_11_2_start,
-        end_line=section_11_range["end"]
+    
+    # Load section index
+    doc_index = parse_document_index(architecture_md)
+    
+    # Extract from Section 11 (50% of requirements)
+    section_11 = load_section(architecture_md, doc_index["11"])
+    
+    # LASRE01-03: Log Management from 11.1
+    logging_data = extract_subsection(section_11, "11.1")
+    contract["requirements"].extend([
+        assess_requirement("LASRE01", "Structured logging", logging_data, "blocker"),
+        assess_requirement("LASRE02", "Log levels", logging_data, "blocker"),
+        assess_requirement("LASRE03", "Log accessibility", logging_data, "blocker"),
+    ])
+    
+    # LASRE04: Deployment from 11.3
+    deployment_data = extract_subsection(section_11, "11.3")
+    contract["requirements"].append(
+        assess_requirement("LASRE04", "Rollback mechanisms", deployment_data, "blocker")
     )
-    subsection_11_2_end = grep_result_11_3["line_number"] - 1
+    
+    # Extract from Section 10 (30% of requirements)
+    section_10 = load_section(architecture_md, doc_index["10"])
+    
+    # LASRE07-11: Resilience from 10.1
+    resilience_data = extract_subsection(section_10, "10.1")
+    contract["requirements"].extend([
+        assess_requirement("LASRE07", "Readiness probes", resilience_data, "blocker"),
+        assess_requirement("LASRE08", "Health checks", resilience_data, "blocker"),
+        assess_requirement("LASRE09", "High availability", resilience_data, "blocker"),
+        assess_requirement("LASRE10", "Load testing", resilience_data, "blocker"),
+        assess_requirement("LASRE11", "Auto-scaling", resilience_data, "blocker"),
+    ])
+    
+    # Calculate compliance scores
+    blocker_reqs = [r for r in contract["requirements"] if r["criticality"] == "blocker"]
+    desired_reqs = [r for r in contract["requirements"] if r["criticality"] == "desired"]
+    
+    blocker_pass = sum(1 for r in blocker_reqs if r["status"] in ["Compliant", "Not Applicable"])
+    blocker_score = (blocker_pass / 36) * 10
+    
+    desired_pass = sum(1 for r in desired_reqs if r["status"] in ["Compliant", "Not Applicable"])
+    desired_score = (desired_pass / 21) * 10
+    
+    final_score = (blocker_score * 0.7) + (desired_score * 0.3)
+    
+    # Apply blocking logic
+    if blocker_pass < 36:
+        final_score = min(final_score, 4.9)  # Cap at FAIL threshold
+    
+    contract["validation"] = {
+        "blocker_score": blocker_score,
+        "desired_score": desired_score,
+        "final_score": final_score,
+        "status": "PASS" if final_score >= 7.0 else "FAIL"
+    }
+    
+    return contract
 
-    incident_section = Read(
-        file_path=architecture_md,
-        offset=subsection_11_2_start - buffer - 1,
-        limit=(subsection_11_2_end - subsection_11_2_start) + (2 * buffer)
-    )
-
-    # Extract incident SLAs
-    p1_response = extract_with_line_tracking(incident_section, r"P1.*<\s*([0-9]+\s*min)", subsection_11_2_start)
-
-    # Return structured data with full traceability
+def assess_requirement(code, name, source_data, criticality):
+    """Assess single LASRE requirement"""
+    # Search for evidence in source data
+    evidence = search_evidence(source_data, name)
+    
+    if evidence["found"]:
+        status = "Compliant"
+        explanation = f"{name} implemented and documented"
+    elif evidence["partial"]:
+        status = "Non-Compliant"
+        explanation = f"{name} partially implemented"
+    else:
+        status = "Unknown"
+        explanation = f"{name} not documented"
+    
     return {
-        "latency_slos": latency_slos,
-        "availability_slo": sla_data,
-        "monitoring": monitoring_tools,
-        "incident_response": {"p1": p1_response},
-        "document_index_version": doc_index["last_updated"]
+        "code": code,
+        "name": name,
+        "criticality": criticality,
+        "status": status,
+        "explanation": explanation,
+        "source": evidence["source_reference"],
+        "blocks_approval": criticality == "blocker" and status in ["Non-Compliant", "Unknown"]
     }
 ```
 
-#### Missing Data Handling
-```
-Scenario 1: On-call rotation not specified
-Action: [PLACEHOLDER: Define on-call rotation schedule.
-        Recommended: 7-day rotation, 24/7 coverage, primary + secondary]
+#### Contract Output Format (v2.0)
 
-Scenario 2: Runbooks not mentioned
-Action: [PLACEHOLDER: Create and maintain operational runbooks.
-        Location: [Specify repository]
-        Required runbooks: Deployment, rollback, incident response]
+```markdown
+## 1. Practice Requirements (LASRE01-LASRE16)
 
-Scenario 3: Error budget policy undefined
-Action: [PLACEHOLDER: Define error budget policy.
-        Recommended: If budget exhausted, freeze feature releases until next period]
-```
+### 1.1 Log Management (LASRE01 - Blocker)
+**Requirement**: Operational and audit logs must be recorded in a structured format...
+**Status**: Compliant
+**Responsible Role**: SRE Engineer
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.1.1 Implementation
+**Implementation Status**: JSON structured logging
+- Status: Compliant
+- Explanation: Implemented with consistent field schema
+- Source: ARCHITECTURE.md Section 11.1, lines 1405-1408
+- Note: N/A
+
+#### 1.1.2 Validation
+**Validation Evidence**: Log parser validates JSON schema
+- Status: Compliant
+- Explanation: Automated validation in logging pipeline
+- Source: ARCHITECTURE.md Section 11.1, line 1410
+
+**Source References**: ARCHITECTURE.md Section 11.1 (Monitoring and Logging)
 
 ---
+
+### 1.13 Log Centralization (LASRE37 - Desired)
+**Requirement**: Generated logs must be centralized in an analysis or monitoring tool...
+**Status**: Compliant
+**Responsible Role**: SRE Engineer
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: Splunk centralized logging
+- Status: Compliant
+- Explanation: All logs aggregated to Splunk with 90-day retention
+- Source: ARCHITECTURE.md Section 11.1, line 1412
+- Note: N/A
+
+**Source References**: ARCHITECTURE.md Section 11.1
+
+---
+```
+
+#### Placeholder Recommendations
+
+**Common Placeholders in Generated Contracts**:
+
+1. **Missing Section 11.1 (Monitoring)**:
+   - LASRE20-26, 29-32: Dynatrace instrumentation, monitoring coverage
+   - Recommendation: Add observability tool configuration to Section 11.1
+
+2. **Missing Section 11.2 (Incident Management)**:
+   - LASRE12, 15, 34-35: DRP, escalation matrix, DR automation
+   - Recommendation: Document DR procedures and escalation paths in Section 11.2
+
+3. **Missing Section 11.3 (Deployment)**:
+   - LASRE04, 33, 36: Rollback, deployment consistency, service automation
+   - Recommendation: Add CI/CD pipeline and deployment automation to Section 11.3
+
+4. **Missing Section 10.1 (Performance)**:
+   - LASRE07-11: Readiness, health checks, HA, load testing, auto-scaling
+   - Recommendation: Document resilience patterns and performance testing in Section 10.1
+
+5. **Missing Section 4.1 (Architecture)**:
+   - LASRE13, 46-47: C2 diagrams, critical journeys
+   - Recommendation: Add C2 diagrams and architecture documentation to Section 4.1
+
+---
+
 
 ### Contract 3: Cloud Architecture
 
