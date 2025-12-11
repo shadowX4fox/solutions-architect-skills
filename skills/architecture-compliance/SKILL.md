@@ -1,6 +1,6 @@
 ---
 name: architecture-compliance
-description: Generate compliance documents (Contratos de Adherencia and Risk Management) from ARCHITECTURE.md files
+description: Generate compliance documents (Compliance Contracts and Risk Management) from ARCHITECTURE.md files
 ---
 
 # Architecture Compliance Skill
@@ -17,6 +17,10 @@ This skill is **manually activated** when users request compliance document gene
 - `/skill architecture-compliance`
 - "Generate all compliance docs"
 - "Create security compliance" or "Generate risk management"
+- "List available contracts"
+- "Show contract types"
+- "What contracts can I generate?"
+- "Show me all compliance contracts"
 
 **NOT Activated For:**
 - Automatic triggers when ARCHITECTURE.md changes
@@ -77,16 +81,16 @@ To support flexible contract selection and validation, the following aliases and
 
 | Contract Type | Aliases | Keywords |
 |---------------|---------|----------|
-| Business Continuity | continuity, bcm, disaster recovery, continuidad | business, continuity, recovery, rto, rpo, backup |
+| Business Continuity | continuity, bcm, disaster recovery | business, continuity, recovery, rto, rpo, backup |
 | SRE | site reliability, sre, reliability | sre, slo, sli, error budget, monitoring, observability |
 | Cloud Architecture | cloud, infrastructure as code, iac | cloud, aws, azure, gcp, deployment, regions |
 | Data & AI Architecture | data, ai, ml, analytics, machine learning, data ai | data, ai, ml, analytics, pipeline, model, hallucination |
-| Development Architecture | development, dev, coding standards, desarrollo | development, coding, stack, framework, languages, tools |
-| Process Transformation | automation, process, transformation, transformacion | process, automation, rpa, efficiency, workflow |
-| Security Architecture | security, infosec, cybersecurity, seguridad | security, authentication, encryption, compliance, oauth |
-| IT Infrastructure | infrastructure, platforms, it, plataformas | infrastructure, platform, database, compute, capacity |
-| Enterprise Architecture | enterprise, ea, strategic, empresarial | enterprise, strategic, modularity, governance, alignment |
-| Integration Architecture | integration, api, middleware, integracion | integration, api, messaging, event, microservices |
+| Development Architecture | development, dev, coding standards | development, coding, stack, framework, languages, tools |
+| Process Transformation | automation, process, transformation | process, automation, rpa, efficiency, workflow |
+| Security Architecture | security, infosec, cybersecurity | security, authentication, encryption, compliance, oauth |
+| IT Infrastructure | infrastructure, platforms, it | infrastructure, platform, database, compute, capacity |
+| Enterprise Architecture | enterprise, ea, strategic | enterprise, strategic, modularity, governance, alignment |
+| Integration Architecture | integration, api, middleware | integration, api, messaging, event, microservices |
 | Risk Management | risk, governance, compliance | risk, governance, mitigation, threat, controls |
 
 ## Files in This Skill
@@ -181,6 +185,44 @@ Avoid re-loading same sections for multiple contracts
 7. Generate contract from cached data
 Total: 460 lines vs 2000+ (77% reduction)
 ```
+
+## Contract Listing Workflow
+
+### Special Command: List Contracts
+
+When users request a list of available contracts (e.g., "list contracts", "show contract types", "what contracts are available"), display the following summary:
+
+**Available Compliance Contracts (11 total):**
+
+1. **Business Continuity** - RTO/RPO objectives, disaster recovery plans, backup strategies
+2. **SRE Architecture** - SLOs, error budgets, monitoring, incident management, runbooks
+3. **Cloud Architecture** - Cloud deployment models, multi-region strategy, cloud-native services
+4. **Data & AI Architecture** - Data quality, AI governance, hallucination control, data lineage
+5. **Development Architecture** - Technology stack validation, code coverage, technical debt management
+6. **Process Transformation** - Automation ROI, efficiency gains, license optimization
+7. **Security Architecture** - API security, authentication, encryption, vulnerability management
+8. **Platform & IT Infrastructure** - Environment isolation, database capacity, naming conventions
+9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first design
+10. **Integration Architecture** - Integration catalog, API standards, event-driven patterns
+11. **Risk Management** - Risk identification, assessment, mitigation, control frameworks
+
+**To generate contracts:**
+- Single contract: "Generate [contract name]" (e.g., "Generate SRE Architecture")
+- Multiple contracts: "Generate Business Continuity and Security Architecture"
+- All contracts: "Generate all compliance documents"
+
+**For more details on any contract type, see:** `/skills/architecture-compliance/contracts/CONTRACT_TYPES_REFERENCE.md`
+
+### User Interaction After Listing
+
+After displaying the contract list, ask:
+
+**"Which compliance contract(s) would you like to generate?"**
+
+**User Options:**
+- User specifies contract(s) → Proceed to normal generation workflow (Phase 1 below)
+- User says "tell me more about [contract]" → Show detailed info from CONTRACT_TYPES_REFERENCE.md
+- User says "all" → Generate all 11 contracts
 
 ## Generation Workflow
 
@@ -926,7 +968,7 @@ User: "Generate security compliance documentation"
 ### Example Template Excerpt
 
 ```markdown
-# Contrato de Adherencia: SRE Architecture
+# Compliance Contract: SRE Architecture
 
 **Project**: [PROJECT_NAME]
 **Generated**: [GENERATION_DATE]

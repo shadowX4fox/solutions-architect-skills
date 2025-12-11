@@ -439,9 +439,9 @@ def extract_rto_rpo_from_architecture(architecture_md_path):
 | **3. Cloud Architecture** | 4, 8, 11 | 9, 10 | High | Medium (#3) |
 | **4. Data & Analytics - AI Architecture** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
 | **5. Development Architecture** | 3, 5, 8, 12 | 11 | Medium | Medium (#5) |
-| **6. Transformación Procesos** | 1, 2, 6 | 5, 7 | Low | Low (#6) |
+| **6. Process Transformation** | 1, 2, 6 | 5, 7 | Low | Low (#6) |
 | **7. Security Architecture v2.0** | 4, 5, 7, 9, 11 | - | High | High (#7) |
-| **8. Plataformas Infraestructura** | 4, 8, 11 | 10 | Medium | Medium (#8) |
+| **8. Platform & IT Infrastructure** | 4, 8, 11 | 10 | Medium | Medium (#8) |
 | **9. Enterprise Architecture** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
 | **10. Integration Architecture v2.0** | 5, 6, 7, 9 | - | High | High (#10) |
 | **11. Risk Management** | 9, 10, 11, 12 | 1, 5 | High | High (#4) |
@@ -2260,7 +2260,7 @@ Used in:
 - Business Continuity (RTO/RPO justification)
 - SRE Architecture (SLO, error budget)
 - Cloud Architecture (cloud SLA requirements)
-- Plataformas Infraestructura (infrastructure availability)
+- Platform & IT Infrastructure (infrastructure availability)
 - Enterprise Architecture (business criticality)
 - Risk Management (availability risks)
 
@@ -2275,8 +2275,8 @@ Source: Section 8
 Used in:
 - Development Architecture (technology choices)
 - Cloud Architecture (cloud services)
-- Plataformas Infraestructura (infrastructure tech)
-- Arquitectura Integración (integration tech)
+- Platform & IT Infrastructure (infrastructure tech)
+- Integration Architecture (integration tech)
 - Security Architecture (security tools)
 
 Extract once: Full technology inventory
@@ -2288,7 +2288,7 @@ Apply different filters per contract
 ```
 Source: Section 7
 Used in:
-- Arquitectura Integración (full catalog)
+- Integration Architecture (full catalog)
 - Security Architecture (integration security)
 - Data & Analytics - AI Architecture (data sources/sinks)
 

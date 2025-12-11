@@ -14,16 +14,16 @@ When generating compliance contracts, the architecture-compliance skill validate
 - **Fuzzy string matching**: Calculating edit distance for typo tolerance (e.g., "securtiy" → "security")
 
 **Supported contract types** (11 total):
-1. Business Continuity (Continuidad de Negocio)
-2. SRE Architecture (Arquitectura SRE)
-3. Cloud Architecture (Arquitectura Cloud)
-4. Data & AI Architecture (Arquitectura Datos y Analítica - IA)
-5. Development Architecture (Arquitectura Desarrollo)
-6. Process Transformation and Automation (Transformación de Procesos y Automatización)
-7. Security Architecture (Arquitectura Seguridad)
-8. IT Infrastructure (Plataformas e Infraestructura TI)
-9. Enterprise Architecture (Arquitectura Empresarial)
-10. Integration Architecture (Arquitectura de Integración)
+1. Business Continuity
+2. SRE Architecture
+3. Cloud Architecture
+4. Data & AI Architecture
+5. Development Architecture
+6. Process Transformation and Automation
+7. Security Architecture
+8. IT Infrastructure
+9. Enterprise Architecture
+10. Integration Architecture
 11. Risk Management
 
 **Aliases and shortcuts**: See SKILL.md Phase 2.1 for complete Contract Type Aliases and Keywords table.

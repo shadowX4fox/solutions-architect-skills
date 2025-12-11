@@ -806,7 +806,7 @@ User: "Generate security compliance documents"
 
 Category Mapping:
 - "security" → Security Architecture, Risk Management
-- "cloud" → Cloud Architecture, Plataformas Infraestructura
+- "cloud" → Cloud Architecture, Platform & IT Infrastructure
 - "data" → Data & Analytics - AI Architecture
 - "development" → Development Architecture
 - "integration" → Integration Architecture
