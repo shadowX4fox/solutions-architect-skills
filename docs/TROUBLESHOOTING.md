@@ -78,7 +78,7 @@ head -n 5 ~/.claude/plugins/solutions-architect-skills/skills/architecture-docs/
 ```yaml
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
 ---
 ```
 

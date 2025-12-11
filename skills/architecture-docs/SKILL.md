@@ -1,6 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when the user asks about architecture documentation, or when answering questions about the documented architecture
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
 ---
 
 # Architecture Documentation Skill
@@ -23,6 +23,32 @@ Automatically activate when:
   - "How does [component/system/integration] work?"
   - "What technologies do we use for [purpose]?"
   - "Tell me about the architecture of [system]"
+
+### Query Pattern Triggers
+
+This skill automatically activates when users ask questions about documented architecture, including:
+
+**Reference Patterns**:
+- "According to my architecture documentation..."
+- "Based on the architecture..."
+- "What does the architecture use/require/implement for..."
+- "My architecture documentation shows/says..."
+- "The architecture specifies/defines..."
+
+**Technical Query Keywords**:
+- **Components**: "components", "services", "modules", "microservices", "systems"
+- **Data**: "data structures", "data flow", "database", "schema", "models", "entities"
+- **Integration**: "APIs", "integrations", "external systems", "endpoints", "interfaces"
+- **Security**: "authentication", "authorization", "encryption", "security", "compliance"
+- **Performance**: "scaling", "performance", "SLA", "capacity", "throughput", "latency"
+- **Deployment**: "deployment", "cloud provider", "infrastructure", "environments", "regions"
+- **Technology**: "tech stack", "languages", "frameworks", "tools", "libraries", "versions"
+- **Decisions**: "why choose", "decision", "trade-offs", "alternatives", "ADR", "rationale"
+
+**Multi-section Queries**:
+- Questions requiring synthesis across multiple sections
+- Cross-cutting concerns (e.g., "How does authentication work with external systems?")
+- Implementation details spanning components, data, and deployment
 
 ## File Naming Convention
 

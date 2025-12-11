@@ -63,7 +63,7 @@ The skill includes:
 
 ### Using the Architecture Documentation Skill
 
-The `architecture-docs` skill provides comprehensive guidelines for creating and maintaining ARCHITECTURE.md files. It will be automatically invoked when working on architecture documentation, but you can also manually activate it.
+The `architecture-docs` skill provides comprehensive guidelines for creating and maintaining ARCHITECTURE.md files. It automatically activates when you create, update, or maintain ARCHITECTURE.md files, or when you ask about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions. You can also manually activate it.
 
 To manually activate the skill, use: `/skill architecture-docs`
 
