@@ -1,7 +1,7 @@
 {
   "template_name": "SRE Architecture",
   "template_id": "TEMPLATE_SRE_ARCHITECTURE",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "SRE Leadership/Operations",
   "scoring": {
     "scale": 10,
@@ -22,184 +22,1013 @@
       "N/A": 10,
       "UNKNOWN": 0,
       "EXCEPTION": 10
+    },
+    "two_tier_scoring": {
+      "blocker": {
+        "count": 36,
+        "weight": 1.0,
+        "required_pass_all": true,
+        "description": "Blocking requirements - all must pass for approval"
+      },
+      "desired": {
+        "count": 21,
+        "weight": 0.3,
+        "required_pass_all": false,
+        "scoring_rule": "Only count if Compliant or N/A",
+        "description": "Desirable requirements - optional enhancements"
+      }
     }
   },
   "validation_sections": [
     {
-      "section_id": "slo_sli",
-      "section_name": "Service Level Objectives and Indicators",
-      "weight": 0.40,
+      "section_id": "practice",
+      "section_name": "Practice Requirements",
+      "weight": 0.35,
       "required": true,
       "validation_items": [
         {
-          "item_id": "slo_defined",
-          "question": "Are Service Level Objectives (SLOs) defined?",
-          "architecture_md_section": "9.1",
+          "item_id": "lasre01",
+          "code": "LASRE01",
+          "question": "Operational and audit logs must be recorded in a structured format, using defined and consistent fields, or following a standard to ensure uniformity and facilitate analysis.",
+          "category": "Practice - Log Management",
+          "architecture_md_section": "11.1",
           "required": true,
-          "weight": 0.4,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Percentage and time window (e.g., 99.9% availability over 30 days)",
-            "pass_criteria": "SLO defined with target percentage and measurement window",
-            "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Non-production environment without SLO requirements",
-            "unknown_criteria": "SLO not specified in Section 9.1"
-          }
-        },
-        {
-          "item_id": "sli_defined",
-          "question": "Are Service Level Indicators (SLIs) defined?",
-          "architecture_md_section": "9.1",
-          "required": true,
-          "weight": 0.35,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Metrics (e.g., request success rate, latency p95, error rate)",
-            "pass_criteria": "SLI metrics defined with measurement methodology",
-            "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Non-production environment without SLI requirements",
-            "unknown_criteria": "SLI not specified"
-          }
-        },
-        {
-          "item_id": "error_budget",
-          "question": "Is error budget defined and tracked?",
-          "architecture_md_section": "9.1",
-          "required": true,
-          "weight": 0.25,
+          "criticality": "blocker",
+          "weight": 0.0219,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Error budget calculated from SLO (e.g., 0.1% = 43 minutes/month for 99.9% SLO)",
-            "fail_criteria": "Error budget not defined or not tracked",
-            "na_criteria": "Non-production environment",
-            "unknown_criteria": "Error budget not documented"
+            "pass_criteria": "Log Management requirement met with documented evidence",
+            "fail_criteria": "Log Management requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Log Management not applicable to this architecture",
+            "unknown_criteria": "Log Management status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre02",
+          "code": "LASRE02",
+          "question": "Operational logs must record relevant information, classified into levels such as debug, info, or error according to the system's needs and characteristics.",
+          "category": "Practice - Log Management",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Log Management requirement met with documented evidence",
+            "fail_criteria": "Log Management requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Log Management not applicable to this architecture",
+            "unknown_criteria": "Log Management status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre03",
+          "code": "LASRE03",
+          "question": "Logs must be accessible without depending on third parties, either through internal mechanisms or automated processes that allow efficient and secure consultation of these records.",
+          "category": "Practice - Log Management",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Log Management requirement met with documented evidence",
+            "fail_criteria": "Log Management requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Log Management not applicable to this architecture",
+            "unknown_criteria": "Log Management status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre04",
+          "code": "LASRE04",
+          "question": "Automatic rollback mechanisms must be in place in case of failures during deployment, ensuring that the system can revert to a previous stable version.",
+          "category": "Practice - Application Deployment",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Application Deployment requirement met with documented evidence",
+            "fail_criteria": "Application Deployment requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Application Deployment not applicable to this architecture",
+            "unknown_criteria": "Application Deployment status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre05",
+          "code": "LASRE05",
+          "question": "All configurations must be stored in official and secure repositories, such as authorized repositories or specialized services like Azure Repos, to ensure protection and controlled access to information.",
+          "category": "Practice - Configuration Management",
+          "architecture_md_section": "11.4",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Configuration Management requirement met with documented evidence",
+            "fail_criteria": "Configuration Management requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Configuration Management not applicable to this architecture",
+            "unknown_criteria": "Configuration Management status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre06",
+          "code": "LASRE06",
+          "question": "Application documentation and operational procedures (SOP) will be maintained in official repositories, accessible to the entire team.",
+          "category": "Practice - Operational Documentation",
+          "architecture_md_section": "11.4",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Documentation requirement met with documented evidence",
+            "fail_criteria": "Operational Documentation requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Documentation not applicable to this architecture",
+            "unknown_criteria": "Operational Documentation status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre07",
+          "code": "LASRE07",
+          "question": "The application must implement mechanisms that allow identifying when it is ready to receive load, ensuring that services are available and operational before starting processes or receiving requests.",
+          "category": "Practice - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre08",
+          "code": "LASRE08",
+          "question": "The application must implement health check mechanisms that allow identifying if it is functioning correctly, ensuring timely detection of possible service failures.",
+          "category": "Practice - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre09",
+          "code": "LASRE09",
+          "question": "The application must have high availability mechanisms, through the implementation of more than one replica, to ensure service continuity and minimize possible interruptions.",
+          "category": "Practice - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre10",
+          "code": "LASRE10",
+          "question": "Load tests must be executed and documented on all application components before production release, ensuring that performance is adequate and results are available for consultation and analysis.",
+          "category": "Practice - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre11",
+          "code": "LASRE11",
+          "question": "The application must have automatic adjustment mechanisms in the number of instances, allowing scaling according to service load to ensure optimal performance and continuous availability.",
+          "category": "Practice - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre12",
+          "code": "LASRE12",
+          "question": "A documented recovery plan (DRP) must be in place, establishing the necessary procedures and resources to restore service in case of incidents or disasters, guaranteeing operational continuity.",
+          "category": "Practice - Recovery and Resilience Testing",
+          "architecture_md_section": "11.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Recovery and Resilience Testing requirement met with documented evidence",
+            "fail_criteria": "Recovery and Resilience Testing requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Recovery and Resilience Testing not applicable to this architecture",
+            "unknown_criteria": "Recovery and Resilience Testing status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre13",
+          "code": "LASRE13",
+          "question": "Has C2 application and deployment diagrams in IcePanel.",
+          "category": "Practice - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre14",
+          "code": "LASRE14",
+          "question": "The application is registered in the Bank's application portfolio and business criticality has been categorized.",
+          "category": "Practice - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre15",
+          "code": "LASRE15",
+          "question": "The escalation matrix is defined and resolving groups are registered in the application portfolio.",
+          "category": "Practice - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre16",
+          "code": "LASRE16",
+          "question": "Has generated a request for implementation or modification of application observability.",
+          "category": "Practice - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0219,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation - BLOCKS APPROVAL"
           }
         }
       ]
     },
     {
-      "section_id": "monitoring_observability",
-      "section_name": "Monitoring and Observability",
-      "weight": 0.30,
+      "section_id": "observability",
+      "section_name": "Observability Requirements",
+      "weight": 0.4,
       "required": true,
       "validation_items": [
         {
-          "item_id": "monitoring_platform",
-          "question": "Is monitoring platform defined with metrics collection?",
-          "architecture_md_section": "9.2",
+          "item_id": "lasre17",
+          "code": "LASRE17",
+          "question": "Has defined the mechanism and criteria for measuring application availability.",
+          "category": "Observability - Key Metrics",
+          "architecture_md_section": "10.2",
           "required": true,
-          "weight": 0.4,
+          "criticality": "blocker",
+          "weight": 0.0154,
           "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["Prometheus", "Grafana", "Azure Monitor", "Datadog", "New Relic", "Dynatrace"],
-            "pass_criteria": "Monitoring platform configured with metric dashboards",
-            "fail_criteria": "No monitoring or manual-only monitoring",
-            "na_criteria": "Third-party fully managed service with vendor monitoring",
-            "unknown_criteria": "Monitoring platform not specified"
+            "type": "custom",
+            "pass_criteria": "Key Metrics requirement met with documented evidence",
+            "fail_criteria": "Key Metrics requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Key Metrics not applicable to this architecture",
+            "unknown_criteria": "Key Metrics status cannot be determined from documentation - BLOCKS APPROVAL"
           }
         },
         {
-          "item_id": "logging_infrastructure",
-          "question": "Is centralized logging configured?",
-          "architecture_md_section": "9.2",
+          "item_id": "lasre18",
+          "code": "LASRE18",
+          "question": "Has defined the mechanism and criteria for measuring application performance.",
+          "category": "Observability - Key Metrics",
+          "architecture_md_section": "10.2",
           "required": true,
-          "weight": 0.3,
+          "criticality": "blocker",
+          "weight": 0.0154,
           "validation_rules": {
-            "type": "value_check",
-            "approved_values": ["ELK Stack", "Splunk", "Azure Log Analytics", "CloudWatch Logs", "Google Cloud Logging"],
-            "pass_criteria": "Centralized logging with retention policy",
-            "fail_criteria": "Logs stored locally only or no centralization",
-            "na_criteria": "N/A (centralized logging generally required)",
-            "unknown_criteria": "Logging infrastructure not documented"
+            "type": "custom",
+            "pass_criteria": "Key Metrics requirement met with documented evidence",
+            "fail_criteria": "Key Metrics requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Key Metrics not applicable to this architecture",
+            "unknown_criteria": "Key Metrics status cannot be determined from documentation - BLOCKS APPROVAL"
           }
         },
         {
-          "item_id": "distributed_tracing",
-          "question": "Is distributed tracing implemented for microservices?",
-          "architecture_md_section": "9.2",
+          "item_id": "lasre19",
+          "code": "LASRE19",
+          "question": "Monitored components have dynamic or static thresholds correctly configured.",
+          "category": "Observability - Key Metrics",
+          "architecture_md_section": "10.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Key Metrics requirement met with documented evidence",
+            "fail_criteria": "Key Metrics requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Key Metrics not applicable to this architecture",
+            "unknown_criteria": "Key Metrics status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre20",
+          "code": "LASRE20",
+          "question": "Has validated that microservices are instrumented with Dynatrace (automatic or manual instrumentation).",
+          "category": "Observability - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre21",
+          "code": "LASRE21",
+          "question": "Internal APIs of the application are monitored.",
+          "category": "Observability - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre22",
+          "code": "LASRE22",
+          "question": "Has validated that microservice requests correctly handle exceptions at code level in test environment, to avoid increase in monitoring failure rate in production.",
+          "category": "Observability - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre23",
+          "code": "LASRE23",
+          "question": "The application URL has synthetic availability validation.",
+          "category": "Observability - Frontend Application",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Frontend Application requirement met with documented evidence",
+            "fail_criteria": "Frontend Application requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Frontend Application not applicable to this architecture",
+            "unknown_criteria": "Frontend Application status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre24",
+          "code": "LASRE24",
+          "question": "The application frontend allows injection of Dynatrace JavaScript for RUM (Real User Experience) capture. Note: Applies to applications with business transactionality.",
+          "category": "Observability - User Experience",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "User Experience requirement met with documented evidence",
+            "fail_criteria": "User Experience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "User Experience not applicable to this architecture",
+            "unknown_criteria": "User Experience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre25",
+          "code": "LASRE25",
+          "question": "Confirms that in security components like WAF, firewall, frontdoor, etc., there are no blocks to Dynatrace injection and beacons. Note: Applies to applications with business transactionality.",
+          "category": "Observability - User Experience",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "User Experience requirement met with documented evidence",
+            "fail_criteria": "User Experience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "User Experience not applicable to this architecture",
+            "unknown_criteria": "User Experience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre26",
+          "code": "LASRE26",
+          "question": "The application has UX monitoring. Note: Applies to applications with business transactionality.",
+          "category": "Observability - User Experience",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "User Experience requirement met with documented evidence",
+            "fail_criteria": "User Experience requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "User Experience not applicable to this architecture",
+            "unknown_criteria": "User Experience status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre27",
+          "code": "LASRE27",
+          "question": "Has performed Dynatrace licensing cost estimation using the official calculator and has Observability team approval for coverage and/or budget allocation.",
+          "category": "Observability - Cost Estimation",
+          "architecture_md_section": "2.5",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Cost Estimation requirement met with documented evidence",
+            "fail_criteria": "Cost Estimation requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Cost Estimation not applicable to this architecture",
+            "unknown_criteria": "Cost Estimation status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre28",
+          "code": "LASRE28",
+          "question": "Prerequisites necessary to ensure coverage of all components have been considered in the budget, such as manual code instrumentation, additional development by the provider, cloud service activation, infrastructure, among others.",
+          "category": "Observability - Cost Estimation",
+          "architecture_md_section": "2.5",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Cost Estimation requirement met with documented evidence",
+            "fail_criteria": "Cost Estimation requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Cost Estimation not applicable to this architecture",
+            "unknown_criteria": "Cost Estimation status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre29",
+          "code": "LASRE29",
+          "question": "Onpremise or cloud servers of the application have Dynatrace agent installed (OneAgent).",
+          "category": "Observability - Infrastructure",
+          "architecture_md_section": "5.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Infrastructure requirement met with documented evidence",
+            "fail_criteria": "Infrastructure requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Infrastructure not applicable to this architecture",
+            "unknown_criteria": "Infrastructure status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre30",
+          "code": "LASRE30",
+          "question": "Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent deployed.",
+          "category": "Observability - Infrastructure",
+          "architecture_md_section": "5.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Infrastructure requirement met with documented evidence",
+            "fail_criteria": "Infrastructure requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Infrastructure not applicable to this architecture",
+            "unknown_criteria": "Infrastructure status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre31",
+          "code": "LASRE31",
+          "question": "Onpremise and/or cloud dependencies like DB, load balancers, Redis, frontdoor, etc. of the application are monitored.",
+          "category": "Observability - Infrastructure",
+          "architecture_md_section": "5.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Infrastructure requirement met with documented evidence",
+            "fail_criteria": "Infrastructure requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Infrastructure not applicable to this architecture",
+            "unknown_criteria": "Infrastructure status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre32",
+          "code": "LASRE32",
+          "question": "Has monitoring of batch processes not managed by Control-M.",
+          "category": "Observability - Batch Processing",
+          "architecture_md_section": "11.1",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Batch Processing requirement met with documented evidence",
+            "fail_criteria": "Batch Processing requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Batch Processing not applicable to this architecture",
+            "unknown_criteria": "Batch Processing status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre33",
+          "code": "LASRE33",
+          "question": "Consistency between applications and their source code will be ensured through automated deployment and configuration processes.",
+          "category": "Observability - Application Deployment",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Application Deployment requirement met with documented evidence",
+            "fail_criteria": "Application Deployment requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Application Deployment not applicable to this architecture",
+            "unknown_criteria": "Application Deployment status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre34",
+          "code": "LASRE34",
+          "question": "Must have automation of the Disaster Recovery process.",
+          "category": "Observability - Disaster Recovery",
+          "architecture_md_section": "11.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Disaster Recovery requirement met with documented evidence",
+            "fail_criteria": "Disaster Recovery requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Disaster Recovery not applicable to this architecture",
+            "unknown_criteria": "Disaster Recovery status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre35",
+          "code": "LASRE35",
+          "question": "Must have automation of the process to validate the state of what is required to start the application at the Alternate Site.",
+          "category": "Observability - Disaster Recovery",
+          "architecture_md_section": "11.2",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Disaster Recovery requirement met with documented evidence",
+            "fail_criteria": "Disaster Recovery requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Disaster Recovery not applicable to this architecture",
+            "unknown_criteria": "Disaster Recovery status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre36",
+          "code": "LASRE36",
+          "question": "Must have an automated process for managing application services (start, stop, restart).",
+          "category": "Observability - Application Operational Tasks",
+          "architecture_md_section": "11.3",
+          "required": true,
+          "criticality": "blocker",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Application Operational Tasks requirement met with documented evidence",
+            "fail_criteria": "Application Operational Tasks requirement not met - BLOCKS APPROVAL",
+            "na_criteria": "Application Operational Tasks not applicable to this architecture",
+            "unknown_criteria": "Application Operational Tasks status cannot be determined from documentation - BLOCKS APPROVAL"
+          }
+        },
+        {
+          "item_id": "lasre37",
+          "code": "LASRE37",
+          "question": "Generated logs must be centralized in an analysis or monitoring tool, such as Dynatrace or Splunk, to facilitate their management, consultation, and analysis.",
+          "category": "Observability - Log Management",
+          "architecture_md_section": "11.1",
           "required": false,
-          "weight": 0.3,
-          "validation_rules": {
-            "type": "presence_check",
-            "approved_values": ["Jaeger", "Zipkin", "Application Insights", "X-Ray", "OpenTelemetry"],
-            "pass_criteria": "Distributed tracing configured for request flows",
-            "fail_criteria": "N/A (optional enhancement)",
-            "na_criteria": "Monolithic architecture or simple single-service application",
-            "unknown_criteria": "Distributed tracing not documented"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "alerting_incident",
-      "section_name": "Alerting and Incident Response",
-      "weight": 0.20,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "alerting_configured",
-          "question": "Are alerts configured for SLO breaches?",
-          "architecture_md_section": "9.2",
-          "required": true,
-          "weight": 0.5,
+          "criticality": "desired",
+          "weight": 0.0154,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Alerts configured for SLO violations with escalation paths",
-            "fail_criteria": "No alerting or alerts not linked to SLOs",
-            "na_criteria": "Non-production environment without alerting requirements",
-            "unknown_criteria": "Alerting configuration not documented"
+            "pass_criteria": "Log Management requirement met with documented evidence",
+            "fail_criteria": "Log Management requirement not met",
+            "na_criteria": "Log Management not applicable to this architecture",
+            "unknown_criteria": "Log Management status cannot be determined from documentation"
           }
         },
         {
-          "item_id": "oncall_rotation",
-          "question": "Is on-call rotation defined?",
-          "architecture_md_section": "9.2",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "On-call schedule with team members",
-            "pass_criteria": "On-call rotation documented with escalation procedures",
-            "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Non-production or best-effort support model",
-            "unknown_criteria": "On-call rotation not specified"
-          }
-        }
-      ]
-    },
-    {
-      "section_id": "capacity_scalability",
-      "section_name": "Capacity and Scalability",
-      "weight": 0.10,
-      "required": true,
-      "validation_items": [
-        {
-          "item_id": "capacity_planning",
-          "question": "Is capacity planning documented?",
-          "architecture_md_section": "9.4",
-          "required": true,
-          "weight": 0.5,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Capacity requirements and scaling thresholds documented",
-            "fail_criteria": "No capacity planning or reactive-only scaling",
-            "na_criteria": "Serverless architecture with automatic scaling",
-            "unknown_criteria": "Capacity planning not documented"
-          }
-        },
-        {
-          "item_id": "auto_scaling",
-          "question": "Is auto-scaling configured?",
-          "architecture_md_section": "9.4",
+          "item_id": "lasre38",
+          "code": "LASRE38",
+          "question": "Operational logs must allow modification of verbosity level, thus facilitating adjustment of the amount and type of information recorded according to monitoring or diagnostic needs.",
+          "category": "Observability - Log Management",
+          "architecture_md_section": "11.1",
           "required": false,
-          "weight": 0.5,
+          "criticality": "desired",
+          "weight": 0.0154,
           "validation_rules": {
-            "type": "presence_check",
-            "approved_values": ["Horizontal Pod Autoscaler", "Azure Autoscale", "AWS Auto Scaling", "Kubernetes HPA"],
-            "pass_criteria": "Auto-scaling configured with metrics-based triggers",
-            "fail_criteria": "Manual scaling only",
-            "na_criteria": "Static capacity sufficient for workload",
-            "unknown_criteria": "Auto-scaling configuration not documented"
+            "type": "custom",
+            "pass_criteria": "Log Management requirement met with documented evidence",
+            "fail_criteria": "Log Management requirement not met",
+            "na_criteria": "Log Management not applicable to this architecture",
+            "unknown_criteria": "Log Management status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre39",
+          "code": "LASRE39",
+          "question": "Configurations must be subject to version control, ensuring that any change is recorded and can be audited or reverted if necessary.",
+          "category": "Observability - Configuration Management",
+          "architecture_md_section": "11.4",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Configuration Management requirement met with documented evidence",
+            "fail_criteria": "Configuration Management requirement not met",
+            "na_criteria": "Configuration Management not applicable to this architecture",
+            "unknown_criteria": "Configuration Management status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre40",
+          "code": "LASRE40",
+          "question": "Deployments of new versions will be performed gradually, using strategies such as Canary Release, to minimize risks and ensure a controlled transition before applying changes to all users.",
+          "category": "Observability - Integration, Deployment and Delivery",
+          "architecture_md_section": "11.3",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Integration, Deployment and Delivery requirement met with documented evidence",
+            "fail_criteria": "Integration, Deployment and Delivery requirement not met",
+            "na_criteria": "Integration, Deployment and Delivery not applicable to this architecture",
+            "unknown_criteria": "Integration, Deployment and Delivery status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre41",
+          "code": "LASRE41",
+          "question": "Appropriate traffic management strategies will be applied to the application's target audience, such as the Friends & Family approach, to control access and use according to defined needs.",
+          "category": "Observability - Integration, Deployment and Delivery",
+          "architecture_md_section": "11.3",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Integration, Deployment and Delivery requirement met with documented evidence",
+            "fail_criteria": "Integration, Deployment and Delivery requirement not met",
+            "na_criteria": "Integration, Deployment and Delivery not applicable to this architecture",
+            "unknown_criteria": "Integration, Deployment and Delivery status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre42",
+          "code": "LASRE42",
+          "question": "Will have a defined 7x24 maintenance procedure that guarantees continuous application availability, allowing preventive and corrective tasks to be performed without affecting service for users.",
+          "category": "Observability - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0154,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "automation",
+      "section_name": "Automation Requirements",
+      "weight": 0.25,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lasre43",
+          "code": "LASRE43",
+          "question": "Must have alternative mechanisms that allow managing backend failures, such as Fallback or Circuit Breaker strategies, ensuring service continuity and resilience in case of possible interruptions.",
+          "category": "Automation - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre44",
+          "code": "LASRE44",
+          "question": "Automatic retries and proper management of timeouts for both client and backend must be implemented, ensuring resilience and proper handling of wait or failure situations in communications.",
+          "category": "Automation - Operational Resilience",
+          "architecture_md_section": "10.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Operational Resilience requirement met with documented evidence",
+            "fail_criteria": "Operational Resilience requirement not met",
+            "na_criteria": "Operational Resilience not applicable to this architecture",
+            "unknown_criteria": "Operational Resilience status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre45",
+          "code": "LASRE45",
+          "question": "The application must execute chaos tests, with the objective of evaluating its resilience and recovery capacity in adverse scenarios or unexpected failures.",
+          "category": "Automation - Recovery and Resilience Testing",
+          "architecture_md_section": "11.2",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Recovery and Resilience Testing requirement met with documented evidence",
+            "fail_criteria": "Recovery and Resilience Testing requirement not met",
+            "na_criteria": "Recovery and Resilience Testing not applicable to this architecture",
+            "unknown_criteria": "Recovery and Resilience Testing status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre46",
+          "code": "LASRE46",
+          "question": "Components involved in the application's critical journeys are identified in the C2 diagram.",
+          "category": "Automation - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre47",
+          "code": "LASRE47",
+          "question": "Components involved in the application's critical journeys are identified in the C2 diagram.",
+          "category": "Automation - Information and Architecture",
+          "architecture_md_section": "4.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Information and Architecture requirement met with documented evidence",
+            "fail_criteria": "Information and Architecture requirement not met",
+            "na_criteria": "Information and Architecture not applicable to this architecture",
+            "unknown_criteria": "Information and Architecture status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre48",
+          "code": "LASRE48",
+          "question": "Microservices and workloads contain labels that allow differentiating the application and its vital functions (for example: application name, application id, resolving group, vital function, tribe, cell, etc.).",
+          "category": "Automation - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre49",
+          "code": "LASRE49",
+          "question": "Has validated with the external system provider that they have APIs that allow monitoring the state of their system/APIs synthetically.",
+          "category": "Automation - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre50",
+          "code": "LASRE50",
+          "question": "Critical services have advanced monitoring configurations and threshold customization (traffic load, anomaly detection, latency, key request, etc.).",
+          "category": "Automation - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre51",
+          "code": "LASRE51",
+          "question": "Application logs are correctly ingested into observability tools.",
+          "category": "Automation - Backend Application",
+          "architecture_md_section": "11.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Backend Application requirement met with documented evidence",
+            "fail_criteria": "Backend Application requirement not met",
+            "na_criteria": "Backend Application not applicable to this architecture",
+            "unknown_criteria": "Backend Application status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre52",
+          "code": "LASRE52",
+          "question": "The application allows performing synthetic validations through authentication of generic Observability user without MFA (only user and password).",
+          "category": "Automation - Frontend Application",
+          "architecture_md_section": "11.1",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Frontend Application requirement met with documented evidence",
+            "fail_criteria": "Frontend Application requirement not met",
+            "na_criteria": "Frontend Application not applicable to this architecture",
+            "unknown_criteria": "Frontend Application status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre53",
+          "code": "LASRE53",
+          "question": "Cloud components (MS Azure, GCP, AWS) of the application are tagged at the source for easy identification.",
+          "category": "Automation - Infrastructure",
+          "architecture_md_section": "5.2",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Infrastructure requirement met with documented evidence",
+            "fail_criteria": "Infrastructure requirement not met",
+            "na_criteria": "Infrastructure not applicable to this architecture",
+            "unknown_criteria": "Infrastructure status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre54",
+          "code": "LASRE54",
+          "question": "Has health or state detection of critical processes or OS services (process group) on hosts.",
+          "category": "Automation - Infrastructure",
+          "architecture_md_section": "5.2",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Infrastructure requirement met with documented evidence",
+            "fail_criteria": "Infrastructure requirement not met",
+            "na_criteria": "Infrastructure not applicable to this architecture",
+            "unknown_criteria": "Infrastructure status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre55",
+          "code": "LASRE55",
+          "question": "Must have generation of reports on application components.",
+          "category": "Automation - Application Operational Tasks",
+          "architecture_md_section": "11.3",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Application Operational Tasks requirement met with documented evidence",
+            "fail_criteria": "Application Operational Tasks requirement not met",
+            "na_criteria": "Application Operational Tasks not applicable to this architecture",
+            "unknown_criteria": "Application Operational Tasks status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre56",
+          "code": "LASRE56",
+          "question": "Will have an automated process to sanitize or copy data to previous environments.",
+          "category": "Automation - Application Operational Tasks",
+          "architecture_md_section": "11.3",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Application Operational Tasks requirement met with documented evidence",
+            "fail_criteria": "Application Operational Tasks requirement not met",
+            "na_criteria": "Application Operational Tasks not applicable to this architecture",
+            "unknown_criteria": "Application Operational Tasks status cannot be determined from documentation"
+          }
+        },
+        {
+          "item_id": "lasre57",
+          "code": "LASRE57",
+          "question": "Will have automation to remediate application failures automatically.",
+          "category": "Automation - Auto-remediation",
+          "architecture_md_section": "11.3",
+          "required": false,
+          "criticality": "desired",
+          "weight": 0.0167,
+          "validation_rules": {
+            "type": "custom",
+            "pass_criteria": "Auto-remediation requirement met with documented evidence",
+            "fail_criteria": "Auto-remediation requirement not met",
+            "na_criteria": "Auto-remediation not applicable to this architecture",
+            "unknown_criteria": "Auto-remediation status cannot be determined from documentation"
           }
         }
       ]
@@ -210,41 +1039,41 @@
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
-      "message": "High confidence validation. Contract automatically approved.",
+      "message": "High confidence validation. All Blocker requirements pass + strong Desired coverage. Contract automatically approved.",
       "review_actor": "System (Auto-Approved)"
     },
     "7.0-7.9": {
       "overall_status": "PASS",
       "document_status": "In Review",
       "action": "MANUAL_REVIEW",
-      "message": "Validation passed with small gaps. Ready for human review.",
+      "message": "All Blocker requirements pass. Ready for human review to validate Desired requirement coverage.",
       "review_actor": "SRE Leadership/Operations"
     },
     "5.0-6.9": {
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "SRE practices incomplete. Address gaps before approval.",
+      "message": "Some Blocker requirements not met. Address gaps before approval.",
       "blockers": [
-        "Must define SLO/SLI and error budgets",
-        "Must configure monitoring and alerting"
+        "Must pass ALL 36 Blocker requirements",
+        "Review and complete missing SRE practices"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient reliability engineering. Cannot proceed.",
+      "message": "Critical Blocker requirements not met. Cannot proceed with approval.",
       "blockers": [
-        "Critical SRE practices missing",
-        "No observability or incident response capability"
+        "Multiple Blocker requirements missing or non-compliant",
+        "Insufficient SRE practices for production deployment"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Implement missing SRE practices (SLO/SLI, monitoring, alerting) or register exception for non-production environments",
-    "UNKNOWN_items": "Add SRE documentation to ARCHITECTURE.md Section 9 (Operational Considerations)",
-    "completeness_below_threshold": "Complete all SRE sections: SLO/SLI definition, monitoring platform, alerting configuration, and capacity planning",
+    "FAIL_items": "Implement missing Blocker SRE practices or register exception for non-production environments",
+    "UNKNOWN_items": "Add SRE documentation to ARCHITECTURE.md Sections 10-11 (Performance and Operational Considerations)",
+    "completeness_below_threshold": "Complete all Blocker sections: logging, monitoring, resilience, deployment automation, and disaster recovery",
     "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections for all SRE metrics and configurations"
   }
 }

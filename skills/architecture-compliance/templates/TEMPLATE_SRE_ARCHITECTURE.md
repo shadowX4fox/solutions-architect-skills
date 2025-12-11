@@ -2,8 +2,8 @@
 
 **Project**: [PROJECT_NAME]
 **Generation Date**: [GENERATION_DATE]
-**Source**: ARCHITECTURE.md (Sections 10, 11)
-**Version**: 1.0
+**Source**: ARCHITECTURE.md (Sections 2, 4, 5, 7, 10, 11)
+**Version**: 2.0
 
 ---
 
@@ -58,178 +58,1505 @@
 - Score 5.0-6.9: Must address gaps before proceeding to review
 - Score < 5.0: Contract rejected, cannot proceed
 
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+**CRITICAL - Two-Tier Compliance Scoring**:
+This template uses a two-tier scoring system for SRE requirements:
+
+**Blocker Requirements (36 total)** - MANDATORY:
+- ALL Blocker requirements must be Compliant or Not Applicable for approval
+- Status values: Compliant, Non-Compliant, Not Applicable, Unknown
+- Non-Compliant or Unknown Blocker requirements BLOCK approval (score capped at 4.9)
+- Blocker Score = (Compliant + Not Applicable) / 36 → Must be 100% for approval pathway
+
+**Desired Requirements (21 total)** - OPTIONAL:
+- Desired requirements are enhancement recommendations
+- Only counted if status is Compliant or Not Applicable
+- Non-Compliant or Unknown Desired requirements do NOT block approval
+- Desired Score = (Compliant + Not Applicable) / 21 → Enhancement metric
+
+**Final Score Calculation**:
+- Final Score = (Blocker Score × 0.7) + (Desired Score × 0.3)
+- Minimum for approval (score ≥ 7.0): All 36 Blocker requirements pass
+- Auto-approval (score ≥ 8.0): All 36 Blocker pass + at least 60% Desired requirements
+
+**Note**: Not Applicable items counted as fully compliant (included in compliance score)
 
 ---
 
-## 1. Service Level Objectives (SLOs)
+## Compliance Summary
 
-### 1.1 Availability SLO
-**Objective**: [EXTRACTED: Availability SLO from Section 10.2]
-**Error Budget**: [CALCULATED: Error budget from SLA]
-**Measurement Window**: Monthly
-**Measurement Method**: [EXTRACTED or PLACEHOLDER]
-**Source**: [SOURCE_REFERENCE]
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LASRE01 | Operational and audit logs must be recorded in a structured format, us... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE02 | Operational logs must record relevant information, classified into lev... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE03 | Logs must be accessible without depending on third parties, either thr... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE04 | Automatic rollback mechanisms must be in place in case of failures dur... | Practice - Application Deployment | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE05 | All configurations must be stored in official and secure repositories,... | Practice - Configuration Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE06 | Application documentation and operational procedures (SOP) will be mai... | Practice - Operational Documentation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE07 | The application must implement mechanisms that allow identifying when ... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE08 | The application must implement health check mechanisms that allow iden... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE09 | The application must have high availability mechanisms, through the im... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE10 | Load tests must be executed and documented on all application componen... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE11 | The application must have automatic adjustment mechanisms in the numbe... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE12 | A documented recovery plan (DRP) must be in place, establishing the ne... | Practice - Recovery and Resilience Testing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE13 | Has C2 application and deployment diagrams in IcePanel. | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE14 | The application is registered in the Bank's application portfolio and ... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE15 | The escalation matrix is defined and resolving groups are registered i... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE16 | Has generated a request for implementation or modification of applicat... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE17 | Has defined the mechanism and criteria for measuring application avail... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE18 | Has defined the mechanism and criteria for measuring application perfo... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE19 | Monitored components have dynamic or static thresholds correctly confi... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE20 | Has validated that microservices are instrumented with Dynatrace (auto... | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE21 | Internal APIs of the application are monitored. | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE22 | Has validated that microservice requests correctly handle exceptions a... | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE23 | The application URL has synthetic availability validation. | Observability - Frontend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE24 | The application frontend allows injection of Dynatrace JavaScript for ... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE25 | Confirms that in security components like WAF, firewall, frontdoor, et... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE26 | The application has UX monitoring. Note: Applies to applications with ... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE27 | Has performed Dynatrace licensing cost estimation using the official c... | Observability - Cost Estimation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
+| LASRE28 | Prerequisites necessary to ensure coverage of all components have been... | Observability - Cost Estimation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
+| LASRE29 | Onpremise or cloud servers of the application have Dynatrace agent ins... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE30 | Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent de... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE31 | Onpremise and/or cloud dependencies like DB, load balancers, Redis, fr... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE32 | Has monitoring of batch processes not managed by Control-M. | Observability - Batch Processing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE33 | Consistency between applications and their source code will be ensured... | Observability - Application Deployment | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE34 | Must have automation of the Disaster Recovery process. | Observability - Disaster Recovery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE35 | Must have automation of the process to validate the state of what is r... | Observability - Disaster Recovery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE36 | Must have an automated process for managing application services (star... | Observability - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE37 | Generated logs must be centralized in an analysis or monitoring tool, ... | Observability - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE38 | Operational logs must allow modification of verbosity level, thus faci... | Observability - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE39 | Configurations must be subject to version control, ensuring that any c... | Observability - Configuration Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE40 | Deployments of new versions will be performed gradually, using strateg... | Observability - Integration, Deployment and Delivery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE41 | Appropriate traffic management strategies will be applied to the appli... | Observability - Integration, Deployment and Delivery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE42 | Will have a defined 7x24 maintenance procedure that guarantees continu... | Observability - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE43 | Must have alternative mechanisms that allow managing backend failures,... | Automation - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE44 | Automatic retries and proper management of timeouts for both client an... | Automation - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE45 | The application must execute chaos tests, with the objective of evalua... | Automation - Recovery and Resilience Testing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE46 | Components involved in the application's critical journeys are identif... | Automation - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE47 | Components involved in the application's critical journeys are identif... | Automation - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE48 | Microservices and workloads contain labels that allow differentiating ... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE49 | Has validated with the external system provider that they have APIs th... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE50 | Critical services have advanced monitoring configurations and threshol... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE51 | Application logs are correctly ingested into observability tools. | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE52 | The application allows performing synthetic validations through authen... | Automation - Frontend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE53 | Cloud components (MS Azure, GCP, AWS) of the application are tagged at... | Automation - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE54 | Has health or state detection of critical processes or OS services (pr... | Automation - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE55 | Must have generation of reports on application components. | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE56 | Will have an automated process to sanitize or copy data to previous en... | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE57 | Will have automation to remediate application failures automatically. | Automation - Auto-remediation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 
-### 1.2 Latency SLOs
-| Percentile | Objective | Measurement Method | Source |
-|------------|-----------|-------------------|--------|
-| p50 | [EXTRACTED from Section 10.1] | [METHOD] | [SOURCE_REFERENCE] |
-| p95 | [EXTRACTED from Section 10.1] | [METHOD] | [SOURCE_REFERENCE] |
-| p99 | [EXTRACTED from Section 10.1] | [METHOD] | [SOURCE_REFERENCE] |
+**Overall Compliance**: [X/57 Compliant, Y/57 Non-Compliant, Z/57 Not Applicable, W/57 Unknown]
 
-**Alert Threshold**: [PLACEHOLDER: Define alert threshold (e.g.: p95 > 110ms)]
+**Blocker Requirements**: [X/36 Compliant] (**MANDATORY** - All must pass for approval)
+**Desired Requirements**: [Y/21 Compliant] (OPTIONAL - Enhancement recommendations)
 
-### 1.3 Throughput SLOs
-**Design Capacity**: [EXTRACTED: Design capacity TPS from Section 10.1]
-**Peak Capacity**: [EXTRACTED: Peak capacity TPS]
-**Capacity Margin**: [CALCULATED: Peak - Design]
-**Source**: [SOURCE_REFERENCE]
-
----
-
-## 2. Service Level Indicators (SLIs)
-
-### 2.1 Availability Indicators
-[PLACEHOLDER: User must provide organizational format for SLIs]
-
-**Monitored Components**:
-- [EXTRACTED: List of components from Section 5]
-
-### 2.2 Performance Indicators
-[PLACEHOLDER: User must provide organizational format]
-
----
-
-## 3. Error Budget
-
-### 3.1 Monthly Error Budget
-**SLA**: [EXTRACTED from Section 10.2]
-**Error Budget**: [CALCULATED: Error budget in minutes/month]
-**Calculation**: (100% - SLA) × 43,200 min = [VALUE] min/month
-
-### 3.2 Budget Usage
-| Period | Allowed Downtime | Current Usage | Remaining |
-|--------|------------------|---------------|-----------|
-| This Month | [CALCULATED] min | [PLACEHOLDER: Add from monitoring] | [PLACEHOLDER] |
-| Previous Month | [CALCULATED] min | [PLACEHOLDER: Add historical data] | [PLACEHOLDER] |
-
-**Error Budget Policy**: [PLACEHOLDER: Define policy when budget is exhausted]
-
----
-
-## 4. Monitoring and Observability
-
-### 4.1 Observability Stack
-**Metrics Collection**: [EXTRACTED: Metrics tool from Section 11.1]
-**Visualization**: [EXTRACTED: Visualization tool from Section 11.1]
-**Log Aggregation**: [EXTRACTED: Logging tool from Section 11.1]
-**Distributed Tracing**: [EXTRACTED: Tracing tool from Section 11.1]
-**Alerting Platform**: [EXTRACTED: Alerting platform from Section 11.1]
-**Source**: [SOURCE_REFERENCE]
-
-### 4.2 Key Monitored Metrics
-- Latency (p50, p95, p99)
-- Throughput (requests/sec)
-- Error rate (%)
-- Availability (uptime %)
-- Resource utilization (CPU, memory, disk)
-
-**Dashboard Links**: [PLACEHOLDER: Add Grafana dashboard URLs]
-
-### 4.3 Alert Configuration
-[PLACEHOLDER: User must provide specific alert configuration]
+**Compliance by Area**:
+- Practice: [X/16 Compliant]
+- Observability: [Y/26 Compliant]
+- Automation: [Z/15 Compliant]
 
 ---
 
-## 5. Incident Management
+## 1. Practice Requirements (LASRE01-LASRE16)
 
-### 5.1 Incident Classification
-[EXTRACTED from Section 11.2 or PLACEHOLDER]
-
-| Priority | Description | Response SLA | Escalation |
-|----------|-------------|--------------|------------|
-| P1 | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] |
-| P2 | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] |
-| P3 | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] | [EXTRACTED or PLACEHOLDER] |
-
-**Source**: [SOURCE_REFERENCE or "PLACEHOLDER: Add to ARCHITECTURE.md Section 11.2"]
-
-### 5.2 Incident Response
-**Alerting Platform**: [EXTRACTED from Section 11.1 or 11.2]
-**Incident Commander**: [EXTRACTED or PLACEHOLDER: Define Incident Commander role]
-**Communication Channel**: [PLACEHOLDER: Add Slack channel or tool]
-
-### 5.3 Escalation Path
-[EXTRACTED from Section 11.2 or PLACEHOLDER]
-
-1. **L1** (0-5 min): [ROLE] performs triage
-2. **L2** (5-15 min): [ROLE] engages
-3. **L3** (15-30 min): [ROLE] + [ROLE]
-
-### 5.4 Postmortem Requirements
-**Required For**: [EXTRACTED or PLACEHOLDER: All P1 and P2 incidents]
-**Timeline**: [PLACEHOLDER: Within 48 hours of resolution]
-**Distribution**: [PLACEHOLDER: Engineering team, stakeholders]
-**Template**: [PLACEHOLDER: Link to postmortem template]
+**Section Requirements**: 16 total (16 Blocker, 0 Desired)
 
 ---
 
-## 6. Capacity Planning
+### 1.1 Log Management (LASRE01 - Blocker)
 
-### 6.1 Current Capacity
-**Design Capacity**: [EXTRACTED from Section 10.1]
-**Peak Capacity**: [EXTRACTED from Section 10.1]
-**Current Utilization**: [PLACEHOLDER: Add from monitoring]
+**Requirement**: Operational and audit logs must be recorded in a structured format, using defined and consistent fields, or following a standard to ensure uniformity and facilitate analysis.
 
-### 6.2 Growth Projections
-[PLACEHOLDER: User must provide growth projections]
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-### 6.3 Scaling Thresholds
-[PLACEHOLDER: Define auto-scaling thresholds]
+#### 1.1.1 Implementation
 
----
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-## 7. On-Call Management
+#### 1.1.2 Validation
 
-### 7.1 On-Call Rotation
-**Rotation Schedule**: [PLACEHOLDER: Define schedule (e.g.: 7 days, 24/7)]
-**Coverage**: [PLACEHOLDER: Primary + Secondary]
-**Calendar**: [PLACEHOLDER: Link to on-call calendar]
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
 
-### 7.2 Incident Response Team Contacts
-[PLACEHOLDER: Add incident response team contacts]
-
-### 7.3 Operational Runbooks
-**Repository**: [PLACEHOLDER: Runbook repository location]
-**Required Runbooks**:
-- Deployment
-- Rollback
-- Incident response
-- [PLACEHOLDER: Other specific runbooks]
+**Source References**: [ARCHITECTURE.md sections used for LASRE01]
 
 ---
 
-## 8. SRE Architecture Guidelines
+### 1.2 Log Management (LASRE02 - Blocker)
 
-### 8.1 Resilience Assessment
-[PLACEHOLDER: User must provide specific organizational guidelines]
+**Requirement**: Operational logs must record relevant information, classified into levels such as debug, info, or error according to the system's needs and characteristics.
 
-**Key Guidelines**:
-- Component resilience assessment
-- Critical component observability
-- Self-healing capability
-- [PLACEHOLDER: Other organizational guidelines]
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-### 8.2 Compliance
-**Compliance Status**: [PLACEHOLDER: Assess compliance]
-**Exceptions**: [PLACEHOLDER: Document exceptions]
-**Remediation Plan**: [PLACEHOLDER: If applicable]
+#### 1.2.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.2.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE02]
+
+---
+
+### 1.3 Log Management (LASRE03 - Blocker)
+
+**Requirement**: Logs must be accessible without depending on third parties, either through internal mechanisms or automated processes that allow efficient and secure consultation of these records.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.3.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.3.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE03]
+
+---
+
+### 1.4 Application Deployment (LASRE04 - Blocker)
+
+**Requirement**: Automatic rollback mechanisms must be in place in case of failures during deployment, ensuring that the system can revert to a previous stable version.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.4.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.4.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE04]
+
+---
+
+### 1.5 Configuration Management (LASRE05 - Blocker)
+
+**Requirement**: All configurations must be stored in official and secure repositories, such as authorized repositories or specialized services like Azure Repos, to ensure protection and controlled access to information.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.5.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.5.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE05]
+
+---
+
+### 1.6 Operational Documentation (LASRE06 - Blocker)
+
+**Requirement**: Application documentation and operational procedures (SOP) will be maintained in official repositories, accessible to the entire team.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Team Lead or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.6.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.6.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE06]
+
+---
+
+### 1.7 Operational Resilience (LASRE07 - Blocker)
+
+**Requirement**: The application must implement mechanisms that allow identifying when it is ready to receive load, ensuring that services are available and operational before starting processes or receiving requests.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.7.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.7.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE07]
+
+---
+
+### 1.8 Operational Resilience (LASRE08 - Blocker)
+
+**Requirement**: The application must implement health check mechanisms that allow identifying if it is functioning correctly, ensuring timely detection of possible service failures.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.8.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.8.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE08]
+
+---
+
+### 1.9 Operational Resilience (LASRE09 - Blocker)
+
+**Requirement**: The application must have high availability mechanisms, through the implementation of more than one replica, to ensure service continuity and minimize possible interruptions.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.9.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.9.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE09]
+
+---
+
+### 1.10 Operational Resilience (LASRE10 - Blocker)
+
+**Requirement**: Load tests must be executed and documented on all application components before production release, ensuring that performance is adequate and results are available for consultation and analysis.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.10.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.10.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE10]
+
+---
+
+### 1.11 Operational Resilience (LASRE11 - Blocker)
+
+**Requirement**: The application must have automatic adjustment mechanisms in the number of instances, allowing scaling according to service load to ensure optimal performance and continuous availability.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.11.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.11.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE11]
+
+---
+
+### 1.12 Recovery and Resilience Testing (LASRE12 - Blocker)
+
+**Requirement**: A documented recovery plan (DRP) must be in place, establishing the necessary procedures and resources to restore service in case of incidents or disasters, guaranteeing operational continuity.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Business Continuity Manager or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.12.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.12.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE12]
+
+---
+
+### 1.13 Information and Architecture (LASRE13 - Blocker)
+
+**Requirement**: Has C2 application and deployment diagrams in IcePanel.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.13.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.13.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE13]
+
+---
+
+### 1.14 Information and Architecture (LASRE14 - Blocker)
+
+**Requirement**: The application is registered in the Bank's application portfolio and business criticality has been categorized.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.14.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.14.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE14]
+
+---
+
+### 1.15 Information and Architecture (LASRE15 - Blocker)
+
+**Requirement**: The escalation matrix is defined and resolving groups are registered in the application portfolio.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.15.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.15.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE15]
+
+---
+
+### 1.16 Information and Architecture (LASRE16 - Blocker)
+
+**Requirement**: Has generated a request for implementation or modification of application observability.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 1.16.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 1.16.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE16]
+
+---
+
+## 2. Observability Requirements (LASRE17-LASRE42)
+
+**Section Requirements**: 26 total (20 Blocker, 6 Desired)
+
+---
+
+### 2.1 Key Metrics (LASRE17 - Blocker)
+
+**Requirement**: Has defined the mechanism and criteria for measuring application availability.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.1.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.1.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE17]
+
+---
+
+### 2.2 Key Metrics (LASRE18 - Blocker)
+
+**Requirement**: Has defined the mechanism and criteria for measuring application performance.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.2.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.2.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE18]
+
+---
+
+### 2.3 Key Metrics (LASRE19 - Blocker)
+
+**Requirement**: Monitored components have dynamic or static thresholds correctly configured.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.3.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.3.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE19]
+
+---
+
+### 2.4 Backend Application (LASRE20 - Blocker)
+
+**Requirement**: Has validated that microservices are instrumented with Dynatrace (automatic or manual instrumentation).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.4.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.4.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE20]
+
+---
+
+### 2.5 Backend Application (LASRE21 - Blocker)
+
+**Requirement**: Internal APIs of the application are monitored.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.5.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.5.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE21]
+
+---
+
+### 2.6 Backend Application (LASRE22 - Blocker)
+
+**Requirement**: Has validated that microservice requests correctly handle exceptions at code level in test environment, to avoid increase in monitoring failure rate in production.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.6.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.6.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE22]
+
+---
+
+### 2.7 Frontend Application (LASRE23 - Blocker)
+
+**Requirement**: The application URL has synthetic availability validation.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Frontend SRE or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.7.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.7.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE23]
+
+---
+
+### 2.8 User Experience (LASRE24 - Blocker)
+
+**Requirement**: The application frontend allows injection of Dynatrace JavaScript for RUM (Real User Experience) capture. Note: Applies to applications with business transactionality.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.8.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.8.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE24]
+
+---
+
+### 2.9 User Experience (LASRE25 - Blocker)
+
+**Requirement**: Confirms that in security components like WAF, firewall, frontdoor, etc., there are no blocks to Dynatrace injection and beacons. Note: Applies to applications with business transactionality.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.9.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.9.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE25]
+
+---
+
+### 2.10 User Experience (LASRE26 - Blocker)
+
+**Requirement**: The application has UX monitoring. Note: Applies to applications with business transactionality.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.10.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.10.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE26]
+
+---
+
+### 2.11 Cost Estimation (LASRE27 - Blocker)
+
+**Requirement**: Has performed Dynatrace licensing cost estimation using the official calculator and has Observability team approval for coverage and/or budget allocation.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Team Lead or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.11.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.11.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE27]
+
+---
+
+### 2.12 Cost Estimation (LASRE28 - Blocker)
+
+**Requirement**: Prerequisites necessary to ensure coverage of all components have been considered in the budget, such as manual code instrumentation, additional development by the provider, cloud service activation, infrastructure, among others.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Team Lead or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.12.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.12.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE28]
+
+---
+
+### 2.13 Infrastructure (LASRE29 - Blocker)
+
+**Requirement**: Onpremise or cloud servers of the application have Dynatrace agent installed (OneAgent).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Platform Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.13.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.13.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE29]
+
+---
+
+### 2.14 Infrastructure (LASRE30 - Blocker)
+
+**Requirement**: Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent deployed.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Platform Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.14.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.14.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE30]
+
+---
+
+### 2.15 Infrastructure (LASRE31 - Blocker)
+
+**Requirement**: Onpremise and/or cloud dependencies like DB, load balancers, Redis, frontdoor, etc. of the application are monitored.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Platform Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.15.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.15.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE31]
+
+---
+
+### 2.16 Batch Processing (LASRE32 - Blocker)
+
+**Requirement**: Has monitoring of batch processes not managed by Control-M.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.16.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.16.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE32]
+
+---
+
+### 2.17 Application Deployment (LASRE33 - Blocker)
+
+**Requirement**: Consistency between applications and their source code will be ensured through automated deployment and configuration processes.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.17.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.17.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE33]
+
+---
+
+### 2.18 Disaster Recovery (LASRE34 - Blocker)
+
+**Requirement**: Must have automation of the Disaster Recovery process.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Business Continuity Manager or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.18.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.18.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE34]
+
+---
+
+### 2.19 Disaster Recovery (LASRE35 - Blocker)
+
+**Requirement**: Must have automation of the process to validate the state of what is required to start the application at the Alternate Site.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Business Continuity Manager or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.19.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.19.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE35]
+
+---
+
+### 2.20 Application Operational Tasks (LASRE36 - Blocker)
+
+**Requirement**: Must have an automated process for managing application services (start, stop, restart).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: **BLOCKER** (Blocking - Must Pass)
+
+#### 2.20.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Implemented and documented. If Non-Compliant: Not implemented. If Not Applicable: N/A. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
+
+#### 2.20.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE36]
+
+---
+
+### 2.21 Log Management (LASRE37 - Desired)
+
+**Requirement**: Generated logs must be centralized in an analysis or monitoring tool, such as Dynatrace or Splunk, to facilitate their management, consultation, and analysis.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE37]
+
+---
+
+### 2.22 Log Management (LASRE38 - Desired)
+
+**Requirement**: Operational logs must allow modification of verbosity level, thus facilitating adjustment of the amount and type of information recorded according to monitoring or diagnostic needs.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE38]
+
+---
+
+### 2.23 Configuration Management (LASRE39 - Desired)
+
+**Requirement**: Configurations must be subject to version control, ensuring that any change is recorded and can be audited or reverted if necessary.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE39]
+
+---
+
+### 2.24 Integration, Deployment and Delivery (LASRE40 - Desired)
+
+**Requirement**: Deployments of new versions will be performed gradually, using strategies such as Canary Release, to minimize risks and ensure a controlled transition before applying changes to all users.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE40]
+
+---
+
+### 2.25 Integration, Deployment and Delivery (LASRE41 - Desired)
+
+**Requirement**: Appropriate traffic management strategies will be applied to the application's target audience, such as the Friends & Family approach, to control access and use according to defined needs.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE41]
+
+---
+
+### 2.26 Operational Resilience (LASRE42 - Desired)
+
+**Requirement**: Will have a defined 7x24 maintenance procedure that guarantees continuous application availability, allowing preventive and corrective tasks to be performed without affecting service for users.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE42]
+
+---
+
+## 3. Automation Requirements (LASRE43-LASRE57)
+
+**Section Requirements**: 15 total (0 Blocker, 15 Desired)
+
+---
+
+### 3.1 Operational Resilience (LASRE43 - Desired)
+
+**Requirement**: Must have alternative mechanisms that allow managing backend failures, such as Fallback or Circuit Breaker strategies, ensuring service continuity and resilience in case of possible interruptions.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE43]
+
+---
+
+### 3.2 Operational Resilience (LASRE44 - Desired)
+
+**Requirement**: Automatic retries and proper management of timeouts for both client and backend must be implemented, ensuring resilience and proper handling of wait or failure situations in communications.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE44]
+
+---
+
+### 3.3 Recovery and Resilience Testing (LASRE45 - Desired)
+
+**Requirement**: The application must execute chaos tests, with the objective of evaluating its resilience and recovery capacity in adverse scenarios or unexpected failures.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Business Continuity Manager or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE45]
+
+---
+
+### 3.4 Information and Architecture (LASRE46 - Desired)
+
+**Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE46]
+
+---
+
+### 3.5 Information and Architecture (LASRE47 - Desired)
+
+**Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Enterprise Architect or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE47]
+
+---
+
+### 3.6 Backend Application (LASRE48 - Desired)
+
+**Requirement**: Microservices and workloads contain labels that allow differentiating the application and its vital functions (for example: application name, application id, resolving group, vital function, tribe, cell, etc.).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE48]
+
+---
+
+### 3.7 Backend Application (LASRE49 - Desired)
+
+**Requirement**: Has validated with the external system provider that they have APIs that allow monitoring the state of their system/APIs synthetically.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE49]
+
+---
+
+### 3.8 Backend Application (LASRE50 - Desired)
+
+**Requirement**: Critical services have advanced monitoring configurations and threshold customization (traffic load, anomaly detection, latency, key request, etc.).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE50]
+
+---
+
+### 3.9 Backend Application (LASRE51 - Desired)
+
+**Requirement**: Application logs are correctly ingested into observability tools.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: SRE Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE51]
+
+---
+
+### 3.10 Frontend Application (LASRE52 - Desired)
+
+**Requirement**: The application allows performing synthetic validations through authentication of generic Observability user without MFA (only user and password).
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Frontend SRE or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE52]
+
+---
+
+### 3.11 Infrastructure (LASRE53 - Desired)
+
+**Requirement**: Cloud components (MS Azure, GCP, AWS) of the application are tagged at the source for easy identification.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Platform Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE53]
+
+---
+
+### 3.12 Infrastructure (LASRE54 - Desired)
+
+**Requirement**: Has health or state detection of critical processes or OS services (process group) on hosts.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Platform Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE54]
+
+---
+
+### 3.13 Application Operational Tasks (LASRE55 - Desired)
+
+**Requirement**: Must have generation of reports on application components.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE55]
+
+---
+
+### 3.14 Application Operational Tasks (LASRE56 - Desired)
+
+**Requirement**: Will have an automated process to sanitize or copy data to previous environments.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: DevOps Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE56]
+
+---
+
+### 3.15 Auto-remediation (LASRE57 - Desired)
+
+**Requirement**: Will have automation to remediate application failures automatically.
+
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: Automation Engineer or N/A
+**Criticality**: DESIRED (Optional Enhancement)
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Brief explanation]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant: Optional enhancement - consider implementing]
+
+**Source References**: [ARCHITECTURE.md sections used for LASRE57]
 
 ---
 
@@ -239,34 +1566,64 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 Data extracted from ARCHITECTURE.md:
 
+**Section 2: Project Context**
+- Budget and cost estimation references
+
+**Section 4: System Architecture**
+- Architecture diagrams and component documentation
+
+**Section 5: Infrastructure**
+- Infrastructure monitoring and agent deployment
+
+**Section 7: Integration**
+- External system integration and API monitoring
+
 **Section 10: Performance Requirements**
-- [SOURCE_REFERENCE]: [DESCRIPTION of extracted data]
+- Performance metrics, SLOs, load testing, resilience requirements
 
 **Section 11: Operational Considerations**
-- [SOURCE_REFERENCE]: [DESCRIPTION of extracted data]
+- Logging, monitoring, observability, incident management, deployment, recovery procedures
 
 ### Missing Data
 
-The following data requires manual review (marked with [PLACEHOLDER]):
+The following data requires manual completion (marked with [PLACEHOLDER] or [VALUE]):
 
-1. [LIST of placeholder items from generation]
-2. [...]
+**Blocker Requirements** (MANDATORY):
+1. Items from ARCHITECTURE.md Sections 10-11 not yet documented
+2. Observability configurations and validations
+3. Automation and deployment procedures
+
+**Desired Requirements** (OPTIONAL):
+1. Enhanced monitoring and observability features
+2. Advanced resilience patterns
+3. Automation improvements
 
 ### Recommendations for ARCHITECTURE.md
 
-To reduce placeholders in future generations, add to ARCHITECTURE.md:
+To reduce placeholders and improve compliance scores:
 
-1. **Section 11.2: Incident Management**
-   - On-call team contacts
-   - Rotation schedule
-   - Escalation procedures
+1. **Section 10: Performance Requirements**
+   - Document load testing procedures and results
+   - Define readiness and health check implementations
+   - Specify auto-scaling configuration and triggers
 
-2. **Section 11.4: Operational Runbooks**
-   - Runbook repository location
-   - List of key runbooks
+2. **Section 11: Operational Considerations**
+   - Detail logging format, levels, and centralization approach
+   - Document observability stack and monitoring tools
+   - Define deployment automation and rollback procedures
+   - Specify disaster recovery automation processes
+
+3. **Section 5: Infrastructure**
+   - List monitoring agents and their deployment status
+   - Document container orchestration monitoring
+
+4. **Section 2: Project Context**
+   - Include observability cost estimation and budget allocation
 
 ---
 
 **Last Generated**: [GENERATION_DATE]
 **Completeness**: [PERCENTAGE]% ([FILLED]/[TOTAL] data points)
-**Action Required**: Review and complete [COUNT] sections marked with [PLACEHOLDER]
+**Action Required**: Review and complete sections marked with placeholders
+
+**Note**: This v2.0 template uses two-tier scoring. ALL 36 Blocker requirements must pass for approval.
