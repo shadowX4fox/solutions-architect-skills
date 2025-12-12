@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=process-transformation -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=process-transformation -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/process_transformation_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Process Transformation Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Process Transformation Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Process Transformation Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -76,13 +24,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAA3 | Efficient License Usage | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [License Manager / Solution Architect or N/A] |
 | LAA4 | Document Management Alignment | Process Transformation | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Information Architect / DMS Administrator or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/4 ([X/4*100]%)
-- ❌ Non-Compliant: [Y]/4 ([Y/4*100]%)
-- ⊘ Not Applicable: [Z]/4 ([Z/4*100]%)
-- ❓ Unknown: [W]/4 ([W/4*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -472,11 +414,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 - **License Pooling**: Sharing licenses across multiple automations or users
 - **Document Management System (DMS)**: Platform for document lifecycle management
 
-**Status Codes**:
-- **Compliant**: Requirement fully satisfied with documented evidence
-- **Non-Compliant**: Requirement not met or missing from ARCHITECTURE.md
-- **Not Applicable**: Requirement does not apply to this solution
-- **Unknown**: Partial information exists but insufficient to determine compliance
+<!-- @include shared/fragments/status-codes.md -->
 
 **Compliance Abbreviations**:
 - **LAA**: Process Automation compliance requirement code
@@ -486,51 +424,13 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ---
 
-### A.2 Validation Methodology
-
-**Validation Process**:
-
-1. **Completeness Check (40% weight)**:
-   - Counts filled data points across all 4 LAA requirements
-   - Formula: (Filled fields / Total required fields) × 10
-   - Example: 18 out of 20 fields = 9.0/10 completeness
-
-2. **Compliance Check (50% weight)**:
-   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN
-   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
-   - **CRITICAL**: N/A items MUST be included in numerator
-   - Example: 15 PASS + 3 N/A + 0 EXCEPTION out of 20 items = (15+3)/20 × 10 = 9.0/10
-
-3. **Quality Check (10% weight)**:
-   - Assesses source traceability (ARCHITECTURE.md section references)
-   - Verifies explanation quality and actionable notes
-   - Formula: (Items with valid sources / Total items) × 10
-
-4. **Final Score Calculation**:
-   ```
-   Final Score = (Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)
-   ```
-
-**Outcome Determination**:
-| Score Range | Document Status | Review Actor | Action |
-|-------------|----------------|--------------|--------|
-| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
-| 7.0-7.9 | In Review | Process Transformation Review Board | Manual review required |
-| 5.0-6.9 | Draft | Architecture Team | Address gaps before review |
-| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed to review |
+<!-- @include-with-config shared/sections/validation-methodology.md config=process-transformation -->
 
 ---
 
 ### A.3 Document Completion Guide
 
-**For Architecture Teams**:
-
-If this contract shows "Non-Compliant" or "Unknown" items:
-
-1. **Identify Missing Sections**: Review the "Note" field for each item
-2. **Locate ARCHITECTURE.md Section**: The note specifies target section (3, 5, 6, 7, 8, 10, 11, or 12)
-3. **Add Required Content**: Document the missing information in the specified section
-4. **Regenerate Contract**: Run compliance generation again after updates
+<!-- @include shared/sections/completion-guide-intro.md -->
 
 **Common Gaps and Remediation**:
 
@@ -567,63 +467,23 @@ If this contract shows "Non-Compliant" or "Unknown" items:
 
 ---
 
-## Data Extracted Successfully
-
-[List of all data points marked as "Compliant" with source references]
-
-Example format:
-- LAA1.1 - Current Manual Effort: [Value] (Source: ARCHITECTURE.md Section 3.2, lines 45-48)
-- LAA1.2 - Integration Points: [Value] (Source: ARCHITECTURE.md Section 7.1, lines 234-240)
-- LAA2.1 - Execution Schedule: [Value] (Source: ARCHITECTURE.md Section 11.2, line 567)
-- LAA3.1 - License Model: [Value] (Source: ARCHITECTURE.md Section 8.3, lines 312-315)
+<!-- @include-with-config shared/sections/data-extracted-template.md config=process-transformation -->
 
 ---
 
-## Missing Data Requiring Attention
-
-| Requirement | Missing Data Point | Responsible Role | Recommended Action |
-|-------------|-------------------|------------------|-------------------|
-| LAA1 | [Example: Manual effort quantification] | Process Architect | Quantify current FTE hours/week in Section 3 |
-| LAA1 | [Example: Integration API endpoints] | Solution Architect | Document API endpoints and authentication in Section 7 |
-| LAA2 | [Example: Execution frequency] | Automation Lead | Define run schedule (hourly/daily/on-demand) in Section 11 |
-| LAA2 | [Example: Cost analysis] | Solution Architect | Calculate license, infrastructure, and support costs in Section 11 |
-| LAA3 | [Example: License consumption model] | License Manager | Specify licensing model (concurrent/named user) in Section 8 |
-| LAA4 | [Example: DMS integration] | Information Architect | Document DMS integration approach in Section 7 |
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=process-transformation -->
 
 ---
 
-## Not Applicable Items
-
-[List of requirements marked as "Not Applicable" with justification]
-
-Example format:
-- LAA1.1 - Current Manual Effort: Net-new automation with no existing manual process
-- LAA1.3 - Training Requirements: Fully automated back-end process with no user interaction
-- LAA4 - Document Management: Solution does not handle document lifecycle operations
+<!-- @include-with-config shared/sections/not-applicable-template.md config=process-transformation -->
 
 ---
 
-## Unknown Status Items Requiring Investigation
-
-| Requirement | Data Point | Issue | Responsible Role | Action Needed |
-|-------------|------------|-------|------------------|---------------|
-| LAA1 | [Example: Integration systems] | Systems mentioned but not fully identified | Solution Architect | List all integrated applications in Section 5 or 7 |
-| LAA2 | [Example: Monitoring metrics] | Monitoring mentioned but metrics unclear | DevOps Engineer | Define success rate, execution time KPIs in Section 11 |
-| LAA3 | [Example: Third-party licenses] | Integrations exist but licensing unknown | License Manager | Verify if API licenses required in Section 7 or 8 |
-| LAA4 | [Example: Document retention] | Documents stored but retention policy unclear | Information Architect | Define retention periods in Section 6 |
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=process-transformation -->
 
 ---
 
-## Generation Metadata
-
-**Template Version**: 2.0 (Updated with 4 LAA requirements and compliance evaluation system)
-**Generation Date**: [GENERATION_DATE]
-**Source Document**: ARCHITECTURE.md
-**Primary Source Sections**: 3 (Business Context), 5 (Component Model), 6 (Data Model), 7 (Integration View), 8 (Technology Stack), 10 (Non-Functional Requirements), 11 (Operational Considerations), 12 (ADRs)
-**Completeness**: [PERCENTAGE]% ([X/45] data points documented)
-**Template Language**: English
-**Compliance Framework**: LAA (Process Automation) with 4 requirements
-**Status Labels**: Compliant, Non-Compliant, Not Applicable, Unknown
+<!-- @include-with-config shared/sections/generation-metadata.md config=process-transformation -->
 
 ---
 

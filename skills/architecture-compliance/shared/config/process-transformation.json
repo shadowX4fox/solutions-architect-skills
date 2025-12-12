@@ -1,0 +1,31 @@
+{
+  "domain_name": "Process Transformation",
+  "compliance_prefix": "LAP",
+  "review_board": "Process Transformation Review Board",
+  "approval_authority": "Process Transformation Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/process_transformation_validation.json",
+
+  "domain_terms": {
+    "Business Process": "Structured set of activities that produce a specific output for customers or stakeholders",
+    "Process Automation": "Use of technology to perform manual tasks without human intervention",
+    "Process Optimization": "Systematic improvement of process efficiency and effectiveness",
+    "Process Digitization": "Conversion of manual/paper processes to digital format",
+    "Business Process Management (BPM)": "Discipline of modeling, automating, and optimizing business processes",
+    "Robotic Process Automation (RPA)": "Software robots that automate repetitive rule-based tasks"
+  },
+
+  "abbreviations": {
+    "LAP": "Process Transformation compliance requirement code",
+    "BPM": "Business Process Management",
+    "RPA": "Robotic Process Automation",
+    "BPMN": "Business Process Model and Notation",
+    "STP": "Straight-Through Processing",
+    "FTE": "Full-Time Equivalent"
+  },
+
+  "primary_source_sections": "2 (System Overview), 10 (Non-Functional Requirements)",
+  "framework_description": "business processes, automation opportunities, digitization strategy, and process optimization",
+  "compliance_framework_code": "LAP (Process Transformation)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "10"
+}

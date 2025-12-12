@@ -7,56 +7,9 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=development-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
-
-**Validation Configuration**: `/skills/architecture-compliance/validation/development_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Technical Architecture Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Technical Architecture Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Technical Architecture Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=development-architecture -->
 
 ---
 
@@ -67,15 +20,9 @@
 | LADES1 | Best Practices Adoption (Technology Stack Alignment) | Development Architecture | [STATUS] | Section 8 | Solution Architect |
 | LADES2 | Architecture Debt Impact (Exception Handling) | Development Architecture | [STATUS] | Section 8, 12 | Technical Lead |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/2 ([X/2*100]%)
-- ❌ Non-Compliant: [Y]/2 ([Y/2*100]%)
-- ⊘ Not Applicable: [Z]/2 ([Z/2*100]%)
-- ❓ Unknown: [W]/2 ([W/2*100]%)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 **Stack Validation**: [VALIDATION_SUMMARY] (**MANDATORY** - Contract cannot be approved without completed validation)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
 
 **Dynamic Field Instructions**:
 - `[VALIDATION_SUMMARY]`: If `validation_results.overall_status == "PASS"` → "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)", else if "FAIL" → "❌ FAIL (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN) - See LADES1.6 for details", else → "PENDING - Validation not performed"
@@ -444,56 +391,86 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ---
 
-## Appendix: Source Traceability
+## Appendix: Source Traceability and Completion Status
 
-This section provides full traceability from compliance requirements to ARCHITECTURE.md source sections.
+### A.1 Definitions and Terminology
 
-### LADES1 - Best Practices Adoption (Technology Stack Alignment)
-**Primary Sources**:
-- Section 4 (Meta Architecture → Deployment Architecture)
-- Section 7 (Integration Points)
-- Section 8 (Technology Stack → Languages, Frameworks, Databases, Infrastructure, CI/CD)
-- Section 11 (Operational Considerations → Deployment, CI/CD)
+**Development Architecture Terms**:
+- **Stack Validation**: Process of verifying technology choices against organizational standards and best practices
+- **Tech Debt (Technical Debt)**: Code or architecture decisions that trade long-term maintainability for short-term delivery
+- **CI/CD (Continuous Integration/Continuous Deployment)**: Automated pipelines for building, testing, and deploying code
+- **Approved Library Catalog**: Organizational list of approved frameworks, libraries, and tools
+- **EOL (End of Life)**: Technology version no longer supported by vendor
+- **ADR (Architecture Decision Record)**: Document capturing architectural choices and their rationale
+- **Stack Alignment**: Ensuring technology choices follow organizational standards
+- **Exception Handling**: Documented approval process for deviating from standard technology choices
 
-**External Source**:
-- Stack Validation Checklist (`stack-validation-checklist.md`)
+<!-- @include shared/fragments/status-codes.md -->
 
-### LADES2 - Architecture Debt Impact (Exception Handling)
-**Primary Sources**:
-- Section 8 (Technology Stack → with exception notations)
-- Section 12 (Architecture Decision Records → ADRs)
-
-**External Sources**:
-- Chapter-approved library catalog (reference)
-- Vendor EOL documentation (reference)
+**Development Abbreviations**:
+- **LADES**: Development Architecture compliance requirement code
+- **DX**: Developer Experience
+- **SCA**: Static Code Analysis
+- **SAST**: Static Application Security Testing
 
 ---
 
-## Generation Metadata
+### A.2 Validation Methodology
 
-**Template Version**: 2.0
-**Template Created**: 2025-11-27
-**Template Author**: Architecture Compliance Skill
-**Compliance Framework**: Development Architecture (LADES)
-**Total Requirements**: 2 (LADES1, LADES2)
-**Total Data Points**: 14 subsections across 2 requirements
+**Validation Process**:
 
-**Document Generation Instructions**:
-1. Extract data from ARCHITECTURE.md sections 3, 5, 8, 11, 12 primarily
-2. For each subsection, evaluate: Compliant/Non-Compliant/Not Applicable
-3. Provide source line numbers for all extracted data
-4. Calculate overall compliance percentage
-5. **MANDATORY**: Complete STACK_VALIDATION_CHECKLIST.md validation for LADES1 - contract cannot be approved without this
-6. Generate remediation guidance for Non-Compliant items
-7. **IMPORTANT**: Set document status to "Draft" if checklist validation is not PASS, cannot move to "Approved" status
+1. **Completeness Check (40% weight)**:
+   - Counts filled data points across all LADES requirements
+   - Formula: (Filled fields / Total required fields) × 10
+   - Example: 12 out of 14 fields = 8.6/10 completeness
 
-**Status Criteria**:
-- **Compliant**: Data fully documented in ARCHITECTURE.md, meets organizational standards, verified against stack validation checklist (PASS status)
-- **Non-Compliant**: Data missing, incomplete, does not meet standards, checklist validation not performed, or checklist validation fails (requires remediation)
-- **Not Applicable**: Requirement does not apply to this architecture
-- **NOTE**: "Unknown" status is NOT allowed for LADES1.6 (Stack Validation) - must be either Compliant (PASS) or Non-Compliant (PENDING/FAIL)
+2. **Compliance Check (50% weight)**:
+   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN
+   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
+   - **CRITICAL**: N/A items MUST be included in numerator
+   - Example: 10 PASS + 2 N/A + 0 EXCEPTION out of 14 items = (10+2)/14 × 10 = 8.6/10
+   - **SPECIAL**: LADES1.6 (Stack Validation) cannot be "Unknown" - must be Compliant (PASS) or Non-Compliant (PENDING/FAIL)
 
-**Stack Validation Checklist Reference**:
+3. **Quality Check (10% weight)**:
+   - Assesses source traceability (ARCHITECTURE.md section references)
+   - Verifies Stack Validation Checklist completion
+   - Formula: (Items with valid sources / Total items) × 10
+
+4. **Final Score Calculation**:
+   ```
+   Final Score = (Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)
+   ```
+
+**Outcome Determination**:
+| Score Range | Document Status | Review Actor | Action |
+|-------------|----------------|--------------|--------|
+| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation (requires LADES1.6 PASS) |
+| 7.0-7.9 | In Review | Development Architecture Review Board | Manual review required |
+| 5.0-6.9 | Draft | Architecture Team | Address gaps before review |
+| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed - critical development standards missing |
+
+**IMPORTANT**: Contract cannot achieve "Approved" status without Stack Validation Checklist (LADES1.6) showing PASS status.
+
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Additional Development-Specific Steps**:
+- **Complete Stack Validation**: For LADES1.6, complete STACK_VALIDATION_CHECKLIST.md
+
+**Common Development Architecture Gaps and Remediation**:
+
+| Missing Item | ARCHITECTURE.md Section | What to Add |
+|--------------|------------------------|-------------|
+| Technology stack | Section 8 (Technology Stack) | Document languages, frameworks, databases, tools with versions |
+| Stack validation | External checklist | Complete STACK_VALIDATION_CHECKLIST.md (26 checkpoints) |
+| CI/CD pipeline | Section 11 (Operational Considerations) | Specify build, test, and deployment automation |
+| Tech debt exceptions | Section 12 (ADRs) | Document approved exceptions with justification and mitigation |
+| Approved library usage | Section 8 (Technology Stack) | Verify frameworks/libraries against organizational catalog |
+
+**Stack Validation Checklist**:
 - **File Path**: `.claude/skills/architecture-compliance/STACK_VALIDATION_CHECKLIST.md`
 - **Total Checkpoints**: 26 validation items across 5 sections
 - **Integration Point**: LADES1.6 subsection
@@ -501,4 +478,47 @@ This section provides full traceability from compliance requirements to ARCHITEC
 
 ---
 
-*End of Template*
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with Cloud Architecture template structure
+- Total: 14 validation data points across 2 LADES requirements
+- Integrated Stack Validation Checklist as mandatory requirement
+
+**Version 1.0 (Previous)**:
+- Basic source traceability section
+- Generation metadata focus
+- Limited structure
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=development-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=development-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=development-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=development-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=development-architecture -->
+
+---
+
+**Note**: This document is auto-generated from ARCHITECTURE.md. Status labels (Compliant/Non-Compliant/Not Applicable/Unknown) and responsible roles must be populated during generation based on available data. Items marked as Non-Compliant or Unknown require stakeholder action to complete the architecture documentation.
+
+**CRITICAL**: Contract approval requires LADES1.6 (Stack Validation) to show PASS status. Complete STACK_VALIDATION_CHECKLIST.md before seeking approval.

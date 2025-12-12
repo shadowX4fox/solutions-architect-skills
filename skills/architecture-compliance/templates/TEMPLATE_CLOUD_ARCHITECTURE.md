@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=cloud-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=cloud-architecture -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/cloud_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Cloud Architecture Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Cloud Architecture Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Cloud Architecture Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -78,13 +26,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAC5 | Backup and Recovery Policies | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Business Continuity Manager or N/A] |
 | LAC6 | Cloud Best Practices Adoption | Cloud Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Cloud Architect / Technical Lead or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/6 ([X/6*100]%)
-- ❌ Non-Compliant: [Y]/6 ([Y/6*100]%)
-- ⊘ Not Applicable: [Z]/6 ([Z/6*100]%)
-- ❓ Unknown: [W]/6 ([W/6*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -343,52 +285,87 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Appendix: Source Traceability and Completion Status
 
-### Data Extracted Successfully
-[List of all data points marked as "Compliant" with source references]
+### A.1 Definitions and Terminology
 
-Example format:
-- LAC1 - Service Model: [Value] (Source: ARCHITECTURE.md Section 4.2, lines 123-125)
-- LAC2 - Network Architecture: [Value] (Source: ARCHITECTURE.md Section 9.1, lines 456-460)
-- LAC3 - Communication Protocols: [Value] (Source: ARCHITECTURE.md Section 9.3, line 678)
+**Key Cloud Architecture Terms**:
 
-### Missing Data Requiring Attention
+- **Cloud Deployment Model**: Infrastructure-as-a-Service (IaaS), Platform-as-a-Service (PaaS), or Software-as-a-Service (SaaS)
+- **Multi-Region**: Deployment across multiple geographic regions for redundancy and low latency
+- **Availability Zone**: Isolated data center within a cloud region
+- **Cloud Service Provider**: AWS, Azure, Google Cloud, or similar provider
+- **Resource Monitoring**: Observability of cloud resource usage and performance
+- **Cloud Best Practices**: Well-Architected Framework principles
 
-| Requirement | Missing Data Point | Responsible Role | Recommended Action |
-|-------------|-------------------|------------------|-------------------|
-| LAC1 | [Example: Service model justification] | Cloud Architect | Add ADR to Section 12 explaining IaaS/PaaS/SaaS selection |
-| LAC2 | [Example: Network latency requirements] | Network Engineer | Define latency SLOs in Section 10 |
-| LAC3 | [Example: Regulatory compliance requirements] | Compliance Officer | Document applicable regulations in Section 9 |
-| LAC4 | [Example: Monitoring tools] | DevOps Engineer | Specify observability stack in Section 11 |
-| LAC5 | [Example: RTO/RPO values] | Business Continuity Manager | Define recovery objectives in Section 11.3 |
-| LAC6 | [Example: IaC tooling] | Technical Lead | Document infrastructure automation approach in Section 4 or 8 |
+<!-- @include shared/fragments/status-codes.md -->
 
-### Not Applicable Items
-[List of requirements marked as "Not Applicable" with justification]
+**Abbreviations**:
 
-Example format:
-- LAC2 - On-Premise Integration: Solution is cloud-native with no hybrid connectivity required
-- LAC5 - Multi-Region Replication: Business requirements accept single-region deployment
-
-### Unknown Status Items Requiring Investigation
-
-| Requirement | Data Point | Issue | Responsible Role | Action Needed |
-|-------------|------------|-------|------------------|---------------|
-| LAC1 | [Example: Deployment regions] | Regions mentioned but not clearly identified | Cloud Architect | Clarify primary and secondary regions in Section 4 |
-| LAC4 | [Example: Alert thresholds] | Monitoring mentioned but no specific thresholds | SRE Lead | Define alert policies and thresholds in Section 11 |
-| LAC3 | [Example: Encryption keys] | Encryption referenced but key management unclear | Security Architect | Specify KMS configuration in Section 9 |
+- **LAC**: Cloud Architecture (Lineamiento de Arquitectura Cloud)
+- **IaaS**: Infrastructure-as-a-Service
+- **PaaS**: Platform-as-a-Service
+- **SaaS**: Software-as-a-Service
+- **CDN**: Content Delivery Network
+- **VPC**: Virtual Private Cloud
 
 ---
 
-## Generation Metadata
+### A.2 Validation Methodology
 
-**Template Version**: 2.0 (Updated with compliance evaluation system)
-**Generation Date**: [GENERATION_DATE]
-**Source Document**: ARCHITECTURE.md
-**Primary Source Sections**: 4 (Infrastructure), 8 (Deployment), 9 (Security), 10 (Performance), 11 (Operational Excellence), 12 (ADRs)
-**Completeness**: [PERCENTAGE]% ([X/TOTAL] data points documented)
-**Template Language**: English
-**Compliance Framework**: LAC (Cloud Architecture Compliance) with 6 requirements
-**Status Labels**: Compliant, Non-Compliant, Not Applicable, Unknown
+<!-- @include-with-config shared/sections/validation-methodology.md config=cloud-architecture -->
+
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Cloud Architecture Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Missing cloud provider justification | LAC1 Non-Compliant | Section 3 (Technology Stack) | Document provider selection rationale |
+| No multi-region strategy | LAC2 Non-Compliant | Section 10 (Non-Functional Requirements) | Define region deployment strategy |
+| Undefined backup/recovery policies | LAC5 Non-Compliant | Section 11 (Operational Considerations) | Document backup schedules and RTO/RPO |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with standardized template structure
+- Total: 6 validation data points across LAC1-LAC6 requirements
+
+**Version 1.0 (Previous)**:
+- Initial template with minimal appendix
+- Basic PLACEHOLDER approach
+- Limited source traceability
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=cloud-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=cloud-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=cloud-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=cloud-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=cloud-architecture -->
 
 ---
 

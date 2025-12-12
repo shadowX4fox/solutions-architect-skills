@@ -7,56 +7,9 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=sre-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
-
-**Validation Configuration**: `/skills/architecture-compliance/validation/sre_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "SRE Leadership/Operations"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "SRE Leadership/Operations"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by SRE Leadership/Operations required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=sre-architecture -->
 
 **CRITICAL - Two-Tier Compliance Scoring**:
 This template uses a two-tier scoring system for SRE requirements:
@@ -144,13 +97,7 @@ This template uses a two-tier scoring system for SRE requirements:
 | LASRE56 | Will have an automated process to sanitize or copy data to previous en... | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 | LASRE57 | Will have automation to remediate application failures automatically. | Automation - Auto-remediation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/57 ([X/57*100]%)
-- ❌ Non-Compliant: [Y]/57 ([Y/57*100]%)
-- ⊘ Not Applicable: [Z]/57 ([Z/57*100]%)
-- ❓ Unknown: [W]/57 ([W/57*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 **Blocker Requirements**: [X/36 Compliant] (**MANDATORY** - All must pass for approval)
 **Desired Requirements**: [Y/21 Compliant] (OPTIONAL - Enhancement recommendations)
@@ -1566,70 +1513,92 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-## Appendix: Source Traceability
+## Appendix: Source Traceability and Completion Status
 
-### Data Sources
+### A.1 Definitions and Terminology
 
-Data extracted from ARCHITECTURE.md:
+**SRE Architecture Terms**:
+- **SLO (Service Level Objective)**: Target level of service reliability agreed upon between service provider and users
+- **SLI (Service Level Indicator)**: Quantifiable measure of service performance (e.g., latency, availability, error rate)
+- **Error Budget**: Maximum allowable downtime or errors before SLO is violated
+- **Golden Signals**: Core monitoring metrics (latency, traffic, errors, saturation)
+- **Observability**: Ability to understand system internal state from external outputs (logs, metrics, traces)
+- **MTTR (Mean Time To Recovery)**: Average time to restore service after incident
+- **MTBF (Mean Time Between Failures)**: Average time between system failures
+- **Toil**: Manual, repetitive operational work that should be automated
+- **Incident Management**: Process for responding to service disruptions
+- **Blameless Postmortem**: Retrospective analysis focusing on systemic improvements, not individual blame
 
-**Section 2: Project Context**
-- Budget and cost estimation references
+<!-- @include shared/fragments/status-codes.md -->
 
-**Section 4: System Architecture**
-- Architecture diagrams and component documentation
-
-**Section 5: Infrastructure**
-- Infrastructure monitoring and agent deployment
-
-**Section 7: Integration**
-- External system integration and API monitoring
-
-**Section 10: Performance Requirements**
-- Performance metrics, SLOs, load testing, resilience requirements
-
-**Section 11: Operational Considerations**
-- Logging, monitoring, observability, incident management, deployment, recovery procedures
-
-### Missing Data
-
-The following data requires manual completion (marked with [PLACEHOLDER] or [VALUE]):
-
-**Blocker Requirements** (MANDATORY):
-1. Items from ARCHITECTURE.md Sections 10-11 not yet documented
-2. Observability configurations and validations
-3. Automation and deployment procedures
-
-**Desired Requirements** (OPTIONAL):
-1. Enhanced monitoring and observability features
-2. Advanced resilience patterns
-3. Automation improvements
-
-### Recommendations for ARCHITECTURE.md
-
-To reduce placeholders and improve compliance scores:
-
-1. **Section 10: Performance Requirements**
-   - Document load testing procedures and results
-   - Define readiness and health check implementations
-   - Specify auto-scaling configuration and triggers
-
-2. **Section 11: Operational Considerations**
-   - Detail logging format, levels, and centralization approach
-   - Document observability stack and monitoring tools
-   - Define deployment automation and rollback procedures
-   - Specify disaster recovery automation processes
-
-3. **Section 5: Infrastructure**
-   - List monitoring agents and their deployment status
-   - Document container orchestration monitoring
-
-4. **Section 2: Project Context**
-   - Include observability cost estimation and budget allocation
+**SRE Abbreviations**:
+- **LASRE**: SRE Architecture compliance requirement code
+- **RED**: Rate, Errors, Duration (monitoring methodology)
+- **USE**: Utilization, Saturation, Errors (resource monitoring)
+- **APM**: Application Performance Monitoring
+- **RCA**: Root Cause Analysis
 
 ---
 
-**Last Generated**: [GENERATION_DATE]
-**Completeness**: [PERCENTAGE]% ([FILLED]/[TOTAL] data points)
-**Action Required**: Review and complete sections marked with placeholders
+<!-- @include-with-config shared/sections/validation-methodology.md config=sre-architecture -->
 
-**Note**: This v2.0 template uses two-tier scoring. ALL 36 Blocker requirements must pass for approval.
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common SRE Gaps and Remediation**:
+
+| Missing Item | ARCHITECTURE.md Section | What to Add |
+|--------------|------------------------|-------------|
+| SLO definitions | Section 10 (Performance Requirements) | Define SLOs with targets (e.g., 99.9% availability, p99 latency < 200ms) |
+| Error budget policy | Section 10 (Performance) | Document error budget calculation and consumption policies |
+| Observability stack | Section 11 (Operational Considerations) | Specify monitoring tools (Prometheus, Grafana, Datadog, etc.) |
+| Incident response plan | Section 11 (Operational → Incident Management) | Define on-call rotation, escalation paths, runbooks |
+| Deployment automation | Section 11 (Operational → Deployment) | Document CI/CD pipeline, rollback procedures, canary releases |
+| Load testing strategy | Section 10 (Performance) | Specify load test scenarios, tools, and acceptance criteria |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Replaced "Recommendations" section with "Missing Data Requiring Attention" table
+- Added Data Extracted Successfully section
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with Cloud Architecture template structure
+- Total: 36+ validation data points across SRE practices
+
+**Version 1.0 (Previous)**:
+- Basic appendix with source references
+- Recommendations-based approach
+- Limited structure
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=sre-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=sre-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=sre-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=sre-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=sre-architecture -->
+
+---
+
+**Note**: This document is auto-generated from ARCHITECTURE.md. Status labels (Compliant/Non-Compliant/Not Applicable/Unknown) and responsible roles must be populated during generation based on available data. Items marked as Non-Compliant or Unknown require stakeholder action to complete the architecture documentation.

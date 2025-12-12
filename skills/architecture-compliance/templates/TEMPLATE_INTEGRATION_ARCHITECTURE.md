@@ -7,61 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=integration-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | Integration Architecture Review Board |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=integration-architecture -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/integration_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Integration Architecture Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Integration Architecture Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -79,13 +29,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 | LAI6 | Traceability and Audit | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / SRE Team or N/A] |
 | LAI7 | Event-Driven Integration Compliance | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Event Architect or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/7 ([X/7*100]%)
-- ❌ Non-Compliant: [Y]/7 ([Y/7*100]%)
-- ⊘ Not Applicable: [Z]/7 ([Z/7*100]%)
-- ❓ Unknown: [W]/7 ([W/7*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -456,7 +400,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 ---
 
-## Appendix
+## Appendix: Source Traceability and Completion Status
 
 ### A.1 Definitions and Terminology
 
@@ -476,19 +420,36 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 **Dead Letter Queue (DLQ)**: Queue for messages/events that fail processing after retry attempts, enabling manual inspection and remediation.
 
+<!-- @include shared/fragments/status-codes.md -->
+
+---
+
 ### A.2 Validation Methodology
 
 This document is validated using an automated scoring system defined in `/skills/architecture-compliance/validation/integration_architecture_validation.json`.
 
-**Validation Scoring**:
-- **Completeness Score** (30%): Percentage of required fields populated
-- **Compliance Score** (60%): Percentage of validation items with PASS or N/A status
-- **Quality Score** (10%): Source traceability coverage
+**Validation Process**:
 
-**Final Score Calculation**:
-```
-Final Score = (Completeness × 0.30) + (Compliance × 0.60) + (Quality × 0.10)
-```
+1. **Completeness Check (30% weight)**:
+   - Counts filled data points across all LAI requirements
+   - Formula: (Filled fields / Total required fields) × 10
+   - Example: 19 out of 21 fields = 9.0/10 completeness
+
+2. **Compliance Check (60% weight)**:
+   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN/EXCEPTION
+   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
+   - **CRITICAL**: N/A items MUST be included in numerator
+   - Example: 15 PASS + 4 N/A + 0 EXCEPTION out of 21 items = (15+4)/21 × 10 = 9.0/10
+
+3. **Quality Check (10% weight)**:
+   - Assesses source traceability (ARCHITECTURE.md section references)
+   - Verifies explanation quality and actionable notes
+   - Formula: (Items with valid sources / Total items) × 10
+
+4. **Final Score Calculation**:
+   ```
+   Final Score = (Completeness × 0.3) + (Compliance × 0.6) + (Quality × 0.1)
+   ```
 
 **Validation Item Statuses**:
 - ✅ **PASS** (10 points): Complies with LAI requirement
@@ -497,13 +458,32 @@ Final Score = (Completeness × 0.30) + (Compliance × 0.60) + (Quality × 0.10)
 - ❓ **UNKNOWN** (0 points): Missing data in ARCHITECTURE.md
 - 🔓 **EXCEPTION** (10 points): Documented and approved exception
 
-**Score Interpretation**:
-- **8.0-10.0**: High confidence → Auto-approved by system
-- **7.0-7.9**: Passed validation → Manual review by Integration Architecture Review Board
-- **5.0-6.9**: Conditional → Address gaps before review
-- **0.0-4.9**: Rejected → Critical integration failures, cannot proceed
+**Outcome Determination**:
+| Score Range | Document Status | Review Actor | Action |
+|-------------|----------------|--------------|--------|
+| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
+| 7.0-7.9 | In Review | Integration Architecture Review Board | Manual review required |
+| 5.0-6.9 | Draft | Architecture Team | Address integration gaps before review |
+| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed - critical integration failures |
+
+---
 
 ### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Integration Architecture Gaps and Remediation**:
+
+| Missing Item | ARCHITECTURE.md Section | What to Add |
+|--------------|------------------------|-------------|
+| API catalog | Section 7 (Integration View) | List all domain APIs with endpoints, authentication, consumers, and SLAs |
+| API design standards | Section 7 (Integration View) | Document REST principles, versioning strategy, error handling standards |
+| API authentication | Section 9 (Security Architecture) | Specify OAuth 2.0, JWT, or mTLS for API security |
+| Integration protocols | Section 7 (Integration View) | Document HTTP/2, REST, message brokers (Kafka, RabbitMQ) |
+| API governance | Section 7 (Integration View) | Define API naming conventions, lifecycle management, change control |
+| Third-party APIs | Section 7 (Integration View) | Inventory external APIs with vendors, endpoints, SLAs, support contacts |
+| Distributed tracing | Section 7 (Integration View) | Implement OpenTelemetry, correlation IDs, structured logging |
+| Event schemas | Section 6 (Data Model) or Section 7 (Integration View) | Define event schemas with JSON Schema/Avro, CloudEvents compliance |
 
 **For UNKNOWN Items** (Missing Data):
 1. Locate the corresponding section in ARCHITECTURE.md (refer to Source field)
@@ -535,15 +515,35 @@ Final Score = (Completeness × 0.30) + (Compliance × 0.60) + (Quality × 0.10)
 - **Minimum 7.0 for manual review**: Address critical integration gaps, document remaining items with placeholders
 - **Below 7.0**: Focus on required LAI items (LAI1, LAI2, LAI4, LAI6) before optional items (LAI3, LAI7)
 
+---
+
 ### A.4 Change History
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
-| 2.0 | [GENERATION_DATE] | Complete template replacement with 7 LAI requirements (LAI1-LAI7). Replaced generic integration catalog format with requirement-specific subsections following Cloud Architecture v2.0 structure. Added comprehensive validation framework with 21 subsections across 7 requirements. | Integration Architecture Team |
+| 2.0 | [GENERATION_DATE] | Complete template replacement with 7 LAI requirements (LAI1-LAI7). Replaced generic integration catalog format with requirement-specific subsections following Cloud Architecture v2.0 structure. Added comprehensive validation framework with 21 subsections across 7 requirements. Added Data Extracted Successfully, Missing Data, Not Applicable, and Unknown Status sections. Aligned with standardized appendix format. | Integration Architecture Team |
 | 1.0 | [ORIGINAL_DATE] | Initial release with basic integration catalog and patterns. | Integration Architecture Team |
 
 ---
 
-**Document End**
+<!-- @include-with-config shared/sections/data-extracted-template.md config=integration-architecture -->
 
-**Note**: This compliance contract is automatically generated from ARCHITECTURE.md. To update this document, modify the source architecture file and regenerate. All [PLACEHOLDER] items indicate missing data that should be added to ARCHITECTURE.md for complete compliance validation.
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=integration-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=integration-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=integration-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=integration-architecture -->
+
+---
+
+**Note**: This compliance contract is automatically generated from ARCHITECTURE.md. Status labels (Compliant/Non-Compliant/Not Applicable/Unknown) and responsible roles must be populated during generation based on available data. Items marked as Non-Compliant or Unknown require stakeholder action to complete the architecture documentation. To update this document, modify the source architecture file and regenerate. All [PLACEHOLDER] items indicate missing data that should be added to ARCHITECTURE.md for complete compliance validation.

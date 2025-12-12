@@ -26,6 +26,65 @@ This guide provides comprehensive reference for generating compliance documents 
 
 ---
 
+## Shared Content System
+
+### Overview
+
+To reduce duplication and ensure consistency, common sections are extracted to `/skills/architecture-compliance/shared/`:
+
+**Shared Sections**:
+- **Document Control**: Standard table structure with validation fields (lines 10-24 in templates)
+- **Dynamic Field Instructions**: Placeholder population logic and validation requirements (lines 27-50)
+- **Compliance Score Calculation**: Critical N/A item scoring rules (around line 61-66)
+- **Validation Methodology**: 3-step scoring process - Completeness (40%), Compliance (50%), Quality (10%)
+- **Status Codes**: Four standard statuses (Compliant, Non-Compliant, Not Applicable, Unknown)
+
+**Benefits**:
+- **Eliminates ~400-500 lines of duplication** across all 10 templates
+- **Single point of maintenance**: Update validation logic once, applies to all contracts
+- **Guaranteed consistency**: Identical scoring formulas and status definitions
+- **Simplified updates**: Change shared file instead of editing 10 templates
+
+### How It Works
+
+Templates use `<!-- @include -->` directives to reference shared content:
+
+```markdown
+<!-- @include-with-config shared/sections/document-control.md config=business-continuity -->
+```
+
+During generation (Phase 4, Step 4.1):
+1. Include directives are detected and parsed
+2. Shared files are loaded from `/shared/` directory
+3. Domain-specific values (review boards, compliance codes) are injected from `shared/config/<domain>.json`
+4. Template variables (e.g., `{{review_board}}`) are replaced with actual values
+5. Directives are replaced with fully expanded content
+6. Placeholder replacement proceeds normally (Step 4.2)
+
+### Domain Configuration
+
+Each compliance domain has a config file (e.g., `shared/config/business-continuity.json`) containing:
+
+```json
+{
+  "domain_name": "Business Continuity",
+  "compliance_prefix": "LABC",
+  "review_board": "Business Continuity Review Board",
+  "approval_authority": "Business Continuity Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json"
+}
+```
+
+Variables like `{{review_board}}` in shared files are replaced with these values during include processing.
+
+### Template Compatibility
+
+**Backward Compatible**: Templates without `@include` directives work unchanged. The system only processes includes if directives are present, ensuring all existing templates continue functioning.
+
+**For detailed documentation**: See `shared/README.md`
+
+---
+
 ## Document Types (10 Compliance Contracts)
 
 ### 1. Business Continuity (Business Continuity)

@@ -1,0 +1,30 @@
+{
+  "domain_name": "Enterprise Architecture",
+  "compliance_prefix": "LAE",
+  "review_board": "Enterprise Architecture Review Board",
+  "approval_authority": "Enterprise Architecture Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/enterprise_architecture_validation.json",
+
+  "domain_terms": {
+    "Enterprise Architecture": "Holistic view of organizational strategy, business processes, information systems, and technology infrastructure",
+    "Business Capability": "What the business does or can do, independent of how it's done",
+    "Target State": "Desired future architecture aligned with business strategy",
+    "Architecture Roadmap": "Planned sequence of transitions from current to target state",
+    "Architecture Domain": "Subject area (Business, Data, Application, Technology)",
+    "Architecture Governance": "Practice of monitoring and directing architecture activities"
+  },
+
+  "abbreviations": {
+    "LAE": "Enterprise Architecture compliance requirement code",
+    "EA": "Enterprise Architecture",
+    "TOGAF": "The Open Group Architecture Framework",
+    "ArchiMate": "Architecture modeling language",
+    "ADM": "Architecture Development Method"
+  },
+
+  "primary_source_sections": "2 (System Overview), 12 (Technical Decisions → Architecture Decisions)",
+  "framework_description": "business capabilities, target state architecture, roadmap alignment, and governance",
+  "compliance_framework_code": "LAE (Enterprise Architecture)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "6"
+}

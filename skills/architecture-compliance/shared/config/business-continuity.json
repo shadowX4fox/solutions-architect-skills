@@ -1,0 +1,33 @@
+{
+  "domain_name": "Business Continuity",
+  "compliance_prefix": "LABC",
+  "review_board": "Business Continuity Review Board",
+  "approval_authority": "Business Continuity Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json",
+
+  "domain_terms": {
+    "RTO": "Recovery Time Objective - Maximum acceptable downtime before business impact becomes unacceptable",
+    "RPO": "Recovery Point Objective - Maximum acceptable data loss measured in time",
+    "DR": "Disaster Recovery - Process and procedures for recovering IT systems after a disaster",
+    "Failover": "Automatic switching to redundant system when primary system fails",
+    "Backup": "Copy of data stored separately for recovery purposes",
+    "HA": "High Availability - System design ensuring minimal downtime through redundancy",
+    "BCP": "Business Continuity Plan - Documented procedures for maintaining business operations during disruptions",
+    "Hot Site": "Fully operational backup facility ready for immediate failover",
+    "Cold Site": "Backup location with basic infrastructure requiring configuration before use",
+    "Warm Site": "Partially configured backup facility requiring some setup time"
+  },
+
+  "abbreviations": {
+    "LABC": "Business Continuity compliance requirement code",
+    "MTTR": "Mean Time To Recovery",
+    "MTBF": "Mean Time Between Failures",
+    "SLA": "Service Level Agreement"
+  },
+
+  "primary_source_sections": "10 (Non-Functional Requirements), 11 (Operational Considerations → High Availability, Backup & Disaster Recovery, Disaster Recovery)",
+  "framework_description": "RTO/RPO, backup, DR, and high availability",
+  "compliance_framework_code": "LABC (Business Continuity)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "10"
+}

@@ -1,0 +1,34 @@
+{
+  "domain_name": "Data & AI Architecture",
+  "compliance_prefix": "LAD / LAIA",
+  "review_board": "Data & AI Architecture Review Board",
+  "approval_authority": "Data & AI Architecture Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/data_analytics_ai_validation.json",
+
+  "domain_terms": {
+    "Data Governance": "Framework ensuring data quality, security, privacy, and compliance",
+    "Data Lineage": "Tracking data flow from origin through transformations to consumption",
+    "Data Lake": "Centralized repository storing structured and unstructured data at scale",
+    "Data Warehouse": "Structured repository optimized for analytics and reporting",
+    "Machine Learning": "Algorithms enabling systems to learn from data without explicit programming",
+    "Feature Store": "Centralized repository for ML features enabling reuse and consistency",
+    "Model Registry": "Catalog of trained ML models with versioning and metadata",
+    "MLOps": "Practices for deploying and maintaining ML models in production"
+  },
+
+  "abbreviations": {
+    "LAD": "Data Architecture compliance requirement code",
+    "LAIA": "AI Architecture compliance requirement code",
+    "ML": "Machine Learning",
+    "ETL": "Extract, Transform, Load",
+    "ELT": "Extract, Load, Transform",
+    "OLAP": "Online Analytical Processing",
+    "OLTP": "Online Transaction Processing"
+  },
+
+  "primary_source_sections": "5 (Data View), 6 (Machine Learning View), 10 (Non-Functional Requirements), 11 (Operational Considerations)",
+  "framework_description": "data governance, data pipelines, ML lifecycle, feature stores, model registry, and MLOps",
+  "compliance_framework_code": "LAD / LAIA (Data & AI Architecture)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "45"
+}

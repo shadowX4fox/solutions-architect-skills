@@ -1,0 +1,34 @@
+{
+  "domain_name": "SRE Architecture",
+  "compliance_prefix": "LASRE",
+  "review_board": "SRE Leadership/Operations",
+  "approval_authority": "SRE Leadership/Operations",
+  "validation_config_path": "/skills/architecture-compliance/validation/sre_architecture_validation.json",
+
+  "domain_terms": {
+    "SRE": "Site Reliability Engineering - applying software engineering to operations",
+    "SLO": "Service Level Objective - target level of service reliability",
+    "SLI": "Service Level Indicator - quantitative measure of service level",
+    "Error Budget": "Acceptable amount of downtime or errors based on SLO",
+    "Toil": "Manual, repetitive operational work that can be automated",
+    "Runbook": "Documented procedures for operational tasks",
+    "Observability": "Ability to understand system internal state from external outputs",
+    "Incident Management": "Process for responding to and resolving service disruptions"
+  },
+
+  "abbreviations": {
+    "LASRE": "SRE Architecture compliance requirement code",
+    "SRE": "Site Reliability Engineering",
+    "SLO": "Service Level Objective",
+    "SLI": "Service Level Indicator",
+    "SLA": "Service Level Agreement",
+    "MTTR": "Mean Time To Recovery",
+    "MTBF": "Mean Time Between Failures"
+  },
+
+  "primary_source_sections": "10 (Non-Functional Requirements), 11 (Operational Considerations)",
+  "framework_description": "SLOs, SLIs, observability, incident management, error budgets, and operational excellence",
+  "compliance_framework_code": "LASRE (SRE Architecture)",
+  "v2_domain_features": "- Replaced old simple sections with 11 comprehensive LASRE requirements\n- LASRE1: SLO Definition (4 subsections, 8 data points)\n- LASRE2: SLI Selection (3 subsections, 6 data points)\n- LASRE3: Error Budget Policy (3 subsections, 6 data points)\n- LASRE4: Observability (4 subsections, 8 data points)\n- LASRE5: Monitoring & Alerting (3 subsections, 6 data points)\n- LASRE6: Incident Management (3 subsections, 6 data points)\n- LASRE7: Capacity Planning (2 subsections, 4 data points)\n- LASRE8: Deployment Automation (2 subsections, 4 data points)\n- LASRE9: Runbook Documentation (2 subsections, 4 data points)\n- LASRE10: Toil Reduction (2 subsections, 4 data points)\n- LASRE11: On-Call Process (2 subsections, 4 data points)",
+  "v2_data_point_count": "57"
+}

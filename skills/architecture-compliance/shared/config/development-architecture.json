@@ -1,0 +1,32 @@
+{
+  "domain_name": "Development Architecture",
+  "compliance_prefix": "LADES",
+  "review_board": "Technical Architecture Review Board",
+  "approval_authority": "Technical Architecture Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/development_architecture_validation.json",
+
+  "domain_terms": {
+    "Development Stack": "Set of technologies, frameworks, and tools used to build software",
+    "Dependency Management": "Process of managing external libraries and their versions",
+    "Build Pipeline": "Automated sequence of steps to compile, test, and package code",
+    "Code Quality": "Measure of software maintainability, readability, and adherence to standards",
+    "Version Control": "System for tracking changes to source code over time",
+    "Development Environment": "Local or cloud-based workspace for writing and testing code",
+    "Artifact Repository": "Storage system for compiled binaries and packages"
+  },
+
+  "abbreviations": {
+    "LADES": "Development Architecture compliance requirement code",
+    "CI/CD": "Continuous Integration / Continuous Deployment",
+    "IDE": "Integrated Development Environment",
+    "SCM": "Source Code Management",
+    "SCA": "Software Composition Analysis",
+    "SAST": "Static Application Security Testing"
+  },
+
+  "primary_source_sections": "3 (Component View), 5 (Data View), 8 (Deployment View), 11 (Operational Considerations), 12 (Technical Decisions)",
+  "framework_description": "development stack, build pipelines, dependency management, code quality, and artifact management",
+  "compliance_framework_code": "LADES (Development Architecture)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "6"
+}

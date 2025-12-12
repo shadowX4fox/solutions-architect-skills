@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=enterprise-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=enterprise-architecture -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/enterprise_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Enterprise Architecture Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Enterprise Architecture Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Enterprise Architecture Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -79,13 +27,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAE6 | Managed Data Vision | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Data Architect / Data Governance Lead or N/A] |
 | LAE7 | API First / Event Driven | Enterprise Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Lead or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/7 ([X/7*100]%)
-- ❌ Non-Compliant: [Y]/7 ([Y/7*100]%)
-- ⊘ Not Applicable: [Z]/7 ([Z/7*100]%)
-- ❓ Unknown: [W]/7 ([W/7*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -692,61 +634,89 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Appendix: Source Traceability and Completion Status
 
-### Data Extracted Successfully
-[List of all data points marked as "Compliant" with source references]
+### A.1 Definitions and Terminology
 
-Example format:
-- LAE1 - Business Capabilities Addressed: [Value] (Source: ARCHITECTURE.md Section 2.2, lines 123-125)
-- LAE2 - Third-Party Applications Used: [Value] (Source: ARCHITECTURE.md Section 6, lines 456-460)
-- LAE3 - Cloud Provider: [Value] (Source: ARCHITECTURE.md Section 4, line 678)
-- LAE4 - Strategic Objectives Addressed: [Value] (Source: ARCHITECTURE.md Section 2.1, lines 234-237)
-- LAE5 - Technology Stack Versions: [Value] (Source: ARCHITECTURE.md Section 6, lines 789-795)
-- LAE6 - Data Classification: [Value] (Source: ARCHITECTURE.md Section 9.5, lines 890-893)
-- LAE7 - API Design Approach: [Value] (Source: ARCHITECTURE.md Section 4.3, lines 567-570)
+**Key Enterprise Architecture Terms**:
 
-### Missing Data Requiring Attention
+- **Modularity**: Design approach enabling independent development and deployment of capabilities
+- **Capability Reusability**: Ability to leverage existing components across multiple solutions
+- **Technology Radar**: Framework for tracking and evaluating technology maturity and adoption
+- **Zero Obsolescence**: Strategy to prevent technical debt through continuous modernization
+- **Managed Data Vision**: Centralized data strategy ensuring data as strategic asset
+- **API First**: Design principle prioritizing API interfaces for all integrations
+- **Event-Driven Architecture**: Pattern using events to trigger and communicate between services
 
-| Requirement | Missing Data Point | Responsible Role | Recommended Action |
-|-------------|-------------------|------------------|-------------------|
-| LAE1 | [Example: Capability redundancy analysis] | Enterprise Architect | Document analysis of existing systems in Section 5 |
-| LAE2 | [Example: Third-party customization justification] | Product Manager | Add regulatory justification for customizations in Section 12 |
-| LAE3 | [Example: Cloud-native services usage] | Cloud Architect | Specify managed services adoption in Section 4 or 6 |
-| LAE4 | [Example: Business value metrics] | Business Analyst | Define measurable KPIs in Section 2.3 |
-| LAE5 | [Example: Component EOL dates] | Technical Lead | Verify end-of-support timelines in Section 6 |
-| LAE6 | [Example: Data retention policies] | Data Governance Lead | Document retention periods in Section 9 or 11 |
-| LAE7 | [Example: API specification] | Integration Architect | Provide OpenAPI/Swagger specs in Section 4 or 9 |
+<!-- @include shared/fragments/status-codes.md -->
 
-### Not Applicable Items
-[List of requirements marked as "Not Applicable" with justification]
+**Abbreviations**:
 
-Example format:
-- LAE1 - Application Rationalization: Greenfield solution with no existing applications to consolidate
-- LAE2 - Third-Party Customization: Solution built entirely in-house with no COTS products
-- LAE3 - Cloud Migration Strategy: Cloud-native solution with no legacy components to migrate
-- LAE5 - Operating System Lifecycle: Serverless/PaaS deployment with no OS management
-
-### Unknown Status Items Requiring Investigation
-
-| Requirement | Data Point | Issue | Responsible Role | Action Needed |
-|-------------|------------|-------|------------------|---------------|
-| LAE1 | [Example: Capability map coverage] | Capabilities mentioned but mapping incomplete | Enterprise Architect | Complete capability map alignment in Section 2 |
-| LAE3 | [Example: Serverless adoption] | Architecture described but serverless usage unclear | Cloud Architect | Clarify serverless strategy in Section 4 or 8 |
-| LAE4 | [Example: ROI calculation] | Business case mentioned but ROI not quantified | Business Analyst | Quantify expected ROI in Section 2.1 |
-| LAE6 | [Example: Data lineage tracking] | Data flow documented but lineage unclear | Data Architect | Document lineage tracking mechanism in Section 4 |
-| LAE7 | [Example: Event schema standards] | Events mentioned but schema format unclear | Integration Architect | Specify event schema standards in Section 4 |
+- **LAE**: Enterprise Architecture (Lineamiento de Arquitectura Empresarial)
+- **API**: Application Programming Interface
+- **EDA**: Event-Driven Architecture
+- **MDM**: Master Data Management
+- **ESB**: Enterprise Service Bus
+- **SOA**: Service-Oriented Architecture
 
 ---
 
-## Generation Metadata
+### A.2 Validation Methodology
 
-**Template Version**: 2.0 (Updated with compliance evaluation system)
-**Generation Date**: [GENERATION_DATE]
-**Source Document**: ARCHITECTURE.md
-**Primary Source Sections**: 2 (Business Context), 3 (Functional Requirements), 4 (Meta Architecture), 5 (Current State), 6 (Technology Stack), 7 (Migration), 8 (Deployment), 9 (Security), 12 (ADRs)
-**Completeness**: [PERCENTAGE]% ([X/TOTAL] data points documented)
-**Template Language**: English
-**Compliance Framework**: LAE (Enterprise Architecture Compliance) with 7 requirements
-**Status Labels**: Compliant, Non-Compliant, Not Applicable, Unknown
+<!-- @include-with-config shared/sections/validation-methodology.md config=enterprise-architecture -->
+
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Enterprise Architecture Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Missing modularity analysis | LAE1 Non-Compliant | Section 2 (Solution Overview) | Document component boundaries and interfaces |
+| No technology radar reference | LAE3 Non-Compliant | Section 8 (Technology Stack) | Align stack with approved enterprise technologies |
+| Undefined data strategy | LAE6 Non-Compliant | Section 4 (Data Model) | Document data governance and management approach |
+| Missing API-first approach | LAE7 Non-Compliant | Section 5 (Integration Approach) | Define API strategy and event-driven patterns |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with standardized template structure
+- Total: 7 validation data points across LAE1-LAE7 requirements
+
+**Version 1.0 (Previous)**:
+- Initial template with minimal appendix
+- Basic PLACEHOLDER approach
+- Limited source traceability
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=enterprise-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=enterprise-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=enterprise-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=enterprise-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=enterprise-architecture -->
 
 ---
 

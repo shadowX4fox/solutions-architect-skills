@@ -1,0 +1,30 @@
+{
+  "domain_name": "Cloud Architecture",
+  "compliance_prefix": "LAC",
+  "review_board": "Cloud Architecture Review Board",
+  "approval_authority": "Cloud Architecture Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/cloud_architecture_validation.json",
+
+  "domain_terms": {
+    "Cloud Model": "Deployment model - Public, Private, Hybrid, or Multi-cloud",
+    "Region": "Geographic data center location for cloud resources",
+    "Availability Zone": "Isolated fault domain within a cloud region",
+    "IaC": "Infrastructure as Code - Declarative infrastructure provisioning",
+    "Service Model": "Cloud service abstraction level - IaaS, PaaS, SaaS",
+    "Cloud Native": "Applications designed specifically for cloud environments"
+  },
+
+  "abbreviations": {
+    "LAC": "Cloud Architecture compliance requirement code",
+    "IaC": "Infrastructure as Code",
+    "HA": "High Availability",
+    "CDN": "Content Delivery Network",
+    "VPC": "Virtual Private Cloud"
+  },
+
+  "primary_source_sections": "4 (Infrastructure View), 8 (Deployment View), 10 (Non-Functional Requirements)",
+  "framework_description": "cloud models, service justification, multi-region design, and IaC",
+  "compliance_framework_code": "LAC (Cloud Architecture)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "6"
+}

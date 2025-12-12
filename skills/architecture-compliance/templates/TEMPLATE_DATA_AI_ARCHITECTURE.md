@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=data-ai-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=data-ai-architecture -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/data_analytics_ai_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Data & AI Architecture Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Data & AI Architecture Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Data & AI Architecture Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -83,13 +31,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAIA2 | AI Security and Reputation | AI | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [AI/ML Architect or N/A] |
 | LAIA3 | AI Hallucination Control | AI | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [AI/ML Architect or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/11 ([X/11*100]%)
-- ❌ Non-Compliant: [Y]/11 ([Y/11*100]%)
-- ⊘ Not Applicable: [Z]/11 ([Z/11*100]%)
-- ❓ Unknown: [W]/11 ([W/11*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -1120,59 +1062,93 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ## Appendix: Source Traceability and Completion Status
 
-### Data Extracted Successfully
-[List of all data points marked as "Compliant" with source references]
+### A.1 Definitions and Terminology
 
-Example format:
-- LAD1 - Quality Validation Framework: [Value] (Source: ARCHITECTURE.md Section 5.3, lines 456-460)
-- LAD2 - Data Fabric Connectivity: [Value] (Source: ARCHITECTURE.md Section 7.2, lines 801-815)
-- LAD5 - Current Data Volume: [Value] (Source: ARCHITECTURE.md Section 10.1, lines 1234-1238)
-- LAD8 - Database Engines: [Value] (Source: ARCHITECTURE.md Section 8.2, lines 912-920)
-- LAIA1 - Foundational Models: [Value] (Source: ARCHITECTURE.md Section 5.7, lines 567-572)
-- LAIA3 - Evaluation Metrics: [Value] (Source: ARCHITECTURE.md Section 11.5, lines 1789-1795)
+**Key Data & AI Architecture Terms**:
 
-### Missing Data Requiring Attention
+- **Data Quality**: Accuracy, completeness, consistency, and timeliness of data
+- **Data Governance**: Policies, procedures, and standards for data management
+- **Data Catalog**: Centralized repository of metadata describing available datasets
+- **Data Lineage**: Documentation of data origin, transformations, and movement
+- **AI Model Governance**: Oversight of AI model development, deployment, and monitoring
+- **AI Hallucination Control**: Mechanisms to detect and prevent AI-generated false information
+- **Data Lake**: Centralized repository storing structured and unstructured data
+- **Master Data Management (MDM)**: Process to ensure single source of truth for critical data
 
-| Requirement | Missing Data Point | Responsible Role | Recommended Action |
-|-------------|-------------------|------------------|-------------------|
-| LAD1 | Data profiling approach | Data Architect | Define data profiling strategy and tools in Section 6 |
-| LAD3 | RTO/RPO values | Business Continuity Manager | Document recovery objectives in Section 11.3 |
-| LAD6 | Schema registry | Data Architect | Specify schema registry solution in Section 8 |
-| LAD7 | Compliance dashboards | Compliance Officer | Document compliance monitoring dashboards in Section 11 |
-| LAIA1 | AI model tenant isolation | AI/ML Architect | Specify model deployment tenant in Section 5 |
-| LAIA2 | Guardrail rules | AI/ML Architect | Define content filtering guardrail rules in Section 9 |
-| LAIA3 | Evaluation metrics | ML Engineer | Define specific metrics (F1, BLEU, ROUGE, perplexity) in Section 11 |
+<!-- @include shared/fragments/status-codes.md -->
 
-### Not Applicable Items
-[List of requirements marked as "Not Applicable" with justification]
+**Abbreviations**:
 
-Example format:
-- LAD2 - Data Fabric Integration: Solution does not integrate with organizational Data Fabric
-- LAD4 - Storage-Processing Separation: Monolithic architecture by design
-- LAIA1 - Custom Models: Only using pre-trained foundational models
-
-### Unknown Status Items Requiring Investigation
-
-| Requirement | Data Point | Issue | Responsible Role | Action Needed |
-|-------------|------------|-------|------------------|---------------|
-| LAD5 | Data volume growth | Scalability mentioned but no specific projections | Data Architect | Clarify projected data growth (annual %) in Section 10 |
-| LAD6 | Replication lag tolerance | Replication referenced but tolerance not specified | Integration Engineer | Define acceptable replication lag thresholds in Section 10 |
-| LAD8 | Catalog compliance | Database engines documented but catalog verification unclear | Data Architect | Verify database engine compliance with institutional catalog |
-| LAIA2 | Prompt injection prevention | Security mentioned but specific measures unclear | Security Architect | Document prompt injection prevention techniques in Section 9 |
-| LAIA3 | Hallucination mitigation | Mitigation referenced but specific techniques not defined | ML Engineer | Define hallucination mitigation strategies (RAG, fine-tuning) in Section 5 |
+- **LAD**: Data Architecture (Lineamiento de Arquitectura de Datos)
+- **LAIA**: AI Architecture (Lineamiento de Arquitectura de IA)
+- **MDM**: Master Data Management
+- **ETL**: Extract, Transform, Load
+- **API**: Application Programming Interface
+- **ML**: Machine Learning
+- **AI**: Artificial Intelligence
+- **LLM**: Large Language Model
 
 ---
 
-## Generation Metadata
+### A.2 Validation Methodology
 
-**Template Version**: 2.0 (Updated with compliance evaluation system)
-**Generation Date**: [GENERATION_DATE]
-**Source Document**: ARCHITECTURE.md
-**Primary Source Sections**: 4 (Architecture Layers), 5 (Component Details), 6 (Data Flow), 7 (Integrations), 8 (Technology Stack), 9 (Security), 10 (Scalability), 11 (Operations), 12 (ADRs)
-**Completeness**: [PERCENTAGE]% ([X/TOTAL] data points documented)
-**Template Language**: English
-**Compliance Framework**: LAD (Data Architecture) + LAIA (AI Architecture) with 11 requirements (8 Data + 3 AI)
-**Status Labels**: Compliant, Non-Compliant, Not Applicable, Unknown
+<!-- @include-with-config shared/sections/validation-methodology.md config=data-ai-architecture -->
+
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Data & AI Architecture Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Missing data quality metrics | LAD1 Non-Compliant | Section 4 (Data Model) | Define data quality KPIs and validation rules |
+| Undefined data governance policies | LAD2 Non-Compliant | Section 11 (Operational Considerations) | Document data access controls and policies |
+| No AI model governance framework | LAIA1 Non-Compliant | Section 6 (AI/ML Components) | Establish model approval and monitoring process |
+| Missing AI hallucination controls | LAIA3 Non-Compliant | Section 6 (AI/ML Components) | Implement validation and grounding mechanisms |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with standardized template structure
+- Separated Data (LAD1-LAD8) and AI (LAIA1-LAIA3) requirements
+- Total: 11 validation data points (8 Data + 3 AI)
+
+**Version 1.0 (Previous)**:
+- Initial template with minimal appendix
+- Basic PLACEHOLDER approach
+- Limited source traceability
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=data-ai-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=data-ai-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=data-ai-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=data-ai-architecture -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=data-ai-architecture -->
 
 ---
 

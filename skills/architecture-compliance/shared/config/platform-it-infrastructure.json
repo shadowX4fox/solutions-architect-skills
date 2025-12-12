@@ -1,0 +1,32 @@
+{
+  "domain_name": "Platform IT Infrastructure",
+  "compliance_prefix": "LAPI",
+  "review_board": "Infrastructure Review Board",
+  "approval_authority": "Infrastructure Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/platform_infrastructure_validation.json",
+
+  "domain_terms": {
+    "Infrastructure Platform": "Foundation layer providing compute, storage, and networking resources",
+    "Compute Platform": "Virtualization or container orchestration infrastructure",
+    "Storage Platform": "Data persistence and retrieval systems",
+    "Network Platform": "Connectivity and routing infrastructure",
+    "Monitoring Platform": "Observability and alerting systems",
+    "Identity Platform": "Authentication and authorization infrastructure",
+    "Database Platform": "Managed database services and engines"
+  },
+
+  "abbreviations": {
+    "LAPI": "Platform IT Infrastructure compliance requirement code",
+    "VM": "Virtual Machine",
+    "IaC": "Infrastructure as Code",
+    "LB": "Load Balancer",
+    "DNS": "Domain Name System",
+    "CMDB": "Configuration Management Database"
+  },
+
+  "primary_source_sections": "4 (Infrastructure View), 8 (Deployment View), 10 (Non-Functional Requirements)",
+  "framework_description": "compute platforms, storage systems, network infrastructure, monitoring, and database platforms",
+  "compliance_framework_code": "LAPI (Platform IT Infrastructure)",
+  "v2_domain_features": "",
+  "v2_data_point_count": "7"
+}

@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=business-continuity -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=business-continuity -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/business_continuity_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Business Continuity Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Business Continuity Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Business Continuity Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -127,12 +75,90 @@ Note: Add business criticality classification to ARCHITECTURE.md Section 2.2 (Sy
 
 ---
 
-## Appendix: Source Traceability
+## Appendix: Source Traceability and Completion Status
 
-**Data Extracted From**:
-- [SOURCE_REFERENCES]
+### A.1 Definitions and Terminology
 
-**Missing Data Requiring Manual Review**:
-1. [PLACEHOLDER items]
+**Business Continuity Terms**:
+- **RTO (Recovery Time Objective)**: Maximum acceptable downtime before business impact becomes unacceptable
+- **RPO (Recovery Point Objective)**: Maximum acceptable data loss measured in time
+- **DR (Disaster Recovery)**: Process and procedures for recovering IT systems after a disaster
+- **Failover**: Automatic switching to redundant system when primary system fails
+- **Backup**: Copy of data stored separately for recovery purposes
+- **High Availability (HA)**: System design ensuring minimal downtime through redundancy
+- **Business Continuity Plan (BCP)**: Documented procedures for maintaining business operations during disruptions
+- **Hot Site**: Fully operational backup facility ready for immediate failover
+- **Cold Site**: Backup location with basic infrastructure requiring configuration before use
+- **Warm Site**: Partially configured backup facility requiring some setup time
 
-**Last Generated**: [GENERATION_DATE]
+<!-- @include shared/fragments/status-codes.md -->
+
+**Compliance Abbreviations**:
+- **LABC**: Business Continuity compliance requirement code
+- **MTTR**: Mean Time To Recovery
+- **MTBF**: Mean Time Between Failures
+- **SLA**: Service Level Agreement
+
+---
+
+<!-- @include-with-config shared/sections/validation-methodology.md config=business-continuity -->
+
+---
+
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Business Continuity Gaps and Remediation**:
+
+| Missing Item | ARCHITECTURE.md Section | What to Add |
+|--------------|------------------------|-------------|
+| RTO/RPO values | Section 11.3 (Backup & Disaster Recovery) | Define recovery objectives (e.g., RTO: 4 hours, RPO: 1 hour) |
+| Backup strategy | Section 11.3 (Backup & Disaster Recovery) | Document backup frequency, retention, and storage location |
+| DR testing plan | Section 11.4 (Disaster Recovery) | Define DR drill schedule and validation procedures |
+| Failover mechanisms | Section 11.2 (High Availability) | Specify automatic failover configuration and triggers |
+| Data replication | Section 11.3 or 11.4 | Document geo-replication strategy and RPO alignment |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with Cloud Architecture template structure
+- Total: 10+ validation data points
+
+**Version 1.0 (Previous)**:
+- Initial template with minimal appendix
+- Basic PLACEHOLDER approach
+- Limited source traceability
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=business-continuity -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=business-continuity -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=business-continuity -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=business-continuity -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=business-continuity -->
+
+---
+
+**Note**: This document is auto-generated from ARCHITECTURE.md. Status labels (Compliant/Non-Compliant/Not Applicable/Unknown) and responsible roles must be populated during generation based on available data. Items marked as Non-Compliant or Unknown require stakeholder action to complete the architecture documentation.

@@ -1,0 +1,31 @@
+{
+  "domain_name": "Security Architecture",
+  "compliance_prefix": "LAS",
+  "review_board": "Security Review Board",
+  "approval_authority": "Security Review Board",
+  "validation_config_path": "/skills/architecture-compliance/validation/security_architecture_validation.json",
+
+  "domain_terms": {
+    "Authentication": "Process of verifying the identity of a user, device, or system",
+    "Authorization": "Process of granting or denying access to resources based on identity",
+    "Encryption": "Cryptographic transformation of data to prevent unauthorized access",
+    "Security Controls": "Safeguards or countermeasures to protect confidentiality, integrity, and availability",
+    "Threat Modeling": "Structured process for identifying and prioritizing potential security threats",
+    "Zero Trust": "Security model assuming no implicit trust regardless of network location"
+  },
+
+  "abbreviations": {
+    "LAS": "Security Architecture compliance requirement code",
+    "CIA": "Confidentiality, Integrity, Availability (security triad)",
+    "IAM": "Identity and Access Management",
+    "RBAC": "Role-Based Access Management",
+    "MFA": "Multi-Factor Authentication",
+    "TLS": "Transport Layer Security"
+  },
+
+  "primary_source_sections": "3 (Component View), 5 (Data View), 7 (Integration View), 10 (Non-Functional Requirements)",
+  "framework_description": "API security, encryption, authentication, authorization, secrets management, and security controls",
+  "compliance_framework_code": "LAS (Security Architecture)",
+  "v2_domain_features": "- Replaced old simple sections with 8 comprehensive LAS requirements\n- LAS1: API Exposure (4 subsections, 10 data points)\n- LAS2: Intra-Microservices Communication (3 subsections, 6 data points)\n- LAS3: Data Encryption (3 subsections, 6 data points)\n- LAS4: Container Security (3 subsections, 6 data points)\n- LAS5: Secrets Management (2 subsections, 4 data points)\n- LAS6: Authentication & Authorization (2 subsections, 4 data points)\n- LAS7: Deployment Security (2 subsections, 4 data points)\n- LAS8: Logging & Auditing (2 subsections, 4 data points)",
+  "v2_data_point_count": "36"
+}

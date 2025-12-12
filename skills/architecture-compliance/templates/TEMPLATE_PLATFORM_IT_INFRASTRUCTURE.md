@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=platform-it-infrastructure -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=platform-it-infrastructure -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/platform_infrastructure_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Infrastructure Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Infrastructure Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Infrastructure Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -81,13 +29,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAPI08 | Transaction Volume Dimensioning | Platform & IT Infrastructure | [STATUS] | Section 10 | Integration Architect |
 | LAPI09 | Legacy Platform Transaction Capacity | Platform & IT Infrastructure | [STATUS] | Section 7, 10 | Integration Architect |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/9 ([X/9*100]%)
-- ❌ Non-Compliant: [Y]/9 ([Y/9*100]%)
-- ⊘ Not Applicable: [Z]/9 ([Z/9*100]%)
-- ❓ Unknown: [W]/9 ([W/9*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -546,88 +488,93 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ---
 
-## Appendix: Source Traceability
+## Appendix: Source Traceability and Completion Status
 
-This section provides full traceability from compliance requirements to ARCHITECTURE.md source sections.
+### A.1 Definitions and Terminology
 
-### LAPI01 - Unique Production Environments
-**Primary Sources**:
-- Section 4 (Meta Architecture Layers)
-- Section 9 (Security Architecture → Network Security, Authentication & Authorization)
-- Section 11 (Operational Considerations → Deployment → Environments)
-- Section 6 (Data Flow Patterns)
+**Platform and IT Infrastructure Terms**:
+- **HA (High Availability)**: System design ensuring minimal downtime through redundancy and failover
+- **Capacity Planning**: Process of determining infrastructure resources needed to meet performance requirements
+- **Environment Isolation**: Separation of development, testing, staging, and production environments
+- **Database Capacity**: Storage sizing based on data volume, growth projections, and retention policies
+- **Horizontal Scaling**: Adding more server instances to distribute load
+- **Vertical Scaling**: Increasing resources (CPU, memory) of existing servers
+- **Transaction Volume**: Number of operations (requests, database transactions) the system processes
+- **Dimensioning**: Sizing infrastructure based on expected workload and performance targets
+- **Naming Conventions**: Standardized naming patterns for infrastructure resources
 
-### LAPI02 - Server Operating Systems
-**Primary Sources**:
-- Section 4 (Meta Architecture Layers)
-- Section 8 (Technology Stack → Infrastructure, Containerization)
-- Section 11 (Operational Considerations → Maintenance)
+<!-- @include shared/fragments/status-codes.md -->
 
-### LAPI03 - Database Storage Capacity
-**Primary Sources**:
-- Section 8 (Technology Stack → Databases)
-- Section 10 (Scalability & Performance → Capacity Planning, Database Scaling, Performance Targets)
-- Section 11 (Operational Considerations → High Availability)
-
-### LAPI04 - Database Version Authorization
-**Primary Sources**:
-- Section 4 (Meta Architecture Layers)
-- Section 8 (Technology Stack → Databases)
-
-### LAPI05 - Database Backup and Retention
-**Primary Sources**:
-- Section 11 (Operational Considerations → Backup & Disaster Recovery, Disaster Recovery)
-- Section 10 (Capacity Planning)
-
-### LAPI06 - Infrastructure Capacity
-**Primary Sources**:
-- Section 8 (Technology Stack → Infrastructure)
-- Section 10 (Scalability & Performance → Capacity Planning, Horizontal Scaling, Vertical Scaling, Performance Targets)
-
-### LAPI07 - Naming Conventions
-**Primary Sources**:
-- Section 4 (Meta Architecture Layers)
-- Section 8 (Technology Stack → Infrastructure)
-- Section 11 (Operational Considerations)
-
-### LAPI08 - Transaction Volume Dimensioning
-**Primary Sources**:
-- Section 7 (Integration Points)
-- Section 8 (Technology Stack → Integration)
-- Section 10 (Scalability & Performance → Performance Targets → Throughput, Capacity Planning)
-
-### LAPI09 - Legacy Platform Transaction Capacity
-**Primary Sources**:
-- Section 7 (Integration Points → External Systems)
-- Section 8 (Technology Stack → Integration)
-- Section 9 (Security Architecture → Network Security)
-- Section 10 (Scalability & Performance → Performance Targets)
-- Section 11 (Operational Considerations → High Availability)
+**Infrastructure Abbreviations**:
+- **LAPI**: Platform and IT Infrastructure compliance requirement code
+- **IOPS**: Input/Output Operations Per Second
+- **VM**: Virtual Machine
+- **vCPU**: Virtual CPU
+- **RPO/RTO**: Recovery Point/Time Objective
 
 ---
 
-## Generation Metadata
-
-**Template Version**: 1.0
-**Template Created**: [CREATION_DATE]
-**Template Author**: Architecture Compliance Skill
-**Compliance Framework**: Platform and IT Infrastructure (LAPI)
-**Total Requirements**: 9 (LAPI01-LAPI09)
-**Total Data Points**: 25 subsections across 9 requirements
-
-**Document Generation Instructions**:
-1. Extract data from ARCHITECTURE.md sections 4, 8, 10, 11 primarily
-2. For each subsection, evaluate: Compliant/Non-Compliant/Not Applicable/Unknown
-3. Provide source line numbers for all extracted data
-4. Calculate overall compliance percentage
-5. Generate remediation guidance for Non-Compliant and Unknown items
-
-**Status Criteria**:
-- **Compliant**: Data fully documented in ARCHITECTURE.md and meets organizational standards
-- **Non-Compliant**: Data missing, incomplete, or does not meet standards (requires remediation)
-- **Not Applicable**: Requirement does not apply to this architecture
-- **Unknown**: Data partially documented or unclear (requires investigation)
+<!-- @include-with-config shared/sections/validation-methodology.md config=platform-it-infrastructure -->
 
 ---
 
-*End of Template*
+### A.3 Document Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+**Common Platform/Infrastructure Gaps and Remediation**:
+
+| Missing Item | ARCHITECTURE.md Section | What to Add |
+|--------------|------------------------|-------------|
+| Environment isolation | Section 11 (Operational → Deployment) | Document dev, test, staging, production environments with access controls |
+| Server OS specifications | Section 8 (Technology Stack → Infrastructure) | Specify OS versions, patching strategy, containerization approach |
+| Database capacity | Section 10 (Performance → Capacity Planning) | Calculate storage requirements based on data volume and retention |
+| Backup and retention | Section 11 (Operational → Backup & DR) | Define backup frequency, retention periods, recovery procedures |
+| Infrastructure capacity | Section 10 (Performance → Capacity Planning) | Document server sizing (vCPUs, memory, storage) and scaling strategy |
+| Naming conventions | Section 8 (Technology Stack → Infrastructure) | Define naming standards for servers, databases, networks, resources |
+| Transaction volume | Section 10 (Performance → Throughput) | Specify expected transaction rates and capacity dimensioning |
+
+---
+
+### A.4 Change History
+
+**Version 2.0 (Current)**:
+- Complete template restructuring to Version 2.0 format
+- Added comprehensive Appendix with A.1-A.4 subsections
+- Added Data Extracted Successfully section
+- Added Missing Data Requiring Attention table
+- Added Not Applicable Items section
+- Added Unknown Status Items Requiring Investigation table
+- Expanded Generation Metadata
+- Aligned with Cloud Architecture template structure
+- Total: 25 validation data points across 9 LAPI requirements
+- Preserved source mapping for LAPI01-LAPI09
+
+**Version 1.0 (Previous)**:
+- Basic source traceability section mapping LAPI01-LAPI09
+- Generation metadata focus
+- Limited structure
+
+---
+
+<!-- @include-with-config shared/sections/data-extracted-template.md config=platform-it-infrastructure -->
+
+---
+
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=platform-it-infrastructure -->
+
+---
+
+<!-- @include-with-config shared/sections/not-applicable-template.md config=platform-it-infrastructure -->
+
+---
+
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=platform-it-infrastructure -->
+
+---
+
+<!-- @include-with-config shared/sections/generation-metadata.md config=platform-it-infrastructure -->
+
+---
+
+**Note**: This document is auto-generated from ARCHITECTURE.md. Status labels (Compliant/Non-Compliant/Not Applicable/Unknown) and responsible roles must be populated during generation based on available data. Items marked as Non-Compliant or Unknown require stakeholder action to complete the architecture documentation.

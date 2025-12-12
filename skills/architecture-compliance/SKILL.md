@@ -100,6 +100,44 @@ To support flexible contract selection and validation, the following aliases and
   - **VALIDATION_SCHEMA.json**: JSON schema defining validation config structure
   - **README.md**: Documentation for the validation system
 - **contracts/CONTRACT_TYPES_REFERENCE.md**: Reference documentation for all contract types
+- **shared/**: Reusable template content to eliminate duplication
+  - **sections/**: Complete reusable sections (Document Control, Validation Methodology, etc.)
+  - **fragments/**: Smaller reusable pieces (Status Codes, Compliance Score Calculation, etc.)
+  - **config/**: Domain-specific configuration files (JSON) with variable mappings
+  - **README.md**: Documentation for the shared content system
+
+## Shared Content System
+
+**Purpose**: Eliminate duplication across 10 compliance templates by extracting common sections into reusable files.
+
+**Directory**: `/skills/architecture-compliance/shared/`
+
+**Components**:
+- **sections/**: Complete reusable sections (Document Control, Validation Methodology, etc.)
+- **fragments/**: Smaller reusable pieces (Status Codes, Compliance Score Calculation, etc.)
+- **config/**: Domain-specific JSON configs (compliance codes, review boards, domain terms)
+- **README.md**: Comprehensive documentation and usage guide
+
+**Include Syntax**:
+- Simple include: `<!-- @include shared/sections/file.md -->`
+- Parameterized include: `<!-- @include-with-config shared/sections/file.md config=domain-name -->`
+
+**Processing**: Includes are resolved during template loading (Phase 4, Step 4.1) before placeholder replacement.
+
+**Benefits**:
+- Reduces template duplication by ~400-500 lines across all 10 templates
+- Centralizes maintenance for common sections (update once, apply to all)
+- Ensures consistency across all contract types (identical validation logic, status codes, etc.)
+- Simplifies updates and reduces maintenance burden
+
+**Example** (Business Continuity template):
+```markdown
+<!-- @include-with-config shared/sections/document-control.md config=business-continuity -->
+```
+
+Resolves to the Document Control table with `{{variables}}` replaced from `shared/config/business-continuity.json`.
+
+**For detailed usage**: See `shared/README.md`
 
 ## File Naming Convention
 
@@ -455,11 +493,63 @@ For ALL contract types:
 
 ### Phase 4: Document Generation
 
-**Step 4.1: Load Template**
+**Step 4.1: Load Template with Include Resolution**
+
+**Implementation**: Use `utils/resolve-includes.py` to expand template includes before processing.
+
+```bash
+python3 utils/resolve-includes.py templates/TEMPLATE_<TYPE>.md /tmp/expanded_template.md
 ```
-Load template file for contract type from templates/
-Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
+
+**Algorithm** (automated by resolve-includes.py):
+
+1. Load template file for contract type from templates/
+   Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
+
+2. Detect and resolve @include directives:
+   - Pattern: <!-- @include(-with-config)?\s+(.+?)\s*(?:config=(\S+))?\s*-->
+   - For each directive found:
+     a. Parse directive type (simple @include or @include-with-config)
+     b. Resolve file path (relative to /skills/architecture-compliance/)
+     c. Read shared file content from resolved path
+     d. If @include-with-config:
+        - Load domain config from shared/config/<config>.json
+        - Replace {{variables}} in shared content with config values
+        - Example: {{review_board}} → "Business Continuity Review Board"
+     e. Replace directive with processed content
+   - Support nested includes up to 3 levels deep
+   - Detect circular includes and error gracefully
+
+3. Cache expanded template to avoid re-processing for same contract type
+
+4. Return fully expanded template for placeholder replacement (Step 4.2)
+
+**Example:**
+```markdown
+<!-- @include-with-config shared/sections/document-control.md config=business-continuity -->
 ```
+
+Expands to:
+```markdown
+## Document Control
+| Field | Value |
+|-------|-------|
+| Approval Authority | Business Continuity Review Board |
+...
+```
+
+**Usage in Workflow:**
+```bash
+# Expand template first
+python3 utils/resolve-includes.py templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/template.md
+
+# Then use expanded template for contract generation
+# (apply placeholders, populate data, etc.)
+```
+
+**Note**: If template has no @include directives, process normally (backward compatible)
+
+**Documentation**: See `utils/README.md` for detailed usage and examples
 
 **Step 4.2: Apply Extracted Data to Placeholders**
 ```

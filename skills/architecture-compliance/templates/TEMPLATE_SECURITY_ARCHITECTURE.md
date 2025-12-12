@@ -7,63 +7,11 @@
 
 ---
 
-## Document Control
+<!-- @include-with-config shared/sections/document-control.md config=security-architecture -->
 
-| Field | Value |
-|-------|-------|
-| Document Owner | [SOLUTION_ARCHITECT or N/A] |
-| Last Review Date | [GENERATION_DATE] |
-| Next Review Date | [NEXT_REVIEW_DATE] |
-| Status | [DOCUMENT_STATUS] |
-| Validation Score | [VALIDATION_SCORE]/10 |
-| Validation Status | [VALIDATION_STATUS] |
-| Validation Date | [VALIDATION_DATE] |
-| Validation Evaluator | [VALIDATION_EVALUATOR] |
-| Review Actor | [REVIEW_ACTOR] |
-| Approval Authority | [APPROVAL_AUTHORITY] |
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config=security-architecture -->
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/security_architecture_validation.json`
-
-**Dynamic Field Instructions for Document Generation**:
-
-- `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
-  - Score 8.0-10.0 → "Approved" (auto-approved)
-  - Score 7.0-7.9 → "In Review" (ready for manual review)
-  - Score 5.0-6.9 → "Draft" (needs work)
-  - Score 0.0-4.9 → "Rejected" (blocked)
-
-- `[VALIDATION_SCORE]`: From validation_results.final_score (format: "8.7/10")
-
-- `[VALIDATION_STATUS]`: From validation_results.outcome.overall_status
-  - "PASS" (score ≥ 7.0)
-  - "CONDITIONAL" (score 5.0-6.9)
-  - "FAIL" (score < 5.0)
-
-- `[VALIDATION_DATE]`: From validation_results.validation_date → "YYYY-MM-DD" or "Not performed"
-
-- `[VALIDATION_EVALUATOR]`: "Claude Code (Automated Validation Engine)"
-
-- `[REVIEW_ACTOR]`: From validation_results.outcome.review_actor
-  - Score 8.0-10.0 → "System (Auto-Approved)"
-  - Score 7.0-7.9 → "Security Review Board"
-  - Score 5.0-6.9 → "Architecture Team"
-  - Score 0.0-4.9 → "N/A (Blocked)"
-
-- `[APPROVAL_AUTHORITY]`: "Security Review Board"
-
-**Validation Requirements**:
-- Validation score ≥ 7.0 MANDATORY for approval pathway
-- Score 8.0-10.0: Automatic approval (no human review required)
-- Score 7.0-7.9: Manual review by Security Review Board required
-- Score 5.0-6.9: Must address gaps before proceeding to review
-- Score < 5.0: Contract rejected, cannot proceed
-
-**CRITICAL - Compliance Score Calculation**:
-When calculating the Compliance Score in validation_results, N/A items MUST be included in the numerator:
-- Compliance Score = (PASS items + N/A items + EXCEPTION items) / (Total items) × 10
-- N/A items count as fully compliant (10 points each)
-- Example: 6 PASS, 5 N/A, 0 FAIL, 0 UNKNOWN → (6+5)/11 × 10 = 10.0/10 (100%)
-- Add note in contract output: "Note: N/A items counted as fully compliant (included in compliance score)"
+<!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---
 
@@ -80,13 +28,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 | LAS7 | Internal Application Authentication | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Identity Architect / Security Architect or N/A] |
 | LAS8 | HTTP Encryption Scheme | Security Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Security Architect or N/A] |
 
-**Overall Compliance**:
-- ✅ Compliant: [X]/8 ([X/8*100]%)
-- ❌ Non-Compliant: [Y]/8 ([Y/8*100]%)
-- ⊘ Not Applicable: [Z]/8 ([Z/8*100]%)
-- ❓ Unknown: [W]/8 ([W/8*100]%)
-
-**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+<!-- @include shared/fragments/compliance-summary-footer.md -->
 
 ---
 
@@ -614,11 +556,7 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 - **HSTS**: HTTP header forcing browsers to use HTTPS connections only
 - **SPIFFE**: Secure Production Identity Framework for Everyone (service identity standard)
 
-**Status Codes**:
-- **Compliant**: Security requirement fully satisfied with documented evidence
-- **Non-Compliant**: Security requirement not met or missing from ARCHITECTURE.md
-- **Not Applicable**: Security requirement does not apply to this solution
-- **Unknown**: Partial security information exists but insufficient to determine compliance
+<!-- @include shared/fragments/status-codes.md -->
 
 **Security Abbreviations**:
 - **LAS**: Security Architecture compliance requirement code
@@ -635,51 +573,13 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ---
 
-### A.2 Validation Methodology
-
-**Validation Process**:
-
-1. **Completeness Check (40% weight)**:
-   - Counts filled data points across all 8 LAS requirements
-   - Formula: (Filled fields / Total required fields) × 10
-   - Example: 28 out of 30 fields = 9.3/10 completeness
-
-2. **Compliance Check (50% weight)**:
-   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN
-   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
-   - **CRITICAL**: N/A items MUST be included in numerator
-   - Example: 20 PASS + 5 N/A + 0 EXCEPTION out of 30 items = (20+5)/30 × 10 = 8.3/10
-
-3. **Quality Check (10% weight)**:
-   - Assesses source traceability (ARCHITECTURE.md section references)
-   - Verifies explanation quality and actionable notes
-   - Formula: (Items with valid sources / Total items) × 10
-
-4. **Final Score Calculation**:
-   ```
-   Final Score = (Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)
-   ```
-
-**Outcome Determination**:
-| Score Range | Document Status | Review Actor | Action |
-|-------------|----------------|--------------|--------|
-| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
-| 7.0-7.9 | In Review | Security Review Board | Manual review required |
-| 5.0-6.9 | Draft | Architecture Team | Address security gaps before review |
-| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed - critical security missing |
+<!-- @include-with-config shared/sections/validation-methodology.md config=security-architecture -->
 
 ---
 
 ### A.3 Document Completion Guide
 
-**For Architecture Teams**:
-
-If this contract shows "Non-Compliant" or "Unknown" items:
-
-1. **Identify Missing Sections**: Review the "Note" field for each item
-2. **Locate ARCHITECTURE.md Section**: The note specifies target section (4, 5, 7, 9, or 11)
-3. **Add Required Security Content**: Document the missing security information in the specified section
-4. **Regenerate Contract**: Run compliance generation again after updates
+<!-- @include shared/sections/completion-guide-intro.md -->
 
 **Common Security Gaps and Remediation**:
 
@@ -723,67 +623,23 @@ If this contract shows "Non-Compliant" or "Unknown" items:
 
 ---
 
-## Data Extracted Successfully
-
-[List of all data points marked as "Compliant" with source references]
-
-Example format:
-- LAS1.1 - API Gateway: [Value] (Source: ARCHITECTURE.md Section 5.2, lines 234-240)
-- LAS2.2 - mTLS Enforcement: [Value] (Source: ARCHITECTURE.md Section 9.4, lines 1168-1172)
-- LAS7.1 - Identity Provider: [Value] (Source: ARCHITECTURE.md Section 9.1, lines 1079-1085)
-- LAS8.1 - TLS Version: [Value] (Source: ARCHITECTURE.md Section 9.4, line 1170)
+<!-- @include-with-config shared/sections/data-extracted-template.md config=security-architecture -->
 
 ---
 
-## Missing Data Requiring Attention
-
-| Requirement | Missing Data Point | Responsible Role | Recommended Action |
-|-------------|-------------------|------------------|-------------------|
-| LAS1 | [Example: API authentication method] | Security Architect | Specify OAuth 2.0, API keys, or mTLS in Section 9 |
-| LAS2 | [Example: Service mesh technology] | Platform Engineer | Document Istio, Linkerd, or Consul Connect in Section 4/5 |
-| LAS3 | [Example: Cross-cluster mTLS] | Kubernetes Admin | Configure multi-cluster service mesh in Section 9 |
-| LAS4 | [Example: Domain bounded contexts] | API Architect | Define DDD bounded contexts and API boundaries in Section 3/5 |
-| LAS5 | [Example: Third-party API catalog] | Integration Engineer | List all consumed external APIs in Section 7 |
-| LAS6 | [Example: Data lake authentication] | Data Architect | Configure Azure AD or IAM roles for data lake access in Section 9 |
-| LAS7 | [Example: SSO integration] | Identity Architect | Document OIDC integration with corporate IdP in Section 9 |
-| LAS8 | [Example: TLS cipher suites] | Security Architect | Specify approved strong cipher suites in Section 9 |
+<!-- @include-with-config shared/sections/missing-data-table-template.md config=security-architecture -->
 
 ---
 
-## Not Applicable Items
-
-[List of requirements marked as "Not Applicable" with justification]
-
-Example format:
-- LAS2: Intra-Microservices Communication - Monolithic architecture with no microservices
-- LAS3: Inter-Cluster Kubernetes Communication - Single Kubernetes cluster deployment
-- LAS4: Domain API Communication - Non-DDD architecture, no domain-driven design
-- LAS6: Data Lake Communication - No data lake integration in solution
+<!-- @include-with-config shared/sections/not-applicable-template.md config=security-architecture -->
 
 ---
 
-## Unknown Status Items Requiring Investigation
-
-| Requirement | Data Point | Issue | Responsible Role | Action Needed |
-|-------------|------------|-------|------------------|---------------|
-| LAS1 | [Example: Rate limiting] | Mentioned but limits not specified | Security Architect | Define rate limits per API consumer tier in Section 9 |
-| LAS2 | [Example: Certificate management] | Service mesh mentioned but cert rotation unclear | Platform Engineer | Document cert-manager or SPIFFE/SPIRE usage in Section 9 |
-| LAS5 | [Example: API key rotation] | Third-party APIs listed but rotation policy unknown | Integration Engineer | Define API key rotation schedule (e.g., 90 days) in Section 9 |
-| LAS7 | [Example: MFA methods] | MFA mentioned but supported methods unclear | Identity Architect | Specify authenticator apps, FIDO2, biometric in Section 9 |
-| LAS8 | [Example: HSTS configuration] | HTTPS enforced but HSTS header configuration unknown | Security Architect | Add HSTS header with max-age and includeSubDomains in Section 9 |
+<!-- @include-with-config shared/sections/unknown-status-table-template.md config=security-architecture -->
 
 ---
 
-## Generation Metadata
-
-**Template Version**: 2.0 (Updated with 8 LAS requirements and compliance evaluation system)
-**Generation Date**: [GENERATION_DATE]
-**Source Document**: ARCHITECTURE.md
-**Primary Source Sections**: 4 (Meta Architecture), 5 (Component Model), 7 (Integration View), 9 (Security Architecture), 11 (Operational Considerations)
-**Completeness**: [PERCENTAGE]% ([X/56] data points documented)
-**Template Language**: English
-**Compliance Framework**: LAS (Security Architecture) with 8 requirements
-**Status Labels**: Compliant, Non-Compliant, Not Applicable, Unknown
+<!-- @include-with-config shared/sections/generation-metadata.md config=security-architecture -->
 
 ---
 
