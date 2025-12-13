@@ -5,6 +5,15 @@
   "approval_authority": "Technical Architecture Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/development_architecture_validation.json",
 
+  "weights": {
+    "completeness": 0.4,
+    "completeness_percent": "40%",
+    "compliance": 0.5,
+    "compliance_percent": "50%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "Development Stack": "Set of technologies, frameworks, and tools used to build software",
     "Dependency Management": "Process of managing external libraries and their versions",

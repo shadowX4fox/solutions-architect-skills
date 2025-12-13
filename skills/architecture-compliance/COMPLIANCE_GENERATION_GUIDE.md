@@ -36,7 +36,7 @@ To reduce duplication and ensure consistency, common sections are extracted to `
 - **Document Control**: Standard table structure with validation fields (lines 10-24 in templates)
 - **Dynamic Field Instructions**: Placeholder population logic and validation requirements (lines 27-50)
 - **Compliance Score Calculation**: Critical N/A item scoring rules (around line 61-66)
-- **Validation Methodology**: 3-step scoring process - Completeness (40%), Compliance (50%), Quality (10%)
+- **Validation Methodology**: 3-step scoring process with template-specific weights (most templates: 40%/50%/10%; Cloud: 35%/55%/10%; Security/SRE: 30%/60%/10%)
 - **Status Codes**: Four standard statuses (Compliant, Non-Compliant, Not Applicable, Unknown)
 
 **Benefits**:

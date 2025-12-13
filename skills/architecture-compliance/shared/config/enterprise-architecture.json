@@ -5,6 +5,15 @@
   "approval_authority": "Enterprise Architecture Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/enterprise_architecture_validation.json",
 
+  "weights": {
+    "completeness": 0.4,
+    "completeness_percent": "40%",
+    "compliance": 0.5,
+    "compliance_percent": "50%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "Enterprise Architecture": "Holistic view of organizational strategy, business processes, information systems, and technology infrastructure",
     "Business Capability": "What the business does or can do, independent of how it's done",

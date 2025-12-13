@@ -5,6 +5,15 @@
   "approval_authority": "Integration Architecture Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/integration_architecture_validation.json",
 
+  "weights": {
+    "completeness": 0.3,
+    "completeness_percent": "30%",
+    "compliance": 0.6,
+    "compliance_percent": "60%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "Integration Pattern": "Reusable solution to common integration challenges",
     "API Gateway": "Single entry point for managing, securing, and routing API requests",

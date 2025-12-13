@@ -59,6 +59,84 @@ Final Score = (9.5 × 0.4) + (10.0 × 0.5) + (9.0 × 0.1)
 
 ---
 
+### Example: Cloud Architecture - Custom Weights (35%/55%/10%)
+
+**Scenario**: A Cloud Architecture contract demonstrating template-specific weights that emphasize compliance over completeness.
+
+**Validation Results**:
+```json
+{
+  "final_score": 8.9,
+  "outcome": {
+    "overall_status": "PASS",
+    "document_status": "Approved",
+    "review_actor": "System (Auto-Approved)",
+    "action": "AUTO_APPROVE",
+    "message": "High confidence validation. Contract automatically approved."
+  },
+  "validation_date": "2025-12-13",
+  "validation_evaluator": "Claude Code (Automated Validation Engine)",
+  "scores": {
+    "completeness": 9.3,
+    "compliance": 8.6,
+    "quality": 9.0
+  },
+  "weights": {
+    "completeness": 0.35,
+    "compliance": 0.55,
+    "quality": 0.10
+  }
+}
+```
+
+**Score Breakdown**:
+- **Completeness (9.3/10)**: 26 of 28 required data points present in ARCHITECTURE.md (93%)
+  - Missing: Cost tracking/monitoring strategy, Cost optimization strategies
+- **Compliance (8.6/10)**: 22 PASS, 2 N/A, 2 FAIL, 2 UNKNOWN out of 28 items
+  - Calculation: (22 PASS + 2 N/A) / 28 = 24/28 × 10 = 8.57 ≈ 8.6/10
+  - Non-Compliant: Cost tracking not documented, Cost optimization strategies missing
+  - Unknown: Well-Architected Framework mapping incomplete, Organizational cloud standards need validation
+- **Quality (9.0/10)**: Excellent source traceability with section and line numbers for all data points
+
+**Final Calculation with Cloud-Specific Weights**:
+```
+Weights from cloud_architecture_validation.json:
+- W_completeness = 0.35 (35%)
+- W_compliance = 0.55 (55%) [higher emphasis on compliance]
+- W_quality = 0.10 (10%)
+
+Final Score = (Completeness × W_completeness) + (Compliance × W_compliance) + (Quality × W_quality)
+            = (9.3 × 0.35) + (8.6 × 0.55) + (9.0 × 0.10)
+            = 3.255 + 4.73 + 0.9
+            = 8.885
+            = 8.9/10 (rounded to 1 decimal)
+```
+
+**Key Insight**: Despite having 2 non-compliant items and slightly lower completeness than the Development Architecture example (9.3 vs 9.5), this Cloud Architecture contract still achieves a high score (8.9) because:
+1. The compliance weight is higher (55% vs 50%)
+2. The compliance score is strong (8.6/10 with 79% compliant items)
+3. Cloud Architecture prioritizes compliance adherence over documentation completeness
+
+**Document Control Output**:
+```markdown
+| Status | Approved |
+| Validation Score | 8.9/10 |
+| Validation Status | PASS |
+| Validation Date | 2025-12-13 |
+| Validation Evaluator | Claude Code (Automated Validation Engine) |
+| Review Actor | System (Auto-Approved) |
+| Approval Authority | Cloud Architecture Review Board |
+```
+
+**Outcome**: Contract is automatically approved without human review. Ready for implementation.
+
+**Threshold Analysis**:
+- Score 8.9 falls in 8.0-10.0 range → AUTO_APPROVE (✓)
+- If score were 7.9 → Would require MANUAL_REVIEW
+- If score were 8.0 exactly → AUTO_APPROVE (inclusive lower bound)
+
+---
+
 ## Tier 2: MANUAL_REVIEW (Score 7.0-7.9)
 
 ### Example: SRE Architecture - Good Compliance with Minor Gaps

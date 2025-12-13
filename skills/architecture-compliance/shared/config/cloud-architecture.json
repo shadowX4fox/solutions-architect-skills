@@ -5,6 +5,15 @@
   "approval_authority": "Cloud Architecture Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/cloud_architecture_validation.json",
 
+  "weights": {
+    "completeness": 0.35,
+    "completeness_percent": "35%",
+    "compliance": 0.55,
+    "compliance_percent": "55%",
+    "quality": 0.10,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "Cloud Model": "Deployment model - Public, Private, Hybrid, or Multi-cloud",
     "Region": "Geographic data center location for cloud resources",

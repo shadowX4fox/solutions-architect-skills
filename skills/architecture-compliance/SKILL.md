@@ -468,10 +468,30 @@ For ALL contract types:
      - EXCEPTION (10 points): Documented exception via LADES2
 
   4. Calculate scores:
-     - Final Score = (Completeness × weight) + (Compliance × weight) + (Quality × weight)
-     - Completeness: (Filled required fields / Total required) × 10
-     - Compliance: (PASS + N/A + EXCEPTION items / Total applicable) × 10
-     - Quality: Source traceability coverage (0-10)
+
+     **CRITICAL: USE WEIGHTS FROM VALIDATION CONFIG, NOT DEFAULT VALUES**
+
+     Step 4a: Extract weights from loaded validation config:
+     - Let W_completeness = config.scoring.weights.completeness
+     - Let W_compliance = config.scoring.weights.compliance
+     - Let W_quality = config.scoring.weights.quality
+     - Verify weights sum to 1.0 (±0.001 tolerance), warn if not
+
+     Step 4b: Calculate component scores (0-10 scale):
+     - Completeness = (Filled required fields / Total required fields) × 10
+     - Compliance = (PASS count + N/A count + EXCEPTION count) / Total applicable items × 10
+     - Quality = (Items with valid source references / Total items) × 10
+
+     Step 4c: Calculate weighted final score:
+     - Final Score = (Completeness × W_completeness) + (Compliance × W_compliance) + (Quality × W_quality)
+     - Round to 1 decimal place
+
+     **Example Calculation**:
+     Given: Completeness=9.3, Compliance=8.6, Quality=9.0, Weights=0.35/0.55/0.10
+     Calculation: (9.3 × 0.35) + (8.6 × 0.55) + (9.0 × 0.10)
+                = 3.255 + 4.73 + 0.9
+                = 8.885
+     Final Score = 8.9/10 (rounded to 1 decimal)
 
      **CRITICAL - N/A Scoring**: N/A items MUST be included in the compliance score numerator:
      - N/A = "Not applicable to this architecture" = Fully compliant (10 points)
@@ -479,10 +499,34 @@ For ALL contract types:
      - Example: 6 PASS + 5 N/A out of 11 items = (6+5)/11 × 10 = 10.0/10 (100%)
 
   5. Determine outcome:
-     - 8.0-10.0: AUTO_APPROVE → "Approved", Actor: "System (Auto-Approved)"
-     - 7.0-7.9: MANUAL_REVIEW → "In Review", Actor: [Approval Authority]
-     - 5.0-6.9: NEEDS_WORK → "Draft", Actor: "Architecture Team"
-     - 0.0-4.9: REJECT → "Rejected", Actor: "N/A (Blocked)"
+
+     **CRITICAL: USE OUTCOME_MAPPING FROM VALIDATION CONFIG**
+
+     Step 5a: Load outcome_mapping from validation config
+     Step 5b: Apply threshold matching using INCLUSIVE lower bound, INCLUSIVE upper bound:
+
+     Algorithm:
+     1. For each range in outcome_mapping (e.g., "8.0-10.0"):
+        - Parse range: lower = 8.0, upper = 10.0
+        - Check if: lower <= Final Score <= upper
+        - If match found, use that tier's values
+
+     2. Extract outcome values from matched tier:
+        - document_status (e.g., "Approved")
+        - overall_status (e.g., "PASS")
+        - action (e.g., "AUTO_APPROVE")
+        - review_actor (e.g., "System (Auto-Approved)")
+
+     **Range Definitions** (from config):
+     - 8.0-10.0: AUTO_APPROVE → Status: "Approved", Actor: "System (Auto-Approved)"
+     - 7.0-7.9: MANUAL_REVIEW → Status: "In Review", Actor: [Approval Authority]
+     - 5.0-6.9: NEEDS_WORK → Status: "Draft", Actor: "Architecture Team"
+     - 0.0-4.9: REJECT → Status: "Rejected", Actor: "N/A (Blocked)"
+
+     **Example Mapping**:
+     Final Score = 8.9 → Check: 8.0 <= 8.9 <= 10.0? YES → Status="Approved"
+     Final Score = 8.2 → Check: 8.0 <= 8.2 <= 10.0? YES → Status="Approved"
+     Final Score = 7.8 → Check: 7.0 <= 7.8 <= 7.9? YES → Status="In Review"
 
   6. Collect evidence with source references (Section X.Y, line Z)
 
@@ -1301,7 +1345,12 @@ Where:
 - Completeness = (Filled required fields / Total required) × 10
 - Compliance = (PASS + N/A + EXCEPTION items / Total applicable) × 10
 - Quality = Source traceability coverage (0-10)
-- Weights = Template-specific (default: Completeness 40%, Compliance 50%, Quality 10%)
+- Weights = Template-specific (defined in validation config):
+  - Most templates: Completeness 40%, Compliance 50%, Quality 10%
+  - Security/SRE/Integration: Completeness 30%, Compliance 60%, Quality 10% (compliance-focused)
+  - Business Continuity: Completeness 50%, Compliance 40%, Quality 10% (completeness-focused)
+  - Cloud Architecture: Completeness 35%, Compliance 55%, Quality 10% (balanced)
+  - See individual validation config files for exact weights per template
 ```
 
 **Outcome Tiers**:

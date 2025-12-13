@@ -5,6 +5,15 @@
   "approval_authority": "Business Continuity Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json",
 
+  "weights": {
+    "completeness": 0.5,
+    "completeness_percent": "50%",
+    "compliance": 0.4,
+    "compliance_percent": "40%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "RTO": "Recovery Time Objective - Maximum acceptable downtime before business impact becomes unacceptable",
     "RPO": "Recovery Point Objective - Maximum acceptable data loss measured in time",

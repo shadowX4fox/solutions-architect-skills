@@ -5,6 +5,15 @@
   "approval_authority": "SRE Leadership/Operations",
   "validation_config_path": "/skills/architecture-compliance/validation/sre_architecture_validation.json",
 
+  "weights": {
+    "completeness": 0.3,
+    "completeness_percent": "30%",
+    "compliance": 0.6,
+    "compliance_percent": "60%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "SRE": "Site Reliability Engineering - applying software engineering to operations",
     "SLO": "Service Level Objective - target level of service reliability",

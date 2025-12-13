@@ -71,13 +71,16 @@ Example:
 ```
 ```
 
-### Default Weights
+### Template-Specific Weights
 
-Default weights (can be customized per template):
+**Weights are template-specific** (defined in validation config JSON files):
 
-- **Completeness**: 40% (W₁ = 0.4)
-- **Compliance**: 50% (W₂ = 0.5)
-- **Quality**: 10% (W₃ = 0.1)
+- Most templates use: Completeness 40%, Compliance 50%, Quality 10%
+- Security/SRE/Integration: Completeness 30%, Compliance 60%, Quality 10% (compliance-focused)
+- Business Continuity: Completeness 50%, Compliance 40%, Quality 10% (completeness-focused)
+- Cloud Architecture: Completeness 35%, Compliance 55%, Quality 10% (balanced)
+
+See individual validation config files in `/validation/*_validation.json` for exact weights per template.
 
 ### Template-Specific Weight Recommendations
 

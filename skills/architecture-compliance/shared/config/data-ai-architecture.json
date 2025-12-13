@@ -5,6 +5,15 @@
   "approval_authority": "Data & AI Architecture Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/data_analytics_ai_validation.json",
 
+  "weights": {
+    "completeness": 0.4,
+    "completeness_percent": "40%",
+    "compliance": 0.5,
+    "compliance_percent": "50%",
+    "quality": 0.1,
+    "quality_percent": "10%"
+  },
+
   "domain_terms": {
     "Data Governance": "Framework ensuring data quality, security, privacy, and compliance",
     "Data Lineage": "Tracking data flow from origin through transformations to consumption",
