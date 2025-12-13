@@ -3,7 +3,7 @@
   "compliance_prefix": "LAPI",
   "review_board": "Infrastructure Review Board",
   "approval_authority": "Infrastructure Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/platform_infrastructure_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/platform_it_infrastructure_validation.json",
 
   "weights": {
     "completeness": 0.4,

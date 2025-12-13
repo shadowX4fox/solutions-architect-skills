@@ -28,7 +28,7 @@ Each compliance template has a corresponding validation configuration file:
 | Security Architecture | `security_architecture_validation.json` |
 | Data & Analytics - AI | `data_analytics_ai_validation.json` |
 | Process Transformation | `process_transformation_validation.json` |
-| Platform & IT Infrastructure | `platform_infrastructure_validation.json` |
+| Platform & IT Infrastructure | `platform_it_infrastructure_validation.json` |
 | Enterprise Architecture | `enterprise_architecture_validation.json` |
 | Integration Architecture | `integration_architecture_validation.json` |
 
