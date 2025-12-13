@@ -43,6 +43,45 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 9. Enterprise Architecture
 10. Integration Architecture
 
+## Template Format Preservation Policy
+
+**CRITICAL REQUIREMENT**: Generated compliance contracts MUST preserve template format exactly.
+
+**Strict Preservation Rules:**
+1. ✅ **ONLY replace explicit `[PLACEHOLDER]` tokens** - text inside `[...]` brackets
+2. ✅ **PRESERVE ALL other text exactly** - including conditionals, formatting, structure
+3. ❌ **NEVER transform template content** - no custom prose, no reformatting
+4. ❌ **NEVER replace conditional structures** - keep `[If Compliant: X. If Non-Compliant: Y]` as-is
+5. ❌ **NEVER add extra sections** - templates have A.1-A.4 only, no A.5-A.9
+
+**Template Format Example:**
+```markdown
+**RTO**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified...]
+```
+
+**CORRECT Replacement:**
+```markdown
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified...]
+```
+
+**INCORRECT Replacement (DO NOT DO THIS):**
+```markdown
+**RTO**: 4 hours documented in Section 11.3
+- Status: Compliant
+- Explanation: The system documents a 4-hour RTO requirement which meets organizational standards...
+```
+
+**Why This Matters:**
+- Ensures template consistency across all generated contracts
+- Maintains conditional guidance for future updates
+- Prevents LLM from "improving" template structure
+
+**See Phase 4, Step 4.2 for detailed placeholder replacement workflow.**
+
 ## Strict Source Traceability Policy
 
 **CRITICAL REQUIREMENT**: All compliance contracts must maintain strict source traceability to ARCHITECTURE.md.
@@ -599,9 +638,11 @@ python3 utils/resolve-includes.py templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp
 
 **CRITICAL RULE: PRESERVE TEMPLATE FORMAT EXACTLY**
 
+⚠️ **See "Template Format Preservation Policy" at the top of this document for critical rules.**
+
 The template format MUST be preserved exactly as written. Do NOT transform, rewrite, or restructure the template content. ONLY replace explicit placeholder tokens inside `[...]` brackets.
 
-**Template Format Preservation Rules:**
+**Quick Reference - Preservation Rules:**
 1. Keep ALL text that is not inside `[PLACEHOLDER]` brackets exactly as-is
 2. Preserve conditional structures like `[If Compliant: X. If Non-Compliant: Y]` without modification
 3. Do NOT replace structured placeholders with custom prose or explanations
