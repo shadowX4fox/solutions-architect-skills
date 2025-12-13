@@ -458,23 +458,147 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 <!-- @include shared/sections/completion-guide-intro.md -->
 
 **Additional Development-Specific Steps**:
-- **Complete Stack Validation**: For LADES1.6, complete STACK_VALIDATION_CHECKLIST.md
+- **Complete Stack Validation**: For LADES1.6, complete STACK_VALIDATION_CHECKLIST.md (26 checkpoints)
+- **Stack Checklist Path**: `.claude/skills/architecture-compliance/STACK_VALIDATION_CHECKLIST.md`
+
+---
+
+#### A.3.1 Common Gaps Quick Reference
 
 **Common Development Architecture Gaps and Remediation**:
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| Technology stack | Section 8 (Technology Stack) | Document languages, frameworks, databases, tools with versions |
-| Stack validation | External checklist | Complete STACK_VALIDATION_CHECKLIST.md (26 checkpoints) |
-| CI/CD pipeline | Section 11 (Operational Considerations) | Specify build, test, and deployment automation |
-| Tech debt exceptions | Section 12 (ADRs) | Document approved exceptions with justification and mitigation |
-| Approved library usage | Section 8 (Technology Stack) | Verify frameworks/libraries against organizational catalog |
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Technology stack incomplete | LADES1 Non-Compliant | Section 8 (Technology Stack) | Document all languages, frameworks, databases, tools with versions |
+| Stack validation not completed | LADES1.6 Non-Compliant | External checklist | Complete STACK_VALIDATION_CHECKLIST.md (26 checkpoints) |
+| Deprecated technology versions | LADES2 Non-Compliant | Section 8 or 12 (Technology/ADRs) | Upgrade to approved versions or register exception via LADES2 |
+| CI/CD pipeline undefined | LADES3 Unknown | Section 11 (Operational Considerations) | Document build, test, deployment automation, rollback procedures |
+| Code quality standards missing | LADES4 Unknown | Section 8 or 11 (Technology/Operational) | Specify linting, static analysis, code coverage requirements |
+| Dependency management undefined | LADES5 Unknown | Section 8 (Technology Stack) | Document dependency lock files, vulnerability scanning, update policy |
+| Testing strategy incomplete | LADES6 Unknown | Section 11 (Operational Considerations) | Define unit, integration, e2e testing with coverage thresholds |
+| Tech debt not documented | LADES2 Unknown | Section 12 (ADRs) | Create ADRs for approved exceptions with justification and mitigation plan |
 
-**Stack Validation Checklist**:
-- **File Path**: `.claude/skills/architecture-compliance/STACK_VALIDATION_CHECKLIST.md`
-- **Total Checkpoints**: 26 validation items across 5 sections
-- **Integration Point**: LADES1.6 subsection
-- **Validation Workflow**: Extract stack from Section 8 → Complete checklist → Document results → Address failures via LADES2
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Development Architecture-Specific Examples**:
+
+**Example 1: Completing Technology Stack Documentation**
+- **Gap**: Technology stack incomplete in Section 8
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add complete technology stack to Section 8:
+   Backend: Java 17 LTS, Spring Boot 3.1, Hibernate 6.2,
+   Frontend: React 18, TypeScript 5.1, Vite 4.4,
+   Database: PostgreSQL 15, Redis 7.2,
+   Infrastructure: Docker 24, Kubernetes 1.28,
+   CI/CD: GitHub Actions, ArgoCD,
+   Monitoring: Prometheus, Grafana"
+  ```
+- **Expected Outcome**: Section 8 with complete stack, versions, approved technologies
+- **Impact**: LADES1 → Compliant (+0.6 points)
+
+**Example 2: CI/CD Pipeline Documentation**
+- **Gap**: CI/CD pipeline not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add CI/CD pipeline to Section 11:
+   Build: GitHub Actions with Maven/Gradle,
+   Testing: automated unit (90% coverage), integration, e2e tests,
+   Deployment: GitOps with ArgoCD, blue-green strategy,
+   Rollback: automated on health check failure within 5 minutes,
+   Environments: dev → staging → production with approval gates"
+  ```
+- **Expected Outcome**: Section 11 with CI/CD workflow, testing, deployment strategies
+- **Impact**: LADES3 → Compliant (+0.5 points)
+
+**Example 3: Code Quality and Testing Standards**
+- **Gap**: Code quality standards and testing strategy missing
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add code quality standards to Section 11:
+   Linting: ESLint (frontend), Checkstyle (backend),
+   Static analysis: SonarQube with Quality Gate (A rating minimum),
+   Code coverage: 90% unit test coverage required,
+   Testing pyramid: 70% unit, 20% integration, 10% e2e,
+   PR requirements: 2 approvals, all checks passing"
+  ```
+- **Expected Outcome**: Section 11 with quality gates, testing strategy, PR requirements
+- **Impact**: LADES4 + LADES6 → Compliant (+0.5 points)
+
+**Example 4: Dependency Management and Security**
+- **Gap**: Dependency management not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add dependency management to Section 8:
+   Lock files: package-lock.json (npm), pom.xml (Maven),
+   Vulnerability scanning: Dependabot automated PRs,
+   Update policy: security patches within 48 hours, minor versions monthly,
+   Supply chain security: npm audit, OWASP dependency check,
+   Private registry: Artifactory for approved dependencies"
+  ```
+- **Expected Outcome**: Section 8 with dependency management, security scanning, update policy
+- **Impact**: LADES5 → Compliant (+0.4 points)
+
+**Example 5: Tech Debt Exception Documentation**
+- **Gap**: Using deprecated Java 8 without documented exception
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Create ADR in Section 12 for Java 8 exception:
+   Title: Continue Java 8 usage for legacy module,
+   Context: Legacy payment module requires Java 8 compatibility,
+   Decision: Maintain Java 8 for legacy module, Java 17 for new services,
+   Consequences: Technical debt, migration plan by Q3 2025,
+   Mitigation: Isolated module, no new features, security patches only"
+  ```
+- **Expected Outcome**: Section 12 with ADR documenting exception, mitigation, migration plan
+- **Impact**: LADES2 → Exception Approved (LADES2 → PASS) (+0.5 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required development architecture fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS (requires stack validation)
+- Quality ({{quality_percent}} weight): Add source traceability for all technology decisions
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Technology Stack Documentation** (estimated impact: +0.6 points)
+   - Document complete technology stack in Section 8: languages, frameworks, databases, tools with versions
+   - Complete STACK_VALIDATION_CHECKLIST.md (26 checkpoints) for LADES1.6
+   - Verify all technologies against organizational approved catalog
+   - Document dependency management: lock files, vulnerability scanning, update policy (Section 8)
+   - Add approved library/framework justifications in Section 8 or Section 12 (ADRs)
+
+2. **Establish Development Workflow and Quality** (estimated impact: +0.3 points)
+   - Document CI/CD pipeline: build, test, deploy, rollback procedures (Section 11)
+   - Define code quality standards: linting, static analysis, SonarQube gates (Section 11)
+   - Add testing strategy: unit, integration, e2e with coverage thresholds (Section 11)
+   - Specify PR requirements: approvals, checks, code review guidelines (Section 11)
+   - Document branching strategy: GitFlow, trunk-based, or feature branches (Section 11)
+
+3. **Address Tech Debt and Exceptions** (estimated impact: +0.2 points)
+   - Create ADRs for deprecated technologies with migration plans (Section 12)
+   - Document approved exceptions via LADES2 process with risk mitigation (Section 12)
+   - Add technical debt register with prioritization and remediation timeline (Section 12)
+   - Specify upgrade path for deprecated versions with timeline (Section 12)
+   - Ensure all FAIL items have exceptions or upgrade plans
+
+**Priority Order**: LADES1 (tech stack) → LADES1.6 (stack validation) → LADES3 (CI/CD) → LADES4 (code quality) → LADES6 (testing) → LADES2 (exceptions) → LADES5 (dependencies)
+
+**CRITICAL**: Contract cannot achieve "Approved" status without LADES1.6 (Stack Validation Checklist) showing PASS status. Complete the checklist before requesting approval.
+
+**Estimated Final Score After Remediation**: 8.2-8.7/10 (AUTO_APPROVE)
 
 ---
 

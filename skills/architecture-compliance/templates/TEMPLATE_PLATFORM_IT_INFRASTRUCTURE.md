@@ -522,17 +522,141 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
-**Common Platform/Infrastructure Gaps and Remediation**:
+---
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| Environment isolation | Section 11 (Operational → Deployment) | Document dev, test, staging, production environments with access controls |
-| Server OS specifications | Section 8 (Technology Stack → Infrastructure) | Specify OS versions, patching strategy, containerization approach |
-| Database capacity | Section 10 (Performance → Capacity Planning) | Calculate storage requirements based on data volume and retention |
-| Backup and retention | Section 11 (Operational → Backup & DR) | Define backup frequency, retention periods, recovery procedures |
-| Infrastructure capacity | Section 10 (Performance → Capacity Planning) | Document server sizing (vCPUs, memory, storage) and scaling strategy |
-| Naming conventions | Section 8 (Technology Stack → Infrastructure) | Define naming standards for servers, databases, networks, resources |
-| Transaction volume | Section 10 (Performance → Throughput) | Specify expected transaction rates and capacity dimensioning |
+#### A.3.1 Common Gaps Quick Reference
+
+**Common Platform & IT Infrastructure Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Environment isolation undefined | LAPI1 Non-Compliant | Section 11 (Operational → Deployment) | Document dev, test, staging, production environments with access controls |
+| Server OS not specified | LAPI2 Non-Compliant | Section 8 (Technology Stack → Infrastructure) | Specify OS versions, patching strategy, containerization approach |
+| Database capacity not calculated | LAPI3 Non-Compliant | Section 10 (Performance → Capacity Planning) | Calculate storage requirements based on data volume and retention |
+| Infrastructure capacity undefined | LAPI4 Unknown | Section 10 (Performance → Capacity Planning) | Document server sizing (vCPUs, memory, storage) and scaling strategy |
+| Backup and retention missing | LAPI5 Unknown | Section 11 (Operational → Backup & DR) | Define backup frequency, retention periods, recovery procedures |
+| Naming conventions not defined | LAPI6 Unknown | Section 8 (Technology Stack → Infrastructure) | Define naming standards for servers, databases, networks, resources |
+| Transaction volume not specified | LAPI7 Unknown | Section 10 (Performance → Throughput) | Specify expected transaction rates and capacity dimensioning |
+| Network architecture undefined | LAPI8 Unknown | Section 4 or 8 (Cloud/Infrastructure) | Document network topology, subnets, firewalls, load balancers |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Platform & IT Infrastructure-Specific Examples**:
+
+**Example 1: Environment Isolation and Access Controls**
+- **Gap**: Environment isolation not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add environment isolation to Section 11:
+   Environments: dev, test, staging, production (separate VPCs),
+   Access controls: dev (all engineers), staging (senior only), prod (SRE only),
+   Network isolation: VPC peering with security groups,
+   Promotion process: dev → test → staging → prod with approvals,
+   Data isolation: anonymized data in non-prod environments"
+  ```
+- **Expected Outcome**: Section 11 with environment strategy, access controls, isolation
+- **Impact**: LAPI1 → Compliant (+0.6 points)
+
+**Example 2: Server OS and Patching Strategy**
+- **Gap**: Server OS specifications missing
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add server OS specifications to Section 8:
+   OS: Ubuntu 22.04 LTS for application servers,
+   Container runtime: Docker 24.x on Kubernetes 1.28,
+   Patching: monthly security patches, quarterly OS upgrades,
+   Patch testing: automated in dev/test, manual approval for prod,
+   Base images: hardened golden images with CIS benchmarks"
+  ```
+- **Expected Outcome**: Section 8 with OS versions, patching strategy, hardening
+- **Impact**: LAPI2 → Compliant (+0.5 points)
+
+**Example 3: Database and Infrastructure Capacity Planning**
+- **Gap**: Database capacity not calculated
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add capacity planning to Section 10:
+   Database: PostgreSQL with 500GB initial, 20% annual growth,
+   Storage: 1TB SSD (IOPS 10000), 5 years retention = 1.2TB total,
+   Compute: 16 vCPUs, 64GB RAM for app servers (3 instances),
+   Network: 10 Gbps bandwidth, 1000 concurrent connections,
+   Scaling: horizontal auto-scaling at 70% CPU threshold"
+  ```
+- **Expected Outcome**: Section 10 with capacity calculations, growth projections, scaling
+- **Impact**: LAPI3 + LAPI4 → Compliant (+0.5 points)
+
+**Example 4: Backup, Retention, and DR**
+- **Gap**: Backup and retention strategy missing
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add backup strategy to Section 11:
+   Frequency: incremental every 6 hours, full daily at 2 AM,
+   Retention: 30 days hot storage, 7 years cold storage,
+   Storage location: S3 with cross-region replication,
+   Recovery: automated restore scripts, RTO 4 hours, RPO 6 hours,
+   Testing: monthly restore drills, quarterly full DR test"
+  ```
+- **Expected Outcome**: Section 11 with backup frequency, retention, recovery procedures
+- **Impact**: LAPI5 → Compliant (+0.4 points)
+
+**Example 5: Naming Conventions and Standards**
+- **Gap**: Naming conventions not defined
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add naming conventions to Section 8:
+   Servers: <env>-<app>-<component>-<instance> (prod-api-web-01),
+   Databases: <env>-<app>-db-<type> (prod-payments-db-primary),
+   Networks: <env>-<vpc/subnet>-<az> (prod-vpc-private-us-east-1a),
+   Resources: <env>-<service>-<resource> (prod-s3-backups),
+   Tags: environment, application, owner, cost-center (mandatory)"
+  ```
+- **Expected Outcome**: Section 8 with naming standards, tagging conventions
+- **Impact**: LAPI6 → Compliant (+0.3 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required infrastructure fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all infrastructure decisions
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Infrastructure and Capacity Planning** (estimated impact: +0.6 points)
+   - Document environment isolation: dev, test, staging, prod with access controls (Section 11)
+   - Specify server OS: versions, patching strategy, hardening (Section 8)
+   - Calculate database capacity: storage, IOPS, growth projections (Section 10)
+   - Define infrastructure capacity: vCPUs, memory, storage, scaling strategy (Section 10)
+   - Add transaction volume estimates and dimensioning (Section 10)
+
+2. **Establish Backup, DR, and Network Architecture** (estimated impact: +0.3 points)
+   - Document backup strategy: frequency, retention, storage location, recovery (Section 11)
+   - Add network architecture: VPCs, subnets, firewalls, load balancers (Section 4 or 8)
+   - Define RTO/RPO objectives aligned with backup strategy (Section 10)
+   - Specify disaster recovery procedures and testing schedule (Section 11)
+   - Add monitoring and alerting for infrastructure health (Section 11)
+
+3. **Improve Standards and Governance** (estimated impact: +0.2 points)
+   - Define naming conventions for all infrastructure resources (Section 8)
+   - Add tagging strategy: mandatory tags (environment, application, owner, cost-center) in Section 8
+   - Document infrastructure as code: Terraform, CloudFormation, GitOps (Section 11)
+   - Specify change management process for infrastructure changes (Section 11)
+   - Add cost optimization strategy: rightsizing, reserved instances, spot instances (Section 11)
+
+**Priority Order**: LAPI1 (environments) → LAPI2 (server OS) → LAPI3 (database capacity) → LAPI4 (infrastructure capacity) → LAPI5 (backup/retention) → LAPI6 (naming conventions) → LAPI7 (transaction volume) → LAPI8 (network architecture)
+
+**Estimated Final Score After Remediation**: 8.2-8.7/10 (AUTO_APPROVE)
 
 ---
 

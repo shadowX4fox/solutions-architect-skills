@@ -1548,16 +1548,137 @@ This template uses a two-tier scoring system for SRE requirements:
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
-**Common SRE Gaps and Remediation**:
+---
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| SLO definitions | Section 10 (Performance Requirements) | Define SLOs with targets (e.g., 99.9% availability, p99 latency < 200ms) |
-| Error budget policy | Section 10 (Performance) | Document error budget calculation and consumption policies |
-| Observability stack | Section 11 (Operational Considerations) | Specify monitoring tools (Prometheus, Grafana, Datadog, etc.) |
-| Incident response plan | Section 11 (Operational → Incident Management) | Define on-call rotation, escalation paths, runbooks |
-| Deployment automation | Section 11 (Operational → Deployment) | Document CI/CD pipeline, rollback procedures, canary releases |
-| Load testing strategy | Section 10 (Performance) | Specify load test scenarios, tools, and acceptance criteria |
+#### A.3.1 Common Gaps Quick Reference
+
+**Common SRE Architecture Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| SLO definitions not documented | LASRE1 Non-Compliant | Section 10 (Performance Requirements) | Define SLOs with targets (e.g., 99.9% availability, p99 latency < 200ms) |
+| Error budget policy missing | LASRE1 Non-Compliant | Section 10 (Performance) | Document error budget calculation and consumption policies |
+| Incident response plan undefined | LASRE2 Non-Compliant | Section 11 (Operational → Incident Management) | Define on-call rotation, escalation paths, runbooks |
+| Observability stack not specified | LASRE3 Unknown | Section 11 (Operational Considerations) | Specify monitoring tools (Prometheus, Grafana, Datadog, etc.) |
+| Deployment automation undefined | LASRE4 Unknown | Section 11 (Operational → Deployment) | Document CI/CD pipeline, rollback procedures, canary releases |
+| Load testing strategy missing | LASRE5 Unknown | Section 10 (Performance) | Specify load test scenarios, tools, and acceptance criteria |
+| Runbook repository not specified | LASRE2 Unknown | Section 11 (Operational → Incident Management) | Define runbook location, format, maintenance process |
+| Chaos engineering not documented | LASRE5 Unknown | Section 10 or 11 (Performance/Operational) | Specify chaos experiments, tools (Chaos Monkey, Gremlin), frequency |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**SRE Architecture-Specific Examples**:
+
+**Example 1: Defining SLOs and Error Budgets**
+- **Gap**: Missing SLO definitions and error budget policy
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add SLO definitions to Section 10:
+   Availability SLO: 99.9% (43 minutes downtime/month),
+   Latency SLO: p99 < 200ms, p95 < 100ms,
+   Error budget: 1 - 99.9% = 0.1% (43 min/month),
+   Error budget policy: freeze deployments when 50% consumed"
+  ```
+- **Expected Outcome**: Section 10 with SLO targets, error budget calculation, consumption policy
+- **Impact**: LASRE1 → Compliant (+0.6 points)
+
+**Example 2: Incident Response Plan**
+- **Gap**: Incident response plan not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add incident response plan to Section 11:
+   On-call rotation: weekly, PagerDuty integration,
+   Escalation: L1 (5 min) → L2 (15 min) → L3 (30 min),
+   Runbook repository: GitHub wiki with incident playbooks,
+   Postmortem process: within 48 hours, RCA template"
+  ```
+- **Expected Outcome**: Section 11 with on-call rotation, escalation matrix, runbook repo, postmortem process
+- **Impact**: LASRE2 → Compliant (+0.5 points)
+
+**Example 3: Observability Stack**
+- **Gap**: Monitoring and observability tools not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add observability stack to Section 11:
+   Metrics: Prometheus for collection, Grafana for dashboards,
+   Logs: ELK stack (Elasticsearch, Logstash, Kibana),
+   Traces: Jaeger for distributed tracing,
+   Alerting: Prometheus Alertmanager, PagerDuty integration,
+   Dashboards: RED (Rate, Errors, Duration) and USE (Utilization, Saturation, Errors)"
+  ```
+- **Expected Outcome**: Section 11 with observability tools, dashboards, alerting configuration
+- **Impact**: LASRE3 → Compliant (+0.5 points)
+
+**Example 4: Deployment Automation**
+- **Gap**: CI/CD pipeline and deployment strategy undefined
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add deployment automation to Section 11:
+   CI/CD: GitHub Actions with automated testing,
+   Deployment strategy: blue-green deployments with instant rollback,
+   Canary releases: 5% → 25% → 100% with automated rollback on SLO breach,
+   Feature flags: LaunchDarkly for gradual rollout"
+  ```
+- **Expected Outcome**: Section 11 with CI/CD pipeline, deployment strategies, rollback procedures
+- **Impact**: LASRE4 → Compliant (+0.4 points)
+
+**Example 5: Load Testing and Chaos Engineering**
+- **Gap**: Reliability testing not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add reliability testing to Section 10:
+   Load testing: k6 or Gatling, weekly tests at 150% peak load,
+   Acceptance criteria: p99 latency < 200ms at peak load,
+   Chaos engineering: monthly Chaos Monkey experiments,
+   Game days: quarterly failure scenario simulations"
+  ```
+- **Expected Outcome**: Section 10 with load testing strategy, chaos engineering plan, acceptance criteria
+- **Impact**: LASRE5 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required SRE fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all operational procedures
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete SLO and Reliability Engineering** (estimated impact: +0.6 points)
+   - Define SLOs with quantitative targets (availability, latency, throughput) in Section 10
+   - Document error budget calculation and consumption policy in Section 10
+   - Add load testing strategy with tools, scenarios, acceptance criteria in Section 10
+   - Specify chaos engineering experiments and frequency in Section 10 or 11
+   - Define capacity planning process with growth projections in Section 11
+
+2. **Enhance Incident Management and Operations** (estimated impact: +0.3 points)
+   - Document incident response plan: on-call rotation, escalation, runbooks in Section 11
+   - Add runbook repository with location, format, maintenance process
+   - Define postmortem process with RCA template and timeline
+   - Specify observability stack: metrics (Prometheus), logs (ELK), traces (Jaeger) in Section 11
+   - Add alerting strategy with severity levels and escalation in Section 11
+
+3. **Improve Deployment and Automation** (estimated impact: +0.2 points)
+   - Document CI/CD pipeline with automated testing in Section 11
+   - Define deployment strategies: blue-green, canary, feature flags in Section 11
+   - Add rollback procedures with automated triggers on SLO breach
+   - Specify toil reduction initiatives and automation targets in Section 11
+   - Document change management process with approval gates in Section 11
+
+**Priority Order**: LASRE1 (SLOs + error budgets) → LASRE2 (incident response) → LASRE3 (observability) → LASRE4 (deployment) → LASRE5 (load testing + chaos)
+
+**Estimated Final Score After Remediation**: 8.5-9.0/10 (AUTO_APPROVE)
 
 ---
 

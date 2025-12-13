@@ -405,6 +405,165 @@ Final Score = (2.5 × 0.4) + (4.0 × 0.5) + (3.0 × 0.1)
 
 ---
 
+## Remediation Workflow Example
+
+### Scenario: Cloud Architecture - Gap Remediation to AUTO_APPROVE
+
+**Initial State**: Cloud Architecture contract with score 6.8/10 (NEEDS_WORK tier) due to 5 UNKNOWN items.
+
+**Before Remediation**:
+```json
+{
+  "final_score": 6.8,
+  "outcome": {
+    "overall_status": "CONDITIONAL",
+    "document_status": "Draft",
+    "review_actor": "Architecture Team",
+    "action": "NEEDS_WORK",
+    "message": "Validation incomplete. Address missing data before approval."
+  },
+  "scores": {
+    "completeness": 7.5,
+    "compliance": 6.4,
+    "quality": 8.0
+  },
+  "weights": {
+    "completeness": 0.35,
+    "compliance": 0.55,
+    "quality": 0.10
+  },
+  "gaps": [
+    "LAC4: Missing cost monitoring configuration - Section 11",
+    "LAC3: No resource tagging strategy - Section 4",
+    "LAC6: Infrastructure as Code not documented - Section 11",
+    "LAC2: Multi-region strategy undefined - Section 4",
+    "LAC5: Backup/recovery policies missing - Section 11"
+  ]
+}
+```
+
+**Calculation (Before)**:
+```
+Final Score = (7.5 × 0.35) + (6.4 × 0.55) + (8.0 × 0.10)
+            = 2.625 + 3.52 + 0.8
+            = 6.945
+            = 6.8/10 (rounded)
+```
+
+---
+
+**Remediation Steps** (following Section A.3.2 workflow):
+
+**Step 1: Activate architecture-docs skill**
+```
+/skill architecture-docs
+```
+
+**Step 2: Remediate highest-impact gap (LAC2 - Multi-region)**
+```
+"Add multi-region deployment to Section 4:
+ primary us-east-1, secondary us-west-2, RTO 15 minutes,
+ automated failover with Route 53"
+```
+- **Result**: Section 4 updated with multi-region strategy
+- **Impact**: LAC2 UNKNOWN → PASS (+0.4 compliance points)
+
+**Step 3: Remediate LAC4 (Cost monitoring)**
+```
+"Add cost monitoring to Section 11: CloudWatch billing alarms,
+ 80% budget threshold, monthly cost reviews"
+```
+- **Result**: Section 11 updated with cost monitoring config
+- **Impact**: LAC4 UNKNOWN → PASS (+0.5 compliance points)
+
+**Step 4: Remediate LAC6 (Infrastructure as Code)**
+```
+"Add Infrastructure as Code strategy to Section 11:
+ Terraform for infrastructure provisioning,
+ GitOps workflow with Terraform Cloud,
+ state management in S3 with DynamoDB locking"
+```
+- **Result**: Section 11 updated with IaC strategy
+- **Impact**: LAC6 UNKNOWN → PASS (+0.4 compliance points)
+
+**Step 5: Remediate LAC3 (Resource tagging)**
+```
+"Add resource tagging strategy to Section 4:
+ required tags (environment, application, cost-center, owner),
+ tag governance policy, automation via IaC"
+```
+- **Result**: Section 4 updated with tagging strategy
+- **Impact**: LAC3 UNKNOWN → PASS (+0.3 compliance points)
+
+**Step 6: Remediate LAC5 (Backup/recovery)**
+```
+"Add backup strategy to Section 11:
+ daily full backup, incremental every 6 hours,
+ 30-day retention, S3 cross-region replication,
+ monthly restore validation"
+```
+- **Result**: Section 11 updated with backup policies
+- **Impact**: LAC5 UNKNOWN → PASS (+0.4 compliance points)
+
+---
+
+**After Remediation**:
+```json
+{
+  "final_score": 8.9,
+  "outcome": {
+    "overall_status": "PASS",
+    "document_status": "Approved",
+    "review_actor": "System (Auto-Approved)",
+    "action": "AUTO_APPROVE",
+    "message": "High confidence validation. Contract automatically approved."
+  },
+  "scores": {
+    "completeness": 9.3,
+    "compliance": 8.6,
+    "quality": 9.0
+  },
+  "weights": {
+    "completeness": 0.35,
+    "compliance": 0.55,
+    "quality": 0.10
+  },
+  "gaps": []
+}
+```
+
+**Calculation (After)**:
+```
+Final Score = (9.3 × 0.35) + (8.6 × 0.55) + (9.0 × 0.10)
+            = 3.255 + 4.73 + 0.9
+            = 8.885
+            = 8.9/10 (rounded)
+```
+
+---
+
+**Impact Analysis**:
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| **Completeness** | 7.5 | 9.3 | +1.8 (+24%) |
+| **Compliance** | 6.4 | 8.6 | +2.2 (+34%) |
+| **Quality** | 8.0 | 9.0 | +1.0 (+13%) |
+| **Final Score** | 6.8 | 8.9 | +2.1 (+31%) |
+| **Document Status** | Draft | Approved | ✅ |
+| **Action** | NEEDS_WORK | AUTO_APPROVE | ✅ |
+
+**Key Success Factors**:
+1. **Prioritized by impact**: Addressed highest-impact gaps first (LAC2, LAC4, LAC6)
+2. **Used architecture-docs skill**: Skill ensured correct section placement and formatting
+3. **Complete documentation**: All gaps resolved, no partial fixes
+4. **Source traceability improved**: Skill added section/line references, boosting quality score
+5. **Time efficient**: Total remediation time ~35 minutes (vs 2-3 hours manual)
+
+**Outcome**: Contract progressed from NEEDS_WORK (Tier 3) → AUTO_APPROVE (Tier 1), bypassing manual review entirely.
+
+---
+
 ## Validation Best Practices
 
 1. **Start with ARCHITECTURE.md completeness**: The more complete your ARCHITECTURE.md, the higher your validation score

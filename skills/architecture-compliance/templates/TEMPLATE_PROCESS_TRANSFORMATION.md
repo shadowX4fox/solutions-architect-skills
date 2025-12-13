@@ -432,16 +432,143 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
-**Common Gaps and Remediation**:
+---
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| Manual effort quantification | Section 3 (Business Context) | FTE hours/week spent on manual process |
-| Integration points | Section 5 or 7 (Component/Integration) | List of integrated systems and APIs |
-| Data sources | Section 6 (Data Model) | Source systems, databases, files |
-| Execution frequency | Section 11 (Operational Considerations) | How often automation runs |
-| License costs | Section 8 or 11 (Technology/Operations) | Automation platform and integration licenses |
-| Monitoring metrics | Section 11 (Operational Considerations) | Success rate, execution time, error tracking |
+#### A.3.1 Common Gaps Quick Reference
+
+**Common Process Transformation & Automation Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| Manual effort not quantified | LAA1 Non-Compliant | Section 1 (Business Context) | Document FTE hours/week spent on manual process, ROI calculation |
+| Integration points undefined | LAA2 Non-Compliant | Section 7 (Integration View) | List all integrated systems, APIs, file transfers |
+| Data sources not documented | LAA3 Non-Compliant | Section 6 (Data Model) | Specify source systems, databases, file formats, data volumes |
+| Execution frequency missing | LAA4 Unknown | Section 11 (Operational Considerations) | Define how often automation runs (hourly, daily, event-driven) |
+| Monitoring metrics undefined | LAA5 Unknown | Section 11 (Operational Considerations) | Add success rate, execution time, error tracking, SLA monitoring |
+| License costs not specified | LAA6 Unknown | Section 8 or 11 (Technology/Operations) | Document automation platform and integration license costs |
+| Error handling not defined | LAA7 Unknown | Section 11 (Operational Considerations) | Specify retry logic, dead letter queue, alerting, manual intervention |
+| Rollback procedures missing | LAA8 Unknown | Section 11 (Operational Considerations) | Define rollback strategy for failed automation runs |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Process Transformation & Automation-Specific Examples**:
+
+**Example 1: Manual Effort Quantification and ROI**
+- **Gap**: Manual effort not quantified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add manual effort quantification to Section 1:
+   Current state: 3 FTE spending 40 hours/week on manual data entry,
+   Annual cost: 3 FTE × 40 hrs/week × 52 weeks × $50/hr = $312,000,
+   Automation savings: reduce to 0.5 FTE (monitoring only),
+   Annual savings: $260,000 (83% reduction),
+   ROI: $260k savings / $80k implementation = 325% ROI, 3.7-month payback"
+  ```
+- **Expected Outcome**: Section 1 with FTE quantification, cost analysis, ROI calculation
+- **Impact**: LAA1 → Compliant (+0.6 points)
+
+**Example 2: Integration Points and Systems**
+- **Gap**: Integration points not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add integration points to Section 7:
+   Source: Salesforce CRM (REST API, OAuth 2.0, 1000 records/day),
+   Target: NetSuite ERP (SOAP API, API key, batch updates),
+   Orchestration: Apache Airflow for workflow coordination,
+   Data transformation: Python scripts with pandas,
+   File transfer: SFTP from legacy mainframe (CSV files, 50MB/day)"
+  ```
+- **Expected Outcome**: Section 7 with integration catalog, protocols, auth methods, volumes
+- **Impact**: LAA2 → Compliant (+0.5 points)
+
+**Example 3: Data Sources and Transformation**
+- **Gap**: Data sources not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add data sources to Section 6:
+   Source 1: Oracle HR database (employee records, 5000 rows),
+   Source 2: CSV files from payroll system (weekly, 200KB),
+   Source 3: SharePoint lists (project data, REST API),
+   Transformation: deduplication, validation, enrichment,
+   Target schema: normalized relational model in PostgreSQL,
+   Data quality: 95% accuracy SLA, automated validation rules"
+  ```
+- **Expected Outcome**: Section 6 with source systems, formats, transformation logic, quality SLA
+- **Impact**: LAA3 → Compliant (+0.5 points)
+
+**Example 4: Execution Frequency and Scheduling**
+- **Gap**: Execution frequency not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add execution frequency to Section 11:
+   Schedule: daily at 2 AM EST (cron: 0 2 * * *),
+   Trigger: event-driven on new file arrival to S3 bucket,
+   Parallelization: 5 concurrent workers for batch processing,
+   Timeout: 2-hour execution limit with alerting,
+   Dependencies: wait for upstream ETL completion before starting"
+  ```
+- **Expected Outcome**: Section 11 with schedule, triggers, parallelization, dependencies
+- **Impact**: LAA4 → Compliant (+0.4 points)
+
+**Example 5: Monitoring, Error Handling, and Alerting**
+- **Gap**: Monitoring metrics and error handling undefined
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add monitoring and error handling to Section 11:
+   Success metrics: 99% success rate SLA, p95 execution time < 30 min,
+   Error tracking: Sentry for application errors, CloudWatch for infra,
+   Retry logic: 3 retries with exponential backoff (5s, 25s, 125s),
+   Dead letter queue: failed records to DLQ for manual review,
+   Alerting: PagerDuty for critical errors, Slack for warnings,
+   Dashboard: Grafana with execution history, success rate, error trends"
+  ```
+- **Expected Outcome**: Section 11 with monitoring SLAs, error handling, alerting, dashboards
+- **Impact**: LAA5 + LAA7 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required automation fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all automation decisions
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Business Case and Integration** (estimated impact: +0.6 points)
+   - Quantify manual effort: FTE hours/week, annual cost, ROI calculation (Section 1)
+   - Document integration points: source systems, APIs, protocols, auth methods (Section 7)
+   - Add data sources: systems, formats, volumes, transformation logic (Section 6)
+   - Specify automation platform: UiPath, Automation Anywhere, Python, Airflow (Section 8)
+   - Define license costs: platform, integration connectors, infrastructure (Section 8 or 11)
+
+2. **Establish Operational Procedures** (estimated impact: +0.3 points)
+   - Define execution frequency: schedule, triggers, parallelization, dependencies (Section 11)
+   - Add monitoring metrics: success rate SLA, execution time, error tracking (Section 11)
+   - Document error handling: retry logic, DLQ, manual intervention procedures (Section 11)
+   - Specify rollback procedures: automated rollback triggers, manual rollback steps (Section 11)
+   - Add alerting strategy: critical errors (PagerDuty), warnings (Slack), dashboards (Grafana) in Section 11
+
+3. **Enhance Quality and Governance** (estimated impact: +0.2 points)
+   - Document data quality: validation rules, accuracy SLA, error thresholds (Section 6)
+   - Add testing strategy: unit tests, integration tests, UAT procedures (Section 11)
+   - Define change management: approval gates, deployment windows, rollback criteria (Section 11)
+   - Specify audit logging: process execution logs, data lineage, compliance trail (Section 11)
+   - Add continuous improvement: KPI tracking, optimization opportunities, automation roadmap (Section 1 or 11)
+
+**Priority Order**: LAA1 (manual effort) → LAA2 (integration) → LAA3 (data sources) → LAA4 (execution frequency) → LAA5 (monitoring) → LAA6 (license costs) → LAA7 (error handling) → LAA8 (rollback)
+
+**Estimated Final Score After Remediation**: 8.3-8.8/10 (AUTO_APPROVE)
 
 ---
 

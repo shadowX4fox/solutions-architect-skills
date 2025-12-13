@@ -472,48 +472,143 @@ This document is validated using an automated scoring system defined in `/skills
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
+---
+
+#### A.3.1 Common Gaps Quick Reference
+
 **Common Integration Architecture Gaps and Remediation**:
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| API catalog | Section 7 (Integration View) | List all domain APIs with endpoints, authentication, consumers, and SLAs |
-| API design standards | Section 7 (Integration View) | Document REST principles, versioning strategy, error handling standards |
-| API authentication | Section 9 (Security Architecture) | Specify OAuth 2.0, JWT, or mTLS for API security |
-| Integration protocols | Section 7 (Integration View) | Document HTTP/2, REST, message brokers (Kafka, RabbitMQ) |
-| API governance | Section 7 (Integration View) | Define API naming conventions, lifecycle management, change control |
-| Third-party APIs | Section 7 (Integration View) | Inventory external APIs with vendors, endpoints, SLAs, support contacts |
-| Distributed tracing | Section 7 (Integration View) | Implement OpenTelemetry, correlation IDs, structured logging |
-| Event schemas | Section 6 (Data Model) or Section 7 (Integration View) | Define event schemas with JSON Schema/Avro, CloudEvents compliance |
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| API catalog missing or incomplete | LAI1 Non-Compliant | Section 7 (Integration View) | List all domain APIs with endpoints, authentication, consumers, SLAs |
+| API design standards not documented | LAI1 Non-Compliant | Section 7 (Integration View) | Document REST principles, versioning strategy, error handling standards |
+| API authentication not specified | LAI2 Non-Compliant | Section 9 (Security Architecture) | Specify OAuth 2.0, JWT, or mTLS for API security |
+| Integration protocols undefined | LAI3 Unknown | Section 7 (Integration View) | Document HTTP/2, REST, message brokers (Kafka, RabbitMQ), no legacy ESB |
+| API governance not defined | LAI4 Unknown | Section 7 (Integration View) | Define API naming conventions, lifecycle management, change control |
+| Third-party API inventory missing | LAI5 Unknown | Section 7 (Integration View) | Inventory external APIs with vendors, endpoints, SLAs, support contacts |
+| Distributed tracing not implemented | LAI6 Unknown | Section 7 (Integration View) | Implement OpenTelemetry, correlation IDs, structured logging |
+| Event schemas not documented | LAI7 Unknown | Section 6 or 7 (Data Model/Integration) | Define event schemas with JSON Schema/Avro, CloudEvents compliance |
+| Schema registry not specified | LAI7 Unknown | Section 7 (Integration View) | Specify schema registry (Confluent, AWS Glue), backward compatibility |
+| Dead letter queue handling undefined | LAI7 Unknown | Section 7 (Integration View) | Define DLQ strategy, retention, reprocessing workflow |
 
-**For UNKNOWN Items** (Missing Data):
-1. Locate the corresponding section in ARCHITECTURE.md (refer to Source field)
-2. Add the required integration architecture information:
-   - **LAI1**: Document domain APIs, API catalog, design standards, versioning, error handling, documentation
-   - **LAI2**: Document API authentication, authorization, encryption (TLS 1.2+), secrets management, security logging
-   - **LAI3**: Document integration protocols (HTTP/2, REST), message brokers (Kafka, RabbitMQ), no legacy ESB
-   - **LAI4**: Document API naming conventions, lifecycle management, change control, governance playbook compliance
-   - **LAI5**: Document third-party API inventory, API specifications, integration guides, SLAs, support contacts
-   - **LAI6**: Document distributed tracing (OpenTelemetry), correlation IDs, structured logging (JSON), centralized platform
-   - **LAI7**: Document event schemas (JSON Schema/Avro), CloudEvents compliance, event catalog, delivery guarantees, DLQ
-3. Regenerate this compliance contract to reflect updated data
+---
 
-**For FAIL Items** (Non-Compliant):
-1. **Obsolete Technologies**: Upgrade deprecated integration technologies (SOAP 1.0, WebSphere MQ, legacy ESB)
-2. **Security Gaps**: Implement secure authentication (OAuth 2.0, mTLS), TLS 1.2+, vault-based secrets
-3. **Missing Standards**: Implement API governance (naming, versioning, change control, lifecycle management)
-4. **Documentation Gaps**: Create API catalog, event catalog, third-party API inventory with SLAs
-5. **Observability Gaps**: Implement distributed tracing, structured logging, correlation IDs, centralized logging
-6. **Event Standards Gaps**: Define event schemas, implement schema registry, CloudEvents compliance, DLQ handling
-7. **Approved Exceptions**: If technology/approach deviation required, document exception with risk acceptance in Section 12 (ADRs)
+#### A.3.2 Step-by-Step Remediation Workflow
 
-**For N/A Items**:
-- Ensure N/A status is accurate (e.g., "No event-driven architecture" for LAI7 event requirements)
-- N/A items count as fully compliant in validation scoring
+<!-- @include shared/sections/remediation-workflow-guide.md -->
 
-**Improving Validation Score**:
-- **Target 8.0+ for auto-approval**: Resolve all UNKNOWN and FAIL items, ensure comprehensive source references
-- **Minimum 7.0 for manual review**: Address critical integration gaps, document remaining items with placeholders
-- **Below 7.0**: Focus on required LAI items (LAI1, LAI2, LAI4, LAI6) before optional items (LAI3, LAI7)
+**Integration Architecture-Specific Examples**:
+
+**Example 1: Adding Comprehensive API Catalog**
+- **Gap**: Missing comprehensive API catalog
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add API catalog to Section 7 with table format:
+   API Name, Endpoint, Authentication, Consumers, SLA, Owner.
+   Include all domain APIs: User Service, Payment Service,
+   Notification Service, Inventory Service"
+  ```
+- **Expected Outcome**: Section 7 with complete API catalog table including SLAs and ownership
+- **Impact**: LAI1 → Compliant (+0.6 points)
+
+**Example 2: Implementing Distributed Tracing**
+- **Gap**: No distributed tracing implementation documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add distributed tracing to Section 7:
+   OpenTelemetry SDK in all services,
+   Jaeger backend for trace storage,
+   W3C Trace Context propagation,
+   100% sampling in prod with adaptive sampling"
+  ```
+- **Expected Outcome**: Section 7 with tracing architecture, propagation standards, backend config
+- **Impact**: LAI6 → Compliant (+0.5 points)
+
+**Example 3: Defining Schema Registry**
+- **Gap**: Missing schema registry for event-driven architecture
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add schema registry to Section 7:
+   Confluent Schema Registry with Kafka,
+   Avro schemas for all events,
+   backward compatibility enforcement,
+   schema evolution policy"
+  ```
+- **Expected Outcome**: Section 7 with schema registry config, versioning, compatibility rules
+- **Impact**: LAI7 → Compliant (+0.4 points)
+
+**Example 4: API Governance Framework**
+- **Gap**: API governance not defined
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add API governance to Section 7:
+   Naming convention (kebab-case, plural nouns),
+   Versioning strategy (URI versioning /v1/),
+   Lifecycle stages (alpha, beta, stable, deprecated),
+   Change control process with stakeholder approvals"
+  ```
+- **Expected Outcome**: Section 7 with governance standards, playbook compliance
+- **Impact**: LAI4 → Compliant (+0.5 points)
+
+**Example 5: Third-Party API Inventory**
+- **Gap**: Third-party API inventory incomplete
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add third-party API inventory to Section 7:
+   Stripe Payment API (REST, OAuth 2.0, 99.9% SLA, support@stripe.com),
+   SendGrid Email API (REST, API key, 99.95% SLA, support@sendgrid.com),
+   Twilio SMS API (REST, Basic Auth, 99.95% SLA, help@twilio.com)
+   Include API specs, integration guides, rate limits"
+  ```
+- **Expected Outcome**: Section 7 with third-party API catalog, SLAs, support contacts
+- **Impact**: LAI5 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required integration architecture fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all integration points
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete API & Integration Documentation** (estimated impact: +0.6 points)
+   - Create comprehensive API catalog with endpoints, auth, consumers, SLAs (Section 7)
+   - Document API design standards: REST principles, versioning, error handling (Section 7)
+   - Define API governance: naming, lifecycle, change control (Section 7)
+   - Add third-party API inventory with vendors, endpoints, SLAs (Section 7)
+   - Specify integration protocols: HTTP/2, REST, message brokers (Section 7)
+
+2. **Enhance Observability & Event-Driven Architecture** (estimated impact: +0.3 points)
+   - Implement distributed tracing: OpenTelemetry, correlation IDs (Section 7)
+   - Add structured logging with centralized platform (Section 11)
+   - Define event schemas with JSON Schema/Avro (Section 6 or 7)
+   - Implement schema registry with backward compatibility (Section 7)
+   - Document DLQ handling and reprocessing workflow (Section 7)
+
+3. **Strengthen Security & Standards Compliance** (estimated impact: +0.2 points)
+   - Document API authentication: OAuth 2.0, JWT, or mTLS (Section 9)
+   - Add TLS 1.2+ encryption for all API communications (Section 9)
+   - Define secrets management for API keys (Vault, Key Vault) in Section 9
+   - Ensure CloudEvents compliance for event-driven patterns (Section 7)
+   - Add API security logging and threat detection (Section 9)
+
+**Priority Order**: LAI1 (API catalog) → LAI2 (API auth) → LAI4 (API governance) → LAI6 (distributed tracing) → LAI5 (third-party APIs) → LAI3 (protocols) → LAI7 (event schemas)
+
+**For FAIL Items**:
+- **Obsolete Technologies**: Upgrade SOAP 1.0, WebSphere MQ, legacy ESB to REST, Kafka, modern integration
+- **Security Gaps**: Implement OAuth 2.0/mTLS, TLS 1.2+, vault-based secrets
+- **Missing Standards**: Implement API governance, event schema registry, CloudEvents compliance
+- **Approved Exceptions**: Document exception with risk acceptance in Section 12 (ADRs)
+
+**Estimated Final Score After Remediation**: 8.3-8.8/10 (AUTO_APPROVE)
 
 ---
 

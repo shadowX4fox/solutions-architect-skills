@@ -319,6 +319,10 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
+---
+
+#### A.3.1 Common Gaps Quick Reference
+
 **Common Cloud Architecture Gaps and Remediation**:
 
 | Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
@@ -326,6 +330,110 @@
 | Missing cloud provider justification | LAC1 Non-Compliant | Section 3 (Technology Stack) | Document provider selection rationale |
 | No multi-region strategy | LAC2 Non-Compliant | Section 10 (Non-Functional Requirements) | Define region deployment strategy |
 | Undefined backup/recovery policies | LAC5 Non-Compliant | Section 11 (Operational Considerations) | Document backup schedules and RTO/RPO |
+| Missing cost monitoring configuration | LAC4 Unknown | Section 11 (Operational Considerations) | Add cost tracking, budgets, and alerts |
+| No resource tagging strategy | LAC3 Unknown | Section 4 (Cloud & Deployment) | Define tagging taxonomy (environment, cost-center, owner) |
+| Infrastructure as Code not documented | LAC6 Unknown | Section 11 (Operational Considerations) | Specify IaC tooling (Terraform, CloudFormation, etc.) |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Cloud Architecture-Specific Examples**:
+
+**Example 1: Adding Cost Monitoring**
+- **Gap**: Missing cost monitoring configuration
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add cost monitoring to Section 11: CloudWatch billing alarms,
+   80% budget threshold, monthly cost reviews"
+  ```
+- **Expected Outcome**: Section 11.X with CloudWatch alarms, thresholds, review schedule
+- **Impact**: LAC4 → Compliant (+0.5 points)
+
+**Example 2: Multi-Region Strategy**
+- **Gap**: No multi-region deployment documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add multi-region deployment to Section 4:
+   primary us-east-1, secondary us-west-2, RTO 15 minutes,
+   automated failover with Route 53"
+  ```
+- **Expected Outcome**: Section 4 with region strategy, failover mechanisms
+- **Impact**: LAC2 → Compliant (+0.4 points)
+
+**Example 3: Well-Architected Alignment**
+- **Gap**: No AWS Well-Architected Framework mapping
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Create ADR in Section 12 mapping architecture to
+   AWS Well-Architected 5 pillars: Operational Excellence,
+   Security, Reliability, Performance, Cost Optimization"
+  ```
+- **Expected Outcome**: New ADR with pillar mappings and trade-offs
+- **Impact**: LAC6 → Compliant (+0.3 points)
+
+**Example 4: Resource Tagging Strategy**
+- **Gap**: No resource tagging strategy documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add resource tagging strategy to Section 4:
+   required tags (environment, application, cost-center, owner),
+   tag governance policy, automation via IaC"
+  ```
+- **Expected Outcome**: Section 4 with tagging taxonomy, governance, enforcement
+- **Impact**: LAC3 → Compliant (+0.3 points)
+
+**Example 5: Infrastructure as Code**
+- **Gap**: IaC tooling not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add Infrastructure as Code strategy to Section 11:
+   Terraform for infrastructure provisioning,
+   GitOps workflow with Terraform Cloud,
+   state management in S3 with DynamoDB locking"
+  ```
+- **Expected Outcome**: Section 11 with IaC tooling, workflow, state management
+- **Impact**: LAC6 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required cloud architecture fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all data points
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Missing Documentation** (estimated impact: +0.4 points)
+   - Add cost monitoring and budget alerts to Section 11
+   - Document resource tagging strategy (environment, cost-center, owner) in Section 4
+   - Define rightsizing review schedule in Section 11
+   - Specify backup and disaster recovery policies in Section 11
+
+2. **Document Cloud Best Practices Alignment** (estimated impact: +0.3 points)
+   - Create ADR mapping to AWS/Azure/GCP Well-Architected Framework in Section 12
+   - Document 5 pillars alignment: Operational Excellence, Security, Reliability, Performance, Cost Optimization
+   - Add Infrastructure as Code strategy (Terraform/CloudFormation) to Section 11
+   - Define multi-region deployment strategy in Section 4
+
+3. **Enhance Cost Optimization** (estimated impact: +0.2 points)
+   - Document reserved instance vs on-demand strategy in Section 11
+   - Add cost breakdown by environment/service to Section 11
+   - Define cost optimization KPIs and review cadence
+   - Specify cost allocation tags and chargeback model
+
+**Priority Order**: LAC2 (multi-region) → LAC4 (cost monitoring) → LAC6 (IaC) → LAC1 (provider justification) → LAC3 (tagging) → LAC5 (backup/recovery)
+
+**Estimated Final Score After Remediation**: 8.5-9.0/10 (AUTO_APPROVE)
 
 ---
 

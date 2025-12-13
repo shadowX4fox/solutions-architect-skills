@@ -669,14 +669,144 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
+---
+
+#### A.3.1 Common Gaps Quick Reference
+
 **Common Enterprise Architecture Gaps and Remediation**:
 
 | Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
 |-----------------|--------|----------------------------------|-------------------|
-| Missing modularity analysis | LAE1 Non-Compliant | Section 2 (Solution Overview) | Document component boundaries and interfaces |
-| No technology radar reference | LAE3 Non-Compliant | Section 8 (Technology Stack) | Align stack with approved enterprise technologies |
-| Undefined data strategy | LAE6 Non-Compliant | Section 4 (Data Model) | Document data governance and management approach |
-| Missing API-first approach | LAE7 Non-Compliant | Section 5 (Integration Approach) | Define API strategy and event-driven patterns |
+| Missing modularity analysis | LAE1 Non-Compliant | Section 5 (Component View) | Document component boundaries, interfaces, bounded contexts |
+| No technology radar reference | LAE3 Non-Compliant | Section 8 (Technology Stack) | Align stack with approved enterprise technologies, reference radar |
+| Undefined data strategy | LAE6 Non-Compliant | Section 6 (Data Model) | Document data governance, MDM, data lake/warehouse strategy |
+| Missing API-first approach | LAE7 Non-Compliant | Section 7 (Integration View) | Define API strategy, event-driven patterns, integration standards |
+| Strategic alignment unclear | LAE2 Unknown | Section 1 (Business Context) | Map architecture to enterprise strategic goals and objectives |
+| Enterprise integration patterns undefined | LAE4 Unknown | Section 7 (Integration View) | Define integration patterns, ESB/API gateway, messaging |
+| Governance framework missing | LAE5 Unknown | Section 12 (ADRs) or Section 11 | Document architectural governance, review boards, decision authority |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Enterprise Architecture-Specific Examples**:
+
+**Example 1: Modularity and Bounded Contexts**
+- **Gap**: Missing modularity analysis and bounded contexts
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add modularity analysis to Section 5:
+   Bounded contexts: Customer, Order, Payment, Inventory, Shipping,
+   Component boundaries: clear domain separation, anti-corruption layers,
+   Interface definitions: REST APIs with OpenAPI specs,
+   Cross-cutting concerns: logging, monitoring, security centralized,
+   Domain dependencies: DAG (directed acyclic graph) with no circular refs"
+  ```
+- **Expected Outcome**: Section 5 with bounded contexts, boundaries, interfaces, dependencies
+- **Impact**: LAE1 → Compliant (+0.6 points)
+
+**Example 2: Technology Radar Alignment**
+- **Gap**: No technology radar reference
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add technology radar alignment to Section 8:
+   All technologies from enterprise radar quadrants,
+   Adopt: Kubernetes, React, PostgreSQL, Kafka,
+   Trial: Temporal workflow, GraphQL, Dapr,
+   Assess: None (stable stack),
+   Hold: Avoiding deprecated ESB, SOAP, monolithic databases,
+   Radar version: Q4 2025, link to enterprise radar"
+  ```
+- **Expected Outcome**: Section 8 with radar alignment, quadrants, version reference
+- **Impact**: LAE3 → Compliant (+0.5 points)
+
+**Example 3: Data Strategy and Governance**
+- **Gap**: Undefined data strategy
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add data strategy to Section 6:
+   Data governance: centralized data governance board,
+   MDM: customer and product master data in dedicated MDM system,
+   Data lake: S3 with Delta Lake for raw/curated/gold zones,
+   Data warehouse: Snowflake for analytics and BI,
+   Data catalog: AWS Glue Data Catalog with business glossary,
+   Retention: operational 30 days, analytics 7 years, GDPR compliance"
+  ```
+- **Expected Outcome**: Section 6 with data governance, MDM, lake/warehouse strategy, catalog
+- **Impact**: LAE6 → Compliant (+0.5 points)
+
+**Example 4: API-First and Integration Strategy**
+- **Gap**: Missing API-first approach and integration patterns
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add API-first strategy to Section 7:
+   API gateway: Kong for all external APIs,
+   Design-first: OpenAPI specs reviewed before implementation,
+   Integration patterns: REST for sync, Kafka for async/event-driven,
+   Event bus: Kafka with schema registry (Avro),
+   API lifecycle: design → review → implement → publish → deprecate,
+   Versioning: URI versioning (/v1/, /v2/), backward compatibility required"
+  ```
+- **Expected Outcome**: Section 7 with API-first strategy, integration patterns, event bus
+- **Impact**: LAE7 → Compliant (+0.5 points)
+
+**Example 5: Strategic Alignment and Governance**
+- **Gap**: Strategic alignment and governance framework missing
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add strategic alignment to Section 1 and governance to Section 12:
+   Strategic goals: digital transformation, cloud-first, API-first,
+   Business objectives: reduce time-to-market 50%, improve scalability,
+   Architecture principles: align with 9 principles in Section 3,
+   Governance: Enterprise Architecture Review Board (EARB),
+   Decision authority: EARB for strategic, team for tactical,
+   ADR process: template, review, approval, publication"
+  ```
+- **Expected Outcome**: Section 1 with strategic alignment, Section 12 with governance framework
+- **Impact**: LAE2 + LAE5 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required enterprise architecture fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all strategic decisions
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Strategic and Modular Architecture** (estimated impact: +0.6 points)
+   - Document modularity analysis: bounded contexts, component boundaries, interfaces (Section 5)
+   - Map architecture to enterprise strategic goals and business objectives (Section 1)
+   - Define technology radar alignment with quadrants (Adopt, Trial, Assess, Hold) in Section 8
+   - Add domain-driven design principles: aggregates, entities, value objects (Section 5 or 6)
+   - Document cross-cutting concerns: logging, monitoring, security, configuration (Section 5)
+
+2. **Establish Data and Integration Strategy** (estimated impact: +0.3 points)
+   - Define data strategy: governance, MDM, data lake/warehouse (Section 6)
+   - Add API-first approach: design-first, OpenAPI, lifecycle management (Section 7)
+   - Document integration patterns: REST, event-driven, messaging, ESB/API gateway (Section 7)
+   - Specify data catalog with business glossary and lineage (Section 6)
+   - Define event-driven architecture: Kafka, schema registry, event catalog (Section 7)
+
+3. **Enhance Governance and Standards** (estimated impact: +0.2 points)
+   - Document architectural governance framework: review boards, decision authority (Section 12 or 11)
+   - Add ADR process: template, review, approval, publication (Section 12)
+   - Define technology standards: approved libraries, frameworks, patterns (Section 8)
+   - Specify architecture compliance checks and validation gates (Section 11 or 12)
+   - Add architecture evolution roadmap with milestones (Section 1 or 12)
+
+**Priority Order**: LAE1 (modularity) → LAE3 (technology radar) → LAE6 (data strategy) → LAE7 (API-first) → LAE2 (strategic alignment) → LAE5 (governance) → LAE4 (integration patterns)
+
+**Estimated Final Score After Remediation**: 8.3-8.8/10 (AUTO_APPROVE)
 
 ---
 

@@ -581,18 +581,136 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
-**Common Security Gaps and Remediation**:
+---
 
-| Missing Item | ARCHITECTURE.md Section | What to Add |
-|--------------|------------------------|-------------|
-| API authentication | Section 9 (Security Architecture) | OAuth 2.0, API keys, or mTLS configuration |
-| Service mesh | Section 4 or 5 (Architecture/Components) | Istio, Linkerd, or Consul Connect implementation |
-| mTLS configuration | Section 9 (Security Architecture) | Mutual TLS enforcement for service-to-service calls |
-| Third-party API catalog | Section 7 (Integration View) | List of external APIs with vendors and endpoints |
-| Data lake authentication | Section 9 (Security Architecture) | Azure AD, IAM roles, or service principal authentication |
-| SSO configuration | Section 9 (Security Architecture) | OIDC or SAML integration with corporate IdP |
-| TLS version | Section 9 (Security Architecture) | TLS 1.3 or minimum TLS 1.2 enforcement |
-| Certificate management | Section 9 or 11 (Security/Operations) | CA, renewal automation, expiration monitoring |
+#### A.3.1 Common Gaps Quick Reference
+
+**Common Security Architecture Gaps and Remediation**:
+
+| Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
+|-----------------|--------|----------------------------------|-------------------|
+| API authentication not specified | LAS1 Non-Compliant | Section 9 (Security Architecture) | Document OAuth 2.0, API keys, or mTLS configuration |
+| mTLS configuration missing | LAS2 Non-Compliant | Section 9 (Security Architecture) | Add mutual TLS enforcement for service-to-service communication |
+| TLS version not enforced | LAS1 Non-Compliant | Section 9 (Security Architecture) | Specify TLS 1.3 or minimum TLS 1.2 enforcement |
+| Service mesh not documented | LAS2 Unknown | Section 4 or 5 (Architecture/Components) | Specify Istio, Linkerd, or Consul Connect implementation |
+| Certificate management undefined | LAS8 Unknown | Section 9 or 11 (Security/Operations) | Document CA, renewal automation, expiration monitoring |
+| SSO configuration missing | LAS7 Unknown | Section 9 (Security Architecture) | Add OIDC or SAML integration with corporate IdP |
+| Third-party API catalog incomplete | LAS5 Unknown | Section 7 (Integration View) | List all external APIs with vendors, endpoints, auth methods |
+| Data lake authentication unclear | LAS6 Unknown | Section 9 (Security Architecture) | Document Azure AD, IAM roles, or service principal authentication |
+| Secrets management not specified | LAS1 Unknown | Section 9 (Security Architecture) | Add HashiCorp Vault, AWS Secrets Manager, or Azure Key Vault |
+| Encryption at rest not documented | LAS6 Unknown | Section 9 (Security Architecture) | Specify AES-256, key rotation policy, KMS integration |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Security Architecture-Specific Examples**:
+
+**Example 1: Adding mTLS Configuration**
+- **Gap**: Missing mTLS for service-to-service communication
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add mTLS enforcement to Section 9 → Network Security:
+   Istio service mesh with automatic mTLS,
+   X.509 certificates with 90-day expiry,
+   automatic cert rotation via cert-manager"
+  ```
+- **Expected Outcome**: Section 9 with mTLS config, service mesh integration, cert management
+- **Impact**: LAS2 → Compliant (+0.6 points)
+
+**Example 2: API Authentication**
+- **Gap**: API authentication not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add API authentication to Section 9 → API Security:
+   OAuth 2.0 Client Credentials flow for service-to-service,
+   JWT tokens with 1-hour expiry,
+   Azure AD as authorization server"
+  ```
+- **Expected Outcome**: Section 9 with OAuth 2.0 flow, token config, Azure AD integration
+- **Impact**: LAS1 → Compliant (+0.5 points)
+
+**Example 3: Certificate Management**
+- **Gap**: Missing certificate lifecycle documentation
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add certificate management to Section 9 → Secrets Management:
+   cert-manager with Let's Encrypt for public certs,
+   internal CA for service certs,
+   30-day expiry alerts to ops team,
+   automated renewal process"
+  ```
+- **Expected Outcome**: Section 9 with cert lifecycle, alerting, automation
+- **Impact**: LAS8 → Compliant (+0.3 points)
+
+**Example 4: Secrets Management**
+- **Gap**: Secrets management not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add secrets management to Section 9 → Secrets Management:
+   HashiCorp Vault for secrets storage,
+   dynamic secrets with 24-hour TTL,
+   auto-rotation for database credentials,
+   audit logging enabled"
+  ```
+- **Expected Outcome**: Section 9 with Vault config, rotation policy, audit logging
+- **Impact**: LAS1 → Compliant (+0.4 points)
+
+**Example 5: Encryption at Rest**
+- **Gap**: Encryption at rest not specified
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add encryption at rest to Section 9 → Data Protection:
+   AES-256 encryption for all databases,
+   AWS KMS for key management,
+   automatic key rotation every 90 days,
+   envelope encryption for S3 buckets"
+  ```
+- **Expected Outcome**: Section 9 with encryption standards, KMS integration, rotation policy
+- **Impact**: LAS6 → Compliant (+0.5 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required security control fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all security controls
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Security Controls** (estimated impact: +0.6 points)
+   - Document mTLS for all service-to-service communication (Section 9)
+   - Add API authentication (OAuth 2.0/JWT) to Section 9
+   - Define certificate management lifecycle (Section 9 or 11)
+   - Specify secrets management solution (Vault/Key Vault) in Section 9
+   - Document TLS version enforcement (minimum 1.2, prefer 1.3) in Section 9
+
+2. **Enhance Encryption & Data Protection** (estimated impact: +0.3 points)
+   - Document encryption at rest (AES-256, key rotation) in Section 9
+   - Add encryption in transit (TLS 1.3, cipher suites) to Section 9
+   - Define key management strategy (KMS, HSM) in Section 9
+   - Specify data classification policy in Section 9
+   - Add PII/sensitive data handling procedures to Section 9
+
+3. **Improve Security Monitoring & Compliance** (estimated impact: +0.2 points)
+   - Add security audit logging to Section 11 (SIEM integration, retention)
+   - Document vulnerability scanning process and frequency
+   - Define security incident response procedures (Section 11)
+   - Specify penetration testing schedule and scope
+   - Add compliance certifications tracking (SOC 2, ISO 27001, etc.)
+
+**Priority Order**: LAS1 (API auth) → LAS2 (mTLS) → LAS8 (cert management) → LAS6 (encryption) → LAS7 (SSO) → LAS5 (third-party APIs) → LAS3 (inter-cluster) → LAS4 (domain APIs)
+
+**Estimated Final Score After Remediation**: 8.7-9.2/10 (AUTO_APPROVE)
 
 ---
 

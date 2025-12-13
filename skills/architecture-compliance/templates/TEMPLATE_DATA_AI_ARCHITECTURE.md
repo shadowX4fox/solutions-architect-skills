@@ -1100,14 +1100,141 @@
 
 <!-- @include shared/sections/completion-guide-intro.md -->
 
+---
+
+#### A.3.1 Common Gaps Quick Reference
+
 **Common Data & AI Architecture Gaps and Remediation**:
 
 | Gap Description | Impact | ARCHITECTURE.md Section to Update | Recommended Action |
 |-----------------|--------|----------------------------------|-------------------|
-| Missing data quality metrics | LAD1 Non-Compliant | Section 4 (Data Model) | Define data quality KPIs and validation rules |
+| Missing data quality metrics | LAD1 Non-Compliant | Section 6 (Data Model) | Define data quality KPIs and validation rules |
 | Undefined data governance policies | LAD2 Non-Compliant | Section 11 (Operational Considerations) | Document data access controls and policies |
 | No AI model governance framework | LAIA1 Non-Compliant | Section 6 (AI/ML Components) | Establish model approval and monitoring process |
 | Missing AI hallucination controls | LAIA3 Non-Compliant | Section 6 (AI/ML Components) | Implement validation and grounding mechanisms |
+| Data lineage not documented | LAD2 Unknown | Section 6 (Data Model) | Add data lineage tracking, upstream/downstream dependencies |
+| AI model monitoring undefined | LAIA2 Unknown | Section 6 or 11 (AI/ML/Operational) | Define model performance metrics, drift detection, retraining triggers |
+| Data retention policies missing | LAD2 Unknown | Section 11 (Operational Considerations) | Specify retention periods, archival strategy, compliance requirements |
+| AI bias mitigation not specified | LAIA3 Unknown | Section 6 (AI/ML Components) | Document bias detection, fairness metrics, mitigation strategies |
+
+---
+
+#### A.3.2 Step-by-Step Remediation Workflow
+
+<!-- @include shared/sections/remediation-workflow-guide.md -->
+
+**Data & AI Architecture-Specific Examples**:
+
+**Example 1: Data Quality Metrics and Validation**
+- **Gap**: Missing data quality metrics
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add data quality framework to Section 6:
+   Completeness: 95% minimum for critical fields,
+   Accuracy: 98% validation against source systems,
+   Consistency: cross-system validation rules,
+   Timeliness: data freshness SLA < 15 minutes,
+   Great Expectations library for automated validation"
+  ```
+- **Expected Outcome**: Section 6 with data quality KPIs, validation rules, monitoring tools
+- **Impact**: LAD1 → Compliant (+0.6 points)
+
+**Example 2: AI Model Governance Framework**
+- **Gap**: No AI model governance framework
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add AI model governance to Section 6:
+   Model approval: peer review + compliance review before production,
+   Model registry: MLflow for versioning and lineage,
+   Performance monitoring: accuracy, precision, recall tracked daily,
+   Retraining triggers: accuracy drop > 5% or drift detection,
+   Model cards: documentation for explainability and bias assessment"
+  ```
+- **Expected Outcome**: Section 6 with governance framework, approval process, monitoring
+- **Impact**: LAIA1 → Compliant (+0.6 points)
+
+**Example 3: AI Hallucination Controls**
+- **Gap**: Missing AI hallucination controls for LLM applications
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add hallucination controls to Section 6:
+   Grounding: RAG (Retrieval-Augmented Generation) with vector DB,
+   Validation: confidence scoring with threshold > 0.85,
+   Citation: source attribution for all generated content,
+   Human-in-the-loop: review for high-risk decisions,
+   Guardrails: NeMo Guardrails for prompt injection prevention"
+  ```
+- **Expected Outcome**: Section 6 with RAG architecture, validation mechanisms, guardrails
+- **Impact**: LAIA3 → Compliant (+0.5 points)
+
+**Example 4: Data Lineage and Governance**
+- **Gap**: Data lineage not documented
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add data lineage to Section 6:
+   Lineage tool: Apache Atlas or AWS Glue Data Catalog,
+   Tracking: upstream sources, transformations, downstream consumers,
+   Data catalog: searchable metadata with business glossary,
+   Access controls: RBAC with attribute-based policies,
+   Retention: PII 30 days, analytics data 7 years, compliance with GDPR"
+  ```
+- **Expected Outcome**: Section 6 with lineage tracking, catalog, governance policies
+- **Impact**: LAD2 → Compliant (+0.5 points)
+
+**Example 5: AI Model Monitoring and Drift Detection**
+- **Gap**: AI model monitoring undefined
+- **Skill Command**:
+  ```
+  /skill architecture-docs
+  "Add model monitoring to Section 6 or 11:
+   Performance metrics: accuracy, F1 score, AUC tracked hourly,
+   Data drift: KL divergence monitoring on input distributions,
+   Concept drift: prediction distribution monitoring,
+   Alerting: Slack notification when accuracy < 90% or drift detected,
+   Auto-retraining: triggered on drift with approval gate"
+  ```
+- **Expected Outcome**: Section 6/11 with monitoring metrics, drift detection, alerting
+- **Impact**: LAIA2 → Compliant (+0.4 points)
+
+---
+
+#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+
+**Target Score Breakdown**:
+- Completeness ({{completeness_percent}} weight): Fill all required data and AI fields
+- Compliance ({{compliance_percent}} weight): Convert UNKNOWN/FAIL to PASS
+- Quality ({{quality_percent}} weight): Add source traceability for all data and AI controls
+
+**To Achieve AUTO_APPROVE Status (8.0+ score):**
+
+1. **Complete Data Governance and Quality** (estimated impact: +0.5 points)
+   - Define data quality metrics: completeness, accuracy, consistency, timeliness (Section 6)
+   - Document data governance policies: access controls, RBAC, data classification (Section 11)
+   - Add data lineage tracking with upstream/downstream dependencies (Section 6)
+   - Specify data retention policies with compliance requirements (GDPR, CCPA) in Section 11
+   - Define data catalog with searchable metadata and business glossary (Section 6)
+
+2. **Establish AI Model Governance and Controls** (estimated impact: +0.6 points)
+   - Create AI model governance framework: approval, versioning, monitoring (Section 6)
+   - Implement hallucination controls: RAG, validation, citation, guardrails (Section 6)
+   - Add model monitoring: performance metrics, drift detection, retraining triggers (Section 6/11)
+   - Document bias mitigation: fairness metrics, bias detection, mitigation strategies (Section 6)
+   - Specify model explainability: SHAP, LIME, model cards for transparency (Section 6)
+
+3. **Enhance Data Security and Compliance** (estimated impact: +0.2 points)
+   - Document data encryption: at-rest (AES-256), in-transit (TLS 1.3) in Section 9
+   - Add PII/sensitive data handling with tokenization or anonymization (Section 9)
+   - Define data masking policies for non-production environments (Section 9/11)
+   - Specify compliance certifications: SOC 2, ISO 27001, GDPR, HIPAA (Section 9)
+   - Add data breach response procedures (Section 11)
+
+**Priority Order**: LAD1 (data quality) → LAIA1 (model governance) → LAIA3 (hallucination controls) → LAD2 (data governance) → LAIA2 (model monitoring)
+
+**Estimated Final Score After Remediation**: 8.4-8.9/10 (AUTO_APPROVE)
 
 ---
 
