@@ -658,15 +658,98 @@ Replace standard placeholders:
 - [GENERATION_DATE] → current date (YYYY-MM-DD)
 - [EXTRACTED_VALUE] → from cached data
 - [SOURCE_REFERENCE] → section and line numbers
+```
 
-Populate Document Control section with validation results:
-- [DOCUMENT_STATUS] → from validation_results.outcome.document_status
-- [VALIDATION_SCORE] → from validation_results.final_score (format: "8.7/10")
-- [VALIDATION_STATUS] → from validation_results.outcome.overall_status
-- [VALIDATION_DATE] → from validation_results.validation_date
+**Step 4.2.1: Apply Validation Outcome Tier Mapping**
+
+Before populating Document Control fields, determine the outcome tier based on the final validation score.
+
+**Outcome Tier Thresholds** (from validation/README.md):
+
+| Score Range | Overall Status | Document Status | Review Actor |
+|-------------|----------------|-----------------|--------------|
+| 8.0-10.0 | PASS | Approved | System (Auto-Approved) |
+| 7.0-7.9 | PASS | In Review | [Approval Authority from config] |
+| 5.0-6.9 | CONDITIONAL | Draft | Architecture Team |
+| 0.0-4.9 | FAIL | Rejected | N/A (Blocked) |
+
+**Mapping Logic**:
+
+```typescript
+function determineOutcome(finalScore: number, approvalAuthority: string) {
+  if (finalScore >= 8.0) {
+    return {
+      overall_status: "PASS",
+      document_status: "Approved",
+      review_actor: "System (Auto-Approved)",
+      action: "AUTO_APPROVE"
+    };
+  } else if (finalScore >= 7.0) {
+    return {
+      overall_status: "PASS",
+      document_status: "In Review",
+      review_actor: approvalAuthority,  // e.g., "Technical Architecture Review Board"
+      action: "MANUAL_REVIEW"
+    };
+  } else if (finalScore >= 5.0) {
+    return {
+      overall_status: "CONDITIONAL",
+      document_status: "Draft",
+      review_actor: "Architecture Team",
+      action: "NEEDS_WORK"
+    };
+  } else {
+    return {
+      overall_status: "FAIL",
+      document_status: "Rejected",
+      review_actor: "N/A (Blocked)",
+      action: "REJECT"
+    };
+  }
+}
+```
+
+**CRITICAL**: Use the outcome object values for Document Control placeholders, NOT static template values or config values.
+
+**Example** - Score 8.4/10:
+- `[DOCUMENT_STATUS]` = "Approved" (from outcome tier, NOT "In Review")
+- `[REVIEW_ACTOR]` = "System (Auto-Approved)" (from outcome tier, NOT approval authority name)
+
+**Step 4.2.2: Populate Document Control Fields**
+
+```
+Populate Document Control section with validation outcome tier values:
+- [DOCUMENT_STATUS] → outcome.document_status (e.g., "Approved" for score ≥ 8.0)
+- [VALIDATION_SCORE] → validation_results.final_score (format: "8.4/10")
+- [VALIDATION_STATUS] → outcome.overall_status (e.g., "PASS")
+- [VALIDATION_DATE] → validation_results.validation_date (YYYY-MM-DD)
 - [VALIDATION_EVALUATOR] → "Claude Code (Automated Validation Engine)"
-- [REVIEW_ACTOR] → from validation_results.outcome.review_actor
-- [APPROVAL_AUTHORITY] → from validation config approval_authority field
+- [REVIEW_ACTOR] → outcome.review_actor (e.g., "System (Auto-Approved)" for score ≥ 8.0)
+- [APPROVAL_AUTHORITY] → config.approval_authority (always from config, unchanged)
+```
+
+**Example Output** - Score 8.4/10 (AUTO_APPROVE):
+```markdown
+| Status | Approved |
+| Validation Score | 8.4/10 |
+| Validation Status | PASS |
+| Review Actor | System (Auto-Approved) |
+| Approval Authority | Technical Architecture Review Board |
+```
+
+**Example Output** - Score 7.6/10 (MANUAL_REVIEW):
+```markdown
+| Status | In Review |
+| Validation Score | 7.6/10 |
+| Validation Status | PASS |
+| Review Actor | Technical Architecture Review Board |
+| Approval Authority | Technical Architecture Review Board |
+```
+
+**Critical Distinction**:
+- **Scores 8.0-10.0**: AUTO_APPROVE → Review Actor = "System (Auto-Approved)"
+- **Scores 7.0-7.9**: MANUAL_REVIEW → Review Actor = [Approval Authority name]
+- **Approval Authority field**: ALWAYS shows the approval authority name (for reference/escalation)
 ```
 
 **See COMPLIANCE_GENERATION_GUIDE.md Step 4.2 for detailed examples of correct vs incorrect placeholder replacement.**
