@@ -1390,6 +1390,181 @@ Before finalizing any generated compliance contract, verify:
 
 ---
 
+### Phase 4.6: Automated Template Validation (NEW)
+
+**All contracts undergo automated validation before output to ensure strict template adherence.**
+
+#### Validation Framework Overview
+
+The Template Validation Framework enforces format compliance across 5 critical areas:
+
+1. **Compliance Summary Table**: 6-column format validation
+2. **Status Values**: Standardized values with exact case
+3. **Appendix Structure**: A.1-A.4 presence and order
+4. **Calculations**: Mathematical accuracy of compliance metrics
+5. **Completeness**: All required sections present
+
+#### Implementation
+
+```typescript
+import { ComplianceValidator } from './utils/validators';
+import { ErrorReporter } from './utils/error_reporter';
+
+// Load contract-specific validation rules
+const validator = new ComplianceValidator(
+  `validation/template_validation_${contractType}.json`
+);
+
+// Validate generated document
+const result = await validator.validateDocument(generatedContent, contractType);
+
+if (!result.isValid) {
+    // BLOCK generation and return detailed error report
+    const report = ErrorReporter.generateReport(result, contractType);
+    console.error(report);
+    throw new ValidationException('Template validation failed. See error report above.');
+}
+
+// Log success
+console.log(ErrorReporter.generateCompactSummary(result));
+```
+
+#### Validation Process
+
+**Step 1: Load Validation Rules**
+- Contract-specific rules from `/validation/template_validation_{type}.json`
+- Includes requirement counts, allowed categories, special case handling
+
+**Step 2: Run Comprehensive Validation**
+- Table format (6 columns, correct headers, row counts)
+- Status values (exact case: Compliant, Non-Compliant, Not Applicable, Unknown)
+- Appendix A.1-A.4 (all present, correct order)
+- Compliance calculations (X+Y+Z+W=TOTAL, percentages accurate)
+- Required sections (header, document control, compliance summary, etc.)
+
+**Step 3: Error Collection**
+- All errors collected before reporting (not fail-fast)
+- Each error includes:
+  - Line number (exact location in generated document)
+  - Section reference (e.g., "Compliance Summary / Row 5")
+  - SKILL.md reference (line numbers documenting the requirement)
+  - Template reference (which template file contains the pattern)
+  - Actionable fix instructions
+
+**Step 4: Decision**
+- **If errors found**: BLOCK generation, display error report
+- **If warnings only**: Generate document, include warning summary
+- **If validation passes**: Proceed to Phase 5 (Output)
+
+#### Error Report Format
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VALIDATION FAILED: SRE Architecture (3 errors, 1 warning)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BLOCKING ERRORS:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ERROR 1: Invalid Status Value (Line 287)
+Severity: BLOCKING
+Location: Compliance Summary Table / Row 5
+
+Expected:
+  One of ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"]
+
+Found:
+  "Pass"
+
+Reference:
+  - SKILL.md line 682 (Status value standardization)
+  - Template: TEMPLATE_SRE_ARCHITECTURE.md
+  - Shared: shared/fragments/status-codes.md
+
+Fix:
+  Change "Pass" to "Compliant" on line 287
+  Ensure exact case as shown in status-codes.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUMMARY:
+  Total Errors: 3
+  Blocking: 3
+  Warnings: 1
+  Contract Generation: ❌ BLOCKED
+```
+
+#### Special Case Handling
+
+**Business Continuity (Section-Based Format)**
+```json
+{
+  "compliance_summary_table": {
+    "enabled": false,
+    "reason": "Business Continuity uses section-based format, not 6-column table"
+  },
+  "section_based_format": {
+    "enabled": true,
+    "required_sections": [...]
+  }
+}
+```
+
+**SRE Architecture (Two-Tier Scoring)**
+```json
+{
+  "two_tier_scoring": {
+    "enabled": true,
+    "blocker_count": 36,
+    "desired_count": 21,
+    "total_requirements": 57
+  }
+}
+```
+
+**Data & AI Architecture (Dual Categories)**
+- Allows "Data" and "AI" as category values
+- Validates CODE pattern: `^LA(D|AI)\\d+$`
+
+#### Bypassing Validation (Not Recommended)
+
+**For debugging purposes only:**
+```typescript
+// Skip validation (USE WITH EXTREME CAUTION)
+const validator = new ComplianceValidator(rulesPath, { skipValidation: true });
+```
+
+**⚠️ WARNING**: Bypassing validation is NOT recommended for production generation. Only use for debugging template issues.
+
+#### Validation Rules Reference
+
+All validation rules are stored in:
+```
+/validation/
+  ├── TEMPLATE_VALIDATION_SCHEMA.json (Schema definition)
+  ├── template_validation_sre_architecture.json
+  ├── template_validation_cloud_architecture.json
+  ├── template_validation_security_architecture.json
+  ├── template_validation_data_ai_architecture.json
+  ├── template_validation_development_architecture.json
+  ├── template_validation_enterprise_architecture.json
+  ├── template_validation_integration_architecture.json
+  ├── template_validation_platform_it_infrastructure.json
+  ├── template_validation_process_transformation.json
+  └── template_validation_business_continuity.json
+```
+
+#### Extending Validation Rules
+
+To add new validation rules:
+
+1. Update `TEMPLATE_VALIDATION_SCHEMA.json` with new rule structure
+2. Add rule to contract-specific JSON file
+3. Implement validation logic in `validators.ts` (if new validation type)
+4. Add unit tests to `validators.test.ts`
+5. Update this documentation
+
+---
+
 ### Phase 5: Output and Verification
 
 **Step 5.1: Generate Filename**

@@ -673,17 +673,24 @@ Verification: X + Y + Z + W = TOTAL (counts must sum correctly)
 - Completeness percentage measures how many total data points across ALL sections are documented
 - Completeness is separate from compliance status (a document can be 100% complete but have non-compliant items)
 
-**Format Enforcement Checklist - Verify Before Finalizing:**
-- [ ] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
-- [ ] Table header uses proper markdown pipe syntax: `| Col1 | Col2 | Col3 | Col4 | Col5 | Col6 |`
-- [ ] Table separator line uses proper syntax: `|------|------|------|------|------|------|`
-- [ ] All requirement codes present (row count matches template's total requirements)
-- [ ] Category column populated (use template type if no specific category)
-- [ ] Status values use EXACTLY one of: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
-- [ ] Overall Compliance line uses emoji indicators: ✅ ❌ ⊘ ❓
-- [ ] Compliance counts sum to TOTAL: X + Y + Z + W = TOTAL
-- [ ] Percentages calculated correctly and rounded to nearest integer
-- [ ] Completeness metric included with percentage and fraction format
+**Format Enforcement Checklist - Automated Validation:**
+The following checks are now automated via the Template Validation Framework (executed in Phase 4.6):
+- [x] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
+- [x] Table header uses proper markdown pipe syntax: `| Col1 | Col2 | Col3 | Col4 | Col5 | Col6 |`
+- [x] Table separator line uses proper syntax: `|------|------|------|------|------|------|`
+- [x] All requirement codes present (row count matches template's total requirements)
+- [x] Category column populated (use template type if no specific category)
+- [x] Status values use EXACTLY one of: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
+- [x] Overall Compliance line uses emoji indicators: ✅ ❌ ⊘ ❓
+- [x] Compliance counts sum to TOTAL: X + Y + Z + W = TOTAL
+- [x] Percentages calculated correctly and rounded to nearest integer
+- [x] Completeness metric included with percentage and fraction format
+
+**Validation Details:**
+- Validation errors include line numbers, section references, and fix instructions
+- Generation is BLOCKED if validation fails
+- Validation rules: `/validation/template_validation_*.json`
+- See error report for detailed debugging information
 
 **Special Cases:**
 - **Business Continuity** contract uses a different format (section-based, not table-based). Do NOT apply table format to this contract.
@@ -697,12 +704,74 @@ Examples:
 - Integration Count from Section 7
 ```
 
-**Step 4.6: Format and Validate**
+**Step 4.6: Format and Comprehensive Validation**
+
+**4.6.1 Automated Template Validation:**
+
+Use the generation helper for integrated validation:
+
+```typescript
+import { validateGeneratedContract } from './utils/generation-helper';
+
+// Validate generated content before output
+const validationResult = await validateGeneratedContract(
+  generatedContent,
+  contractType  // e.g., 'sre_architecture', 'cloud_architecture', etc.
+);
+
+if (!validationResult.isValid) {
+  // BLOCK: Generation failed validation
+  console.error(validationResult.errorReport);
+
+  throw new Error(
+    `Validation failed for ${validationResult.contractDisplayName}: ` +
+    `${validationResult.validationResult.errors.length} error(s), ` +
+    `${validationResult.validationResult.warnings.length} warning(s)`
+  );
+}
+
+// SUCCESS: Proceed to Phase 5 (Output)
+console.log(validationResult.successMessage);
+```
+
+**Validation Checks:**
+1. **Compliance Summary Table**: 6-column format, row counts, markdown syntax
+2. **Status Values**: Exact case enforcement (Compliant, Non-Compliant, Not Applicable, Unknown)
+3. **Appendix A.1-A.4 Structure**: All present, correct order
+4. **Compliance Calculations**: Counts sum correctly, percentages accurate (X+Y+Z+W=TOTAL)
+5. **Template Completeness**: All required sections present
+
+**Error Handling:**
+- Validation errors include line numbers, SKILL.md references, and actionable fix instructions
+- All errors collected before reporting (not fail-fast)
+- Generation BLOCKED if any BLOCKING-severity errors found
+- Detailed error report shows exact violations and how to fix them
+
+**Supported Contract Types:**
+- `business_continuity`, `sre_architecture`, `cloud_architecture`
+- `data_ai_architecture`, `development_architecture`, `process_transformation`
+- `security_architecture`, `platform_it_infrastructure`, `enterprise_architecture`
+- `integration_architecture`
+
+**Standalone Validation CLI:**
+For validating existing contracts or testing:
+```bash
+bun run utils/validate-cli.ts compliance-docs/sre_architecture.md sre_architecture
+bun run utils/validate-cli.ts --help
+```
+
+**Integration Examples:**
+See `INTEGRATION_EXAMPLE.md` for complete workflow examples including:
+- Full generation workflow with validation
+- Batch validation for multiple contracts
+- CI/CD integration
+- Error recovery workflow
+
+**4.6.2 Manual Format Checks** (backward compatibility):
 ```
 - Ensure proper markdown formatting
-- Check all sections present
-- Validate tables and lists
-- Add source traceability
+- Verify tables and lists render correctly
+- Check source traceability references
 ```
 
 **Step 4.7: Flag Missing Data**

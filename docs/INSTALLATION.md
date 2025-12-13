@@ -11,9 +11,81 @@ Complete guide to installing the Solutions Architect Skills plugin for Claude Co
 
 ### Prerequisites
 - **Claude Code** (latest version)
+- **Bun** (v1.0.0 or later) - **REQUIRED** for compliance generation
 - **Terminal/Shell** access
 - **Internet connection** (for downloading release)
 - **~2 MB disk space** for plugin files
+
+### Installing Bun
+
+**Bun is required** for the architecture-compliance skill to function properly. It powers template expansion, validation, and contract generation.
+
+#### macOS & Linux
+
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Verify installation
+bun --version
+```
+
+Expected output: `1.0.0` or later
+
+#### Windows
+
+```powershell
+# Install Bun (PowerShell)
+powershell -c "irm bun.sh/install.ps1 | iex"
+
+# Verify installation
+bun --version
+```
+
+#### Alternative: Using Package Managers
+
+**macOS (Homebrew):**
+```bash
+brew install oven-sh/bun/bun
+```
+
+**Linux (Snap):**
+```bash
+sudo snap install bun-js
+```
+
+**Verify Installation:**
+```bash
+# Check Bun is accessible
+which bun
+# Output: /home/username/.bun/bin/bun (or similar)
+
+# Test Bun works
+bun --version
+# Output: 1.x.x
+```
+
+**Learn More:**
+- [Official Bun Installation Guide](https://bun.sh/docs/installation)
+- [Bun Documentation](https://bun.sh/docs)
+
+---
+
+### Why Bun is Required
+
+The `architecture-compliance` skill uses Bun for:
+
+1. **Template Expansion** - Resolves `@include` directives in compliance templates
+2. **Pre-Validation (Phase 4.1)** - Validates template structure before data population
+3. **Post-Validation (Phase 4.6)** - Validates generated contracts before output
+4. **High Performance** - Fast TypeScript execution for validation framework
+
+**Without Bun installed**, compliance generation will fail with:
+```
+Error: bun command not found
+```
+
+---
 
 ## Understanding Marketplaces & Plugins
 
@@ -180,9 +252,24 @@ solutions-architect-skills v1.0.0
 
 ## Verification Checklist
 
-After installation, verify all skills are available:
+After installation, verify all prerequisites and skills are available:
 
-### 1. Check Plugin Installation
+### 1. Verify Bun Installation
+
+**IMPORTANT:** Check Bun is installed before using the plugin:
+
+```bash
+bun --version
+```
+
+**Expected output:**
+- `1.0.0` or later
+
+**If Bun is not installed:**
+- See [Installing Bun](#installing-bun) section above
+- The compliance skill will not work without Bun
+
+### 2. Check Plugin Installation
 
 ```
 /plugin list
@@ -191,7 +278,7 @@ After installation, verify all skills are available:
 **Expected output:**
 - `solutions-architect-skills v1.0.0` appears in the list
 
-### 2. Verify Architecture Readiness Skill
+### 3. Verify Architecture Readiness Skill
 
 ```
 /skill architecture-readiness
@@ -201,7 +288,7 @@ After installation, verify all skills are available:
 - Skill activates successfully
 - You see prompts about creating Product Owner Specifications
 
-### 3. Verify Architecture Docs Skill
+### 4. Verify Architecture Docs Skill
 
 ```
 /skill architecture-docs
@@ -211,7 +298,7 @@ After installation, verify all skills are available:
 - Skill activates successfully
 - You see prompts about ARCHITECTURE.md creation
 
-### 4. Verify Architecture Compliance Skill
+### 5. Verify Architecture Compliance Skill
 
 ```
 /skill architecture-compliance
@@ -221,7 +308,9 @@ After installation, verify all skills are available:
 - Skill activates successfully
 - You see prompts about generating compliance documents
 
-### 5. Check File Structure
+**Note:** This skill requires Bun to be installed (verified in step 1)
+
+### 6. Check File Structure
 
 Verify plugin files are in place:
 
@@ -244,6 +333,59 @@ CHANGELOG.md
 ```
 
 ## Troubleshooting
+
+### Issue: Bun Not Found
+
+**Symptom:** Compliance generation fails with `bun: command not found`
+
+**Solutions:**
+
+1. **Install Bun:**
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   ```
+
+2. **Add Bun to PATH (if installed but not found):**
+   ```bash
+   # Add to ~/.bashrc, ~/.zshrc, or ~/.profile
+   export BUN_INSTALL="$HOME/.bun"
+   export PATH="$BUN_INSTALL/bin:$PATH"
+
+   # Reload shell configuration
+   source ~/.bashrc  # or ~/.zshrc
+   ```
+
+3. **Verify Bun installation:**
+   ```bash
+   which bun
+   bun --version
+   ```
+
+4. **Restart terminal:**
+   - Close and reopen terminal
+   - Verify `bun --version` works
+
+### Issue: Bun Installed But Not Working
+
+**Symptom:** `bun --version` shows version but compliance skill fails
+
+**Solutions:**
+
+1. **Test Bun directly:**
+   ```bash
+   cd ~/.claude/plugins/solutions-architect-skills/skills/architecture-compliance
+   bun run utils/resolve-includes.ts --help
+   ```
+
+2. **Check file permissions:**
+   ```bash
+   chmod +x ~/.claude/plugins/solutions-architect-skills/skills/architecture-compliance/utils/*.ts
+   ```
+
+3. **Reinstall Bun:**
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   ```
 
 ### Issue: Plugin Not Appearing in List
 

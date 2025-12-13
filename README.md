@@ -265,8 +265,18 @@ To request specific examples or use cases, [open an issue](https://github.com/sh
 ## Requirements
 
 - **Claude Code** (latest version)
+- **Bun** (v1.0.0 or later) - Required for compliance generation and template validation
 - **Platform:** macOS, Linux, or Windows
-- **No dependencies** - Pure markdown-based plugin
+
+### Why Bun?
+
+The architecture-compliance skill uses Bun for:
+- Template expansion with `@include` directives
+- Pre-validation of template structure (Phase 4.1)
+- Post-validation of generated contracts (Phase 4.6)
+- High-performance TypeScript execution
+
+**Installation:** See [INSTALLATION.md](docs/INSTALLATION.md#installing-bun) for Bun setup instructions.
 
 ## Use Cases
 

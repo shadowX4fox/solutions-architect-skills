@@ -1,0 +1,167 @@
+{
+  "contract_type": "sre_architecture",
+  "contract_name": "SRE Architecture (Site Reliability Engineering)",
+  "template_file": "TEMPLATE_SRE_ARCHITECTURE.md",
+  "version": "1.0.0",
+  "validations": {
+    "compliance_summary_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "requirement_count": 57,
+      "blocker_count": 36,
+      "desired_count": 21,
+      "column_validation": {
+        "columns": [
+          {
+            "name": "Code",
+            "pattern": "^LASRE\\d{2}$",
+            "required": true
+          },
+          {
+            "name": "Requirement",
+            "max_length": 150,
+            "required": true
+          },
+          {
+            "name": "Category",
+            "allowed_values": [
+              "Practice - Log Management",
+              "Practice - Application Deployment",
+              "Practice - Configuration Management",
+              "Practice - Operational Documentation",
+              "Practice - Operational Resilience",
+              "Practice - Recovery and Resilience Testing",
+              "Practice - Information and Architecture",
+              "Observability - Key Metrics",
+              "Observability - Backend Application",
+              "Observability - Frontend Application",
+              "Observability - User Experience",
+              "Observability - Cost Estimation",
+              "Observability - Infrastructure",
+              "Observability - Batch Processing",
+              "Observability - Application Deployment",
+              "Observability - Disaster Recovery",
+              "Observability - Application Operational Tasks",
+              "Observability - Log Management",
+              "Observability - Configuration Management",
+              "Observability - Integration, Deployment and Delivery",
+              "Observability - Operational Resilience",
+              "Automation - Operational Resilience",
+              "Automation - Recovery and Resilience Testing",
+              "Automation - Information and Architecture",
+              "Automation - Backend Application",
+              "Automation - Frontend Application",
+              "Automation - Infrastructure",
+              "Automation - Application Operational Tasks",
+              "Automation - Auto-remediation"
+            ],
+            "required": true
+          },
+          {
+            "name": "Status",
+            "allowed_values": [
+              "Compliant",
+              "Non-Compliant",
+              "Not Applicable",
+              "Unknown"
+            ],
+            "required": true
+          },
+          {
+            "name": "Source Section",
+            "pattern": "^(\\d+\\.\\d+|Not documented)$",
+            "required": true
+          },
+          {
+            "name": "Responsible Role",
+            "required": true
+          }
+        ]
+      }
+    },
+    "section_based_format": {
+      "enabled": false
+    },
+    "status_value_standardization": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "allowed_values": [
+        "Compliant",
+        "Non-Compliant",
+        "Not Applicable",
+        "Unknown"
+      ],
+      "case_sensitive": true,
+      "common_errors": {
+        "compliant": "Compliant",
+        "non-compliant": "Non-Compliant",
+        "not applicable": "Not Applicable",
+        "unknown": "Unknown",
+        "N/A": "Not Applicable",
+        "Pass": "Compliant",
+        "Fail": "Non-Compliant",
+        "PASS": "Compliant",
+        "FAIL": "Non-Compliant",
+        "pass": "Compliant",
+        "fail": "Non-Compliant"
+      }
+    },
+    "appendix_structure": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_appendices": [
+        "A.1",
+        "A.2",
+        "A.3",
+        "A.4"
+      ],
+      "strict_order": true
+    },
+    "compliance_calculation": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "total_requirements": 57,
+      "percentage_tolerance": 0,
+      "completeness_tolerance": 1
+    },
+    "template_completeness": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_sections": [
+        "header",
+        "document_control",
+        "compliance_summary",
+        "overall_compliance",
+        "appendix_a1_a4",
+        "dynamic_sections"
+      ],
+      "section_order": {
+        "strict_order": false,
+        "sequence": [
+          "header",
+          "document_control",
+          "compliance_summary",
+          "overall_compliance",
+          "practice_requirements",
+          "observability_requirements",
+          "automation_requirements",
+          "appendix_a1_a4",
+          "dynamic_sections"
+        ]
+      }
+    },
+    "two_tier_scoring": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "blocker_section_pattern": "\\(LASRE01-16\\)",
+      "blocker_count": 36,
+      "desired_count": 21,
+      "blocker_validation": "all_must_pass_for_approval"
+    }
+  },
+  "error_messages": {
+    "table_row_count_mismatch": "SRE Architecture requires exactly 57 requirement rows (36 Blocker + 21 Desired). Found {actual} rows.",
+    "invalid_category": "Category '{value}' not recognized. Must be one of Practice, Observability, or Automation subcategories.",
+    "missing_two_tier_note": "SRE Architecture requires Two-Tier Compliance Scoring note before Compliance Summary table."
+  }
+}

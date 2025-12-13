@@ -1,0 +1,87 @@
+{
+  "contract_type": "business_continuity",
+  "contract_name": "Business Continuity",
+  "template_file": "TEMPLATE_BUSINESS_CONTINUITY.md",
+  "version": "1.0.0",
+  "validations": {
+    "compliance_summary_table": {
+      "enabled": false,
+      "severity": "BLOCKING",
+      "reason": "Business Continuity uses section-based format, not 6-column table"
+    },
+    "section_based_format": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_sections": [
+        {
+          "id": "recovery_objectives",
+          "heading": "## 1. Recovery Objectives",
+          "required_fields": ["RTO", "RPO", "Business Criticality"]
+        },
+        {
+          "id": "backup_strategy",
+          "heading": "## 2. Backup Strategy",
+          "required_fields": ["Backup Type", "Frequency", "Retention", "Storage Location"]
+        },
+        {
+          "id": "disaster_recovery",
+          "heading": "## 3. Disaster Recovery Procedures",
+          "required_fields": ["Primary Site", "DR Site", "Failover Mechanism"]
+        },
+        {
+          "id": "business_impact",
+          "heading": "## 4. Business Impact Analysis",
+          "required_fields": ["Availability Requirement", "Allowed Downtime"]
+        },
+        {
+          "id": "resilience_measures",
+          "heading": "## 5. Resilience Measures",
+          "required_fields": []
+        }
+      ]
+    },
+    "status_value_standardization": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "allowed_values": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"],
+      "case_sensitive": true,
+      "common_errors": {
+        "compliant": "Compliant",
+        "non-compliant": "Non-Compliant",
+        "not applicable": "Not Applicable",
+        "unknown": "Unknown",
+        "N/A": "Not Applicable"
+      }
+    },
+    "appendix_structure": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_appendices": ["A.1", "A.3", "A.4"],
+      "strict_order": false,
+      "note": "A.2 Validation Methodology not required for Business Continuity"
+    },
+    "compliance_calculation": {
+      "enabled": false,
+      "severity": "BLOCKING",
+      "note": "Business Continuity uses section-based compliance tracking, not Overall Compliance section"
+    },
+    "template_completeness": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_sections": [
+        "header",
+        "document_control",
+        "recovery_objectives",
+        "backup_strategy",
+        "disaster_recovery",
+        "business_impact",
+        "resilience_measures",
+        "appendix_a1_a4",
+        "dynamic_sections"
+      ]
+    }
+  },
+  "error_messages": {
+    "missing_required_section": "Business Continuity contract requires all 5 main sections (Recovery Objectives, Backup Strategy, Disaster Recovery, Business Impact, Resilience Measures)"
+  }
+}

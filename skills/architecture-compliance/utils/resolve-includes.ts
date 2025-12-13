@@ -7,14 +7,21 @@
  * Optimized for performance using Bun's fast file I/O APIs.
  *
  * Usage:
- *   bun resolve-includes.ts <template-file> [output-file]
- *   ./resolve-includes.ts <template-file> [output-file]
+ *   bun resolve-includes.ts <template-file> [output-file] [--validate]
+ *   ./resolve-includes.ts <template-file> [output-file] [--validate]
+ *
+ * Options:
+ *   --validate    Run template structure pre-validation after expansion
  *
  * If output-file is omitted, outputs to stdout.
  */
 
-import { resolve, join } from 'path';
+import { resolve, join, basename } from 'path';
 import { existsSync } from 'fs';
+import {
+  validateTemplateStructure,
+  generateTemplateValidationReport
+} from './template-prevalidator';
 
 // Configuration
 const SKILL_DIR = resolve(import.meta.dir, '..');
@@ -178,22 +185,47 @@ async function resolveIncludes(
 }
 
 /**
+ * Extract contract type from template filename
+ * Example: TEMPLATE_SRE_ARCHITECTURE.md → sre_architecture
+ */
+function extractContractType(templatePath: string): string | null {
+  const filename = basename(templatePath, '.md');
+
+  // Pattern: TEMPLATE_CONTRACT_TYPE or template_contract_type
+  const match = filename.match(/^TEMPLATE_(.+)$/i);
+  if (!match) {
+    return null;
+  }
+
+  // Convert to lowercase with underscores
+  return match[1].toLowerCase();
+}
+
+/**
  * Main function
  */
 async function main() {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.error('Usage: bun resolve-includes.ts <template-file> [output-file]');
+    console.error('Usage: bun resolve-includes.ts <template-file> [output-file] [--validate]');
+    console.error('');
+    console.error('Options:');
+    console.error('  --validate    Run template structure pre-validation after expansion');
     console.error('');
     console.error('Example:');
     console.error('  bun resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md');
-    console.error('  ./resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md');
+    console.error('  bun resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate');
+    console.error('  ./resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md --validate');
     process.exit(1);
   }
 
-  const templatePath = args[0];
-  const outputPath = args[1] || null;
+  // Parse arguments
+  const validateFlag = args.includes('--validate');
+  const nonFlagArgs = args.filter(arg => !arg.startsWith('--'));
+
+  const templatePath = nonFlagArgs[0];
+  const outputPath = nonFlagArgs[1] || null;
 
   if (!existsSync(templatePath)) {
     console.error(`Error: Template file not found: ${templatePath}`);
@@ -207,15 +239,39 @@ async function main() {
     // Resolve includes
     const expanded = await resolveIncludes(content);
 
+    // Pre-validation (Phase 4.1)
+    if (validateFlag) {
+      const contractType = extractContractType(templatePath);
+
+      if (!contractType) {
+        console.error('Warning: Could not extract contract type from filename. Skipping validation.');
+        console.error('Expected filename format: TEMPLATE_CONTRACT_TYPE.md');
+      } else {
+        console.log('\n📋 Running template structure pre-validation...');
+
+        const validationResult = await validateTemplateStructure(expanded, contractType);
+        const report = generateTemplateValidationReport(validationResult, contractType);
+
+        console.log(report);
+
+        if (!validationResult.isValid) {
+          console.error('\n❌ Template validation failed. Fix errors before proceeding.');
+          process.exit(1);
+        }
+
+        console.log('');
+      }
+    }
+
     // Output
     if (outputPath) {
       await Bun.write(outputPath, expanded);
-      console.log(`Template expanded successfully: ${outputPath}`);
+      console.log(`✅ Template expanded successfully: ${outputPath}`);
 
       // Show statistics
       const originalLines = content.split('\n').length;
       const expandedLines = expanded.split('\n').length;
-      console.log(`Lines: ${originalLines} → ${expandedLines} (+${expandedLines - originalLines})`);
+      console.log(`   Lines: ${originalLines} → ${expandedLines} (+${expandedLines - originalLines})`);
     } else {
       console.log(expanded);
     }

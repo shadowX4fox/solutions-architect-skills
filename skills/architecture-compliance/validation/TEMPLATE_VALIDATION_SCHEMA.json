@@ -1,0 +1,343 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://anthropic.com/schemas/compliance-validation-rules.json",
+  "title": "Compliance Template Validation Rules Schema",
+  "description": "Schema defining the structure of validation rules for compliance contract templates",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["contract_type", "contract_name", "template_file", "version", "validations"],
+  "properties": {
+    "contract_type": {
+      "type": "string",
+      "description": "Unique identifier for the contract type (e.g., 'sre_architecture', 'cloud_architecture')",
+      "pattern": "^[a-z_]+$"
+    },
+    "contract_name": {
+      "type": "string",
+      "description": "Human-readable name of the contract type"
+    },
+    "template_file": {
+      "type": "string",
+      "description": "Name of the template file (e.g., 'TEMPLATE_SRE_ARCHITECTURE.md')",
+      "pattern": "^TEMPLATE_[A-Z_]+\\.md$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the validation rules",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "validations": {
+      "type": "object",
+      "description": "Collection of validation configurations",
+      "properties": {
+        "compliance_summary_table": {
+          "type": "object",
+          "description": "Validation rules for the 6-column Compliance Summary table",
+          "required": ["enabled", "severity"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether this validation is enabled for this contract type"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures"
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason why validation is disabled (if enabled=false)"
+            },
+            "requirement_count": {
+              "type": "integer",
+              "description": "Total number of requirements expected in the table",
+              "minimum": 1
+            },
+            "blocker_count": {
+              "type": "integer",
+              "description": "Number of blocker requirements (for two-tier scoring like SRE)",
+              "minimum": 0
+            },
+            "desired_count": {
+              "type": "integer",
+              "description": "Number of desired requirements (for two-tier scoring like SRE)",
+              "minimum": 0
+            },
+            "column_validation": {
+              "type": "object",
+              "description": "Column-specific validation rules",
+              "properties": {
+                "columns": {
+                  "type": "array",
+                  "description": "Array of column specifications",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "required"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Column name (must match header exactly)"
+                      },
+                      "pattern": {
+                        "type": "string",
+                        "description": "Regex pattern for validating column values"
+                      },
+                      "allowed_values": {
+                        "type": "array",
+                        "description": "List of allowed values for this column",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "max_length": {
+                        "type": "integer",
+                        "description": "Maximum character length for column values",
+                        "minimum": 1
+                      },
+                      "required": {
+                        "type": "boolean",
+                        "description": "Whether this column must have non-empty values"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "section_based_format": {
+          "type": "object",
+          "description": "Validation rules for section-based format (alternative to table format)",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether this contract uses section-based format instead of table"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures"
+            },
+            "required_sections": {
+              "type": "array",
+              "description": "Array of required section configurations",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique identifier for the section"
+                  },
+                  "heading": {
+                    "type": "string",
+                    "description": "Expected heading text (exact match)"
+                  },
+                  "required_fields": {
+                    "type": "array",
+                    "description": "List of required field names in this section",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "status_value_standardization": {
+          "type": "object",
+          "description": "Validation rules for status value standardization",
+          "required": ["enabled", "allowed_values", "case_sensitive"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether status value validation is enabled"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures",
+              "default": "BLOCKING"
+            },
+            "allowed_values": {
+              "type": "array",
+              "description": "Exact list of allowed status values",
+              "items": {
+                "type": "string"
+              },
+              "default": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"]
+            },
+            "case_sensitive": {
+              "type": "boolean",
+              "description": "Whether status value matching is case-sensitive",
+              "default": true
+            },
+            "common_errors": {
+              "type": "object",
+              "description": "Map of common errors to suggested corrections",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "appendix_structure": {
+          "type": "object",
+          "description": "Validation rules for Appendix A.1-A.4 structure",
+          "required": ["enabled", "required_appendices"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether appendix structure validation is enabled"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures",
+              "default": "BLOCKING"
+            },
+            "required_appendices": {
+              "type": "array",
+              "description": "List of required appendix identifiers",
+              "items": {
+                "type": "string",
+                "pattern": "^A\\.\\d+$"
+              },
+              "default": ["A.1", "A.2", "A.3", "A.4"]
+            },
+            "strict_order": {
+              "type": "boolean",
+              "description": "Whether appendices must appear in exact order",
+              "default": true
+            },
+            "note": {
+              "type": "string",
+              "description": "Additional notes about appendix requirements for this contract"
+            }
+          }
+        },
+        "compliance_calculation": {
+          "type": "object",
+          "description": "Validation rules for compliance calculation accuracy",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether compliance calculation validation is enabled"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures",
+              "default": "BLOCKING"
+            },
+            "total_requirements": {
+              "type": "integer",
+              "description": "Total number of requirements (for sum validation)",
+              "minimum": 1
+            },
+            "percentage_tolerance": {
+              "type": "integer",
+              "description": "Allowed tolerance for percentage calculations (0 = exact match)",
+              "minimum": 0,
+              "maximum": 5,
+              "default": 0
+            },
+            "completeness_tolerance": {
+              "type": "integer",
+              "description": "Allowed tolerance for completeness percentage (accounts for rounding)",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 1
+            }
+          }
+        },
+        "template_completeness": {
+          "type": "object",
+          "description": "Validation rules for template completeness (required sections)",
+          "required": ["enabled", "required_sections"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether template completeness validation is enabled"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures",
+              "default": "BLOCKING"
+            },
+            "required_sections": {
+              "type": "array",
+              "description": "List of required section identifiers",
+              "items": {
+                "type": "string"
+              }
+            },
+            "section_order": {
+              "type": "object",
+              "description": "Section ordering configuration",
+              "properties": {
+                "strict_order": {
+                  "type": "boolean",
+                  "description": "Whether sections must appear in exact order",
+                  "default": false
+                },
+                "sequence": {
+                  "type": "array",
+                  "description": "Expected section sequence",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "two_tier_scoring": {
+          "type": "object",
+          "description": "Special validation for two-tier scoring (SRE Architecture)",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether two-tier scoring validation is enabled"
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["BLOCKING", "WARNING", "INFO"],
+              "description": "Severity level of validation failures",
+              "default": "BLOCKING"
+            },
+            "blocker_section_pattern": {
+              "type": "string",
+              "description": "Regex pattern identifying blocker section"
+            },
+            "blocker_count": {
+              "type": "integer",
+              "description": "Number of blocker requirements",
+              "minimum": 1
+            },
+            "desired_count": {
+              "type": "integer",
+              "description": "Number of desired requirements",
+              "minimum": 1
+            },
+            "blocker_validation": {
+              "type": "string",
+              "enum": ["all_must_pass_for_approval", "scored_separately"],
+              "description": "How blocker requirements affect approval"
+            }
+          }
+        }
+      }
+    },
+    "error_messages": {
+      "type": "object",
+      "description": "Custom error messages for this contract type",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

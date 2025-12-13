@@ -1,0 +1,87 @@
+{
+  "contract_type": "development_architecture",
+  "contract_name": "Development Architecture",
+  "template_file": "TEMPLATE_DEVELOPMENT_ARCHITECTURE.md",
+  "version": "1.0.0",
+  "validations": {
+    "compliance_summary_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "requirement_count": 14,
+      "column_validation": {
+        "columns": [
+          {
+            "name": "Code",
+            "pattern": "^LADES\\d+$",
+            "required": true
+          },
+          {
+            "name": "Requirement",
+            "max_length": 120,
+            "required": true
+          },
+          {
+            "name": "Category",
+            "allowed_values": [
+              "Development Architecture",
+              "Technology Stack",
+              "Development Practices",
+              "Code Quality",
+              "Testing",
+              "CI/CD"
+            ],
+            "required": true
+          },
+          {
+            "name": "Status",
+            "allowed_values": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"],
+            "required": true
+          },
+          {
+            "name": "Source Section",
+            "pattern": "^(\\d+\\.\\d+|Not documented)$",
+            "required": true
+          },
+          {
+            "name": "Responsible Role",
+            "required": true
+          }
+        ]
+      }
+    },
+    "status_value_standardization": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "allowed_values": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"],
+      "case_sensitive": true
+    },
+    "appendix_structure": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_appendices": ["A.1", "A.2", "A.3", "A.4"],
+      "strict_order": true
+    },
+    "compliance_calculation": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "total_requirements": 14,
+      "percentage_tolerance": 0,
+      "completeness_tolerance": 1
+    },
+    "template_completeness": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_sections": [
+        "header",
+        "document_control",
+        "compliance_summary",
+        "overall_compliance",
+        "appendix_a1_a4",
+        "dynamic_sections"
+      ]
+    }
+  },
+  "error_messages": {
+    "table_row_count_mismatch": "Development Architecture requires exactly 14 requirement rows. Found {actual} rows."
+  }
+}
