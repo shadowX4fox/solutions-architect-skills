@@ -192,9 +192,12 @@ Resolves to the Document Control table with `{{variables}}` replaced from `share
 - `BUSINESS_CONTINUITY_PaymentGateway_2025-11-26.md`
 - `DEVELOPMENT_ARCHITECTURE_JobScheduler_2025-11-26.md`
 
-**Handling Existing Files:**
-- If file exists, append timestamp: `_HHMM`
-- Example: `SRE_ARCHITECTURE_JobScheduler_2025-11-26_1430.md`
+**Regeneration Behavior:**
+- When regenerating an existing contract (same type, project, date), the file is REPLACED
+- Previous content is overwritten with newly generated contract
+- No timestamp appending - same filename is used: `[CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md`
+- To preserve old versions, manually rename/copy files before regenerating
+- Alternatively, use git for version control of generated contracts
 
 **Additional Outputs:**
 - `COMPLIANCE_MANIFEST.md`: Index of all generated compliance documents with metadata
@@ -888,12 +891,15 @@ For each missing data point:
 ```
 Pattern: [CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md
 Example: SRE_ARCHITECTURE_JobScheduler_2025-11-26.md
-If exists: append _HHMM timestamp
+
+IMPORTANT: If file exists, it will be REPLACED (overwritten) with the new version.
+This ensures regenerated contracts reflect the latest ARCHITECTURE.md data.
 ```
 
 **Step 5.2: Save to Output Directory**
 ```
-Write file to /compliance-docs/
+Write file to /compliance-docs/ using Write tool
+The Write tool OVERWRITES existing files, ensuring regeneration replaces old content
 Preserve formatting and markdown structure
 ```
 
