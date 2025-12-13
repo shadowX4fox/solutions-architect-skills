@@ -596,6 +596,18 @@ python3 utils/resolve-includes.py templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp
 **Documentation**: See `utils/README.md` for detailed usage and examples
 
 **Step 4.2: Apply Extracted Data to Placeholders**
+
+**CRITICAL RULE: PRESERVE TEMPLATE FORMAT EXACTLY**
+
+The template format MUST be preserved exactly as written. Do NOT transform, rewrite, or restructure the template content. ONLY replace explicit placeholder tokens inside `[...]` brackets.
+
+**Template Format Preservation Rules:**
+1. Keep ALL text that is not inside `[PLACEHOLDER]` brackets exactly as-is
+2. Preserve conditional structures like `[If Compliant: X. If Non-Compliant: Y]` without modification
+3. Do NOT replace structured placeholders with custom prose or explanations
+4. Do NOT change formatting, line breaks, bullets, or markdown structure
+5. Replace ONLY explicit `[PLACEHOLDER]` tokens with actual values
+
 ```
 Replace standard placeholders:
 - [PROJECT_NAME] → from Document Index
@@ -612,6 +624,8 @@ Populate Document Control section with validation results:
 - [REVIEW_ACTOR] → from validation_results.outcome.review_actor
 - [APPROVAL_AUTHORITY] → from validation config approval_authority field
 ```
+
+**See COMPLIANCE_GENERATION_GUIDE.md Step 4.2 for detailed examples of correct vs incorrect placeholder replacement.**
 
 **Step 4.3: Populate Compliance Summary Table**
 

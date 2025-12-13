@@ -1036,6 +1036,11 @@ If template not found:
 ```
 
 **Step 4.2: Apply Extracted Data to Placeholders**
+
+**CRITICAL RULE: PRESERVE TEMPLATE FORMAT EXACTLY**
+
+The template format MUST be preserved exactly as written. Do NOT transform, rewrite, or restructure the template content. ONLY replace explicit placeholder tokens.
+
 ```
 Replace standard placeholders:
 
@@ -1048,6 +1053,49 @@ Example:
 Template: **Availability SLO**: [EXTRACTED_VALUE]
 Output: **Availability SLO**: 99.99% (Section 10.2, line 1576)
 ```
+
+**Template Format Preservation Rules:**
+
+1. **Keep All Template Text**: Preserve ALL text that is not inside `[PLACEHOLDER]` brackets exactly as written
+2. **Preserve Conditional Structures**: If template has conditional text like `[If Compliant: X. If Non-Compliant: Y]`, keep it AS-IS
+3. **No Custom Prose**: Do NOT replace structured placeholders with custom explanations or prose
+4. **No Reformatting**: Do NOT change bullet points, line breaks, indentation, or markdown structure
+5. **Replace ONLY Explicit Placeholders**: Only replace text inside `[...]` brackets with actual values
+
+**Examples:**
+
+**CORRECT (Preserves Template Format):**
+```markdown
+Template:
+**RTO**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+
+Generated:
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+```
+
+**INCORRECT (Transforms Template Format):**
+```markdown
+Template:
+**RTO**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+
+Generated (WRONG):
+**RTO**: 4 hours documented in Section 11.3
+- Status: Compliant
+- Explanation: The Recovery Time Objective is well-documented at 4 hours, which aligns with Tier 1 application requirements and meets industry best practices for mission-critical systems.
+```
+
+**The INCORRECT example above violates rules 2 and 3** by:
+- Removing the conditional structure `[If Compliant: ... If Non-Compliant: ...]`
+- Replacing it with custom prose explanation
+- Adding extra information not in the template
+
+**Always use the CORRECT approach**: Replace ONLY the explicit placeholders, preserve ALL other text.
 
 **Step 4.2.1: Populate Document Control Section**
 ```
