@@ -227,6 +227,11 @@ The validation engine executes the following steps:
 5. **Determine Outcome**: Map final score to tier (AUTO_APPROVE/MANUAL_REVIEW/NEEDS_WORK/REJECT)
 6. **Generate Results Object**: Create validation_results with score, status, breakdown, and recommendations
 7. **Populate Template**: Fill in Document Control fields and compliance summary based on results
+8. **Generate Manifest**: Create COMPLIANCE_MANIFEST.md summarizing:
+   - Validation framework reference (two-stage validation)
+   - Validation configuration details (schema, rule files)
+   - All generated contracts with validation scores
+   - Aggregate metrics and approval status
 
 ## Validation Results Object
 

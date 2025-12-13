@@ -1610,6 +1610,33 @@ Content:
 **Source**: ARCHITECTURE.md
 **Generated**: 2025-11-26
 
+## Compliance Framework Reference
+
+**Framework**: Two-Stage Template Validation Framework v1.0
+**Documentation**: `/skills/architecture-compliance/VALIDATION_FRAMEWORK_GUIDE.md`
+**Scoring Formula**: `(Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)`
+
+**Approval Thresholds**:
+| Score Range | Status | Review Actor |
+|-------------|--------|--------------|
+| 8.0-10.0 | Approved | System (Auto-Approved) |
+| 7.0-7.9 | In Review | Review Board |
+| 5.0-6.9 | Draft | Architecture Team |
+| 0.0-4.9 | Rejected | N/A (Blocked) |
+
+## Validation Configuration
+
+**Validation Schema**: `/skills/architecture-compliance/validation/TEMPLATE_VALIDATION_SCHEMA.json`
+**Schema Version**: 1.0.0
+**Validation Engine**: ComplianceValidator v1.0
+**Validation Date**: [GENERATION_DATE]
+
+**Validation Stages**:
+- Stage 1 (Pre-Validation): Template structure validation
+- Stage 2 (Post-Validation): Populated contract validation (5 critical areas)
+
+**Rule Files**: 10 contract-specific validation rule files in `/validation/` directory
+
 ## Generated Documents
 
 | Contract Type | Filename | Completeness | Placeholders |

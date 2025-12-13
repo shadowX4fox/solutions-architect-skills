@@ -801,10 +801,12 @@ Preserve formatting and markdown structure
 **Step 5.3: Generate Manifest**
 ```
 Create/update COMPLIANCE_MANIFEST.md with:
-- List of all generated documents
+- Compliance Framework Reference (validation framework details, scoring methodology, approval thresholds)
+- Validation Configuration (schema paths, validation engine version, contract-specific rule files)
+- List of all generated documents (table format)
 - Generation date and time
 - Source ARCHITECTURE.md reference
-- Summary of completeness (% placeholders)
+- Summary of completeness (% placeholders, total requirements)
 ```
 
 **Step 5.4: Per-Contract Completion Report**

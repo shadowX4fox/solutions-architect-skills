@@ -195,6 +195,17 @@ skills/architecture-compliance/
   └──────────┘
 ```
 
+### Validation Manifest Integration
+
+After all contracts are generated (Phase 5), the COMPLIANCE_MANIFEST.md is created with:
+
+1. **Compliance Framework Reference**: Links to this guide (VALIDATION_FRAMEWORK_GUIDE.md)
+2. **Validation Configuration**: Lists all validation rule files used
+3. **Generated Documents**: Summary of all contracts with completeness metrics
+4. **Approval Status**: Aggregate validation scores and review requirements
+
+This manifest provides a centralized reference for auditing and tracking validation framework usage across all compliance contracts.
+
 ## Contract Types & Rules
 
 | Contract | Requirements | Special Case |
