@@ -1057,42 +1057,53 @@ Output: **Availability SLO**: 99.99% (Section 10.2, line 1576)
 **Template Format Preservation Rules:**
 
 1. **Keep All Template Text**: Preserve ALL text that is not inside `[PLACEHOLDER]` brackets exactly as written
-2. **Preserve Conditional Structures**: If template has conditional text like `[If Compliant: X. If Non-Compliant: Y]`, keep it AS-IS
+2. **Expand Conditional Structures**: Replace conditional text like `[If Compliant: X. If Non-Compliant: Y]` with the branch matching the Status value
 3. **No Custom Prose**: Do NOT replace structured placeholders with custom explanations or prose
 4. **No Reformatting**: Do NOT change bullet points, line breaks, indentation, or markdown structure
 5. **Replace ONLY Explicit Placeholders**: Only replace text inside `[...]` brackets with actual values
 
 **Examples:**
 
-**CORRECT (Preserves Template Format):**
+**CORRECT (Expands Conditionals Based on Status):**
 ```markdown
 Template:
 **RTO**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+- Explanation: [If Compliant: RTO documented and meets requirements. If Non-Compliant: RTO not specified in ARCHITECTURE.md. If Not Applicable: N/A. If Unknown: RTO mentioned but value unclear]
 
-Generated:
+Generated (Status = Compliant):
 **RTO**: 4 hours
 - Status: Compliant
-- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+- Explanation: RTO documented and meets requirements
+
+Generated (Status = Unknown):
+**RTO**: Not specified
+- Status: Unknown
+- Explanation: RTO mentioned but value unclear
 ```
 
-**INCORRECT (Transforms Template Format):**
+**INCORRECT (Does NOT Expand Conditionals OR Adds Custom Prose):**
 ```markdown
 Template:
 **RTO**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified]
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified. If Unknown: RTO unclear]
 
-Generated (WRONG):
+Generated (WRONG - preserves all branches):
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified. If Unknown: RTO unclear]
+                ↑ Should show ONLY "RTO documented" since Status = Compliant
+
+Generated (ALSO WRONG - custom prose):
 **RTO**: 4 hours documented in Section 11.3
 - Status: Compliant
 - Explanation: The Recovery Time Objective is well-documented at 4 hours, which aligns with Tier 1 application requirements and meets industry best practices for mission-critical systems.
 ```
 
-**The INCORRECT example above violates rules 2 and 3** by:
-- Removing the conditional structure `[If Compliant: ... If Non-Compliant: ...]`
-- Replacing it with custom prose explanation
+**The INCORRECT examples above violate rules 2 and 3** by:
+- Example 1: NOT expanding the conditional structure (showing all branches instead of just "Compliant" branch)
+- Example 2: Replacing structured placeholder with custom prose explanation
 - Adding extra information not in the template
 
 **Always use the CORRECT approach**: Replace ONLY the explicit placeholders, preserve ALL other text.

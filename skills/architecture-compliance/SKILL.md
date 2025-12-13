@@ -49,23 +49,23 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 
 **Strict Preservation Rules:**
 1. ✅ **ONLY replace explicit `[PLACEHOLDER]` tokens** - text inside `[...]` brackets
-2. ✅ **PRESERVE ALL other text exactly** - including conditionals, formatting, structure
+2. ✅ **PRESERVE ALL other text exactly** - including formatting, structure
 3. ❌ **NEVER transform template content** - no custom prose, no reformatting
-4. ❌ **NEVER replace conditional structures** - keep `[If Compliant: X. If Non-Compliant: Y]` as-is
+4. ✅ **EXPAND conditional structures** - replace `[If Compliant: X. If Non-Compliant: Y]` with the text matching the Status value
 5. ❌ **NEVER add extra sections** - templates have A.1-A.4 only, no A.5-A.9
 
 **Template Format Example:**
 ```markdown
 **RTO**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified...]
+- Explanation: [If Compliant: RTO documented and meets requirements. If Non-Compliant: RTO not specified. If Not Applicable: N/A. If Unknown: RTO mentioned but value unclear]
 ```
 
-**CORRECT Replacement:**
+**CORRECT Replacement** (Status = Compliant):
 ```markdown
 **RTO**: 4 hours
 - Status: Compliant
-- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified...]
+- Explanation: RTO documented and meets requirements
 ```
 
 **INCORRECT Replacement (DO NOT DO THIS):**
@@ -751,6 +751,76 @@ Populate Document Control section with validation outcome tier values:
 - **Scores 7.0-7.9**: MANUAL_REVIEW → Review Actor = [Approval Authority name]
 - **Approval Authority field**: ALWAYS shows the approval authority name (for reference/escalation)
 ```
+
+**Step 4.2.3: Expand Conditional Placeholders**
+
+Conditional placeholders provide status-specific explanations and notes. They must be EXPANDED to show only the relevant branch based on the Status value.
+
+**Conditional Pattern**:
+```
+[If Compliant: <text>. If Non-Compliant: <text>. If Not Applicable: <text>. If Unknown: <text>]
+```
+
+**Expansion Logic**:
+
+1. **Identify conditionals**: Find text matching the pattern `[If STATUS: ...]`
+2. **Extract Status value**: Get the Status field from the same data point (e.g., "Compliant", "Unknown")
+3. **Match branch**: Find the conditional branch matching the Status
+4. **Replace entire conditional**: Replace with ONLY the matching branch text (remove brackets and other branches)
+
+**Example** - Status = "Unknown":
+
+Template:
+```markdown
+**Business Capabilities**: Not specified
+- Status: Unknown
+- Explanation: [If Compliant: Business capabilities documented. If Non-Compliant: Capabilities not specified in ARCHITECTURE.md. If Not Applicable: Not required for this solution type. If Unknown: Capabilities mentioned but not clearly mapped]
+- Note: [If Non-Compliant or Unknown: Map solution capabilities to enterprise capability model in Section 2 or 3]
+```
+
+Generated (CORRECT):
+```markdown
+**Business Capabilities**: Not specified
+- Status: Unknown
+- Explanation: Capabilities mentioned but not clearly mapped
+- Note: Map solution capabilities to enterprise capability model in Section 2 or 3
+```
+
+**Example** - Status = "Compliant":
+
+Template:
+```markdown
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: [If Compliant: RTO documented and meets requirements. If Non-Compliant: RTO not specified. If Not Applicable: N/A. If Unknown: RTO mentioned but value unclear]
+- Source: ARCHITECTURE.md Section 11.3, line 1576
+```
+
+Generated (CORRECT):
+```markdown
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: RTO documented and meets requirements
+- Source: ARCHITECTURE.md Section 11.3, line 1576
+```
+
+**Handling "Or" Conditions**:
+
+Some conditionals use "or" logic: `[If Non-Compliant or Unknown: text]`
+
+- If Status matches ANY of the listed values, show the text
+- Example: Status = "Unknown" → `[If Non-Compliant or Unknown: Fix this]` → "Fix this"
+
+**Edge Cases**:
+
+| Case | Behavior |
+|------|----------|
+| Conditional not found for Status | Keep original conditional as-is (fallback) |
+| Multiple conditionals in same line | Expand each one independently |
+| Nested conditionals | Not supported (flag as error) |
+| Partial matches | Match exact Status values only (case-sensitive) |
+
+**CRITICAL**: This is a BREAKING CHANGE from previous behavior (v1.5.10 and earlier). Previously, conditionals were preserved as-is. Now they must be expanded to show only the relevant branch based on Status value.
 
 **See COMPLIANCE_GENERATION_GUIDE.md Step 4.2 for detailed examples of correct vs incorrect placeholder replacement.**
 
