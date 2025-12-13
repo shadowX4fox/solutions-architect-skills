@@ -1,35 +1,26 @@
 # Compliance Template Utilities
 
-This directory contains utility scripts for working with compliance templates.
-
-## Available Implementations
-
-Three implementations are available, each with specific advantages:
-
-1. **`resolve-includes.ts`** (Bun/TypeScript) - Type-safe, modern syntax, best developer experience
-2. **`resolve-includes.py`** (Python 3) - Fastest performance, universally available, no dependencies
-3. **`resolve-includes.js`** (Node.js) - Cross-runtime compatibility fallback
-
-**Recommended**: Use Python for production (fastest), Bun for development (type safety).
-
----
+This directory contains utilities for working with compliance templates.
 
 ## resolve-includes.ts (Bun/TypeScript)
 
-**Purpose**: Type-safe implementation using Bun runtime with modern ES modules and TypeScript interfaces.
+**Purpose**: Resolves `@include` and `@include-with-config` directives in compliance templates, expanding them into fully rendered documents using the Bun runtime.
 
 ### Usage
 
 ```bash
-bun resolve-includes.ts <template-file> [output-file]
+bun resolve-includes.ts <template-file> [output-file] [--validate]
 # or make executable:
 chmod +x resolve-includes.ts
-./resolve-includes.ts <template-file> [output-file]
+./resolve-includes.ts <template-file> [output-file] [--validate]
 ```
 
 **Arguments:**
 - `template-file`: Path to the template file (required)
 - `output-file`: Path for the expanded output (optional, outputs to stdout if omitted)
+
+**Options:**
+- `--validate`: Run template structure pre-validation after expansion
 
 ### Examples
 
@@ -43,69 +34,16 @@ bun utils/resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded
 bun utils/resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md
 ```
 
+**Expand with validation:**
+```bash
+bun utils/resolve-includes.ts templates/TEMPLATE_SECURITY_ARCHITECTURE.md expanded.md --validate
+```
+
 **Test all templates:**
 ```bash
 for template in templates/TEMPLATE_*.md; do
   echo "Testing: $(basename $template)"
   bun utils/resolve-includes.ts "$template" /tmp/test.md
-  rm /tmp/test.md
-done
-```
-
-### Key Features
-
-- ✅ **TypeScript type safety** with interfaces for `DomainConfig` and `IncludeDirective`
-- ✅ **Modern ES modules** (`import/export`)
-- ✅ **Bun-optimized APIs** (`Bun.file().text()`, `Bun.file().json<T>()`)
-- ✅ **Clean async/await** patterns throughout
-- ✅ **Same output** as Python version (verified with all 10 templates)
-
-### Requirements
-
-- Bun runtime 1.0 or higher
-- No external dependencies
-
-### Performance
-
-Benchmark on SRE Architecture template (1655 lines):
-- **Bun**: ~33ms per run
-- **Python**: ~23ms per run (1.4x faster)
-
-While Python is faster for small files, Bun provides better type safety and developer experience.
-
----
-
-## resolve-includes.py (Python 3)
-
-**Purpose**: Resolves `@include` and `@include-with-config` directives in compliance templates, expanding them into fully rendered documents.
-
-### Usage
-
-```bash
-python3 resolve-includes.py <template-file> [output-file]
-```
-
-**Arguments:**
-- `template-file`: Path to the template file (required)
-- `output-file`: Path for the expanded output (optional, outputs to stdout if omitted)
-
-### Examples
-
-**Expand a single template:**
-```bash
-python3 utils/resolve-includes.py templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md
-```
-
-**Output to stdout:**
-```bash
-python3 utils/resolve-includes.py templates/TEMPLATE_SRE_ARCHITECTURE.md
-```
-
-**Test all templates:**
-```bash
-for template in templates/TEMPLATE_*.md; do
-  echo "Testing: $(basename $template)"
-  python3 utils/resolve-includes.py "$template" /tmp/test.md
   rm /tmp/test.md
 done
 ```
@@ -155,13 +93,18 @@ Variables in shared content use double-curly-brace syntax: `{{variable_name}}`
 **Compliance Code**: LABC
 ```
 
-### Features
+### Key Features
 
+- ✅ **TypeScript type safety** with interfaces for `DomainConfig` and `IncludeDirective`
+- ✅ **Modern ES modules** (`import/export`)
+- ✅ **Bun-optimized APIs** (`Bun.file().text()`, `Bun.file().json<T>()`)
+- ✅ **Clean async/await** patterns throughout
 - ✅ **Simple includes** for static content
 - ✅ **Parameterized includes** with JSON config-based variable replacement
 - ✅ **Nested includes** support (up to 3 levels deep)
 - ✅ **Circular include detection** prevents infinite loops
 - ✅ **Error handling** with descriptive messages
+- ✅ **Template pre-validation** (with `--validate` flag)
 - ✅ **Statistics** showing line count changes
 
 ### Error Handling
@@ -203,21 +146,41 @@ All 10 compliance templates expand successfully:
 
 ### Integration with Skill
 
-The include resolution utilities are used during contract generation (Phase 4, Step 4.1) to expand templates before placeholder replacement.
-
-**Implementation Priority:**
-1. **Python** (`resolve-includes.py`) - Recommended for production (fastest)
-2. **Bun** (`resolve-includes.ts`) - Recommended for development (type-safe)
-3. **Node.js** (`resolve-includes.js`) - Fallback if neither Python nor Bun available
+The include resolution utility is used during contract generation (Phase 4, Step 4.1) to expand templates before placeholder replacement.
 
 **Workflow:**
 1. **Phase 1-3**: Extract data from ARCHITECTURE.md
-2. **Phase 4.1**: Load template and resolve includes using one of the scripts above
+2. **Phase 4.1**: Load template and resolve includes using `resolve-includes.ts`
 3. **Phase 4.2**: Apply extracted data to placeholders in expanded template
 4. **Phase 4.3**: Populate compliance summary table
 5. **Phase 5**: Save final contract
 
-All three implementations produce identical output and support the same features.
+### Template Pre-Validation
+
+When using the `--validate` flag, the utility runs structural validation on the expanded template to catch common issues early:
+
+```bash
+bun utils/resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate
+```
+
+**Validates:**
+- Required sections present (Document Control, Compliance Summary, Appendix)
+- Appendix structure (A.1-A.4 sections)
+- Compliance codes follow correct format
+- No duplicate codes
+- Required metadata fields present
+
+**Benefits:**
+- Catch template errors before contract generation
+- Ensure template consistency across all 10 contract types
+- Faster feedback loop during template development
+
+### Performance
+
+Benchmark on SRE Architecture template (1655 lines):
+- **Bun**: ~33ms per run
+- Includes type safety and modern developer experience
+- Zero external dependencies
 
 ### Maintenance
 
@@ -231,20 +194,11 @@ When adding new shared content:
 
 ### Requirements
 
-**For Python version:**
-- Python 3.6 or higher
-- No external dependencies (uses only standard library)
-
-**For Bun version:**
 - Bun runtime 1.0 or higher
 - No external dependencies
-
-**For Node.js version:**
-- Node.js 14 or higher
-- No external dependencies (uses only standard library)
 
 ### License
 
 Part of the Solutions Architect Skills plugin for Claude Code.
 
-**Last Updated**: 2025-12-11 (Completed Appendix extraction refactoring - all 10 templates optimized)
+**Last Updated**: 2025-12-13 (Removed Python/Node.js implementations - Bun/TypeScript only)

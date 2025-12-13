@@ -578,13 +578,13 @@ For ALL contract types:
 
 **Step 4.1: Load Template with Include Resolution**
 
-**Implementation**: Use `utils/resolve-includes.py` to expand template includes before processing.
+**Implementation**: Use `utils/resolve-includes.ts` to expand template includes before processing.
 
 ```bash
-python3 utils/resolve-includes.py templates/TEMPLATE_<TYPE>.md /tmp/expanded_template.md
+bun utils/resolve-includes.ts templates/TEMPLATE_<TYPE>.md /tmp/expanded_template.md
 ```
 
-**Algorithm** (automated by resolve-includes.py):
+**Algorithm** (automated by resolve-includes.ts):
 
 1. Load template file for contract type from templates/
    Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
@@ -624,7 +624,7 @@ Expands to:
 **Usage in Workflow:**
 ```bash
 # Expand template first
-python3 utils/resolve-includes.py templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/template.md
+bun utils/resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/template.md
 
 # Then use expanded template for contract generation
 # (apply placeholders, populate data, etc.)
