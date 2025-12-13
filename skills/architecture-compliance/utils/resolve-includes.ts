@@ -61,13 +61,30 @@ async function loadConfig(configName: string): Promise<DomainConfig> {
 
 /**
  * Replace {{variables}} in content with values from config
+ * Searches top-level properties first, then nested objects
  */
 function replaceVariables(content: string, config: DomainConfig): string {
   return content.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
-    const value = config[varName as keyof DomainConfig];
+    // Check top-level property first
+    let value = config[varName as keyof DomainConfig];
+
+    // If not found, search nested objects
+    if (value === undefined) {
+      for (const key in config) {
+        const nestedValue = config[key as keyof DomainConfig];
+        if (typeof nestedValue === 'object' && nestedValue !== null && !Array.isArray(nestedValue)) {
+          if (varName in nestedValue) {
+            value = (nestedValue as Record<string, any>)[varName];
+            break;
+          }
+        }
+      }
+    }
+
     if (value !== undefined) {
       return String(value);
     }
+
     // Keep the placeholder if variable not found in config
     console.warn(`Warning: Variable {{${varName}}} not found in config`);
     return match;
@@ -236,13 +253,29 @@ async function main() {
     // Read template using Bun's fast file API
     const content = await Bun.file(templatePath).text();
 
-    // Resolve includes
-    const expanded = await resolveIncludes(content);
+    // Detect config from template filename and load it
+    const contractType = extractContractType(templatePath);
+    let config: DomainConfig | null = null;
+
+    if (contractType) {
+      try {
+        config = await loadConfig(contractType.replace(/_/g, '-'));
+      } catch (error) {
+        console.warn(`Warning: Could not load config for ${contractType}. Variables in template won't be replaced.`);
+      }
+    }
+
+    // Resolve includes (this handles @include-with-config directives)
+    let expanded = await resolveIncludes(content);
+
+    // Apply variable replacement to the entire expanded content
+    // This catches variables in the template itself (not in included files)
+    if (config) {
+      expanded = replaceVariables(expanded, config);
+    }
 
     // Pre-validation (Phase 4.1)
     if (validateFlag) {
-      const contractType = extractContractType(templatePath);
-
       if (!contractType) {
         console.error('Warning: Could not extract contract type from filename. Skipping validation.');
         console.error('Expected filename format: TEMPLATE_CONTRACT_TYPE.md');
