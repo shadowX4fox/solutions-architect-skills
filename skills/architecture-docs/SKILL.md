@@ -1,6 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
 ---
 
 # Architecture Documentation Skill
@@ -34,6 +34,8 @@ This skill automatically activates when users ask questions about documented arc
 - "What does the architecture use/require/implement for..."
 - "My architecture documentation shows/says..."
 - "The architecture specifies/defines..."
+- "Check/Validate/Verify the architecture [aspect]..."
+- "Audit the [architecture component/pattern]..."
 
 **Technical Query Keywords**:
 - **Components**: "components", "services", "modules", "microservices", "systems"
@@ -44,6 +46,7 @@ This skill automatically activates when users ask questions about documented arc
 - **Deployment**: "deployment", "cloud provider", "infrastructure", "environments", "regions"
 - **Technology**: "tech stack", "languages", "frameworks", "tools", "libraries", "versions"
 - **Decisions**: "why choose", "decision", "trade-offs", "alternatives", "ADR", "rationale"
+- **Validation**: "check", "validate", "verify", "audit", "alignment", "BIAN", "META", "service domain", "layer", "standards", "compliance check"
 
 **Multi-section Queries**:
 - Questions requiring synthesis across multiple sections
