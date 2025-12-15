@@ -49,32 +49,53 @@ interface StatusCounts {
 
 /**
  * Parse existing manifest to extract contract entries
+ * Uses line-by-line state machine parsing for robustness
  */
 function parseExistingManifest(content: string): ContractMetadata[] {
   const contracts: ContractMetadata[] = [];
+  const lines = content.split('\n');
 
-  // Find the Generated Documents table
-  const tableRegex = /## Generated Documents\s+\|[^\n]+\|\s+\|[-\s|]+\|\s+((?:\|[^\n]+\|\s+)+)/;
-  const match = content.match(tableRegex);
+  let inTable = false;
+  let headerSeen = false;
 
-  if (!match || !match[1]) {
-    return contracts;
-  }
+  for (const line of lines) {
+    const trimmed = line.trim();
 
-  // Parse each table row
-  const rows = match[1].trim().split('\n');
-  for (const row of rows) {
-    const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell);
+    // Find the Generated Documents section
+    if (trimmed.startsWith('## Generated Documents')) {
+      inTable = true;
+      continue;
+    }
 
-    if (cells.length === 6) {
-      contracts.push({
-        contractType: cells[0],
-        filename: cells[1],
-        score: parseFloat(cells[2]),
-        status: cells[3],
-        completeness: parseInt(cells[4].replace('%', '')),
-        generatedDate: cells[5]
-      });
+    if (!inTable) continue;
+
+    // Stop at divider or next section
+    if (trimmed.startsWith('---') || (trimmed.startsWith('##') && !trimmed.includes('Generated'))) {
+      break;
+    }
+
+    // Skip header and separator rows
+    if (trimmed.includes('Contract Type') || trimmed.match(/^\|[-\s|]+\|$/)) {
+      headerSeen = true;
+      continue;
+    }
+
+    // Parse data rows
+    if (trimmed.startsWith('|') && headerSeen) {
+      const cells = trimmed.split('|')
+        .map(c => c.trim())
+        .filter(c => c.length > 0);
+
+      if (cells.length === 6) {
+        contracts.push({
+          contractType: cells[0],
+          filename: cells[1],
+          score: parseFloat(cells[2]),
+          status: cells[3],
+          completeness: parseInt(cells[4].replace('%', '')),
+          generatedDate: cells[5]
+        });
+      }
     }
   }
 
@@ -259,6 +280,12 @@ async function generateManifest(
       const existingContent = await Bun.file(manifestPath).text();
       contracts = parseExistingManifest(existingContent);
       console.log(`📝 Loaded ${contracts.length} existing contract(s) from manifest`);
+
+      // Warn if parsing failed on a large file (potential data loss)
+      if (contracts.length === 0 && existingContent.length > 1000) {
+        console.warn('⚠️  WARNING: Manifest exists but no contracts parsed!');
+        console.warn('   This may cause data loss. Check manifest format.');
+      }
     } else {
       console.warn('⚠️  Manifest not found. Switching to create mode.');
       mode = 'create';
