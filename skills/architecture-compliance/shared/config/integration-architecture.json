@@ -18,7 +18,7 @@
     "Integration Pattern": "Reusable solution to common integration challenges",
     "API Gateway": "Single entry point for managing, securing, and routing API requests",
     "Message Broker": "Middleware enabling asynchronous communication between systems",
-    "Event-Driven Architecture": "Pattern where systems communicate through events",
+    "Decouple Through Events": "Pattern where systems communicate through events",
     "Service Mesh": "Infrastructure layer for service-to-service communication",
     "Data Integration": "Process of combining data from different sources",
     "ESB": "Enterprise Service Bus - centralized integration middleware",
@@ -36,7 +36,7 @@
   },
 
   "primary_source_sections": "3 (Component View), 7 (Integration View), 10 (Non-Functional Requirements)",
-  "framework_description": "integration patterns, API design, messaging, event-driven architecture, and data integration",
+  "framework_description": "integration patterns, API design, messaging, async event decoupling, and data integration",
   "compliance_framework_code": "LAI (Integration Architecture)",
   "v2_domain_features": "",
   "v2_data_point_count": "10"

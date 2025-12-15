@@ -361,7 +361,7 @@
         },
         {
           "item_id": "lae7_event_driven_architecture",
-          "question": "Are asynchronous and real-time requirements implemented using event-driven patterns?",
+          "question": "Are asynchronous and real-time requirements implemented using selective async patterns?",
           "architecture_md_section": "4",
           "required": false,
           "weight": 0.35,
@@ -417,7 +417,7 @@
         "Must align with business strategy (LAE4)",
         "Must eliminate technology obsolescence (LAE5)",
         "Must define managed data vision (LAE6)",
-        "Must implement API-first/event-driven patterns (LAE7)"
+        "Must implement API-first/selective async patterns (LAE7)"
       ]
     },
     "0.0-4.9": {
@@ -433,7 +433,7 @@
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document all 7 LAE requirements with comprehensive coverage: modularity, third-party strategy, cloud-first, business alignment, zero obsolescence, managed data, and API-first/event-driven architecture",
+    "FAIL_items": "Document all 7 LAE requirements with comprehensive coverage: modularity, third-party strategy, cloud-first, business alignment, zero obsolescence, managed data, and API-first/async decoupling architecture",
     "UNKNOWN_items": "Add enterprise architecture details to ARCHITECTURE.md covering all LAE domains: Sections 2-3 (strategy/business), 4 (architecture), 5 (components), 6 (data), 7 (integration), 8 (technology), 9 (NFRs), 12 (decisions)",
     "completeness_below_threshold": "Complete all 7 LAE validation sections with specific evidence from ARCHITECTURE.md sections",
     "low_quality_score": "Improve traceability by explicitly referencing ARCHITECTURE.md sections for each LAE requirement with direct quotes and page numbers"

@@ -2126,7 +2126,7 @@ All templates with Section 9 references must use this standard:
 - Section 6 (Data Model): Event schema definition (JSON Schema, Avro), CloudEvents compliance, event versioning strategy, schema registry implementation, event catalog, consumer contracts, event delivery semantics, Dead Letter Queue (DLQ) handling
 - Section 7 (Integration View): Event-driven patterns, event catalog, messaging guarantees
 - Section 5 (Component Model): Schema registry, event bus, message brokers
-- Requirement: CloudEvents specification with schema registry for event-driven integrations
+- Requirement: CloudEvents specification with schema registry for async event decoupling integrations
 
 **Key Extractions**:
 - Section 5: API Gateway (LAI1), message brokers (LAI3, LAI7), schema registry (LAI7), observability infrastructure (LAI6)

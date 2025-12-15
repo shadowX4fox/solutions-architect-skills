@@ -216,7 +216,7 @@
         },
         {
           "item_id": "domain_events_security",
-          "question": "Are domain events secured (if using event-driven architecture)?",
+          "question": "Are domain events secured (if using async event decoupling)?",
           "architecture_md_section": "7",
           "required": false,
           "weight": 0.25,
@@ -224,7 +224,7 @@
             "type": "custom",
             "pass_criteria": "Domain events with encryption and access controls",
             "fail_criteria": "Unencrypted or unauthenticated event streams",
-            "na_criteria": "No event-driven architecture",
+            "na_criteria": "No async event decoupling",
             "unknown_criteria": "Domain events security not documented"
           }
         }

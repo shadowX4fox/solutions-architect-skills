@@ -264,7 +264,7 @@
 
 **Event Publishing Security**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Domain event publishing security documented (encryption, authentication). If Non-Compliant: Event security not addressed. If Not Applicable: No event-driven architecture. If Unknown: Events mentioned but security unclear]
+- Explanation: [If Compliant: Domain event publishing security documented (encryption, authentication). If Non-Compliant: Event security not addressed. If Not Applicable: No async event decoupling. If Unknown: Events mentioned but security unclear]
 - Source: [ARCHITECTURE.md Section 7 (Integration View → Events/Messaging) or Section 9, lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Enforce authentication and encryption for domain event publishing in Section 7 or 9]
 

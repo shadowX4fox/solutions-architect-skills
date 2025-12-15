@@ -337,7 +337,7 @@ When users request a list of available contracts (e.g., "list contracts", "show 
 7. **Security Architecture** - API security, authentication, encryption, vulnerability management
 8. **Platform & IT Infrastructure** - Environment isolation, database capacity, naming conventions
 9. **Enterprise Architecture** - Strategic alignment, modularity, cloud-first, API-first design
-10. **Integration Architecture** - Integration catalog, API standards, event-driven patterns
+10. **Integration Architecture** - Integration catalog, API standards, selective async patterns
 
 **To generate contracts:**
 - Single contract: "Generate [contract name]" (e.g., "Generate SRE Architecture")

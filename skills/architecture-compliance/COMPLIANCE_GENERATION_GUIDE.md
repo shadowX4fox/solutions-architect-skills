@@ -643,7 +643,7 @@ Variables like `{{review_board}}` in shared files are replaced with these values
 - **Cloud-First**: Cloud adoption strategy, cloud-native principles
 - **Third-Party Applications**: Customization limits, integration approach
 - **Obsolescence Zero**: Technology lifecycle, modernization roadmap
-- **API First / Event Driven**: API strategy, event-driven architecture
+- **API First / Event Driven**: API strategy, async event decoupling
 - **Business Capabilities**: Capability mapping, domain-driven design
 
 **Source Sections from ARCHITECTURE.md**:
@@ -675,7 +675,7 @@ Variables like `{{review_board}}` in shared files are replaced with these values
 
 ### 10. Integration Architecture (Version 2.0)
 
-**Purpose**: Define guidelines for API integration best practices, secure integrations, technology currency, governance compliance, third-party documentation, traceability, and event-driven architecture standards.
+**Purpose**: Define guidelines for API integration best practices, secure integrations, technology currency, governance compliance, third-party documentation, traceability, and async event decoupling standards.
 
 **Stakeholders**:
 - Integration architects

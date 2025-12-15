@@ -432,7 +432,7 @@
     },
     {
       "section_id": "lai7_event_driven",
-      "section_name": "LAI7 - Event-Driven Integration Compliance",
+      "section_name": "LAI7 - Async Event Decoupling Integration Compliance",
       "weight": 0.05,
       "required": false,
       "validation_items": [
@@ -447,7 +447,7 @@
             "approved_values": ["JSON Schema", "Avro", "Protocol Buffers"],
             "pass_criteria": "Event schemas defined with standard format",
             "fail_criteria": "Unstructured events or no schema validation",
-            "na_criteria": "No event-driven architecture",
+            "na_criteria": "No async event decoupling",
             "unknown_criteria": "Event schemas not documented"
           }
         },
@@ -461,7 +461,7 @@
             "type": "custom",
             "pass_criteria": "Events follow CloudEvents specification for metadata (id, source, type, time)",
             "fail_criteria": "Custom event format without standard metadata",
-            "na_criteria": "No event-driven architecture",
+            "na_criteria": "No async event decoupling",
             "unknown_criteria": "CloudEvents compliance not documented"
           }
         },
@@ -541,7 +541,7 @@
   "remediation_guidance": {
     "FAIL_items": "Implement required integration architecture standards for all 7 LAI requirements or document approved exceptions with risk acceptance. Critical: domain API exposure (LAI1), secure authentication (LAI2), modern integration technologies (LAI3), governance compliance (LAI4), distributed tracing (LAI6)",
     "UNKNOWN_items": "Add missing integration architecture documentation to ARCHITECTURE.md Sections 5 (Component Model), 6 (Data Model), 7 (Integration View), and 9 (Security Architecture)",
-    "completeness_below_threshold": "Complete all 7 LAI sections: Best Practices Adoption, Secure Integrations, No Obsolete Technologies, Integration Governance Standards, Third-Party Documentation, Traceability and Audit, and Event-Driven Integration Compliance",
+    "completeness_below_threshold": "Complete all 7 LAI sections: Best Practices Adoption, Secure Integrations, No Obsolete Technologies, Integration Governance Standards, Third-Party Documentation, Traceability and Audit, and Async Event Decoupling Integration Compliance",
     "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers for all integration architecture decisions across LAI1-LAI7 requirements"
   }
 }

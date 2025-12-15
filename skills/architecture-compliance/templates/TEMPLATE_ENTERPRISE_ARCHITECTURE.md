@@ -572,11 +572,11 @@
 
 ---
 
-### 7.2 Event-Driven Architecture
+### 7.2 Decouple Through Events
 
 **Event Streaming Platform**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Event platform documented. If Non-Compliant: No event-driven architecture. If Not Applicable: Request-response sufficient. If Unknown: Events mentioned but platform unclear]
+- Explanation: [If Compliant: Event platform documented. If Non-Compliant: No async event decoupling. If Not Applicable: Request-response sufficient. If Unknown: Events mentioned but platform unclear]
 - Source: [ARCHITECTURE.md Section 4 or Section 6 (Technology Stack) or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Document Kafka, Event Grid, EventBridge, or Pub/Sub usage in Section 4 or 6]
 
@@ -644,7 +644,7 @@
 - **Zero Obsolescence**: Strategy to prevent technical debt through continuous modernization
 - **Managed Data Vision**: Centralized data strategy ensuring data as strategic asset
 - **API First**: Design principle prioritizing API interfaces for all integrations
-- **Event-Driven Architecture**: Pattern using events to trigger and communicate between services
+- **Decouple Through Events**: Pattern using async events to decouple components where temporal independence is prioritized
 
 <!-- @include shared/fragments/status-codes.md -->
 
@@ -652,7 +652,7 @@
 
 - **LAE**: Enterprise Architecture (Lineamiento de Arquitectura Empresarial)
 - **API**: Application Programming Interface
-- **EDA**: Event-Driven Architecture
+- **EDA**: Event Decoupling Architecture
 - **MDM**: Master Data Management
 - **ESB**: Enterprise Service Bus
 - **SOA**: Service-Oriented Architecture
@@ -680,7 +680,7 @@
 | Missing modularity analysis | LAE1 Non-Compliant | Section 5 (Component View) | Document component boundaries, interfaces, bounded contexts |
 | No technology radar reference | LAE3 Non-Compliant | Section 8 (Technology Stack) | Align stack with approved enterprise technologies, reference radar |
 | Undefined data strategy | LAE6 Non-Compliant | Section 6 (Data Model) | Document data governance, MDM, data lake/warehouse strategy |
-| Missing API-first approach | LAE7 Non-Compliant | Section 7 (Integration View) | Define API strategy, event-driven patterns, integration standards |
+| Missing API-first approach | LAE7 Non-Compliant | Section 7 (Integration View) | Define API strategy, selective async patterns, integration standards |
 | Strategic alignment unclear | LAE2 Unknown | Section 1 (Business Context) | Map architecture to enterprise strategic goals and objectives |
 | Enterprise integration patterns undefined | LAE4 Unknown | Section 7 (Integration View) | Define integration patterns, ESB/API gateway, messaging |
 | Governance framework missing | LAE5 Unknown | Section 12 (ADRs) or Section 11 | Document architectural governance, review boards, decision authority |
@@ -748,7 +748,7 @@
   "Add API-first strategy to Section 7:
    API gateway: Kong for all external APIs,
    Design-first: OpenAPI specs reviewed before implementation,
-   Integration patterns: REST for sync, Kafka for async/event-driven,
+   Integration patterns: REST for sync, Kafka for selective async decoupling,
    Event bus: Kafka with schema registry (Avro),
    API lifecycle: design → review → implement → publish → deprecate,
    Versioning: URI versioning (/v1/, /v2/), backward compatibility required"
@@ -793,9 +793,9 @@
 2. **Establish Data and Integration Strategy** (estimated impact: +0.3 points)
    - Define data strategy: governance, MDM, data lake/warehouse (Section 6)
    - Add API-first approach: design-first, OpenAPI, lifecycle management (Section 7)
-   - Document integration patterns: REST, event-driven, messaging, ESB/API gateway (Section 7)
+   - Document integration patterns: REST, selective async, messaging, ESB/API gateway (Section 7)
    - Specify data catalog with business glossary and lineage (Section 6)
-   - Define event-driven architecture: Kafka, schema registry, event catalog (Section 7)
+   - Define async event decoupling: Kafka, schema registry, event catalog (Section 7)
 
 3. **Enhance Governance and Standards** (estimated impact: +0.2 points)
    - Document architectural governance framework: review boards, decision authority (Section 12 or 11)

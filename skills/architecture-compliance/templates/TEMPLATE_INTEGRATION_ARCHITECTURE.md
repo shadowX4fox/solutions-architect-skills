@@ -17,7 +17,7 @@
 
 ## Compliance Summary
 
-This Integration Architecture compliance contract validates 7 LAI (Integration Architecture) requirements to ensure integration best practices, security, technology currency, governance compliance, third-party documentation, traceability, and event-driven architecture standards.
+This Integration Architecture compliance contract validates 7 LAI (Integration Architecture) requirements to ensure integration best practices, security, technology currency, governance compliance, third-party documentation, traceability, and async event decoupling standards.
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
@@ -27,7 +27,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 | LAI4 | Integration Governance Standards | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Governance Board or N/A] |
 | LAI5 | Third-Party Documentation | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / API Product Owner or N/A] |
 | LAI6 | Traceability and Audit | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / SRE Team or N/A] |
-| LAI7 | Event-Driven Integration Compliance | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Event Architect or N/A] |
+| LAI7 | Async Event Decoupling Integration Compliance | Integration Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | [Section X or N/A] | [Integration Architect / Event Architect or N/A] |
 
 <!-- @include shared/fragments/compliance-summary-footer.md -->
 
@@ -335,9 +335,9 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 ---
 
-## 7. Event-Driven Integration Compliance (LAI7)
+## 7. Async Event Decoupling Integration Compliance (LAI7)
 
-**Requirement**: Ensure compliance with event-driven integration guidelines including event schema standards, event versioning, event catalog, consumer contracts, and event delivery guarantees.
+**Requirement**: Ensure compliance with async event decoupling guidelines including event schema standards, event versioning, event catalog, consumer contracts, and event delivery guarantees.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
 **Responsible Role**: [Integration Architect / Event Architect or N/A]
@@ -346,13 +346,13 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 **Event Schema Definition**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Event schemas defined with standard format (JSON Schema, Avro, Protocol Buffers). If Non-Compliant: Unstructured events or no schema validation. If Not Applicable: No event-driven architecture. If Unknown: Event schemas not documented]
+- Explanation: [If Compliant: Event schemas defined with standard format (JSON Schema, Avro, Protocol Buffers). If Non-Compliant: Unstructured events or no schema validation. If Not Applicable: No async event decoupling. If Unknown: Event schemas not documented]
 - Source: [ARCHITECTURE.md Section 6 (Data Model → Event Schemas) or Section 7 (Integration View → Event Definitions), lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Define event schemas in Section 6 using JSON Schema or Avro. Include schema versioning and validation]
 
 **CloudEvents Compliance**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Events follow CloudEvents specification for metadata (id, source, type, time). If Non-Compliant: Custom event format without standard metadata. If Not Applicable: No event-driven architecture. If Unknown: CloudEvents compliance not documented]
+- Explanation: [If Compliant: Events follow CloudEvents specification for metadata (id, source, type, time). If Non-Compliant: Custom event format without standard metadata. If Not Applicable: No async event decoupling. If Unknown: CloudEvents compliance not documented]
 - Source: [ARCHITECTURE.md Section 6 (Data Model → Event Format / CloudEvents), lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Adopt CloudEvents specification in Section 6 for event metadata standardization. Include required fields: id, source, specversion, type]
 
@@ -366,7 +366,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 **Schema Registry Implementation**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Schema registry used for event schema management (Confluent Schema Registry, Azure Schema Registry). If Non-Compliant: No schema registry or manual schema management. If Not Applicable: No event-driven architecture. If Unknown: Schema registry not documented]
+- Explanation: [If Compliant: Schema registry used for event schema management (Confluent Schema Registry, Azure Schema Registry). If Non-Compliant: No schema registry or manual schema management. If Not Applicable: No async event decoupling. If Unknown: Schema registry not documented]
 - Source: [ARCHITECTURE.md Section 6 (Data Model → Schema Registry) or Section 5 (Component Model → Schema Registry), lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement schema registry in Section 6 for centralized schema versioning and compatibility checks]
 
@@ -408,7 +408,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 **Domain API**: RESTful API exposing a bounded context's capabilities following domain-driven design principles.
 
-**LAI (Integration Architecture Requirements)**: Organizational standards for integration architecture covering best practices, security, technology currency, governance, documentation, traceability, and event-driven patterns.
+**LAI (Integration Architecture Requirements)**: Organizational standards for integration architecture covering best practices, security, technology currency, governance, documentation, traceability, and selective async patterns.
 
 **API Catalog**: Comprehensive inventory of all APIs including endpoints, authentication, SLAs, consumers, and documentation.
 
@@ -527,7 +527,7 @@ This document is validated using an automated scoring system defined in `/skills
 - **Impact**: LAI6 → Compliant (+0.5 points)
 
 **Example 3: Defining Schema Registry**
-- **Gap**: Missing schema registry for event-driven architecture
+- **Gap**: Missing schema registry for async event decoupling
 - **Skill Command**:
   ```
   /skill architecture-docs
@@ -586,7 +586,7 @@ This document is validated using an automated scoring system defined in `/skills
    - Add third-party API inventory with vendors, endpoints, SLAs (Section 7)
    - Specify integration protocols: HTTP/2, REST, message brokers (Section 7)
 
-2. **Enhance Observability & Event-Driven Architecture** (estimated impact: +0.3 points)
+2. **Enhance Observability & Decouple Through Events** (estimated impact: +0.3 points)
    - Implement distributed tracing: OpenTelemetry, correlation IDs (Section 7)
    - Add structured logging with centralized platform (Section 11)
    - Define event schemas with JSON Schema/Avro (Section 6 or 7)
@@ -597,7 +597,7 @@ This document is validated using an automated scoring system defined in `/skills
    - Document API authentication: OAuth 2.0, JWT, or mTLS (Section 9)
    - Add TLS 1.2+ encryption for all API communications (Section 9)
    - Define secrets management for API keys (Vault, Key Vault) in Section 9
-   - Ensure CloudEvents compliance for event-driven patterns (Section 7)
+   - Ensure CloudEvents compliance for selective async patterns (Section 7)
    - Add API security logging and threat detection (Section 9)
 
 **Priority Order**: LAI1 (API catalog) → LAI2 (API auth) → LAI4 (API governance) → LAI6 (distributed tracing) → LAI5 (third-party APIs) → LAI3 (protocols) → LAI7 (event schemas)

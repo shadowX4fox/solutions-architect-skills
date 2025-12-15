@@ -351,7 +351,7 @@ This policy ensures compliance documents are fully auditable for regulatory requ
 - **Cloud first**: Prefer cloud-native over on-premise
 - **Business strategy alignment**: Capability mapping
 - **Zero obsolescence**: Avoid technologies EOL within 3 years
-- **API First/Event Driven**: API-first design, event-driven architecture
+- **API First/Event Driven**: API-first design, async event decoupling
 
 **Guideline Examples**:
 - Solutions must align with enterprise business capabilities
@@ -391,7 +391,7 @@ This policy ensures compliance documents are fully auditable for regulatory requ
 **Guideline Examples**:
 - All integrations must be cataloged and documented
 - REST APIs must follow OpenAPI 3.0 specification
-- Asynchronous integrations must use event-driven patterns
+- Asynchronous integrations must use selective async patterns
 - Integration security: OAuth 2.0, mutual TLS, API keys
 - Avoid obsolete protocols (SOAP 1.1, XML-RPC, etc.)
 - All integrations must include correlation IDs for traceability
