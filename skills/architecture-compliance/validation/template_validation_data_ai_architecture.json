@@ -54,6 +54,31 @@
       "required_appendices": ["A.1", "A.2", "A.3", "A.4"],
       "strict_order": true
     },
+    "forbidden_section_numbering": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "forbidden_patterns": [
+        "### A\\.5",
+        "### A\\.6",
+        "### A\\.7",
+        "### A\\.8",
+        "### A\\.9"
+      ],
+      "error_message": "Sections after A.4 must be H2 headers WITHOUT numbering. Found: {pattern}. Correct format: '## Section Name' (not '### A.X Section Name')"
+    },
+    "document_control_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_table_pattern": "\\| Field \\| Value \\|",
+      "required_fields": [
+        "Document Owner",
+        "Last Review Date",
+        "Status",
+        "Validation Score",
+        "Approval Authority"
+      ],
+      "error_message": "Document Control section must use table format with | Field | Value | structure. Found list format instead of table."
+    },
     "compliance_calculation": {
       "enabled": true,
       "severity": "BLOCKING",

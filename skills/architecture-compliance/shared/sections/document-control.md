@@ -1,5 +1,10 @@
 ## Document Control
 
+<!-- CRITICAL: This table structure MUST be preserved exactly.
+     DO NOT convert this table to bold field lists like **Field**: Value.
+     Keep the | Field | Value | markdown table format.
+     Validation rule 'document_control_table' will BLOCK contracts that transform this table. -->
+
 | Field | Value |
 |-------|-------|
 | Document Owner | [SOLUTION_ARCHITECT or N/A] |

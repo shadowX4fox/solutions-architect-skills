@@ -373,6 +373,182 @@ Final Score = (2.5 × 0.4) + (4.0 × 0.5) + (3.0 × 0.1)
 
 ---
 
+## Format Validation Rules (BLOCKING)
+
+The validation system includes BLOCKING format rules that enforce template structure preservation. These rules prevent contracts from being generated if they violate mandatory formatting requirements.
+
+### Rule 1: Forbidden Section Numbering
+
+**Validation Rule**: `forbidden_section_numbering`
+**Severity**: BLOCKING
+**Purpose**: Prevent sections after A.4 from being incorrectly numbered as A.5, A.6, A.7, A.8, A.9
+
+**Context**:
+- Templates have formal appendix sections A.1 through A.4 (H3 headers with numbering)
+- After A.4, templates use `@include` directives that expand to plain H2 headers WITHOUT numbering
+- The `resolve-includes.ts` utility expands these to `## Section Name` format
+- LLMs must preserve this H2 format and NOT add section numbers
+
+**WRONG Format (BLOCKED)**:
+```markdown
+### A.4 Change History
+...
+
+---
+
+### A.5 Data Extracted Successfully
+[Content]
+
+---
+
+### A.6 Missing Data Requiring Attention
+[Content]
+
+---
+
+### A.7 Not Applicable Items
+[Content]
+
+---
+
+### A.8 Unknown Status Items Requiring Investigation
+[Content]
+
+---
+
+### A.9 Generation Metadata
+[Content]
+```
+
+**Error Message**:
+```
+Sections after A.4 must be H2 headers WITHOUT numbering. Found: ### A.5.
+Correct format: '## Section Name' (not '### A.X Section Name')
+```
+
+**CORRECT Format (PASS)**:
+```markdown
+### A.4 Change History
+...
+
+---
+
+## Data Extracted Successfully
+[Content]
+
+---
+
+## Missing Data Requiring Attention
+[Content]
+
+---
+
+## Not Applicable Items
+[Content]
+
+---
+
+## Unknown Status Items Requiring Investigation
+[Content]
+
+---
+
+## Generation Metadata
+[Content]
+```
+
+**Impact**: Prevents template hierarchy violations and ensures consistent markdown structure across all 10 compliance contract types.
+
+---
+
+### Rule 2: Document Control Table Structure
+
+**Validation Rule**: `document_control_table`
+**Severity**: BLOCKING
+**Purpose**: Enforce markdown table format for Document Control section
+
+**Context**:
+- The Document Control section (from `shared/sections/document-control.md`) uses a table format
+- Table structure is `| Field | Value |` with proper markdown table syntax
+- LLMs must preserve this table format and NOT transform it to bold field lists
+
+**WRONG Format (BLOCKED)**:
+```markdown
+## Document Control
+
+**Document ID**: CLOUD_ARCHITECTURE_TaskSchedulingSystem_2025-12-14
+**Template Version**: 2.0
+**Validation Framework Version**: 1.0.0
+**Approval Authority**: Cloud Architecture Review Board
+
+**Lifecycle Status**: In Review
+**Overall Validation Score**: 8.3/10 (AUTO_APPROVE)
+
+**Document Status**:
+- **Overall Status**: PASS
+- **Action Required**: AUTO_APPROVE
+- **Review Actor**: System (Auto-Approved)
+- **Message**: High confidence validation. Contract automatically approved.
+```
+
+**Error Message**:
+```
+Document Control section must use table format with | Field | Value | structure.
+Found list format instead of table.
+```
+
+**CORRECT Format (PASS)**:
+```markdown
+## Document Control
+
+| Field | Value |
+|-------|-------|
+| Document Owner | Solution Architect |
+| Last Review Date | 2025-12-14 |
+| Next Review Date | 2026-12-14 |
+| Status | Approved |
+| Validation Score | 8.3/10 |
+| Validation Status | AUTO_APPROVE |
+| Validation Date | 2025-12-14 |
+| Validation Evaluator | ComplianceValidator v1.0 |
+| Review Actor | System (Auto-Approved) |
+| Approval Authority | Cloud Architecture Review Board |
+
+**Validation Configuration**: `/skills/architecture-compliance/validation/cloud_architecture_validation.json`
+```
+
+**Required Fields** (validated):
+- Document Owner
+- Last Review Date
+- Status
+- Validation Score
+- Approval Authority
+
+**Impact**: Ensures Document Control data is structured, parseable, and audit-compliant. Table format enables automated extraction and validation tracking.
+
+---
+
+**Format Validation Summary**:
+
+| Rule | Purpose | Forbidden Pattern | Required Format | Severity |
+|------|---------|-------------------|----------------|----------|
+| `forbidden_section_numbering` | Block A.5+ numbering | `### A.5`, `### A.6`, etc. | `## Section Name` (H2) | BLOCKING |
+| `document_control_table` | Enforce table structure | Bold field lists (`**Field**: Value`) | `\| Field \| Value \|` table | BLOCKING |
+
+**Files Affected**: All 10 compliance contract validation files
+- `template_validation_cloud_architecture.json`
+- `template_validation_development_architecture.json`
+- `template_validation_sre_architecture.json`
+- `template_validation_business_continuity.json`
+- `template_validation_data_ai_architecture.json`
+- `template_validation_security_architecture.json`
+- `template_validation_integration_architecture.json`
+- `template_validation_enterprise_architecture.json`
+- `template_validation_platform_it_infrastructure.json`
+- `template_validation_process_transformation.json`
+
+---
+
 ## Summary Comparison
 
 | Tier | Score Range | Status | Review Actor | Example | Key Characteristics |

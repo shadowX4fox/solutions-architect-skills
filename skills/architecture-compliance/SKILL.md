@@ -82,6 +82,63 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 
 **See Phase 4, Step 4.2 for detailed placeholder replacement workflow.**
 
+---
+
+## CRITICAL FORMAT PRESERVATION RULES
+
+**IMPORTANT**: The following format rules are MANDATORY and validated with BLOCKING severity. Violations will prevent contract generation.
+
+### 1. Shared Section Headers After A.4
+
+After "### A.4 Change History", the template includes shared sections via `@include` directives.
+These are already expanded by `resolve-includes.ts` and appear as `## Header` (H2).
+
+**YOU MUST PRESERVE THEM AS H2 - DO NOT ADD A.5+ NUMBERING**
+
+- ❌ **WRONG**: `### A.5 Data Extracted Successfully`
+- ✅ **CORRECT**: `## Data Extracted Successfully`
+
+**Validation Rule**: `forbidden_section_numbering` will BLOCK any sections numbered A.5 or higher.
+
+### 2. Document Control Table Structure
+
+Document Control MUST use table format: `| Field | Value |`
+
+**NEVER convert tables to bold field lists**
+
+- ❌ **WRONG**:
+  ```markdown
+  **Document ID**: VALUE
+  **Template Version**: VALUE
+  ```
+
+- ✅ **CORRECT**:
+  ```markdown
+  | Field | Value |
+  |-------|-------|
+  | Document ID | VALUE |
+  | Template Version | VALUE |
+  ```
+
+**Validation Rule**: `document_control_table` will BLOCK contracts without proper table format.
+
+### 3. ALL Template Formatting
+
+**Preserve ALL markdown structures exactly:**
+- Tables must stay as tables (with `|` separators)
+- Lists must stay as lists (with `-` or `*`)
+- Headers must preserve level (H2/H3) and numbering exactly
+- ONLY replace `[PLACEHOLDER]` tokens - nothing else
+
+**Why This Matters:**
+- Template consistency across all 10 contract types
+- Automated validation and parsing
+- Audit trail integrity
+
+**See Phase 4, Step 4.2 for detailed format preservation workflow.**
+
+---
+
 ## Strict Source Traceability Policy
 
 **CRITICAL REQUIREMENT**: All compliance contracts must maintain strict source traceability to ARCHITECTURE.md.
@@ -880,6 +937,28 @@ These sections are already expanded by resolve-includes.ts (Phase 4.1) and appea
 
 **Reason**: These shared sections are supplementary content, not formal appendix sections.
 They provide dynamic data tables and should remain as unnumbered H2 sections for flexibility.
+
+**CRITICAL RULE**: DO NOT convert Document Control table to bold field lists.
+
+The Document Control section (expanded from `shared/sections/document-control.md`) uses a table format:
+
+**Correct Format**:
+```markdown
+| Field | Value |
+|-------|-------|
+| Document Owner | [PLACEHOLDER] |
+| Last Review Date | [PLACEHOLDER] |
+...
+```
+
+**WRONG Format** (DO NOT DO THIS):
+```markdown
+**Document ID**: [VALUE]
+**Template Version**: [VALUE]
+**Document Owner**: [VALUE]
+```
+
+**Validation**: The `document_control_table` validation rule will BLOCK contracts that transform tables into bold field lists.
 
 **Step 4.3: Populate Compliance Summary Table**
 

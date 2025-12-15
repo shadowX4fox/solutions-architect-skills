@@ -69,6 +69,19 @@
       "error_message": "Found numbered section A.5 or higher. Only A.1-A.4 should be numbered. Shared sections (Data Extracted, Missing Data, Not Applicable, Unknown Status, Generation Metadata) must be H2 (##) without numbering.",
       "fix_instructions": "Remove numbering from shared sections. Change '### A.5 Data Extracted Successfully' to '## Data Extracted Successfully'"
     },
+    "document_control_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_table_pattern": "\\| Field \\| Value \\|",
+      "required_fields": [
+        "Document Owner",
+        "Last Review Date",
+        "Status",
+        "Validation Score",
+        "Approval Authority"
+      ],
+      "error_message": "Document Control section must use table format with | Field | Value | structure. Found list format instead of table."
+    },
     "compliance_calculation": {
       "enabled": true,
       "severity": "BLOCKING",

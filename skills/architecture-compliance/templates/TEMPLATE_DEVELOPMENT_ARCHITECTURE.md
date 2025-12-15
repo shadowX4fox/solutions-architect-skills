@@ -623,6 +623,11 @@ When calculating the Compliance Score in validation_results, N/A items MUST be i
 
 ---
 
+<!-- CRITICAL: The sections below use @include directives that expand to H2 headers.
+     DO NOT add section numbers (A.5, A.6, etc.) to these headers.
+     The resolved content will be ## Header format - preserve it exactly.
+     Validation rule 'forbidden_section_numbering' will BLOCK numbered sections after A.4. -->
+
 <!-- @include-with-config shared/sections/data-extracted-template.md config=development-architecture -->
 
 ---
