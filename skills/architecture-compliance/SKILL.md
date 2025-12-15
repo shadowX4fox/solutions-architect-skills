@@ -651,6 +651,13 @@ The template format MUST be preserved exactly as written. Do NOT transform, rewr
 3. Do NOT replace structured placeholders with custom prose or explanations
 4. Do NOT change formatting, line breaks, bullets, or markdown structure
 5. Replace ONLY explicit `[PLACEHOLDER]` tokens with actual values
+6. **CRITICAL - Appendix Numbering**: Only A.1 through A.4 should be numbered
+   - A.1: Definitions and Terminology
+   - A.2: Validation Methodology
+   - A.3: Document Completion Guide (with A.3.1, A.3.2, A.3.3)
+   - A.4: Change History
+   - Sections after A.4 (Data Extracted, Missing Data, Not Applicable, Unknown Status, Generation Metadata)
+     MUST remain as H2 (`##`) headers WITHOUT section numbering (NOT A.5, A.6, etc.)
 
 ```
 Replace standard placeholders:
@@ -823,6 +830,56 @@ Some conditionals use "or" logic: `[If Non-Compliant or Unknown: text]`
 **CRITICAL**: This is a BREAKING CHANGE from previous behavior (v1.5.10 and earlier). Previously, conditionals were preserved as-is. Now they must be expanded to show only the relevant branch based on Status value.
 
 **See COMPLIANCE_GENERATION_GUIDE.md Step 4.2 for detailed examples of correct vs incorrect placeholder replacement.**
+
+**Step 4.2.4: Preserve Shared Section Headers**
+
+After A.4 Change History, the template includes shared sections via `<!-- @include-with-config -->` directives.
+These sections are already expanded by resolve-includes.ts (Phase 4.1) and appear as H2 (`##`) headers.
+
+**CRITICAL RULE**: DO NOT add section numbers to these shared sections.
+
+**Correct Format** (after A.4):
+```markdown
+### A.4 Change History
+...
+
+---
+
+## Data Extracted Successfully
+[List of data points...]
+
+---
+
+## Missing Data Requiring Attention
+[Table of gaps...]
+
+---
+
+## Not Applicable Items
+[List of N/A items...]
+
+---
+
+## Unknown Status Items Requiring Investigation
+[Table of unknowns...]
+
+---
+
+## Generation Metadata
+[Metadata table...]
+```
+
+**WRONG Format** (DO NOT DO THIS):
+```markdown
+### A.5 Data Extracted Successfully
+### A.6 Missing Data Requiring Attention
+### A.7 Not Applicable Items
+### A.8 Unknown Status Items Requiring Investigation
+### A.9 Generation Metadata
+```
+
+**Reason**: These shared sections are supplementary content, not formal appendix sections.
+They provide dynamic data tables and should remain as unnumbered H2 sections for flexibility.
 
 **Step 4.3: Populate Compliance Summary Table**
 
@@ -1056,16 +1113,64 @@ The Write tool OVERWRITES existing files, ensuring regeneration replaces old con
 Preserve formatting and markdown structure
 ```
 
-**Step 5.3: Generate Manifest**
+**Step 5.3: Generate/Update Manifest**
+
+After generating each compliance contract, update the manifest using the manifest-generator utility:
+
+```bash
+bun utils/manifest-generator.ts \
+  --mode [create|update] \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE_NAME]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score [VALIDATION_SCORE] \
+  --status "[DOCUMENT_STATUS]" \
+  --completeness [COMPLETENESS_PERCENTAGE]
 ```
-Create/update COMPLIANCE_MANIFEST.md with:
-- Compliance Framework Reference (validation framework details, scoring methodology, approval thresholds)
-- Validation Configuration (schema paths, validation engine version, contract-specific rule files)
-- List of all generated documents (table format)
-- Generation date and time
-- Source ARCHITECTURE.md reference
-- Summary of completeness (% placeholders, total requirements)
+
+**Mode Selection**:
+- Use `create` if this is the FIRST contract generated (manifest doesn't exist)
+- Use `update` if manifest already exists (subsequent contracts)
+
+**Required Arguments**:
+- `--project`: Project name from ARCHITECTURE.md Document Index (e.g., "Task Scheduling System")
+- `--contract-type`: Full contract type name (e.g., "Development Architecture", "Cloud Architecture")
+- `--filename`: Generated contract filename (e.g., "DEVELOPMENT_ARCHITECTURE_Project_2025-12-14.md")
+- `--score`: Final validation score from Phase 3.5 (0-10 scale, e.g., 8.5)
+- `--status`: Document status from outcome tier mapping (e.g., "Approved", "In Review", "Draft", "Rejected")
+- `--completeness`: Completeness percentage (0-100, e.g., 85 for 85%)
+
+**Manifest Contents** (Auto-Generated):
+- Compliance Framework Reference (framework version, scoring formula, approval thresholds)
+- Validation Configuration (schema paths, validation engine version, rule files)
+- Generated Documents table (contract type, filename, score, status, completeness, date)
+- Summary statistics (total contracts, average completeness, average score, generation timestamp)
+
+**Output**: `/compliance-docs/COMPLIANCE_MANIFEST.md`
+
+**Behavior**:
+- **Create mode**: Generates new manifest with framework/validation sections + first contract entry
+- **Update mode**: Replaces existing contract entry if same type, appends if new type, recalculates summary
+
+**Example Output**:
+```markdown
+## Generated Documents
+
+| Contract Type | Filename | Score | Status | Completeness | Generated |
+|---------------|----------|-------|--------|--------------|-----------|
+| Cloud Architecture | CLOUD_ARCHITECTURE_TaskScheduling_2025-12-14.md | 7.8 | In Review | 78% | 2025-12-14 |
+| Development Architecture | DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md | 8.5 | Approved | 85% | 2025-12-14 |
+| SRE Architecture | SRE_ARCHITECTURE_TaskScheduling_2025-12-14.md | 9.2 | Approved | 92% | 2025-12-14 |
+
+## Summary
+- Total Contracts: 3
+- Average Score: 8.5/10
+- Average Completeness: 85%
+- Approved: 2, In Review: 1, Draft: 0, Rejected: 0
+- Last Updated: 2025-12-14 14:30:00
 ```
+
+**Note**: The utility automatically handles manifest creation, entry merging, sorting, and summary calculation.
 
 **Step 5.4: Per-Contract Completion Report**
 ```

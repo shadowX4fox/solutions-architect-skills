@@ -61,6 +61,14 @@
       "required_appendices": ["A.1", "A.2", "A.3", "A.4"],
       "strict_order": true
     },
+    "forbidden_section_numbering": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "description": "Sections after A.4 Change History must not be numbered (A.5, A.6, etc.)",
+      "pattern": "###\\s+A\\.[5-9]\\d*\\b",
+      "error_message": "Found numbered section A.5 or higher. Only A.1-A.4 should be numbered. Shared sections (Data Extracted, Missing Data, Not Applicable, Unknown Status, Generation Metadata) must be H2 (##) without numbering.",
+      "fix_instructions": "Remove numbering from shared sections. Change '### A.5 Data Extracted Successfully' to '## Data Extracted Successfully'"
+    },
     "compliance_calculation": {
       "enabled": true,
       "severity": "BLOCKING",

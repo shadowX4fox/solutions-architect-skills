@@ -202,3 +202,278 @@ When adding new shared content:
 Part of the Solutions Architect Skills plugin for Claude Code.
 
 **Last Updated**: 2025-12-13 (Removed Python/Node.js implementations - Bun/TypeScript only)
+
+---
+
+## manifest-generator.ts (Bun/TypeScript)
+
+**Purpose**: Generate or update the COMPLIANCE_MANIFEST.md file after each compliance contract generation. Tracks all generated contracts with metadata (score, status, completeness).
+
+### Usage
+
+```bash
+bun manifest-generator.ts --mode <create|update> --project "<name>" \
+  --contract-type "<type>" --filename "<file>" --score <0-10> \
+  --status "<status>" --completeness <0-100>
+# or make executable:
+chmod +x manifest-generator.ts
+./manifest-generator.ts --mode <create|update> ...
+```
+
+**Required Arguments:**
+- `--mode`: `create` (new manifest) or `update` (modify existing)
+- `--project`: Project name from ARCHITECTURE.md Document Index
+- `--contract-type`: Full contract type name (e.g., "Development Architecture", "Cloud Architecture")
+- `--filename`: Generated contract filename
+- `--score`: Validation score (0-10, one decimal place, e.g., 8.5)
+- `--status`: Document status - one of: `Approved`, `In Review`, `Draft`, `Rejected`
+- `--completeness`: Completeness percentage (0-100, e.g., 85 for 85%)
+
+**Optional Arguments:**
+- `--compliance-docs-dir`: Custom output directory (default: `./compliance-docs`)
+
+### Examples
+
+**Create new manifest (first contract):**
+```bash
+bun utils/manifest-generator.ts --mode create --project "Task Scheduling System" \
+  --contract-type "Development Architecture" \
+  --filename "DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --score 8.5 --status "Approved" --completeness 85
+```
+
+**Update existing manifest (subsequent contract):**
+```bash
+bun utils/manifest-generator.ts --mode update --project "Task Scheduling System" \
+  --contract-type "Cloud Architecture" \
+  --filename "CLOUD_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --score 7.8 --status "In Review" --completeness 78
+```
+
+**Regenerate contract (replaces existing entry):**
+```bash
+bun utils/manifest-generator.ts --mode update --project "Task Scheduling System" \
+  --contract-type "Development Architecture" \
+  --filename "DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --score 9.0 --status "Approved" --completeness 95
+```
+
+### How It Works
+
+1. **Parses command-line arguments** and validates required parameters
+2. **Loads existing manifest** (in update mode) and extracts contract entries from table
+3. **Merges contract data**:
+   - Replaces entry if contract type already exists (regeneration)
+   - Appends entry if new contract type
+   - Sorts entries alphabetically by contract type
+4. **Calculates summary statistics**:
+   - Total contracts, average score, average completeness
+   - Counts by status (Approved, In Review, Draft, Rejected)
+5. **Generates manifest content**:
+   - Framework Reference section (static)
+   - Validation Configuration section (static)
+   - Generated Documents table (dynamic)
+   - Summary section (calculated)
+6. **Writes manifest file** to `/compliance-docs/COMPLIANCE_MANIFEST.md`
+
+### Manifest Structure
+
+**File**: `/compliance-docs/COMPLIANCE_MANIFEST.md`
+
+**Contents**:
+```markdown
+# Compliance Documentation Manifest
+
+**Project**: [PROJECT_NAME]
+**Source**: ARCHITECTURE.md
+**Generated**: [GENERATION_DATE]
+
+---
+
+## Compliance Framework Reference
+[Framework version, scoring formula, approval thresholds table]
+
+---
+
+## Validation Configuration
+[Schema paths, engine version, rule files]
+
+---
+
+## Generated Documents
+
+| Contract Type | Filename | Score | Status | Completeness | Generated |
+|---------------|----------|-------|--------|--------------|-----------|
+| Cloud Architecture | CLOUD_ARCHITECTURE_Task_2025-12-14.md | 7.8 | In Review | 78% | 2025-12-14 |
+| Development Architecture | DEV_ARCHITECTURE_Task_2025-12-14.md | 8.5 | Approved | 85% | 2025-12-14 |
+| SRE Architecture | SRE_ARCHITECTURE_Task_2025-12-14.md | 9.2 | Approved | 92% | 2025-12-14 |
+
+---
+
+## Summary
+- Total Contracts: 3
+- Average Score: 8.5/10
+- Average Completeness: 85%
+- Approved: 2, In Review: 1, Draft: 0, Rejected: 0
+- Last Updated: 2025-12-14 14:30:00
+```
+
+### Key Features
+
+- ✅ **TypeScript type safety** with interfaces for `ContractMetadata` and `ManifestData`
+- ✅ **Modern ES modules** (`import/export`)
+- ✅ **Bun-optimized APIs** (`Bun.file().text()`, `Bun.write()`)
+- ✅ **Automatic entry merging** (replace if same type, append if new)
+- ✅ **Alphabetical sorting** by contract type
+- ✅ **Summary statistics calculation** (averages, status counts)
+- ✅ **Markdown table formatting** with proper alignment
+- ✅ **Mode detection** (create vs update)
+- ✅ **Error handling** with validation of arguments
+- ✅ **Programmatic API** (exported functions for testing)
+
+### Update Behavior
+
+**Create mode** (`--mode create`):
+- Generates new manifest file
+- Initializes with Framework and Validation sections
+- Adds first contract entry
+- Sets up Summary section
+
+**Update mode** (`--mode update`):
+- Reads existing manifest
+- Parses contract entries from table
+- Merges new contract:
+  - **Same contract type**: Replaces existing entry (regeneration)
+  - **New contract type**: Appends new entry
+- Recalculates summary statistics
+- Writes updated manifest
+
+**Example - Regeneration**:
+```bash
+# Initial generation
+bun manifest-generator.ts --mode create --project "Project" \
+  --contract-type "Development Architecture" --filename "DEV_v1.md" \
+  --score 8.0 --status "Draft" --completeness 75
+
+# Later regeneration (replaces entry)
+bun manifest-generator.ts --mode update --project "Project" \
+  --contract-type "Development Architecture" --filename "DEV_v2.md" \
+  --score 9.5 --status "Approved" --completeness 98
+
+# Result: Only ONE "Development Architecture" entry in manifest (v2 replaced v1)
+```
+
+### Integration with SKILL.md
+
+The manifest generator is integrated into the compliance contract generation workflow at **Phase 5, Step 5.3**.
+
+**Workflow**:
+1. **Phase 1-3**: Extract data from ARCHITECTURE.md and validate
+2. **Phase 4**: Generate compliance contract from template
+3. **Phase 5.1-5.2**: Save contract to `/compliance-docs/`
+4. **Phase 5.3**: **Update manifest** using `manifest-generator.ts`
+5. **Phase 5.4-5.5**: Generate per-contract and summary reports
+
+### Error Handling
+
+The script validates all arguments and handles errors gracefully:
+
+- **Missing required argument**: Exits with clear error message listing required parameters
+- **Invalid mode**: Must be `create` or `update`
+- **Invalid score**: Must be 0-10
+- **Invalid status**: Must be one of: `Approved`, `In Review`, `Draft`, `Rejected`
+- **Invalid completeness**: Must be 0-100
+- **Compliance docs directory not found**: Exits with error (directory must exist)
+- **Manifest not found in update mode**: Automatically switches to create mode
+
+### Performance
+
+- **Fast parsing**: Uses regex to extract table rows from existing manifest
+- **Efficient merging**: In-place array operations (replace or append)
+- **Clean output**: Formatted markdown with proper table alignment
+- **Minimal dependencies**: No external packages required
+
+### Maintenance
+
+When modifying the manifest structure:
+
+1. Update section generators (`generateFrameworkSection`, `generateValidationSection`, etc.)
+2. Update table column definitions in `generateDocumentsTable`
+3. Update summary calculation in `calculateSummary`
+4. Update parsing logic in `parseExistingManifest` if table structure changes
+5. Test with both create and update modes
+
+### Requirements
+
+- Bun runtime 1.0 or higher
+- No external dependencies
+- Compliance docs directory must exist (`/compliance-docs/`)
+
+### Testing
+
+```bash
+# Create compliance-docs directory for testing
+mkdir -p compliance-docs
+
+# Test create mode
+bun utils/manifest-generator.ts --mode create --project "Test Project" \
+  --contract-type "Development Architecture" --filename "DEV_Test.md" \
+  --score 8.5 --status "Approved" --completeness 85
+
+# Verify manifest was created
+cat compliance-docs/COMPLIANCE_MANIFEST.md
+
+# Test update mode (add second contract)
+bun utils/manifest-generator.ts --mode update --project "Test Project" \
+  --contract-type "Cloud Architecture" --filename "CLOUD_Test.md" \
+  --score 7.8 --status "In Review" --completeness 78
+
+# Verify manifest was updated
+cat compliance-docs/COMPLIANCE_MANIFEST.md
+
+# Test regeneration (same contract type)
+bun utils/manifest-generator.ts --mode update --project "Test Project" \
+  --contract-type "Development Architecture" --filename "DEV_Test_v2.md" \
+  --score 9.2 --status "Approved" --completeness 95
+
+# Verify entry was replaced (not duplicated)
+cat compliance-docs/COMPLIANCE_MANIFEST.md
+```
+
+### Exported API
+
+For programmatic use or testing:
+
+```typescript
+import {
+  generateManifest,
+  parseExistingManifest,
+  mergeContracts,
+  calculateSummary,
+  type ContractMetadata,
+  type ManifestData
+} from './utils/manifest-generator.ts';
+
+// Example: Programmatic usage
+const contractMetadata: ContractMetadata = {
+  contractType: "Development Architecture",
+  filename: "DEV_Project_2025-12-14.md",
+  score: 8.5,
+  status: "Approved",
+  completeness: 85,
+  generatedDate: "2025-12-14"
+};
+
+await generateManifest(
+  '/path/to/compliance-docs',
+  contractMetadata,
+  'Project Name',
+  'create'
+);
+```
+
+### License
+
+Part of the Solutions Architect Skills plugin for Claude Code.
+
+**Last Updated**: 2025-12-14 (Added manifest-generator.ts)
