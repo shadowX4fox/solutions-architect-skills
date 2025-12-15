@@ -38,12 +38,12 @@ All ARCHITECTURE.md documents MUST include these **9 core principles** in this *
 
 ### Optional Principle
 
-10. **Event-Driven Architecture** *(Include ONLY if the system actually uses event-driven patterns)*
+10. **Decouple Through Events** *(Apply selectively where temporal independence and scalability are prioritized)*
 
 **When to Include**:
-- ✅ System uses message queues (Kafka, RabbitMQ, SQS, etc.)
-- ✅ System has event-driven workflows or event sourcing
-- ✅ Components communicate primarily via events
+- ✅ System uses async patterns for background processing (Kafka, RabbitMQ, SQS, etc.)
+- ✅ Temporal decoupling provides clear scalability benefits
+- ✅ System implements both synchronous and asynchronous patterns
 
 **When to Omit**:
 - ❌ System is purely synchronous request/response
@@ -122,9 +122,9 @@ When creating or updating Section 3, verify:
 - Operational burdens: monitoring, debugging, deployment complexity
 - Development overhead: additional code, testing requirements
 
-✅ **Event-Driven Architecture (#10) only included if system uses it**
-- Check if system has message queues or event streams
-- Verify event-driven is a core pattern, not incidental
+✅ **Decouple Through Events (#10) only included where async patterns provide clear benefits**
+- Check if system uses async patterns for temporal decoupling
+- Verify both sync and async patterns are documented
 - If included, must have same three-subsection structure
 
 ✅ **No additional custom principles beyond the standard 9-10**
@@ -149,7 +149,7 @@ Principle Presence:
 ☐ 7. Simplicity
 ☐ 8. Cloud-Native
 ☐ 9. Open Standards
-☐ 10. Event-Driven Architecture (optional - only if applicable)
+☐ 10. Decouple Through Events (optional - apply selectively)
 
 Structure Validation:
 ☐ All principles in exact order (1-9, optional 10)
@@ -162,7 +162,7 @@ Content Quality:
 ☐ Technologies and patterns explicitly named
 ☐ Trade-offs are realistic and honest
 ☐ No placeholder text ("TBD", "TODO", etc.)
-☐ Event-Driven (#10) only if system uses events
+☐ Decouple Through Events (#10) only where async provides benefits
 
 Common Errors:
 ☐ No missing principles from core 9
@@ -190,9 +190,9 @@ Common Errors:
 - Example: Only having Description and Implementation
 - Fix: Add Trade-offs with honest assessment of costs
 
-❌ **Including Event-Driven Architecture when system doesn't use it**
-- Example: Synchronous REST API system lists Event-Driven principle
-- Fix: Remove Event-Driven Architecture principle (#10)
+❌ **Including Decouple Through Events when system doesn't use async patterns**
+- Example: Purely synchronous REST API system lists async decoupling principle
+- Fix: Remove Decouple Through Events principle (#10)
 
 ❌ **Adding custom principles not in the standard list**
 - Example: "11. Innovation" or "12. Customer-Centric Design"
@@ -1164,7 +1164,7 @@ Common Errors:
 - ❌ Reorder sections from standard sequence
 - ❌ Omit principle subsections (Description/Implementation/Trade-offs)
 - ❌ Use generic placeholder text
-- ❌ Include Event-Driven principle unless system uses it
+- ❌ Include Decouple Through Events unless async provides clear benefits
 - ❌ Add custom principles beyond standard 9-10
 - ❌ Forget to update Document Index after changes
 
@@ -1212,6 +1212,6 @@ This document provides validation rules and enforcement checklists for ARCHITECT
 - 9 required Architecture Principles (strict order)
 - 12 required Section Names (exact match, case-sensitive)
 - 3 required subsections per principle (Description, Implementation, Trade-offs)
-- Optional: Event-Driven Architecture principle (#10)
+- Optional: Decouple Through Events principle (#10)
 - Optional: Data Flow Patterns section (#6)
 - Strict markdown header format: `## [NUMBER]. [NAME]`

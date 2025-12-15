@@ -96,7 +96,7 @@ When users ask questions about the architecture, this guide helps identify which
 7. Simplicity
 8. Cloud-Native
 9. Open Standards
-10. Event-Driven Architecture (optional)
+10. Decouple Through Events (optional - selective async patterns)
 
 **Subsections to check**:
 - Each principle has: Description, Implementation, Trade-offs

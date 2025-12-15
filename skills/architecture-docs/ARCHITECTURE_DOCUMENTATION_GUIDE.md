@@ -579,7 +579,7 @@ All architecture documents must include these 9 core principles in this exact or
 
 **Optional Principle:**
 
-10. **Event-Driven Architecture**: *(Include only if your system uses event-driven patterns)*
+10. **Decouple Through Events**: *(Apply selectively where temporal independence and scalability are prioritized)*
     - Loose coupling via domain events
     - Asynchronous communication patterns
 
@@ -720,21 +720,27 @@ Prefer open standards over proprietary solutions to ensure interoperability and 
 - [May miss proprietary optimizations]
 - [Potential performance trade-offs]
 
-### 10. Event-Driven Architecture *(Optional - include only if applicable)*
+### 10. Decouple Through Events *(Optional - apply selectively)*
 
 **Description:**
-Loose coupling via domain events instead of synchronous coupling, enabling asynchronous communication patterns.
+Use asynchronous domain events to decouple components where temporal independence and scalability are prioritized over immediate consistency.
 
 **Implementation:**
-- [Event publishing: Kafka, EventBridge, etc.]
-- [Consumer groups and subscription model]
-- [Idempotent event handlers]
-- [Event sourcing patterns if used]
+- **Synchronous Patterns**: [Describe where sync APIs are used, e.g., REST for user-facing operations]
+- **Asynchronous Patterns**: [Describe where async events are used, e.g., Kafka for background processing]
+- [Consumer groups, idempotency, schema management]
+
+**When to Use Async:**
+- [Scenarios where async is appropriate, e.g., background jobs, notifications]
+
+**When to Use Sync:**
+- [Scenarios requiring sync, e.g., user-facing APIs, immediate feedback needed]
 
 **Trade-offs:**
-- [Eventual consistency requires careful handling]
-- [Increased debugging complexity]
-- [Message ordering challenges]
+- Eventual consistency requires careful handling in business logic
+- Increased debugging complexity for async flows
+- Not all interactions benefit from async (user-facing APIs need immediate responses)
+- [Additional trade-offs specific to your implementation]
 ```
 
 **Important Notes:**
@@ -744,7 +750,7 @@ Loose coupling via domain events instead of synchronous coupling, enabling async
 - Each principle must include all three subsections: **Description**, **Implementation**, and **Trade-offs**
 - The **Implementation** section must be customized with system-specific details (not generic placeholders)
 - The **Trade-offs** section must honestly assess the costs and downsides
-- Event-Driven Architecture (principle #10) is **optional** and should only be included if the system actually uses event-driven patterns
+- Decouple Through Events (principle #10) is **optional** and should only be included where asynchronous patterns provide clear benefits for temporal decoupling and scalability
 
 ---
 

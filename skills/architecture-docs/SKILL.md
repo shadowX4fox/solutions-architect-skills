@@ -1928,7 +1928,7 @@ When updating existing architecture docs:
 7. Simplicity
 8. Cloud-Native
 9. Open Standards
-10. Event-Driven Architecture (OPTIONAL - only if system uses event-driven patterns)
+10. Decouple Through Events (OPTIONAL - apply where async provides clear decoupling benefits)
 
 ### Quick Validation
 
@@ -1936,7 +1936,7 @@ When updating existing architecture docs:
 ✅ Each has Description + Implementation + Trade-offs
 ✅ Implementation is system-specific (not generic placeholders)
 ✅ Trade-offs honestly assess costs
-✅ Event-Driven (#10) only if applicable
+✅ Decouple Through Events (#10) only where async benefits temporal decoupling
 
 ### Detailed Rules
 

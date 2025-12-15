@@ -93,7 +93,7 @@ graph TB
     end
 
     %% Layer 3: Business Scenarios (DETAILED)
-    subgraph Layer3["Layer 3: Business Scenarios<br/>(Event-Driven Architecture)"]
+    subgraph Layer3["Layer 3: Business Scenarios<br/>(Decouple Through Events)"]
         %% Orchestrator Service
         OrchestratorService["Orchestrator Service<br/>REST API: /api/v1/resources"]
 
@@ -138,7 +138,7 @@ graph TB
     APIGateway -->|REST/GraphQL<br/>mTLS, 30s timeout<br/>Resource Creation| OrchestratorService
     APIGateway -.->|REST<br/>mTLS<br/>Query API| QueryService
 
-    %% Data Flows - Layer 3 Internal (Event-Driven Flow)
+    %% Data Flows - Layer 3 Internal (Async Event Decoupling)
     OrchestratorService -.->|Kafka Protocol<br/>TLS 1.2+ SASL<br/>Async Publish| EventTopicA
     OrchestratorService -.->|Kafka Protocol<br/>CREATED event| EventTopicB
 
