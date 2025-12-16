@@ -1045,7 +1045,7 @@ The template format MUST be preserved exactly as written. Do NOT transform, rewr
 Replace standard placeholders:
 
 [PROJECT_NAME] → "Job Scheduling Platform" (from Document Index)
-[GENERATION_DATE] → "2025-12-07" (current date)
+[GENERATION_DATE] → "2025-12-07" (use `date +%Y-%m-%d` bash command to get local system date)
 [EXTRACTED_VALUE] → Actual value from cached data
 [SOURCE_REFERENCE] → "Section X, line Y" (from cache)
 
@@ -1114,7 +1114,7 @@ Using validation_results from Step 3.5, populate Document Control fields:
 
 Standard Placeholders:
 [SOLUTION_ARCHITECT] → Extract from ARCHITECTURE.md Section 1 metadata
-[GENERATION_DATE] → Current date (YYYY-MM-DD)
+[GENERATION_DATE] → Current date (YYYY-MM-DD) - Use `date +%Y-%m-%d` bash command to get local system date
 [NEXT_REVIEW_DATE] → GENERATION_DATE + 6 months (or per policy)
 
 Validation-Driven Placeholders:

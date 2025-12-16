@@ -719,7 +719,7 @@ The template format MUST be preserved exactly as written. Do NOT transform, rewr
 ```
 Replace standard placeholders:
 - [PROJECT_NAME] → from Document Index
-- [GENERATION_DATE] → current date (YYYY-MM-DD)
+- [GENERATION_DATE] → current date (YYYY-MM-DD) - Use `date +%Y-%m-%d` bash command to get local system date
 - [EXTRACTED_VALUE] → from cached data
 - [SOURCE_REFERENCE] → section and line numbers
 ```
@@ -1659,7 +1659,7 @@ User: "Generate security compliance documentation"
 
 **Project Information:**
 - `[PROJECT_NAME]` - Extracted from ARCHITECTURE.md title (Section 1)
-- `[GENERATION_DATE]` - Current date in YYYY-MM-DD format
+- `[GENERATION_DATE]` - Current date in YYYY-MM-DD format (use `date +%Y-%m-%d` bash command)
 - `[DOCUMENT_OWNER]` - Extracted from ARCHITECTURE.md metadata or [PLACEHOLDER]
 
 **Extracted Values:**
