@@ -1,7 +1,7 @@
 {
   "template_name": "Business Continuity",
   "template_id": "TEMPLATE_BUSINESS_CONTINUITY",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "approval_authority": "Business Continuity Review Board",
   "scoring": {
     "scale": 10,
@@ -12,8 +12,8 @@
       "reject": 0
     },
     "weights": {
-      "completeness": 0.5,
-      "compliance": 0.4,
+      "completeness": 0.4,
+      "compliance": 0.5,
       "quality": 0.1
     },
     "status_codes": {
@@ -26,165 +26,694 @@
   },
   "validation_sections": [
     {
-      "section_id": "recovery_objectives",
-      "section_name": "Recovery Objectives",
-      "weight": 0.35,
+      "section_id": "bc_gen",
+      "section_name": "General Information",
+      "weight": 0.12,
       "required": true,
       "validation_items": [
         {
-          "item_id": "rto_defined",
-          "question": "Is Recovery Time Objective (RTO) defined?",
-          "architecture_md_section": "9.3",
+          "item_id": "lacn001",
+          "code": "LACN001",
+          "question": "Document the official name of the application, system, or business initiative covered by this Business Continuity plan",
+          "architecture_md_section": "Section 1 (Business Context) or Section 2 (System Overview)",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.2,
           "validation_rules": {
             "type": "presence_check",
-            "required_format": "Duration (e.g., 4 hours, 24 hours, 2 business days)",
-            "pass_criteria": "RTO value specified with time unit in Section 9.3",
+            "pass_criteria": "Application or Initiative Name documented in Section 1 (Business Context) or Section 2 (System Overview)",
             "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Business continuity not applicable to this system",
-            "unknown_criteria": "RTO not specified in ARCHITECTURE.md Section 9.3"
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Application or Initiative Name not specified in Section 1 (Business Context) or Section 2 (System Overview)"
           }
         },
         {
-          "item_id": "rpo_defined",
-          "question": "Is Recovery Point Objective (RPO) defined?",
-          "architecture_md_section": "9.3",
+          "item_id": "lacn002",
+          "code": "LACN002",
+          "question": "Specify the architectural pattern (e.g., monolithic, microservices, serverless) and deployment model (e.g., on-premises, cloud, hybrid) used by the system",
+          "architecture_md_section": "Section 3 (Architecture Overview) or Section 4 (Deployment Architecture)",
           "required": true,
-          "weight": 0.5,
+          "weight": 0.2,
           "validation_rules": {
             "type": "presence_check",
-            "required_format": "Duration (e.g., 15 minutes, 1 hour, 24 hours)",
-            "pass_criteria": "RPO value specified with time unit in Section 9.3",
+            "pass_criteria": "Architecture Type and Deployment Model documented in Section 3 (Architecture Overview) or Section 4 (Deployment Architecture)",
             "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "Business continuity not applicable to this system",
-            "unknown_criteria": "RPO not specified in ARCHITECTURE.md Section 9.3"
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Architecture Type and Deployment Model not specified in Section 3 (Architecture Overview) or Section 4 (Deployment Architecture)"
+          }
+        },
+        {
+          "item_id": "lacn003",
+          "code": "LACN003",
+          "question": "Define the number of logical or physical layers in the system architecture (e.g., presentation, business logic, data access, persistence)",
+          "architecture_md_section": "Section 3 (Architecture Overview → Logical Architecture)",
+          "required": true,
+          "weight": 0.2,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Number of Architecture Layers documented in Section 3 (Architecture Overview → Logical Architecture)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Number of Architecture Layers not specified in Section 3 (Architecture Overview → Logical Architecture)"
+          }
+        },
+        {
+          "item_id": "lacn004",
+          "code": "LACN004",
+          "question": "Document the infrastructure type: physical servers, virtual machines, containers, serverless, or a combination thereof",
+          "architecture_md_section": "Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)",
+          "required": true,
+          "weight": 0.2,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Infrastructure Type documented in Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Infrastructure Type not specified in Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)"
+          }
+        },
+        {
+          "item_id": "lacn005",
+          "code": "LACN005",
+          "question": "Identify all critical dependencies including internal systems, external services, third-party APIs, databases, and infrastructure components required for operation",
+          "architecture_md_section": "Section 1 (Business Context → Dependencies) or Section 5 (System Integrations)",
+          "required": true,
+          "weight": 0.2,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Critical System Dependencies documented in Section 1 (Business Context → Dependencies) or Section 5 (System Integrations)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Critical System Dependencies not specified in Section 1 (Business Context → Dependencies) or Section 5 (System Integrations)"
           }
         }
       ]
     },
     {
-      "section_id": "backup_strategy",
-      "section_name": "Backup and Recovery Strategy",
-      "weight": 0.30,
+      "section_id": "bc_rto",
+      "section_name": "Recovery Time Objectives",
+      "weight": 0.15,
       "required": true,
       "validation_items": [
         {
-          "item_id": "backup_frequency",
-          "question": "Is backup frequency defined and aligned with RPO?",
-          "architecture_md_section": "9.3",
+          "item_id": "lacn012",
+          "code": "LACN012",
+          "question": "Establish a Recovery Time Objective (RTO) - the maximum acceptable time to restore service after a failure",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR)",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.5,
           "validation_rules": {
             "type": "presence_check",
-            "required_format": "Frequency (e.g., hourly, daily, continuous)",
-            "pass_criteria": "Backup frequency documented and consistent with RPO requirements",
-            "fail_criteria": "Backup frequency does not meet RPO requirements",
-            "na_criteria": "No data persistence requirements",
-            "unknown_criteria": "Backup frequency not specified in Section 9.3"
-          }
-        },
-        {
-          "item_id": "backup_retention",
-          "question": "Is backup retention policy defined?",
-          "architecture_md_section": "9.3",
-          "required": true,
-          "weight": 0.3,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Retention period (e.g., 30 days, 1 year, 7 years)",
-            "pass_criteria": "Backup retention period documented with compliance requirements",
+            "pass_criteria": "Recovery Time Objective (RTO) Definition documented in Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR)",
             "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "No data persistence requirements",
-            "unknown_criteria": "Backup retention policy not specified"
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Recovery Time Objective (RTO) Definition not specified in Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR)"
           }
         },
         {
-          "item_id": "recovery_procedures",
-          "question": "Are recovery procedures documented?",
-          "architecture_md_section": "9.3",
+          "item_id": "lacn024",
+          "code": "LACN024",
+          "question": "Confirm that the Recovery Point Objective (RPO) - maximum acceptable data loss - has been validated and approved by business stakeholders",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR)",
           "required": true,
-          "weight": 0.3,
+          "weight": 0.5,
           "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Step-by-step recovery procedures documented with responsible roles",
-            "fail_criteria": "Recovery procedures incomplete or missing critical steps",
-            "na_criteria": "Business continuity not applicable",
-            "unknown_criteria": "Recovery procedures not documented in Section 9.3"
+            "type": "presence_check",
+            "pass_criteria": "RPO Validation with Business Stakeholders documented in Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "RPO Validation with Business Stakeholders not specified in Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR)"
           }
         }
       ]
     },
     {
-      "section_id": "disaster_recovery",
+      "section_id": "bc_dr",
       "section_name": "Disaster Recovery",
       "weight": 0.25,
       "required": true,
       "validation_items": [
         {
-          "item_id": "dr_site_defined",
-          "question": "Is disaster recovery site/region defined?",
-          "architecture_md_section": "9.3",
+          "item_id": "lacn006",
+          "code": "LACN006",
+          "question": "Determine whether the solution requires high availability (HA) design patterns to minimize downtime and ensure continuous operation",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements → Availability)",
           "required": true,
-          "weight": 0.4,
+          "weight": 0.091,
           "validation_rules": {
             "type": "presence_check",
-            "required_format": "Geographic location or cloud region (e.g., Azure East US 2, AWS eu-west-1)",
-            "pass_criteria": "DR site/region documented with geographic separation from primary",
-            "fail_criteria": "DR site same as primary site (no geographic separation)",
-            "na_criteria": "Non-critical system with no DR requirements",
-            "unknown_criteria": "DR site/region not specified"
-          }
-        },
-        {
-          "item_id": "failover_process",
-          "question": "Is failover process documented?",
-          "architecture_md_section": "9.3",
-          "required": true,
-          "weight": 0.35,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Failover process documented with triggers, steps, and success criteria",
-            "fail_criteria": "Failover process incomplete or untested",
-            "na_criteria": "No DR requirements",
-            "unknown_criteria": "Failover process not documented"
-          }
-        },
-        {
-          "item_id": "dr_testing",
-          "question": "Is DR testing schedule defined?",
-          "architecture_md_section": "9.3",
-          "required": true,
-          "weight": 0.25,
-          "validation_rules": {
-            "type": "presence_check",
-            "required_format": "Testing frequency (e.g., quarterly, semi-annually, annually)",
-            "pass_criteria": "DR testing schedule documented with success criteria",
+            "pass_criteria": "High Availability Requirement documented in Section 10 (Non-Functional Requirements → Availability)",
             "fail_criteria": "N/A (presence check cannot fail)",
-            "na_criteria": "No DR requirements",
-            "unknown_criteria": "DR testing schedule not specified"
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "High Availability Requirement not specified in Section 10 (Non-Functional Requirements → Availability)"
+          }
+        },
+        {
+          "item_id": "lacn007",
+          "code": "LACN007",
+          "question": "If HA is required, identify which specific system components, services, or tiers must be designed for high availability",
+          "architecture_md_section": "Section 11 (Operational → High Availability)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "High Availability Component Scope documented in Section 11 (Operational → High Availability)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "High Availability Component Scope not specified in Section 11 (Operational → High Availability)"
+          }
+        },
+        {
+          "item_id": "lacn008",
+          "code": "LACN008",
+          "question": "Determine if the solution requires local contingency measures (within same data center or availability zone) to handle component failures",
+          "architecture_md_section": "Section 11 (Operational → High Availability)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Local Contingency Requirement documented in Section 11 (Operational → High Availability)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Local Contingency Requirement not specified in Section 11 (Operational → High Availability)"
+          }
+        },
+        {
+          "item_id": "lacn009",
+          "code": "LACN009",
+          "question": "Determine if the solution requires disaster recovery (DR) capabilities to recover from catastrophic site-wide or regional failures",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Disaster Recovery Requirement documented in Section 11 (Operational → Disaster Recovery)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Disaster Recovery Requirement not specified in Section 11 (Operational → Disaster Recovery)"
+          }
+        },
+        {
+          "item_id": "lacn010",
+          "code": "LACN010",
+          "question": "Specify the DR architecture pattern: cold standby, warm standby, hot standby, or active-active multi-region",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Disaster Recovery Architecture Pattern documented in Section 11 (Operational → Disaster Recovery)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Disaster Recovery Architecture Pattern not specified in Section 11 (Operational → Disaster Recovery)"
+          }
+        },
+        {
+          "item_id": "lacn011",
+          "code": "LACN011",
+          "question": "Specify the data replication method used for DR: synchronous, asynchronous, snapshot-based, or backup-restore",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery → Data Replication)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Data Replication Method for DR documented in Section 11 (Operational → Disaster Recovery → Data Replication)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Data Replication Method for DR not specified in Section 11 (Operational → Disaster Recovery → Data Replication)"
+          }
+        },
+        {
+          "item_id": "lacn013",
+          "code": "LACN013",
+          "question": "Determine if contingency and disaster recovery procedures must be regularly tested and validated",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery → Testing)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Contingency and DR Testing Requirement documented in Section 11 (Operational → Disaster Recovery → Testing)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Contingency and DR Testing Requirement not specified in Section 11 (Operational → Disaster Recovery → Testing)"
+          }
+        },
+        {
+          "item_id": "lacn014",
+          "code": "LACN014",
+          "question": "Verify that the application can continue operating gracefully when individual components or dependencies experience transient failures",
+          "architecture_md_section": "Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Resilience to Transient Component Failures documented in Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Resilience to Transient Component Failures not specified in Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns)"
+          }
+        },
+        {
+          "item_id": "lacn015",
+          "code": "LACN015",
+          "question": "Determine if the platform will execute batch processing jobs or scheduled workloads",
+          "architecture_md_section": "Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Batch Processing Requirement documented in Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Batch Processing Requirement not specified in Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational)"
+          }
+        },
+        {
+          "item_id": "lacn016",
+          "code": "LACN016",
+          "question": "Specify the type of batch execution: scheduled (time-based), event-triggered, manual, or on-demand",
+          "architecture_md_section": "Section 7 (Application Architecture → Batch Processing)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Batch Execution Type documented in Section 7 (Application Architecture → Batch Processing)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Batch Execution Type not specified in Section 7 (Application Architecture → Batch Processing)"
+          }
+        },
+        {
+          "item_id": "lacn017",
+          "code": "LACN017",
+          "question": "Determine if failed batch jobs must support reprocessing or retry to avoid data inconsistencies",
+          "architecture_md_section": "Section 7 (Application Architecture → Batch Processing → Error Handling)",
+          "required": true,
+          "weight": 0.091,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Batch Job Reprocessing on Failure documented in Section 7 (Application Architecture → Batch Processing → Error Handling)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Batch Job Reprocessing on Failure not specified in Section 7 (Application Architecture → Batch Processing → Error Handling)"
           }
         }
       ]
     },
     {
-      "section_id": "data_protection",
-      "section_name": "Data Protection",
-      "weight": 0.10,
+      "section_id": "bc_backup",
+      "section_name": "Backup and Recovery Strategy",
+      "weight": 0.3,
       "required": true,
       "validation_items": [
         {
-          "item_id": "data_classification",
-          "question": "Is data classified with retention requirements?",
-          "architecture_md_section": "6",
+          "item_id": "lacn018",
+          "code": "LACN018",
+          "question": "Determine if periodic backups of application data are required for recovery purposes",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore)",
           "required": true,
-          "weight": 1.0,
+          "weight": 0.077,
           "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Data classification levels defined with corresponding retention and backup requirements",
-            "fail_criteria": "Data not classified or retention requirements missing",
-            "na_criteria": "Stateless system with no persistent data",
-            "unknown_criteria": "Data classification not documented in Section 6"
+            "type": "presence_check",
+            "pass_criteria": "Periodic Data Backup Requirement documented in Section 11 (Operational → Backup & Restore)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Periodic Data Backup Requirement not specified in Section 11 (Operational → Backup & Restore)"
+          }
+        },
+        {
+          "item_id": "lacn019",
+          "code": "LACN019",
+          "question": "Specify the frequency of data backups: continuous, hourly, daily, weekly, or custom schedule based on RPO requirements",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Schedule)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Backup Frequency documented in Section 11 (Operational → Backup & Restore → Schedule)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Backup Frequency not specified in Section 11 (Operational → Backup & Restore → Schedule)"
+          }
+        },
+        {
+          "item_id": "lacn020",
+          "code": "LACN020",
+          "question": "Define how long backup copies must be retained before deletion: days, months, years, or permanent archival",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Retention)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Backup Retention Period documented in Section 11 (Operational → Backup & Restore → Retention)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Backup Retention Period not specified in Section 11 (Operational → Backup & Restore → Retention)"
+          }
+        },
+        {
+          "item_id": "lacn021",
+          "code": "LACN021",
+          "question": "Determine if backups should overwrite previous versions or maintain historical versions for point-in-time recovery",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Versioning)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Backup Versioning Strategy documented in Section 11 (Operational → Backup & Restore → Versioning)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Backup Versioning Strategy not specified in Section 11 (Operational → Backup & Restore → Versioning)"
+          }
+        },
+        {
+          "item_id": "lacn022",
+          "code": "LACN022",
+          "question": "Assess the difficulty and effort required to recreate lost data if backups are unavailable",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore) or Section 1 (Business Context)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Data Recreation Difficulty Assessment documented in Section 11 (Operational → Backup & Restore) or Section 1 (Business Context)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Data Recreation Difficulty Assessment not specified in Section 11 (Operational → Backup & Restore) or Section 1 (Business Context)"
+          }
+        },
+        {
+          "item_id": "lacn023",
+          "code": "LACN023",
+          "question": "Quantify the business impact if data is lost: revenue loss, operational disruption, regulatory penalties, reputation damage",
+          "architecture_md_section": "Section 1 (Business Context → Business Impact Analysis)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Business Impact of Data Loss documented in Section 1 (Business Context → Business Impact Analysis)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Business Impact of Data Loss not specified in Section 1 (Business Context → Business Impact Analysis)"
+          }
+        },
+        {
+          "item_id": "lacn025",
+          "code": "LACN025",
+          "question": "Determine if backups must be stored in a geographically separate location to protect against site-wide disasters",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Geographic Distribution)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Geographic Backup Distribution documented in Section 11 (Operational → Backup & Restore → Geographic Distribution)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Geographic Backup Distribution not specified in Section 11 (Operational → Backup & Restore → Geographic Distribution)"
+          }
+        },
+        {
+          "item_id": "lacn026",
+          "code": "LACN026",
+          "question": "Determine if infrastructure configurations, operating system settings, and system files require backup (often called BDI - Base de Infraestructura)",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Infrastructure)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Infrastructure Configuration Backup documented in Section 11 (Operational → Backup & Restore → Infrastructure)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Infrastructure Configuration Backup not specified in Section 11 (Operational → Backup & Restore → Infrastructure)"
+          }
+        },
+        {
+          "item_id": "lacn027",
+          "code": "LACN027",
+          "question": "Determine if audit logs of infrastructure changes must be backed up for compliance, troubleshooting, and forensic analysis",
+          "architecture_md_section": "Section 11 (Operational → Logging & Monitoring or Backup & Restore)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Infrastructure Change Log Backup documented in Section 11 (Operational → Logging & Monitoring or Backup & Restore)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Infrastructure Change Log Backup not specified in Section 11 (Operational → Logging & Monitoring or Backup & Restore)"
+          }
+        },
+        {
+          "item_id": "lacn028",
+          "code": "LACN028",
+          "question": "Verify that the complete application can be restored from backups if all components fail simultaneously (worst-case scenario)",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Testing)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Full Application Restore Capability documented in Section 11 (Operational → Backup & Restore → Testing)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Full Application Restore Capability not specified in Section 11 (Operational → Backup & Restore → Testing)"
+          }
+        },
+        {
+          "item_id": "lacn029",
+          "code": "LACN029",
+          "question": "Identify if the platform handles sensitive data such as customer PII, financial data, or other regulated information requiring enhanced backup protection",
+          "architecture_md_section": "Section 8 (Security Architecture → Data Classification) or Section 11 (Operational)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Sensitive Data Classification documented in Section 8 (Security Architecture → Data Classification) or Section 11 (Operational)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Sensitive Data Classification not specified in Section 8 (Security Architecture → Data Classification) or Section 11 (Operational)"
+          }
+        },
+        {
+          "item_id": "lacn030",
+          "code": "LACN030",
+          "question": "Define who is responsible for executing, monitoring, and validating backups: infrastructure team, DBA team, application team, or managed service provider",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Responsibilities)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Backup Responsibility Assignment documented in Section 11 (Operational → Backup & Restore → Responsibilities)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Backup Responsibility Assignment not specified in Section 11 (Operational → Backup & Restore → Responsibilities)"
+          }
+        },
+        {
+          "item_id": "lacn031",
+          "code": "LACN031",
+          "question": "Determine if backups stored in cloud or managed services can be downloaded to local or on-premises storage for additional protection",
+          "architecture_md_section": "Section 11 (Operational → Backup & Restore → Hybrid Strategy)",
+          "required": true,
+          "weight": 0.077,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Backup Download to Local/On-Premises Repository documented in Section 11 (Operational → Backup & Restore → Hybrid Strategy)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Backup Download to Local/On-Premises Repository not specified in Section 11 (Operational → Backup & Restore → Hybrid Strategy)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "bc_auto",
+      "section_name": "DR Automation",
+      "weight": 0.08,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lacn032",
+          "code": "LACN032",
+          "question": "Assess if disaster recovery activation can be automated rather than requiring manual procedures",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery → Automation)",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "DR Activation Automation Capability documented in Section 11 (Operational → Disaster Recovery → Automation)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "DR Activation Automation Capability not specified in Section 11 (Operational → Disaster Recovery → Automation)"
+          }
+        },
+        {
+          "item_id": "lacn033",
+          "code": "LACN033",
+          "question": "Identify which specific components and procedures can be automated during disaster recovery activation",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery → Automation)",
+          "required": true,
+          "weight": 0.5,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Automatable DR Components documented in Section 11 (Operational → Disaster Recovery → Automation)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Automatable DR Components not specified in Section 11 (Operational → Disaster Recovery → Automation)"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "bc_cloud",
+      "section_name": "Cloud Resilience and Fault Tolerance",
+      "weight": 0.1,
+      "required": true,
+      "validation_items": [
+        {
+          "item_id": "lacn034",
+          "code": "LACN034",
+          "question": "Determine if the application requires circuit breaker pattern to prevent cascading failures when downstream services are unavailable or slow",
+          "architecture_md_section": "Section 7 (Application Architecture → Resilience Patterns)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Circuit Breaker Pattern Requirement documented in Section 7 (Application Architecture → Resilience Patterns)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Circuit Breaker Pattern Requirement not specified in Section 7 (Application Architecture → Resilience Patterns)"
+          }
+        },
+        {
+          "item_id": "lacn035",
+          "code": "LACN035",
+          "question": "Implement retry logic with exponential backoff to handle transient failures in distributed systems and third-party integrations",
+          "architecture_md_section": "Section 7 (Application Architecture → Resilience Patterns)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Retry with Exponential Backoff Pattern documented in Section 7 (Application Architecture → Resilience Patterns)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Retry with Exponential Backoff Pattern not specified in Section 7 (Application Architecture → Resilience Patterns)"
+          }
+        },
+        {
+          "item_id": "lacn036",
+          "code": "LACN036",
+          "question": "Implement appropriate timeout values for calls to third-party and external services to prevent blocking and cascading slowness",
+          "architecture_md_section": "Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Timeout Configuration for External Services documented in Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Timeout Configuration for External Services not specified in Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations)"
+          }
+        },
+        {
+          "item_id": "lacn037",
+          "code": "LACN037",
+          "question": "Define time-bound triggers for automated contingency or disaster recovery activation to limit blast radius and ensure timely response",
+          "architecture_md_section": "Section 11 (Operational → Disaster Recovery → Automation)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Timeboxing for Automated Contingency/DRP Activation documented in Section 11 (Operational → Disaster Recovery → Automation)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Timeboxing for Automated Contingency/DRP Activation not specified in Section 11 (Operational → Disaster Recovery → Automation)"
+          }
+        },
+        {
+          "item_id": "lacn038",
+          "code": "LACN038",
+          "question": "Implement fallback responses or degraded functionality when primary services or features are unavailable",
+          "architecture_md_section": "Section 7 (Application Architecture → Resilience Patterns)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Fallback Response Pattern documented in Section 7 (Application Architecture → Resilience Patterns)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Fallback Response Pattern not specified in Section 7 (Application Architecture → Resilience Patterns)"
+          }
+        },
+        {
+          "item_id": "lacn039",
+          "code": "LACN039",
+          "question": "Implement bulkhead pattern to isolate failing components and prevent cascading failures across services",
+          "architecture_md_section": "Section 7 (Application Architecture → Resilience Patterns)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Bulkhead Isolation Pattern documented in Section 7 (Application Architecture → Resilience Patterns)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Bulkhead Isolation Pattern not specified in Section 7 (Application Architecture → Resilience Patterns)"
+          }
+        },
+        {
+          "item_id": "lacn040",
+          "code": "LACN040",
+          "question": "Implement auto-scaling with health checks to automatically replace failed instances across multiple availability zones",
+          "architecture_md_section": "Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Auto-Scaling with Health-Based Instance Replacement documented in Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Auto-Scaling with Health-Based Instance Replacement not specified in Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture)"
+          }
+        },
+        {
+          "item_id": "lacn041",
+          "code": "LACN041",
+          "question": "Implement load balancing to automatically distribute traffic across multiple instances and availability zones",
+          "architecture_md_section": "Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Load Balancing for Automatic Traffic Distribution documented in Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Load Balancing for Automatic Traffic Distribution not specified in Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational)"
+          }
+        },
+        {
+          "item_id": "lacn042",
+          "code": "LACN042",
+          "question": "Implement queue-based load leveling to absorb traffic spikes and process workloads asynchronously without impacting service availability",
+          "architecture_md_section": "Section 7 (Application Architecture → Asynchronous Processing)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Queue-Based Load Leveling Pattern documented in Section 7 (Application Architecture → Asynchronous Processing)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Queue-Based Load Leveling Pattern not specified in Section 7 (Application Architecture → Asynchronous Processing)"
+          }
+        },
+        {
+          "item_id": "lacn043",
+          "code": "LACN043",
+          "question": "Identify all potential single points of failure in the architecture that could cause complete service outage if they fail",
+          "architecture_md_section": "Section 3 (Architecture Overview) or Section 11 (Operational → High Availability)",
+          "required": true,
+          "weight": 0.1,
+          "validation_rules": {
+            "type": "presence_check",
+            "pass_criteria": "Single Points of Failure (SPOF) Identification documented in Section 3 (Architecture Overview) or Section 11 (Operational → High Availability)",
+            "fail_criteria": "N/A (presence check cannot fail)",
+            "na_criteria": "Not applicable to this system architecture",
+            "unknown_criteria": "Single Points of Failure (SPOF) Identification not specified in Section 3 (Architecture Overview) or Section 11 (Operational → High Availability)"
           }
         }
       ]
@@ -195,42 +724,44 @@
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
-      "message": "High confidence validation. Contract automatically approved.",
+      "message": "Comprehensive business continuity planning. Contract automatically approved.",
       "review_actor": "System (Auto-Approved)"
     },
     "7.0-7.9": {
       "overall_status": "PASS",
       "document_status": "In Review",
       "action": "MANUAL_REVIEW",
-      "message": "Validation passed with small gaps. Ready for human review.",
+      "message": "Good business continuity coverage with minor gaps. Ready for human review.",
       "review_actor": "Business Continuity Review Board"
     },
     "5.0-6.9": {
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "Validation incomplete. Address missing data before approval.",
+      "message": "Business continuity planning incomplete. Address missing data before approval.",
       "blockers": [
-        "Must define RTO/RPO in ARCHITECTURE.md Section 9.3",
-        "Must document backup strategy and recovery procedures"
+        "Must define RTO/RPO in ARCHITECTURE.md Section 10",
+        "Must document backup strategy and DR architecture in Section 11",
+        "Must implement resilience patterns in Section 7"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient business continuity planning. Cannot proceed.",
+      "message": "Insufficient business continuity planning. Cannot proceed with deployment.",
       "blockers": [
-        "Critical recovery objectives missing",
+        "Critical recovery objectives missing (RTO/RPO)",
         "No disaster recovery strategy documented",
+        "Backup and restore procedures not defined",
         "Completeness below 50%"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document failover process with testing results or register exception if DR not required for this system criticality level",
-    "UNKNOWN_items": "Add missing recovery objectives and backup strategy to ARCHITECTURE.md Section 9.3 (Operational Considerations → Business Continuity)",
-    "completeness_below_threshold": "Complete all required sections: RTO/RPO definition, backup strategy, disaster recovery site, and testing schedule",
-    "low_quality_score": "Improve source traceability by referencing specific line numbers in ARCHITECTURE.md Section 9.3"
+    "FAIL_items": "Document required business continuity controls or register exception if not applicable to system criticality level",
+    "UNKNOWN_items": "Add missing business continuity requirements to ARCHITECTURE.md Sections 1, 3, 4, 5, 7, 8, 10, 11",
+    "completeness_below_threshold": "Complete all required sections across 6 categories: BC-GEN, BC-RTO, BC-DR, BC-BACKUP, BC-AUTO, BC-CLOUD",
+    "low_quality_score": "Improve source traceability by referencing specific sections and line numbers in ARCHITECTURE.md"
   }
 }

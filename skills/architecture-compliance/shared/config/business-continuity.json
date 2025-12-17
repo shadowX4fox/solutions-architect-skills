@@ -1,15 +1,15 @@
 {
   "domain_name": "Business Continuity",
-  "compliance_prefix": "LABC",
+  "compliance_prefix": "LACN",
   "review_board": "Business Continuity Review Board",
   "approval_authority": "Business Continuity Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json",
 
   "weights": {
-    "completeness": 0.5,
-    "completeness_percent": "50%",
-    "compliance": 0.4,
-    "compliance_percent": "40%",
+    "completeness": 0.4,
+    "completeness_percent": "40%",
+    "compliance": 0.5,
+    "compliance_percent": "50%",
     "quality": 0.1,
     "quality_percent": "10%"
   },
@@ -24,19 +24,31 @@
     "BCP": "Business Continuity Plan - Documented procedures for maintaining business operations during disruptions",
     "Hot Site": "Fully operational backup facility ready for immediate failover",
     "Cold Site": "Backup location with basic infrastructure requiring configuration before use",
-    "Warm Site": "Partially configured backup facility requiring some setup time"
+    "Warm Site": "Partially configured backup facility requiring some setup time",
+    "Circuit Breaker": "Resilience pattern that prevents cascading failures by failing fast",
+    "Exponential Backoff": "Retry strategy with progressively increasing wait times",
+    "Bulkhead": "Isolation pattern that prevents failures from spreading",
+    "Auto-Scaling": "Automatic adjustment of compute resources based on demand or health",
+    "SPOF": "Single Point of Failure - Component whose failure causes complete service outage"
   },
 
   "abbreviations": {
-    "LABC": "Business Continuity compliance requirement code",
+    "LACN": "Business Continuity compliance requirement code (new standard)",
+    "BC-GEN": "General information requirements",
+    "BC-RTO": "Recovery time objective requirements",
+    "BC-DR": "Disaster recovery requirements",
+    "BC-BACKUP": "Backup and restore requirements",
+    "BC-AUTO": "Automation requirements",
+    "BC-CLOUD": "Cloud resilience requirements",
     "MTTR": "Mean Time To Recovery",
     "MTBF": "Mean Time Between Failures",
-    "SLA": "Service Level Agreement"
+    "SLA": "Service Level Agreement",
+    "SPOF": "Single Point of Failure"
   },
 
-  "primary_source_sections": "10 (Non-Functional Requirements), 11 (Operational Considerations → High Availability, Backup & Disaster Recovery, Disaster Recovery)",
-  "framework_description": "RTO/RPO, backup, DR, and high availability",
-  "compliance_framework_code": "LABC (Business Continuity)",
-  "v2_domain_features": "",
-  "v2_data_point_count": "10"
+  "primary_source_sections": "1 (Business Context), 3 (Architecture Overview), 4 (Deployment Architecture), 5 (System Integrations), 7 (Application Architecture), 8 (Security Architecture), 10 (Non-Functional Requirements), 11 (Operational Considerations → High Availability, Backup & Disaster Recovery, Disaster Recovery, Resilience)",
+  "framework_description": "RTO/RPO, backup, DR, high availability, resilience patterns, and cloud continuity",
+  "compliance_framework_code": "LACN (Business Continuity)",
+  "v2_domain_features": "43 requirements organized into 6 categories: BC-GEN (5), BC-RTO (2), BC-DR (11), BC-BACKUP (13), BC-AUTO (2), BC-CLOUD (10). Includes cloud resilience patterns, auto-scaling, load balancing, and SPOF analysis.",
+  "v2_data_point_count": "43"
 }

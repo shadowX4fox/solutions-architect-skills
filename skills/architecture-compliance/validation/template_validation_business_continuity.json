@@ -2,43 +2,19 @@
   "contract_type": "business_continuity",
   "contract_name": "Business Continuity",
   "template_file": "TEMPLATE_BUSINESS_CONTINUITY.md",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "validations": {
     "compliance_summary_table": {
-      "enabled": false,
-      "severity": "BLOCKING",
-      "reason": "Business Continuity uses section-based format, not 6-column table"
-    },
-    "section_based_format": {
       "enabled": true,
       "severity": "BLOCKING",
-      "required_sections": [
-        {
-          "id": "recovery_objectives",
-          "heading": "## 1. Recovery Objectives",
-          "required_fields": ["RTO", "RPO", "Business Criticality"]
-        },
-        {
-          "id": "backup_strategy",
-          "heading": "## 2. Backup Strategy",
-          "required_fields": ["Backup Type", "Frequency", "Retention", "Storage Location"]
-        },
-        {
-          "id": "disaster_recovery",
-          "heading": "## 3. Disaster Recovery Procedures",
-          "required_fields": ["Primary Site", "DR Site", "Failover Mechanism"]
-        },
-        {
-          "id": "business_impact",
-          "heading": "## 4. Business Impact Analysis",
-          "required_fields": ["Availability Requirement", "Allowed Downtime"]
-        },
-        {
-          "id": "resilience_measures",
-          "heading": "## 5. Resilience Measures",
-          "required_fields": []
-        }
-      ]
+      "reason": "Business Continuity v2.0 uses 6-column table format (Code, Requirement, Category, Status, Source Section, Responsible Role)",
+      "expected_columns": ["Code", "Requirement", "Category", "Status", "Source Section", "Responsible Role"],
+      "minimum_rows": 43
+    },
+    "section_based_format": {
+      "enabled": false,
+      "severity": "BLOCKING",
+      "note": "Business Continuity v2.0 migrated from section-based to table-based format"
     },
     "status_value_standardization": {
       "enabled": true,
@@ -56,9 +32,9 @@
     "appendix_structure": {
       "enabled": true,
       "severity": "BLOCKING",
-      "required_appendices": ["A.1", "A.3", "A.4"],
+      "required_appendices": ["A.1", "A.2", "A.3", "A.4"],
       "strict_order": false,
-      "note": "A.2 Validation Methodology not required for Business Continuity"
+      "note": "Business Continuity v2.0 includes A.2 Source Mapping Table"
     },
     "forbidden_section_numbering": {
       "enabled": true,
@@ -96,17 +72,19 @@
       "required_sections": [
         "header",
         "document_control",
-        "recovery_objectives",
-        "backup_strategy",
-        "disaster_recovery",
-        "business_impact",
-        "resilience_measures",
-        "appendix_a1_a4",
+        "compliance_summary_table",
+        "detailed_requirements",
+        "appendix_a1",
+        "appendix_a2",
+        "appendix_a3",
+        "appendix_a4",
         "dynamic_sections"
-      ]
+      ],
+      "minimum_requirements": 43
     }
   },
   "error_messages": {
-    "missing_required_section": "Business Continuity contract requires all 5 main sections (Recovery Objectives, Backup Strategy, Disaster Recovery, Business Impact, Resilience Measures)"
+    "missing_required_section": "Business Continuity contract v2.0 requires: Compliance Summary table (43 LACN codes), Detailed Requirements sections, and Appendices A.1-A.4",
+    "insufficient_requirements": "Business Continuity contract v2.0 must include all 43 LACN requirements (LACN001-LACN043)"
   }
 }
