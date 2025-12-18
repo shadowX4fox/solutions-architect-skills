@@ -68,7 +68,7 @@ Each compliance domain has a config file (e.g., `shared/config/business-continui
 ```json
 {
   "domain_name": "Business Continuity",
-  "compliance_prefix": "LABC",
+  "compliance_prefix": "LACN",
   "review_board": "Business Continuity Review Board",
   "approval_authority": "Business Continuity Review Board",
   "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json"
@@ -87,39 +87,79 @@ Variables like `{{review_board}}` in shared files are replaced with these values
 
 ## Document Types (10 Compliance Contracts)
 
-### 1. Business Continuity (Business Continuity)
+### 1. Business Continuity v2.0
 
-**Purpose**: Define guidelines for business continuity, disaster recovery, and resilience to ensure solution availability during disruptions.
+**Purpose**: Define comprehensive business continuity planning through disaster recovery, high availability, backup strategies, cloud resilience patterns, and SPOF analysis.
 
 **Stakeholders**:
 - Business Continuity team
 - Operations team
 - Infrastructure team
+- SRE team
 - Executive leadership
 
+**Template Version**: 2.0 (43 LACN Requirements)
+
+**43 Requirements Organized in 6 Categories**:
+
+**BC-GEN (5 requirements)** - General Information:
+- LACN001: Application or Initiative Name
+- LACN002: Architecture Type and Deployment Model
+- LACN003: Number of Architecture Layers
+- LACN004: Infrastructure Type
+- LACN005: Critical System Dependencies
+
+**BC-RTO (2 requirements)** - Recovery Time Objectives:
+- LACN012: Recovery Time Objective (RTO) Definition
+- LACN024: RPO Validation with Business Stakeholders
+
+**BC-DR (11 requirements)** - Disaster Recovery:
+- LACN006-008: High availability requirements, components, local contingency
+- LACN009-011: DR requirements, architecture pattern, data replication
+- LACN013-014: DR testing, resilience to transient failures
+- LACN015-017: Batch processing requirements
+
+**BC-BACKUP (13 requirements)** - Backup and Recovery:
+- LACN018-021: Backup requirements, frequency, retention, versioning
+- LACN022-023: Data recreation difficulty, business impact
+- LACN025-031: Geographic distribution, infrastructure backups, responsibilities
+
+**BC-AUTO (2 requirements)** - DR Automation:
+- LACN032: DR activation automation capability
+- LACN033: Automatable DR components
+
+**BC-CLOUD (10 requirements)** - Cloud Resilience:
+- LACN034-036: Circuit breaker, retry logic, timeouts
+- LACN037-039: Timeboxing, fallback, bulkhead patterns
+- LACN040-043: Auto-scaling, load balancing, queue leveling, SPOF analysis
+
 **Key Content Requirements**:
-- **Recovery Objectives**: RTO (Recovery Time Objective), RPO (Recovery Point Objective)
-- **Backup Strategy**: Frequency, retention, storage location, testing
-- **Disaster Recovery**: Procedures, failover mechanisms, DR site configuration
-- **Business Impact Analysis**: Critical processes, downtime costs, dependencies
-- **Resilience Measures**: Redundancy, fault tolerance, geographic distribution
-- **Testing**: DR drills, backup restoration tests, validation frequency
+- **Recovery Objectives**: RTO/RPO with business stakeholder validation
+- **Backup Strategy**: Frequency, retention, versioning, geographic distribution, testing
+- **Disaster Recovery**: Architecture pattern (cold/warm/hot/active-active), replication, testing
+- **High Availability**: HA components, deployment patterns, multi-AZ strategy
+- **Cloud Resilience**: Circuit breaker, retry, timeout, fallback, bulkhead patterns
+- **Auto-Scaling & Load Balancing**: Health-based replacement, traffic distribution
+- **SPOF Analysis**: Single point of failure identification and mitigation
 
 **Source Sections from ARCHITECTURE.md**:
-- **Primary**: Section 11 (Operational Considerations) - 80% of content
-  - 11.3: Backup and Recovery
-  - 11.4: Disaster Recovery
-- **Secondary**: Section 10 (Performance Requirements) - 20% of content
-  - 10.2: Availability SLAs
+- **Section 1**: Business Context (dependencies, business impact analysis)
+- **Section 3**: Architecture Overview (logical layers, SPOF analysis)
+- **Section 4**: Deployment Architecture (infrastructure, load balancing, auto-scaling)
+- **Section 5**: System Integrations (critical dependencies)
+- **Section 7**: Application Architecture (resilience patterns, batch processing)
+- **Section 8**: Security Architecture (data classification for backup security)
+- **Section 10**: Non-Functional Requirements (RTO, RPO, availability SLAs)
+- **Section 11**: Operational Considerations (backup & DR, HA, resilience, automation)
 
-**Example Guidelines**:
-- Impact to critical business processes must be documented
-- RTO and RPO must be defined based on business criticality
-- Disaster recovery procedures must be automated where possible
-- Backup restoration must be tested quarterly
-- Geographic redundancy required for Tier 1 applications
+**Template Format**: 6-column compliance summary table with structure:
+```
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+```
 
-**Template Priority**: High (Template #2)
+**Template Priority**: High (#2)
+
+**Data Source**: Compliance_Questionnaire_LACN.xlsx (43 validation data points)
 
 ---
 
@@ -1225,7 +1265,7 @@ For each missing data point:
 
 ### Phase 4.5: Compliance Summary Table Generation
 
-**CRITICAL**: The Compliance Summary table is the most important section for stakeholders. It MUST follow the exact format specified below for ALL compliance contracts (except Business Continuity).
+**CRITICAL**: The Compliance Summary table is the most important section for stakeholders. It MUST follow the exact format specified below for ALL compliance contracts.
 
 #### Mandatory Table Format
 
@@ -1399,11 +1439,6 @@ Before finalizing any generated compliance contract, verify:
 
 #### Special Cases
 
-**Business Continuity Contracts:**
-- These two contracts use a **different format** (section-based, not table-based)
-- DO NOT apply the 6-column table format to these contracts
-- Use the template's native format instead
-
 **Data & AI Architecture Contract:**
 - Uses two explicit categories: "Data" and "AI"
 - LAD1-LAD5 requirements use "Data" category
@@ -1444,7 +1479,7 @@ Before finalizing any generated compliance contract, verify:
 4. ❌ **Missing emoji indicators**: Not using ✅ ❌ ⊘ ❓ in Overall Compliance
 5. ❌ **Missing percentages**: Only showing fractions without percentages
 6. ❌ **Incorrect sums**: X + Y + Z + W ≠ TOTAL
-7. ❌ **Applying table to wrong contracts**: Using table format for Business Continuity (only contract with section-based format)
+7. ❌ **Applying incorrect table format**: Using wrong column structure or category organization for specific contracts
 8. ❌ **Using wrong category**: Using "Data & AI Architecture" for every row in Data/AI contract instead of "Data"/"AI"
 
 ---
@@ -1554,16 +1589,32 @@ SUMMARY:
 
 #### Special Case Handling
 
-**Business Continuity (Section-Based Format)**
+**Business Continuity v2.0 (Standard 6-Column Table Format)**
 ```json
 {
   "compliance_summary_table": {
-    "enabled": false,
-    "reason": "Business Continuity uses section-based format, not 6-column table"
-  },
-  "section_based_format": {
     "enabled": true,
-    "required_sections": [...]
+    "format": "6-column",
+    "total_requirements": 43,
+    "requirement_prefix": "LACN",
+    "categories": ["BC-GEN", "BC-RTO", "BC-DR", "BC-BACKUP", "BC-AUTO", "BC-CLOUD"]
+  },
+  "validation": {
+    "code_pattern": "^LACN\\d{3}$",
+    "total_count": 43,
+    "category_distribution": {
+      "BC-GEN": 5,
+      "BC-RTO": 2,
+      "BC-DR": 11,
+      "BC-BACKUP": 13,
+      "BC-AUTO": 2,
+      "BC-CLOUD": 10
+    }
+  },
+  "scoring_weights": {
+    "completeness": 0.4,
+    "compliance": 0.5,
+    "quality": 0.1
   }
 }
 ```
@@ -1583,6 +1634,47 @@ SUMMARY:
 **Data & AI Architecture (Dual Categories)**
 - Allows "Data" and "AI" as category values
 - Validates CODE pattern: `^LA(D|AI)\\d+$`
+
+#### Business Continuity v2.0 Validation Configuration
+
+**Configuration File**: `/skills/architecture-compliance/validation/business_continuity_validation.json`
+
+**Template Characteristics**:
+- **Version**: 2.0.0
+- **Total Requirements**: 43 (LACN001-LACN043)
+- **Code Pattern**: `^LACN\\d{3}$`
+- **Table Format**: 6-column compliance summary
+- **Categories**: 6 technical categories
+
+**Validation Sections and Weights**:
+
+| Section ID | Section Name | Weight | Requirements | Codes |
+|-----------|--------------|--------|--------------|-------|
+| bc_gen | General Information | 12% | 5 | LACN001-005 |
+| bc_rto | Recovery Time Objectives | 15% | 2 | LACN012, LACN024 |
+| bc_dr | Disaster Recovery | 25% | 11 | LACN006-017 (skip 012) |
+| bc_backup | Backup and Recovery | 30% | 13 | LACN018-031 (skip 024) |
+| bc_auto | DR Automation | 8% | 2 | LACN032-033 |
+| bc_cloud | Cloud Resilience | 10% | 10 | LACN034-043 |
+
+**Scoring Configuration**:
+- **Completeness Weight**: 40%
+- **Compliance Weight**: 50%
+- **Quality Weight**: 10%
+- **Auto-Approve Threshold**: ≥ 8.0
+- **Ready for Review Threshold**: ≥ 7.0
+- **Needs Work Threshold**: ≥ 5.0
+
+**Status Codes**:
+- PASS (Compliant): 10 points
+- FAIL (Non-Compliant): 0 points
+- N/A (Not Applicable): 10 points (counted as fully compliant)
+- UNKNOWN: 0 points
+
+**Migration from v1.0**:
+- ❌ **Removed**: 10 LABC requirements, section-based format
+- ✅ **Added**: 43 LACN requirements, 6-column table, cloud resilience validation
+- 🔄 **Changed**: Prefix (LABC → LACN), Complexity (Medium → High), Priority (Medium → High #2)
 
 #### Bypassing Validation (Not Recommended)
 

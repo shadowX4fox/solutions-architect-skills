@@ -434,7 +434,7 @@ def extract_rto_rpo_from_architecture(architecture_md_path):
 
 | Contract Type | Primary Sections | Secondary | Complexity | Templates Priority |
 |---------------|------------------|-----------|------------|-------------------|
-| **1. Business Continuity** | 11 | 10 | Medium | High (#2) |
+| **1. Business Continuity v2.0** | 1, 3, 4, 5, 7, 8, 10, 11 | - | High | High (#2) |
 | **2. SRE Architecture** | 10, 11 | 5 | High | High (#1) |
 | **3. Cloud Architecture** | 4, 8, 11 | 9, 10 | High | Medium (#3) |
 | **4. Data & Analytics - AI Architecture** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
@@ -449,277 +449,412 @@ def extract_rto_rpo_from_architecture(architecture_md_path):
 
 ## Detailed Contract Mappings
 
-### Contract 1: Business Continuity (Business Continuity)
+### Contract 1: Business Continuity v2.0
 
 #### Document Purpose
-Ensure business continuity through disaster recovery, backup strategies, and resilience measures.
+Ensure comprehensive business continuity planning through disaster recovery, high availability, backup strategies, cloud resilience patterns, and SPOF analysis.
 
-#### Required Content Sections
-1. Recovery Objectives (RTO/RPO)
-2. Backup Strategy
-3. Disaster Recovery Procedures
-4. Business Impact Analysis
-5. Resilience Measures
-6. DR Testing Schedule
+#### Template Characteristics
+- **Version**: 2.0
+- **Total Requirements**: 43 (LACN001-LACN043)
+- **Requirement Prefix**: LACN (replaced LABC from v1.0)
+- **Format**: 6-column compliance summary table
+- **Categories**: 6 (BC-GEN, BC-RTO, BC-DR, BC-BACKUP, BC-AUTO, BC-CLOUD)
+- **Template Priority**: High (#2)
 
-#### ARCHITECTURE.md Section Mapping
+#### Template Format Structure
 
-**Primary Source: Section 11 (Operational Considerations) - 80%**
-
-##### Subsection 11.3: Backup & Recovery
-**Extract**: Backup frequency, retention, RTO, RPO, storage location
-**Transform to**: Contract Sections 1 (Recovery Objectives) & 2 (Backup Strategy)
-
-**Pattern Example**:
+**Compliance Summary Table (6 columns)**:
 ```
-ARCHITECTURE.md Input (Section 11.3, lines {subsection_start}+):
-"Backup Strategy:
-- Incremental backups: Daily at 2 AM UTC
-- Full backups: Weekly on Sunday
-- Retention: 30 days (incremental), 12 months (full)
-- Storage: AWS S3 (primary), Glacier (long-term)
-- RTO: 4 hours
-- RPO: 1 hour"
-
-Line Number Calculation:
-1. Document Index: Section 11 (Operational Considerations) → Lines 1401-1650
-2. Grep within Section 11: "^### 11\.3" found at line 1523
-3. subsection_start = 1523
-4. Extract RTO at relative offset +5 → absolute line 1528 (1523 + 5)
-5. Extract RPO at relative offset +6 → absolute line 1529 (1523 + 6)
-
-Contract Output:
-## 1. Recovery Objectives
-**Recovery Time Objective (RTO)**: 4 hours
-**Recovery Point Objective (RPO)**: 1 hour
-**Business Criticality**: Tier 1 (inferred from RTO)
-**Source**: ARCHITECTURE.md Section 11.3 (Backup & Recovery), lines {rto_line}-{rpo_line}
-
-## 2. Backup Strategy
-| Backup Type | Frequency | Retention | Storage Location |
-|-------------|-----------|-----------|------------------|
-| Incremental | Daily (2 AM UTC) | 30 days | AWS S3 |
-| Full | Weekly (Sunday) | 12 months | AWS S3 + Glacier |
-
-**Backup Testing**: [PLACEHOLDER: Add backup restoration test schedule]
-**Source**: ARCHITECTURE.md Section 11.3 (Backup & Recovery), lines {subsection_start}-{subsection_start + 3}
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LACN001 | Document the official name... | BC-GEN | [Status] | Section 1 or 2 | [Role] |
+| LACN002 | Specify the architectural pattern... | BC-GEN | [Status] | Section 3 or 4 | [Role] |
+...
+| LACN043 | Identify all potential single points... | BC-CLOUD | [Status] | Section 3 or 11 | [Role] |
 ```
 
-##### Subsection 11.4: Disaster Recovery
-**Extract**: DR procedures, failover mechanisms, geographic redundancy
-**Transform to**: Contract Section 3 (DR Procedures)
+Status values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
 
-**Pattern Example**:
+#### ARCHITECTURE.md Section Mapping by Category
+
+##### Category 1: BC-GEN (General Information) - 5 Requirements
+
+**LACN001: Application or Initiative Name**
+- **Source**: Section 1 (Business Context) or Section 2 (System Overview)
+- **Extract**: Official application name, acronyms, alternative names
+- **Pattern**: Look for project name, system name in Section 1 or 2 header
+- **Example**: "Payment Processing Platform (PPP)" → Compliant
+
+**LACN002: Architecture Type and Deployment Model**
+- **Source**: Section 3 (Architecture Overview) or Section 4 (Deployment Architecture)
+- **Extract**: Architecture pattern (monolithic, microservices, serverless), deployment (on-prem, cloud, hybrid)
+- **Pattern**: Search for "architecture pattern", "deployment model", "microservices", "cloud"
+- **Example**: "Microservices on AWS EKS" → Compliant
+
+**LACN003: Number of Architecture Layers**
+- **Source**: Section 3 (Architecture Overview → Logical Architecture)
+- **Extract**: Layer count and layer names
+- **Pattern**: Search for "tier", "layer", numbered architecture levels
+- **Example**: "4-tier: Presentation, API, Business Logic, Data" → Compliant
+
+**LACN004: Infrastructure Type**
+- **Source**: Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)
+- **Extract**: Physical servers, VMs, containers, serverless, hybrid
+- **Pattern**: Search for "infrastructure", "deployment", "Kubernetes", "EKS", "containers"
+- **Example**: "Kubernetes containers on AWS EKS" → Compliant
+
+**LACN005: Critical System Dependencies**
+- **Source**: Section 1 (Business Context → Dependencies) or Section 5 (System Integrations)
+- **Extract**: Internal systems, external APIs, databases, infrastructure components
+- **Pattern**: Search for "dependencies", "integrations", "external systems", dependency diagrams
+- **Example**: "Auth0 (SSO), Stripe (payments), PostgreSQL (database), Redis (cache)" → Compliant
+
+##### Category 2: BC-RTO (Recovery Time Objectives) - 2 Requirements
+
+**LACN012: Recovery Time Objective (RTO) Definition**
+- **Source**: Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR)
+- **Extract**: Maximum acceptable downtime
+- **Pattern**: `RTO:?\s*([0-9]+\s*(hours?|minutes?|days?))`
+- **Example**: "RTO: 4 hours" → Compliant
+
+**LACN024: RPO Validation with Business Stakeholders**
+- **Source**: Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR)
+- **Extract**: Maximum acceptable data loss, business approval
+- **Pattern**: `RPO:?\s*([0-9]+\s*(hours?|minutes?))`, look for "approved by", "validated with"
+- **Example**: "RPO: 1 hour, validated with CFO on 2024-11-15" → Compliant
+
+##### Category 3: BC-DR (Disaster Recovery) - 11 Requirements
+
+**LACN006: High Availability Requirement**
+- **Source**: Section 10 (Non-Functional Requirements → Availability)
+- **Extract**: HA required (Yes/No), target availability %
+- **Pattern**: Search for "high availability", "HA", "99.9%", "uptime"
+- **Example**: "HA Required: Yes, 99.95% availability" → Compliant
+
+**LACN007: High Availability Component Scope**
+- **Source**: Section 11 (Operational → High Availability)
+- **Extract**: Which components have HA, deployment pattern
+- **Pattern**: Search for "active-active", "active-passive", "redundant", component names
+- **Example**: "API servers: active-active across 3 AZs, Database: primary-replica with auto-failover" → Compliant
+
+**LACN008: Local Contingency Requirement**
+- **Source**: Section 11 (Operational → High Availability)
+- **Extract**: Within-AZ/datacenter failover capabilities
+- **Pattern**: Search for "local failover", "same AZ", "component redundancy"
+- **Example**: "Auto-scaling with health checks, instance replacement within 5 min" → Compliant
+
+**LACN009: Disaster Recovery Requirement**
+- **Source**: Section 11 (Operational → Disaster Recovery)
+- **Extract**: DR needed (Yes/No), scenarios addressed
+- **Pattern**: Search for "disaster recovery", "DR required", "regional outage"
+- **Example**: "DR Required: Yes, addresses regional outages" → Compliant
+
+**LACN010: Disaster Recovery Architecture Pattern**
+- **Source**: Section 11 (Operational → Disaster Recovery)
+- **Extract**: Cold/warm/hot/active-active, primary/DR sites
+- **Pattern**: Search for "cold standby", "warm standby", "hot standby", "active-active", site names
+- **Example**: "Warm standby: Primary us-east-1, DR us-west-2" → Compliant
+
+**LACN011: Data Replication Method for DR**
+- **Source**: Section 11 (Operational → Disaster Recovery → Data Replication)
+- **Extract**: Synchronous/asynchronous/snapshot/backup-restore
+- **Pattern**: Search for "replication", "sync", "async", "snapshot"
+- **Example**: "Asynchronous replication with 5-minute lag" → Compliant
+
+**LACN013: Contingency and DR Testing Requirement**
+- **Source**: Section 11 (Operational → Disaster Recovery → Testing)
+- **Extract**: Testing frequency, test types
+- **Pattern**: Search for "DR drill", "quarterly", "testing", "failover test"
+- **Example**: "Quarterly DR drills, annual full failover" → Compliant
+
+**LACN014: Resilience to Transient Component Failures**
+- **Source**: Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns)
+- **Extract**: Resilience patterns implemented
+- **Pattern**: Search for "circuit breaker", "retry", "resilience patterns"
+- **Example**: "Circuit breakers and retry logic on all external calls" → Compliant
+
+**LACN015: Batch Processing Requirement**
+- **Source**: Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational)
+- **Extract**: Batch jobs inventory
+- **Pattern**: Search for "batch", "scheduled jobs", "ETL", "data pipeline"
+- **Example**: "Daily report generation at 2 AM UTC" → Compliant
+
+**LACN016: Batch Execution Type**
+- **Source**: Section 7 (Application Architecture → Batch Processing)
+- **Extract**: Scheduled/event-triggered/manual/on-demand
+- **Pattern**: Search for "cron", "scheduled", "event-driven", "trigger"
+- **Example**: "Scheduled (cron), event-triggered on S3 upload" → Compliant
+
+**LACN017: Batch Job Reprocessing on Failure**
+- **Source**: Section 7 (Application Architecture → Batch Processing → Error Handling)
+- **Extract**: Idempotency, retry, checkpoint/resume
+- **Pattern**: Search for "idempotent", "retry", "checkpoint", "reprocessing"
+- **Example**: "Idempotent design, checkpoint every 1000 records" → Compliant
+
+##### Category 4: BC-BACKUP (Backup and Recovery) - 13 Requirements
+
+**LACN018: Periodic Data Backup Requirement**
+- **Source**: Section 11 (Operational → Backup & Restore)
+- **Extract**: Backup required (Yes/No), scope
+- **Pattern**: Search for "backup", "data backup", database names
+- **Example**: "Backups required for PostgreSQL, S3, configs" → Compliant
+
+**LACN019: Backup Frequency**
+- **Source**: Section 11 (Operational → Backup & Restore → Schedule)
+- **Extract**: Full/incremental backup schedule
+- **Pattern**: `(daily|hourly|weekly).*backup`, `([0-9]+\s*(AM|PM|UTC))`
+- **Example**: "Full daily at 2 AM UTC, incremental every 6 hours" → Compliant
+
+**LACN020: Backup Retention Period**
+- **Source**: Section 11 (Operational → Backup & Restore → Retention)
+- **Extract**: Retention policy by type
+- **Pattern**: `([0-9]+\s*(days?|months?|years?)).*retention`
+- **Example**: "30 days online, 90 days warm, 7 years archival" → Compliant
+
+**LACN021: Backup Versioning Strategy**
+- **Source**: Section 11 (Operational → Backup & Restore → Versioning)
+- **Extract**: Overwrite vs. historical versioning
+- **Pattern**: Search for "versioning", "historical", "point-in-time"
+- **Example**: "Historical: 30 daily, 12 monthly, 7 yearly" → Compliant
+
+**LACN022: Data Recreation Difficulty Assessment**
+- **Source**: Section 11 (Operational → Backup & Restore) or Section 1 (Business Context)
+- **Extract**: Impossible/difficult/moderate/easy to recreate
+- **Pattern**: Search for "data recreation", "recreate", "impossible to recreate"
+- **Example**: "Transaction data: impossible to recreate" → Compliant
+
+**LACN023: Business Impact of Data Loss**
+- **Source**: Section 1 (Business Context → Business Impact Analysis)
+- **Extract**: Revenue, operational, compliance, reputation impact
+- **Pattern**: `\$[0-9,]+.*loss`, "regulatory fine", "business impact"
+- **Example**: "$500K/hour revenue loss, $2M regulatory fines" → Compliant
+
+**LACN025: Geographic Backup Distribution**
+- **Source**: Section 11 (Operational → Backup & Restore → Geographic Distribution)
+- **Extract**: Offsite location, distance
+- **Pattern**: Search for "cross-region", "geographic", "offsite", region names
+- **Example**: "Cross-region replication to us-west-2" → Compliant
+
+**LACN026: Infrastructure Configuration Backup**
+- **Source**: Section 11 (Operational → Backup & Restore → Infrastructure)
+- **Extract**: OS configs, app configs, IaC
+- **Pattern**: Search for "infrastructure backup", "IaC", "Terraform", "AMI"
+- **Example**: "Terraform state in S3, Kubernetes manifests in Git" → Compliant
+
+**LACN027: Infrastructure Change Log Backup**
+- **Source**: Section 11 (Operational → Logging & Monitoring or Backup & Restore)
+- **Extract**: Audit log retention
+- **Pattern**: Search for "audit log", "CloudTrail", "log retention"
+- **Example**: "CloudTrail logs: 90 days operational, 7 years archive" → Compliant
+
+**LACN028: Full Application Restore Capability**
+- **Source**: Section 11 (Operational → Backup & Restore → Testing)
+- **Extract**: Restore testing frequency, RTO
+- **Pattern**: Search for "restore test", "DR drill", "restoration"
+- **Example**: "Quarterly restore tests to staging, RTO 4 hours" → Compliant
+
+**LACN029: Sensitive Data Classification**
+- **Source**: Section 8 (Security Architecture → Data Classification) or Section 11 (Operational)
+- **Extract**: PII, financial, health data handling
+- **Pattern**: Search for "PII", "sensitive data", "PCI-DSS", "data classification"
+- **Example**: "Customer PII (encrypted), Payment data (PCI-DSS)" → Compliant
+
+**LACN030: Backup Responsibility Assignment**
+- **Source**: Section 11 (Operational → Backup & Restore → Responsibilities)
+- **Extract**: Team/role responsible for backups
+- **Pattern**: Search for "backup responsibility", "owned by", "RACI"
+- **Example**: "Infrastructure team: backup execution, DBA: validation" → Compliant
+
+**LACN031: Backup Download to Local/On-Premises**
+- **Source**: Section 11 (Operational → Backup & Restore → Hybrid Strategy)
+- **Extract**: Cloud-to-on-prem backup capability
+- **Pattern**: Search for "hybrid", "download", "on-premises", "air-gap"
+- **Example**: "Weekly download to on-prem tape (air-gap)" → Compliant
+
+##### Category 5: BC-AUTO (DR Automation) - 2 Requirements
+
+**LACN032: DR Activation Automation Capability**
+- **Source**: Section 11 (Operational → Disaster Recovery → Automation)
+- **Extract**: Fully automated/semi-automated/manual
+- **Pattern**: Search for "automated failover", "manual DR", "semi-automated"
+- **Example**: "Semi-automated: health checks alert, manual approval for failover" → Compliant
+
+**LACN033: Automatable DR Components**
+- **Source**: Section 11 (Operational → Disaster Recovery → Automation)
+- **Extract**: Which components can be automated
+- **Pattern**: Search for "automated", component names, "manual", "runbook"
+- **Example**: "Automated: DNS (Route53), DB promotion. Manual: validation" → Compliant
+
+##### Category 6: BC-CLOUD (Cloud Resilience) - 10 Requirements
+
+**LACN034: Circuit Breaker Pattern Requirement**
+- **Source**: Section 7 (Application Architecture → Resilience Patterns)
+- **Extract**: Circuit breaker implementation
+- **Pattern**: Search for "circuit breaker", library names (Hystrix, Resilience4j)
+- **Example**: "Resilience4j circuit breaker, 50% threshold, 60s timeout" → Compliant
+
+**LACN035: Retry with Exponential Backoff Pattern**
+- **Source**: Section 7 (Application Architecture → Resilience Patterns)
+- **Extract**: Retry policy details
+- **Pattern**: `([0-9]+).*retr`, "exponential backoff", "backoff"
+- **Example**: "Max 3 retries, 1s initial, 2x backoff, 30s max" → Compliant
+
+**LACN036: Timeout Configuration for External Services**
+- **Source**: Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations)
+- **Extract**: Timeout values per service
+- **Pattern**: `timeout:?\s*([0-9]+\s*s)`, "connection timeout", "read timeout"
+- **Example**: "Stripe: connection 5s, read 30s" → Compliant
+
+**LACN037: Timeboxing for Automated Contingency/DRP**
+- **Source**: Section 11 (Operational → Disaster Recovery → Automation)
+- **Extract**: Time-bound failover triggers
+- **Pattern**: `> ([0-9]+\s*min).*failover`, "time window", "timeout"
+- **Example**: "If primary unreachable > 5 min, trigger failover" → Compliant
+
+**LACN038: Fallback Response Pattern**
+- **Source**: Section 7 (Application Architecture → Resilience Patterns)
+- **Extract**: Degraded functionality strategies
+- **Pattern**: Search for "fallback", "cached response", "degraded mode"
+- **Example**: "Return cached catalog if DB down" → Compliant
+
+**LACN039: Bulkhead Isolation Pattern**
+- **Source**: Section 7 (Application Architecture → Resilience Patterns)
+- **Extract**: Resource isolation (thread pools, connection pools)
+- **Pattern**: Search for "bulkhead", "thread pool", "isolation"
+- **Example**: "Separate thread pools: checkout (20), search (50)" → Compliant
+
+**LACN040: Auto-Scaling with Health-Based Instance Replacement**
+- **Source**: Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture)
+- **Extract**: Auto-scaling config, health checks
+- **Pattern**: Search for "auto-scaling", "min/max instances", "health check"
+- **Example**: "Min 2, max 20, health check /health every 30s" → Compliant
+
+**LACN041: Load Balancing for Traffic Distribution**
+- **Source**: Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational)
+- **Extract**: Load balancer type, algorithm
+- **Pattern**: Search for "load balancer", "ALB", "NLB", algorithm names
+- **Example**: "ALB with least-outstanding-requests, cross-zone" → Compliant
+
+**LACN042: Queue-Based Load Leveling Pattern**
+- **Source**: Section 7 (Application Architecture → Asynchronous Processing)
+- **Extract**: Message queue usage for traffic absorption
+- **Pattern**: Search for "queue", "SQS", "Kafka", "asynchronous"
+- **Example**: "SQS for orders, workers scale on queue depth" → Compliant
+
+**LACN043: Single Points of Failure (SPOF) Identification**
+- **Source**: Section 3 (Architecture Overview) or Section 11 (Operational → High Availability)
+- **Extract**: SPOF analysis and mitigations
+- **Pattern**: Search for "SPOF", "single point", "no redundancy"
+- **Example**: "SPOF: Single DB. Mitigation: Primary-replica in 3 AZs" → Compliant
+
+#### Extraction Workflow
+
+**Step 1: Load Document Index**
 ```
-ARCHITECTURE.md Input (Section 11.4, lines {subsection_start}+):
-"Disaster Recovery:
-- DR Site: AWS us-west-2 (primary: us-east-1)
-- Failover: Automated via Route 53 health checks
-- RTO Target: 4 hours
-- DR Drills: Quarterly"
-
-Line Number Calculation:
-1. Document Index: Section 11 → Lines 1401-1650
-2. Grep for "^### 11\.4" within Section 11 → line 1575
-3. subsection_start = 1575
-4. DR details span lines 1575-1579 (subsection header + 4 lines)
-
-Contract Output:
-## 3. Disaster Recovery
-**Primary Site**: AWS us-east-1
-**DR Site**: AWS us-west-2
-**Failover Mechanism**: Automated via Route 53 health checks
-**RTO Target**: 4 hours
-**DR Testing**: Quarterly drills
-**Last DR Test**: [PLACEHOLDER: Add last DR drill date and results]
-**Source**: ARCHITECTURE.md Section 11.4 (Disaster Recovery), lines {subsection_start}-{subsection_start + 4}
+Read ARCHITECTURE.md lines 1-50
+Parse Document Index → {1: lines 25-53, 3: lines 147-300, ...}
 ```
 
-**Secondary Source: Section 10 (Performance Requirements) - 20%**
+**Step 2: Extract by Category (43 iterations)**
 
-##### Subsection 10.2: Availability SLA
-**Extract**: Availability requirements, downtime tolerance
-**Transform to**: Contract Section 4 (Business Impact)
+For each LACN requirement:
+1. Identify source section from mapping above
+2. Load section using Document Index line range
+3. Apply extraction pattern (Grep or string search)
+4. Calculate absolute line number: section_start + relative_offset
+5. Determine status (Compliant/Non-Compliant/Not Applicable/Unknown)
+6. Populate table row
 
-**Pattern Example**:
+**Step 3: Generate Compliance Summary**
+
+Transform extracted data → 6-column table:
 ```
-ARCHITECTURE.md Input (Section 10.2, lines {subsection_start}+):
-"Availability SLA: 99.99% uptime"
-
-Line Number Calculation:
-1. Document Index: Section 10 (Performance Requirements) → Lines 1251-1400
-2. Grep for "^### 10\.2" within Section 10 → line 1305
-3. SLA value found at relative offset +2 → absolute line 1307 (1305 + 2)
-
-Contract Output:
-## 4. Business Impact Analysis
-**Availability Requirement**: 99.99% uptime
-**Allowable Downtime**: 43.2 minutes/month (calculated from SLA)
-**Business Criticality**: Tier 1 (Mission Critical - inferred from 99.99% SLA)
-**Estimated Downtime Cost**: [PLACEHOLDER: Add hourly revenue impact]
-**Source**: ARCHITECTURE.md Section 10.2 (Availability SLA), line {sla_line}
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LACN001 | Application Name | BC-GEN | Compliant | Section 1, line 28 | Business Team |
+| LACN012 | RTO Definition | BC-RTO | Compliant | Section 10, line 1296 | Infrastructure |
+...
 ```
 
-#### Extraction Logic (Pseudo-code)
-```python
-def extract_business_continuity(architecture_md):
-    # Step 1: Load Document Index
-    index_content = Read(file_path=architecture_md, offset=1, limit=50)
-    doc_index = parse_document_index(index_content)
-    # Returns: {"11": {"start": 1401, "end": 1650, ...}, "10": {"start": 1251, "end": 1400, ...}}
+#### Line Number Calculation Example
 
-    # Step 2: Get Section 11 range
-    section_11_range = doc_index["11"]
-    # Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
-
-    # Step 3: Find Subsection 11.3 (Backup & Recovery) within Section 11
-    grep_result_11_3 = grep_subsection(
-        file_path=architecture_md,
-        pattern="^### 11\.3",
-        start_line=section_11_range["start"],
-        end_line=section_11_range["end"]
-    )
-    subsection_11_3_start = grep_result_11_3["line_number"]  # e.g., 1523
-
-    # Find next subsection to determine end boundary
-    grep_result_11_4 = grep_subsection(
-        pattern="^### 11\.4",
-        start_line=subsection_11_3_start,
-        end_line=section_11_range["end"]
-    )
-    subsection_11_3_end = grep_result_11_4["line_number"] - 1  # e.g., 1574
-
-    # Step 4: Calculate load parameters for Section 11.3
-    buffer = 10
-    offset_11_3 = subsection_11_3_start - buffer - 1  # e.g., 1512
-    limit_11_3 = (subsection_11_3_end - subsection_11_3_start) + (2 * buffer)  # e.g., 71
-
-    # Step 5: Load Section 11.3 with buffer
-    backup_section = Read(
-        file_path=architecture_md,
-        offset=offset_11_3,
-        limit=limit_11_3
-    )
-
-    # Step 6: Extract RTO/RPO with line number tracking
-    rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', backup_section)
-    rpo_match = re.search(r'RPO:?\s*([0-9]+\s*hours?)', backup_section)
-
-    rto_data = {}
-    if rto_match:
-        relative_offset = backup_section[:rto_match.start()].count('\n')
-        rto_data = {
-            "value": rto_match.group(1),
-            "line": subsection_11_3_start + relative_offset,
-            "source": f"Section 11.3, line {subsection_11_3_start + relative_offset}"
-        }
-
-    rpo_data = {}
-    if rpo_match:
-        relative_offset = backup_section[:rpo_match.start()].count('\n')
-        rpo_data = {
-            "value": rpo_match.group(1),
-            "line": subsection_11_3_start + relative_offset,
-            "source": f"Section 11.3, line {subsection_11_3_start + relative_offset}"
-        }
-
-    # Extract backup details
-    backup_frequency = extract_with_line_tracking(
-        backup_section,
-        pattern=r"Incremental.*:\s*(.+)",
-        subsection_start=subsection_11_3_start
-    )
-    retention = extract_with_line_tracking(
-        backup_section,
-        pattern=r"Retention:\s*(.+)",
-        subsection_start=subsection_11_3_start
-    )
-
-    # Step 7: Load Section 11.4 (Disaster Recovery) using same methodology
-    subsection_11_4_start = grep_result_11_4["line_number"]  # e.g., 1575
-
-    # Find next subsection (11.5 or section end)
-    grep_result_11_5 = grep_subsection(
-        pattern="^### 11\.5",
-        start_line=subsection_11_4_start,
-        end_line=section_11_range["end"]
-    )
-    subsection_11_4_end = (grep_result_11_5["line_number"] - 1
-                           if grep_result_11_5 else section_11_range["end"])
-
-    offset_11_4 = subsection_11_4_start - buffer - 1
-    limit_11_4 = (subsection_11_4_end - subsection_11_4_start) + (2 * buffer)
-
-    dr_section = Read(file_path=architecture_md, offset=offset_11_4, limit=limit_11_4)
-
-    # Extract DR details
-    dr_site = extract_with_line_tracking(dr_section, r"DR Site:\s*(.+)", subsection_11_4_start)
-    failover = extract_with_line_tracking(dr_section, r"Failover:\s*(.+)", subsection_11_4_start)
-
-    # Step 8: Load Section 10.2 (Availability SLA)
-    section_10_range = doc_index["10"]
-    grep_result_10_2 = grep_subsection(
-        pattern="^### 10\.2",
-        start_line=section_10_range["start"],
-        end_line=section_10_range["end"]
-    )
-    subsection_10_2_start = grep_result_10_2["line_number"]
-
-    # Find next subsection for boundary
-    grep_result_10_3 = grep_subsection(
-        pattern="^### 10\.3",
-        start_line=subsection_10_2_start,
-        end_line=section_10_range["end"]
-    )
-    subsection_10_2_end = (grep_result_10_3["line_number"] - 1
-                           if grep_result_10_3 else section_10_range["end"])
-
-    offset_10_2 = subsection_10_2_start - buffer - 1
-    limit_10_2 = (subsection_10_2_end - subsection_10_2_start) + (2 * buffer)
-
-    perf_section = Read(file_path=architecture_md, offset=offset_10_2, limit=limit_10_2)
-
-    # Extract SLA with transformation
-    sla_match = re.search(r'SLA:?\s*([0-9.]+%)', perf_section)
-    sla_data = {}
-    if sla_match:
-        relative_offset = perf_section[:sla_match.start()].count('\n')
-        sla_value = sla_match.group(1)
-        sla_data = {
-            "value": sla_value,
-            "line": subsection_10_2_start + relative_offset,
-            "source": f"Section 10.2, line {subsection_10_2_start + relative_offset}",
-            "downtime": calculate_downtime(sla_value),  # Transformation
-            "criticality": infer_criticality(sla_value)  # Inference
-        }
-
-    # Return structured data with full traceability
-    return {
-        "rto": rto_data,
-        "rpo": rpo_data,
-        "backup_frequency": backup_frequency,
-        "retention": retention,
-        "dr_site": dr_site,
-        "failover": failover,
-        "sla": sla_data,
-        "document_index_version": doc_index["last_updated"]
-    }
+**LACN012 (RTO)** extraction:
+```
+1. Document Index → Section 10: lines 1251-1400
+2. Grep in Section 10: "RTO:?\s*([0-9]+\s*(hours?|minutes?))"
+3. Match found at offset +45 from section start
+4. Absolute line: 1251 + 45 = 1296
+5. Source reference: "Section 10 (Non-Functional Requirements), line 1296"
+6. Value: "4 hours"
+7. Status: Compliant (RTO documented)
 ```
 
-#### Missing Data Handling
-```
-Scenario 1: RTO/RPO not specified
-Action: [PLACEHOLDER: Define RTO/RPO based on business criticality.
-        Recommended: Tier 1 = RTO 4hr/RPO 1hr, Tier 2 = RTO 8hr/RPO 4hr]
+#### Cross-Contract Data Sharing
 
-Scenario 2: DR testing schedule missing
-Action: [PLACEHOLDER: Define DR testing schedule.
-        Recommended: Quarterly for Tier 1, Semi-annual for Tier 2]
+**Shared with SRE Architecture**:
+- RTO/RPO (LACN012, LACN024) → SRE error budget calculation
+- Availability SLA (LACN006) → SRE SLO definition
+- DR automation (LACN032-033) → SRE operational procedures
 
-Scenario 3: Backup restoration testing not mentioned
-Action: [PLACEHOLDER: Implement backup restoration testing.
-        Recommended: Monthly sample restorations, quarterly full restoration]
+**Shared with Cloud Architecture**:
+- Infrastructure type (LACN004) → Cloud deployment model
+- Auto-scaling (LACN040) → Cloud capacity planning
+- Load balancing (LACN041) → Cloud traffic management
+
+**Shared with Security Architecture**:
+- Sensitive data (LACN029) → Security data classification
+- Audit logs (LACN027) → Security compliance logging
+
+**Transformation Example** (RTO → Error Budget):
 ```
+LACN012 RTO: 4 hours
+Section 10 Availability: 99.95%
+→ Error Budget = (1 - 0.9995) × 30 days × 24 hours = 21.6 minutes/month
+Used in SRE contract for operational targets
+```
+
+#### Migration Notes (v1.0 → v2.0)
+
+**Removed**:
+- ❌ Section-based narrative format (5 sections: RTO/RPO, Backup, DR, BIA, Resilience, Testing)
+- ❌ LABC prefix (10 requirements)
+- ❌ Medium complexity rating
+- ❌ Single source section (Section 11 only)
+
+**Added**:
+- ✅ 6-column compliance table format
+- ✅ LACN prefix (43 requirements, 330% increase)
+- ✅ 6 technical categories with weighted scoring
+- ✅ 8 distributed source sections
+- ✅ Cloud resilience patterns (circuit breaker, retry, bulkhead, fallback)
+- ✅ Auto-scaling and load balancing requirements
+- ✅ SPOF analysis
+- ✅ Batch processing continuity
+- ✅ Enhanced backup requirements (13 vs. 2 in v1.0)
+- ✅ DR automation requirements
+
+**Changed**:
+- 🔄 Complexity: Medium → High
+- 🔄 Source sections: 2 (Sections 10, 11) → 8 (Sections 1, 3, 4, 5, 7, 8, 10, 11)
+- 🔄 Format: Narrative → Structured table
+- 🔄 Validation: Basic presence → Category-weighted scoring
+- 🔄 Priority: Implicitly Medium → Explicitly High (#2)
+
+**Version History**:
+
+v2.0 (Current - December 2024):
+- Data source: Compliance_Questionnaire_LACN.xlsx
+- Total validation points: 43
+- All requirements use presence-check validation (no complex rule logic)
+- Approval threshold: 8.0 (auto), 7.0 (manual review)
+- Scoring: Completeness 40%, Compliance 50%, Quality 10%
+
+v1.0 (Previous):
+- Data source: Manual questionnaire
+- Total validation points: 10
+- Limited to operational sections only
+- No cloud resilience coverage
 
 ---
 
@@ -2551,13 +2686,21 @@ This checklist ensures full compliance with the index-based section mapping meth
 ### Cross-Contract Consistency Validation
 
 **Shared Data Points**:
-- [ ] Availability SLA: Same value in all 6 contracts (Business Continuity, SRE, Cloud, Platform, Enterprise, Risk)
+- [ ] Availability SLA: Same value in all 6 contracts (Business Continuity v2.0, SRE, Cloud, Platform, Enterprise, Risk)
+  - Business Continuity v2.0: Referenced in LACN006 (HA Requirement), extracted from Section 10
+  - SRE Architecture: Used for SLO and error budget calculation
+  - Cloud Architecture: Cloud SLA requirements
+  - All contracts must show identical value and source line number
 - [ ] Technology Stack: Same inventory in 5 contracts (Development, Cloud, Platform, Integration, Security)
 - [ ] Integration Catalog: Same list in 3 contracts (Integration, Security, Data/AI)
 - [ ] Same line numbers for same data across all contracts
 
 **Transformation Consistency**:
-- [ ] Error budget calculation: Same formula in SRE and Business Continuity
+- [ ] Error budget calculation: Same formula in SRE and Business Continuity v2.0
+  - Formula: Error Budget = (1 - SLA%) × Time Period
+  - Example: 99.95% SLA → 0.05% × 30 days × 24 hours = 21.6 minutes/month
+  - Business Continuity: Validates RTO aligns with error budget
+  - SRE Architecture: Uses for operational targets and alerting thresholds
 - [ ] Downtime calculation: Same formula across all contracts
 - [ ] Criticality inference: Same rules (99.99% → Tier 1)
 - [ ] All transformations documented and replicable
