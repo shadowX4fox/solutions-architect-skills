@@ -65,15 +65,24 @@
           "item_id": "lacn003",
           "code": "LACN003",
           "question": "Define the number of logical or physical layers in the system architecture (e.g., presentation, business logic, data access, persistence)",
-          "architecture_md_section": "Section 3 (Architecture Overview → Logical Architecture)",
+          "architecture_md_section": "Section 4 (Architecture Layers) - Primary; Section 3 (Architecture Overview) - Fallback",
           "required": true,
           "weight": 0.2,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Number of Architecture Layers documented in Section 3 (Architecture Overview → Logical Architecture)",
+            "pass_criteria": "Number of Architecture Layers documented in Section 4 (Architecture Layers) with architecture type detected (META: 6 layers, BIAN: 5 layers, 3-Tier: 3 tiers, Microservices: variable, N-Layer: 4-7 layers), or documented in Section 3 (Architecture Overview) if architecture type unknown",
             "fail_criteria": "N/A (presence check cannot fail)",
             "na_criteria": "Not applicable to this system architecture",
-            "unknown_criteria": "Number of Architecture Layers not specified in Section 3 (Architecture Overview → Logical Architecture)"
+            "unknown_criteria": "Number of Architecture Layers not specified in Section 4 (Architecture Layers) or Section 3 (Architecture Overview)",
+            "architecture_type_aware": true,
+            "expected_values_by_type": {
+              "META": "6 layers: Channels, User Experience, Business Scenarios, Business, Domain, Core",
+              "BIAN": "5 layers: Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core",
+              "3-TIER": "3 tiers: Presentation, Application/Business Logic, Data",
+              "MICROSERVICES": "Variable (count independent services/bounded contexts)",
+              "NLAYER": "4-7 layers (custom layer definitions)",
+              "UNKNOWN": "Generic layer count from Section 3"
+            }
           }
         },
         {

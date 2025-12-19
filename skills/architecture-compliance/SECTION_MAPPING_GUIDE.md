@@ -493,10 +493,63 @@ Status values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
 - **Example**: "Microservices on AWS EKS" → Compliant
 
 **LACN003: Number of Architecture Layers**
-- **Source**: Section 3 (Architecture Overview → Logical Architecture)
-- **Extract**: Layer count and layer names
-- **Pattern**: Search for "tier", "layer", numbered architecture levels
-- **Example**: "4-tier: Presentation, API, Business Logic, Data" → Compliant
+- **Source**: Section 4 (Architecture Layers) - Primary; Section 3 (Architecture Overview) - Fallback for non-typed architectures
+- **Extract**: Layer count and layer names based on architecture type
+- **Architecture-Type-Aware Extraction**:
+  - **Step 1**: Detect architecture type from `<!-- ARCHITECTURE_TYPE: [TYPE] -->` comment in Section 4
+  - **Step 2**: Load Document Index to get Section 4 line range
+  - **Step 3**: Apply type-specific extraction pattern:
+
+  **META Architecture** (Section 4):
+  - **Pattern**: Search for "## Layers Overview" table, extract "Layer 1:", "Layer 2:", etc.
+  - **Expected**: 6 layers - Channels, User Experience, Business Scenarios, Business, Domain, Core
+  - **Example**: "6 layers: Channels, User Experience, Business Scenarios, Business, Domain, Core" → Compliant
+
+  **BIAN Architecture** (Section 4):
+  - **Pattern**: Search for "## Layers Overview" table, extract "Layer 1:", "Layer 2:", etc.
+  - **Expected**: 5 layers - Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core
+  - **Example**: "5 layers: Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core" → Compliant
+
+  **3-Tier Architecture** (Section 4):
+  - **Pattern**: Search for "## Tiers Overview" table, extract "Tier 1:", "Tier 2:", "Tier 3:"
+  - **Expected**: 3 tiers - Presentation, Application/Business Logic, Data
+  - **Example**: "3 tiers: Presentation, Application/Business Logic, Data" → Compliant
+
+  **Microservices Architecture** (Section 4):
+  - **Pattern**: Count independent services in service catalog or API Gateway topology
+  - **Expected**: Variable (count bounded contexts)
+  - **Example**: "8 microservices: Auth, Payment, Order, Inventory, Shipping, Notification, Analytics, Gateway" → Compliant
+
+  **N-Layer Architecture** (Section 4):
+  - **Pattern**: Search for "Layer 1:", "Layer 2:", etc. or custom layer definitions
+  - **Expected**: 4-7 layers (variable)
+  - **Example**: "4 layers: Presentation, Application, Domain, Infrastructure" → Compliant
+
+  **UNKNOWN (Fallback)** (Section 3):
+  - **Pattern**: Generic search for "tier", "layer", numbered architecture levels
+  - **Example**: "4-tier: Presentation, API, Business Logic, Data" → Compliant
+  - **Note**: This fallback maintains backward compatibility with architectures that don't use the ARCHITECTURE_TYPE comment
+
+- **Extraction Workflow**:
+  1. Load Document Index (lines 1-50)
+  2. Search for `<!-- ARCHITECTURE_TYPE: META -->` or similar comment in Section 4 header
+  3. If architecture type detected:
+     - Load Section 4 using Document Index line range
+     - Apply type-specific pattern to extract layer names from "## Layers Overview" or "## Tiers Overview" table
+     - Count layers and extract exact names
+     - Store: layer_count, layer_names[], architecture_type, source_section="Section 4", source_line
+  4. If architecture type NOT detected (UNKNOWN):
+     - Fall back to Section 3 search
+     - Use generic "tier", "layer" pattern
+     - Store: layer_count, layer_names[], architecture_type="UNKNOWN", source_section="Section 3", source_line
+  5. Return structured data with architecture type metadata
+
+- **Key Distinction**:
+  - **Logical Architecture Layers** (Section 4): Enterprise layers organizing system components by responsibility (META, BIAN, 3-Tier)
+  - **Deployment Infrastructure Layers** (avoid): Technical deployment topology (API Gateway, Execution, Data layers)
+  - This extraction targets **logical architecture layers only**
+
+- **Line Number Tracking**: Record exact line number of "## Layers Overview" or "## Tiers Overview" table for traceability
 
 **LACN004: Infrastructure Type**
 - **Source**: Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)

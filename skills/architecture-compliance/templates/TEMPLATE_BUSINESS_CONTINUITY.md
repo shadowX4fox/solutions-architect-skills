@@ -21,7 +21,7 @@
 |------|-------------|----------|--------|----------------|------------------|
 | LACN001 | Document the official name of the application, system, or business initiative covered by this Business Continuity plan | BC-GEN | [Status] | Section 1 (Business Context) or Section 2 (System Overview) | [Role or N/A] |
 | LACN002 | Specify the architectural pattern (e.g., monolithic, microservices, serverless) and deployment model (e.g., on-premises, cloud, hybrid) used by the system | BC-GEN | [Status] | Section 3 (Architecture Overview) or Section 4 (Deployment Architecture) | [Role or N/A] |
-| LACN003 | Define the number of logical or physical layers in the system architecture (e.g., presentation, business logic, data access, persistence) | BC-GEN | [Status] | Section 3 (Architecture Overview → Logical Architecture) | [Role or N/A] |
+| LACN003 | Define the number of logical or physical layers in the system architecture (e.g., presentation, business logic, data access, persistence) | BC-GEN | [Status] | Section 4 (Architecture Layers) or Section 3 (Architecture Overview) | [Role or N/A] |
 | LACN004 | Document the infrastructure type: physical servers, virtual machines, containers, serverless, or a combination thereof | BC-GEN | [Status] | Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure) | [Role or N/A] |
 | LACN005 | Identify all critical dependencies including internal systems, external services, third-party APIs, databases, and infrastructure components required for operation | BC-GEN | [Status] | Section 1 (Business Context → Dependencies) or Section 5 (System Integrations) | [Role or N/A] |
 | LACN006 | Determine whether the solution requires high availability (HA) design patterns to minimize downtime and ensure continuous operation | BC-DR | [Status] | Section 10 (Non-Functional Requirements → Availability) | [Role or N/A] |
@@ -100,15 +100,37 @@ Document the high-level architecture pattern and deployment model. Architecture 
 #### LACN003: Number of Architecture Layers {#LACN003}
 **Category**: BC-GEN
 **Status**: [Status]
-**Source Section**: Section 3 (Architecture Overview → Logical Architecture)
+**Source Section**: Section 4 (Architecture Layers) - Primary; Section 3 (Architecture Overview) - Fallback
 
 ##### Implementation
-Specify how many distinct layers or tiers comprise the architecture. Common patterns include: 2-tier (client-server), 3-tier (presentation, application, data), or N-tier architectures. Each layer should be identified with its responsibility. Understanding layer count helps determine dependencies and recovery sequence during disaster recovery scenarios.
+Specify how many distinct layers or tiers comprise the architecture based on the architecture type:
+
+**Architecture Type**: [Detected type: META/BIAN/3-TIER/MICROSERVICES/NLAYER/UNKNOWN]
+
+**Number of Layers**: [Count]
+
+**Layer Names**: [Exact layer names from ARCHITECTURE.md Section 4]
+
+**Examples by Architecture Type**:
+- **META**: 6 layers - Channels, User Experience, Business Scenarios, Business, Domain, Core
+- **BIAN**: 5 layers - Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core
+- **3-Tier**: 3 tiers - Presentation, Application/Business Logic, Data
+- **Microservices**: Variable count - [List service names or bounded contexts]
+- **N-Layer**: 4-7 layers - [Custom layer names from Section 4]
+- **UNKNOWN (fallback)**: Layers from Section 3 - [Generic layer count and names]
+
+**Source**: ARCHITECTURE.md Section 4 (Architecture Layers, lines [XXX-YYY])
+
+Understanding layer count helps determine dependencies and recovery sequence during disaster recovery scenarios.
 
 ##### Validation
-- [ ] Number of layers is documented
-- [ ] Each layer is named and its responsibility defined
+- [ ] Number of layers is documented in Section 4 or Section 3
+- [ ] Architecture type is detected (or marked as UNKNOWN)
+- [ ] Each layer is named with exact names from ARCHITECTURE.md
+- [ ] Layer names match architecture type expectations (e.g., META has 6 specific layers)
+- [ ] Layer responsibilities are defined in source section
 - [ ] Layer dependencies are identified for DR sequencing
+- [ ] Source line numbers are tracked for traceability
 
 ---
 
