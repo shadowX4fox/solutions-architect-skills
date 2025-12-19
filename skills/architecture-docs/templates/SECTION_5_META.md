@@ -196,13 +196,16 @@ For each component in your system, document using the template below. **Group co
 
 ### [Service Domain Name] (BIAN V12.0)
 
-**BIAN Information**:
-- **BIAN Capability Name**: [Official BIAN service domain name - validate in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)]
-- **BIAN ID**: [e.g., SD-001, SD-003, SD-045 - internal document tracking ID only]
-- **BIAN Version**: V12.0 (default)
-- **Official Definition**: [Link to specific service domain in BIAN landscape]
+**BIAN Metadata** (MANDATORY - All fields required):
 
-**Note**: The BIAN Capability Name must match the official BIAN V12.0 Service Landscape definition. The BIAN ID is for internal tracking to count service domains in this document.
+1. **Official BIAN Name**: [Exact name from BIAN V12.0 Service Landscape - e.g., "Payment Order", "Current Account", "Customer Offer"]
+2. **BIAN ID**: [Internal tracking ID - e.g., SD-001, SD-002 for document tracking only]
+3. **BIAN Version**: V12.0 (mandatory)
+4. **BIAN Business Domain**: [Parent business domain - e.g., "Payments", "Loans and Deposits", "Customer Management"]
+5. **BIAN Business Area**: [Parent business area - e.g., "Operations and Execution", "Sales and Service", "Risk and Compliance"]
+6. **BIAN Service Landscape URL**: [Direct link to this service domain - https://bian.org/servicelandscape-12-0-0/views/view_51891.html]
+
+**Note**: The Official BIAN Name must match the official BIAN V12.0 Service Landscape definition exactly. The BIAN ID is for internal tracking to count service domains in this document. BIAN Business Domain and Business Area must be traceable to the BIAN hierarchy.
 
 **Type**: Service Domain | Microservice
 **Technology**: [Specific technology used]
@@ -214,21 +217,78 @@ For each component in your system, document using the template below. **Group co
 
 **BIAN Alignment Details**:
 
-**Service Domain Characteristics** (per BIAN V12.0):
-- **Domain Type**: [Operational/Enabling/Support - from BIAN taxonomy]
-- **Control Record**: [Structure of the control record]
-- **Functional Patterns**: [List applicable BIAN functional patterns]
+**Control Record** ([BIAN V12.0 Standard](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
 
-**Service Operations** (BIAN V12.0):
-- **Initiate**: [Description of initiation operation]
-- **Update**: [Description of update operation]
-- **Retrieve**: [Description of retrieval operation]
-- **Activate/Configure**: [Configuration operations]
-- **Provide Feedback**: [Feedback mechanisms]
+- **Control Record Type**: [As defined in BIAN spec - e.g., "PaymentOrderProcedure", "CurrentAccountFulfillmentArrangement", "CustomerOfferProcedure"]
+- **Control Record Structure**:
+  - Field 1: [Name, data type, description per BIAN spec]
+  - Field 2: [Name, data type, description per BIAN spec]
+  - Field 3: [Name, data type, description per BIAN spec]
+  - [Add all fields as defined in BIAN V12.0 specification for this service domain]
+- **Lifecycle States**: [Document all states - e.g., Initiated, Active, Completed, Suspended, Cancelled - per BIAN]
+- **State Transitions**: [Document allowed state transitions per BIAN specification - e.g., Initiated→Active, Active→Suspended, Suspended→Active, Active→Completed, Active→Cancelled]
 
-**Behavior Qualifiers**:
-- Qualifier 1: [Description]
-- Qualifier 2: [Description]
+**Service Operations** ([BIAN V12.0 Standard](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+
+All BIAN service domains MUST document the following service operations:
+
+1. **Initiate**:
+   - **Purpose**: Create new control record
+   - **Input**: [Required fields per BIAN spec for this service domain]
+   - **Output**: [Control record instance with unique identifier]
+   - **API Endpoint**: `POST /service-domain/initiate`
+
+2. **Update**:
+   - **Purpose**: Modify existing control record
+   - **Input**: [Control record ID, update fields per BIAN spec]
+   - **Output**: [Updated control record]
+   - **API Endpoint**: `PUT /service-domain/{id}/update`
+
+3. **Retrieve**:
+   - **Purpose**: Query control record
+   - **Input**: [Control record ID or query parameters]
+   - **Output**: [Control record data]
+   - **API Endpoint**: `GET /service-domain/{id}/retrieve`
+
+4. **Control**:
+   - **Purpose**: Manage control record lifecycle (suspend, resume, terminate)
+   - **Input**: [Control record ID, control action (suspend/resume/terminate)]
+   - **Output**: [Updated control record with new lifecycle state]
+   - **API Endpoint**: `PUT /service-domain/{id}/control`
+
+5. **Exchange** (if applicable per BIAN spec for this service domain):
+   - **Purpose**: [Per BIAN spec for this specific service domain]
+   - **Input**: [Per BIAN spec]
+   - **Output**: [Per BIAN spec]
+   - **API Endpoint**: `PUT /service-domain/{id}/exchange`
+
+6. **Execute** (if applicable per BIAN spec for this service domain):
+   - **Purpose**: [Per BIAN spec for this specific service domain]
+   - **Input**: [Per BIAN spec]
+   - **Output**: [Per BIAN spec]
+   - **API Endpoint**: `POST /service-domain/{id}/execute`
+
+7. **Request** (if applicable per BIAN spec for this service domain):
+   - **Purpose**: [Per BIAN spec for this specific service domain]
+   - **Input**: [Per BIAN spec]
+   - **Output**: [Per BIAN spec]
+   - **API Endpoint**: `POST /service-domain/{id}/request`
+
+**Behavior Qualifiers** ([BIAN V12.0 Standard](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+
+Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
+- Qualifier 1: [Name, description per BIAN spec - e.g., "registration", "valuation", "reporting", "compliance", "booking", "analysis", "fulfillment"]
+- Qualifier 2: [Name, description per BIAN spec]
+- Qualifier 3: [Name, description per BIAN spec]
+- [Add all qualifiers as defined in BIAN V12.0 specification for this service domain]
+
+Reference: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+
+**Functional Patterns** ([BIAN V12.0 Standard](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
+
+- **Pattern Type**: [Managed Object | Tracked Object | Administered Object | Governed Object | Monitored Object | Catalog Entry | Register Entry]
+- **Pattern Description**: [How this service domain implements the BIAN functional pattern]
+- **Pattern Implications**: [What the pattern means for service operations and lifecycle management - e.g., Managed Object requires full CRUD + lifecycle control operations]
 
 **Responsibilities**:
 - Implement BIAN V12.0 service domain [name]
@@ -246,16 +306,30 @@ For each component in your system, document using the template below. **Group co
 - **Depended by**: [Layer 4 Business components]
 - **BIAN References**: [Link to official BIAN V12.0 dependencies]
 
+**BIAN Hierarchy Traceability**:
+- **Service Domain** → **Business Domain** → **Business Area**
+- [Service Domain Name] → [Business Domain Name] → [Business Area Name]
+
+This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper categorization within the BIAN landscape.
+
 **Data Model**:
 - **Control Record Structure**: [Main entity/aggregate]
 - **BIAN Alignment**: Maps to BIAN V12.0 [Service Domain] control record
 - **Persistence**: [Database, storage approach]
 
-**Compliance**:
-- **BIAN Version**: V12.0
-- **Compliance Level**: [Full/Partial/Extended]
-- **Deviations**: [Document any deviations from BIAN standard]
-- **Verification**: Service domain verified in [BIAN Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+**BIAN Compliance Documentation**:
+
+- **BIAN Version**: V12.0 (mandatory)
+- **Compliance Level**: Full BIAN V12.0 compliance (mandatory for META Layer 5)
+- **Validation Details**:
+  - ✅ Service Domain Name validated against [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+  - ✅ Control Record Structure aligned with BIAN V12.0 specification
+  - ✅ Service Operations implemented per BIAN standard (4 mandatory minimum)
+  - ✅ Behavior Qualifiers documented per BIAN spec
+  - ✅ Functional Pattern identified per BIAN spec
+  - ✅ BIAN Hierarchy traceable (Service Domain → Business Domain → Business Area)
+- **Validation Date**: [YYYY-MM-DD when compliance was verified]
+- **Deviations**: [Document any customizations or extensions beyond BIAN standard]
 
 **Configuration**:
 - Config param 1: [Description, default]

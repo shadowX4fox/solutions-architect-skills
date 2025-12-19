@@ -126,9 +126,9 @@ When users ask questions about the architecture, this guide helps identify which
 **Typical line range**: Lines 401-600
 
 **Architecture Type Variations**:
+- **Microservices (Recommended)**: Service mesh, API Gateway, microservices catalog, cloud-native patterns
 - **META**: 6 layers (Channels → UX → Business Scenarios → Business → Domain → Core)
 - **3-Tier**: 3 tiers (Presentation → Application → Data)
-- **Microservices**: Service mesh, API Gateway, microservices catalog
 - **N-Layer**: DDD, Clean Architecture, or Hexagonal patterns
 
 **Subsections to check**:

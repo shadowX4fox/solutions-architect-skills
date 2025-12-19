@@ -761,346 +761,517 @@ Use asynchronous domain events to decouple components where temporal independenc
 **Architecture Type**: This section's structure depends on your chosen architecture type. The skill automatically loads the appropriate template based on your selection.
 
 **Available Templates**:
-- `templates/SECTION_4_META.md` - 6-layer enterprise model (Channels → UX → Business Scenarios → Integration → Domain → Core)
+- `templates/SECTION_4_MICROSERVICES.md` - **Microservices (Recommended)** - API Gateway, Service Mesh, Services, Event Bus, cloud-native patterns
+- `templates/SECTION_4_META.md` - META 6-layer model (Channels → UX → Business Scenarios → Integration → Domain → Core)
 - `templates/SECTION_4_3TIER.md` - Classic 3-tier (Presentation → Application/Business Logic → Data)
-- `templates/SECTION_4_MICROSERVICES.md` - Microservices with API Gateway, Service Mesh, Services, Event Bus
 - `templates/SECTION_4_NLAYER_PATTERNS.md` - Customizable N-layer patterns (DDD, Clean Architecture, Hexagonal)
 
-**Note**: The META Architecture template is shown below as the default example. When creating your ARCHITECTURE.md, the skill will prompt for architecture type selection and load the corresponding template.
+**Note**: The Microservices Architecture template is shown below as the recommended default example. When creating your ARCHITECTURE.md, the skill will prompt for architecture type selection and load the corresponding template.
 
 ---
 
-## META Architecture Layers (Default Template)
+## Microservices Architecture Components (Recommended Default Template)
 
-## Layers
+## Architecture Overview
 
-| Layer | Function |
-|-------|----------|
-| **Channels** | Manages interaction with end users through various channels (web, mobile, chatbots, IVR, etc.). |
-| **User Experience** | Centralizes user experience and personalization logic, managing user journeys and flows. |
-| **Business Scenarios** | Defines and orchestrates transversal business processes and scenarios. |
-| **Business** | Implements main business capabilities, aligned with strategic objectives and organizational standards. |
-| **Domain** | Represents the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard. |
-| **Core** | Manages central and legacy systems that support critical operations. |
+| Component Layer | Function |
+|----------------|----------|
+| **API Gateway** | Single entry point for clients, handles routing, authentication, rate limiting, and request aggregation. |
+| **Service Mesh** | Infrastructure layer managing service-to-service communication, observability, and resilience. |
+| **Microservices** | Independently deployable services implementing bounded contexts and business capabilities. |
+| **Data Stores** | Decentralized data management with database-per-service pattern. |
+| **Event Bus** | Asynchronous communication backbone for event-driven interactions between services. |
+| **Supporting Infrastructure** | Configuration, service discovery, secrets management, and cross-cutting concerns. |
 
 ---
 
-### Layer Documentation Template
+### Component Documentation Template
 
-For each layer, document the following information:
+For each component layer, document the following information:
 
 **Template:**
 ```markdown
-## Architecture Layers
+## Microservices Architecture Components
 
-### Layer 1: Channels
+### API Gateway
 
-**Purpose**: [What this layer provides to the business/users]
+**Purpose**: [What the API Gateway provides to clients]
+
+**Capabilities**:
+- Request routing and load balancing
+- Authentication and authorization (JWT, OAuth 2.0)
+- Rate limiting and throttling
+- Request/response transformation
+- API composition and aggregation
+
+**Technologies**:
+- Primary: [Kong, AWS API Gateway, Azure API Management, etc.]
+- Supporting: [Authentication provider, caching layer]
+
+**Key Responsibilities**:
+- Centralized authentication
+- API versioning management
+- Cross-cutting concerns (CORS, compression)
+- Client-specific API composition (BFF pattern)
+
+**Communication Patterns**:
+- Inbound: HTTPS from external clients
+- Outbound: HTTP/gRPC to microservices
+- Protocols: [REST, GraphQL, gRPC]
+
+**Non-Functional Requirements**:
+- Performance: [Latency overhead, throughput]
+- Availability: [High availability setup]
+- Scalability: [Concurrent connections capacity]
+
+---
+
+### Service Mesh
+
+**Purpose**: [What the service mesh provides to services]
+
+**Capabilities**:
+- Service-to-service authentication (mTLS)
+- Traffic management (canary deployments, circuit breaking)
+- Observability (distributed tracing, metrics)
+- Resilience (retries, timeouts, circuit breakers)
+
+**Technologies**:
+- Primary: [Istio, Linkerd, Consul Connect, AWS App Mesh]
+- Supporting: [Envoy proxy, Jaeger, Prometheus]
+
+**Key Responsibilities**:
+- Automatic mTLS for service communication
+- Traffic shaping and routing
+- Distributed tracing injection
+- Health checks and circuit breaking
+
+**Communication Patterns**:
+- Sidecar proxy pattern
+- Control plane ↔ data plane communication
+- Protocols: [gRPC for control plane, HTTP/gRPC for data plane]
+
+**Non-Functional Requirements**:
+- Performance: [Proxy overhead <10ms p99]
+- Availability: [Control plane redundancy]
+- Scalability: [Support for N services]
+
+---
+
+### Microservices
+
+**Purpose**: [What microservices provide to the system]
+
+Document each microservice using this template:
+
+#### Service: [Service Name]
+
+**Bounded Context**: [Domain/business capability this service owns]
+
+**Responsibilities**:
+- Responsibility 1
+- Responsibility 2
+- Responsibility 3
+
+**Technologies**:
+- Primary: [Language, framework - e.g., Java/Spring Boot, Node.js/Express, Go]
+- Supporting: [Libraries, tools]
+
+**API Endpoints**:
+- `POST /api/v1/resource`: [Description]
+- `GET /api/v1/resource/{id}`: [Description]
+- `PUT /api/v1/resource/{id}`: [Description]
+
+**Data Store**:
+- Type: [PostgreSQL, MongoDB, DynamoDB, etc.]
+- Schema: [Brief description or link to schema]
+- Data Ownership: [What data this service owns]
+
+**Events Published**:
+- `resource.created`: [When and what data]
+- `resource.updated`: [When and what data]
+
+**Events Consumed**:
+- `other.event`: [From which service, what action taken]
+
+**Dependencies**:
+- Upstream Services: [Services this service calls]
+- Downstream Services: [Services that call this service]
+
+**Non-Functional Requirements**:
+- Performance: [Response time, throughput]
+- Availability: [SLA, redundancy]
+- Scalability: [Scaling strategy, resource limits]
+
+---
+
+### Data Stores (Database-per-Service)
+
+**Purpose**: [Decentralized data management strategy]
+
+**Pattern**: Database-per-Service
+
+**Data Stores**:
+
+| Service | Database Type | Technology | Purpose |
+|---------|--------------|------------|---------|
+| Service A | Relational | PostgreSQL | [Transactional data] |
+| Service B | Document | MongoDB | [Flexible schema] |
+| Service C | Key-Value | Redis | [Caching, sessions] |
+
+**Data Consistency Strategy**:
+- **Saga Pattern**: [For distributed transactions]
+- **Event Sourcing**: [If applicable]
+- **CQRS**: [If applicable]
+- **Eventual Consistency**: [How handled]
+
+**Data Synchronization**:
+- Method: [Events, CDC, scheduled sync]
+- Tools: [Kafka, Debezium, custom]
+
+**Non-Functional Requirements**:
+- Performance: [Query latency, throughput]
+- Availability: [Backup strategy, failover]
+- Scalability: [Sharding, replication]
+
+---
+
+### Event Bus
+
+**Purpose**: [Asynchronous communication and event streaming]
+
+**Capabilities**:
+- Event publishing and subscription
+- Event ordering and partitioning
+- Event replay and history
+- Dead-letter queue handling
+
+**Technologies**:
+- Primary: [Kafka, RabbitMQ, AWS EventBridge, Azure Event Hubs]
+- Supporting: [Schema registry, monitoring]
+
+**Event Topics**:
+
+| Topic | Producers | Consumers | Purpose |
+|-------|-----------|-----------|---------|
+| `topic.name` | [Services] | [Services] | [What events flow here] |
+
+**Key Responsibilities**:
+- Reliable event delivery
+- Event schema validation
+- Event retention and replay
+- Topic partitioning for scalability
+
+**Communication Patterns**:
+- Pub/Sub model
+- Event sourcing (if applicable)
+- CQRS read model updates
+
+**Non-Functional Requirements**:
+- Performance: [Throughput, latency]
+- Availability: [Replication factor, durability]
+- Scalability: [Partitioning strategy, consumer groups]
+
+---
+
+### Supporting Infrastructure
+
+**Purpose**: [Cross-cutting infrastructure services]
 
 **Components**:
-- Component 1: [Name and brief description]
-- Component 2: [Name and brief description]
-- Component 3: [Name and brief description]
 
-**Technologies**:
-- Primary: [Main technology stack]
-- Supporting: [Additional technologies, frameworks]
+#### Service Discovery
+- Technology: [Consul, Eureka, Kubernetes DNS]
+- Purpose: Dynamic service registration and lookup
 
-**Key Responsibilities**:
-- Orchestrate omnichannel experience
-- Adapt presentation and flow according to the channel
-- Encapsulate presentation and access logic
-- Manage channel-specific user interactions
+#### Configuration Management
+- Technology: [Spring Cloud Config, Consul KV, Kubernetes ConfigMaps]
+- Purpose: Centralized configuration for all services
 
-**Communication Patterns**:
-- Inbound: [How this layer receives requests]
-- Outbound: [How this layer communicates with other layers]
-- Protocols: [HTTP/REST, gRPC, messaging, etc.]
+#### Secrets Management
+- Technology: [HashiCorp Vault, AWS Secrets Manager, Azure Key Vault]
+- Purpose: Secure storage and rotation of secrets
 
-**Non-Functional Requirements**:
-- Performance: [Latency, throughput requirements]
-- Availability: [SLA, uptime requirements]
-- Scalability: [How this layer scales]
+#### Distributed Logging
+- Technology: [ELK Stack, Splunk, CloudWatch]
+- Purpose: Centralized log aggregation and search
 
----
-
-### Layer 2: User Experience
-
-**Purpose**: [What this layer provides to the business/users]
-
-**Components**:
-- BFF (Backend for Frontend): [Description]
-- API Gateway: [Description]
-- Session Management: [Description]
-
-**Technologies**:
-- Primary: [Main technology stack]
-- Supporting: [Additional technologies, frameworks]
-
-**Key Responsibilities**:
-- Manage user journeys and flows
-- Apply personalization and context rules
-- Service orchestration and composition
-- User session management
-- Experience personalization
-- Response formatting and aggregation
-
-**Communication Patterns**:
-- Inbound: [From Channels layer]
-- Outbound: [To Business Scenarios and Business layers]
-- Protocols: [REST, GraphQL, etc.]
+#### Monitoring & Alerting
+- Technology: [Prometheus, Grafana, Datadog, New Relic]
+- Purpose: Metrics collection and visualization
 
 **Non-Functional Requirements**:
-- Performance: [Response time targets]
-- Availability: [High availability requirements]
-- Scalability: [Horizontal scaling approach]
-
----
-
-### Layer 3: Business Scenarios
-
-**Purpose**: [What this layer provides to the business/users]
-
-**Components**:
-- Scenario Orchestrator: [Description]
-- Process Engine: [Description]
-- Business Rules Engine: [Description]
-
-**Technologies**:
-- Primary: [Workflow/orchestration technology]
-- Supporting: [Rules engine, process automation]
-
-**Key Responsibilities**:
-- Model end-to-end business processes
-- Integrate business and domain capabilities
-- Adapt flows to regulatory or market requirements
-- Cross-domain business process orchestration
-- Business rule execution
-- Transaction coordination
-- Workflow management
-
-**Communication Patterns**:
-- Inbound: [From User Experience layer]
-- Outbound: [To Business and Domain layers]
-- Protocols: [Sync/async patterns, events]
-
-**Non-Functional Requirements**:
-- Performance: [Process execution time]
-- Availability: [Business continuity requirements]
-- Scalability: [Process volume handling]
-
----
-
-### Layer 4: Business
-
-**Purpose**: Implement main business capabilities, aligned with strategic objectives
-
-**Components**:
-- Business Capability Services: [Description]
-- Business API Layer: [Description]
-- Business Rules Management: [Description]
-
-**Technologies**:
-- Primary: [Business services platform]
-- Supporting: [API management, business rules engine]
-
-**Key Responsibilities**:
-- Manage business rules and logic
-- Expose business services through APIs
-- Ensure interoperability and API standards compliance
-- Implement business capability orchestration
-
-**Communication Patterns**:
-- Inbound: [From Business Scenarios layer]
-- Outbound: [To Domain and external services]
-- Protocols: [REST, SOAP, messaging, file transfer]
-
-**Non-Functional Requirements**:
-- Performance: [Message throughput]
-- Availability: [Integration uptime]
-- Scalability: [Message volume capacity]
-
----
-
-### Layer 5: Domain
-
-**Purpose**: [What this layer provides to the business/users]
-
-**Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
-
-Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to select appropriate service domains.
-
-- Service Domain 1: [Name, BIAN ID, description]
-- Service Domain 2: [Name, BIAN ID, description]
-- Service Domain 3: [Name, BIAN ID, description]
-
-**Technologies**:
-- Primary: [Microservices framework]
-- Supporting: [Databases, caching, messaging]
-
-**Key Responsibilities**:
-- Implementation of BIAN Service Domains
-- Domain-specific business logic
-- Data ownership and management
-- Domain event publishing
-
-**Communication Patterns**:
-- Inbound: [From Integration layer]
-- Outbound: [To Core systems and other domains]
-- Protocols: [REST, gRPC, domain events]
-
-**BIAN Alignment**:
-- Service Domain Model: [Version, compliance level]
-- Control Records: [How implemented]
-- Service Operations: [Activation, configuration, feedback]
-
-**Non-Functional Requirements**:
-- Performance: [Service response time]
-- Availability: [Domain availability targets]
-- Scalability: [Domain-specific scaling strategy]
-
----
-
-### Layer 6: Core
-
-**Purpose**: [What this layer provides to the business/users]
-
-**Systems**:
-- Core Banking System: [Name, vendor, version]
-- Transaction Processing: [Name, description]
-- Legacy Systems: [List of critical legacy systems]
-
-**Technologies**:
-- Primary: [Mainframe, core banking platform]
-- Supporting: [Databases, interfaces]
-
-**Key Responsibilities**:
-- Account management
-- Transaction processing
-- Balance and ledger management
-- Master data management
-
-**Communication Patterns**:
-- Inbound: [From Domain layer]
-- Outbound: [Data replication, events]
-- Protocols: [Legacy protocols, files, APIs]
-
-**Modernization Strategy**:
-- Current State: [Assessment of current systems]
-- Target State: [Modernization goals]
-- Migration Approach: [Strangler pattern, lift-and-shift, etc.]
-
-**Non-Functional Requirements**:
-- Performance: [Transaction processing rate]
-- Availability: [24/7 uptime requirements]
-- Scalability: [Capacity planning]
+- Performance: [Minimal performance overhead]
+- Availability: [High availability for critical infrastructure]
+- Scalability: [Support system growth]
 ```
 
 **Example Implementation:**
 
 ```markdown
-## Architecture Layers
+## Microservices Architecture Components
 
-### Layer 1: Channels
+### API Gateway
 
-**Purpose**: Provide omnichannel access to banking services for retail and corporate customers.
+**Purpose**: Provide unified entry point for e-commerce platform clients (web, mobile, partners).
 
-**Components**:
-- Mobile Banking App (iOS/Android): Native applications for retail customers
-- Internet Banking Portal: Web-based portal for account management
-- ATM Network Interface: Integration with ATM network for cash services
-- Contact Center Platform: Unified platform for customer service representatives
+**Capabilities**:
+- Request routing to appropriate microservices
+- JWT authentication and OAuth 2.0 authorization
+- Rate limiting per client tier (free: 100 req/min, premium: 1000 req/min)
+- Request/response transformation and aggregation
+- API composition for mobile and web clients
 
 **Technologies**:
-- Primary: React Native (Mobile), Angular (Web), Java Spring Boot (APIs)
-- Supporting: OAuth 2.0, Firebase, CDN (CloudFront)
+- Primary: Kong API Gateway, Redis (rate limiting)
+- Supporting: Auth0 (authentication), DataDog (monitoring)
 
 **Key Responsibilities**:
-- User authentication and authorization
-- Channel-specific presentation logic
-- Device management and security
-- Multi-factor authentication orchestration
+- Centralized authentication and JWT validation
+- API versioning (v1, v2) management
+- CORS, compression, and caching
+- Backend-for-Frontend (BFF) pattern for mobile/web
 
 **Communication Patterns**:
-- Inbound: User interactions via mobile, web, ATM, voice
-- Outbound: REST APIs to User Experience layer
-- Protocols: HTTPS/REST, WebSocket for real-time updates
+- Inbound: HTTPS from web/mobile clients, partners
+- Outbound: HTTP/gRPC to Order, Product, User microservices
+- Protocols: REST (external), gRPC (internal services)
 
 **Non-Functional Requirements**:
-- Performance: <200ms response time for UI interactions
-- Availability: 99.95% uptime per channel
-- Scalability: Support 1M concurrent mobile users
+- Performance: <20ms p99 latency overhead
+- Availability: 99.99% uptime (4x instances, load balanced)
+- Scalability: Handle 10,000 concurrent connections
 
 ---
 
-### Layer 2: User Experience
+### Service Mesh
 
-**Purpose**: Orchestrate personalized banking experiences across all channels.
+**Purpose**: Manage secure service-to-service communication and observability.
 
-**Components**:
-- Mobile BFF: Backend for frontend optimized for mobile apps
-- Web BFF: Backend for frontend optimized for web portal
-- API Gateway: Kong API Gateway for routing and security
-- Session Service: Distributed session management with Redis
+**Capabilities**:
+- Automatic mTLS between all microservices
+- Traffic management (canary: 10% traffic, blue-green deployments)
+- Distributed tracing with Jaeger
+- Circuit breakers and retry policies
 
 **Technologies**:
-- Primary: Node.js (BFF), Kong (API Gateway), Redis (Session)
-- Supporting: JWT tokens, GraphQL, circuit breakers (Hystrix)
+- Primary: Istio with Envoy proxies
+- Supporting: Jaeger (tracing), Prometheus (metrics), Grafana (visualization)
 
 **Key Responsibilities**:
-- Experience orchestration and service composition
-- Session management and security token handling
-- Response aggregation and formatting
-- A/B testing and feature flag management
+- Zero-trust security with mTLS
+- Canary deployments for gradual rollouts
+- Request tracing across microservices
+- Automatic health checks and failover
 
 **Communication Patterns**:
-- Inbound: REST/GraphQL from Channels layer
-- Outbound: REST/gRPC to Business Scenarios and Business layers
-- Protocols: REST, GraphQL, gRPC
+- Sidecar proxy per microservice pod
+- Control plane (Istiod) manages configuration
+- Protocols: gRPC (control plane), HTTP/gRPC (data plane)
 
 **Non-Functional Requirements**:
-- Performance: p95 latency <100ms
-- Availability: 99.99% uptime
-- Scalability: Auto-scale 10-100 instances based on load
+- Performance: <5ms p99 proxy overhead
+- Availability: Control plane: 3 replicas, HA setup
+- Scalability: Support 50+ microservices
 
 ---
 
-### Layer 5: Domain
+### Microservices
 
-**Purpose**: Implement core banking capabilities as [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) Service Domains (default version).
+**Purpose**: Implement business capabilities as independently deployable services.
 
-**Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
-- **Customer Agreement** (SD-001 - internal ID): Manages customer agreements and terms
-- **Current Account** (SD-002 - internal ID): Handles current account operations
-- **Payment Execution** (SD-003 - internal ID): Processes payment transactions
-- **Card Management** (SD-004 - internal ID): Manages card lifecycle and operations
+#### Service: Order Service
 
-**Note**: Validate all BIAN service domain **names (Capabilities)** against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment. BIAN IDs (SD-XXX) are for internal document tracking only to count service domains.
+**Bounded Context**: Order Management
+
+**Responsibilities**:
+- Create and manage customer orders
+- Order status tracking and updates
+- Integration with inventory and payment services
+- Order history and cancellation
 
 **Technologies**:
-- Primary: Java Spring Boot microservices, PostgreSQL
-- Supporting: Kafka (events), Redis (cache), Kubernetes
+- Primary: Java 17, Spring Boot 3.1, Spring Cloud
+- Supporting: Resilience4j (circuit breakers), OpenAPI 3.0
 
-**Key Responsibilities**:
-- BIAN Service Domain implementation
-- Domain-specific business rules and validation
-- Transactional data management
-- Domain event publishing for cross-domain coordination
+**API Endpoints**:
+- `POST /api/v1/orders`: Create new order
+- `GET /api/v1/orders/{id}`: Get order details
+- `PUT /api/v1/orders/{id}/status`: Update order status
+- `DELETE /api/v1/orders/{id}`: Cancel order
 
-**Communication Patterns**:
-- Inbound: REST APIs from Integration layer
-- Outbound: REST to Core systems, Kafka events to other domains
-- Protocols: REST (synchronous), Kafka (asynchronous events)
+**Data Store**:
+- Type: PostgreSQL 15
+- Schema: orders, order_items, order_status_history tables
+- Data Ownership: All order-related data
 
-**BIAN Alignment**:
-- Service Domain Model: [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) (default and recommended version)
-- Control Records: Implemented as aggregate roots
-- Service Operations: Initiate, Update, Execute, Request, Retrieve
+**Events Published**:
+- `order.created`: When order is placed (includes order ID, user ID, items)
+- `order.cancelled`: When order is cancelled
+- `order.completed`: When order is fulfilled
+
+**Events Consumed**:
+- `payment.confirmed`: From Payment Service (trigger order processing)
+- `inventory.reserved`: From Inventory Service (confirm stock availability)
+
+**Dependencies**:
+- Upstream Services: Payment Service, Inventory Service, User Service
+- Downstream Services: Notification Service, Analytics Service
 
 **Non-Functional Requirements**:
-- Performance: <50ms service response time (p95)
-- Availability: 99.99% uptime for critical domains
-- Scalability: Horizontal scaling up to 50 instances per domain
+- Performance: <100ms p95 response time
+- Availability: 99.95% SLA, 3 replicas minimum
+- Scalability: Horizontal scaling 3-20 instances based on CPU/memory
+
+---
+
+#### Service: Product Service
+
+**Bounded Context**: Product Catalog Management
+
+**Responsibilities**:
+- Product catalog management (CRUD)
+- Product search and filtering
+- Product recommendations
+- Inventory level integration
+
+**Technologies**:
+- Primary: Node.js 20, Express.js, TypeScript
+- Supporting: Elasticsearch (search), Redis (caching)
+
+**API Endpoints**:
+- `GET /api/v1/products`: List products with pagination
+- `GET /api/v1/products/{id}`: Get product details
+- `POST /api/v1/products/search`: Search products
+- `GET /api/v1/products/{id}/recommendations`: Get recommendations
+
+**Data Store**:
+- Type: MongoDB (primary), Elasticsearch (search index)
+- Schema: products collection with flexible schema for attributes
+- Data Ownership: Product catalog, descriptions, images, metadata
+
+**Events Published**:
+- `product.updated`: When product details change
+- `product.created`: When new product added
+
+**Events Consumed**:
+- `inventory.updated`: From Inventory Service (update stock levels)
+
+**Dependencies**:
+- Upstream Services: Inventory Service (stock levels)
+- Downstream Services: Recommendation Engine, Search Service
+
+**Non-Functional Requirements**:
+- Performance: <50ms p95 for product details, <200ms for search
+- Availability: 99.99% SLA, read replicas for high availability
+- Scalability: Auto-scale 5-30 instances, ElastiCache for hot products
+
+---
+
+### Data Stores (Database-per-Service)
+
+**Purpose**: Decentralized data management ensuring service autonomy and scalability.
+
+**Pattern**: Database-per-Service
+
+**Data Stores**:
+
+| Service | Database Type | Technology | Purpose |
+|---------|--------------|------------|---------|
+| Order Service | Relational | PostgreSQL 15 | Transactional order data with ACID guarantees |
+| Product Service | Document | MongoDB 6.0 | Flexible product catalog with varied attributes |
+| User Service | Relational | PostgreSQL 15 | User accounts, profiles, preferences |
+| Analytics Service | Columnar | ClickHouse | High-performance analytics queries |
+| Session Service | Key-Value | Redis 7.0 | User sessions and temporary data |
+
+**Data Consistency Strategy**:
+- **Saga Pattern**: Orchestration for order workflow (order → payment → inventory → fulfillment)
+- **Event Sourcing**: Order Service uses event sourcing for audit trail
+- **CQRS**: Analytics Service maintains read-optimized views
+- **Eventual Consistency**: Cross-service data sync via events within 5 seconds
+
+**Data Synchronization**:
+- Method: Event-driven via Kafka, Debezium CDC for legacy systems
+- Tools: Kafka Connect, custom event handlers
+
+**Non-Functional Requirements**:
+- Performance: <10ms p99 for primary key lookups
+- Availability: Multi-AZ deployment, automated backups every 6 hours
+- Scalability: Read replicas for high-traffic services, horizontal sharding for Order/User services
+
+---
+
+### Event Bus
+
+**Purpose**: Enable asynchronous, decoupled communication between microservices.
+
+**Capabilities**:
+- Event publishing with guaranteed delivery
+- Topic partitioning for parallel processing
+- Event replay for recovery and debugging
+- Dead-letter queues for failed events
+
+**Technologies**:
+- Primary: Apache Kafka 3.4 (5-node cluster)
+- Supporting: Confluent Schema Registry, Kafka Connect, Kafdrop (monitoring)
+
+**Event Topics**:
+
+| Topic | Producers | Consumers | Purpose |
+|-------|-----------|-----------|---------|
+| `orders.events` | Order Service | Analytics, Notification, Inventory | Order lifecycle events |
+| `payments.events` | Payment Service | Order, Analytics, Fraud Detection | Payment status updates |
+| `inventory.events` | Inventory Service | Order, Product, Analytics | Stock level changes |
+| `users.events` | User Service | Recommendation, Analytics, Marketing | User activity tracking |
+
+**Key Responsibilities**:
+- Reliable event delivery with at-least-once semantics
+- Avro schema validation via Schema Registry
+- 7-day event retention for replay
+- 10 partitions per topic for parallelism
+
+**Communication Patterns**:
+- Pub/Sub for domain events
+- Event sourcing for Order Service
+- CQRS read model updates for Analytics Service
+
+**Non-Functional Requirements**:
+- Performance: <5ms p99 publish latency, 50K events/second throughput
+- Availability: Replication factor 3, min in-sync replicas 2
+- Scalability: Dynamic partition rebalancing, consumer groups for load distribution
+
+---
+
+### Supporting Infrastructure
+
+**Purpose**: Provide cross-cutting infrastructure services for all microservices.
+
+**Components**:
+
+#### Service Discovery
+- Technology: Kubernetes DNS + Consul
+- Purpose: Dynamic service registration and health-aware routing
+
+#### Configuration Management
+- Technology: Spring Cloud Config Server + Kubernetes ConfigMaps
+- Purpose: Centralized configuration with environment-specific overrides
+
+#### Secrets Management
+- Technology: HashiCorp Vault + Kubernetes Secrets
+- Purpose: Secure storage of API keys, DB credentials, certificates with auto-rotation
+
+#### Distributed Logging
+- Technology: ELK Stack (Elasticsearch, Logstash, Kibana) + Filebeat
+- Purpose: Centralized log aggregation with full-text search and dashboards
+
+#### Monitoring & Alerting
+- Technology: Prometheus + Grafana + Alertmanager
+- Purpose: Metrics collection (CPU, memory, request rates), custom dashboards, PagerDuty integration
+
+**Non-Functional Requirements**:
+- Performance: <1% overhead from logging/monitoring
+- Availability: HA deployment for Vault and Consul (3 replicas)
+- Scalability: Support 50+ services with centralized observability
 ```
 
 ---

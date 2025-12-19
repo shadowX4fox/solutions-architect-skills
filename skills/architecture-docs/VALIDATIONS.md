@@ -583,11 +583,12 @@ Format:
 
 ### Overview
 
-Starting with the Architecture Type Selection feature, ARCHITECTURE.md documents are categorized into one of four architecture types:
+Starting with the Architecture Type Selection feature, ARCHITECTURE.md documents are categorized into one of five architecture types:
+- **Microservices Architecture** (cloud-native distributed) - **Recommended**
 - **META Architecture** (6-layer enterprise)
 - **3-Tier Architecture** (classic web application)
-- **Microservices Architecture** (cloud-native distributed)
 - **N-Layer Architecture** (DDD, Clean Architecture, Hexagonal)
+- **BIAN Architecture** (5-layer BIAN-compliant for banking systems)
 
 Each architecture type has **type-specific validation rules** for Section 4 (Meta Architecture) and Section 5 (Component Details).
 
@@ -602,10 +603,11 @@ grep -n "<!-- ARCHITECTURE_TYPE:" ARCHITECTURE.md
 ```
 
 **Valid metadata values:**
+- `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`
 - `<!-- ARCHITECTURE_TYPE: META -->`
 - `<!-- ARCHITECTURE_TYPE: 3-TIER -->`
-- `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`
 - `<!-- ARCHITECTURE_TYPE: N-LAYER -->`
+- `<!-- ARCHITECTURE_TYPE: BIAN -->`
 
 **Method 2: Section 4 Header Inference**
 
@@ -615,11 +617,12 @@ If no metadata comment exists, infer type from Section 4 headers:
 grep -n "^### [0-9]" ARCHITECTURE.md | grep -A5 "## 4\."
 ```
 
-**Inference Rules:**
+**Inference Rules (in order of specificity):**
 
 | Pattern Found in Section 4 | Inferred Type |
 |---------------------------|---------------|
-| "Layer 1: Channels" AND "Layer 5: Domain" | **META** |
+| "Layer 2: BIAN Business Scenarios" OR "Layer 4: BIAN Service Domains" | **BIAN** (check first - most specific) |
+| "Layer 1: Channels" AND "Layer 5: Domain" AND "Layer 6: Core" | **META** |
 | "Tier 1: Presentation" OR "Tier 3: Data" | **3-Tier** |
 | "API Gateway" AND "Service Mesh" | **Microservices** |
 | "Clean Architecture" OR "Hexagonal" OR "Ports & Adapters" | **N-Layer** |
@@ -937,6 +940,270 @@ If matches found → **WARNING**: Domain layer should be framework-free.
 
 ❌ **Circular dependencies between layers**
 - Fix: Enforce unidirectional dependencies with dependency inversion
+
+### BIAN Architecture Validation
+
+**Applies when**: `<!-- ARCHITECTURE_TYPE: BIAN -->` is present OR Section 4 contains BIAN layer headers.
+
+#### Section 4: Meta Architecture - BIAN Layers
+
+✅ **All 5 BIAN layers must be documented in order:**
+- Layer 1: Channels
+- Layer 2: BIAN Business Scenarios
+- Layer 3: BIAN Business Capabilities
+- Layer 4: BIAN Service Domains
+- Layer 5: Core Systems
+
+✅ **Layer 2: BIAN Business Scenarios Validation:**
+- Must map business scenarios to BIAN Business Areas (5 areas):
+  - Sales and Service
+  - Reference Data
+  - Operations and Execution
+  - Risk and Compliance
+  - Business Support
+- Business scenarios organized by BIAN Business Area
+- BIAN Business Area mapping table present
+- BIAN V12.0 reference URL included
+
+**Verification Command:**
+```bash
+grep -i "Layer 2: BIAN Business Scenarios" ARCHITECTURE.md
+grep -i "BIAN Business Area" ARCHITECTURE.md | head -10
+```
+
+✅ **Layer 3: BIAN Business Capabilities Validation:**
+- Must map business capabilities to BIAN Business Domains (30+ domains)
+- Examples: Customer Management, Payments, Loans and Deposits, Risk Management, etc.
+- Business capability components mapped to BIAN Business Domains
+- BIAN Business Domain mapping table present
+- Parent Business Area documented for each Business Domain
+- BIAN V12.0 reference URL included
+
+**Verification Command:**
+```bash
+grep -i "Layer 3: BIAN Business Capabilities" ARCHITECTURE.md
+grep -i "BIAN Business Domain" ARCHITECTURE.md | head -10
+```
+
+✅ **Layer 4: BIAN Service Domains Validation (CRITICAL):**
+- Must implement BIAN Service Domains from BIAN V12.0 (326+ service domains)
+- All service domain names validated against [official BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- Service domain catalog table with BIAN IDs (SD-XXX format)
+- BIAN V12.0 reference URL: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
+
+**Verification Command:**
+```bash
+grep -i "Layer 4: BIAN Service Domains" ARCHITECTURE.md
+grep -i "BIAN Service Domain\|SD-[0-9]" ARCHITECTURE.md | wc -l
+grep -i "bian.org/servicelandscape-12-0-0" ARCHITECTURE.md
+```
+
+Expected: Multiple BIAN service domains documented with BIAN IDs (SD-001, SD-002, etc.)
+
+✅ **BIAN Hierarchy Traceability:**
+- Clear mapping: Service Domain → Business Domain → Business Area
+- Documented in Layer 4 service domain catalog
+- Cross-references between layers 2, 3, and 4
+
+**Verification Command:**
+```bash
+# Check for BIAN hierarchy documentation
+grep -A5 "BIAN Business Area\|BIAN Business Domain" ARCHITECTURE.md | grep -i "Service Domain"
+```
+
+✅ **Mermaid Diagram Requirement:**
+- Architecture diagram showing all 5 BIAN layers
+- BIAN hierarchy visualization (Business Areas → Business Domains → Service Domains)
+- Communication patterns between layers
+
+**Verification Command:**
+```bash
+grep -A20 "```mermaid" ARCHITECTURE.md | grep -i "BIAN\|Layer [1-5]"
+```
+
+#### Section 5: Component Details - BIAN Compliance
+
+✅ **Components grouped by BIAN layers (1-5):**
+- Layer 1: Channels components
+- Layer 2: BIAN Business Scenarios components
+- Layer 3: BIAN Business Capabilities components
+- Layer 4: BIAN Service Domains components (CRITICAL - see below)
+- Layer 5: Core Systems components
+
+✅ **Layer 4 Components - Complete BIAN Metadata (MANDATORY):**
+
+Every Layer 4 (BIAN Service Domain) component MUST include:
+
+1. **Official BIAN Name:**
+   - Exact name from BIAN V12.0 Service Landscape
+   - Examples: "Payment Order", "Current Account", "Party Authentication"
+
+2. **BIAN ID:**
+   - Internal tracking ID in SD-XXX format
+   - Examples: SD-001, SD-002, SD-003
+
+3. **BIAN Version:**
+   - Must be V12.0 (mandatory)
+
+4. **BIAN Business Domain:**
+   - Parent business domain from Layer 3
+   - Examples: "Payments", "Loans and Deposits", "Customer Management"
+
+5. **BIAN Business Area:**
+   - Parent business area from Layer 2
+   - Examples: "Operations and Execution", "Sales and Service"
+
+6. **BIAN Service Landscape URL:**
+   - Direct link to service domain in BIAN V12.0
+   - Must be: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
+
+7. **Control Record:**
+   - Control Record Type (e.g., "PaymentOrderProcedure")
+   - Control Record Structure (fields, types, descriptions)
+   - Lifecycle States (e.g., Initiated, Completed, Failed, Cancelled)
+   - State Transitions (allowed state changes)
+
+8. **Service Operations (BIAN V12.0 Standard):**
+   - **Initiate**: Create new control record (MANDATORY)
+   - **Update**: Modify control record (MANDATORY)
+   - **Retrieve**: Query control record (MANDATORY)
+   - **Control**: Manage lifecycle (MANDATORY)
+   - **Exchange**: If applicable per BIAN spec (OPTIONAL)
+   - **Execute**: If applicable per BIAN spec (OPTIONAL)
+   - **Request**: If applicable per BIAN spec (OPTIONAL)
+
+9. **Behavior Qualifiers:**
+   - List of behavior qualifiers from BIAN spec
+   - Examples: "compliance", "reporting", "booking", "registration", "valuation"
+
+10. **Functional Patterns:**
+    - Pattern Type from BIAN spec
+    - Examples: "Managed Object", "Tracked Object", "Administered Object", "Governed Object"
+    - Pattern Description
+
+11. **BIAN Compliance Level:**
+    - Compliance Level: Full BIAN V12.0 Compliance (required for BIAN architecture)
+    - Validation Date: When compliance was verified
+    - Deviations: None for full compliance, or document customizations
+
+12. **BIAN Traceability:**
+    - Service Domain → Business Domain → Business Area mapping documented
+
+**Verification Command for Layer 4 Components:**
+```bash
+# Check for BIAN metadata in Layer 4 components
+grep -A50 "Layer 4.*BIAN Service Domain" ARCHITECTURE.md | \
+  grep -E "Official BIAN Name|BIAN ID|BIAN Version|Control Record|Service Operations|Behavior Qualifiers|Functional Pattern"
+```
+
+Expected: Every Layer 4 component includes all 12 required BIAN metadata fields.
+
+**Verification Command for BIAN V12.0 URLs:**
+```bash
+# Count BIAN V12.0 URL references
+grep -c "bian.org/servicelandscape-12-0-0" ARCHITECTURE.md
+```
+
+Expected: Multiple references (at least one per service domain + general references)
+
+✅ **Layer 2 Components - BIAN Business Area Mapping:**
+- Each component mapped to one of 5 BIAN Business Areas
+- BIAN Business Area documented in component metadata
+- Orchestration logic for business scenarios documented
+
+✅ **Layer 3 Components - BIAN Business Domain Mapping:**
+- Each component mapped to a BIAN Business Domain (30+ domains)
+- BIAN Business Domain documented in component metadata
+- Parent Business Area documented
+- Service Domains coordinated by this capability listed
+
+✅ **Layer 5 Components - BIAN Integration Strategy:**
+- Core systems integration with BIAN service domains documented
+- Adapter pattern for BIAN integration described
+- Modernization strategy aligned with BIAN architecture
+
+#### Common Errors - BIAN Architecture
+
+❌ **Missing layers (not all 5 layers present)**
+- Fix: Document all 5 BIAN layers in Section 4 in correct order
+
+❌ **Layer 2 not mapped to BIAN Business Areas**
+- Fix: Add BIAN Business Area mapping table, map scenarios to 5 BIAN Business Areas
+
+❌ **Layer 3 not mapped to BIAN Business Domains**
+- Fix: Add BIAN Business Domain mapping table, identify which domains are implemented
+
+❌ **Layer 4 service domain names don't match BIAN V12.0**
+- Fix: Validate all service domain names against [official BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- Examples of correct names: "Payment Order", "Payment Execution", "Current Account"
+
+❌ **Layer 4 components missing BIAN metadata**
+- Fix: Add all 12 required BIAN metadata fields for every Layer 4 component
+- Required: Official BIAN Name, BIAN ID, Version, Business Domain, Business Area, URL, Control Record, Service Operations, Behavior Qualifiers, Functional Patterns, Compliance Level, Traceability
+
+❌ **Control records not documented per BIAN spec**
+- Fix: Document control record structure, lifecycle states, and state transitions per BIAN V12.0
+
+❌ **Missing mandatory BIAN service operations**
+- Fix: Implement all 4 mandatory operations: Initiate, Update, Retrieve, Control
+- Optional operations: Exchange, Execute, Request (add if applicable per BIAN spec)
+
+❌ **Behavior qualifiers not documented**
+- Fix: List all behavior qualifiers from BIAN spec for each service domain
+- Reference: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
+
+❌ **Functional patterns not documented**
+- Fix: Identify and document BIAN functional pattern (Managed Object, Tracked Object, etc.)
+
+❌ **BIAN V12.0 URLs missing or incorrect**
+- Fix: Use correct URL: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
+- Add URL references in Layer 2, Layer 3, and Layer 4 sections
+
+❌ **BIAN hierarchy not traceable**
+- Fix: Document clear mapping: Service Domain → Business Domain → Business Area
+- Add cross-references between layers 2, 3, and 4
+
+❌ **Compliance level not documented**
+- Fix: Document "Full BIAN V12.0 Compliance" for each Layer 4 service domain
+- Include validation date and any deviations
+
+❌ **BIAN IDs not used consistently**
+- Fix: Assign BIAN IDs (SD-001, SD-002, etc.) for internal tracking
+- Use consistently throughout document
+
+#### BIAN Architecture Checklist
+
+**Section 4: Meta Architecture**
+- [ ] All 5 layers documented in order (Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core Systems)
+- [ ] Layer 2 mapped to 5 BIAN Business Areas
+- [ ] Layer 2 includes BIAN Business Area mapping table
+- [ ] Layer 3 mapped to BIAN Business Domains (30+ domains)
+- [ ] Layer 3 includes BIAN Business Domain mapping table
+- [ ] Layer 4 implements BIAN Service Domains from BIAN V12.0
+- [ ] Layer 4 includes service domain catalog with BIAN IDs
+- [ ] All layer names use exact BIAN terminology
+- [ ] BIAN V12.0 reference URL included throughout
+- [ ] BIAN hierarchy traceability documented
+- [ ] Mermaid diagram shows all 5 BIAN layers
+
+**Section 5: Component Details**
+- [ ] Components grouped by 5 BIAN layers
+- [ ] Layer 4 components include complete BIAN metadata (all 12 fields)
+- [ ] Official BIAN Names validated against BIAN V12.0 Service Landscape
+- [ ] BIAN IDs (SD-XXX) assigned to all Layer 4 components
+- [ ] BIAN Version V12.0 documented for all Layer 4 components
+- [ ] BIAN Business Domain documented for all Layer 4 components
+- [ ] BIAN Business Area documented for all Layer 4 components
+- [ ] BIAN Service Landscape URL included for all Layer 4 components
+- [ ] Control records documented per BIAN specification
+- [ ] All 4 mandatory service operations implemented (Initiate, Update, Retrieve, Control)
+- [ ] Behavior qualifiers documented per BIAN spec
+- [ ] Functional patterns documented per BIAN spec
+- [ ] Full BIAN V12.0 compliance level documented
+- [ ] BIAN hierarchy traceability documented (Service Domain → Business Domain → Business Area)
+- [ ] Layer 2 components mapped to BIAN Business Areas
+- [ ] Layer 3 components mapped to BIAN Business Domains
+- [ ] Layer 5 includes BIAN integration and modernization strategy
 
 ### Type-Aware Validation Workflow
 

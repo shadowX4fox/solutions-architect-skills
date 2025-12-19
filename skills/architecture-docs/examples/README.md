@@ -4,7 +4,23 @@ This directory contains example ARCHITECTURE.md files demonstrating each support
 
 ## Available Examples
 
-### 1. ARCHITECTURE_example_meta.md
+### 1. ARCHITECTURE_example_microservices.md (Recommended)
+**Architecture Type**: Microservices (Cloud-Native Distributed)
+
+Demonstrates:
+- Infrastructure components (API Gateway, Service Mesh, Event Bus)
+- Database-per-service pattern
+- Event-driven communication
+- Circuit breaker patterns
+- Microservice catalog with comprehensive service details
+
+**Best for**: Cloud-native systems, independently deployable services, event-driven architectures
+
+**Why Recommended**: Industry-standard approach for modern, scalable, cloud-native applications
+
+---
+
+### 2. ARCHITECTURE_example_meta.md
 **Architecture Type**: META (6-Layer Enterprise)
 
 Demonstrates:
@@ -19,7 +35,7 @@ Demonstrates:
 
 ---
 
-### 2. ARCHITECTURE_example_3tier.md
+### 3. ARCHITECTURE_example_3tier.md
 **Architecture Type**: 3-Tier (Classic Web Application)
 
 Demonstrates:
@@ -29,20 +45,6 @@ Demonstrates:
 - Standard web application patterns
 
 **Best for**: Web applications, REST APIs, standard CRUD systems
-
----
-
-### 3. ARCHITECTURE_example_microservices.md
-**Architecture Type**: Microservices (Cloud-Native Distributed)
-
-Demonstrates:
-- Infrastructure components (API Gateway, Service Mesh, Event Bus)
-- Database-per-service pattern
-- Event-driven communication
-- Circuit breaker patterns
-- Microservice catalog with comprehensive service details
-
-**Best for**: Cloud-native systems, independently deployable services, event-driven architectures
 
 ---
 
@@ -90,15 +92,17 @@ This metadata enables type-specific validation and ensures proper template selec
 
 ## Comparison Matrix
 
-| Feature | META | 3-Tier | Microservices | N-Layer |
-|---------|------|--------|---------------|---------|
-| **Complexity** | Very High | Low | High | Medium-High |
-| **Team Size** | Large (10+) | Small-Med (2-8) | Large (10+) | Medium (4-10) |
-| **Scalability** | Horizontal/Vertical | Vertical | Horizontal | Depends on pattern |
-| **Deployment** | Complex | Simple | Complex (independent) | Moderate |
-| **Data Management** | Centralized/Distributed | Centralized | Distributed (per-service) | Depends on pattern |
-| **Integration** | Complex (ESB/Integration layer) | Simple (direct) | Event-driven + REST | Interface-based |
-| **Best For** | Enterprises, banking | Web apps, APIs | Cloud-native, SaaS | DDD, Clean Arch |
+| Feature | Microservices* | META | 3-Tier | N-Layer |
+|---------|----------------|------|--------|---------|
+| **Complexity** | High | Very High | Low | Medium-High |
+| **Team Size** | Large (10+) | Large (10+) | Small-Med (2-8) | Medium (4-10) |
+| **Scalability** | Horizontal | Horizontal/Vertical | Vertical | Depends on pattern |
+| **Deployment** | Complex (independent) | Complex | Simple | Moderate |
+| **Data Management** | Distributed (per-service) | Centralized/Distributed | Centralized | Depends on pattern |
+| **Integration** | Event-driven + REST | Complex (ESB/Integration layer) | Simple (direct) | Interface-based |
+| **Best For** | Cloud-native, SaaS | Enterprises, banking | Web apps, APIs | DDD, Clean Arch |
+
+\* Recommended for modern cloud-native applications
 
 ---
 

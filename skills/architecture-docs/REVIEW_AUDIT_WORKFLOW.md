@@ -53,34 +53,53 @@ Verify structural integrity and compliance with architecture documentation stand
 #### 2. Architecture Type Validation
 
 **What to Check**:
-- HTML comment with architecture type present at top of document: `<!-- ARCHITECTURE_TYPE: {TYPE} -->`
-- Architecture type is one of: META, 3-TIER, MICROSERVICES, N-LAYER
+- HTML comment with architecture type present at top of Section 4: `<!-- ARCHITECTURE_TYPE: {TYPE} -->`
+- Architecture type is one of: MICROSERVICES, META, 3-TIER, N-LAYER, BIAN
 - Section 4 (Architecture Layers) structure matches declared architecture type
 - Section 5 (Component Details) component organization matches architecture type
 
 **Architecture Type Requirements**:
 
+**Microservices Architecture (Recommended)**:
+- Section 4 must define service mesh topology and communication patterns
+- Section 5 must provide service catalog with bounded contexts and APIs
+
 **META Architecture (6-Layer)**:
 - Section 4 must define 6 layers: Channels → UX → Business Scenarios → Integration → Domain → Core
 - Section 5 components must be mapped to these 6 layers
+- Layer 5 (Domain) must include BIAN V12.0 alignment section
 
 **3-Tier Architecture**:
 - Section 4 must define 3 tiers: Presentation → Application/Business Logic → Data
 - Section 5 components must be organized by tier assignment
 
-**Microservices Architecture**:
-- Section 4 must define service mesh topology and communication patterns
-- Section 5 must provide service catalog with bounded contexts and APIs
-
 **N-Layer Architecture**:
 - Section 4 must define custom layers (4-7 layers typical)
 - Section 5 components must be mapped to defined layers
+
+**BIAN Architecture (5-Layer BIAN-Compliant)**:
+- Section 4 must define 5 BIAN layers in order: Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems
+- Layer 2 must map to BIAN Business Areas (5 areas)
+- Layer 3 must map to BIAN Business Domains (30+ domains)
+- Layer 4 must implement BIAN Service Domains from [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- All Layer 4 service domain names validated against official BIAN Service Landscape
+- Section 5 components must be grouped by all 5 BIAN layers
+- Layer 4 components must include complete BIAN metadata (12 required fields):
+  1. Official BIAN Name, 2. BIAN ID (SD-XXX), 3. BIAN Version (V12.0), 4. BIAN Business Domain, 5. BIAN Business Area, 6. BIAN Service Landscape URL, 7. Control Record, 8. Service Operations (Initiate, Update, Retrieve, Control), 9. Behavior Qualifiers, 10. Functional Patterns, 11. BIAN Compliance Level, 12. BIAN Traceability
+- Full BIAN V12.0 compliance level documented for all Layer 4 service domains
+- BIAN hierarchy traceability: Service Domain → Business Domain → Business Area
 
 **Common Violations**:
 - ❌ Missing architecture type HTML comment
 - ❌ Invalid architecture type value
 - ❌ Section 4 structure doesn't match declared type
 - ❌ Section 5 components not organized according to architecture type
+- ❌ BIAN: Missing layers (not all 5 layers present)
+- ❌ BIAN: Layer 4 service domain names don't match BIAN V12.0
+- ❌ BIAN: Layer 4 components missing BIAN metadata (all 12 fields required)
+- ❌ BIAN: Control records not documented per BIAN specification
+- ❌ BIAN: Missing mandatory BIAN service operations
+- ❌ BIAN: BIAN hierarchy not traceable
 
 ---
 

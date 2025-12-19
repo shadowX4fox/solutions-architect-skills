@@ -173,10 +173,11 @@ After significant edits:
 
 ### Available Architecture Types
 
-1. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Business → Domain → Core) with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 Domain service domains
-2. **3-Tier Architecture** - Classic web application pattern (Presentation → Application/Business Logic → Data)
-3. **Microservices Architecture** - Cloud-native distributed systems with independent services
+1. **Microservices Architecture (Recommended)** - Cloud-native distributed systems with independent services
+2. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Business → Domain → Core) with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 Domain service domains
+3. **3-Tier Architecture** - Classic web application pattern (Presentation → Application/Business Logic → Data)
 4. **N-Layer Architecture** - Customizable patterns (DDD, Clean Architecture, Hexagonal)
+5. **BIAN Architecture** - 5-layer BIAN-compliant model (Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems) with full [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) compliance across layers 2-4
 
 **BIAN Standard for META**: BIAN V12.0 is the default and recommended version for META architecture. Use the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify and define service domains for Layer 5 (Domain).
 
@@ -191,23 +192,24 @@ When creating a new ARCHITECTURE.md, present the user with architecture type sel
 
 Before creating your ARCHITECTURE.md, please select the architecture type that best describes your system:
 
-**1. META Architecture** (6-Layer Enterprise)
+**1. Microservices Architecture (Recommended)** (Cloud-Native Distributed)
+   - Best for: Cloud-native systems, independently deployable services, modern applications
+   - Components: API Gateway → Services → Data Stores → Event Bus
+   - Complexity: High
+   - Team Size: Large (10+)
+   - Why Recommended: Industry standard for scalable, resilient modern applications
+
+**2. META Architecture** (6-Layer Enterprise)
    - Best for: Large enterprise systems, financial services, complex integrations
    - Layers: Channels → UX → Business Scenarios → Integration → Domain → Core
    - Complexity: Very High
    - Team Size: Large (10+)
 
-**2. 3-Tier Architecture** (Classic Web Application)
+**3. 3-Tier Architecture** (Classic Web Application)
    - Best for: Web apps, REST APIs, standard CRUD systems
    - Tiers: Presentation → Application/Business Logic → Data
    - Complexity: Low
    - Team Size: Small-Medium (2-8)
-
-**3. Microservices Architecture** (Cloud-Native Distributed)
-   - Best for: Cloud-native systems, independently deployable services
-   - Components: API Gateway → Services → Data Stores → Event Bus
-   - Complexity: High
-   - Team Size: Large (10+)
 
 **4. N-Layer Architecture** (Customizable Patterns)
    - Best for: DDD, Clean Architecture, Hexagonal Architecture
@@ -215,25 +217,35 @@ Before creating your ARCHITECTURE.md, please select the architecture type that b
    - Complexity: Medium-High
    - Team Size: Medium (4-10)
 
+**5. BIAN Architecture** (5-Layer BIAN-Compliant)
+   - Best for: Banking systems requiring BIAN V12.0 certification, full BIAN compliance
+   - Layers: Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems
+   - Complexity: Very High
+   - Team Size: Large (10+)
+   - BIAN Compliance: Full BIAN V12.0 across layers 2-4
+
 For detailed comparison and decision guidance, refer to: `templates/ARCHITECTURE_TYPE_SELECTOR.md`
 
-**Which architecture type best describes your system? (1-4)**
+**Which architecture type best describes your system? (1-5, or type name)**
+
+Note: Option 1 (Microservices) is recommended for most modern cloud-native applications.
 ```
 
 #### Step 2: Capture User Selection
 
-Wait for user response (1, 2, 3, or 4) or architecture type name.
+Wait for user response (1, 2, 3, 4, or 5) or architecture type name.
 
 **Valid inputs:**
-- Numeric: `1`, `2`, `3`, `4`
-- Type names: `META`, `3-Tier`, `Microservices`, `N-Layer`
-- Variations: `meta`, `three-tier`, `microservices`, `n-layer`
+- Numeric: `1`, `2`, `3`, `4`, `5`
+- Type names: `Microservices`, `META`, `3-Tier`, `N-Layer`, `BIAN`
+- Variations: `microservices`, `meta`, `three-tier`, `n-layer`, `bian`
 
 **If user is unsure:**
 - Offer to load `templates/ARCHITECTURE_TYPE_SELECTOR.md` decision guide
 - Provide quick decision tree questions
-- Default to **META** if user has enterprise requirements
-- Default to **3-Tier** if user wants simplicity
+- Default to **Microservices (Recommended)** for modern cloud-native systems
+- Default to **META** if user has enterprise requirements and regulatory compliance needs
+- Default to **3-Tier** if user wants maximum simplicity and minimal operational complexity
 
 #### Step 3: Load Type-Specific Templates
 
@@ -241,10 +253,11 @@ Based on user selection, load the appropriate templates:
 
 | Selection | Section 4 Template | Section 5 Template |
 |-----------|-------------------|-------------------|
-| META (1) | `templates/SECTION_4_META.md` | `templates/SECTION_5_META.md` |
-| 3-Tier (2) | `templates/SECTION_4_3TIER.md` | `templates/SECTION_5_3TIER.md` |
-| Microservices (3) | `templates/SECTION_4_MICROSERVICES.md` | `templates/SECTION_5_MICROSERVICES.md` |
+| Microservices (1) | `templates/SECTION_4_MICROSERVICES.md` | `templates/SECTION_5_MICROSERVICES.md` |
+| META (2) | `templates/SECTION_4_META.md` | `templates/SECTION_5_META.md` |
+| 3-Tier (3) | `templates/SECTION_4_3TIER.md` | `templates/SECTION_5_3TIER.md` |
 | N-Layer (4) | `templates/SECTION_4_NLAYER_PATTERNS.md` | *(Use generic component template)* |
+| BIAN (5) | `templates/SECTION_4_BIAN.md` | `templates/SECTION_5_BIAN.md` |
 
 **Loading Process:**
 1. Read the appropriate Section 4 template file
@@ -265,6 +278,7 @@ When creating the ARCHITECTURE.md, add an HTML comment metadata tag at the begin
 - `<!-- ARCHITECTURE_TYPE: 3-TIER -->`
 - `<!-- ARCHITECTURE_TYPE: MICROSERVICES -->`
 - `<!-- ARCHITECTURE_TYPE: N-LAYER -->`
+- `<!-- ARCHITECTURE_TYPE: BIAN -->`
 
 **Purpose:**
 - Enables type detection for future edits
@@ -302,8 +316,11 @@ If found, extract the type from the comment.
 If no metadata comment, infer from Section 4 headers:
 
 ```bash
+# Check for BIAN indicators (check FIRST - most specific)
+grep -E "(Layer 2: BIAN Business Scenarios|Layer 4: BIAN Service Domains)" ARCHITECTURE.md
+
 # Check for META indicators
-grep -E "(Layer 1: Channels|Layer 5: Domain|BIAN V12.0)" ARCHITECTURE.md
+grep -E "(Layer 1: Channels|Layer 5: Domain|Layer 6: Core)" ARCHITECTURE.md
 
 # Check for 3-Tier indicators
 grep -E "(Tier 1: Presentation|Tier 3: Data)" ARCHITECTURE.md
@@ -315,12 +332,13 @@ grep -E "(API Gateway|Service Mesh|Microservices Catalog)" ARCHITECTURE.md
 grep -E "(Clean Architecture|Hexagonal|Ports & Adapters)" ARCHITECTURE.md
 ```
 
-**Inference Rules:**
-- Contains "Layer 1: Channels" AND "Layer 5: Domain" → **META**
+**Inference Rules (in order of specificity):**
+- Contains "Layer 2: BIAN Business Scenarios" OR "Layer 4: BIAN Service Domains" → **BIAN**
+- Contains "Layer 1: Channels" AND "Layer 5: Domain" AND "Layer 6: Core" → **META**
 - Contains "Tier 1: Presentation" OR "Tier 3: Data" → **3-Tier**
 - Contains "API Gateway" AND "Service Mesh" → **Microservices**
 - Contains "Clean Architecture" OR "Hexagonal" → **N-Layer**
-- Cannot determine → Ask user or default to **META**
+- Cannot determine → Ask user or default to **Microservices (Recommended)**
 
 ### Changing Architecture Type (Existing Document)
 
@@ -360,6 +378,21 @@ If user requests to change architecture type of an existing ARCHITECTURE.md:
 ### Type-Specific Validation
 
 After selecting or detecting architecture type, apply type-specific validation rules:
+
+**BIAN Architecture:**
+- ✅ Must have all 5 layers (Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core Systems)
+- ✅ Layer 2 must map to BIAN Business Areas (5 areas)
+- ✅ Layer 3 must map to BIAN Business Domains (30+ domains)
+- ✅ Layer 4 must implement BIAN Service Domains from [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- ✅ All Layer 4 service domain names validated against official [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- ✅ Layer 4 components must include complete BIAN metadata (Official Name, BIAN ID, Version, Business Domain, Business Area, URL)
+- ✅ Control records documented per BIAN specification for all Layer 4 service domains
+- ✅ All mandatory BIAN service operations implemented (Initiate, Update, Retrieve, Control)
+- ✅ Behavior qualifiers documented per BIAN spec
+- ✅ Functional patterns documented per BIAN spec (Managed Object, Tracked Object, etc.)
+- ✅ Full BIAN V12.0 compliance level documented
+- ✅ BIAN hierarchy traceability: Service Domain → Business Domain → Business Area
+- ✅ Layers documented in correct order
 
 **META Architecture:**
 - ✅ Must have all 6 layers (Channels, UX, Business Scenarios, Business, Domain, Core)

@@ -160,15 +160,33 @@ For each layer, document the following information:
 
 **Purpose**: Represent the functional core of the business, modeled under [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) standard
 
+**BIAN V12.0 Hierarchy**:
+Layer 5 service domains must be traceable to their parent BIAN hierarchy:
+- BIAN Business Area (5 areas: Sales and Service, Reference Data, Operations and Execution, Risk and Compliance, Business Support)
+- BIAN Business Domain (30+ domains: e.g., Payments, Customer Management, Loans and Deposits)
+- BIAN Service Domain (326+ domains) ← Layer 5 implements this level
+
 **Service Domains** ([BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)):
 
 Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify appropriate service domains for your system.
 
-- Service Domain 1: [BIAN Capability Name, BIAN ID (e.g., SD-001 - internal tracking), description]
-- Service Domain 2: [BIAN Capability Name, BIAN ID (e.g., SD-003 - internal tracking), description]
-- Service Domain 3: [BIAN Capability Name, BIAN ID (e.g., SD-045 - internal tracking), description]
+**Service Domain Template** (use for each service domain):
+- **Official BIAN Name**: [Exact name from BIAN V12.0 Service Landscape - e.g., "Payment Order", "Current Account"]
+- **BIAN ID**: [SD-XXX for internal document tracking only - e.g., SD-001, SD-002]
+- **BIAN Business Domain**: [Parent business domain - e.g., "Payments", "Customer Management", "Loans and Deposits"]
+- **BIAN Business Area**: [Parent business area - e.g., "Operations and Execution", "Sales and Service", "Risk and Compliance"]
+- **Description**: [Brief description of this service domain's purpose in your system]
+- **BIAN Service Landscape URL**: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
 
-**Note**: Validate each service domain **name (Capability)** against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment. BIAN IDs (SD-XXX) are for internal document tracking only to count how many service domains are used.
+**Example**:
+- **Official BIAN Name**: Payment Order
+- **BIAN ID**: SD-001
+- **BIAN Business Domain**: Payments
+- **BIAN Business Area**: Operations and Execution
+- **Description**: Manages payment order creation, validation, and execution
+- **BIAN Service Landscape URL**: https://bian.org/servicelandscape-12-0-0/views/view_51891.html
+
+**Note**: Validate each service domain **Official BIAN Name** against the official [BIAN V12.0 Service Landscape](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to ensure accurate alignment. BIAN IDs (SD-XXX) are for internal document tracking only to count how many service domains are used. BIAN Business Domain and Business Area must be traceable to the BIAN hierarchy.
 
 **Technologies**:
 - Primary: [Microservices framework]
@@ -188,17 +206,61 @@ Reference the [BIAN Service Landscape](https://bian.org/servicelandscape-12-0-0/
 - Protocols: [REST, gRPC, domain events]
 
 **BIAN Alignment**:
-- **Service Domain Model**: BIAN V12.0 (default and recommended version)
+- **Service Domain Model**: BIAN V12.0 (mandatory)
 - **Official Reference**: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
-- **Control Records**: [How implemented - document control record structure per BIAN spec]
-- **Service Operations**: [Activation, configuration, feedback - reference official BIAN operations]
-- **Compliance Level**: [Document alignment level - Full/Partial/Custom]
+
+**Control Records** (per BIAN V12.0):
+Each service domain must document its control record structure per BIAN specification:
+- **Control Record Type**: [As defined in BIAN spec - e.g., "PaymentOrderProcedure", "CurrentAccountFulfillmentArrangement"]
+- **Control Record Structure**:
+  - Field 1: [Name, data type, description per BIAN spec]
+  - Field 2: [Name, data type, description per BIAN spec]
+  - Field 3: [Name, data type, description per BIAN spec]
+  - [Add all fields as defined in BIAN V12.0 specification]
+- **Lifecycle States**: [Document all states - e.g., Initiated, Active, Completed, Suspended, Cancelled per BIAN]
+- **State Transitions**: [Document allowed state transitions per BIAN specification - e.g., Initiated→Active, Active→Suspended, Suspended→Active, Active→Completed]
+
+**Service Operations** (BIAN V12.0 Standard):
+All BIAN service domains support the following standardized operations (document which operations are implemented for each service domain):
+
+**Mandatory Operations** (all service domains MUST implement):
+- **Initiate**: Create new control record
+- **Update**: Modify existing control record
+- **Retrieve**: Query control record
+- **Control**: Manage control record lifecycle (suspend, resume, terminate)
+
+**Optional Operations** (implement if applicable per BIAN spec for specific service domain):
+- **Exchange**: Bi-directional data exchange (if applicable per BIAN spec)
+- **Execute**: Execute service operation (if applicable per BIAN spec)
+- **Request**: Request service action (if applicable per BIAN spec)
+
+Reference: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+
+**Behavior Qualifiers**:
+Document all behavior qualifiers defined in BIAN V12.0 for each service domain.
+
+Examples: "registration", "valuation", "compliance", "reporting", "booking", "analysis", "fulfillment"
+
+Reference: [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+
+**Functional Patterns**:
+Identify and document the BIAN functional pattern for each service domain:
+- **Pattern Types**: Managed Object | Tracked Object | Administered Object | Governed Object | Monitored Object | Catalog Entry | Register Entry
+- **Pattern Description**: [How the service domain implements the pattern]
+- **Pattern Implications**: [What the pattern means for service operations and lifecycle management]
+
+**Compliance Level**: Full BIAN V12.0 compliance (mandatory for META Layer 5)
 
 **Implementation Guidance**:
-1. Validate service domain **names (Capabilities)** against the official BIAN V12.0 landscape
+1. Validate service domain **Official BIAN Name** against the official BIAN V12.0 landscape
 2. Assign internal BIAN IDs (e.g., SD-001, SD-002) for document tracking purposes only
-3. Implement service operations according to BIAN V12.0 specifications for the validated capability
-4. Maintain control records as defined in BIAN standards
+3. Document BIAN hierarchy traceability: Service Domain → Business Domain → Business Area
+4. Document control record structure with fields, data types, and lifecycle states per BIAN spec
+5. Specify which BIAN service operations are implemented (4 mandatory + optional)
+6. List behavior qualifiers from BIAN V12.0 for each service domain
+7. Identify functional pattern type and implications for service lifecycle
+8. Implement service operations according to BIAN V12.0 specifications with enforced API endpoint naming
+9. Ensure Full BIAN V12.0 compliance for all Layer 5 service domains
 
 **Non-Functional Requirements**:
 - Performance: [Service response time]
