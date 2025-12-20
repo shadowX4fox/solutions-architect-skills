@@ -1784,6 +1784,18 @@ Architectural decisions are documented in ADRs. See [ADR_GUIDE.md](ADR_GUIDE.md)
 | [ADR-001](adr/ADR-001.md) | [Title] | Accepted | YYYY-MM-DD | High/Medium/Low |
 ```
 
+**Automatic ADR File Generation**:
+
+When using the architecture-docs skill to create ARCHITECTURE.md, you will be prompted to automatically generate these ADR files. The skill will:
+- Read the table above
+- Create each ADR file in the `adr/` directory
+- Populate metadata (title, status, date) from the table
+- Use the standard template (`adr/ADR-000-template.md`)
+
+You can skip automatic generation and create ADRs manually as architectural decisions are made. To add ADRs later, simply update this table and manually create the files using the template.
+
+For complete ADR creation guide and template details, see: [ADR_GUIDE.md](ADR_GUIDE.md)
+
 ---
 
 ## References

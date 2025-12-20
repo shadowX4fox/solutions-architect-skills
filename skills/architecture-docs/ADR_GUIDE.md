@@ -193,7 +193,50 @@ Create an ADR for decisions that:
 - **Scalability Approaches**: Caching strategies, database sharding
 - **Integration Choices**: Third-party services, APIs, message brokers
 
-### ADR Workflow
+### Automatic ADR Generation
+
+When creating a new ARCHITECTURE.md using the architecture-docs skill, you will be prompted to automatically generate ADR files from the Section 12 table. This feature:
+
+- **Creates ADR files** with proper naming convention (`ADR-{number}-{slug}.md`)
+- **Populates metadata** from Section 12 table (title, status, date, impact)
+- **Uses the standard template** (ADR-000-template.md)
+- **Creates the adr/ directory** if it doesn't exist
+- **Handles conflicts** gracefully (never overwrites existing files)
+
+**How it Works:**
+
+1. After creating ARCHITECTURE.md, you'll see a prompt:
+   ```
+   Would you like me to generate the ADR files now?
+
+   Options:
+   1. [Yes - Generate ADRs] - Create all ADR files listed in Section 12
+   2. [Preview First] - Show me which ADRs will be created
+   3. [No Thanks] - I'll create them manually later
+   4. [Learn More] - Tell me about ADRs and the template
+   ```
+
+2. If you choose to generate ADRs, the skill will:
+   - Read Section 12 table in ARCHITECTURE.md
+   - Extract ADR metadata (number, title, status, date)
+   - Generate ADR files using the template
+   - Report which files were created
+
+3. You can then customize each ADR by filling in:
+   - Context section (problem statement, requirements)
+   - Decision section (what was decided)
+   - Rationale section (why this choice)
+   - Consequences section (positive/negative outcomes)
+   - Alternatives section (options considered but rejected)
+
+**To regenerate ADRs later or add new ones:**
+- Update Section 12 table in ARCHITECTURE.md with new ADR entries
+- Manually copy and customize ADR-000-template.md
+- Use the architecture-docs skill's ADR generation feature
+
+**Note**: Automatic generation is optional - you can skip it and create ADRs manually using the workflow below.
+
+### Manual ADR Workflow
 
 ```bash
 # 1. Copy template

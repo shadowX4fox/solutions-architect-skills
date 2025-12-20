@@ -300,6 +300,531 @@ Create the complete ARCHITECTURE.md using:
 - All template content properly formatted
 - Placeholder values for customization
 
+#### Step 6: Prompt for ADR Generation (Optional)
+
+**Trigger**: Immediately after Step 5 completes successfully (ARCHITECTURE.md created)
+
+**Objective**: Offer to generate ADR files from Section 12 table
+
+---
+
+##### Step 6.0: Present ADR Generation Prompt
+
+After ARCHITECTURE.md is successfully created, display the following prompt:
+
+```
+✅ ARCHITECTURE.md created successfully!
+
+═══════════════════════════════════════════════════════════
+📋 Architecture Decision Records (ADRs) Setup
+═══════════════════════════════════════════════════════════
+
+Section 12 of your ARCHITECTURE.md includes an ADR table with placeholder
+entries. I can automatically generate these ADR files using the standard
+ADR template.
+
+Would you like me to generate the ADR files now?
+
+Options:
+1. [Yes - Generate ADRs] - Create all ADR files listed in Section 12
+2. [Preview First] - Show me which ADRs will be created
+3. [No Thanks] - I'll create them manually later
+4. [Learn More] - Tell me about ADRs and the template
+
+Recommended: Option 1 (Generate ADRs) - Saves time and ensures consistency
+```
+
+**Wait for user response**: `1`, `2`, `3`, `4`, or keywords like "yes", "preview", "no", "learn more"
+
+---
+
+##### Step 6.1: Handle User Selection
+
+**If user selects Option 1 (Yes - Generate ADRs)**:
+- Proceed to Step 6.2 (Locate Section 12)
+
+**If user selects Option 2 (Preview First)**:
+- Proceed to Step 6.2 (Locate Section 12)
+- After Step 6.3 (Extract ADR List), show preview
+- Re-prompt: "Proceed with generation? (yes/no)"
+- If yes: Continue to Step 6.4
+- If no: Skip to Step 6.8 (Complete)
+
+**If user selects Option 3 (No Thanks)**:
+- Skip to Step 6.8 (Complete with skip message)
+
+**If user selects Option 4 (Learn More)**:
+- Show ADR information:
+
+```
+Architecture Decision Records (ADRs) document important architectural choices,
+providing context for future team members and explaining the "why" behind
+technical decisions.
+
+**What ADRs Document**:
+- Technology selection rationale
+- Architecture pattern choices
+- Trade-offs and alternatives considered
+- Consequences of decisions
+
+**ADR Template Structure**:
+- Context: Problem statement and requirements
+- Decision: What was decided
+- Rationale: Why this choice was made
+- Consequences: Positive/negative outcomes
+- Alternatives: Options that were considered but rejected
+
+**Template Location**: skills/architecture-docs/adr/ADR-000-template.md
+**Guide**: skills/architecture-docs/ADR_GUIDE.md
+
+Would you like me to generate the ADR files now? (yes/no)
+```
+
+- Re-prompt with Options 1-3
+- Wait for new response
+
+---
+
+##### Step 6.2: Locate Section 12
+
+**Method 1: Use Document Index** (preferred)
+
+```bash
+# Read Document Index to find Section 12 line range
+grep -A 20 "^## Document Index" ARCHITECTURE.md | grep "Section 12"
+```
+
+**Expected output**: `- [Section 12: Architecture Decision Records (ADRs)](#12-architecture-decision-records-adrs) → Lines 1750-1800`
+
+**Parse line range**: Extract start line `1750` and end line `1800`
+
+**Method 2: Fallback - Find by Header**
+
+If Document Index method fails:
+
+```bash
+# Find Section 12 header line number
+grep -n "^## 12\. Architecture Decision Records" ARCHITECTURE.md
+```
+
+**Expected output**: `1750:## 12. Architecture Decision Records (ADRs)`
+
+**Parse line number**: Extract `1750`
+
+**Read until**: Next section header or end of file (typically 50-100 lines)
+
+**Error Handling**: If Section 12 not found:
+
+```
+⚠️  Section 12: Architecture Decision Records not found in ARCHITECTURE.md
+
+This is unusual - all ARCHITECTURE.md files should include Section 12.
+
+Would you like me to:
+1. [Add Section 12] - Add the section with empty ADR table
+2. [Skip ADR Generation] - Continue without generating ADRs
+3. [Manual Review] - Let me check the document structure first
+
+Recommended: Option 3 (Manual Review)
+```
+
+---
+
+##### Step 6.3: Extract ADR List from Section 12
+
+**Read Section 12 content**:
+
+```bash
+# Using Read tool with line range from Step 6.2
+Read(file_path="ARCHITECTURE.md", offset=1750, limit=50)
+```
+
+**Parse ADR table rows**:
+
+```bash
+# Extract ADR table rows using grep
+grep -E "^\| \[ADR-" ARCHITECTURE.md
+```
+
+**Expected output** (example):
+```
+| [ADR-001](adr/ADR-001.md) | [Title] | Accepted | YYYY-MM-DD | High/Medium/Low |
+| [ADR-002](adr/ADR-002-database.md) | Database Choice | Proposed | 2024-01-20 | High |
+```
+
+**Parse each row**:
+
+For each line matching the pattern `^\| \[ADR-`:
+1. Extract ADR number: `001`, `002`, etc. (from `[ADR-001]`)
+2. Extract file path from link: `adr/ADR-001.md` (from `(adr/ADR-001.md)`)
+3. Extract slug (if present): `` (empty) or `database` (from `ADR-002-database.md`)
+4. Extract title: Column 2 (e.g., `[Title]` or `Database Choice`)
+5. Extract status: Column 3 (e.g., `Accepted`, `Proposed`)
+6. Extract date: Column 4 (e.g., `YYYY-MM-DD` or `2024-01-20`)
+7. Extract impact: Column 5 (e.g., `High/Medium/Low` or `High`)
+
+**Regex Pattern** for parsing:
+```regex
+^\| \[ADR-(\d{3})\]\(adr\/ADR-\d{3}(-[a-z0-9-]+)?\.md\) \| (.+?) \| (.+?) \| (.+?) \| (.+?) \|
+```
+
+**Capture Groups**:
+- Group 1: ADR number (e.g., `001`)
+- Group 2: Optional slug (e.g., `-database` or empty)
+- Group 3: Title
+- Group 4: Status
+- Group 5: Date
+- Group 6: Impact
+
+**Store in list**:
+```python
+# Example structure (pseudocode)
+adrs = [
+    {
+        "number": "001",
+        "slug": "",  # Empty means generate from title
+        "title": "[Title]",
+        "status": "Accepted",
+        "date": "YYYY-MM-DD",
+        "impact": "High/Medium/Low",
+        "file_path": "adr/ADR-001.md"
+    },
+    {
+        "number": "002",
+        "slug": "database",
+        "title": "Database Choice",
+        "status": "Proposed",
+        "date": "2024-01-20",
+        "impact": "High",
+        "file_path": "adr/ADR-002-database.md"
+    }
+]
+```
+
+**Error Handling**: If no ADRs found (empty table):
+
+```
+ℹ️  Section 12 ADR table is empty or contains only placeholder entries.
+
+No ADRs found to generate. This is normal for newly created ARCHITECTURE.md files.
+
+Would you like me to:
+1. [Skip ADR Generation] - Continue without creating ADR files
+2. [Learn About ADRs] - Understand when to create ADRs
+3. [Add Sample ADR] - Create one example ADR to get started
+
+Recommended: Option 1 (Skip) - Create ADRs as architectural decisions are made
+```
+
+**Validation**:
+- Check for duplicate ADR numbers (same number appears multiple times)
+- Check for malformed rows (wrong column count)
+
+**If duplicates found**:
+```
+⚠️  Duplicate ADR numbers detected in Section 12 table
+
+Duplicates found: ADR-002 (appears 2 times)
+
+This will cause file overwrites. Please fix the table before generating ADRs.
+
+Would you like me to:
+1. [Show Duplicates] - Display the conflicting rows
+2. [Auto-Renumber] - Automatically renumber ADRs sequentially
+3. [Skip ADR Generation] - Fix manually and regenerate later
+
+Recommended: Option 1 (Show Duplicates)
+```
+
+---
+
+##### Step 6.3a: Preview ADRs (if user selected Option 2)
+
+If user selected "Preview First" in Step 6.1:
+
+**Display ADR list**:
+```
+Found {count} ADRs in Section 12 table:
+
+1. ADR-001: [Title] (Status: Accepted, Impact: High/Medium/Low)
+   → Will create: adr/ADR-001-untitled.md
+   Note: Placeholder title - you can customize later
+
+2. ADR-002: Database Choice (Status: Proposed, Impact: High)
+   → Will create: adr/ADR-002-database.md
+
+Proceed with generation? (yes/no)
+```
+
+**Wait for response**:
+- If `yes` or `1`: Continue to Step 6.4
+- If `no` or `2` or `skip`: Skip to Step 6.8
+
+---
+
+##### Step 6.4: Prepare ADR Generation
+
+**Get ARCHITECTURE.md directory**:
+
+```bash
+# Extract directory path from ARCHITECTURE.md location
+# If ARCHITECTURE.md is in current directory, use "."
+# Otherwise, extract directory from file path
+ARCH_DIR="."
+```
+
+**Define ADR directory path**:
+```bash
+ADR_DIR="${ARCH_DIR}/adr"
+# Results in: "./adr" relative to ARCHITECTURE.md
+```
+
+**Create ADR directory if doesn't exist**:
+```bash
+mkdir -p adr
+```
+
+**Error Handling**: If directory creation fails:
+
+```
+❌ Error: Unable to create adr/ directory
+
+Reason: [Error message from mkdir]
+
+Possible causes:
+- Insufficient file permissions
+- Path does not exist
+- Disk space full
+
+Would you like me to:
+1. [Retry with Different Path] - Try creating in user home directory
+2. [Skip ADR Generation] - Continue without creating ADR files
+3. [Manual Instructions] - Show me how to create manually
+
+Recommended: Option 3 (Manual Instructions)
+```
+
+**Success message**:
+```
+Generating ADR files in ./adr/
+```
+
+---
+
+##### Step 6.5: Load ADR Template
+
+**Template path**: `/home/shadowx4fox/solutions-architect-skills/skills/architecture-docs/adr/ADR-000-template.md`
+
+**Load template**:
+```bash
+Read(file_path="/home/shadowx4fox/solutions-architect-skills/skills/architecture-docs/adr/ADR-000-template.md")
+```
+
+**Store template content** in memory for reuse across all ADR files
+
+---
+
+##### Step 6.6: Generate Each ADR File
+
+For each ADR in the `adrs` list from Step 6.3:
+
+**Step 6.6a: Generate File Path**
+
+```python
+# Determine slug (pseudocode)
+if adr["slug"] == "":
+    # Generate slug from title using Step 6.6b rules
+    slug = generate_slug(adr["title"])
+else:
+    # Use slug from file path in table
+    slug = adr["slug"]
+
+# Construct file path
+file_name = f"ADR-{adr['number']}-{slug}.md"
+file_path = f"adr/{file_name}"
+```
+
+**Step 6.6b: Generate Slug from Title** (if needed)
+
+**Slug Generation Rules**:
+1. Convert title to lowercase
+2. Replace spaces with hyphens
+3. Remove special characters: `:?/*<>|"` (keep alphanumeric and hyphens)
+4. Remove consecutive hyphens (replace `--` with `-`)
+5. Trim leading/trailing hyphens
+6. Limit to 50 characters
+7. If title is `[Title]` or placeholder, use slug `untitled`
+
+**Examples**:
+- `Technology Stack Selection` → `technology-stack-selection`
+- `REST vs. gRPC: Which API?` → `rest-vs-grpc-which-api`
+- `PostgreSQL Database Choice` → `postgresql-database-choice`
+- `[Title]` → `untitled`
+
+**Step 6.6c: Check for Existing File**
+
+```bash
+# Check if file already exists
+if [ -f "adr/ADR-${number}-*.md" ]; then
+    # File exists - trigger conflict handling
+fi
+```
+
+**If exists**:
+```
+⚠️  ADR file conflict detected
+
+Existing file: adr/ADR-001-old-title.md
+New file: adr/ADR-001-technology-stack.md
+
+Would you like me to:
+1. [Skip This ADR] - Don't overwrite, keep existing file
+2. [Rename New ADR] - Create as ADR-{next_available} instead
+3. [Overwrite] - Replace existing file (destructive)
+4. [Review Existing] - Show me what's in the existing file first
+
+Recommended: Option 4 (Review Existing)
+```
+
+**Conflict Resolution**:
+- **Never auto-overwrite** existing ADRs
+- Always require user confirmation
+- Suggest next available ADR number if renaming
+
+**Step 6.6d: Populate Template**
+
+```python
+# Copy template (pseudocode)
+adr_content = template_content
+
+# Replace placeholders
+adr_content = adr_content.replace("ADR-XXX", f"ADR-{adr['number']}")
+adr_content = adr_content.replace("[Short Decision Title]", adr["title"])
+
+# Replace status line (keep full line format from template)
+status_line_old = "**Status**: Proposed | Accepted | Deprecated | Superseded by ADR-XXX"
+status_line_new = f"**Status**: {adr['status']}"
+adr_content = adr_content.replace(status_line_old, status_line_new)
+
+# Replace date
+if adr["date"] == "YYYY-MM-DD" or adr["date"] == "[Date]":
+    # Use current date
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    adr_content = adr_content.replace("**Date**: YYYY-MM-DD", f"**Date**: {current_date}")
+else:
+    # Use date from table
+    adr_content = adr_content.replace("**Date**: YYYY-MM-DD", f"**Date**: {adr['date']}")
+
+# Replace authors (default to Architecture Team)
+adr_content = adr_content.replace("**Authors**: [Author names or team name]", "**Authors**: Architecture Team")
+
+# Replace related ADRs (empty by default)
+adr_content = adr_content.replace("**Related**: [Links to related ADRs, e.g., ADR-001, ADR-005]", "**Related**: []")
+```
+
+**Special handling for placeholder titles**:
+```python
+# If title is placeholder, add TODO note
+if adr["title"] in ["[Title]", "[title]", "Title"]:
+    # Add note about placeholder
+    note = "\n> **TODO**: This ADR was auto-generated with a placeholder title. Please update the title, filename, and content with your actual architectural decision.\n"
+    # Insert after first header (after "# ADR-XXX: [Title]" line)
+    lines = adr_content.split('\n')
+    for i, line in enumerate(lines):
+        if line.startswith('# ADR-'):
+            lines.insert(i + 1, note)
+            break
+    adr_content = '\n'.join(lines)
+```
+
+**Step 6.6e: Write ADR File**
+
+```bash
+# Write the file using Write tool
+Write(file_path=file_path, content=adr_content)
+```
+
+**Error Handling**: If write fails:
+- Log error message
+- Mark ADR as "failed" in tracking
+- Continue with next ADR (don't abort entire batch)
+
+**Step 6.6f: Report Progress**
+
+```
+✅ Created: adr/ADR-001-technology-stack.md
+```
+
+**Repeat** Steps 6.6a-6.6f for all ADRs in list
+
+---
+
+##### Step 6.7: Display Summary Report
+
+After all ADRs processed:
+
+**Count results**:
+```python
+total_adrs = len(adrs)
+created_adrs = count(created successfully)
+skipped_adrs = count(skipped due to conflicts)
+failed_adrs = count(failed to write)
+```
+
+**Display summary**:
+```
+═══════════════════════════════════════════════════════════
+✅ ADR Generation Complete
+═══════════════════════════════════════════════════════════
+
+Successfully generated {created_adrs} of {total_adrs} ADR files in ./adr/
+
+Created ADRs:
+- adr/ADR-001-technology-stack.md
+- adr/ADR-002-database-choice.md
+- adr/ADR-003-api-protocol.md
+
+{If skipped_adrs > 0:}
+Skipped ADRs:
+- ADR-004 (file already exists: adr/ADR-004-old-title.md)
+
+{If failed_adrs > 0:}
+Failed ADRs:
+- ADR-005 (write error: permission denied)
+
+Next steps:
+1. Review and customize each ADR file
+2. Fill in Context, Decision, and Rationale sections
+3. Update placeholder titles (marked with TODO)
+4. Link related ADRs in the "Related" field
+5. Update status to "Accepted" once reviewed and approved
+
+ADR Template Guide: skills/architecture-docs/ADR_GUIDE.md
+```
+
+---
+
+##### Step 6.8: Complete Workflow
+
+**If user skipped ADR generation** (Option 3 in Step 6.1):
+
+```
+ℹ️  Skipped ADR generation - you can create ADR files manually later
+
+To create ADRs manually:
+1. Update Section 12 table in ARCHITECTURE.md with your ADRs
+2. Copy template: cp skills/architecture-docs/adr/ADR-000-template.md adr/ADR-001-your-title.md
+3. Customize the ADR content
+
+For guidance, see: skills/architecture-docs/ADR_GUIDE.md
+```
+
+**Return to main workflow**: Architecture Type Selection Workflow completes successfully
+
+---
+
+**End of Step 6**
+
 ### Detecting Existing Architecture Type
 
 When editing an existing ARCHITECTURE.md, detect the architecture type:

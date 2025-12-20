@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-1.5.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -79,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v1.3.2` in the list.
+You should see `solutions-architect-skills v1.5.23` in the list.
 
 ### First Workflow
 
@@ -115,12 +115,13 @@ Create and maintain technical architecture documentation following enterprise st
 **Key Features:**
 - 12-section standardized structure (Executive Summary → ADRs)
 - Automatic Document Index (lines 1-50)
-- 4 architecture type templates (META, 3-Tier, Microservices, N-Layer)
+- 5 architecture type templates (META, 3-Tier, Microservices, N-Layer, BIAN) ⭐ UPDATED v1.5
 - Interactive Mermaid diagrams in Section 4
 - Metric consistency validation across document
 - Design Drivers calculation (Value Delivery %, Scale, Impacts)
 - 9 mandatory Architecture Principles + 1 optional
 - ADR (Architecture Decision Record) templates
+- **Automatic ADR file generation** from Section 12 table ⭐ NEW v1.5
 
 **Output:** `ARCHITECTURE.md` (2,000-3,000 lines typically)
 
@@ -138,6 +139,12 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 - Compliance manifest (index of all generated documents)
 
 **Output:** `/compliance-docs/` directory with all 10 contracts + manifest (v1.3.0)
+
+**🎯 New in v1.5.0: Business Continuity v2.0**
+- Table-based format with 43 LACN requirements (expanded from 10 LABC)
+- 6-column compliance summary table
+- 330% increase in validation data points
+- Cloud-native resilience patterns (circuit breaker, retry, bulkhead, auto-scaling)
 
 #### Compliance Contract Types ⭐ v1.3.0: All 10 Contracts Complete
 
@@ -171,15 +178,16 @@ All 10 contracts now include automatic validation with:
 
 ## Architecture Types & Visualization
 
-### 4 Supported Architecture Types
+### 5 Supported Architecture Types
 
 Choose the architecture type that best fits your system:
 
 **1. META (6-Layer Enterprise)** - Large enterprise systems with complex integrations
 - Layers: Channels → UX → Business Scenarios → Business → Domain → Core
 - Best for: Financial services, regulated industries, enterprise platforms
-- Template: Section 4 META with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment (default version)
-- **BIAN Standard**: Uses [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) for Layer 5 Domain service domains
+- Template: Section 4 META with BIAN V12.0 alignment
+- **BIAN Standard**: Full V12.0 compliance with 12 metadata fields ⭐ ENHANCED v1.5
+- **Layer 5 Enhancement**: Matches BIAN Layer 4 comprehensiveness with complete service domain metadata
 
 **2. 3-Tier (Classic Web Application)** - Standard web applications and REST APIs
 - Tiers: Presentation → Application/Business Logic → Data
@@ -195,6 +203,14 @@ Choose the architecture type that best fits your system:
 - Patterns: Classic DDD (4-Layer), Extended (5-Layer), Clean Architecture
 - Best for: Domain-Driven Design, Hexagonal Architecture, testable systems
 - Template: Section 4 N-Layer with dependency inversion
+
+**5. BIAN (Full BIAN V12.0 Certification)** - Pure BIAN Service Landscape architecture ⭐ NEW v1.5
+- Layers: Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems
+- Best for: Banking, financial services requiring full BIAN certification
+- Template: Section 4 BIAN and Section 5 BIAN with comprehensive metadata
+- **Compliance**: Mandatory full BIAN V12.0 compliance (12 metadata fields, 7 standard operations)
+- **Validation**: All service domain names validated against official [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html)
+- **Traceability**: Full BIAN hierarchy (Service Domain → Business Domain → Business Area)
 
 **How to Choose**: See [ARCHITECTURE_TYPE_SELECTOR.md](skills/architecture-docs/templates/ARCHITECTURE_TYPE_SELECTOR.md) for decision tree and comparison matrix.
 
@@ -343,7 +359,37 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v1.3.0 (Current Release) ✅
+### v1.5.0 (Current Release) ✅
+**Major Release: BIAN Full Compliance + Business Continuity v2.0**
+
+- ✅ **5th Architecture Type: Full BIAN V12.0** ⭐ MAJOR
+  - New SECTION_4_BIAN.md and SECTION_5_BIAN.md templates
+  - Mandatory Full BIAN V12.0 compliance (no Partial/Custom options)
+  - 12 BIAN metadata fields (expanded from 4)
+  - 7 standardized BIAN service operations (Initiate, Update, Retrieve, Control, Exchange, Execute, Request)
+  - Full BIAN hierarchy traceability (Service Domain → Business Domain → Business Area)
+  - All service domain names validated against official BIAN V12.0 Service Landscape
+- ✅ **META Layer 5 Enhancement** - Upgraded to match BIAN Layer 4 comprehensiveness
+  - Expanded from 4 to 12 BIAN metadata fields
+  - Complete service domain documentation requirements
+- ✅ **Business Continuity v2.0** - Table-based format with 43 LACN requirements ⭐ MAJOR
+  - Expanded from 10 LABC to 43 LACN requirements (330% increase in validation coverage)
+  - 6-column compliance summary table (Code, Requirement, Category, Status, Source, Role)
+  - 6 validation categories: BC-GEN, BC-RTO, BC-DR, BC-BACKUP, BC-AUTO, BC-CLOUD
+  - Cloud-native resilience patterns (circuit breaker, retry, bulkhead, auto-scaling)
+  - Comprehensive disaster recovery documentation
+- ✅ **Automatic ADR file generation** from Section 12 table in ARCHITECTURE.md
+  - 4-option prompt: Generate, Preview, Skip, Learn More
+  - Automatic metadata population (title, status, date, authors)
+  - Slug generation with conflict handling
+  - Creates `adr/` directory with properly formatted ADR files
+- ✅ **Enhanced compliance validation** - Multi-layer format enforcement
+  - LACN003 extraction for META architecture layers
+  - Template format validators with strict enforcement
+  - Improved error messages and validation feedback
+- ✅ **Principle #10 rename** - "Decouple Through Events" (formerly "Event-Driven Integration")
+
+### v1.3.0 (Previous Release)
 **Major Release: Complete Validation System**
 
 - ✅ **All 10 compliance contracts** with templates and validation ⭐ MAJOR
