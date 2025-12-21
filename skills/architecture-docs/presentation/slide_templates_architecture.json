@@ -1,0 +1,170 @@
+{
+  "stakeholder_type": "architecture",
+  "slide_count": 12,
+  "primary_sections": [3, 4, 5, 6, 7, 8, 12],
+  "secondary_sections": [1, 9],
+  "slides": [
+    {
+      "id": 1,
+      "type": "title",
+      "title_source": "system_name",
+      "subtitle_key": "title_suffix.architecture"
+    },
+    {
+      "id": 2,
+      "type": "agenda",
+      "title_key": "slide_titles.agenda",
+      "items_key": "agenda_items.architecture"
+    },
+    {
+      "id": 3,
+      "type": "content",
+      "title_key": "slide_titles.executive_summary",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Overview",
+          "extract_type": "text"
+        },
+        {
+          "section": 1,
+          "subsection": "Key Metrics",
+          "extract_type": "table"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "content",
+      "title_key": "slide_titles.architecture_principles",
+      "data_sources": [
+        {
+          "section": 3,
+          "subsection": "principles",
+          "extract_type": "principles",
+          "limit": null,
+          "note": "All 9-10 principles"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "content",
+      "title_key": "slide_titles.architecture_layers",
+      "data_sources": [
+        {
+          "section": 4,
+          "subsection": "layers",
+          "extract_type": "layers"
+        },
+        {
+          "section": 4,
+          "subsection": "diagram",
+          "extract_type": "mermaid"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "content",
+      "title_key": "slide_titles.component_overview",
+      "data_sources": [
+        {
+          "section": 5,
+          "subsection": "components",
+          "extract_type": "components",
+          "limit": 10,
+          "note": "Top 10 components, paginate if needed"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "content",
+      "title_key": "slide_titles.technology_stack",
+      "data_sources": [
+        {
+          "section": 8,
+          "subsection": "Backend",
+          "extract_type": "table"
+        },
+        {
+          "section": 8,
+          "subsection": "Frontend",
+          "extract_type": "table"
+        },
+        {
+          "section": 8,
+          "subsection": "Data",
+          "extract_type": "table"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "content",
+      "title_key": "slide_titles.data_flow",
+      "data_sources": [
+        {
+          "section": 6,
+          "subsection": "patterns",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "content",
+      "title_key": "slide_titles.integration_points",
+      "data_sources": [
+        {
+          "section": 7,
+          "subsection": "External Systems",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 7,
+          "subsection": "APIs",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "content",
+      "title_key": "slide_titles.security_architecture",
+      "data_sources": [
+        {
+          "section": 9,
+          "subsection": "Authentication",
+          "extract_type": "text"
+        },
+        {
+          "section": 9,
+          "subsection": "Encryption",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "content",
+      "title_key": "slide_titles.key_adrs",
+      "data_sources": [
+        {
+          "section": 12,
+          "subsection": "ADR Table",
+          "extract_type": "adr_table",
+          "limit": 5,
+          "note": "Top 5 most important ADRs"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "summary",
+      "title_key": "slide_titles.summary",
+      "include_next_steps": true
+    }
+  ]
+}

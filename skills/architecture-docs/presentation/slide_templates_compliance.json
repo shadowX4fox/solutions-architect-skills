@@ -1,0 +1,173 @@
+{
+  "stakeholder_type": "compliance",
+  "slide_count": 11,
+  "primary_sections": [7, 8, 9, 10, 11, 12],
+  "secondary_sections": [1],
+  "slides": [
+    {
+      "id": 1,
+      "type": "title",
+      "title_source": "system_name",
+      "subtitle_key": "title_suffix.compliance"
+    },
+    {
+      "id": 2,
+      "type": "agenda",
+      "title_key": "slide_titles.agenda",
+      "items_key": "agenda_items.compliance"
+    },
+    {
+      "id": 3,
+      "type": "content",
+      "title_key": "slide_titles.executive_summary",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Overview",
+          "extract_type": "text"
+        },
+        {
+          "section": 1,
+          "subsection": "Key Metrics",
+          "extract_type": "table",
+          "focus": "Availability SLA"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "content",
+      "title_key": "slide_titles.security_overview",
+      "data_sources": [
+        {
+          "section": 9,
+          "subsection": "Overview",
+          "extract_type": "text"
+        },
+        {
+          "section": 9,
+          "subsection": "Security Layers",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "content",
+      "title_key": "slide_titles.authentication",
+      "data_sources": [
+        {
+          "section": 9,
+          "subsection": "9.1",
+          "heading": "Authentication & Authorization",
+          "extract_type": "text"
+        },
+        {
+          "section": 9,
+          "subsection": "Access Controls",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "content",
+      "title_key": "slide_titles.data_protection",
+      "data_sources": [
+        {
+          "section": 9,
+          "subsection": "9.3",
+          "heading": "Data Protection",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 9,
+          "subsection": "Encryption",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "content",
+      "title_key": "slide_titles.operational_excellence",
+      "data_sources": [
+        {
+          "section": 11,
+          "subsection": "Monitoring",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 11,
+          "subsection": "Incident Response",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "content",
+      "title_key": "slide_titles.disaster_recovery",
+      "data_sources": [
+        {
+          "section": 11,
+          "subsection": "11.4",
+          "heading": "Disaster Recovery",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 11,
+          "subsection": "Backup",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "content",
+      "title_key": "slide_titles.integration_security",
+      "data_sources": [
+        {
+          "section": 7,
+          "subsection": "API Security",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 7,
+          "subsection": "External Dependencies",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "content",
+      "title_key": "slide_titles.technology_compliance",
+      "data_sources": [
+        {
+          "section": 8,
+          "subsection": "Approved Technologies",
+          "extract_type": "table"
+        },
+        {
+          "section": 8,
+          "subsection": "Deprecation Plan",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 12,
+          "subsection": "ADR Table",
+          "extract_type": "adr_table",
+          "filter": "compliance",
+          "note": "Compliance-related ADRs only"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "summary",
+      "title_key": "slide_titles.summary",
+      "include_next_steps": true
+    }
+  ]
+}

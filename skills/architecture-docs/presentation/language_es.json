@@ -1,0 +1,92 @@
+{
+  "title_suffix": {
+    "business": "Resumen de Arquitectura para Stakeholders de Negocio",
+    "architecture": "Arquitectura Técnica en Detalle",
+    "compliance": "Cumplimiento y Gobernanza"
+  },
+  "slide_titles": {
+    "agenda": "Agenda",
+    "executive_summary": "Resumen Ejecutivo",
+    "problem_solution": "Problema y Solución",
+    "use_cases": "Casos de Uso",
+    "business_value": "Valor de Negocio",
+    "system_availability": "Disponibilidad y Rendimiento del Sistema",
+    "operational_support": "Soporte Operacional",
+    "architecture_principles": "Principios de Arquitectura",
+    "architecture_layers": "Capas de Arquitectura",
+    "component_overview": "Descripción General de Componentes",
+    "technology_stack": "Stack Tecnológico",
+    "data_flow": "Patrones de Flujo de Datos",
+    "integration_points": "Puntos de Integración",
+    "security_architecture": "Arquitectura de Seguridad",
+    "key_adrs": "Decisiones Clave de Arquitectura",
+    "security_overview": "Descripción General de Seguridad",
+    "authentication": "Autenticación y Autorización",
+    "data_protection": "Protección de Datos",
+    "operational_excellence": "Excelencia Operacional",
+    "disaster_recovery": "Recuperación de Desastres y Continuidad del Negocio",
+    "integration_security": "Seguridad de Integración",
+    "technology_compliance": "Cumplimiento Tecnológico",
+    "summary": "Resumen y Preguntas"
+  },
+  "labels": {
+    "version": "Versión",
+    "last_updated": "Última Actualización",
+    "source": "Fuente",
+    "status": "Estado",
+    "next_steps": "Próximos Pasos",
+    "objective": "Objetivo",
+    "primary_sections": "Secciones Primarias",
+    "secondary_sections": "Secciones Secundarias",
+    "key_metrics": "Métricas Clave",
+    "principle": "Principio",
+    "description": "Descripción",
+    "implementation": "Implementación",
+    "trade_offs": "Compromisos",
+    "component": "Componente",
+    "technology": "Tecnología",
+    "responsibility": "Responsabilidad",
+    "not_documented": "No documentado en ARCHITECTURE.md"
+  },
+  "messages": {
+    "missing_section": "[No especificado en ARCHITECTURE.md Sección {section}]",
+    "refer_to_doc": "Consultar ARCHITECTURE.md Sección {section} para detalles",
+    "contact": "Contacto",
+    "questions": "¿Preguntas?"
+  },
+  "agenda_items": {
+    "business": [
+      "Resumen Ejecutivo",
+      "Problema y Solución",
+      "Casos de Uso",
+      "Valor de Negocio",
+      "Disponibilidad del Sistema",
+      "Soporte Operacional",
+      "Principios de Arquitectura",
+      "Resumen y Preguntas"
+    ],
+    "architecture": [
+      "Resumen Ejecutivo",
+      "Principios de Arquitectura",
+      "Capas de Arquitectura",
+      "Descripción General de Componentes",
+      "Stack Tecnológico",
+      "Patrones de Flujo de Datos",
+      "Puntos de Integración",
+      "Arquitectura de Seguridad",
+      "Decisiones Clave de Arquitectura",
+      "Resumen y Preguntas"
+    ],
+    "compliance": [
+      "Resumen Ejecutivo",
+      "Descripción General de Seguridad",
+      "Autenticación y Autorización",
+      "Protección de Datos",
+      "Excelencia Operacional",
+      "Recuperación de Desastres",
+      "Seguridad de Integración",
+      "Cumplimiento Tecnológico",
+      "Resumen y Preguntas"
+    ]
+  }
+}

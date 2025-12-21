@@ -1,0 +1,92 @@
+{
+  "title_suffix": {
+    "business": "Architecture Overview for Business Stakeholders",
+    "architecture": "Technical Architecture Deep Dive",
+    "compliance": "Compliance & Governance Overview"
+  },
+  "slide_titles": {
+    "agenda": "Agenda",
+    "executive_summary": "Executive Summary",
+    "problem_solution": "Problem & Solution",
+    "use_cases": "Use Cases",
+    "business_value": "Business Value",
+    "system_availability": "System Availability & Performance",
+    "operational_support": "Operational Support",
+    "architecture_principles": "Architecture Principles",
+    "architecture_layers": "Architecture Layers",
+    "component_overview": "Component Overview",
+    "technology_stack": "Technology Stack",
+    "data_flow": "Data Flow Patterns",
+    "integration_points": "Integration Points",
+    "security_architecture": "Security Architecture",
+    "key_adrs": "Key Architecture Decisions",
+    "security_overview": "Security Architecture Overview",
+    "authentication": "Authentication & Authorization",
+    "data_protection": "Data Protection",
+    "operational_excellence": "Operational Excellence",
+    "disaster_recovery": "Disaster Recovery & Business Continuity",
+    "integration_security": "Integration Security",
+    "technology_compliance": "Technology Compliance",
+    "summary": "Summary & Q&A"
+  },
+  "labels": {
+    "version": "Version",
+    "last_updated": "Last Updated",
+    "source": "Source",
+    "status": "Status",
+    "next_steps": "Next Steps",
+    "objective": "Objective",
+    "primary_sections": "Primary Sections",
+    "secondary_sections": "Secondary Sections",
+    "key_metrics": "Key Metrics",
+    "principle": "Principle",
+    "description": "Description",
+    "implementation": "Implementation",
+    "trade_offs": "Trade-offs",
+    "component": "Component",
+    "technology": "Technology",
+    "responsibility": "Responsibility",
+    "not_documented": "Not documented in ARCHITECTURE.md"
+  },
+  "messages": {
+    "missing_section": "[Not specified in ARCHITECTURE.md Section {section}]",
+    "refer_to_doc": "Refer to ARCHITECTURE.md Section {section} for details",
+    "contact": "Contact",
+    "questions": "Questions?"
+  },
+  "agenda_items": {
+    "business": [
+      "Executive Summary",
+      "Problem & Solution",
+      "Use Cases",
+      "Business Value",
+      "System Availability",
+      "Operational Support",
+      "Architecture Principles",
+      "Summary & Q&A"
+    ],
+    "architecture": [
+      "Executive Summary",
+      "Architecture Principles",
+      "Architecture Layers",
+      "Component Overview",
+      "Technology Stack",
+      "Data Flow Patterns",
+      "Integration Points",
+      "Security Architecture",
+      "Key Architecture Decisions",
+      "Summary & Q&A"
+    ],
+    "compliance": [
+      "Executive Summary",
+      "Security Architecture Overview",
+      "Authentication & Authorization",
+      "Data Protection",
+      "Operational Excellence",
+      "Disaster Recovery",
+      "Integration Security",
+      "Technology Compliance",
+      "Summary & Q&A"
+    ]
+  }
+}

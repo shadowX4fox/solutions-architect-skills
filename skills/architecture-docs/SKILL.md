@@ -3175,6 +3175,442 @@ All references to Job Execution Capacity are now consistent.
 
 ---
 
+## Workflow 8: Presentation Generation (Generate Architecture Presentations)
+
+### When to Use
+
+This workflow is activated when users request presentation generation from ARCHITECTURE.md:
+- "Generate architecture presentation"
+- "Create PowerPoint from architecture"
+- "Generate presentation for [stakeholder]"
+- "Create slides for architecture review"
+- User references: "business presentation", "compliance review deck", "architecture overview slides"
+
+### Activation Triggers
+
+**Automatic Invocation:**
+- User asks to "generate presentation", "create slides", "make PowerPoint", "create pptx"
+- User specifies stakeholder: "business stakeholders", "architecture team", "compliance review"
+- User specifies language: "presentación en español", "presentation in English"
+
+**Manual Invocation:**
+- User explicitly: "Run presentation generation workflow"
+- User references: `/workflow presentation`
+
+### Prerequisites
+
+- **ARCHITECTURE.md file exists** in the project
+- Document has **valid 12-section structure**
+- **Document Index is present** (lines 1-50 typically)
+- **Python 3.8+** available with python-pptx library
+
+### Step-by-Step Process
+
+#### Step 1: Detect Request & Present Stakeholder Options
+
+When presentation generation is requested, present the following options:
+
+```
+📊 **Architecture Presentation Generation**
+
+I'll generate a PowerPoint presentation from your ARCHITECTURE.md file.
+
+**Step 1: Select Stakeholder Type**
+
+Who is the target audience for this presentation?
+
+1. **Business Stakeholders** - Focus on value, ROI, business metrics, use cases
+2. **Architecture Team** - Technical details, components, patterns, decisions
+3. **Compliance/Governance** - Security, operational standards, SLAs, controls
+
+**Please select: 1, 2, or 3**
+```
+
+**Stakeholder Focus Areas**:
+
+| Stakeholder | Focus | Primary Sections | Slide Count |
+|-------------|-------|------------------|-------------|
+| Business | Business value, ROI, metrics, use cases | 1, 2, 10, 11 | ~10 slides |
+| Architecture | Technical design, components, patterns | 3, 4, 5, 6, 7, 8, 12 | ~12 slides |
+| Compliance | Security, governance, standards | 7, 8, 9, 10, 11, 12 | ~11 slides |
+
+#### Step 2: Language Selection
+
+After stakeholder selection:
+
+```
+**Step 2: Select Language**
+
+Which language should the presentation use?
+
+1. **English (EN)** - Default
+2. **Spanish (ES)** - Español
+
+**Please select: 1 or 2** (or type: en/es)
+```
+
+**Translation Scope**:
+- ✅ **Translate**: Slide titles, section headers, labels, UI elements
+- ❌ **Do NOT translate**: System names, component names, technologies, metrics, code snippets
+
+#### Step 3: Confirmation
+
+```
+**Step 3: Confirmation**
+
+I'll generate a presentation with these settings:
+- Stakeholder: [Business/Architecture/Compliance]
+- Language: [English/Spanish]
+- Slides: ~10-12 slides (~15 minutes)
+- Output: /presentations/ARCHITECTURE_[Type]_[Lang].pptx
+
+Proceed with generation? [Yes/No]
+```
+
+#### Step 4: Load Document Index
+
+**Process**:
+1. Read lines 1-50 of ARCHITECTURE.md
+2. Parse Document Index to extract section line ranges
+3. Validate 12-section structure
+4. Extract system name from first heading
+
+**Fallback**: If Document Index not found, use default line ranges with warning
+
+#### Step 5: Load Required Sections Incrementally
+
+**Context-Efficient Loading**:
+- Load only sections required for the selected stakeholder
+- Use ±10 line buffer around each section
+- Minimize total lines loaded (50-80% reduction vs. full document)
+
+**Sections by Stakeholder**:
+- **Business**: Sections 1, 2, 10, 11 (~400 lines, 80% reduction)
+- **Architecture**: Sections 3, 4, 5, 6, 7, 8, 12 (~1000 lines, 50% reduction)
+- **Compliance**: Sections 7, 8, 9, 10, 11, 12 (~700 lines, 65% reduction)
+
+#### Step 6: Extract Data Using SectionExtractor
+
+**Data Extraction Methods**:
+- `extract_key_metrics()` - Parse metrics table from Section 1
+- `extract_business_value()` - Parse business value bullets from Section 1
+- `extract_use_cases()` - Parse use cases with success metrics from Section 2
+- `extract_principles()` - Parse 9-10 architecture principles from Section 3
+- `extract_components()` - Parse component subsections from Section 5
+- `extract_tech_stack()` - Parse technology tables from Section 8
+- `extract_security_controls()` - Parse security subsections from Section 9
+- `extract_adrs()` - Parse ADR summary table from Section 12
+
+#### Step 7: Load Language Translations
+
+**Process**:
+1. Load appropriate language JSON file (language_en.json or language_es.json)
+2. Initialize LanguageManager with translations
+3. Prepare slide titles, labels, and UI strings in target language
+
+**Translation Files Location**:
+- `/skills/architecture-docs/presentation/language_en.json`
+- `/skills/architecture-docs/presentation/language_es.json`
+
+#### Step 8: Generate Slides Using SlideBuilder
+
+**Slide Generation Process**:
+1. Initialize PowerPoint presentation (10" x 7.5")
+2. Load slide template for stakeholder type
+3. Build slides sequentially using SlideBuilder:
+   - Title slide with system name and stakeholder subtitle
+   - Agenda slide with translated items
+   - Content slides based on template configuration
+   - Summary & Q&A slide
+
+**Slide Primitives** (reused from create_presentation.py):
+- `add_title_slide()` - Title/cover slides
+- `add_content_slide()` - Content slides with title/subtitle
+- `add_bullet_text()` - Bullet points (configurable font, color)
+- `add_box()` - Colored boxes for highlights
+- Color scheme: BLUE (#1E3A8A), GREEN (#10B981), GRAY (#6B7280)
+
+#### Step 9: Save Presentation
+
+**Output Path**: `/presentations/ARCHITECTURE_{Type}_{Lang}.pptx`
+
+**Examples**:
+- `/presentations/ARCHITECTURE_Business_EN.pptx`
+- `/presentations/ARCHITECTURE_Architecture_ES.pptx`
+- `/presentations/ARCHITECTURE_Compliance_EN.pptx`
+
+**Process**:
+1. Ensure /presentations/ directory exists (create if needed)
+2. Save PowerPoint file with naming convention
+3. Verify file creation
+
+#### Step 10: Display Success Summary
+
+**Success Message Template**:
+
+```
+═══════════════════════════════════════════════════════════
+   PRESENTATION GENERATION COMPLETE
+═══════════════════════════════════════════════════════════
+
+✓ Successfully generated presentation!
+📁 Output: /presentations/ARCHITECTURE_Business_EN.pptx
+📊 Slides: 10 slides (~15 minute presentation)
+🎯 Stakeholder: Business
+🌐 Language: English
+
+Data Sources Used:
+- Section 1: Executive Summary (lines 25-65)
+- Section 2: System Overview (lines 66-120)
+- Section 10: Scalability & Performance (lines 1551-1750)
+- Section 11: Operational Considerations (lines 1751-1950)
+
+Next Steps:
+1. Review the generated presentation
+2. Customize slide content as needed
+3. Add company branding/logos if required
+
+═══════════════════════════════════════════════════════════
+```
+
+### Command-Line Usage
+
+For direct command-line generation without interactive prompts:
+
+```bash
+# Generate Business presentation in English
+python /utils/presentation_generator.py ARCHITECTURE.md \
+  --stakeholder business \
+  --language en
+
+# Generate Architecture presentation in Spanish
+python /utils/presentation_generator.py ARCHITECTURE.md \
+  --stakeholder architecture \
+  --language es \
+  --output /custom/path/presentation.pptx
+
+# Generate Compliance presentation (default English)
+python /utils/presentation_generator.py ARCHITECTURE.md \
+  --stakeholder compliance
+```
+
+### Slide Templates by Stakeholder
+
+#### Business Stakeholder Template (10 slides)
+
+1. **Title Slide** - System name + "Architecture Overview for Business Stakeholders"
+2. **Agenda** - Table of contents
+3. **Executive Summary** - Key metrics, business value (Section 1)
+4. **Problem & Solution** - Problem statement, solution overview (Section 2.1, 2.2)
+5. **Use Cases** - Primary use cases with success metrics (Section 2.3)
+6. **Business Value** - ROI, efficiency gains, revenue impact (Section 1)
+7. **System Availability & Performance** - SLA commitments, uptime (Section 10)
+8. **Operational Support** - Monitoring, support model (Section 11)
+9. **Architecture Principles** - Top 5 principles (Section 3)
+10. **Summary & Q&A** - Key takeaways, next steps
+
+#### Architecture Stakeholder Template (12 slides)
+
+1. **Title Slide** - System name + "Technical Architecture Deep Dive"
+2. **Agenda** - Table of contents
+3. **Executive Summary** - System purpose, key technical metrics (Section 1)
+4. **Architecture Principles** - All 9-10 principles (Section 3)
+5. **Architecture Layers** - Layer diagram, layer descriptions (Section 4)
+6. **Component Overview** - Component catalog with key services (Section 5)
+7. **Technology Stack** - Backend, frontend, data, infrastructure (Section 8)
+8. **Data Flow Patterns** - How data moves through system (Section 6)
+9. **Integration Points** - External APIs, dependencies (Section 7)
+10. **Security Architecture** - Auth, encryption, controls (Section 9)
+11. **Key Architecture Decisions** - Top 5 ADRs (Section 12)
+12. **Summary & Q&A** - Key patterns, next steps
+
+#### Compliance Stakeholder Template (11 slides)
+
+1. **Title Slide** - System name + "Compliance & Governance Overview"
+2. **Agenda** - Table of contents
+3. **Executive Summary** - System purpose, availability commitment (Section 1)
+4. **Security Architecture Overview** - Security layers (Section 9)
+5. **Authentication & Authorization** - Auth mechanisms, access controls (Section 9.1)
+6. **Data Protection** - Encryption at rest/transit, data classification (Section 9.3)
+7. **Operational Excellence** - Monitoring, incident response (Section 11)
+8. **Disaster Recovery & Business Continuity** - RTO/RPO, backup strategies (Section 11.4)
+9. **Integration Security** - API security, external dependency controls (Section 7)
+10. **Technology Compliance** - Approved technologies, deprecation plan (Section 8)
+11. **Summary & Q&A** - Compliance posture, remediation items
+
+### Error Handling
+
+**Missing ARCHITECTURE.md**:
+```
+❌ Error: ARCHITECTURE.md not found at: [path]
+
+Presentation generation requires a valid ARCHITECTURE.md file.
+Please create one using the architecture-docs skill first.
+
+To create ARCHITECTURE.md:
+1. Use the architecture-docs skill
+2. Select architecture type (Microservices, META, 3-Tier, BIAN, N-Layer)
+3. Complete all 12 sections
+4. Ensure Document Index is present
+```
+
+**Invalid Document Index**:
+```
+⚠️ Warning: Document Index not found or incomplete.
+Using default line ranges. Presentation may have incomplete data.
+
+Recommendation: Update Document Index in ARCHITECTURE.md
+(See Workflow 4: Automatic Index Updates)
+```
+
+**Missing Sections**:
+```
+⚠️ Warning: Section [X] not found in ARCHITECTURE.md.
+Slides requiring this section will show: "[Not documented in Section X]"
+
+Affected slides:
+- Slide 5: Use Cases (requires Section 2.3)
+- Slide 8: Operational Support (requires Section 11)
+
+Recommendation: Complete missing sections in ARCHITECTURE.md before regenerating.
+```
+
+**Empty Subsections**:
+- Placeholder slides added: "[Not specified in ARCHITECTURE.md Section X.Y]"
+- User notified of missing data in success summary
+- Recommendation to complete documentation
+
+### Context Efficiency
+
+**Context Usage Comparison**:
+
+| Approach | Lines Loaded | Context Usage | Savings |
+|----------|-------------|---------------|---------|
+| Full Document Load | 2,000-3,000 | 100% | - |
+| Business Presentation | ~400 | 15-20% | 80-85% |
+| Architecture Presentation | ~1,000 | 40-50% | 50-60% |
+| Compliance Presentation | ~700 | 25-35% | 65-75% |
+
+**Efficiency Techniques**:
+- Document Index-based section location
+- Incremental section loading with ±10 line buffers
+- Load only stakeholder-relevant sections
+- Reuse loaded sections across multiple extractions
+
+### Integration with Other Workflows
+
+**Typical Workflow Sequence**:
+1. **Workflow 1**: Create ARCHITECTURE.md (select architecture type)
+2. **Workflow 2**: Generate ADRs from Section 12
+3. **Workflow 4**: Update Document Index after edits
+4. **Workflow 5**: Verify metric consistency
+5. **→ Workflow 8**: Generate presentations for stakeholders ✓
+
+**Presentation Regeneration**:
+- Regenerate presentations after ARCHITECTURE.md updates
+- No need to recreate ARCHITECTURE.md, just regenerate presentations
+- Presentations reflect latest documented architecture
+- Version presentations by adding date suffix if needed
+
+### Best Practices
+
+**DO:**
+- ✅ Generate presentations AFTER completing ARCHITECTURE.md
+- ✅ Verify Document Index is up-to-date before generation
+- ✅ Select stakeholder type based on presentation audience
+- ✅ Regenerate presentations when architecture changes
+- ✅ Review generated slides for accuracy
+- ✅ Customize branding/logos after generation
+
+**DON'T:**
+- ❌ Generate presentations from incomplete ARCHITECTURE.md
+- ❌ Manually edit ARCHITECTURE.md after presentation generation (regenerate instead)
+- ❌ Assume all sections will be present (handle missing data gracefully)
+- ❌ Translate technical content (system names, metrics remain as-is)
+
+### Example Workflow Execution
+
+**User**: "Generate architecture presentation for business stakeholders in Spanish"
+
+**Skill Response**:
+
+*Step 1: Detect request → Workflow 8 (Presentation Generation)*
+*Step 2: Parse request → Stakeholder: Business, Language: Spanish*
+*Step 3: Confirm settings*
+
+📊 **Architecture Presentation Generation**
+
+I'll generate a presentation with these settings:
+- Stakeholder: Business
+- Language: Spanish
+- Slides: ~10 slides (~15 minutes)
+- Output: /presentations/ARCHITECTURE_Business_ES.pptx
+
+Proceeding with generation...
+
+═══════════════════════════════════════════════════════════
+   ARCHITECTURE PRESENTATION GENERATION
+═══════════════════════════════════════════════════════════
+Stakeholder: Business
+Language: ES
+Output: /presentations/ARCHITECTURE_Business_ES.pptx
+═══════════════════════════════════════════════════════════
+
+Step 1/6: Loading ARCHITECTURE.md Document Index...
+  ✓ Loaded index for 12 sections
+
+Step 2/6: Loading required sections (1, 2, 10, 11)...
+  ✓ Loaded 4 sections (387 lines)
+  ✓ Context efficiency: 387/2,453 lines = 15.8%
+
+Step 3/6: Extracting data for business stakeholders...
+  ✓ Extracted 4 data categories
+
+Step 4/6: Loading language translations (Spanish)...
+  ✓ Loaded ES translations
+
+Step 5/6: Generating slides (10 slides)...
+  - Slide 1: Title Slide ✓
+  - Slide 2: Agenda ✓
+  - Slide 3: Resumen Ejecutivo ✓
+  - Slide 4: Problema y Solución ✓
+  - Slide 5: Casos de Uso ✓
+  - Slide 6: Valor de Negocio ✓
+  - Slide 7: Disponibilidad del Sistema ✓
+  - Slide 8: Soporte Operacional ✓
+  - Slide 9: Principios de Arquitectura ✓
+  - Slide 10: Resumen y Preguntas ✓
+
+Step 6/6: Saving presentation file...
+  ✓ Saved to /presentations/ARCHITECTURE_Business_ES.pptx
+
+═══════════════════════════════════════════════════════════
+   PRESENTATION GENERATION COMPLETE
+═══════════════════════════════════════════════════════════
+
+✓ Successfully generated presentation!
+📁 Output: /presentations/ARCHITECTURE_Business_ES.pptx
+📊 Slides: 10 slides (~15 minute presentation)
+🎯 Stakeholder: Business
+🌐 Language: Spanish
+
+Data Sources Used:
+- Section 1: Executive Summary (lines 25-87)
+- Section 2: System Overview (lines 88-201)
+- Section 10: Scalability & Performance (lines 1678-1802)
+- Section 11: Operational Considerations (lines 1803-2015)
+
+Próximos Pasos:
+1. Review the generated presentation
+2. Customize slide content as needed
+3. Add company branding/logos if required
+
+═══════════════════════════════════════════════════════════
+
+**Your presentation is ready!** You can find it at: `/presentations/ARCHITECTURE_Business_ES.pptx`
+
+---
+
 ## Optional Enhancements
 
 - Data Flow Patterns (for complex flows)

@@ -1,0 +1,135 @@
+{
+  "stakeholder_type": "business",
+  "slide_count": 10,
+  "primary_sections": [1, 2, 10, 11],
+  "secondary_sections": [3],
+  "slides": [
+    {
+      "id": 1,
+      "type": "title",
+      "title_source": "system_name",
+      "subtitle_key": "title_suffix.business"
+    },
+    {
+      "id": 2,
+      "type": "agenda",
+      "title_key": "slide_titles.agenda",
+      "items_key": "agenda_items.business"
+    },
+    {
+      "id": 3,
+      "type": "content",
+      "title_key": "slide_titles.executive_summary",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Key Metrics",
+          "extract_type": "table"
+        },
+        {
+          "section": 1,
+          "subsection": "Business Value",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "content",
+      "title_key": "slide_titles.problem_solution",
+      "data_sources": [
+        {
+          "section": 2,
+          "subsection": "2.1",
+          "heading": "Problem Statement",
+          "extract_type": "text"
+        },
+        {
+          "section": 2,
+          "subsection": "2.2",
+          "heading": "Solution Overview",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "content",
+      "title_key": "slide_titles.use_cases",
+      "data_sources": [
+        {
+          "section": 2,
+          "subsection": "2.3",
+          "heading": "Use Cases",
+          "extract_type": "subsections"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "content",
+      "title_key": "slide_titles.business_value",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Business Value",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "content",
+      "title_key": "slide_titles.system_availability",
+      "data_sources": [
+        {
+          "section": 10,
+          "subsection": "SLA",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 10,
+          "subsection": "Availability",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "content",
+      "title_key": "slide_titles.operational_support",
+      "data_sources": [
+        {
+          "section": 11,
+          "subsection": "Monitoring",
+          "extract_type": "bullets"
+        },
+        {
+          "section": 11,
+          "subsection": "Support Model",
+          "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "content",
+      "title_key": "slide_titles.architecture_principles",
+      "data_sources": [
+        {
+          "section": 3,
+          "subsection": "principles",
+          "extract_type": "principles",
+          "limit": 5,
+          "note": "Top 5 principles only"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "summary",
+      "title_key": "slide_titles.summary",
+      "include_next_steps": true
+    }
+  ]
+}
