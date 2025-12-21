@@ -53,6 +53,40 @@ This skill automatically activates when users ask questions about documented arc
 - Cross-cutting concerns (e.g., "How does authentication work with external systems?")
 - Implementation details spanning components, data, and deployment
 
+---
+
+## 🎯 AUTOMATIC WORKFLOW DETECTION
+
+**IMPORTANT**: Immediately upon skill invocation, analyze the user's request to detect their intent.
+
+### Detection Logic
+
+Check the user's original message (before `/architecture-docs` was invoked) for these patterns:
+
+#### Workflow 8: Presentation Generation
+**Triggers:**
+- Keywords: "generate", "create", "make" + "presentation", "slides", "PowerPoint", "pptx", "deck"
+- Examples: "generate presentations", "create slides", "make PowerPoint"
+- Stakeholder mentions: "business presentation", "architecture slides", "compliance deck"
+- Language: "presentación en español", "slides in English"
+
+**Action when detected:**
+1. Confirm: "I'll help you generate architecture presentations."
+2. Jump directly to **Workflow 8, Step 1** (Stakeholder Type Selection)
+3. Do NOT ask which workflow - proceed automatically
+
+#### Other Workflows
+If the user's request matches other documented workflows (1-7, 9-10), follow their respective trigger patterns.
+
+### If No Pattern Matches
+
+If the user's request doesn't match any workflow triggers:
+1. Acknowledge the skill invocation
+2. Ask which workflow they want to use
+3. Provide brief description of available workflows
+
+---
+
 ## File Naming Convention
 
 **IMPORTANT**: All architecture documents MUST be named **ARCHITECTURE.md**
@@ -3177,6 +3211,8 @@ All references to Job Execution Capacity are now consistent.
 
 ## Workflow 8: Presentation Generation (Generate Architecture Presentations)
 
+**⚡ Auto-triggers**: This workflow automatically activates when presentation-related keywords are detected (see Automatic Workflow Detection section above).
+
 ### When to Use
 
 This workflow is activated when users request presentation generation from ARCHITECTURE.md:
@@ -3202,7 +3238,7 @@ This workflow is activated when users request presentation generation from ARCHI
 - **ARCHITECTURE.md file exists** in the project
 - Document has **valid 12-section structure**
 - **Document Index is present** (lines 1-50 typically)
-- **Python 3.8+** available with python-pptx library
+- **Bun 1.0+** runtime installed (PowerPoint generation uses Bun/TypeScript with officegen)
 
 ### Step-by-Step Process
 
