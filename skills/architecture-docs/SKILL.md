@@ -3289,17 +3289,60 @@ Proceed with generation? [Yes/No]
 - **Architecture**: Sections 3, 4, 5, 6, 7, 8, 12 (~1000 lines, 50% reduction)
 - **Compliance**: Sections 7, 8, 9, 10, 11, 12 (~700 lines, 65% reduction)
 
-#### Step 6: Extract Data Using SectionExtractor
+#### Step 6: Generate Summaries Using LLM (NEW - Recommended)
 
-**Data Extraction Methods**:
-- `extract_key_metrics()` - Parse metrics table from Section 1
-- `extract_business_value()` - Parse business value bullets from Section 1
-- `extract_use_cases()` - Parse use cases with success metrics from Section 2
-- `extract_principles()` - Parse 9-10 architecture principles from Section 3
-- `extract_components()` - Parse component subsections from Section 5
-- `extract_tech_stack()` - Parse technology tables from Section 8
-- `extract_security_controls()` - Parse security subsections from Section 9
-- `extract_adrs()` - Parse ADR summary table from Section 12
+**IMPORTANT**: Use LLM capabilities to generate slide summaries instead of regex extraction.
+
+**Process**:
+1. Load slide template for stakeholder type
+2. For each content slide in template:
+   - Identify `data_sources` from slide config (section numbers)
+   - Read those sections from ARCHITECTURE.md
+   - Generate summary using LLM based on slide type + stakeholder
+   - Format as 3-6 bullet points
+3. Save all summaries to JSON file
+
+**Summarization Prompts by Slide Type**:
+
+```
+Executive Summary (Slide 3):
+"Summarize the key metrics and system purpose in 3-4 bullet points for [stakeholder] stakeholders. Focus on quantifiable metrics and business value. Language: [language]"
+
+Architecture Principles (Slide 4):
+"List the top 5 architecture principles from this content. For each, provide the principle name and a 1-sentence description. Language: [language]"
+
+Components (Slide 6):
+"Summarize the main system components in 4-5 bullet points. Focus on component responsibilities and interactions. Language: [language]"
+
+Technology Stack (Slide 7):
+"List the key technologies used, organized by category (Backend, Frontend, Data, Infrastructure). Keep it concise. Language: [language]"
+
+Data Flow (Slide 8):
+"Describe the main data flow patterns in 3-4 bullet points. Focus on how data moves through the system. Language: [language]"
+
+Integration Points (Slide 9):
+"List the main external integrations in 4-5 bullet points. Include system names and integration methods. Language: [language]"
+
+Security Architecture (Slide 10):
+"Summarize security controls in 4-5 bullet points. Cover authentication, encryption, and access controls. Language: [language]"
+
+ADRs (Slide 11):
+"List the top 5 most important architecture decisions in format: ADR-### : [Decision title]. Language: [language]"
+```
+
+**Output Format (JSON)**:
+```json
+{
+  "3": ["Metric bullet 1", "Metric bullet 2", "Metric bullet 3"],
+  "4": ["Principle 1", "Principle 2", "Principle 3"],
+  "5": ["Layer description 1", "Layer description 2"],
+  ...
+}
+```
+
+**Save to**: `/tmp/presentation_summaries_{stakeholder}_{language}.json`
+
+**Fallback**: If LLM summarization fails, presentation-generator.ts will fall back to regex extraction automatically.
 
 #### Step 7: Load Language Translations
 
@@ -3312,23 +3355,34 @@ Proceed with generation? [Yes/No]
 - `/skills/architecture-docs/presentation/language_en.json`
 - `/skills/architecture-docs/presentation/language_es.json`
 
-#### Step 8: Generate Slides Using SlideBuilder
+#### Step 8: Generate Slides Using presentation-generator.ts
+
+**Command to Execute**:
+```bash
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
+  --stakeholder [business|architecture|compliance] \
+  --language [en|es] \
+  --summaries /tmp/presentation_summaries_{stakeholder}_{language}.json
+```
 
 **Slide Generation Process**:
 1. Initialize PowerPoint presentation (10" x 7.5")
 2. Load slide template for stakeholder type
-3. Build slides sequentially using SlideBuilder:
+3. Load LLM-generated summaries from JSON file
+4. Build slides sequentially using SlideBuilder:
    - Title slide with system name and stakeholder subtitle
    - Agenda slide with translated items
-   - Content slides based on template configuration
+   - Content slides using LLM summaries (no regex extraction)
    - Summary & Q&A slide
 
-**Slide Primitives** (reused from create_presentation.py):
-- `add_title_slide()` - Title/cover slides
-- `add_content_slide()` - Content slides with title/subtitle
-- `add_bullet_text()` - Bullet points (configurable font, color)
-- `add_box()` - Colored boxes for highlights
+**Slide Primitives** (from create-presentation.ts):
+- `addTitleSlide()` - Title/cover slides
+- `addContentSlide()` - Content slides with title/subtitle
+- `addBulletText()` - Bullet points (configurable font, color)
+- `addBox()` - Colored boxes for highlights
 - Color scheme: BLUE (#1E3A8A), GREEN (#10B981), GRAY (#6B7280)
+
+**Note**: If `--summaries` parameter is not provided, presentation-generator.ts will automatically fall back to regex-based extraction.
 
 #### Step 9: Save Presentation
 
@@ -3378,21 +3432,30 @@ Next Steps:
 For direct command-line generation without interactive prompts:
 
 ```bash
-# Generate Business presentation in English
-python /utils/presentation_generator.py ARCHITECTURE.md \
+# With LLM summaries (RECOMMENDED)
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
+  --stakeholder architecture \
+  --language es \
+  --summaries /tmp/presentation_summaries_architecture_es.json
+
+# Without summaries (falls back to regex extraction)
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
-# Generate Architecture presentation in Spanish
-python /utils/presentation_generator.py ARCHITECTURE.md \
-  --stakeholder architecture \
+# With custom output path
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
+  --stakeholder compliance \
   --language es \
+  --summaries /tmp/presentation_summaries_compliance_es.json \
   --output /custom/path/presentation.pptx
-
-# Generate Compliance presentation (default English)
-python /utils/presentation_generator.py ARCHITECTURE.md \
-  --stakeholder compliance
 ```
+
+**Parameters**:
+- `--stakeholder`: Target audience (business|architecture|compliance)
+- `--language`: Presentation language (en|es)
+- `--summaries`: Path to LLM-generated summaries JSON (optional - uses regex if not provided)
+- `--output`: Custom output path (optional)
 
 ### Slide Templates by Stakeholder
 

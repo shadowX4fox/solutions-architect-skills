@@ -22,7 +22,7 @@ The presentation generation feature automatically creates professional PowerPoin
 
 1. **ARCHITECTURE.md file** exists and is complete
 2. **Document Index** is present (lines 1-50)
-3. **Python 3.8+** with python-pptx library installed
+3. **Bun 1.0+** runtime installed
 4. All 12 sections documented in ARCHITECTURE.md
 
 ### Basic Usage
@@ -45,17 +45,17 @@ The skill will guide you through:
 cd /home/shadowx4fox/solutions-architect-skills
 
 # Business presentation in English
-python utils/presentation_generator.py ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
 # Architecture presentation in Spanish
-python utils/presentation_generator.py ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder architecture \
   --language es
 
 # Compliance presentation with custom output
-python utils/presentation_generator.py ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder compliance \
   --output /custom/path/presentation.pptx
 ```
@@ -208,7 +208,7 @@ Then add translation to `language_en.json`:
 1. Create language JSON file: `/presentation/language_{code}.json`
 2. Copy structure from `language_en.json`
 3. Translate all strings
-4. Update `presentation_generator.py` to support new language code
+4. Update `presentation-generator.ts` to support new language code
 
 ### Customizing Colors
 
@@ -245,7 +245,7 @@ ls -la ARCHITECTURE.md
 pwd
 
 # Provide full path
-python utils/presentation_generator.py /full/path/to/ARCHITECTURE.md \
+bun run utils/presentation-generator.ts /full/path/to/ARCHITECTURE.md \
   --stakeholder business
 ```
 
@@ -310,7 +310,7 @@ ls -la /home/shadowx4fox/solutions-architect-skills/create_presentation.py
 
 # Run from correct directory
 cd /home/shadowx4fox/solutions-architect-skills
-python utils/presentation_generator.py ARCHITECTURE.md --stakeholder business
+bun run utils/presentation-generator.ts ARCHITECTURE.md --stakeholder business
 ```
 
 ## Best Practices
@@ -343,7 +343,7 @@ python utils/presentation_generator.py ARCHITECTURE.md --stakeholder business
 **How to Regenerate**:
 ```bash
 # Same command as initial generation
-python utils/presentation_generator.py ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
@@ -355,7 +355,7 @@ python utils/presentation_generator.py ARCHITECTURE.md \
 
 **Option 1: Date Suffix**
 ```bash
-python utils/presentation_generator.py ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --output /presentations/ARCHITECTURE_Business_EN_2025-12-21.pptx
 ```
@@ -376,7 +376,7 @@ git tag presentation-v1.5
 
 **Command**:
 ```bash
-python utils/presentation_generator.py ./ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
   --stakeholder business \
   --language en
 ```
@@ -392,7 +392,7 @@ python utils/presentation_generator.py ./ARCHITECTURE.md \
 
 **Command**:
 ```bash
-python utils/presentation_generator.py ./ARCHITECTURE.md \
+bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
   --stakeholder compliance \
   --language es
 ```
@@ -413,15 +413,15 @@ python utils/presentation_generator.py ./ARCHITECTURE.md \
 ARCH_FILE="./ARCHITECTURE.md"
 
 # Business (English)
-python utils/presentation_generator.py $ARCH_FILE \
+bun run utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder business --language en
 
 # Architecture (English)
-python utils/presentation_generator.py $ARCH_FILE \
+bun run utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder architecture --language en
 
 # Compliance (Spanish)
-python utils/presentation_generator.py $ARCH_FILE \
+bun run utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder compliance --language es
 
 echo "All presentations generated successfully!"
@@ -443,7 +443,7 @@ echo "All presentations generated successfully!"
 
 ### Q: How do I add support for French/German/other languages?
 
-**A**: Create a new language_{code}.json file with translations, then modify `presentation_generator.py` to accept the new language code in the validation.
+**A**: Create a new language_{code}.json file with translations, then modify `presentation-generator.ts` to accept the new language code in the validation.
 
 ### Q: Can I generate PDF instead of PowerPoint?
 
@@ -460,7 +460,7 @@ echo "All presentations generated successfully!"
 # .github/workflows/docs.yml
 - name: Generate Architecture Presentations
   run: |
-    python utils/presentation_generator.py ./docs/ARCHITECTURE.md \
+    bun run utils/presentation-generator.ts ./docs/ARCHITECTURE.md \
       --stakeholder business --language en
 ```
 
