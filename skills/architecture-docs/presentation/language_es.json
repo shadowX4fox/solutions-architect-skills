@@ -5,6 +5,8 @@
     "compliance": "Cumplimiento y Gobernanza"
   },
   "slide_titles": {
+    "title_slide": "{system} - Presentación de Arquitectura",
+    "subtitle": "Resumen de Arquitectura para Stakeholders de {stakeholder}",
     "agenda": "Agenda",
     "executive_summary": "Resumen Ejecutivo",
     "problem_solution": "Problema y Solución",

@@ -5,6 +5,8 @@
     "compliance": "Compliance & Governance Overview"
   },
   "slide_titles": {
+    "title_slide": "{system} - Architecture Presentation",
+    "subtitle": "Architecture Overview for {stakeholder} Stakeholders",
     "agenda": "Agenda",
     "executive_summary": "Executive Summary",
     "problem_solution": "Problem & Solution",
