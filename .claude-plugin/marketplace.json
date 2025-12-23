@@ -9,7 +9,7 @@
       "name": "solutions-architect-skills",
       "source": "./",
       "description": "Professional architecture documentation workflow: Business requirements, technical architecture, and compliance documentation",
-      "version": "1.5.27",
+      "version": "1.6.0",
       "author": {
         "name": "shadowX4fox"
       }

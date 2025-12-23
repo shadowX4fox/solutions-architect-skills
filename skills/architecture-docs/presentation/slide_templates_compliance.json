@@ -1,6 +1,6 @@
 {
   "stakeholder_type": "compliance",
-  "slide_count": 11,
+  "slide_count": 14,
   "primary_sections": [7, 8, 9, 10, 11, 12],
   "secondary_sections": [1],
   "slides": [
@@ -15,6 +15,12 @@
       "type": "agenda",
       "title_key": "slide_titles.agenda",
       "items_key": "agenda_items.compliance"
+    },
+    {
+      "id": 2.5,
+      "type": "section_divider",
+      "section_number": "01",
+      "title_key": "slide_titles.security_compliance"
     },
     {
       "id": 3,
@@ -48,6 +54,24 @@
           "section": 9,
           "subsection": "Security Layers",
           "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 4.5,
+      "type": "comparison",
+      "title_key": "slide_titles.security_controls",
+      "left_title": "Preventive Controls",
+      "right_title": "Detective Controls",
+      "data_sources": [
+        {
+          "section": 9,
+          "subsection": "Security Controls",
+          "extract_type": "security_comparison",
+          "fallback": {
+            "left": ["Authentication & Authorization", "Encryption at rest and in transit", "Input validation & sanitization", "Network segmentation"],
+            "right": ["Security monitoring & logging", "Intrusion detection systems", "Vulnerability scanning", "Audit trails & compliance checks"]
+          }
         }
       ]
     },
@@ -160,6 +184,24 @@
           "extract_type": "adr_table",
           "filter": "compliance",
           "note": "Compliance-related ADRs only"
+        }
+      ]
+    },
+    {
+      "id": 10.5,
+      "type": "call_to_action",
+      "title_key": "slide_titles.compliance_contact",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Contacts",
+          "extract_type": "contact_info",
+          "fallback_message": "Questions?",
+          "fallback_contact": [
+            "Security Team: security@company.com",
+            "Compliance Officer: compliance@company.com",
+            "Documentation: docs.company.com/compliance"
+          ]
         }
       ]
     },

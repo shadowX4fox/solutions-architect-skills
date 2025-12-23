@@ -1,6 +1,6 @@
 {
   "stakeholder_type": "architecture",
-  "slide_count": 12,
+  "slide_count": 16,
   "primary_sections": [3, 4, 5, 6, 7, 8, 12],
   "secondary_sections": [1, 9],
   "slides": [
@@ -34,6 +34,12 @@
       ]
     },
     {
+      "id": 3.5,
+      "type": "section_divider",
+      "section_number": "01",
+      "title_key": "slide_titles.technical_overview"
+    },
+    {
       "id": 4,
       "type": "content",
       "title_key": "slide_titles.architecture_principles",
@@ -61,6 +67,24 @@
           "section": 4,
           "subsection": "diagram",
           "extract_type": "mermaid"
+        }
+      ]
+    },
+    {
+      "id": 5.5,
+      "type": "comparison",
+      "title_key": "slide_titles.architecture_comparison",
+      "left_title": "Current State",
+      "right_title": "Target State",
+      "data_sources": [
+        {
+          "section": 4,
+          "subsection": "Current vs Target",
+          "extract_type": "comparison",
+          "fallback": {
+            "left": ["Monolithic architecture", "Single database", "Manual deployment", "Limited scalability"],
+            "right": ["Microservices architecture", "Distributed data", "Automated CI/CD", "Horizontal scaling"]
+          }
         }
       ]
     },
@@ -101,6 +125,25 @@
       ]
     },
     {
+      "id": 7.5,
+      "type": "process",
+      "title_key": "slide_titles.deployment_process",
+      "data_sources": [
+        {
+          "section": 11,
+          "subsection": "Deployment Pipeline",
+          "extract_type": "process_steps",
+          "fallback_steps": [
+            "Code Commit & PR Review",
+            "Automated Testing",
+            "Security Scanning",
+            "Staging Deployment",
+            "Production Release"
+          ]
+        }
+      ]
+    },
+    {
       "id": 8,
       "type": "content",
       "title_key": "slide_titles.data_flow",
@@ -125,6 +168,19 @@
         {
           "section": 7,
           "subsection": "APIs",
+          "extract_type": "bullets"
+        }
+      ]
+    },
+    {
+      "id": 9.5,
+      "type": "explanation_visual",
+      "title_key": "slide_titles.data_architecture",
+      "visual_note": "[Add data flow diagram from Section 6]",
+      "data_sources": [
+        {
+          "section": 6,
+          "subsection": "Data Architecture",
           "extract_type": "bullets"
         }
       ]

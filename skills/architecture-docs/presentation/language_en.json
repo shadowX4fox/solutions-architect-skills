@@ -29,7 +29,24 @@
     "disaster_recovery": "Disaster Recovery & Business Continuity",
     "integration_security": "Integration Security",
     "technology_compliance": "Technology Compliance",
-    "summary": "Summary & Q&A"
+    "summary": "Summary & Q&A",
+    "business_overview": "Business Overview",
+    "technical_overview": "Technical Overview",
+    "security_compliance": "Security & Compliance",
+    "key_metrics": "Key Performance Metrics",
+    "architecture_comparison": "Architecture Evolution",
+    "deployment_process": "Deployment Process",
+    "data_architecture": "Data Architecture",
+    "security_controls": "Security Controls",
+    "compliance_contact": "Compliance & Contact",
+    "testimonial": "Success Story"
+  },
+  "metrics": {
+    "concurrent_users": "Concurrent Users",
+    "availability": "System Availability",
+    "response_time": "Avg Response Time",
+    "throughput": "Throughput (TPS)",
+    "uptime": "Uptime %"
   },
   "labels": {
     "version": "Version",

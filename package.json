@@ -1,6 +1,6 @@
 {
   "name": "solutions-architect-skills",
-  "version": "1.5.25",
+  "version": "1.6.0",
   "description": "Claude Code plugin for architecture documentation and presentation generation",
   "type": "module",
   "scripts": {

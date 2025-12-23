@@ -29,7 +29,24 @@
     "disaster_recovery": "Recuperación de Desastres y Continuidad del Negocio",
     "integration_security": "Seguridad de Integración",
     "technology_compliance": "Cumplimiento Tecnológico",
-    "summary": "Resumen y Preguntas"
+    "summary": "Resumen y Preguntas",
+    "business_overview": "Visión General del Negocio",
+    "technical_overview": "Visión General Técnica",
+    "security_compliance": "Seguridad y Cumplimiento",
+    "key_metrics": "Métricas Clave de Rendimiento",
+    "architecture_comparison": "Evolución de la Arquitectura",
+    "deployment_process": "Proceso de Despliegue",
+    "data_architecture": "Arquitectura de Datos",
+    "security_controls": "Controles de Seguridad",
+    "compliance_contact": "Cumplimiento y Contacto",
+    "testimonial": "Historia de Éxito"
+  },
+  "metrics": {
+    "concurrent_users": "Usuarios Concurrentes",
+    "availability": "Disponibilidad del Sistema",
+    "response_time": "Tiempo de Respuesta Promedio",
+    "throughput": "Rendimiento (TPS)",
+    "uptime": "Tiempo Activo %"
   },
   "labels": {
     "version": "Versión",

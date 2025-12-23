@@ -1,6 +1,6 @@
 {
   "stakeholder_type": "business",
-  "slide_count": 10,
+  "slide_count": 13,
   "primary_sections": [1, 2, 10, 11],
   "secondary_sections": [3],
   "slides": [
@@ -15,6 +15,12 @@
       "type": "agenda",
       "title_key": "slide_titles.agenda",
       "items_key": "agenda_items.business"
+    },
+    {
+      "id": 2.5,
+      "type": "section_divider",
+      "section_number": "01",
+      "title_key": "slide_titles.business_overview"
     },
     {
       "id": 3,
@@ -78,6 +84,23 @@
       ]
     },
     {
+      "id": 6.5,
+      "type": "metrics",
+      "title_key": "slide_titles.key_metrics",
+      "data_sources": [
+        {
+          "section": 1,
+          "subsection": "Key Metrics",
+          "extract_type": "metrics_table",
+          "metrics": [
+            {"field": "Concurrent Users", "label_key": "metrics.concurrent_users"},
+            {"field": "Availability", "label_key": "metrics.availability"},
+            {"field": "Response Time", "label_key": "metrics.response_time"}
+          ]
+        }
+      ]
+    },
+    {
       "id": 7,
       "type": "content",
       "title_key": "slide_titles.system_availability",
@@ -108,6 +131,20 @@
           "section": 11,
           "subsection": "Support Model",
           "extract_type": "text"
+        }
+      ]
+    },
+    {
+      "id": 8.5,
+      "type": "quote",
+      "title_key": "slide_titles.testimonial",
+      "data_sources": [
+        {
+          "section": 2,
+          "subsection": "Success Stories",
+          "extract_type": "quote",
+          "fallback_quote": "This solution has transformed our business operations and significantly improved our efficiency.",
+          "fallback_attribution": "Business Stakeholder"
         }
       ]
     },

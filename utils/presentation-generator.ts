@@ -20,11 +20,27 @@ import {
   addContentSlide,
   addBulletText,
   addBox,
+  // New slide functions (Dark Blue Professional Theme)
+  addSectionDividerSlide,
+  addSingleFocusSlide,
+  addComparisonSlide,
+  addProcessSlide,
+  addExplanationSlide,
+  addMetricsSlide,
+  addQuoteSlide,
+  addCallToActionSlide,
+  // Color constants
   BLUE,
   GREEN,
   GRAY,
   WHITE,
-  DARK_GRAY
+  DARK_GRAY,
+  // New colors (Dark Blue Professional Theme)
+  PRIMARY,
+  SECONDARY,
+  ACCENT,
+  SURFACE,
+  MUTED
 } from './create-presentation';
 
 // ============================================================
@@ -450,59 +466,140 @@ class ArchitecturePresentationGenerator {
 
     for (const slideConfig of this.slideTemplate.slides) {
       const slideId = String(slideConfig.id);
+      const slideType = slideConfig.type || 'content';
       const titleKey = slideConfig.title_key;
-      const title = this.langManager.translate(`slide_titles.${titleKey}`);
+      const title = titleKey ? this.langManager.translate(`slide_titles.${titleKey}`) : '';
+
+      // Skip title and agenda slides (handled above)
+      if (slideType === 'title' || slideType === 'agenda') {
+        continue;
+      }
 
       // Get content
-      let content: string[];
+      let content: string[] = [];
 
       if (this.summaries && this.summaries[slideId]) {
         // Use LLM summaries
         content = this.summaries[slideId];
-        console.log(`  - Slide ${slideNum}: ${titleKey} (LLM) ✓`);
-      } else {
+      } else if (slideConfig.data_sources) {
         // Extract from ARCHITECTURE.md
         content = this.extractSlideContent(slideConfig);
-        console.log(`  - Slide ${slideNum}: ${titleKey} (extracted) ✓`);
       }
 
-      // Build slide
-      const slide = addContentSlide(pptx, title);
+      // Create slide based on type (type-aware slide generation)
+      let slide: any;
 
-      if (content.length > 0) {
-        addBulletText(
-          slide,
-          0.8, 2.0, 8.5, 4.5,
-          content,
-          18,
-          DARK_GRAY,
-          false
-        );
-      } else {
-        // Placeholder if no content - extract section numbers
-        if (slideConfig.data_sources && slideConfig.data_sources.length > 0) {
-          const sectionNums = slideConfig.data_sources
-            .map((ds: any) => typeof ds === 'number' ? ds : ds.section)
-            .filter((n: any) => n !== undefined);
+      switch (slideType) {
+        case 'section_divider':
+          const sectionNum = slideConfig.section_number || '01';
+          slide = addSectionDividerSlide(pptx, sectionNum, title);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (section divider) ✓`);
+          break;
 
-          addBulletText(
-            slide,
-            0.8, 3.0, 8.5, 2.0,
-            [`Ver ARCHITECTURE.md Sección ${sectionNums.join(', ')}`],
-            16,
-            GRAY,
-            true
-          );
-        } else {
-          addBulletText(
-            slide,
-            0.8, 3.0, 8.5, 2.0,
-            ['[No content available]'],
-            16,
-            GRAY,
-            true
-          );
-        }
+        case 'single_focus':
+          const keyMessage = content[0] || 'Key message';
+          const subMessage = content[1];
+          slide = addSingleFocusSlide(pptx, title, keyMessage, subMessage);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (single focus) ✓`);
+          break;
+
+        case 'comparison':
+          const leftTitle = slideConfig.left_title || 'Before';
+          const rightTitle = slideConfig.right_title || 'After';
+
+          // Use fallback if no content
+          let leftContent: string[];
+          let rightContent: string[];
+
+          if (content.length > 0) {
+            const midpoint = Math.ceil(content.length / 2);
+            leftContent = content.slice(0, midpoint);
+            rightContent = content.slice(midpoint);
+          } else if (slideConfig.data_sources?.[0]?.fallback) {
+            leftContent = slideConfig.data_sources[0].fallback.left || [];
+            rightContent = slideConfig.data_sources[0].fallback.right || [];
+          } else {
+            leftContent = ['No data available'];
+            rightContent = ['No data available'];
+          }
+
+          slide = addComparisonSlide(pptx, title, leftTitle, leftContent, rightTitle, rightContent);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (comparison) ✓`);
+          break;
+
+        case 'process':
+          const steps = content.length > 0 ? content : (slideConfig.data_sources?.[0]?.fallback_steps || ['Step 1', 'Step 2', 'Step 3']);
+          slide = addProcessSlide(pptx, title, steps);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (process) ✓`);
+          break;
+
+        case 'explanation_visual':
+          const visualNote = slideConfig.visual_note || '[Diagram placeholder - add visual here]';
+          const explanation = content.length > 0 ? content : ['Explanation text will be added here'];
+          slide = addExplanationSlide(pptx, title, explanation, visualNote);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (explanation + visual) ✓`);
+          break;
+
+        case 'metrics':
+          const metrics = this.extractMetrics(slideConfig, content);
+          slide = addMetricsSlide(pptx, title, metrics);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (metrics) ✓`);
+          break;
+
+        case 'quote':
+          const quote = content[0] || slideConfig.data_sources?.[0]?.fallback_quote || 'Quote text';
+          const attribution = content[1] || slideConfig.data_sources?.[0]?.fallback_attribution;
+          slide = addQuoteSlide(pptx, quote, attribution);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (quote) ✓`);
+          break;
+
+        case 'call_to_action':
+          const ctaMessage = content[0] || slideConfig.data_sources?.[0]?.fallback_message || 'Get in touch';
+          const contactInfo = content.length > 1 ? content.slice(1) : (slideConfig.data_sources?.[0]?.fallback_contact || ['Contact information']);
+          slide = addCallToActionSlide(pptx, ctaMessage, contactInfo);
+          console.log(`  - Slide ${slideNum}: ${titleKey} (call to action) ✓`);
+          break;
+
+        case 'summary':
+          // Summary slide is still a content slide
+          slide = addContentSlide(pptx, title);
+          if (content.length > 0) {
+            addBulletText(slide, 0.8, 2.0, 8.5, 4.5, content, 18, DARK_GRAY, false);
+          } else {
+            addBulletText(slide, 0.8, 2.0, 8.5, 4.5, ['Summary content will be added here'], 18, DARK_GRAY, false);
+          }
+          console.log(`  - Slide ${slideNum}: ${titleKey} (summary) ✓`);
+          break;
+
+        case 'content':
+        default:
+          // Standard content slide (existing logic)
+          slide = addContentSlide(pptx, title);
+
+          if (content.length > 0) {
+            addBulletText(slide, 0.8, 2.0, 8.5, 4.5, content, 18, DARK_GRAY, false);
+          } else {
+            // Placeholder if no content
+            if (slideConfig.data_sources && slideConfig.data_sources.length > 0) {
+              const sectionNums = slideConfig.data_sources
+                .map((ds: any) => typeof ds === 'number' ? ds : ds.section)
+                .filter((n: any) => n !== undefined);
+
+              addBulletText(
+                slide, 0.8, 3.0, 8.5, 2.0,
+                [`Ver ARCHITECTURE.md Sección ${sectionNums.join(', ')}`],
+                16, GRAY, true
+              );
+            } else {
+              addBulletText(
+                slide, 0.8, 3.0, 8.5, 2.0,
+                ['[No content available]'],
+                16, GRAY, true
+              );
+            }
+          }
+          console.log(`  - Slide ${slideNum}: ${titleKey} (content) ✓`);
+          break;
       }
 
       slideNum++;
@@ -568,6 +665,66 @@ class ArchitecturePresentationGenerator {
     } else {
       return SectionExtractor.extractGenericBullets(combinedContent);
     }
+  }
+
+  /**
+   * Extract metrics from slide configuration and content for metrics slides
+   *
+   * @param slideConfig - The slide configuration object
+   * @param content - Extracted content from ARCHITECTURE.md
+   * @returns Array of metric objects {value: string, label: string}
+   */
+  private extractMetrics(slideConfig: any, content: string[]): Array<{value: string; label: string}> {
+    const metrics: Array<{value: string; label: string}> = [];
+
+    // Check if slide config has specific metrics defined
+    if (slideConfig.data_sources?.[0]?.metrics) {
+      // Extract specific metrics from config
+      const metricDefs = slideConfig.data_sources[0].metrics;
+
+      for (const metricDef of metricDefs) {
+        // Try to find metric in content
+        const metricLine = content.find(line => line.includes(metricDef.field));
+
+        if (metricLine) {
+          // Extract value (assumes format: "Field: Value" or "Field | Value")
+          const parts = metricLine.split(/[:|\t]/);
+          if (parts.length >= 2) {
+            const value = parts[1].trim();
+            const label = this.langManager.translate(metricDef.label_key);
+            metrics.push({ value, label });
+          }
+        } else {
+          // Use placeholder if metric not found
+          const label = this.langManager.translate(metricDef.label_key);
+          metrics.push({ value: 'N/A', label });
+        }
+      }
+    } else {
+      // Fallback: extract first 3 lines as metrics
+      content.slice(0, 3).forEach(line => {
+        const parts = line.split(/[:|\t]/);
+        if (parts.length >= 2) {
+          metrics.push({
+            value: parts[1].trim(),
+            label: parts[0].trim()
+          });
+        } else {
+          // If line doesn't have separator, use whole line as label
+          metrics.push({
+            value: 'N/A',
+            label: line.trim()
+          });
+        }
+      });
+    }
+
+    // Ensure we have at least 1 metric, max 3
+    if (metrics.length === 0) {
+      metrics.push({ value: 'N/A', label: 'No metrics available' });
+    }
+
+    return metrics.slice(0, 3);  // Max 3 metrics per slide
   }
 
   private async savePresentationToFile(pptx: any, outputPath: string): Promise<void> {
