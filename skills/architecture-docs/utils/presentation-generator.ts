@@ -86,13 +86,11 @@ class LanguageManager {
   }
 
   private loadTranslations(): void {
-    // import.meta.dir gives us /home/.../solutions-architect-skills/utils
-    // We need to go up one level to get the base directory
-    const baseDir = path.resolve(import.meta.dir, '..');
+    // import.meta.dir gives us /home/.../solutions-architect-skills/skills/architecture-docs/utils
+    // We need to go up one level to get the skill directory
+    const skillDir = path.resolve(import.meta.dir, '..');
     const langFile = path.join(
-      baseDir,
-      'skills',
-      'architecture-docs',
+      skillDir,
       'presentation',
       `language_${this.languageCode}.json`
     );
@@ -276,11 +274,9 @@ class ArchitecturePresentationGenerator {
   }
 
   private loadSlideTemplate(): SlideTemplate {
-    const baseDir = path.resolve(import.meta.dir, '..');
+    const skillDir = path.resolve(import.meta.dir, '..');
     const templateFile = path.join(
-      baseDir,
-      'skills',
-      'architecture-docs',
+      skillDir,
       'presentation',
       `slide_templates_${this.stakeholderType}.json`
     );

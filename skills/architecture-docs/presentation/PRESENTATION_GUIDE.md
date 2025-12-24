@@ -4,19 +4,20 @@
 
 The presentation generation feature automatically creates professional PowerPoint presentations from your ARCHITECTURE.md files. Generate stakeholder-specific presentations in English or Spanish with a single command.
 
-**Version**: 1.0
-**Last Updated**: 2025-12-21
+**Version**: 2.0
+**Last Updated**: 2025-12-24
 
 ## Features
 
-- **3 Stakeholder Types**: Business (13 slides), Architecture (16 slides), Compliance (14 slides)
-- **11 Slide Types**: Including section dividers, comparisons, metrics, quotes, and more
+- **3 Stakeholder Types**: Business (30 slides), Architecture (35 slides), Compliance (32 slides)
+- **12 Slide Types**: Including section dividers, comparisons, metrics, quotes, process flows, and more
 - **Dark Blue Professional Theme**: Modern color palette (#0A1E3D primary)
 - **Bilingual Support**: English and Spanish
 - **Context-Efficient**: Loads only required sections (50-80% reduction)
-- **Automated Slide Generation**: 13-16 slides per presentation
+- **Automated Slide Generation**: 30-35 slides per presentation
 - **Professional Design**: Corporate color scheme with consistent branding
 - **Template-Based**: Predefined slide structures for each stakeholder type
+- **Comprehensive Content**: Enhanced technical details and business context
 
 ## Quick Start
 
@@ -47,17 +48,17 @@ The skill will guide you through:
 cd /home/shadowx4fox/solutions-architect-skills
 
 # Business presentation in English
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
 # Architecture presentation in Spanish
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder architecture \
   --language es
 
 # Compliance presentation with custom output
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder compliance \
   --output /custom/path/presentation.pptx
 ```
@@ -76,77 +77,148 @@ Presentations are saved to:
 
 ## Stakeholder Types
 
-### Business Stakeholders (13 slides)
+### Business Stakeholders (30 slides)
 
 **Target Audience**: Executives, Product Owners, Business Analysts
 
-**Focus**: Business value, ROI, metrics, use cases
+**Focus**: Business value, outcomes, operations, high-level architecture
+
+**Presentation Time**: ~45 minutes
 
 **Slide Structure**:
 1. Title Slide
 2. Agenda
-3. **Section Divider** - Business Overview (NEW)
-4. Executive Summary - Key metrics, business value
-5. Problem & Solution - Problem statement, solution overview
-6. Use Cases - Primary use cases with success metrics
-7. Business Value - ROI, efficiency gains, revenue impact
-8. **Metrics Slide** - Key Performance Metrics (NEW)
-9. System Availability & Performance - SLA commitments
-10. Operational Support - Monitoring, support model
-11. **Quote Slide** - Success Story/Testimonial (NEW)
-12. Architecture Principles - Top 5 principles
-13. Summary & Q&A
+3. **Section Divider** - Business Overview
+4. Executive Summary - Key business metrics and overview
+5. **Metrics Slide** - Key Performance Metrics (concurrent users, availability, response time)
+6. **Single Focus** - Business Value Proposition
+7. **Quote Slide** - Customer Success Story
+8. **Section Divider** - Business Context
+9. Problem & Solution - Problem statement (3 bullets)
+10. **Explanation Visual** - Solution Overview
+11. Use Cases - Part 1 (first 5 use cases)
+12. Use Cases - Part 2 (Details, use cases 6-10)
+13. Target Users & Personas
+14. **Comparison** - Before/After Transformation Impact
+15. **Section Divider** - Core Capabilities
+16. Core Capabilities - Functional requirements
+17. **Metrics Slide** - System Availability & Performance (SLAs)
+18. Performance Guarantees
+19. **Single Focus** - Scalability Overview
+20. **Section Divider** - Operational Support
+21. Support Model
+22. Monitoring & Observability
+23. **Process** - Incident Response workflow
+24. **Comparison** - Disaster Recovery (RPO/RTO)
+25. **Section Divider** - Architecture Foundation
+26. Architecture Principles - Part 1 (first 5 principles)
+27. Architecture Principles - Part 2 (principles 6-10)
+28. **Explanation Visual** - Architecture Layers Overview
+29. Summary - Key takeaways and next steps
+30. **Call to Action** - Compliance & Contact
 
-**Data Sources**: Sections 1, 2, 10, 11 (~400 lines, 80% context reduction)
+**Data Sources**: Sections 1, 2, 3, 4, 10, 11 (Primary: 1, 2, 10, 11; Secondary: 3, 4)
 
-**New Features**: Section dividers for visual breaks, large metric cards, customer testimonials
+**New Features**: Comprehensive business context, dual metrics slides, transformation impact comparison, complete operational coverage
 
-### Architecture Team (16 slides)
+### Architecture Team (35 slides)
 
 **Target Audience**: Software Architects, Tech Leads, Senior Engineers
 
-**Focus**: Technical design, components, patterns, decisions
+**Focus**: Technical depth, design decisions, components, integrations, security
+
+**Presentation Time**: ~60 minutes
 
 **Slide Structure**:
 1. Title Slide
 2. Agenda
-3. Executive Summary - System purpose, technical metrics
-4. Architecture Principles - All 9-10 principles
-5. Architecture Layers - Layer diagram, descriptions
-6. Component Overview - Component catalog
-7. Technology Stack - Backend, frontend, data, infrastructure
-8. Data Flow Patterns - How data moves
-9. Integration Points - External APIs, dependencies
-10. Security Architecture - Auth, encryption, controls
-11. Key Architecture Decisions - Top 5 ADRs
-12. Summary & Q&A
+3. **Section Divider** - Technical Overview
+4. Executive Summary - System purpose and overview
+5. **Metrics Slide** - Key Performance Metrics
+6. Business Context - Problem and solution summary
+7. **Section Divider** - Architecture Foundation
+8. Architecture Principles - Part 1 (first 5 principles)
+9. Architecture Principles - Part 2 (principles 6-10)
+10. **Comparison** - Design Drivers & Trade-offs
+11. Architecture Layers Overview
+12. **Explanation Visual** - Architecture Diagram
+13. **Section Divider** - Component Architecture
+14. Layer 1 Components - Presentation layer
+15. Layer 2 Components - Business logic layer
+16. Layer 3 Components - Integration layer
+17. Layer 4 Components - Data layer
+18. Layer 5-6 Components - Infrastructure & cross-cutting
+19. **Explanation Visual** - Component Dependencies
+20. **Section Divider** - Data & Integration
+21. **Process** - Data Flow Patterns (5-step workflow)
+22. **Explanation Visual** - Data Architecture
+23. API Strategy
+24. Integration Points - External systems
+25. **Comparison** - Integration Patterns (Sync/Async)
+26. API Catalog
+27. **Section Divider** - Technology & Security
+28. Technology Stack - Comprehensive overview
+29. **Explanation Visual** - Security Architecture
+30. Authentication & Authorization
+31. Data Protection
+32. **Section Divider** - Key Architecture Decisions
+33. ADRs Part 1 - First 5 decisions
+34. ADRs Part 2 - Decisions 6-10
+35. Summary & Q&A
 
-**Data Sources**: Sections 3, 4, 5, 6, 7, 8, 12 (~1000 lines, 50% context reduction)
+**Data Sources**: Sections 3, 4, 5, 6, 7, 8, 9, 12 (Primary: 3, 4, 5, 6, 7, 8, 9, 12; Secondary: 1, 2)
 
-### Compliance/Governance (11 slides)
+**New Features**: Layer-by-layer component coverage, dual ADR slides, comprehensive data & integration section, security deep dive
+
+### Compliance/Governance (32 slides)
 
 **Target Audience**: Compliance Officers, Security Teams, Auditors
 
-**Focus**: Security, governance, operational standards
+**Focus**: Security controls, governance, compliance requirements, operational reliability
+
+**Presentation Time**: ~50 minutes
 
 **Slide Structure**:
 1. Title Slide
 2. Agenda
-3. Executive Summary - System purpose, availability commitment
-4. Security Architecture Overview - Security layers
-5. Authentication & Authorization - Auth mechanisms, access controls
-6. Data Protection - Encryption, data classification
-7. Operational Excellence - Monitoring, incident response
-8. Disaster Recovery & Business Continuity - RTO/RPO, backup
-9. Integration Security - API security, external dependencies
-10. Technology Compliance - Approved technologies
-11. Summary & Q&A
+3. **Section Divider** - Business Overview
+4. Executive Summary
+5. **Metrics Slide** - Compliance Metrics (availability, uptime, response time)
+6. Regulatory Context
+7. **Section Divider** - Security Architecture
+8. **Explanation Visual** - Security Overview & Layers
+9. **Comparison** - Security Controls Framework (Preventive vs Detective)
+10. Authentication & Authorization (9.1, 9.2)
+11. Access Control Matrix
+12. Data Protection (9.3)
+13. Network Security (9.4, 9.5)
+14. API Security
+15. Security Monitoring & Threat Detection (9.6)
+16. Compliance Standards (9.7)
+17. **Section Divider** - Integration Security
+18. Integration Points - External systems
+19. API Security Controls
+20. Secure Data Exchange
+21. **Section Divider** - Operational Compliance
+22. Monitoring & Audit Logging (11.1, 11.2)
+23. Alerting & Response
+24. **Process** - Incident Management workflow
+25. **Comparison** - Disaster Recovery (RPO/RTO)
+26. Change Management & Governance
+27. **Metrics Slide** - SLA Compliance
+28. **Section Divider** - Technology Governance
+29. Approved Technology Stack
+30. Technology Standards & Policies
+31. Compliance-Related ADRs (Section 12)
+32. Summary & Audit - Next steps and contact
 
-**Data Sources**: Sections 7, 8, 9, 10, 11, 12 (~700 lines, 65% context reduction)
+**Data Sources**: Sections 9, 11, 10, 1, 7, 8, 12 (Primary: 9, 11, 10; Secondary: 1, 7, 8, 12)
+
+**New Features**: 10 slides on security architecture (Section 9 comprehensive), preventive/detective controls comparison, operational compliance deep dive, technology governance
 
 ## Slide Type Reference
 
-The presentation generator supports **11 slide types** with the Dark Blue Professional Theme. Each type serves a specific purpose and follows a consistent visual design.
+The presentation generator supports **12 slide types** with the Dark Blue Professional Theme. Each type serves a specific purpose and follows a consistent visual design.
 
 ### Color Palette
 
@@ -560,37 +632,71 @@ The presentation generator supports **11 slide types** with the Dark Blue Profes
 
 ## Slide Type Usage by Stakeholder
 
-### Business Stakeholders (13 slides)
+### Business Stakeholders (30 slides)
 
-**New Slide Types Used**:
-- Section Divider (id 2.5) - "Business Overview"
-- Metrics (id 6.5) - "Key Performance Metrics"
-- Quote (id 8.5) - "Success Story"
+**Slide Type Breakdown**:
+- Content slides: 14
+- Section Dividers: 5
+- Metrics slides: 2
+- Single Focus slides: 2
+- Quote slides: 1
+- Comparison slides: 2
+- Process slides: 1
+- Explanation + Visual slides: 2
+- Call to Action: 1
+- Summary: 1 (with next steps)
 
-**Total**: 10 content + 3 new = 13 slides
+**Key Features**:
+- Dual metrics slides for KPIs and SLAs
+- Before/After transformation comparison
+- Complete operational support coverage (7 slides)
+- Architecture foundation overview (4 slides)
+
+**Total**: 30 slides covering business value, operations, and high-level architecture
 
 ---
 
-### Architecture Team (16 slides)
+### Architecture Team (35 slides)
 
-**New Slide Types Used**:
-- Section Divider (id 3.5) - "Technical Overview"
-- Comparison (id 5.5) - "Architecture Evolution" (Current vs Target)
-- Process (id 7.5) - "Deployment Process"
-- Explanation + Visual (id 9.5) - "Data Architecture"
+**Slide Type Breakdown**:
+- Content slides: 18
+- Section Dividers: 6
+- Metrics slides: 1
+- Comparison slides: 2
+- Process slides: 1
+- Explanation + Visual slides: 3
+- Summary: 1
 
-**Total**: 12 content + 4 new = 16 slides
+**Key Features**:
+- Component architecture by layer (7 slides total)
+- Data & integration deep dive (6 slides)
+- Dual ADR slides (Part 1 & 2)
+- Comprehensive security coverage
+- Technology stack details
+
+**Total**: 35 slides with deep technical coverage across all architecture aspects
 
 ---
 
-### Compliance/Governance (14 slides)
+### Compliance/Governance (32 slides)
 
-**New Slide Types Used**:
-- Section Divider (id 2.5) - "Security & Compliance"
-- Comparison (id 4.5) - "Security Controls" (Preventive vs Detective)
-- Call to Action (id 10.5) - "Compliance & Contact"
+**Slide Type Breakdown**:
+- Content slides: 20
+- Section Dividers: 5
+- Metrics slides: 2
+- Comparison slides: 2
+- Process slides: 1
+- Explanation + Visual slides: 1
+- Summary: 1 (with contact info)
 
-**Total**: 11 content + 3 new = 14 slides
+**Key Features**:
+- 10 slides dedicated to Security Architecture (Section 9)
+- Preventive vs Detective controls comparison
+- Complete Section 9 subsection coverage (9.1-9.7)
+- Operational compliance with incident management workflow
+- Technology governance and standards
+
+**Total**: 32 slides focused on security, compliance, and governance
 
 ---
 
@@ -760,7 +866,7 @@ ls -la ARCHITECTURE.md
 pwd
 
 # Provide full path
-bun run utils/presentation-generator.ts /full/path/to/ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts /full/path/to/ARCHITECTURE.md \
   --stakeholder business
 ```
 
@@ -825,7 +931,7 @@ ls -la /home/shadowx4fox/solutions-architect-skills/create_presentation.py
 
 # Run from correct directory
 cd /home/shadowx4fox/solutions-architect-skills
-bun run utils/presentation-generator.ts ARCHITECTURE.md --stakeholder business
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md --stakeholder business
 ```
 
 ## Best Practices
@@ -858,7 +964,7 @@ bun run utils/presentation-generator.ts ARCHITECTURE.md --stakeholder business
 **How to Regenerate**:
 ```bash
 # Same command as initial generation
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
@@ -870,7 +976,7 @@ bun run utils/presentation-generator.ts ARCHITECTURE.md \
 
 **Option 1: Date Suffix**
 ```bash
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --output /presentations/ARCHITECTURE_Business_EN_2025-12-21.pptx
 ```
@@ -891,7 +997,7 @@ git tag presentation-v1.5
 
 **Command**:
 ```bash
-bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ./ARCHITECTURE.md \
   --stakeholder business \
   --language en
 ```
@@ -907,7 +1013,7 @@ bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
 
 **Command**:
 ```bash
-bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ./ARCHITECTURE.md \
   --stakeholder compliance \
   --language es
 ```
@@ -928,15 +1034,15 @@ bun run utils/presentation-generator.ts ./ARCHITECTURE.md \
 ARCH_FILE="./ARCHITECTURE.md"
 
 # Business (English)
-bun run utils/presentation-generator.ts $ARCH_FILE \
+bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder business --language en
 
 # Architecture (English)
-bun run utils/presentation-generator.ts $ARCH_FILE \
+bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder architecture --language en
 
 # Compliance (Spanish)
-bun run utils/presentation-generator.ts $ARCH_FILE \
+bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
   --stakeholder compliance --language es
 
 echo "All presentations generated successfully!"
@@ -975,7 +1081,7 @@ echo "All presentations generated successfully!"
 # .github/workflows/docs.yml
 - name: Generate Architecture Presentations
   run: |
-    bun run utils/presentation-generator.ts ./docs/ARCHITECTURE.md \
+    bun run skills/architecture-docs/utils/presentation-generator.ts ./docs/ARCHITECTURE.md \
       --stakeholder business --language en
 ```
 
@@ -1004,6 +1110,6 @@ For issues, questions, or feature requests:
 
 ---
 
-**Version**: 1.0
-**Plugin**: Solutions Architect Skills v1.5.23
-**Last Updated**: 2025-12-21
+**Version**: 2.0
+**Plugin**: Solutions Architect Skills v1.6.0
+**Last Updated**: 2025-12-24

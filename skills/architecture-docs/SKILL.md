@@ -1,6 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating presentations/slides/PowerPoint from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating presentations/slides/PowerPoint from architecture documentation, when generating diagrams from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
 ---
 
 # Architecture Documentation Skill
@@ -23,6 +23,10 @@ Automatically activate when:
   - "How does [component/system/integration] work?"
   - "What technologies do we use for [purpose]?"
   - "Tell me about the architecture of [system]"
+- **User asks to generate, create, or add diagrams to architecture documentation** (triggers Workflow 9)
+  - "Generate my architecture diagrams"
+  - "Create Mermaid diagrams from ARCHITECTURE.md"
+  - "Add diagrams to my architecture"
 
 ### Query Pattern Triggers
 
@@ -73,6 +77,18 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 **Action when detected:**
 1. Confirm: "I'll help you generate architecture presentations."
 2. Jump directly to **Workflow 8, Step 1** (Stakeholder Type Selection)
+3. Do NOT ask which workflow - proceed automatically
+
+#### Workflow 9: Diagram Generation
+**Triggers:**
+- Keywords: "generate", "create", "add", "update", "make" + "diagram", "diagrams", "Mermaid diagram", "architecture diagram"
+- Examples: "generate my architecture diagrams", "create diagrams from ARCHITECTURE.md", "add diagrams to my architecture"
+- Section-specific: "generate diagrams for Section 4", "create data flow diagrams"
+- Format mentions: "Mermaid diagrams", "visual diagrams", "architecture diagrams"
+
+**Action when detected:**
+1. Confirm: "I'll help you generate architecture diagrams."
+2. Jump directly to **Workflow 9, Step 1** (Diagram Type Selection)
 3. Do NOT ask which workflow - proceed automatically
 
 #### Other Workflows
@@ -3395,7 +3411,7 @@ ADRs (Slide 11):
 
 **Command to Execute**:
 ```bash
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder [business|architecture|compliance] \
   --language [en|es] \
   --summaries /tmp/presentation_summaries_{stakeholder}_{language}.json
@@ -3469,18 +3485,18 @@ For direct command-line generation without interactive prompts:
 
 ```bash
 # With LLM summaries (RECOMMENDED)
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder architecture \
   --language es \
   --summaries /tmp/presentation_summaries_architecture_es.json
 
 # Without summaries (falls back to regex extraction)
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder business \
   --language en
 
 # With custom output path
-bun run utils/presentation-generator.ts ARCHITECTURE.md \
+bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
   --stakeholder compliance \
   --language es \
   --summaries /tmp/presentation_summaries_compliance_es.json \
@@ -3707,6 +3723,245 @@ Próximos Pasos:
 ═══════════════════════════════════════════════════════════
 
 **Your presentation is ready!** You can find it at: `/presentations/ARCHITECTURE_Business_ES.pptx`
+
+---
+
+## Workflow 9: Diagram Generation (Generate Architecture Diagrams)
+
+**⚡ Auto-triggers**: This workflow automatically activates when diagram-related keywords are detected (see Automatic Workflow Detection section above).
+
+### When to Use
+
+This workflow is activated when users request diagram generation from ARCHITECTURE.md:
+- "Generate architecture diagrams"
+- "Create Mermaid diagrams from architecture"
+- "Generate diagrams for my architecture"
+- "Add diagrams to ARCHITECTURE.md"
+- User references: "visual diagrams", "data flow diagrams", "component diagrams"
+
+### Activation Triggers
+
+**Automatic Invocation:**
+- User asks to "generate diagrams", "create diagrams", "add diagrams", "make diagrams"
+- User specifies: "Mermaid diagrams", "architecture diagrams", "visual diagrams"
+- User references sections: "generate diagrams for Section 4"
+
+**Manual Invocation:**
+- User explicitly: "Run diagram generation workflow"
+- User references: `/workflow diagrams`
+
+### Prerequisites
+
+- **ARCHITECTURE.md file exists** in the project
+- Document has **valid 12-section structure** (or at least core sections 1-4)
+- **Document Index is present** (lines 1-50 typically)
+- **MERMAID_DIAGRAMS_GUIDE.md** available for templates (optional but recommended)
+
+### Step-by-Step Process
+
+#### Step 1: Detect Request & Present Diagram Type Options
+
+When diagram generation is requested, present the following options:
+
+```
+📊 **Architecture Diagram Generation**
+
+I'll generate Mermaid architecture diagrams for your ARCHITECTURE.md file.
+
+**Step 1: Select Diagram Type**
+
+What diagrams would you like to generate?
+
+1. **Default Set (Recommended)** - 3 core diagrams (High-Level Architecture, Infrastructure, High Availability)
+2. **High-Level Architecture Only** - Single comprehensive 3-tier or META layer diagram
+3. **Extended Set** - All 6 diagrams (includes Data Flow, Performance, Legend)
+4. **Custom Selection** - Choose specific diagrams or describe your needs
+
+**Please select: 1, 2, 3, or 4**
+```
+
+**Default Diagram Set** (Recommended):
+
+1. **High-Level System Architecture** → Section 4.1 (Architecture Layers)
+2. **Infrastructure & Deployment** → Section 9.2 (Deployment Architecture)
+3. **High Availability & Failover** → Section 8.3 (Availability & Reliability)
+
+**Additional Diagram Types Available**:
+
+| Diagram Type | Purpose | Typical Sections | Complexity |
+|-------------|---------|------------------|------------|
+| Data Flow (Read/Write) | Sequence diagrams for operations | Section 5 (Data Structures), Section 6 (Integrations) | High |
+| Performance Strategy | Cache, DB, throughput optimization | Section 8 (Operational Characteristics) | Medium |
+| Diagram Legend | Color coding, symbols, arrow meanings | All diagrams | Low |
+
+#### Step 2: Target Location Selection
+
+After diagram type selection:
+
+```
+**Step 2: Select Target Location**
+
+Where should the diagrams be placed?
+
+1. **Inline in ARCHITECTURE.md** - Embed diagrams directly in relevant sections (Recommended)
+2. **Separate Section 4 Subsection** - Create dedicated "### Architecture Diagrams" subsection
+3. **Both** - Inline for key diagrams + comprehensive set in Section 4
+
+**Please select: 1, 2, or 3**
+```
+
+**Recommended Placements**:
+- **High-Level Architecture**: Section 4.1 or Section 4 introduction
+- **Data Flow Diagrams**: Section 5.3 (Data Flow Patterns)
+- **Infrastructure Diagram**: Section 9.2 (Deployment Architecture)
+- **HA Diagram**: Section 8.3 (Availability & Reliability)
+- **Performance Diagram**: Section 8.1 (Performance Requirements)
+
+#### Step 3: Confirmation
+
+```
+**Step 3: Confirmation**
+
+I'll generate diagrams with these settings:
+- Diagram Type: [Default Set (3)/High-Level Only (1)/Extended Set (6)/Custom]
+- Target Location: [Inline/Section 4 Subsection/Both]
+- Total Diagrams: 1-6 diagrams (typically 3 for Default Set)
+- Output: Mermaid code blocks embedded in ARCHITECTURE.md
+
+Proceed with generation? [Yes/No]
+```
+
+#### Step 4: Load Document & Identify Architecture Type
+
+**Process**:
+1. Read lines 1-50 of ARCHITECTURE.md (Document Index)
+2. Parse Document Index to extract section line ranges
+3. Read Section 1 (Executive Summary) to identify system type
+4. Determine architecture pattern (3-Tier, Microservices, META, N-Layer)
+5. Read Section 4 (Architecture Layers) to understand component structure
+
+**Architecture Type Detection**:
+- **3-Tier**: Frontend → Backend → Database layers
+- **Microservices**: Multiple independent services with API Gateway
+- **META (6-Layer)**: Channels → UX → Business Scenarios → Service Orchestration → Atomic Services → Data
+- **N-Layer**: Custom layered architecture (N > 3)
+
+#### Step 5: Load Required Sections Incrementally
+
+**Context-Efficient Loading**:
+- Load only sections required for the selected diagram type
+- Use ±10 line buffer around each section
+- Minimize total lines loaded (similar to Workflow 8 approach)
+
+**Sections by Diagram Type**:
+- **Default Set (3 diagrams)**: Sections 4, 8, 9 (~500-800 lines, 60-75% reduction vs. full document)
+- **High-Level Architecture Only**: Section 4 (~150-300 lines)
+- **Infrastructure Only**: Section 9 (~150-250 lines)
+- **HA/Performance**: Section 8 (~200-350 lines)
+- **Extended Set (6 diagrams)**: Sections 4, 5, 6, 8, 9 (~800-1200 lines, 40-60% reduction vs. full document)
+
+#### Step 6: Generate Diagrams Using MERMAID_DIAGRAMS_GUIDE Templates
+
+**Process**:
+1. Load MERMAID_DIAGRAMS_GUIDE.md for reference templates
+2. For each diagram to generate:
+   - Identify appropriate Mermaid diagram type (graph TB, sequenceDiagram, etc.)
+   - Extract key components, data flows, or infrastructure elements from sections
+   - Apply color scheme and styling from templates
+   - Generate complete Mermaid code block
+3. Format with proper markdown code block syntax
+
+**Mermaid Diagram Types**:
+- **High-Level Architecture**: `graph TB` (top-to-bottom flowchart)
+- **Data Flow**: `sequenceDiagram` (participant interactions)
+- **Infrastructure**: `graph TB` with subgraphs (nested component groups)
+- **HA/Performance**: `graph TB` or `graph LR` (left-to-right)
+
+**Color Scheme** (from MERMAID_DIAGRAMS_GUIDE):
+```
+classDef presentation fill:#4A90E2,stroke:#2E5C8A,stroke-width:3px,color:#fff
+classDef application fill:#F5A623,stroke:#B8791A,stroke-width:3px,color:#fff
+classDef data fill:#7ED321,stroke:#5A9B18,stroke-width:3px,color:#fff
+classDef cache fill:#BD10E0,stroke:#8A0CA3,stroke-width:3px,color:#fff
+classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
+```
+
+#### Step 7: Insert Diagrams into ARCHITECTURE.md
+
+**Process**:
+1. For inline placement:
+   - Read target section (e.g., Section 4.1)
+   - Find appropriate insertion point (after section header or before subsection)
+   - Use Edit tool to insert diagram with proper heading
+
+2. For Section 4 subsection:
+   - Create new `### 4.X Architecture Diagrams` subsection
+   - Insert all diagrams with individual headings
+
+3. Maintain proper markdown structure:
+   ```markdown
+   #### Diagram: High-Level System Architecture
+
+   ```mermaid
+   graph TB
+       %% Diagram content here
+   ```
+
+   **Description**: This diagram shows...
+   ```
+
+#### Step 8: Verification & User Notification
+
+**Verification**:
+- ✅ All diagrams inserted successfully
+- ✅ Mermaid syntax is valid (no unclosed code blocks)
+- ✅ Proper headings and descriptions added
+- ✅ Document structure maintained
+
+**Notification**:
+```
+✅ **Diagram Generation Complete**
+
+Generated diagrams (Default Set):
+- High-Level System Architecture (Section 4.1)
+- Infrastructure & Deployment (Section 9.2)
+- High Availability & Failover (Section 8.3)
+
+**Location**: ARCHITECTURE.md (inline in respective sections)
+
+**Rendering**:
+- GitHub/GitLab: Diagrams will render automatically
+- VS Code: Install "Markdown Preview Mermaid Support" extension
+- Online: Use https://mermaid.live/ to preview
+
+**Next Steps**:
+- Review diagrams in your markdown viewer
+- Verify all components are correctly represented
+- Request updates if any changes needed
+```
+
+### Error Handling
+
+**Common Issues**:
+
+| Issue | Solution |
+|-------|----------|
+| ARCHITECTURE.md not found | Prompt user to create ARCHITECTURE.md first (Workflow 1) |
+| Document Index missing | Generate index first or use default line ranges with warning |
+| Section not found | Skip that diagram type or prompt user to add section |
+| Invalid Mermaid syntax | Validate syntax using mermaid-cli or fallback to simpler diagram |
+| Insertion point conflict | Ask user for preferred location |
+
+### Integration with Other Workflows
+
+**Workflow Dependencies**:
+- **Workflow 1 (Create ARCHITECTURE.md)**: Must run first if document doesn't exist
+- **Workflow 8 (Presentation Generation)**: Can use generated diagrams in presentations
+- **Workflow 7 (Informational Query)**: Can answer questions about generated diagrams
+
+**Complementary Actions**:
+- After diagram generation, suggest running Workflow 8 to create presentation
+- Recommend adding diagram descriptions to ADRs (Workflow 2) if design decisions are visualized
 
 ---
 
