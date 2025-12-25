@@ -3772,27 +3772,29 @@ I'll generate Mermaid architecture diagrams for your ARCHITECTURE.md file.
 
 What diagrams would you like to generate?
 
-1. **Default Set (Recommended)** - 3 core diagrams (High-Level Architecture, Infrastructure, High Availability)
-2. **High-Level Architecture Only** - Single comprehensive 3-tier or META layer diagram
-3. **Extended Set** - All 6 diagrams (includes Data Flow, Performance, Legend)
-4. **Custom Selection** - Choose specific diagrams or describe your needs
+**1. High-Level Architecture Only (Recommended)** - Single comprehensive diagram
+   - Shows Presentation → Application → Data layers (3-tier)
+   - Or shows all 6 META layers for META architectures
+   - Includes all major components and data flows
 
-**Please select: 1, 2, 3, or 4**
+**2. Default Set** - 3 core diagrams
+   - High-Level System Architecture (3-tier overview)
+   - Infrastructure & Deployment (Azure AKS setup)
+   - Component Interactions (Frontend ↔ Backend ↔ Database)
+
+**Please select: 1 or 2**
 ```
 
-**Default Diagram Set** (Recommended):
+**High-Level Architecture Diagram Details**:
+- Single comprehensive Mermaid flowchart showing all tiers/layers
+- Includes component relationships and data flows
+- Color-coded by tier for easy visualization
+- Suitable for executive presentations and documentation
 
+**Default Set Diagram Details**:
 1. **High-Level System Architecture** → Section 4.1 (Architecture Layers)
 2. **Infrastructure & Deployment** → Section 9.2 (Deployment Architecture)
 3. **High Availability & Failover** → Section 8.3 (Availability & Reliability)
-
-**Additional Diagram Types Available**:
-
-| Diagram Type | Purpose | Typical Sections | Complexity |
-|-------------|---------|------------------|------------|
-| Data Flow (Read/Write) | Sequence diagrams for operations | Section 5 (Data Structures), Section 6 (Integrations) | High |
-| Performance Strategy | Cache, DB, throughput optimization | Section 8 (Operational Characteristics) | Medium |
-| Diagram Legend | Color coding, symbols, arrow meanings | All diagrams | Low |
 
 #### Step 2: Target Location Selection
 
@@ -3823,7 +3825,7 @@ Where should the diagrams be placed?
 **Step 3: Confirmation**
 
 I'll generate diagrams with these settings:
-- Diagram Type: [Default Set (3)/High-Level Only (1)/Extended Set (6)/Custom]
+- Diagram Type: [High-Level Only (1)/Default Set (3)]
 - Target Location: [Inline/Section 4 Subsection/Both]
 - Total Diagrams: 1-6 diagrams (typically 3 for Default Set)
 - Output: Mermaid code blocks embedded in ARCHITECTURE.md
@@ -3854,8 +3856,8 @@ Proceed with generation? [Yes/No]
 - Minimize total lines loaded (similar to Workflow 8 approach)
 
 **Sections by Diagram Type**:
+- **High-Level Architecture Only (1 diagram)**: Section 4 (~150-300 lines, 85-90% reduction vs. full document)
 - **Default Set (3 diagrams)**: Sections 4, 8, 9 (~500-800 lines, 60-75% reduction vs. full document)
-- **High-Level Architecture Only**: Section 4 (~150-300 lines)
 - **Infrastructure Only**: Section 9 (~150-250 lines)
 - **HA/Performance**: Section 8 (~200-350 lines)
 - **Extended Set (6 diagrams)**: Sections 4, 5, 6, 8, 9 (~800-1200 lines, 40-60% reduction vs. full document)
