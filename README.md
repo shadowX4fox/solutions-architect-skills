@@ -239,7 +239,7 @@ All ARCHITECTURE.md documents include **Mermaid architecture diagrams** integrat
 
 ### Real-World Example Repository
 
-**[Task Scheduling Platform Example](https://github.com/shadowX4fox/task-scheduling-example)** ⭐
+**[Todo List Application Example](https://github.com/shadowX4fox/todo-list-example)** ⭐
 
 Complete end-to-end demonstration of the three-phase workflow:
 
@@ -261,7 +261,7 @@ Complete end-to-end demonstration of the three-phase workflow:
 - Security, Cloud, SRE, and Enterprise Architecture contracts
 - Full source traceability to ARCHITECTURE.md
 
-**Repository**: https://github.com/shadowX4fox/task-scheduling-example
+**Repository**: https://github.com/shadowX4fox/todo-list-example
 
 ---
 
