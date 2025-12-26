@@ -43,6 +43,57 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 9. Enterprise Architecture
 10. Integration Architecture
 
+## Implementation: Generation Script
+
+**IMPORTANT**: Compliance contract generation is implemented by the `generate-contracts.ts` script. This ensures the complete workflow is always executed correctly.
+
+### How It Works
+
+When this skill is invoked (e.g., "Generate all compliance contracts"), the workflow is:
+
+1. **Skill invocation** → User requests contract generation
+2. **Script execution** → Skill executes: `bun generate-contracts.ts --all --arch-path [path]`
+3. **Complete workflow** → Script performs all 5 phases automatically:
+   - Phase 1: Load and validate ARCHITECTURE.md
+   - Phase 2: Configure contracts and output directory
+   - Phase 3: Extract data from ARCHITECTURE.md sections
+   - Phase 4: Generate contracts (load templates → resolve includes → post-process → replace placeholders)
+   - Phase 5: Save contracts and generate manifest
+4. **Results** → Contracts saved to `/compliance-docs/`, summary reported to user
+
+### Why a Script?
+
+Previously, SKILL.md described the workflow but didn't enforce it. This led to incomplete generation:
+- ❌ Includes not resolved (`<!-- @include -->` directives still present)
+- ❌ Data not extracted (all placeholders unchanged)
+- ❌ Post-processing skipped (instructions still visible)
+
+The generation script **guarantees** all steps execute every time.
+
+### Script Details
+
+- **Location**: `/skills/architecture-compliance/generate-contracts.ts`
+- **Runtime**: Bun (TypeScript)
+- **Performance**: All 10 contracts in ~0.7 seconds
+- **Documentation**: See `utils/GENERATION_SCRIPT.md` for complete details
+
+### Standalone Usage
+
+The script can also run independently:
+
+```bash
+# Generate all contracts
+bun generate-contracts.ts --all --arch-path ./ARCHITECTURE.md
+
+# Generate specific contract
+bun generate-contracts.ts --contract "SRE Architecture" --arch-path ./ARCHITECTURE.md
+
+# Verbose output
+bun generate-contracts.ts --all --arch-path ./ARCHITECTURE.md --verbose
+```
+
+---
+
 ## Template Format Preservation Policy
 
 **CRITICAL REQUIREMENT**: Generated compliance contracts MUST preserve template format exactly.
