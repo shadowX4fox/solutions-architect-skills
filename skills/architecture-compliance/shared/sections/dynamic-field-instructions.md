@@ -1,3 +1,4 @@
+<!-- BEGIN INSTRUCTIONS - REMOVE FROM FINAL OUTPUT -->
 **Dynamic Field Instructions for Document Generation**:
 
 - `[DOCUMENT_STATUS]`: Determined by validation_results.outcome.document_status
@@ -31,3 +32,4 @@
 - Score 7.0-7.9: Manual review by {{review_board}} required
 - Score 5.0-6.9: Must address gaps before proceeding to review
 - Score < 5.0: Contract rejected, cannot proceed
+<!-- END INSTRUCTIONS -->

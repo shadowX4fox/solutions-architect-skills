@@ -694,6 +694,67 @@ bun utils/resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/tem
 
 **Documentation**: See `utils/README.md` for detailed usage and examples
 
+**Step 4.1.5: Post-Process Template (Remove Instructions & Replace Dynamic Fields)**
+
+**Implementation**: Use `utils/post-processor.ts` to clean and finalize the expanded template.
+
+```bash
+bun utils/post-processor.ts <expanded-template> <validation-results.json> <config.json> <output>
+```
+
+**Purpose**: The post-processor removes instructional sections meant for generators (not end users) and replaces dynamic validation placeholders with actual values from Phase 3.5 validation results.
+
+**Algorithm** (automated by post-processor.ts):
+
+1. Remove instructional sections:
+   - Detect and remove content between `<!-- BEGIN INSTRUCTIONS ... -->` and `<!-- END INSTRUCTIONS -->`
+   - These sections contain generator guidance (how to populate placeholders) and should never appear in final output
+   - Example: "Dynamic Field Instructions" section explaining `[DOCUMENT_STATUS]` mapping
+
+2. Map validation score to outcome tier:
+   - Load outcome mapping from validation config (if available) or use default
+   - Default mapping:
+     - 8.0-10.0 → Document Status: "Approved", Review Actor: "System (Auto-Approved)"
+     - 7.0-7.9 → Document Status: "In Review", Review Actor: [Approval Authority]
+     - 5.0-6.9 → Document Status: "Draft", Review Actor: "Architecture Team"
+     - 0.0-4.9 → Document Status: "Rejected", Review Actor: "N/A (Blocked)"
+
+3. Replace dynamic field placeholders with actual values:
+   - `[DOCUMENT_STATUS]` → outcome.document_status (e.g., "Approved")
+   - `[VALIDATION_SCORE]` → "X.X/10" format (e.g., "9.5/10")
+   - `[VALIDATION_STATUS]` → "PASS" / "CONDITIONAL" / "FAIL"
+   - `[VALIDATION_DATE]` → "YYYY-MM-DD" or "Not performed"
+   - `[VALIDATION_EVALUATOR]` → "Claude Code (Automated Validation Engine)"
+   - `[REVIEW_ACTOR]` → outcome.review_actor (e.g., "System (Auto-Approved)")
+   - `[APPROVAL_AUTHORITY]` → config.approval_authority
+   - `[GENERATION_DATE]` → current date in YYYY-MM-DD format
+
+4. Return processed template ready for content population (Step 4.2)
+
+**Usage in Workflow:**
+```typescript
+import { postProcessTemplate } from './utils/post-processor';
+
+// After Step 4.1 (resolve includes)
+const expandedTemplate = await resolveIncludes(templatePath);
+
+// Step 4.1.5 (post-process)
+const config = await loadConfig(contractType);
+const processedTemplate = await postProcessTemplate(
+  expandedTemplate,
+  validationResults,  // from Phase 3.5
+  config,
+  generationDate
+);
+
+// Continue to Step 4.2 with processed template
+```
+
+**Why This Step is Critical:**
+- Without this step, instructional sections appear in final contracts (seen in bulk generation bug)
+- Without this step, Document Status shows placeholder "DRAFT" instead of actual "Approved"
+- Without this step, validation scores show "Calculated based on..." instead of actual "9.5/10"
+
 **Step 4.2: Apply Extracted Data to Placeholders**
 
 **CRITICAL RULE: PRESERVE TEMPLATE FORMAT EXACTLY**
