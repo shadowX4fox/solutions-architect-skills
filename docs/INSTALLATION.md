@@ -109,20 +109,63 @@ A Claude Code Plugin is a repository containing skills and tools that extend Cla
 
 This is the easiest and official method for installing plugins in Claude Code.
 
-#### Step 1: Add Marketplace
+#### Step 1: Register Marketplace (One-Time Setup)
+
+**IMPORTANT:** Marketplace registration is a manual security step. You must explicitly register the marketplace before installing plugins.
+
+**Option A: Using Command (Quick)**
 
 In Claude Code, run:
 
 ```
-/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
+/plugin marketplace add shadowX4fox/solutions-architect-skills
 ```
 
-This adds the shadowX4fox marketplace which contains a catalog of available plugins.
+This registers the `shadowx4fox-solution-architect-marketplace` which is hosted in this plugin repository.
+
+**Option B: Using Settings File (Project Configuration)**
+
+Create or update `.claude/settings.json` in your project:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "shadowx4fox-solution-architect-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "shadowX4fox/solutions-architect-skills"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code after adding the marketplace.
+
+**Verify Marketplace Registration:**
+
+```
+/plugin marketplace list
+```
+
+You should see `shadowx4fox-solution-architect-marketplace` in the list.
 
 #### Step 2: Install Plugin
 
+After registering the marketplace, install the plugin:
+
 ```
-/plugin install solutions-architect-skills
+/plugin install solutions-architect-skills@shadowx4fox-solution-architect-marketplace
+```
+
+**OR** enable in your project's `.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
+  }
+}
 ```
 
 Claude Code will automatically clone and install the plugin.
@@ -135,16 +178,17 @@ Claude Code will automatically clone and install the plugin.
 
 You should see:
 ```
-solutions-architect-skills v1.0.0
+solutions-architect-skills v1.9.0
 ```
 
 **Advantages:**
 - Official Claude Code installation method
 - No manual file operations needed
 - Integrated with Claude Code plugin system
-- Automatic updates available
+- Automatic update discovery
+- Secure: Explicit marketplace registration required
 
-**Note:** The marketplace repository (`shadowx4fox-marketplace`) contains a catalog of plugins. You add the marketplace once, then can install any plugin listed in it.
+**Note:** The marketplace is hosted within the plugin repository at `.claude-plugin/marketplace.json`. This is a security feature - users must explicitly trust and add marketplaces before installing plugins from them.
 
 ---
 

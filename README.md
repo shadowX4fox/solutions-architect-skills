@@ -54,22 +54,22 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### Installation
 
-**Method 1: Using Claude Code Marketplace (Recommended)**
+**See [Installation Guide](docs/INSTALLATION.md) for detailed instructions.**
+
+**Quick Start (Using Marketplace - Recommended):**
 
 ```bash
-# Add the shadowX4fox marketplace
-/plugin marketplace add https://github.com/shadowX4fox/shadowx4fox-marketplace
+# Step 1: Register marketplace (one-time)
+/plugin marketplace add shadowX4fox/solutions-architect-skills
 
-# Install the plugin
-/plugin install solutions-architect-skills
+# Step 2: Install plugin
+/plugin install solutions-architect-skills@shadowx4fox-solution-architect-marketplace
 
-# Verify installation
+# Step 3: Verify installation
 /plugin list
 ```
 
-**Note:** The marketplace repository (`shadowx4fox-marketplace`) contains a catalog of plugins. You add the marketplace once, then can install any plugin listed in it.
-
-**Method 2: Direct Git Clone**
+**Alternative: Direct Git Clone**
 
 ```bash
 # Clone directly to plugins directory
@@ -79,7 +79,9 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v1.5.23` in the list.
+You should see `solutions-architect-skills v1.9.0` in the list.
+
+**Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
 ### First Workflow
 

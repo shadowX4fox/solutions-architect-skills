@@ -1,0 +1,23 @@
+{
+  "// MARKETPLACE REGISTRATION": "Register the shadowx4fox marketplace to install plugins",
+  "extraKnownMarketplaces": {
+    "shadowx4fox-solution-architect-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "shadowX4fox/solutions-architect-skills"
+      }
+    }
+  },
+
+  "// PLUGIN INSTALLATION": "Enable the solutions-architect-skills plugin",
+  "enabledPlugins": {
+    "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
+  },
+
+  "// USAGE NOTES": [
+    "1. Copy this file to your project: cp .claude/settings.json.example /path/to/your/project/.claude/settings.json",
+    "2. Remove the comment fields (lines starting with '//')",
+    "3. Restart Claude Code to load the marketplace and plugin",
+    "4. Verify installation: /plugin list"
+  ]
+}
