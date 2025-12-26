@@ -1342,12 +1342,100 @@ Overall summary:
 
 ---
 
+## Batching Configuration
+
+**Automatic Batching Thresholds:**
+- **Batch Size**: 3 contracts per batch
+- **Trigger Threshold**: 4+ contracts (automatic batching enabled)
+- **Small Bulk Threshold**: 2-3 contracts (batching disabled, use parallel loading)
+
+**Batching Behavior:**
+- **4-10 contracts**: Automatic batching (batches of 3)
+- **2-3 contracts**: No batching (existing parallel loading)
+- **1 contract**: Single-contract workflow
+
+**Performance Characteristics:**
+| Contracts | Batching | Batches | Context/Batch | Total Time |
+|-----------|----------|---------|---------------|------------|
+| 1 | None | 1 | ~30 KB | ~5 sec |
+| 2-3 | Disabled | 1 | ~110-167 KB | ~10-15 sec |
+| 4-6 | Enabled | 2 | ~167 KB | ~20-30 sec |
+| 7-9 | Enabled | 3 | ~167 KB | ~30-45 sec |
+| 10 | Enabled | 4 | ~167 KB | ~40-60 sec |
+
+---
+
 ## BULK GENERATION WORKFLOW
 
 **This section is used ONLY when selected_contracts.length > 1 (bulk mode).**
 **For single contracts, use Phase 2-5 above (existing workflow).**
 
-### Phase 2 Bulk: Parallel Data Loading
+### Phase 2 Bulk: Batch Workflow Routing
+
+**Step 2B.0: Batching Decision**
+
+Determine workflow mode based on selected_contracts.length:
+
+```
+IF selected_contracts.length >= 4:
+    # BATCHED MODE
+    batch_size = 3
+    batches = split_into_batches(selected_contracts, batch_size)
+
+    # Priority order for splitting (importance-based)
+    priority_order = [
+        'business_continuity', 'sre_architecture', 'cloud_architecture',
+        'data_ai_architecture', 'development_architecture',
+        'process_transformation', 'security_architecture',
+        'platform_it_infrastructure', 'enterprise_architecture',
+        'integration_architecture'
+    ]
+
+    # Initialize cross-batch state
+    batch_results = {
+        'successful_contracts': [],
+        'failed_contracts': [],
+        'generated_contracts': {},
+        'validation_results': [],
+        'manifest_mode': 'create'  # First batch creates, rest update
+    }
+
+    # Execute batched workflow
+    for batch_num, batch_contracts in enumerate(batches, start=1):
+        print("═══════════════════════════════════════════")
+        print(f"Processing Batch {batch_num}/{len(batches)}")
+        print(f"Contracts: {', '.join(batch_contracts)}")
+        print("═══════════════════════════════════════════\n")
+
+        # Process batch (Phases 2B.1-Batched through 4B.3-Batched)
+        batch_result = process_single_batch(
+            batch_contracts,
+            batch_num,
+            batch_results['manifest_mode']
+        )
+
+        # Accumulate results
+        batch_results['successful_contracts'].extend(batch_result.successful)
+        batch_results['failed_contracts'].extend(batch_result.failed)
+        batch_results['generated_contracts'].update(batch_result.generated)
+        batch_results['validation_results'].extend(batch_result.validation)
+
+        # Update manifest mode for next batch
+        batch_results['manifest_mode'] = 'update'
+
+    # Generate aggregated summary (Phase 5B-Batched)
+    generate_batched_summary_report(batch_results)
+    EXIT  # Batched workflow complete
+
+ELSE:
+    # PARALLEL MODE (2-3 contracts, no batching needed)
+    # Continue to Step 2B.1 (existing workflow below)
+```
+
+### Phase 2 Bulk: Parallel Data Loading (Non-Batched)
+
+**NOTE**: This workflow is used when selected_contracts.length <= 3 (no batching needed).
+**For 4+ contracts, batching is automatically enabled (see Step 2B.0 above).**
 
 This phase loads all templates and ARCHITECTURE.md sections in parallel to minimize I/O overhead.
 
@@ -1462,7 +1550,258 @@ Cache results as: `sections[section_number] = section_content`
 
 ---
 
+## BATCHED WORKFLOW (4+ Contracts)
+
+**This section describes processing ONE batch of contracts (used when batching is enabled).**
+
+### Phase 2B-Batched: Single Batch Processing
+
+**Input:**
+- `batch_contracts`: Array of 1-3 contract types for this batch
+- `batch_num`: Current batch number (1-based)
+- `manifest_mode`: 'create' for first batch, 'update' for subsequent
+
+**Step 2B.1-Batched: Load Shared Context for Batch**
+
+Execute in parallel:
+
+1. **Load ARCHITECTURE.md Document Index** (lines 1-50)
+   ```
+   - Extract project name
+   - Identify section boundaries
+   - Cache as: document_index = { project_name, section_boundaries }
+   ```
+
+2. **Validate output directory** (only if batch_num == 1)
+   ```
+   - Check /compliance-docs/ exists
+   - Create if needed: mkdir -p /compliance-docs
+   - Get current date: YYYY-MM-DD format
+   ```
+
+**Step 2B.2-Batched: Parallel Template Loading (Batch Only)**
+
+For each contract in `batch_contracts`, execute Read in parallel:
+
+```
+# Example Batch 1 (3 contracts)
+Read skills/architecture-compliance/templates/TEMPLATE_BUSINESS_CONTINUITY.md
+Read skills/architecture-compliance/templates/TEMPLATE_SRE_ARCHITECTURE.md
+Read skills/architecture-compliance/templates/TEMPLATE_CLOUD_ARCHITECTURE.md
+```
+
+Cache: `batch_templates[contract_type] = template_content`
+
+**Context Usage**: ~85 KB for 3 templates (vs ~556 KB for all 10)
+
+**Step 2B.3-Batched: Parallel Include Resolution (Batch Only)**
+
+For each template in batch, resolve @include directives in parallel:
+
+```bash
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/expanded_bc.md &
+
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  templates/TEMPLATE_SRE_ARCHITECTURE.md /tmp/expanded_sre.md &
+
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  templates/TEMPLATE_CLOUD_ARCHITECTURE.md /tmp/expanded_cloud.md &
+
+wait
+```
+
+Then read expanded templates in parallel:
+```
+Read /tmp/expanded_bc.md
+Read /tmp/expanded_sre.md
+Read /tmp/expanded_cloud.md
+```
+
+Cache: `batch_expanded_templates[contract_type] = expanded_content`
+
+**Step 2B.4-Batched: Parallel Section Extraction (Batch Only)**
+
+Determine unique sections needed for this batch:
+
+```
+# Example Batch 1:
+# - Business Continuity: Section 11
+# - SRE Architecture: Sections 10, 11
+# - Cloud Architecture: Sections 4, 8, 11
+# Unique sections: [4, 8, 10, 11] (4 sections instead of all 12)
+```
+
+Load unique sections in parallel from ARCHITECTURE.md with ±10 line buffer.
+
+Cache: `batch_sections[section_number] = section_content`
+
+**Context Efficiency**:
+- Batch 1-3 (3 contracts each): ~85 KB templates + 40 KB sections = ~125 KB
+- Batch 4 (1 contract): ~30 KB templates + 10 KB sections = ~40 KB
+
+---
+
+### Phase 3B-Batched: Sequential Generation (Batch Only)
+
+**Step 3B.1-Batched: For Each Contract in Batch**
+
+Process each contract in `batch_contracts` using cached data only (no additional I/O):
+
+```
+for contract_type in batch_contracts:
+    template = batch_expanded_templates[contract_type]
+    required_sections = get_required_sections_from_mapping(contract_type)
+
+    # Extract data from cached sections
+    extracted_data = extract_from_sections(batch_sections, required_sections)
+
+    # Apply data to template
+    generated = apply_data_to_template(template, extracted_data, document_index)
+
+    # Cache generated contract
+    batch_generated_contracts[contract_type] = {
+        'content': generated,
+        'filename': f"{contract_type.upper()}_{project_name}_{date}.md"
+    }
+```
+
+**Performance**: ~1-2 seconds per contract (in-memory processing)
+
+**Step 3B.2-Batched**: Apply placeholders (same as existing Step 3B.2)
+- Replace `[PROJECT_NAME]`, `[GENERATION_DATE]`, etc.
+- Expand conditional placeholders
+- Populate Document Control table
+- Calculate Compliance Summary
+
+**Step 3B.3-Batched**: Cache generated contracts
+
+---
+
+### Phase 4B-Batched: Batch Validation & Output
+
+**Step 4B.1-Batched: Batch Validation**
+
+Use `validateMultipleContracts()` from generation-helper.ts:
+
+```typescript
+import { validateMultipleContracts } from './utils/generation-helper';
+
+const validation_inputs = Object.entries(batch_generated_contracts).map(
+  ([contract_type, contract_data]) => ({
+    content: contract_data.content,
+    contractType: contract_type
+  })
+);
+
+const validation_results = await validateMultipleContracts(validation_inputs);
+```
+
+**Step 4B.2-Batched: Parallel Output**
+
+Write contracts that passed validation in parallel:
+
+```
+# Parallel Write calls
+Write /compliance-docs/BUSINESS_CONTINUITY_Project_2025-12-26.md
+Write /compliance-docs/SRE_ARCHITECTURE_Project_2025-12-26.md
+Write /compliance-docs/CLOUD_ARCHITECTURE_Project_2025-12-26.md
+```
+
+**Step 4B.3-Batched: Sequential Manifest Updates**
+
+**CRITICAL**: First contract in Batch 1 uses `create`, all others use `update`:
+
+```bash
+# First contract (Batch 1, Contract 1 only)
+if batch_num == 1 and contract_index == 0:
+    bun utils/manifest-generator.ts --mode create \
+      --project "[PROJECT]" --contract-type "[TYPE]" \
+      --filename "[FILE]" --score [SCORE] \
+      --status "[STATUS]" --completeness [COMP]
+else:
+    # All other contracts
+    bun utils/manifest-generator.ts --mode update \
+      --project "[PROJECT]" --contract-type "[TYPE]" \
+      --filename "[FILE]" --score [SCORE] \
+      --status "[STATUS]" --completeness [COMP]
+```
+
+---
+
+### Phase 5B-Batched: Aggregated Summary Report
+
+**Step 5B.1-Batched: Aggregate Results Across All Batches**
+
+```
+total_successful = len(batch_results['successful_contracts'])
+total_failed = len(batch_results['failed_contracts'])
+all_validations = batch_results['validation_results']
+
+avg_score = mean([v.finalScore for v in all_validations if v.isValid])
+avg_completeness = mean([v.completeness for v in all_validations if v.isValid])
+
+# Count by status
+auto_approved = count([v for v in all_validations if v.finalScore >= 8.0])
+needs_review = count([v for v in all_validations if 7.0 <= v.finalScore < 8.0])
+```
+
+**Step 5B.2-Batched: Generate Summary Report**
+
+Display formatted output with batching statistics:
+
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Batched Mode)
+═══════════════════════════════════════════════════════════════
+
+Generated Contracts: [successful]/[total_requested]
+Batches Processed: [num_batches]
+
+✅ Successful: ([successful] contracts)
+- Business Continuity: BUSINESS_CONTINUITY_Project_2025-12-26.md
+  Score: 7.2/10 | Status: In Review | Completeness: 72% | Batch: 1
+
+- SRE Architecture: SRE_ARCHITECTURE_Project_2025-12-26.md
+  Score: 8.7/10 | Status: Approved | Completeness: 89% | Batch: 1
+
+[... all successful contracts grouped by batch ...]
+
+───────────────────────────────────────────────────────────────
+Overall Statistics
+───────────────────────────────────────────────────────────────
+• Average Score: [avg_score]/10
+• Average Completeness: [avg_completeness]%
+• Auto-Approved (≥8.0): [count]
+• Needs Review (7.0-7.9): [count]
+• Needs Work (5.0-6.9): [count]
+
+───────────────────────────────────────────────────────────────
+Batching Performance
+───────────────────────────────────────────────────────────────
+• Total Batches: [num_batches]
+• Contracts per Batch: 3 (last may have fewer)
+• Est. Context per Batch: ~167 KB avg
+• Context Savings: ~70% vs parallel (556 KB → 167 KB/batch)
+
+───────────────────────────────────────────────────────────────
+Output
+───────────────────────────────────────────────────────────────
+All contracts saved to: /compliance-docs/
+Manifest updated: /compliance-docs/COMPLIANCE_MANIFEST.md
+
+Next Steps:
+1. Review contracts with "Needs Review" status
+2. Complete missing data for "Needs Work" contracts
+3. Re-generate individual contracts if needed
+```
+
+---
+
 ### Phase 3 Bulk: Sequential Generation
+
+**NOTE**: This workflow is used when selected_contracts.length <= 3 (no batching).
+**For 4+ contracts, see Phase 3B-Batched (automatic batching enabled).**
 
 This phase processes each contract sequentially using cached data (no I/O overhead).
 
@@ -1544,6 +1883,9 @@ generated_contracts = {
 ---
 
 ### Phase 4 Bulk: Batch Validation & Output
+
+**NOTE**: This workflow is used when selected_contracts.length <= 3 (no batching).
+**For 4+ contracts, see Phase 4B-Batched (automatic batching enabled).**
 
 **Step 4B.1: Batch Validation (Use Existing Utility)**
 
@@ -1630,6 +1972,9 @@ This is fast (~100ms per update) and ensures data integrity.
 ---
 
 ### Phase 5 Bulk: Summary Report
+
+**NOTE**: This workflow is used when selected_contracts.length <= 3 (no batching).
+**For 4+ contracts, see Phase 5B-Batched (automatic batching enabled).**
 
 **Step 5B.1: Aggregate Results**
 
