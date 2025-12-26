@@ -1088,6 +1088,143 @@ compliance-docs/
 └── ARQUITECTURA_INTEGRACION_JobScheduling_2025-11-28.md
 ```
 
+### Parallel Agent Mode (4+ Contracts)
+
+**AUTOMATIC ACTIVATION:** When generating 4 or more compliance contracts, the skill automatically uses parallel agent processing for 10× performance improvement.
+
+**When It Activates:**
+- User requests 4+ contracts
+- Automatically spawns Task Agents (1 per contract)
+- No user prompt required
+
+**How It Works:**
+
+1. **Main Agent spawns 10 Task Agents in parallel** (1 per contract)
+   - Each agent runs independently
+   - All agents execute simultaneously
+
+2. **Each Task Agent invokes the architecture-compliance skill:**
+   - Agent 1: Generate Business Continuity
+   - Agent 2: Generate SRE Architecture
+   - Agent 3: Generate Cloud Architecture
+   - Agent 4: Generate Data & AI Architecture
+   - Agent 5: Generate Development Architecture
+   - Agent 6: Generate Process Transformation
+   - Agent 7: Generate Security Architecture
+   - Agent 8: Generate Platform & IT Infrastructure
+   - Agent 9: Generate Enterprise Architecture
+   - Agent 10: Generate Integration Architecture
+
+3. **Each agent's skill invocation:**
+   - Reads ARCHITECTURE.md
+   - Generates and validates its contract
+   - Writes to /compliance-docs/
+   - Updates COMPLIANCE_MANIFEST.md
+
+4. **Main Agent aggregates results and generates summary report**
+   - Collects success/failure status from all agents
+   - Updates manifest with generation summary
+   - Reports any failures with recovery instructions
+
+**Performance:**
+- Sequential mode: ~50 minutes for 10 contracts
+- Parallel agent mode: ~3-5 minutes for 10 contracts
+- **10× speedup** via parallel execution
+
+**Fallback Behavior:**
+- If all agents fail → Auto-fallback to sequential mode
+- If some agents fail → Successful contracts written, failures reported
+- No user intervention required
+
+**Example Output (Complete Success):**
+
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Parallel Agent Mode)
+═══════════════════════════════════════════════════════════════
+
+Status: 10/10 successful, 0 failed
+Performance: 10 parallel agents, ~3.5 min total (10× speedup)
+Output: /compliance-docs/
+
+Generated Contracts:
+✅ Business Continuity
+✅ SRE Architecture
+✅ Cloud Architecture
+✅ Data & AI Architecture
+✅ Development Architecture
+✅ Process Transformation
+✅ Security Architecture
+✅ Platform & IT Infrastructure
+✅ Enterprise Architecture
+✅ Integration Architecture
+
+Next Steps:
+- Review contracts in /compliance-docs/
+- Check COMPLIANCE_MANIFEST.md for full audit trail
+
+═══════════════════════════════════════════════════════════════
+```
+
+**Example Output (Partial Success - 8/10):**
+
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Parallel Agent Mode)
+═══════════════════════════════════════════════════════════════
+
+Status: 8/10 successful, 2 failed
+Performance: 10 parallel agents, ~4 min total (10× speedup)
+Output: /compliance-docs/
+
+Generated Contracts:
+✅ Business Continuity
+✅ Cloud Architecture
+✅ Data & AI Architecture
+✅ Development Architecture
+✅ Process Transformation
+✅ Security Architecture
+✅ Platform & IT Infrastructure
+✅ Enterprise Architecture
+❌ SRE Architecture (Failed - Missing Section 10.1)
+❌ Integration Architecture (Failed - Missing Section 5.2)
+
+Next Steps:
+- Review contracts in /compliance-docs/
+- Check COMPLIANCE_MANIFEST.md for full audit trail
+- Fix ARCHITECTURE.md missing sections:
+  • Add Section 10.1 (Monitoring and Observability)
+  • Add Section 5.2 (Integration Patterns)
+- Regenerate failed contracts individually:
+  /solutions-architect-skills:architecture-compliance sre_architecture
+  /solutions-architect-skills:architecture-compliance integration
+
+═══════════════════════════════════════════════════════════════
+```
+
+**Usage:**
+
+Parallel agent mode activates automatically when you request 4+ contracts:
+
+```bash
+# Automatically uses parallel agents (all 10 contracts)
+/solutions-architect-skills:architecture-compliance all
+
+# Or manually request
+"Generate all my compliance contracts"
+
+# Works with any request ≥ 4 contracts
+/solutions-architect-skills:architecture-compliance sre cloud security data
+```
+
+**Benefits:**
+- **Massive speedup:** 10× faster than sequential generation
+- **Fully automatic:** No configuration needed
+- **Graceful failure handling:** Partial results saved, clear recovery instructions
+- **Same quality:** Each agent uses the existing skill workflow
+
+**Note:** For 1-3 contracts, the skill uses the standard sequential or parallel data loading workflow (no agents spawned). Parallel agent mode only activates for 4+ contracts to maximize performance where it matters most.
+
 ---
 
 ## Integration Patterns

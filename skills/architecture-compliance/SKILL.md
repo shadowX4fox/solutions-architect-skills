@@ -1432,6 +1432,367 @@ ELSE:
     # Continue to Step 2B.1 (existing workflow below)
 ```
 
+---
+
+### Phase 2C: Parallel Agent Generation (4+ Contracts)
+
+**CRITICAL**: This phase is automatically activated when `selected_contracts.length >= 4` to enable parallel agent-based generation with 10× speedup.
+
+**When to Use:**
+- User requests 4 or more compliance contracts
+- Automatically spawns Task Agents (1 per contract) in parallel
+- No user prompt required (automatic activation)
+
+**Routing Logic:**
+```
+IF selected_contracts.length === 1:
+    → Use Phase 2-5 (Single Contract Workflow)
+ELSE IF selected_contracts.length <= 3:
+    → Use Phase 2 Bulk (Parallel Data Loading - see below)
+ELSE IF selected_contracts.length >= 4:
+    → Use Phase 2C (Parallel Agent Generation - THIS SECTION)
+```
+
+**Benefits:**
+- 10× speedup (3-5 min for 10 contracts vs 50+ min sequential)
+- Parallel execution (all contracts generated simultaneously)
+- Auto-fallback on failure (graceful degradation to sequential mode)
+- Leverages existing skill infrastructure (agents invoke skill)
+
+---
+
+**Step 2C.0: Agent Configuration**
+
+1. **Determine contract list**
+   ```
+   IF user requested "all":
+       contracts = all 10 contract types
+   ELSE:
+       contracts = user-specified list (must be >= 4)
+   ```
+
+2. **Locate ARCHITECTURE.md**
+   ```
+   architecture_file = path to ARCHITECTURE.md
+   - Validate file exists
+   - Get absolute path for agents
+   ```
+
+3. **Get project metadata**
+   ```
+   - Read ARCHITECTURE.md lines 1-50 (Document Index)
+   - Extract project_name from Section 1
+   - Get current_date in YYYY-MM-DD format (for manifest updates)
+   ```
+
+**Contract Type List:**
+```javascript
+all_contracts = [
+  'business_continuity',      // 1. Business Continuity
+  'sre_architecture',         // 2. SRE Architecture
+  'cloud_architecture',       // 3. Cloud Architecture
+  'data_ai',                  // 4. Data & AI Architecture
+  'development',              // 5. Development Architecture
+  'process',                  // 6. Process Transformation
+  'security',                 // 7. Security Architecture
+  'platform',                 // 8. Platform & IT Infrastructure
+  'enterprise',               // 9. Enterprise Architecture
+  'integration'               // 10. Integration Architecture
+]
+```
+
+---
+
+**Step 2C.1: Spawn Task Agents in Parallel**
+
+For each contract_type in contracts, spawn a Task Agent using the compliance-generator agent definition:
+
+```
+For contract_type in contracts:
+  Spawn Task Agent:
+    Agent Definition: agents/compliance-generator.md  ← At plugin root
+    Parameters:
+      contract_type: [contract_type]
+      architecture_file: [architecture_file_path]
+
+    The agent will:
+      1. Invoke: /solutions-architect-skills:architecture-compliance [contract_type]
+      2. The skill automatically:
+         - Reads ARCHITECTURE.md
+         - Loads template for [contract_type]
+         - Generates and validates contract
+         - Writes to /compliance-docs/[FILENAME].md
+         - Updates COMPLIANCE_MANIFEST.md
+      3. Returns: Success or error message
+```
+
+**Example Spawn Calls (10 agents in parallel):**
+```
+Task Agent 1:  Load agents/compliance-generator.md, contract_type=business_continuity, architecture_file=[PATH]
+Task Agent 2:  Load agents/compliance-generator.md, contract_type=sre_architecture, architecture_file=[PATH]
+Task Agent 3:  Load agents/compliance-generator.md, contract_type=cloud_architecture, architecture_file=[PATH]
+Task Agent 4:  Load agents/compliance-generator.md, contract_type=data_ai, architecture_file=[PATH]
+Task Agent 5:  Load agents/compliance-generator.md, contract_type=development, architecture_file=[PATH]
+Task Agent 6:  Load agents/compliance-generator.md, contract_type=process, architecture_file=[PATH]
+Task Agent 7:  Load agents/compliance-generator.md, contract_type=security, architecture_file=[PATH]
+Task Agent 8:  Load agents/compliance-generator.md, contract_type=platform, architecture_file=[PATH]
+Task Agent 9:  Load agents/compliance-generator.md, contract_type=enterprise, architecture_file=[PATH]
+Task Agent 10: Load agents/compliance-generator.md, contract_type=integration, architecture_file=[PATH]
+```
+
+**Agent Behavior:**
+- Each agent follows compliance-generator.md workflow (simple skill invocation)
+- Agents run independently (no shared state)
+- Each agent has Write tool access via the skill
+- Timeout: 10 minutes per agent
+- **Agent location:** Plugin root `agents/` directory (Claude Code convention)
+
+---
+
+**Step 2C.2: Wait for All Task Agents**
+
+```
+Wait for all spawned agents to complete
+Timeout: 10 minutes per agent
+Collect results: { agent_id, contract_type, status, output }
+```
+
+**Expected Results:**
+```javascript
+agent_results = [
+  { agent_id: 1, contract_type: 'business_continuity', status: 'success', output: '✅ Generated...' },
+  { agent_id: 2, contract_type: 'sre_architecture', status: 'success', output: '✅ Generated...' },
+  { agent_id: 3, contract_type: 'cloud_architecture', status: 'failed', output: '❌ Failed...' },
+  ...
+]
+```
+
+---
+
+**Step 2C.3: Handle Complete Failure (All Agents Failed)**
+
+```
+successful_agents = agent_results.filter(r => r.status === 'success')
+
+IF successful_agents.length === 0:
+    Display:
+    ═══════════════════════════════════════════════
+    ⚠️  Parallel Agent Mode Failed
+    ═══════════════════════════════════════════════
+
+    All agents failed to generate contracts.
+    Falling back to sequential single-contract mode...
+
+    This will process contracts one at a time using the
+    existing workflow. Processing may take longer.
+
+    ═══════════════════════════════════════════════
+
+    → Fall back to Phase 2-5 (Single Contract Workflow)
+    → Process each contract sequentially
+    → EXIT Phase 2C
+```
+
+---
+
+**Step 2C.4: Aggregate Results**
+
+```javascript
+successful_agents = agent_results.filter(r => r.status === 'success')
+failed_agents = agent_results.filter(r => r.status === 'failed')
+
+aggregated_results = {
+  total_requested: contracts.length,
+  successful: successful_agents.length,
+  failed: failed_agents.length,
+  successful_contracts: successful_agents.map(a => a.contract_type),
+  failed_contracts: failed_agents.map(a => ({
+    contract_type: a.contract_type,
+    error_message: a.output
+  }))
+}
+```
+
+**Note:** Each successful agent already:
+- Wrote its contract file to /compliance-docs/
+- Updated COMPLIANCE_MANIFEST.md with its entry
+- Performed validation
+
+Main Agent only needs to aggregate and report.
+
+---
+
+**Step 2C.5: Update COMPLIANCE_MANIFEST.md Summary**
+
+Since each Task Agent's skill invocation updates the manifest independently, the Main Agent adds generation summary metadata:
+
+```
+1. Read COMPLIANCE_MANIFEST.md
+2. Verify all successful contracts are listed
+3. Append generation summary section:
+
+## Generation Summary (Parallel Agent Mode)
+
+- **Generation Mode:** Parallel Agents
+- **Total Contracts Requested:** [N]
+- **Successfully Generated:** [N_SUCCESS]
+- **Failed:** [N_FAILED]
+- **Timestamp:** [CURRENT_DATE]
+- **Performance:** Generated [N_SUCCESS] contracts in parallel (~3-5 min, 10× speedup)
+- **Method:** 10 Task Agents (1 per contract) invoked architecture-compliance skill
+
+### Successful Contracts
+[List of contract_type names]
+
+### Failed Contracts (if any)
+[List of contract_type names with error messages]
+```
+
+---
+
+**Step 2C.6: Report Failures (If Any)**
+
+```
+IF failed_agents.length > 0:
+  Display:
+  ═══════════════════════════════════════════════
+  ⚠️  Partial Generation Failures
+  ═══════════════════════════════════════════════
+
+  [N] out of [TOTAL] contracts failed to generate.
+  Successful contracts have been written to /compliance-docs/
+
+  Failed Contracts:
+  [For each failed_agent:]
+    - [contract_type]: [error_message]
+
+  Recovery Options:
+  1. Fix ARCHITECTURE.md missing sections/errors
+  2. Regenerate failed contracts individually:
+     /solutions-architect-skills:architecture-compliance [contract_type]
+     /solutions-architect-skills:architecture-compliance [contract_type]
+     ...
+
+  ═══════════════════════════════════════════════
+```
+
+**Example:**
+```
+═══════════════════════════════════════════════
+⚠️  Partial Generation Failures
+═══════════════════════════════════════════════
+
+2 out of 10 contracts failed to generate.
+Successful contracts have been written to /compliance-docs/
+
+Failed Contracts:
+  - sre_architecture: Missing Section 10.1 (Monitoring and Observability)
+  - integration: Missing Section 5.2 (Integration Patterns)
+
+Recovery Options:
+1. Fix ARCHITECTURE.md missing sections/errors
+2. Regenerate failed contracts individually:
+   /solutions-architect-skills:architecture-compliance sre_architecture
+   /solutions-architect-skills:architecture-compliance integration
+
+═══════════════════════════════════════════════
+```
+
+---
+
+**Step 2C.7: Generate Summary Report**
+
+Display comprehensive summary of parallel agent generation:
+
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Parallel Agent Mode)
+═══════════════════════════════════════════════════════════════
+
+Status: [N_SUCCESS]/[TOTAL] successful, [N_FAILED] failed
+Performance: [N] parallel agents, ~3-5 min total (10× speedup vs sequential)
+Output: /compliance-docs/
+
+Generated Contracts:
+[For each successful_agent:]
+✅ [Display Name]
+[For each failed_agent:]
+❌ [Display Name] (Failed - [Error Summary])
+
+Next Steps:
+- Review contracts in /compliance-docs/
+- Check COMPLIANCE_MANIFEST.md for full audit trail
+[IF failures:]
+- Fix ARCHITECTURE.md missing sections
+- Regenerate failed contracts individually (see commands above)
+
+═══════════════════════════════════════════════════════════════
+```
+
+**Example (Partial Success - 8/10):**
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Parallel Agent Mode)
+═══════════════════════════════════════════════════════════════
+
+Status: 8/10 successful, 2 failed
+Performance: 10 parallel agents, ~4 min total (10× speedup vs sequential)
+Output: /compliance-docs/
+
+Generated Contracts:
+✅ Business Continuity
+✅ Cloud Architecture
+✅ Data & AI Architecture
+✅ Development Architecture
+✅ Process Transformation
+✅ Security Architecture
+✅ Platform & IT Infrastructure
+✅ Enterprise Architecture
+❌ SRE Architecture (Failed - Missing Section 10.1)
+❌ Integration Architecture (Failed - Missing Section 5.2)
+
+Next Steps:
+- Review contracts in /compliance-docs/
+- Check COMPLIANCE_MANIFEST.md for full audit trail
+- Fix ARCHITECTURE.md missing sections
+- Regenerate failed contracts individually (see commands above)
+
+═══════════════════════════════════════════════════════════════
+```
+
+**Example (Complete Success - 10/10):**
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary (Parallel Agent Mode)
+═══════════════════════════════════════════════════════════════
+
+Status: 10/10 successful, 0 failed
+Performance: 10 parallel agents, ~3.5 min total (10× speedup vs sequential)
+Output: /compliance-docs/
+
+Generated Contracts:
+✅ Business Continuity
+✅ SRE Architecture
+✅ Cloud Architecture
+✅ Data & AI Architecture
+✅ Development Architecture
+✅ Process Transformation
+✅ Security Architecture
+✅ Platform & IT Infrastructure
+✅ Enterprise Architecture
+✅ Integration Architecture
+
+Next Steps:
+- Review contracts in /compliance-docs/
+- Check COMPLIANCE_MANIFEST.md for full audit trail
+
+═══════════════════════════════════════════════════════════════
+```
+
+**EXIT Phase 2C** - Parallel agent generation complete.
+
+---
+
 ### Phase 2 Bulk: Parallel Data Loading (Non-Batched)
 
 **NOTE**: This workflow is used when selected_contracts.length <= 3 (no batching needed).

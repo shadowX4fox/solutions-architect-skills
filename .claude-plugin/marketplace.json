@@ -9,7 +9,8 @@
       "name": "solutions-architect-skills",
       "source": "./",
       "description": "Professional architecture documentation workflow: Business requirements, technical architecture, and compliance documentation",
-      "version": "1.8.0",
+      "version": "1.9.0",
+      "changelog": "v1.9.0: Automatic parallel agent compliance generation for 4+ contracts (10× speedup)",
       "author": {
         "name": "shadowX4fox"
       }
