@@ -21,6 +21,10 @@ This skill is **manually activated** when users request compliance document gene
 - "Show contract types"
 - "What contracts can I generate?"
 - "Show me all compliance contracts"
+- "Generate all my compliance contracts"
+- "Create all compliance contracts"
+- `/skill architecture-compliance all`
+- `/skill architecture-compliance SRE,Cloud,Security` (comma-separated list for subset)
 
 **NOT Activated For:**
 - Automatic triggers when ARCHITECTURE.md changes
@@ -362,8 +366,48 @@ After displaying the contract list, ask:
 ### Phase 1: Initialization
 
 **Step 1.1: Detect User Intent**
-- Parse user request to determine which contracts to generate
-- Options: all (11 documents), specific type, or category
+
+Parse user request to determine which contracts to generate:
+
+**Intent Types:**
+1. **"all" keyword** → Generate all 10 contracts
+   - Examples:
+     - "Generate all compliance documents"
+     - "Generate all my compliance contracts"
+     - "/skill architecture-compliance all"
+     - "Create all compliance contracts"
+   - Detection: Check for "all" keyword in normalized input (lowercase, trimmed)
+   - Pattern matching: "all compliance", "all my compliance", "all contracts", "all docs"
+
+2. **Comma-separated list** → Generate specific subset of contracts
+   - Examples:
+     - "/skill architecture-compliance SRE,Cloud,Security"
+     - "Generate compliance contracts: SRE, Cloud, and Security"
+     - "Create SRE and Cloud contracts"
+   - Detection: Split by comma, "and", "or" delimiters
+   - Parse each contract name using alias matching (see Aliases table lines 173-188)
+
+3. **Single contract name** → Generate one contract (existing workflow)
+   - Examples:
+     - "Generate SRE Architecture contract"
+     - "Create Development Architecture compliance"
+   - Detection: Single contract type identified via exact or fuzzy matching
+
+**Parsing Logic:**
+```
+1. Normalize input: lowercase, trim whitespace, remove punctuation
+2. Check for "all" keyword (in patterns like "all compliance", "all my", "all contracts")
+   - If found → selected_contracts = ALL_10_CONTRACT_TYPES
+3. Check for delimiter patterns (comma, "and", "or")
+   - If found → split input, parse each token as contract name
+   - Use alias matching for each token (see lines 173-188)
+   - selected_contracts = [matched contract types]
+4. Otherwise → single contract mode
+   - Use exact or fuzzy matching (existing logic, lines 410-431)
+   - selected_contracts = [single contract type]
+
+Output: selected_contracts = array of 1-10 contract types
+```
 
 **Step 1.2: Locate ARCHITECTURE.md**
 ```
@@ -391,23 +435,34 @@ If ambiguous, ask:
 
 ### Phase 2: Configuration
 
-**Step 2.1: Contract Selection with Validation**
-```
-Based on user intent:
-- All: Generate all 10 contracts
-- Specific: Parse contract name from request
-- Category: Map category to relevant contracts
-  Examples:
-  - "security" → Security Architecture
-  - "cloud" → Cloud Architecture, Platform & IT Infrastructure
-  - "SRE" → SRE Architecture, Business Continuity
+**Step 2.1: Contract Selection and Workflow Routing**
 
+Based on selected_contracts from Step 1.1:
+
+**Routing Logic:**
+```
+IF selected_contracts.length == 1:
+  # SINGLE CONTRACT MODE (Existing Workflow)
+  # Use Phase 2-5 as-is (current implementation)
+  # No changes to existing behavior - backward compatibility maintained
+  proceed_with_existing_single_contract_workflow()
+  # Continue to Step 2.2 below
+
+ELIF selected_contracts.length > 1:
+  # BULK MODE (New Parallel Workflow)
+  # Use Phase 2 Bulk → Phase 3 Bulk → Phase 4 Bulk → Phase 5 Bulk
+  # See new bulk workflow sections below (after Phase 5)
+  proceed_with_bulk_workflow()
+  # Skip to Phase 2 Bulk section
+```
+
+**Single Contract Validation** (when selected_contracts.length == 1):
+```
 Validation Process:
 1. Normalize user input: Convert to lowercase, trim whitespace
 2. Check for exact match against contract type names and aliases (see Aliases table above)
    - If match found → Proceed to Step 2.2
-3. Check for "all" keyword → Generate all 10 contracts
-4. If no match found:
+3. If no match found:
    - Calculate similarity scores using:
      * Keyword matching (40% weight): Count matching words between user input and contract names/keywords
      * Substring matching (30% weight): Check if user input is substring of contract name or vice versa
@@ -425,7 +480,20 @@ Validation Process:
    - If user selects alternative → Use selected contract type
    - If user selects "Other" → List all 10 contract types with descriptions and let user choose
 
-Output: Validated contract type(s)
+Output: Validated contract type
+```
+
+**Bulk Contracts Validation** (when selected_contracts.length > 1):
+```
+1. For each contract in selected_contracts:
+   - Validate template exists: templates/TEMPLATE_[CONTRACT_TYPE].md
+   - Validate validation config exists: validation/template_validation_[contract_type].json
+2. If any templates missing:
+   - Warn user: "Template not found for [CONTRACT_TYPE]"
+   - Offer options:
+     a) Skip missing contracts, generate remaining ones
+     b) Cancel entire operation
+3. Output: validated_contracts = [contracts with templates available]
 ```
 
 **Step 2.2: Output Directory Configuration**
@@ -1271,6 +1339,409 @@ Overall summary:
 - Recommendations for ARCHITECTURE.md improvements
 - Next steps for user review
 ```
+
+---
+
+## BULK GENERATION WORKFLOW
+
+**This section is used ONLY when selected_contracts.length > 1 (bulk mode).**
+**For single contracts, use Phase 2-5 above (existing workflow).**
+
+### Phase 2 Bulk: Parallel Data Loading
+
+This phase loads all templates and ARCHITECTURE.md sections in parallel to minimize I/O overhead.
+
+**Step 2B.1: Load Shared Context (Once)**
+
+Execute the following operations in parallel:
+
+1. **Load ARCHITECTURE.md Document Index** (lines 1-50)
+   ```
+   - Extract project name from Document Index
+   - Identify section boundaries (line ranges for sections 1-12)
+   - Cache as: document_index = { project_name, section_boundaries }
+   ```
+
+2. **Validate output directory**
+   ```
+   - Check /compliance-docs/ exists relative to ARCHITECTURE.md
+   - Create directory if needed using Bash: mkdir -p /compliance-docs
+   - Get current date for filename generation: YYYY-MM-DD format
+   ```
+
+**Step 2B.2: Parallel Template Loading**
+
+For each contract in validated_contracts, execute Read tool calls in parallel:
+
+**Example for 3 contracts** (SRE, Cloud, Security):
+```
+Read skills/architecture-compliance/templates/TEMPLATE_SRE_ARCHITECTURE.md
+Read skills/architecture-compliance/templates/TEMPLATE_CLOUD_ARCHITECTURE.md
+Read skills/architecture-compliance/templates/TEMPLATE_SECURITY_ARCHITECTURE.md
+```
+
+Cache results as: `templates[contract_type] = template_content`
+
+**Step 2B.3: Parallel Include Resolution**
+
+For each loaded template, resolve `@include-with-config` directives in parallel:
+
+**Use resolve-includes.ts utility** (see skills/architecture-compliance/utils/resolve-includes.ts):
+
+```bash
+# Parallel Bash tool calls (one per contract)
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  skills/architecture-compliance/templates/TEMPLATE_SRE_ARCHITECTURE.md \
+  /tmp/expanded_sre.md
+
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  skills/architecture-compliance/templates/TEMPLATE_CLOUD_ARCHITECTURE.md \
+  /tmp/expanded_cloud.md
+
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  skills/architecture-compliance/templates/TEMPLATE_SECURITY_ARCHITECTURE.md \
+  /tmp/expanded_security.md
+```
+
+Then read expanded templates back in parallel:
+```
+Read /tmp/expanded_sre.md
+Read /tmp/expanded_cloud.md
+Read /tmp/expanded_security.md
+```
+
+Cache results as: `expanded_templates[contract_type] = expanded_content`
+
+**Step 2B.4: Parallel Section Extraction**
+
+For each contract, determine required sections from SECTION_MAPPING_GUIDE.md (see lines 1344+):
+
+**Section Requirements per Contract:**
+- Business Continuity: Section 11
+- SRE Architecture: Sections 10, 11
+- Cloud Architecture: Sections 4, 8, 11
+- Data & AI: Sections 3, 5, 6
+- Development: Sections 3, 5, 8, 12
+- Process Transformation: Sections 5, 8
+- Security: Section 9
+- Platform & IT: Sections 4, 8, 10, 11
+- Enterprise: Sections 1, 2, 3, 4
+- Integration: Section 7
+
+**Identify unique sections needed across ALL validated_contracts:**
+```
+unique_sections = set()
+for contract in validated_contracts:
+  unique_sections.add(contract.required_sections)
+
+Example: If generating SRE (10,11), Cloud (4,8,11), Security (9)
+  → unique_sections = [4, 8, 9, 10, 11] (5 unique sections)
+```
+
+**Load all unique sections in parallel using section_boundaries from Step 2B.1:**
+
+```
+# Example: Load sections 4, 8, 9, 10, 11 in parallel
+Read ARCHITECTURE.md lines [section_4_start]:[section_4_end+10]  # ±10 buffer
+Read ARCHITECTURE.md lines [section_8_start]:[section_8_end+10]
+Read ARCHITECTURE.md lines [section_9_start]:[section_9_end+10]
+Read ARCHITECTURE.md lines [section_10_start]:[section_10_end+10]
+Read ARCHITECTURE.md lines [section_11_start]:[section_11_end+10]
+```
+
+Cache results as: `sections[section_number] = section_content`
+
+**Context Efficiency:**
+- Each section loaded ONCE, shared across all contracts that need it
+- Total loaded (worst case all 10 contracts): Document Index (50 lines) + 10 templates (~500KB) + 12 sections (~100KB) = ~602KB
+
+**Fallback for Context Limits:**
+- If context approaching limits, use batched loading:
+  - Batch 1: Contracts 1-5 (load templates + sections, generate, output) ~325KB
+  - Batch 2: Contracts 6-10 (load templates + sections, generate, output) ~325KB
+
+---
+
+### Phase 3 Bulk: Sequential Generation
+
+This phase processes each contract sequentially using cached data (no I/O overhead).
+
+**Step 3B.1: For Each Contract in validated_contracts**
+
+Loop through each contract type:
+
+```
+for contract_type in validated_contracts:
+  # All data already loaded in Phase 2 Bulk - no tool calls needed
+
+  template = expanded_templates[contract_type]
+  required_sections = get_required_sections(contract_type)  # From SECTION_MAPPING_GUIDE.md
+
+  # Extract data from cached sections
+  extracted_data = {}
+  for section_num in required_sections:
+    section_content = sections[section_num]
+    extracted_data[section_num] = extract_data(section_content, contract_type)
+
+  # Generate contract (in-memory, fast)
+  generated_contract = apply_data_to_template(
+    template=template,
+    data=extracted_data,
+    project_name=document_index.project_name,
+    generation_date=current_date
+  )
+
+  # Cache for validation
+  generated_contracts[contract_type] = generated_contract
+```
+
+**Step 3B.2: Apply Placeholders**
+
+For each contract, follow existing Phase 4, Step 4.2 logic (lines 698-889):
+
+1. **Replace standard placeholders:**
+   - `[PROJECT_NAME]` → from document_index.project_name
+   - `[GENERATION_DATE]` → current_date
+   - `[CONTRACT_TYPE]` → contract type name
+   - `[DOCUMENT_VERSION]` → "1.0" (initial generation)
+
+2. **Expand conditional placeholders** (lines 820-889):
+   - Pattern: `[If Compliant: X. If Non-Compliant: Y. If Not Applicable: Z. If Unknown: W]`
+   - Expand to match the Status value for each requirement
+
+3. **Populate Document Control table** (lines 784-817):
+   - Document ID, Version, Status, Classification, etc.
+
+4. **Calculate Compliance Summary** (lines 963-1088):
+   - 6-column format: Code | Requirement | Category | Status | Source Section | Responsible Role
+   - Status values: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
+
+5. **Format derived values** (lines 1090-1095):
+   - Compliance scores, completeness percentages
+
+**Step 3B.3: Cache Generated Contracts**
+
+Store all generated contracts in memory for batch validation:
+
+```
+generated_contracts = {
+  'sre_architecture': {
+    content: generated_content,
+    filename: 'SRE_ARCHITECTURE_Project_2025-12-26.md',
+    metadata: { score, status, completeness }
+  },
+  'cloud_architecture': {
+    content: generated_content,
+    filename: 'CLOUD_ARCHITECTURE_Project_2025-12-26.md',
+    metadata: { score, status, completeness }
+  },
+  ...
+}
+```
+
+**Performance**: This phase is fast (~1-2 seconds per contract) because all data is cached.
+
+---
+
+### Phase 4 Bulk: Batch Validation & Output
+
+**Step 4B.1: Batch Validation (Use Existing Utility)**
+
+Use the existing `validateMultipleContracts()` function from generation-helper.ts (lines 192-203):
+
+```typescript
+import { validateMultipleContracts } from './utils/generation-helper';
+
+const validation_inputs = Object.entries(generated_contracts).map(
+  ([contract_type, contract_data]) => ({
+    content: contract_data.content,
+    contractType: contract_type
+  })
+);
+
+const validation_results = await validateMultipleContracts(validation_inputs);
+```
+
+**Process Validation Results:**
+
+```
+successful_contracts = []
+failed_contracts = []
+
+for result in validation_results:
+  if result.isValid:
+    mark_for_output(result.contractType)
+    successful_contracts.push(result)
+  else:
+    log_error(result.contractType, result.errorReport)
+    failed_contracts.push(result)
+
+    # Graceful degradation: generate anyway as "Draft"
+    if result.validationResult.finalScore >= 3.0:
+      mark_for_output_as_draft(result.contractType)
+      successful_contracts.push(result)  # Include in output
+```
+
+**Step 4B.2: Parallel Output (Write Contracts)**
+
+For all contracts that passed validation (or marked as Draft), write in parallel:
+
+```
+# Parallel Write Tool Calls
+Write /compliance-docs/SRE_ARCHITECTURE_Project_2025-12-26.md
+Write /compliance-docs/CLOUD_ARCHITECTURE_Project_2025-12-26.md
+Write /compliance-docs/SECURITY_ARCHITECTURE_Project_2025-12-26.md
+... (for all successful contracts)
+```
+
+**Step 4B.3: Sequential Manifest Updates**
+
+Use manifest-generator.ts to create or update COMPLIANCE_MANIFEST.md:
+
+**First contract: create manifest**
+```bash
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "[PROJECT_NAME]" \
+  --contract-type "SRE Architecture" \
+  --filename "SRE_ARCHITECTURE_Project_2025-12-26.md" \
+  --score 8.7 \
+  --status "Approved" \
+  --completeness 89
+```
+
+**Subsequent contracts: update manifest (sequential, fast)**
+```bash
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "[PROJECT_NAME]" \
+  --contract-type "Cloud Architecture" \
+  --filename "CLOUD_ARCHITECTURE_Project_2025-12-26.md" \
+  --score 7.8 \
+  --status "In Review" \
+  --completeness 78
+
+# ... (repeat for all successful contracts)
+```
+
+**Note**: Manifest updates are sequential to prevent concurrent write conflicts.
+This is fast (~100ms per update) and ensures data integrity.
+
+---
+
+### Phase 5 Bulk: Summary Report
+
+**Step 5B.1: Aggregate Results**
+
+Collect statistics from validation_results:
+
+```
+successful_count = len(successful_contracts)
+failed_count = len(failed_contracts)
+total_requested = len(validated_contracts)
+
+avg_score = mean([r.validationResult.finalScore for r in successful_contracts])
+avg_completeness = mean([r.completeness for r in successful_contracts])
+
+# Status breakdown
+auto_approved = [r for r in successful_contracts if r.validationResult.finalScore >= 8.0]
+needs_review = [r for r in successful_contracts if 7.0 <= r.validationResult.finalScore < 8.0]
+needs_work = [r for r in successful_contracts if 5.0 <= r.validationResult.finalScore < 7.0]
+rejected = [r for r in successful_contracts if r.validationResult.finalScore < 5.0]
+```
+
+**Step 5B.2: Generate Summary Report**
+
+Output formatted summary to user:
+
+```
+═══════════════════════════════════════════════════════════════
+Compliance Contract Generation Summary
+═══════════════════════════════════════════════════════════════
+
+Generated Contracts: [successful_count]/[total_requested]
+
+✅ Successful: ([successful_count] contracts)
+- SRE Architecture: SRE_ARCHITECTURE_Project_2025-12-26.md
+  Score: 8.7/10 | Status: Approved | Completeness: 89%
+
+- Cloud Architecture: CLOUD_ARCHITECTURE_Project_2025-12-26.md
+  Score: 7.8/10 | Status: In Review | Completeness: 78%
+
+- Security Architecture: SECURITY_ARCHITECTURE_Project_2025-12-26.md
+  Score: 9.2/10 | Status: Approved | Completeness: 92%
+
+[... list all successful contracts with scores, status, completeness ...]
+
+❌ Failed: ([failed_count] contracts)
+[Only if failures occurred]
+- Integration Architecture: Validation failed (score 4.2/10)
+  Reason: Missing required data in ARCHITECTURE.md Section 7
+  Missing Data:
+    • Integration catalog (Section 7.1)
+    • API standards (Section 7.2)
+    • Async patterns (Section 7.3)
+
+  Recovery Steps:
+  1. Add Section 7 to ARCHITECTURE.md with integration details
+  2. Regenerate: /skill architecture-compliance Integration
+
+  Reference: SKILL.md lines 1400+ (Integration Architecture requirements)
+
+───────────────────────────────────────────────────────────────
+Overall Statistics
+───────────────────────────────────────────────────────────────
+• Average Score: [avg_score]/10
+• Average Completeness: [avg_completeness]%
+• Auto-Approved (≥8.0): [count] contracts
+• Needs Review (7.0-7.9): [count] contracts
+• Needs Work (5.0-6.9): [count] contracts
+• Rejected (<5.0): [count] contracts
+
+───────────────────────────────────────────────────────────────
+Output
+───────────────────────────────────────────────────────────────
+All contracts saved to: /compliance-docs/
+Manifest updated: /compliance-docs/COMPLIANCE_MANIFEST.md
+
+═══════════════════════════════════════════════════════════════
+Next Steps
+═══════════════════════════════════════════════════════════════
+1. Review contracts in /compliance-docs/
+2. Complete placeholders in contracts with score < 8.0:
+   [List specific contracts and what needs completion]
+3. Update ARCHITECTURE.md for failed contracts:
+   [List specific sections and data points to add]
+4. Regenerate improved contracts: /skill architecture-compliance [CONTRACT_TYPE]
+5. See COMPLIANCE_MANIFEST.md for detailed tracking
+```
+
+**Step 5B.3: Error Handling & Recovery**
+
+For each failed contract, provide specific recovery instructions:
+
+```
+Failed Contract: [CONTRACT_TYPE]
+├─ Error: [SPECIFIC_ERROR_MESSAGE]
+├─ Root Cause: [MISSING_SECTION | VALIDATION_FAILURE | TEMPLATE_NOT_FOUND]
+├─ Missing Data Points:
+│  • [DATA_POINT_1] (should be in Section [X])
+│  • [DATA_POINT_2] (should be in Section [Y])
+│  • [DATA_POINT_3] (should be in Section [Z])
+├─ Recommended Actions:
+│  1. Update ARCHITECTURE.md Section [X]: Add [SPECIFIC_DATA]
+│  2. Update ARCHITECTURE.md Section [Y]: Add [SPECIFIC_DATA]
+│  3. Regenerate contract: /skill architecture-compliance [CONTRACT_TYPE]
+└─ Reference: SECTION_MAPPING_GUIDE.md for [CONTRACT_TYPE] requirements
+```
+
+**Idempotent Regeneration**:
+- User can regenerate failed contracts individually using existing single-contract workflow
+- Existing successful contracts are preserved (not regenerated)
+- Manifest tracks latest version per contract type (updates existing entry)
+- Files are REPLACED when regenerating (Write tool overwrites)
+
+---
 
 ## Contract Types and Required Sections
 
