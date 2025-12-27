@@ -673,22 +673,75 @@ for agent in launched_agents:
 
 **Step 3.5: Generate Compliance Manifest**
 
-After all agent(s) complete successfully, the skill orchestrator generates the COMPLIANCE_MANIFEST.md file:
+After all agent(s) complete successfully, generate COMPLIANCE_MANIFEST.md using manifest-generator.ts.
 
-**Manifest Generation Workflow:**
-1. Collect metadata from all generated contracts
-2. Invoke `manifest-generator.ts` utility:
-   ```bash
-   bun skills/architecture-compliance/utils/manifest-generator.ts \
-     --contracts <list of generated contract files> \
-     --output compliance-docs/COMPLIANCE_MANIFEST.md
-   ```
-3. Manifest includes:
-   - Project name
-   - Generation date
-   - List of all generated contracts with scores
-   - Overall compliance summary
-   - Links to individual contract files
+**CRITICAL: You MUST execute these commands after all contracts are generated.**
+
+**Command Sequence:**
+
+For each generated contract, invoke manifest-generator.ts sequentially:
+
+1. **First Contract** (creates new manifest):
+```bash
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score [SCORE] \
+  --status "[STATUS]" \
+  --completeness [COMPLETENESS_PERCENTAGE]
+```
+
+2. **Subsequent Contracts** (update existing manifest):
+```bash
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score [SCORE] \
+  --status "[STATUS]" \
+  --completeness [COMPLETENESS_PERCENTAGE]
+```
+
+**Parameter Extraction:**
+- `[PROJECT_NAME]`: Extract from first H1 in ARCHITECTURE.md or contract filename
+- `[CONTRACT_TYPE]`: Type of contract (Business Continuity, SRE Architecture, etc.)
+- `[GENERATED_FILENAME]`: The .md file created by the agent
+- `[SCORE]`: Extract from contract (if available) or use "Pending Validation"
+- `[STATUS]`: Extract from contract (if available) or use "Draft"
+- `[COMPLETENESS_PERCENTAGE]`: Calculate based on filled placeholders or use 0
+
+**Example Execution Sequence:**
+```bash
+# 1. First contract (creates manifest)
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Business Continuity" \
+  --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# 2-10. Remaining contracts (update manifest)
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "SRE Architecture" \
+  --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# ... repeat for all 10 contracts
+```
+
+**Error Handling:**
+- If manifest-generator.ts fails → Log error, continue with remaining contracts
+- If all contracts fail → Return error, do not create empty manifest
+- Always verify COMPLIANCE_MANIFEST.md exists after completion
 
 **Why Skill Handles Manifest:**
 - **Atomicity**: Manifest updated only after ALL contracts complete
@@ -696,7 +749,10 @@ After all agent(s) complete successfully, the skill orchestrator generates the C
 - **No Race Conditions**: Prevents conflicts when running 10 agents in parallel
 - **Traceability**: Skill aggregates all agent results before manifest creation
 
-**IMPORTANT**: Individual agents DO NOT generate or update COMPLIANCE_MANIFEST.md. This prevents write conflicts during parallel execution.
+**IMPORTANT**:
+- Individual agents DO NOT generate or update COMPLIANCE_MANIFEST.md (prevents write conflicts during parallel execution)
+- This step is NOT optional - always execute after parallel agent completion
+- Verify COMPLIANCE_MANIFEST.md exists before reporting completion to user
 
 ### Phase 3 (Legacy): Data Extraction (Context-Efficient)
 
@@ -1739,40 +1795,59 @@ aggregated_results = {
 }
 ```
 
-**Note:** Each successful agent already:
+**Note:** Each successful agent:
 - Wrote its contract file to /compliance-docs/
-- Updated COMPLIANCE_MANIFEST.md with its entry
-- Performed validation
+- Does NOT update COMPLIANCE_MANIFEST.md (prevents race conditions during parallel execution)
+- Returns metadata to skill orchestrator
 
-Main Agent only needs to aggregate and report.
+**Next Step:** Skill MUST invoke manifest-generator.ts sequentially for all contracts (see Step 3.5)
 
 ---
 
-**Step 2C.5: Update COMPLIANCE_MANIFEST.md Summary**
+**Step 2C.5: Generate COMPLIANCE_MANIFEST.md**
 
-Since each Task Agent's skill invocation updates the manifest independently, the Main Agent adds generation summary metadata:
+**CRITICAL: You MUST execute this step - DO NOT SKIP**
 
+After collecting all agent results, generate COMPLIANCE_MANIFEST.md using manifest-generator.ts:
+
+**Workflow:**
+1. **Extract project name** from ARCHITECTURE.md or first contract filename
+2. **For EACH generated contract file** in /compliance-docs/:
+   - Determine contract type from filename
+   - Use Bash tool to invoke manifest-generator.ts with proper parameters
+   - First contract: `--mode create`
+   - Subsequent contracts: `--mode update`
+3. **Verify** COMPLIANCE_MANIFEST.md exists in /compliance-docs/
+4. **Report** to user that manifest was generated
+
+**Command Template:**
+```bash
+# First contract (creates manifest)
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Subsequent contracts (update manifest)
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# ... repeat for all contracts
 ```
-1. Read COMPLIANCE_MANIFEST.md
-2. Verify all successful contracts are listed
-3. Append generation summary section:
 
-## Generation Summary (Parallel Agent Mode)
+**See Step 3.5 for detailed command documentation and examples.**
 
-- **Generation Mode:** Parallel Agents
-- **Total Contracts Requested:** [N]
-- **Successfully Generated:** [N_SUCCESS]
-- **Failed:** [N_FAILED]
-- **Timestamp:** [CURRENT_DATE]
-- **Performance:** Generated [N_SUCCESS] contracts in parallel (~3-5 min, 10× speedup)
-- **Method:** 10 Task Agents (1 per contract) invoked architecture-compliance skill
-
-### Successful Contracts
-[List of contract_type names]
-
-### Failed Contracts (if any)
-[List of contract_type names with error messages]
-```
+**IMPORTANT**: This step is NOT optional. Always execute after parallel agent completion
 
 ---
 
@@ -1914,6 +1989,23 @@ Next Steps:
 
 ═══════════════════════════════════════════════════════════════
 ```
+
+---
+
+**Bulk Generation Completion Checklist:**
+
+After all parallel agents complete, verify:
+- [ ] All requested .md contract files exist in /compliance-docs/
+- [ ] COMPLIANCE_MANIFEST.md was generated (Step 2C.5 executed)
+- [ ] COMPLIANCE_MANIFEST.md contains all successful contracts
+- [ ] Final summary reported to user
+
+**If COMPLIANCE_MANIFEST.md is missing:**
+- This means Step 2C.5 was skipped (BUG)
+- You MUST execute manifest-generator.ts commands manually
+- Collect contract metadata and invoke sequentially (see Step 3.5 for command syntax)
+
+---
 
 **EXIT Phase 2C** - Parallel agent generation complete.
 
