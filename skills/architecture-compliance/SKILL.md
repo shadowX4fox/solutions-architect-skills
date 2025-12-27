@@ -1804,50 +1804,286 @@ aggregated_results = {
 
 ---
 
-**Step 2C.5: Generate COMPLIANCE_MANIFEST.md**
+### PHASE 2D: MANDATORY MANIFEST GENERATION
 
-**CRITICAL: You MUST execute this step - DO NOT SKIP**
+**BLOCKING REQUIREMENT**: You MUST execute this phase. The skill is NOT complete until COMPLIANCE_MANIFEST.md exists.
 
-After collecting all agent results, generate COMPLIANCE_MANIFEST.md using manifest-generator.ts:
+**Purpose**: Create COMPLIANCE_MANIFEST.md with metadata for all generated contracts.
 
-**Workflow:**
-1. **Extract project name** from ARCHITECTURE.md or first contract filename
-2. **For EACH generated contract file** in /compliance-docs/:
-   - Determine contract type from filename
-   - Use Bash tool to invoke manifest-generator.ts with proper parameters
-   - First contract: `--mode create`
-   - Subsequent contracts: `--mode update`
-3. **Verify** COMPLIANCE_MANIFEST.md exists in /compliance-docs/
-4. **Report** to user that manifest was generated
+**Why This Phase Exists**:
+- Agents do NOT update manifest (prevents race conditions during parallel execution)
+- Manifest provides single source of truth for all contracts
+- Required for stakeholder review and tracking
 
-**Command Template:**
+---
+
+**Step 2D.1: Collect Contract Metadata**
+
+From the 10 completed agents, gather:
+- Project name (from ARCHITECTURE.md H1 or first contract filename)
+- Generation date (current date YYYY-MM-DD)
+- For each successfully generated contract:
+  - Contract type (Business Continuity, SRE Architecture, Cloud Architecture, etc.)
+  - Generated filename (full filename with .md extension)
+  - Score: `0` (validation not performed)
+  - Status: `"Draft"` (validation not performed)
+  - Completeness: `0` (validation not performed)
+
+**Example Metadata Collection**:
+```
+Project: "3-Tier-To-Do-List"
+Date: "2025-12-27"
+Contracts:
+  1. Type: "Business Continuity", File: "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md"
+  2. Type: "SRE Architecture", File: "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md"
+  ... (continue for all generated contracts)
+```
+
+---
+
+**Step 2D.2: Execute Manifest Generation Commands**
+
+**CRITICAL**: Execute these commands sequentially (NOT parallel) to prevent file conflicts.
+
+**FIRST CONTRACT - CREATE MODE**:
+
+Use Bash tool to run:
 ```bash
-# First contract (creates manifest)
+cd /home/shadowx4fox/solutions-architect-skills
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "[PROJECT_NAME]" \
-  --contract-type "[CONTRACT_TYPE]" \
-  --filename "[GENERATED_FILENAME]" \
+  --contract-type "[FIRST_CONTRACT_TYPE]" \
+  --filename "[FIRST_FILENAME]" \
   --score 0 \
   --status "Draft" \
   --completeness 0
+```
 
-# Subsequent contracts (update manifest)
+**Example**:
+```bash
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Business Continuity" \
+  --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+```
+
+**SUBSEQUENT CONTRACTS - UPDATE MODE (Sequential)**:
+
+For each remaining contract (2-10), use Bash tool:
+```bash
+cd /home/shadowx4fox/solutions-architect-skills
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "[PROJECT_NAME]" \
   --contract-type "[CONTRACT_TYPE]" \
-  --filename "[GENERATED_FILENAME]" \
+  --filename "[FILENAME]" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+```
+
+**Example** (Contract 2):
+```bash
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "SRE Architecture" \
+  --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+```
+
+**Repeat UPDATE mode for all remaining contracts** (Cloud, Data & AI, Development, Process, Security, Platform, Enterprise, Integration).
+
+**IMPORTANT**:
+- Use absolute path: `cd /home/shadowx4fox/solutions-architect-skills` before each command
+- Execute sequentially (not parallel) to prevent file conflicts
+- Capture and report any errors immediately
+- Do NOT proceed to Step 2D.3 until all contracts are added
+
+---
+
+**Step 2D.3: VERIFY Manifest Creation**
+
+Use Read tool to verify:
+```
+Read file: /compliance-docs/COMPLIANCE_MANIFEST.md
+```
+
+**Expected**: File exists and contains all generated contracts in the table.
+
+**If file does not exist**:
+- This is a CRITICAL ERROR - skill has FAILED
+- You MUST retry manifest generation (Step 2D.2)
+- Do NOT report skill completion
+- Report error to user with manifest-generator.ts logs
+
+**If file exists but is incomplete**:
+- Count contracts in manifest table
+- Compare with number of successful agent generations
+- If mismatch, identify missing contracts and add them using UPDATE mode
+
+---
+
+**Step 2D.4: Report Manifest Completion**
+
+Only after COMPLIANCE_MANIFEST.md exists and contains all contracts:
+
+```
+✅ Compliance manifest generated successfully
+
+Location: /compliance-docs/COMPLIANCE_MANIFEST.md
+Contracts: [N]/[N] included
+Framework: [FRAMEWORK from ARCHITECTURE.md]
+Generation Date: [DATE]
+```
+
+**IMPORTANT**: Do NOT report skill completion before this message is displayed
+
+---
+
+### Example: Complete Manifest Generation Workflow
+
+**Scenario**: Generated all 10 contracts for "3-Tier-To-Do-List" project on 2025-12-27
+
+**Complete Command Sequence**:
+
+```bash
+# Contract 1: Business Continuity (CREATE - establishes manifest)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode create \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Business Continuity" \
+  --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
   --score 0 \
   --status "Draft" \
   --completeness 0
 
-# ... repeat for all contracts
+# Contract 2: SRE Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "SRE Architecture" \
+  --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 3: Cloud Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Cloud Architecture" \
+  --filename "CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 4: Data & AI Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Data & AI Architecture" \
+  --filename "DATA_AI_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 5: Development Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Development Architecture" \
+  --filename "DEVELOPMENT_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 6: Process Transformation (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Process Transformation" \
+  --filename "PROCESS_TRANSFORMATION_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 7: Security Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Security Architecture" \
+  --filename "SECURITY_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 8: Platform & IT Infrastructure (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Platform & IT Infrastructure" \
+  --filename "PLATFORM_IT_INFRASTRUCTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 9: Enterprise Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Enterprise Architecture" \
+  --filename "ENTERPRISE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Contract 10: Integration Architecture (UPDATE)
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/manifest-generator.ts \
+  --mode update \
+  --project "3-Tier-To-Do-List" \
+  --contract-type "Integration Architecture" \
+  --filename "INTEGRATION_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  --score 0 \
+  --status "Draft" \
+  --completeness 0
+
+# Verify manifest was created
+# Read /compliance-docs/COMPLIANCE_MANIFEST.md
 ```
 
-**See Step 3.5 for detailed command documentation and examples.**
+**Expected Result**: COMPLIANCE_MANIFEST.md created with all 10 contracts in the table.
 
-**IMPORTANT**: This step is NOT optional. Always execute after parallel agent completion
+**Contract Type Order**:
+1. Business Continuity
+2. SRE Architecture
+3. Cloud Architecture
+4. Data & AI Architecture
+5. Development Architecture
+6. Process Transformation
+7. Security Architecture
+8. Platform & IT Infrastructure
+9. Enterprise Architecture
+10. Integration Architecture
 
 ---
 
@@ -1992,18 +2228,28 @@ Next Steps:
 
 ---
 
-**Bulk Generation Completion Checklist:**
+**MANDATORY Completion Criteria (BLOCKING):**
 
-After all parallel agents complete, verify:
+Before reporting skill completion, you MUST verify:
+
 - [ ] All requested .md contract files exist in /compliance-docs/
-- [ ] COMPLIANCE_MANIFEST.md was generated (Step 2C.5 executed)
-- [ ] COMPLIANCE_MANIFEST.md contains all successful contracts
-- [ ] Final summary reported to user
+- [ ] COMPLIANCE_MANIFEST.md exists in /compliance-docs/
+- [ ] COMPLIANCE_MANIFEST.md contains all successfully generated contracts in the table
+- [ ] Manifest shows correct project name and generation date
+- [ ] No manifest-generator.ts errors occurred during PHASE 2D
+- [ ] Manifest completion message displayed (Step 2D.4)
 
-**If COMPLIANCE_MANIFEST.md is missing:**
-- This means Step 2C.5 was skipped (BUG)
-- You MUST execute manifest-generator.ts commands manually
-- Collect contract metadata and invoke sequentially (see Step 3.5 for command syntax)
+**CRITICAL**: If ANY item is unchecked, the skill has FAILED. You MUST fix before reporting completion.
+
+**Recovery Steps if Manifest is Missing or Incomplete**:
+
+1. Re-execute PHASE 2D manually:
+   - Collect contract metadata from agent outputs (Step 2D.1)
+   - Execute manifest-generator.ts commands sequentially (Step 2D.2)
+   - Verify manifest exists and is complete (Step 2D.3)
+   - Report manifest completion (Step 2D.4)
+2. If errors persist, report failure to user with error details
+3. Do NOT report skill completion until manifest exists and is verified
 
 ---
 
