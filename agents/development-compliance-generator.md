@@ -128,9 +128,220 @@ output_mode: content
 
 ### PHASE 4: Populate Template
 
-Standard template population
+**CRITICAL: You MUST preserve exact template format. Do NOT enhance, modify, or add context.**
+
+**Step 4.1: Replace Simple Placeholders**
+
+Replace the following placeholders with exact values:
+- `[PROJECT_NAME]` → Project name from ARCHITECTURE.md H1
+- `[GENERATION_DATE]` → Current date (YYYY-MM-DD)
+- `[VALUE or "Not specified"]` → Extracted value OR literal string "Not specified"
+
+**Rules:**
+- Use ONLY the extracted value, no additional text
+- If value not found: Use literal "Not specified" (no context)
+- Do NOT add explanatory text to values
+
+**Step 4.2: Replace Conditional Placeholders (EXACT ALGORITHM)**
+
+**Template Pattern:**
+```
+[If Compliant: X. If Non-Compliant: Y. If Not Applicable: N/A. If Unknown: W]
+```
+
+**Replacement Algorithm:**
+1. Locate the conditional placeholder in template
+2. Identify the Status value for this field (from data extraction)
+3. Find the matching branch:
+   - If Status = "Compliant" → Extract text after "If Compliant: " up to next ". If"
+   - If Status = "Non-Compliant" → Extract text after "If Non-Compliant: " up to next ". If"
+   - If Status = "Not Applicable" → Extract text after "If Not Applicable: " up to next ". If"
+   - If Status = "Unknown" → Extract text after "If Unknown: " up to end "]"
+4. Replace entire placeholder with ONLY the extracted branch text
+5. Do NOT modify, enhance, or add context to the branch text
+
+**Example:**
+```
+Template: [If Compliant: CI/CD pipeline documented. If Non-Compliant: CI/CD pipeline not specified. If Unknown: CI/CD pipeline unclear]
+Status: Compliant
+Replacement: CI/CD pipeline documented
+```
+
+**CRITICAL:**
+- Extract ONLY the text from the matching branch
+- Do NOT combine multiple branches
+- Do NOT add extra explanation
+- Do NOT modify the branch text
+- Preserve exact template wording
+
+**Step 4.3: Replace Source References**
+
+**Template Pattern:**
+```
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+```
+
+**Replacement Rules:**
+1. If data found in ARCHITECTURE.md:
+   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+   - Do NOT add line numbers unless template explicitly shows them
+   - Do NOT add quotes or extra context
+2. If data not found:
+   - Use literal: "Not documented"
+
+**Examples:**
+- Correct: `- Source: ARCHITECTURE.md Section 3.2`
+- Correct: `- Source: "Not documented"`
+- INCORRECT: `- Source: ARCHITECTURE.md Section 3.2, lines 67-72`
+- INCORRECT: `- Source: ARCHITECTURE.md Section 3.2 (Development Practices section)`
+
+**Step 4.4: Preserve Template Structure**
+
+**CRITICAL RULES:**
+
+1. **Table Format**:
+   - Preserve ALL table formatting: `| Field | Value |`
+   - NEVER convert to bold lists: `**Field**: Value`
+   - Maintain table alignment exactly as template
+
+2. **Status Values**:
+   - Use ONLY these 4 values: Compliant, Non-Compliant, Not Applicable, Unknown
+   - Exact case: "Compliant" not "compliant" or "COMPLIANT"
+
+3. **Section Numbering**:
+   - Preserve H2/H3 levels exactly as template
+   - Shared sections (Document Control, etc.) are H2: `## Section`
+   - Do NOT number shared sections (no `## A.5`, just `## Section Name`)
+
+4. **Note Fields with Conditionals**:
+   - Template: `- Note: [If Non-Compliant or Unknown: Implement X]`
+   - If Status is Compliant or Not Applicable: Remove entire Note line
+   - If Status is Non-Compliant or Unknown: Extract and use the conditional text
+   - Do NOT modify conditional logic
+
+**Step 4.5: Final Format Check**
+
+Before writing output, verify:
+- [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
+- [ ] All tables use pipe format `| X | Y |`
+- [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
+- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Conditional placeholders extracted exact branch text (no enhancements)
+- [ ] No extra prose or explanatory text added beyond template
+
+### PHASE 4 Examples: Correct vs Incorrect Replacements
+
+**Example 1: Simple Placeholder**
+
+Template:
+```
+**CI/CD Pipeline**: [Value or "Not specified"]
+```
+
+Correct:
+```
+**CI/CD Pipeline**: GitHub Actions
+```
+
+INCORRECT (added context):
+```
+**CI/CD Pipeline**: GitHub Actions with automated testing
+```
+
+---
+
+**Example 2: Conditional Placeholder**
+
+Template:
+```
+- Explanation: [If Compliant: CI/CD pipeline documented. If Non-Compliant: CI/CD pipeline not specified. If Unknown: CI/CD pipeline unclear]
+```
+
+Status: Compliant
+
+Correct:
+```
+- Explanation: CI/CD pipeline documented
+```
+
+INCORRECT (enhanced):
+```
+- Explanation: Automated CI/CD pipeline using GitHub Actions is fully documented with build, test, and deployment stages
+```
+
+---
+
+**Example 3: Source Reference**
+
+Template:
+```
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+```
+
+Correct:
+```
+- Source: ARCHITECTURE.md Section 3.2
+```
+
+INCORRECT (added line numbers):
+```
+- Source: ARCHITECTURE.md Section 3.2, lines 67-72
+```
+
+---
+
+**Example 4: Conditional Note Field**
+
+Template:
+```
+- Note: [If Non-Compliant or Unknown: Implement CI/CD pipeline in Section 3]
+```
+
+Status: Compliant → Remove entire Note line
+Status: Non-Compliant → Use:
+```
+- Note: Implement CI/CD pipeline in Section 3
+```
+
+---
+
+**Example 5: Table Preservation**
+
+Template:
+```
+| Field | Value |
+|-------|-------|
+| CI/CD Pipeline | [Value or "Not specified"] |
+```
+
+Correct:
+```
+| Field | Value |
+|-------|-------|
+| CI/CD Pipeline | GitHub Actions |
+```
+
+INCORRECT (converted to bold list):
+```
+**CI/CD Pipeline**: GitHub Actions
+```
 
 ### PHASE 5: Write Output
+
+**Step 5.0: Pre-Flight Format Validation**
+
+Before writing the output file, verify the following:
+
+**Validation Checklist:**
+- [ ] **No LLM enhancements**: All replacements use exact template text
+- [ ] **Table format preserved**: All `| Field | Value |` tables intact
+- [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
+- [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
+- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **No extra prose**: No explanatory text added beyond template
+- [ ] **Section numbering**: Shared sections use H2 without numbering
+
+**If any validation check fails, STOP and fix the issue before proceeding.**
 
 **CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
 
