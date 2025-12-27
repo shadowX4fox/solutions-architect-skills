@@ -217,9 +217,22 @@ For any placeholder not replaced:
 
 ### PHASE 5: Write Output
 
+**CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
+
+**Prohibited Actions**:
+- ❌ DO NOT create .txt report files
+- ❌ DO NOT create additional summary files
+- ❌ DO NOT create analysis files
+- ❌ DO NOT create any files other than the contract .md file
+
+**Allowed Output**:
+- ✅ ONLY: `/compliance-docs/SRE_ARCHITECTURE_[PROJECT]_[DATE].md`
+
 **Step 5.1: Determine Output Filename**
 
 Format: `/compliance-docs/SRE_ARCHITECTURE_[PROJECT]_[DATE].md`
+
+**IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
 
 **Step 5.2: Create Output Directory**
 
@@ -252,7 +265,10 @@ Contract Details:
    Sections: 10, 11, 5
 ```
 
-**IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.
+**IMPORTANT**:
+- This agent does NOT generate COMPLIANCE_MANIFEST.md (skill orchestrator handles this)
+- This agent does NOT generate .txt report files
+- Return ONLY the success message above - no additional files
 
 ## Error Handling
 

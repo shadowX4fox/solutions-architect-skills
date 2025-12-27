@@ -167,9 +167,22 @@ output_mode: content
 
 ### PHASE 5: Write Output
 
+**CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
+
+**Prohibited Actions**:
+- ❌ DO NOT create .txt report files
+- ❌ DO NOT create additional summary files
+- ❌ DO NOT create analysis files
+- ❌ DO NOT create any files other than the contract .md file
+
+**Allowed Output**:
+- ✅ ONLY: `/compliance-docs/DATA_AI_ARCHITECTURE_[PROJECT]_[DATE].md`
+
 **Step 5.1: Determine Output Filename**
 
 Format: `/compliance-docs/DATA_AI_ARCHITECTURE_[PROJECT]_[DATE].md`
+
+**IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
 
 **Step 5.2-5.4**: Create directory, write contract, return success
 

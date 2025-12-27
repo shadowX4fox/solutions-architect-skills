@@ -626,6 +626,7 @@ Task(
 **Agent Output:**
 - Generated compliance contract file: `/compliance-docs/[CONTRACT_TYPE]_[PROJECT]_[DATE].md`
 - Metadata (filename, project, date, score) returned to skill
+- **IMPORTANT**: Agents create ONLY the .md contract file (no .txt reports, no additional files)
 
 **Step 3.3: Bulk Contract Invocation (Parallel)**
 

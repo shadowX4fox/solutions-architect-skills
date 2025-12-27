@@ -186,6 +186,11 @@ Task(subagent_type="...:cloud-compliance-generator", ...),
 - **No shared state**: Fully independent agents
 - **Manifest safety**: Skill handles manifest to prevent conflicts
 
+### 6. Output Discipline
+- **Single file output**: Each agent creates exactly one .md contract file
+- **No extraneous files**: Agents explicitly prohibited from creating .txt reports or additional files
+- **Predictable behavior**: All output follows strict specification
+
 ---
 
 ## Breaking Changes
