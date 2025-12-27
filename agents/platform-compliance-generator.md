@@ -53,7 +53,35 @@ bun skills/architecture-compliance/utils/resolve-includes.ts \
 
 **Step 1.2: Read Expanded Template**
 
-Use Read tool
+Use Read tool:
+```
+Read file: /tmp/expanded_platform_template.md
+Store content in variable: template_content
+```
+
+**Step 1.3: Remove Instructional Sections**
+
+Use Bash tool to remove internal agent instructions from expanded template:
+
+```bash
+sed '/<!-- BEGIN_INTERNAL_INSTRUCTIONS -->/,/<!-- END_INTERNAL_INSTRUCTIONS -->/d' \
+  /tmp/expanded_platform_template.md > /tmp/cleaned_platform_template.md
+```
+
+**What This Does**:
+- Removes all content between `<!-- BEGIN_INTERNAL_INSTRUCTIONS -->` and `<!-- END_INTERNAL_INSTRUCTIONS -->`
+- Preserves only contract-facing content
+- Prevents instructional metadata from appearing in final output
+
+**Step 1.4: Read Cleaned Template**
+
+Use Read tool:
+```
+Read file: /tmp/cleaned_platform_template.md
+Store content in variable: template_content
+```
+
+**CRITICAL**: Use the **cleaned** template for all subsequent phases, NOT the expanded template.
 
 ### PHASE 2: Extract Project Information
 
@@ -137,6 +165,20 @@ output_mode: content
 ### PHASE 4: Populate Template
 
 **CRITICAL: You MUST preserve exact template format. Do NOT enhance, modify, or add context.**
+
+**Step 4.0: Populate Document Control Fields**
+
+Replace Document Control placeholders with default values:
+
+- `[DOCUMENT_STATUS]` → `"Draft"`
+- `[VALIDATION_SCORE]` → `"Not performed"`
+- `[VALIDATION_STATUS]` → `"Not performed"`
+- `[VALIDATION_DATE]` → `"Not performed"`
+- `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
+- `[REVIEW_ACTOR]` → `"Platform & Infrastructure Review Board"`
+- `[APPROVAL_AUTHORITY]` → `"Platform & Infrastructure Review Board"`
+
+**Note**: Validation integration is tracked separately. Current defaults indicate contract has not been validated yet.
 
 **Step 4.1: Replace Simple Placeholders**
 
@@ -348,6 +390,7 @@ Before writing the output file, verify the following:
 - [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
+- [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
 
 **If any validation check fails, STOP and fix the issue before proceeding.**
 
