@@ -80,14 +80,19 @@ The skill includes:
 
 The `architecture-compliance` skill generates Compliance Contracts (Contratos de Adherencia) from ARCHITECTURE.md files. It produces 10 separate compliance documents ensuring organizational standards adherence.
 
+**Version 2.0+**: Uses 10 specialized compliance generation agents (one per contract type) for optimized performance and parallel execution.
+
 To manually activate the skill, use: `/skill architecture-compliance`
 
 The skill includes:
-- 10 compliance contract templates (Contratos de Adherencia)
-- Automated data extraction from ARCHITECTURE.md
-- Context-efficient generation (70-80% reduction in loaded content)
-- Full source traceability for audit trails
-- Gap detection and completion recommendations
+- **10 specialized compliance agents**: One dedicated agent per contract type
+- **10 compliance contract templates** (Contratos de Adherencia)
+- **Parallel execution support**: Generate all 10 contracts simultaneously (~10x faster)
+- **Pre-configured section mappings**: Domain-specific optimization
+- **Automated data extraction** from ARCHITECTURE.md
+- **Context-efficient generation** (70-80% reduction in loaded content)
+- **Full source traceability** for audit trails
+- **Gap detection** and completion recommendations
 
 **Compliance Document Types**:
 1. Continuidad de Negocio (Business Continuity)
@@ -101,6 +106,26 @@ The skill includes:
 9. Arquitectura Empresarial (Enterprise Architecture)
 10. Arquitectura de Integración
 
+**Specialized Agents** (v2.0+):
+1. `business-continuity-compliance-generator` - Business Continuity contracts
+2. `sre-compliance-generator` - SRE Architecture contracts
+3. `cloud-compliance-generator` - Cloud Architecture contracts
+4. `data-ai-compliance-generator` - Data & AI Architecture contracts
+5. `development-compliance-generator` - Development Architecture contracts
+6. `process-compliance-generator` - Process Transformation contracts
+7. `security-compliance-generator` - Security Architecture contracts
+8. `platform-compliance-generator` - Platform & IT Infrastructure contracts
+9. `enterprise-compliance-generator` - Enterprise Architecture contracts
+10. `integration-compliance-generator` - Integration Architecture contracts
+
+**Agent Benefits**:
+- **Performance**: Pre-configured section mappings, domain-specific extraction patterns
+- **Clarity**: Each agent has single responsibility, self-documenting names
+- **Scalability**: Native parallel execution, no shared state
+- **Maintainability**: Independent updates per agent, easier testing
+
 **When to use**: After ARCHITECTURE.md is complete, when compliance documentation is required, or when organizational standards validation is needed.
 
-**Output**: All generated compliance documents are saved to `/compliance-docs/` directory with full traceability to ARCHITECTURE.md sources.
+**Output**: All generated compliance documents are saved to `/compliance-docs/` directory with full traceability to ARCHITECTURE.md sources. The skill orchestrator generates `COMPLIANCE_MANIFEST.md` after all contracts complete.
+
+**Migration**: See `agents/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.

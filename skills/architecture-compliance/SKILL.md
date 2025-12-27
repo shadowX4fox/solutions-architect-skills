@@ -576,7 +576,132 @@ Offer user preview of what will be generated:
 - User selects "Other" → Shows all 10 contract types
 - Output: User selects appropriate contract type
 
-### Phase 3: Data Extraction (Context-Efficient)
+### Phase 3: Agent Invocation (v2.0+)
+
+**IMPORTANT**: As of v2.0.0, this skill uses specialized compliance generation agents (one per contract type) instead of direct generation. This section documents the agent routing logic.
+
+**Step 3.1: Agent Selection**
+
+Based on the selected contract type(s) from Phase 2, invoke the corresponding specialized agent(s):
+
+| Contract Type | Agent Name | Subagent Type |
+|---------------|------------|---------------|
+| Business Continuity | business-continuity-compliance-generator | `solutions-architect-skills:business-continuity-compliance-generator` |
+| SRE Architecture | sre-compliance-generator | `solutions-architect-skills:sre-compliance-generator` |
+| Cloud Architecture | cloud-compliance-generator | `solutions-architect-skills:cloud-compliance-generator` |
+| Data & AI Architecture | data-ai-compliance-generator | `solutions-architect-skills:data-ai-compliance-generator` |
+| Development Architecture | development-compliance-generator | `solutions-architect-skills:development-compliance-generator` |
+| Process Transformation | process-compliance-generator | `solutions-architect-skills:process-compliance-generator` |
+| Security Architecture | security-compliance-generator | `solutions-architect-skills:security-compliance-generator` |
+| Platform & IT Infrastructure | platform-compliance-generator | `solutions-architect-skills:platform-compliance-generator` |
+| Enterprise Architecture | enterprise-compliance-generator | `solutions-architect-skills:enterprise-compliance-generator` |
+| Integration Architecture | integration-compliance-generator | `solutions-architect-skills:integration-compliance-generator` |
+
+**Agent Characteristics:**
+- Each agent is **pre-configured** with contract-specific settings:
+  - Contract type (no parameter needed)
+  - Template filename
+  - Section mappings (pre-configured for performance)
+  - Domain-specific data extraction patterns
+- Agents are **self-contained** (no shared state)
+- Agents support **parallel execution** (unique output filenames)
+- Agents **DO NOT** generate COMPLIANCE_MANIFEST.md (skill handles this)
+
+**Step 3.2: Single Contract Invocation**
+
+When generating a single contract (selected_contracts.length == 1):
+
+```python
+# Example: Generate Cloud Architecture contract
+Task(
+    subagent_type="solutions-architect-skills:cloud-compliance-generator",
+    prompt="Generate Cloud Architecture compliance contract from ./ARCHITECTURE.md",
+    description="Generate Cloud compliance"
+)
+```
+
+**Agent Input:**
+- `architecture_file` path (default: ./ARCHITECTURE.md)
+
+**Agent Output:**
+- Generated compliance contract file: `/compliance-docs/[CONTRACT_TYPE]_[PROJECT]_[DATE].md`
+- Metadata (filename, project, date, score) returned to skill
+
+**Step 3.3: Bulk Contract Invocation (Parallel)**
+
+When generating multiple contracts (selected_contracts.length > 1):
+
+**Parallel Execution:**
+```python
+# Example: Generate all 10 contracts in parallel
+# Single message with multiple Task tool calls
+
+Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:sre-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:development-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:process-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:security-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:platform-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", ...),
+Task(subagent_type="solutions-architect-skills:integration-compliance-generator", ...)
+```
+
+**Benefits:**
+- **Performance**: 10 agents in parallel ~10x faster than sequential
+- **No conflicts**: Each agent writes unique output file
+- **No shared state**: Fully independent execution
+
+**Step 3.4: Collect Agent Results**
+
+After all agents complete:
+
+```python
+results = []
+for agent in launched_agents:
+    result = agent.wait_for_completion()
+    results.append({
+        "filename": result.filename,
+        "project": result.project,
+        "date": result.date,
+        "score": result.score,  # If calculated by agent
+        "type": result.contract_type
+    })
+```
+
+**Step 3.5: Generate Compliance Manifest**
+
+After all agent(s) complete successfully, the skill orchestrator generates the COMPLIANCE_MANIFEST.md file:
+
+**Manifest Generation Workflow:**
+1. Collect metadata from all generated contracts
+2. Invoke `manifest-generator.ts` utility:
+   ```bash
+   bun skills/architecture-compliance/utils/manifest-generator.ts \
+     --contracts <list of generated contract files> \
+     --output compliance-docs/COMPLIANCE_MANIFEST.md
+   ```
+3. Manifest includes:
+   - Project name
+   - Generation date
+   - List of all generated contracts with scores
+   - Overall compliance summary
+   - Links to individual contract files
+
+**Why Skill Handles Manifest:**
+- **Atomicity**: Manifest updated only after ALL contracts complete
+- **Consistency**: Single source of truth for manifest generation
+- **No Race Conditions**: Prevents conflicts when running 10 agents in parallel
+- **Traceability**: Skill aggregates all agent results before manifest creation
+
+**IMPORTANT**: Individual agents DO NOT generate or update COMPLIANCE_MANIFEST.md. This prevents write conflicts during parallel execution.
+
+### Phase 3 (Legacy): Data Extraction (Context-Efficient)
+
+**NOTE**: This phase is now delegated to specialized agents (v2.0+). The documentation below describes the agent's internal workflow for reference.
+
+**Legacy Phase - Now Handled by Agents:**
 
 **Step 3.1: Load Document Index**
 ```
