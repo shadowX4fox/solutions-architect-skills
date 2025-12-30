@@ -40,6 +40,41 @@ Generate Development Architecture compliance contract from ARCHITECTURE.md using
 
 Follow these steps exactly, using the specified tools for each operation.
 
+### PHASE 0: Template Preservation Mandate
+
+**ABSOLUTE RULE - READ THIS FIRST**:
+
+You are operating in **TEMPLATE PRESERVATION MODE**.
+
+**What this means**:
+- The template is a READ-ONLY document
+- Your ONLY task is to replace `[PLACEHOLDER]` text with actual values
+- You are FORBIDDEN from modifying any template structure
+- You are FORBIDDEN from adding, removing, or reorganizing sections
+- You are FORBIDDEN from changing table formats
+- You are FORBIDDEN from adding section numbering (A.1, A.2, etc.)
+- You are FORBIDDEN from adding or removing table columns/rows
+- You are FORBIDDEN from converting tables to other formats
+
+**What you CAN do**:
+- Replace `[PROJECT_NAME]` with the actual project name
+- Replace `[GENERATION_DATE]` with the current date
+- Replace `[DOCUMENT_STATUS]` with "Draft"
+- Replace `[VALIDATION_SCORE]` with "Not performed"
+- Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
+- Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
+- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Role or N/A]` with extracted role or "N/A"
+
+**How to work**:
+1. Read the cleaned template as immutable content
+2. Identify each `[PLACEHOLDER]` in the template
+3. Replace ONLY the placeholder with its value
+4. Preserve everything else EXACTLY as-is
+5. Write the result (structure must be identical to template)
+
+**Violation Detection**: If the output structure differs from template structure in ANY way, the contract will be REJECTED.
+
 ### PHASE 1: Template Preparation
 
 **Step 1.1: Expand Template**
@@ -367,6 +402,56 @@ INCORRECT (converted to bold list):
 ```
 **CI/CD Pipeline**: GitHub Actions
 ```
+
+### PHASE 4.5: Comprehensive Pre-Write Template Validation
+
+**MANDATORY CHECK**: Before writing the output file, verify COMPLETE template compliance.
+
+**Validation Checklist - ALL sections MUST pass**:
+
+**1. Document Control Section**:
+- [ ] Section exists with title "## Document Control" (exact match, NO numbering)
+- [ ] Table format uses markdown pipes: | Field | Value |
+- [ ] Table has exactly 10 fields (Document Owner, Last Review Date, Next Review Date, Status, Validation Score, Validation Status, Validation Date, Validation Evaluator, Review Actor, Approval Authority)
+- [ ] NO extra fields (no Document ID, Template Version, etc.)
+- [ ] Validation Configuration field present
+
+**2. Dynamic Field Instructions Section**:
+- [ ] Section exists with title matching template (exact match, NO numbering)
+- [ ] Contains Purpose, Field Types, Status Values subsections
+- [ ] Status values listed: Compliant, Non-Compliant, Not Applicable, Unknown
+
+**3. Scoring Methodology Section**:
+- [ ] Section exists (title varies by contract type)
+- [ ] Blocker/Desired tier descriptions present (for two-tier scoring)
+- [ ] Scoring formulas present
+
+**4. Compliance Summary Table**:
+- [ ] Section exists with title "## Compliance Summary"
+- [ ] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
+- [ ] All requirement rows present (count matches template)
+- [ ] Status column uses ONLY: Compliant, Non-Compliant, Not Applicable, Unknown
+- [ ] NO rows added or removed
+
+**5. Detailed Requirements Sections**:
+- [ ] All detailed requirement sections from template present
+- [ ] Each section structure matches template
+- [ ] Table structures preserved
+
+**6. Compliance Summary Footer**:
+- [ ] Footer section present (if in template)
+- [ ] Content matches template
+
+**7. General Structure Rules**:
+- [ ] NO section numbering in shared sections (no A.1, A.2, etc.)
+- [ ] ALL tables use markdown pipe format (| X | Y |)
+- [ ] NO tables converted to bold field format (**Field**: Value)
+- [ ] Header section intact (Project, Generation Date, Source, Version)
+- [ ] NO extra sections added
+- [ ] NO template sections removed
+
+**If ANY check fails**: DO NOT write the output file. Return error:
+"TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
 ### PHASE 5: Write Output
 

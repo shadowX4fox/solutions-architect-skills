@@ -88,6 +88,51 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 
 ---
 
+## Version History & Recent Improvements
+
+### v2.1.0 - Enhanced Template Format Enforcement (2025-12-30)
+
+**Summary**: Implemented comprehensive template preservation mandate and pre-write validation across all 10 compliance generation agents.
+
+**Changes:**
+
+1. **PHASE 0: Template Preservation Mandate** (All agents)
+   - Establishes "READ-ONLY TEMPLATE MODE" as first instruction
+   - Explicitly forbids structural modifications, table conversions, section numbering
+   - Defines allowed operations (placeholder replacement ONLY)
+   - Includes violation detection warnings
+
+2. **PHASE 4.5: Comprehensive Pre-Write Validation** (All agents)
+   - 7-point validation checklist covering ALL template sections
+   - Document Control: 10 required fields, table format validation, forbidden field detection
+   - Dynamic Field Instructions, Scoring Methodology validation
+   - Compliance Summary table: 6 columns, row count verification
+   - Detailed Requirements sections structure check
+   - General structure rules enforcement (no section numbering, table formats)
+   - **Aborts contract generation if ANY validation check fails**
+
+3. **Validation Utility** (New tool)
+   - Created `validate-contract-structure.ts` for automated format verification
+   - Validates Document Control section (10 fields, table format, no extra fields)
+   - Validates Compliance Summary table (6 columns, proper structure)
+   - Detects invalid status values
+   - Detects forbidden section numbering (A.1, A.2, etc. in shared sections)
+   - Detects table-to-bold-field conversions
+   - Usage: `bun skills/architecture-compliance/utils/validate-contract-structure.ts <contract-file>`
+
+**Impact:**
+- **100% template fidelity** - Zero structural deviations allowed
+- **Deterministic output** - Same ARCHITECTURE.md → same structure every time
+- **Consistent bulk generation** - All 10 contracts follow exact template format
+- **Zero hallucinations** - No extra fields, sections, or content
+- **Automated enforcement** - Validation happens before output is written
+
+**Files Modified:**
+- All 10 agent files in `/agents/` (PHASE 0 + PHASE 4.5 added)
+- New utility: `/skills/architecture-compliance/utils/validate-contract-structure.ts`
+
+---
+
 ## CRITICAL FORMAT PRESERVATION RULES
 
 **IMPORTANT**: The following format rules are MANDATORY and validated with BLOCKING severity. Violations will prevent contract generation.
