@@ -716,11 +716,36 @@ for agent in launched_agents:
     })
 ```
 
+**Step 3.4A: Detect Compliance Docs Directory**
+
+Determine the absolute path to the compliance-docs directory:
+
+```bash
+# Get absolute path to ARCHITECTURE.md directory
+ARCH_DIR=$(dirname "$(realpath ./ARCHITECTURE.md)")
+
+# Compliance docs are in subdirectory of ARCHITECTURE.md location
+COMPLIANCE_DOCS_DIR="${ARCH_DIR}/compliance-docs"
+```
+
+Store this path for use in manifest-generator invocations.
+
+**Why This Step**:
+- Manifest-generator.ts looks for compliance-docs at `process.cwd()/compliance-docs`
+- In plugin context, `process.cwd()` differs from ARCHITECTURE.md location
+- Passing absolute path via `--compliance-docs-dir` ensures correct directory is used
+
 **Step 3.5: Generate Compliance Manifest**
 
 After all agent(s) complete successfully, generate COMPLIANCE_MANIFEST.md using manifest-generator.ts.
 
 **CRITICAL: You MUST execute these commands after all contracts are generated.**
+
+**Path Resolution Note** (v1.9.3+):
+
+The `--compliance-docs-dir` parameter is required when running from plugin context to ensure manifest-generator finds the correct directory. This parameter should be set to the absolute path of the compliance-docs directory (subdirectory of ARCHITECTURE.md location).
+
+If the parameter is omitted, manifest-generator defaults to `./compliance-docs` relative to `process.cwd()`, which may not match the contract generation location in plugin contexts.
 
 **Command Sequence:**
 
@@ -735,7 +760,8 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --filename "[GENERATED_FILENAME]" \
   --score [SCORE] \
   --status "[STATUS]" \
-  --completeness [COMPLETENESS_PERCENTAGE]
+  --completeness [COMPLETENESS_PERCENTAGE] \
+  --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 ```
 
 2. **Subsequent Contracts** (update existing manifest):
@@ -747,7 +773,8 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --filename "[GENERATED_FILENAME]" \
   --score [SCORE] \
   --status "[STATUS]" \
-  --completeness [COMPLETENESS_PERCENTAGE]
+  --completeness [COMPLETENESS_PERCENTAGE] \
+  --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 ```
 
 **Parameter Extraction:**
@@ -768,7 +795,8 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
   --score 0 \
   --status "Draft" \
-  --completeness 0
+  --completeness 0 \
+  --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 
 # 2-10. Remaining contracts (update manifest)
 bun skills/architecture-compliance/utils/manifest-generator.ts \
@@ -778,7 +806,8 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
   --score 0 \
   --status "Draft" \
-  --completeness 0
+  --completeness 0 \
+  --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 
 # ... repeat for all 10 contracts
 ```

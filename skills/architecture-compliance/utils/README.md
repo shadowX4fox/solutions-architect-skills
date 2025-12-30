@@ -232,6 +232,25 @@ chmod +x manifest-generator.ts
 **Optional Arguments:**
 - `--compliance-docs-dir`: Custom output directory (default: `./compliance-docs`)
 
+**Working Directory Consideration** (v1.9.3+):
+
+When invoking manifest-generator from a different working directory than where ARCHITECTURE.md resides (e.g., plugin context), you MUST provide the `--compliance-docs-dir` parameter with an absolute path.
+
+Example:
+```bash
+# Determine absolute path first
+ARCH_DIR=$(dirname "$(realpath /path/to/ARCHITECTURE.md)")
+COMPLIANCE_DOCS_DIR="${ARCH_DIR}/compliance-docs"
+
+# Pass to manifest-generator
+bun manifest-generator.ts \
+  --mode create \
+  --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}" \
+  [other params...]
+```
+
+Without this parameter, manifest-generator uses `process.cwd()/compliance-docs`, which may be incorrect in plugin contexts.
+
 ### Examples
 
 **Create new manifest (first contract):**
