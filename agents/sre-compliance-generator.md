@@ -513,6 +513,48 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
+### PHASE 4.6: Calculate Validation Score
+
+**CRITICAL**: This phase calculates validation score and updates contract fields BEFORE writing output.
+
+**Step 4.6.1: Run Score Calculation**
+
+Use Bash tool to execute score calculator:
+```bash
+bun skills/architecture-compliance/utils/score-calculator-cli.ts \
+  /tmp/populated_sre_contract.md \
+  validation/sre_architecture_validation.json
+```
+
+**Output**: JSON with validation score, written to `/tmp/validation_score.json`
+
+**Step 4.6.2: Update Contract Fields**
+
+Use Bash tool to execute field updater:
+```bash
+bun skills/architecture-compliance/utils/field-updater-cli.ts \
+  /tmp/populated_sre_contract.md \
+  /tmp/validation_score.json \
+  /tmp/final_sre_contract.md
+```
+
+**What This Does**:
+- Reads populated contract from Step 4.6.1 input
+- Reads validation score JSON from `/tmp/validation_score.json`
+- Updates Document Control fields with calculated validation scores
+- Updates Overall Compliance footer with actual status counts and percentages
+- Updates Remediation Section A.3.3 with current status and score estimates
+- Writes final contract to `/tmp/final_sre_contract.md`
+
+**Step 4.6.3: Error Handling**
+
+If validation fails (e.g., malformed table, missing sections):
+- Log error to stderr
+- Write contract with "Error" placeholders in validation fields
+- Continue to PHASE 5 (always write contract output)
+
+**CRITICAL**: Never block contract generation due to validation failure. Always produce output.
+
 ### PHASE 5: Write Output
 
 **Step 5.0: Pre-Flight Format Validation**

@@ -452,6 +452,15 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
+### PHASE 4.6: Calculate Validation Score
+
+```bash
+bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_contract.md validation/process_transformation_validation.json
+bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_contract.md /tmp/validation_score.json /tmp/final_contract.md
+```
+
+**Error Handling**: Continue to PHASE 5 on failure (always write output).
+
 ### PHASE 5: Write Output
 
 **Step 5.0: Pre-Flight Format Validation**
