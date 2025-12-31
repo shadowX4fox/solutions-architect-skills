@@ -527,7 +527,7 @@ bun skills/architecture-compliance/utils/score-calculator-cli.ts \
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_cloud_contract.md \
   /tmp/validation_score.json \
-  /tmp/final_cloud_contract.md
+  /tmp/final_cloud_architecture_contract.md
 ```
 
 **Step 4.6.3: Error Handling** - Continue to PHASE 5 on validation failure (always write output).
@@ -576,12 +576,17 @@ Use Bash tool:
 mkdir -p compliance-docs
 ```
 
-**Step 5.3: Write Final Contract**
+**Step 5.3: Read and Write Final Contract**
 
-Use Write tool:
+Use Read tool to load the validated contract:
+```
+file_path: /tmp/final_cloud_architecture_contract.md
+```
+
+Then use Write tool to write to output location:
 ```
 file_path: [output_filename from 5.1]
-content: [populated template from Phase 4]
+content: [content from Read tool above]
 ```
 
 **Step 5.4: Return Success with Metadata**

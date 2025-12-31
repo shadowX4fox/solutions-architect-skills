@@ -474,7 +474,7 @@ INCORRECT (converted to bold list):
 
 ```bash
 bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_contract.md validation/integration_architecture_validation.json
-bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_contract.md /tmp/validation_score.json /tmp/final_contract.md
+bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_contract.md /tmp/validation_score.json /tmp/final_integration_architecture_contract.md
 ```
 
 ### PHASE 5: Write Output
@@ -511,6 +511,32 @@ Before writing the output file, verify the following:
 Format: `/compliance-docs/INTEGRATION_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
+
+**Step 5.2: Create Output Directory**
+
+Use Bash tool:
+```bash
+mkdir -p compliance-docs
+```
+
+**Step 5.3: Read Validated Contract**
+
+Use Read tool:
+```
+file_path: /tmp/final_integration_architecture_contract.md
+```
+
+**Note**: Use the validated contract from PHASE 4.6 (Step 4.6.2) which has validation scores populated.
+
+**Step 5.4: Write Contract to Output**
+
+Use Write tool:
+```
+file_path: [output_filename from 5.1]
+content: [content from Step 5.3 Read operation]
+```
+
+**Step 5.5: Return Success with Metadata**
 
 Return formatted result:
 ```

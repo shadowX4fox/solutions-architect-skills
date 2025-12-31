@@ -609,15 +609,18 @@ Use Bash tool:
 mkdir -p compliance-docs
 ```
 
-**Step 5.3: Write Final Contract**
+**Step 5.3: Read and Write Final Contract**
 
-Use Write tool to copy the validated contract from PHASE 4.6:
+Use Read tool to load the validated contract:
+```
+file_path: /tmp/final_business_continuity_contract.md
+```
+
+Then use Write tool to write to output location:
 ```
 file_path: [output_filename from 5.1]
-content: [final validated contract from /tmp/final_business_continuity_contract.md]
+content: [content from Read tool above]
 ```
-
-**Note**: Use the final contract from PHASE 4.6 (Step 4.6.2), which has validation scores populated.
 
 **Step 5.4: Return Success with Metadata**
 

@@ -535,7 +535,7 @@ Use Bash tool to execute field updater:
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_sre_contract.md \
   /tmp/validation_score.json \
-  /tmp/final_sre_contract.md
+  /tmp/final_sre_architecture_contract.md
 ```
 
 **What This Does**:
@@ -544,7 +544,7 @@ bun skills/architecture-compliance/utils/field-updater-cli.ts \
 - Updates Document Control fields with calculated validation scores
 - Updates Overall Compliance footer with actual status counts and percentages
 - Updates Remediation Section A.3.3 with current status and score estimates
-- Writes final contract to `/tmp/final_sre_contract.md`
+- Writes final contract to `/tmp/final_sre_architecture_contract.md`
 
 **Step 4.6.3: Error Handling**
 
@@ -597,12 +597,17 @@ Use Bash tool:
 mkdir -p compliance-docs
 ```
 
-**Step 5.3: Write Final Contract**
+**Step 5.3: Read and Write Final Contract**
 
-Use Write tool:
+Use Read tool to load the validated contract:
+```
+file_path: /tmp/final_sre_architecture_contract.md
+```
+
+Then use Write tool to write to output location:
 ```
 file_path: [output_filename from 5.1]
-content: [populated template from Phase 4]
+content: [content from Read tool above]
 ```
 
 **Step 5.4: Return Success with Metadata**
