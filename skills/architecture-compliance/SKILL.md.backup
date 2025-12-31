@@ -90,42 +90,6 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 
 ## Version History & Recent Improvements
 
-### v2.2.0 - Unified Agent-Based Workflow (2025-12-31)
-
-**Summary**: Refactored single contract generation to use specialized agents, eliminating duplicate inline generation logic and creating a consistent workflow path for all contract counts.
-
-**Changes:**
-
-1. **Routing Logic Unification**
-   - Single contracts (count == 1) now use Phase 3 (Agent Invocation) instead of Phase 2-5 (inline generation)
-   - All contract generation paths now consistently route to specialized agents
-   - Removed conditional workflow branching based on contract count
-
-2. **Code Cleanup** (~740 lines removed)
-   - Removed obsolete Phase 2.2-2.4 (Output Directory, Template Availability, Preview Option)
-   - Removed obsolete Phase 4 (Document Generation - inline logic)
-   - Removed obsolete Phase 5 (Output - inline logic)
-   - Removed Phase 2.1 Example Scenarios (6 scenarios)
-   - SKILL.md reduced from 3491 to 2830 lines
-
-3. **Phase 3.5 Enhancement**
-   - Clarified manifest generation applies to both single AND bulk contract generation
-   - Added explicit guidance for single contract invocation (create mode once)
-   - Maintained existing sequential manifest generation for bulk
-
-**Impact:**
-- **Single Source of Truth**: Agents are the only generation implementation (no duplicate logic)
-- **Consistency**: Identical workflow path regardless of contract count (1, 2-3, 4+)
-- **Maintainability**: Fixes/updates only needed in agent files, not in SKILL.md
-- **Simplicity**: SKILL.md is now ONLY an orchestrator (routing + manifest generation)
-- **Reliability**: All contracts benefit from v1.9.5 agent fixes (file writing, validation)
-
-**Files Modified:**
-- `/skills/architecture-compliance/SKILL.md` (740 lines removed, ~50 lines updated)
-- All documentation references updated to reflect unified workflow
-
----
-
 ### v2.1.0 - Enhanced Template Format Enforcement (2025-12-30)
 
 **Summary**: Implemented comprehensive template preservation mandate and pre-write validation across all 10 compliance generation agents.
@@ -522,16 +486,19 @@ Based on selected_contracts from Step 1.1:
 
 **Routing Logic:**
 ```
-# ALL contract generation now uses specialized agents (v2.0+)
-# No inline generation logic in SKILL.md
+IF selected_contracts.length == 1:
+  # SINGLE CONTRACT MODE (Existing Workflow)
+  # Use Phase 2-5 as-is (current implementation)
+  # No changes to existing behavior - backward compatibility maintained
+  proceed_with_existing_single_contract_workflow()
+  # Continue to Step 2.2 below
 
-IF selected_contracts.length >= 1:
-  # AGENT-BASED GENERATION (All contract counts)
-  # Single contract (count == 1): Invoke one agent sequentially
-  # Multiple contracts (count >= 2): Invoke agents in parallel
-  # See Phase 3: Agent Invocation below
-  proceed_to_phase_3()
-  # Skip to Phase 3: Agent Invocation
+ELIF selected_contracts.length > 1:
+  # BULK MODE (New Parallel Workflow)
+  # Use Phase 2 Bulk → Phase 3 Bulk → Phase 4 Bulk → Phase 5 Bulk
+  # See new bulk workflow sections below (after Phase 5)
+  proceed_with_bulk_workflow()
+  # Skip to Phase 2 Bulk section
 ```
 
 **Single Contract Validation** (when selected_contracts.length == 1):
@@ -573,6 +540,86 @@ Output: Validated contract type
      b) Cancel entire operation
 3. Output: validated_contracts = [contracts with templates available]
 ```
+
+**Step 2.2: Output Directory Configuration**
+```
+Default: /compliance-docs/ (relative to ARCHITECTURE.md)
+Check if directory exists, create if needed
+Confirm with user if non-default location desired
+```
+
+**Step 2.3: Template Availability Check**
+```
+For each selected contract:
+- Check if template exists in templates/ directory
+- If missing: warn user, use basic placeholder structure
+- If exists: load template for generation
+```
+
+**Step 2.4: Preview Option**
+```
+Offer user preview of what will be generated:
+- List of contracts to create
+- Output directory
+- Source sections to be used
+- Estimated placeholders (missing data)
+```
+
+#### Phase 2.1 Example Scenarios
+
+**Scenario 1: Exact Match**
+- User input: "Cloud Architecture"
+- Validation: Exact match found
+- Output: Cloud Architecture contract selected
+
+**Scenario 2: Alias Match**
+- User input: "sre"
+- Validation: Alias match found ("sre" → "SRE Architecture")
+- Output: SRE Architecture contract selected
+
+**Scenario 3: Typo with Fuzzy Match**
+- User input: "securtiy architecture"
+- Validation: No exact match
+- Similarity scores:
+  - Security Architecture: 95% (high keyword + fuzzy match)
+  - Enterprise Architecture: 45% (keyword "architecture")
+  - Cloud Architecture: 42% (keyword "architecture")
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects: "Security Architecture"
+- Output: Security Architecture contract selected
+
+**Scenario 4: Conceptual Match**
+- User input: "ml governance"
+- Validation: No exact match
+- Similarity scores:
+  - Data & AI Architecture: 75% (keywords "ml", "governance" related to AI)
+  - Enterprise Architecture: 50% (keyword "governance")
+  - Security Architecture: 45% (keyword "governance")
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects: "Data & AI Architecture"
+- Output: Data & AI Architecture contract selected
+
+**Scenario 5: Ambiguous Input**
+- User input: "platform"
+- Validation: No exact match
+- Similarity scores:
+  - IT Infrastructure: 70% (alias "platforms")
+  - Data & AI Architecture: 45% (data platform concept)
+  - Cloud Architecture: 40% (cloud platform concept)
+- Action: Offer top 3 alternatives via AskUserQuestion
+- User selects "Other" and requests: "Show me all options"
+- Action: List all 10 contract types with descriptions
+- User selects: "IT Infrastructure"
+- Output: IT Infrastructure contract selected
+
+**Scenario 6: Completely Unrelated Input**
+- User input: "banana"
+- Validation: No exact match
+- Similarity scores: All very low
+- Action: Offer 3 most common contracts (Enterprise Architecture, Cloud Architecture, Development Architecture)
+- Note: "Your input didn't match any contract types. Here are some common options."
+- User selects "Other" → Shows all 10 contract types
+- Output: User selects appropriate contract type
 
 ### Phase 3: Agent Invocation (v2.0+)
 
@@ -692,11 +739,7 @@ Store this path for use in manifest-generator invocations.
 
 After all agent(s) complete successfully, generate COMPLIANCE_MANIFEST.md using manifest-generator.ts.
 
-**CRITICAL: You MUST execute manifest generation after ALL contract generation (single OR bulk).**
-
-**Applies To:**
-- Single contract generation: Execute manifest-generator once (create mode)
-- Bulk contract generation: Execute manifest-generator sequentially for each contract (create for first, update for rest)
+**CRITICAL: You MUST execute these commands after all contracts are generated.**
 
 **Path Resolution Note** (v1.9.3+):
 
@@ -915,12 +958,673 @@ For ALL contract types:
 - Result: PASS (score ≥ 7.0) | CONDITIONAL (5.0-6.9) | FAIL (< 5.0)
 ```
 
+### Phase 4: Document Generation
+
+**Step 4.1: Load Template with Include Resolution**
+
+**Implementation**: Use `utils/resolve-includes.ts` to expand template includes before processing.
+
+```bash
+bun utils/resolve-includes.ts templates/TEMPLATE_<TYPE>.md /tmp/expanded_template.md
+```
+
+**Algorithm** (automated by resolve-includes.ts):
+
+1. Load template file for contract type from templates/
+   Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
+
+2. Detect and resolve @include directives:
+   - Pattern: <!-- @include(-with-config)?\s+(.+?)\s*(?:config=(\S+))?\s*-->
+   - For each directive found:
+     a. Parse directive type (simple @include or @include-with-config)
+     b. Resolve file path (relative to /skills/architecture-compliance/)
+     c. Read shared file content from resolved path
+     d. If @include-with-config:
+        - Load domain config from shared/config/<config>.json
+        - Replace {{variables}} in shared content with config values
+        - Example: {{review_board}} → "Business Continuity Review Board"
+     e. Replace directive with processed content
+   - Support nested includes up to 3 levels deep
+   - Detect circular includes and error gracefully
+
+3. Cache expanded template to avoid re-processing for same contract type
+
+4. Return fully expanded template for placeholder replacement (Step 4.2)
+
+**Example:**
+```markdown
+<!-- @include-with-config shared/sections/document-control.md config=business-continuity -->
+```
+
+Expands to:
+```markdown
+## Document Control
+| Field | Value |
+|-------|-------|
+| Approval Authority | Business Continuity Review Board |
+...
+```
+
+**Usage in Workflow:**
+```bash
+# Expand template first
+bun utils/resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md /tmp/template.md
+
+# Then use expanded template for contract generation
+# (apply placeholders, populate data, etc.)
+```
+
+**Note**: If template has no @include directives, process normally (backward compatible)
+
+**Documentation**: See `utils/README.md` for detailed usage and examples
+
+**Step 4.2: Apply Extracted Data to Placeholders**
+
+**CRITICAL RULE: PRESERVE TEMPLATE FORMAT EXACTLY**
+
+⚠️ **See "Template Format Preservation Policy" at the top of this document for critical rules.**
+
+The template format MUST be preserved exactly as written. Do NOT transform, rewrite, or restructure the template content. ONLY replace explicit placeholder tokens inside `[...]` brackets.
+
+**Quick Reference - Preservation Rules:**
+1. Keep ALL text that is not inside `[PLACEHOLDER]` brackets exactly as-is
+2. Preserve conditional structures like `[If Compliant: X. If Non-Compliant: Y]` without modification
+3. Do NOT replace structured placeholders with custom prose or explanations
+4. Do NOT change formatting, line breaks, bullets, or markdown structure
+5. Replace ONLY explicit `[PLACEHOLDER]` tokens with actual values
+6. **CRITICAL - Appendix Numbering**: Only A.1 through A.4 should be numbered
+   - A.1: Definitions and Terminology
+   - A.2: Validation Methodology
+   - A.3: Document Completion Guide (with A.3.1, A.3.2, A.3.3)
+   - A.4: Change History
+   - Sections after A.4 (Data Extracted, Missing Data, Not Applicable, Unknown Status, Generation Metadata)
+     MUST remain as H2 (`##`) headers WITHOUT section numbering (NOT A.5, A.6, etc.)
+
+```
+Replace standard placeholders:
+- [PROJECT_NAME] → from Document Index
+- [GENERATION_DATE] → current date (YYYY-MM-DD) - Use `date +%Y-%m-%d` bash command to get local system date
+- [EXTRACTED_VALUE] → from cached data
+- [SOURCE_REFERENCE] → section and line numbers
+```
+
+**Step 4.2.1: Apply Validation Outcome Tier Mapping**
+
+Before populating Document Control fields, determine the outcome tier based on the final validation score.
+
+**Outcome Tier Thresholds** (from validation/README.md):
+
+| Score Range | Overall Status | Document Status | Review Actor |
+|-------------|----------------|-----------------|--------------|
+| 8.0-10.0 | PASS | Approved | System (Auto-Approved) |
+| 7.0-7.9 | PASS | In Review | [Approval Authority from config] |
+| 5.0-6.9 | CONDITIONAL | Draft | Architecture Team |
+| 0.0-4.9 | FAIL | Rejected | N/A (Blocked) |
+
+**Mapping Logic**:
+
+```typescript
+function determineOutcome(finalScore: number, approvalAuthority: string) {
+  if (finalScore >= 8.0) {
+    return {
+      overall_status: "PASS",
+      document_status: "Approved",
+      review_actor: "System (Auto-Approved)",
+      action: "AUTO_APPROVE"
+    };
+  } else if (finalScore >= 7.0) {
+    return {
+      overall_status: "PASS",
+      document_status: "In Review",
+      review_actor: approvalAuthority,  // e.g., "Technical Architecture Review Board"
+      action: "MANUAL_REVIEW"
+    };
+  } else if (finalScore >= 5.0) {
+    return {
+      overall_status: "CONDITIONAL",
+      document_status: "Draft",
+      review_actor: "Architecture Team",
+      action: "NEEDS_WORK"
+    };
+  } else {
+    return {
+      overall_status: "FAIL",
+      document_status: "Rejected",
+      review_actor: "N/A (Blocked)",
+      action: "REJECT"
+    };
+  }
+}
+```
+
+**CRITICAL**: Use the outcome object values for Document Control placeholders, NOT static template values or config values.
+
+**Example** - Score 8.4/10:
+- `[DOCUMENT_STATUS]` = "Approved" (from outcome tier, NOT "In Review")
+- `[REVIEW_ACTOR]` = "System (Auto-Approved)" (from outcome tier, NOT approval authority name)
+
+**Step 4.2.2: Populate Document Control Fields**
+
+```
+Populate Document Control section with validation outcome tier values:
+- [DOCUMENT_STATUS] → outcome.document_status (e.g., "Approved" for score ≥ 8.0)
+- [VALIDATION_SCORE] → validation_results.final_score (format: "8.4/10")
+- [VALIDATION_STATUS] → outcome.overall_status (e.g., "PASS")
+- [VALIDATION_DATE] → validation_results.validation_date (YYYY-MM-DD)
+- [VALIDATION_EVALUATOR] → "Claude Code (Automated Validation Engine)"
+- [REVIEW_ACTOR] → outcome.review_actor (e.g., "System (Auto-Approved)" for score ≥ 8.0)
+- [APPROVAL_AUTHORITY] → config.approval_authority (always from config, unchanged)
+```
+
+**Example Output** - Score 8.4/10 (AUTO_APPROVE):
+```markdown
+| Status | Approved |
+| Validation Score | 8.4/10 |
+| Validation Status | PASS |
+| Review Actor | System (Auto-Approved) |
+| Approval Authority | Technical Architecture Review Board |
+```
+
+**Example Output** - Score 7.6/10 (MANUAL_REVIEW):
+```markdown
+| Status | In Review |
+| Validation Score | 7.6/10 |
+| Validation Status | PASS |
+| Review Actor | Technical Architecture Review Board |
+| Approval Authority | Technical Architecture Review Board |
+```
+
+**Critical Distinction**:
+- **Scores 8.0-10.0**: AUTO_APPROVE → Review Actor = "System (Auto-Approved)"
+- **Scores 7.0-7.9**: MANUAL_REVIEW → Review Actor = [Approval Authority name]
+- **Approval Authority field**: ALWAYS shows the approval authority name (for reference/escalation)
+```
+
+**Step 4.2.3: Expand Conditional Placeholders**
+
+Conditional placeholders provide status-specific explanations and notes. They must be EXPANDED to show only the relevant branch based on the Status value.
+
+**Conditional Pattern**:
+```
+[If Compliant: <text>. If Non-Compliant: <text>. If Not Applicable: <text>. If Unknown: <text>]
+```
+
+**Expansion Logic**:
+
+1. **Identify conditionals**: Find text matching the pattern `[If STATUS: ...]`
+2. **Extract Status value**: Get the Status field from the same data point (e.g., "Compliant", "Unknown")
+3. **Match branch**: Find the conditional branch matching the Status
+4. **Replace entire conditional**: Replace with ONLY the matching branch text (remove brackets and other branches)
+
+**Example** - Status = "Unknown":
+
+Template:
+```markdown
+**Business Capabilities**: Not specified
+- Status: Unknown
+- Explanation: [If Compliant: Business capabilities documented. If Non-Compliant: Capabilities not specified in ARCHITECTURE.md. If Not Applicable: Not required for this solution type. If Unknown: Capabilities mentioned but not clearly mapped]
+- Note: [If Non-Compliant or Unknown: Map solution capabilities to enterprise capability model in Section 2 or 3]
+```
+
+Generated (CORRECT):
+```markdown
+**Business Capabilities**: Not specified
+- Status: Unknown
+- Explanation: Capabilities mentioned but not clearly mapped
+- Note: Map solution capabilities to enterprise capability model in Section 2 or 3
+```
+
+**Example** - Status = "Compliant":
+
+Template:
+```markdown
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: [If Compliant: RTO documented and meets requirements. If Non-Compliant: RTO not specified. If Not Applicable: N/A. If Unknown: RTO mentioned but value unclear]
+- Source: ARCHITECTURE.md Section 11.3, line 1576
+```
+
+Generated (CORRECT):
+```markdown
+**RTO**: 4 hours
+- Status: Compliant
+- Explanation: RTO documented and meets requirements
+- Source: ARCHITECTURE.md Section 11.3, line 1576
+```
+
+**Handling "Or" Conditions**:
+
+Some conditionals use "or" logic: `[If Non-Compliant or Unknown: text]`
+
+- If Status matches ANY of the listed values, show the text
+- Example: Status = "Unknown" → `[If Non-Compliant or Unknown: Fix this]` → "Fix this"
+
+**Edge Cases**:
+
+| Case | Behavior |
+|------|----------|
+| Conditional not found for Status | Keep original conditional as-is (fallback) |
+| Multiple conditionals in same line | Expand each one independently |
+| Nested conditionals | Not supported (flag as error) |
+| Partial matches | Match exact Status values only (case-sensitive) |
+
+**CRITICAL**: This is a BREAKING CHANGE from previous behavior (v1.5.10 and earlier). Previously, conditionals were preserved as-is. Now they must be expanded to show only the relevant branch based on Status value.
+
+**See COMPLIANCE_GENERATION_GUIDE.md Step 4.2 for detailed examples of correct vs incorrect placeholder replacement.**
+
+**Step 4.2.4: Preserve Shared Section Headers**
+
+After A.4 Change History, the template includes shared sections via `<!-- @include-with-config -->` directives.
+These sections are already expanded by resolve-includes.ts (Phase 4.1) and appear as H2 (`##`) headers.
+
+**CRITICAL RULE**: DO NOT add section numbers to these shared sections.
+
+**Correct Format** (after A.4):
+```markdown
+### A.4 Change History
+...
+
+---
+
+## Data Extracted Successfully
+[List of data points...]
+
+---
+
+## Missing Data Requiring Attention
+[Table of gaps...]
+
+---
+
+## Not Applicable Items
+[List of N/A items...]
+
+---
+
+## Unknown Status Items Requiring Investigation
+[Table of unknowns...]
+
+---
+
+## Generation Metadata
+[Metadata table...]
+```
+
+**WRONG Format** (DO NOT DO THIS):
+```markdown
+### A.5 Data Extracted Successfully
+### A.6 Missing Data Requiring Attention
+### A.7 Not Applicable Items
+### A.8 Unknown Status Items Requiring Investigation
+### A.9 Generation Metadata
+```
+
+**Reason**: These shared sections are supplementary content, not formal appendix sections.
+They provide dynamic data tables and should remain as unnumbered H2 sections for flexibility.
+
+**CRITICAL RULE**: DO NOT convert Document Control table to bold field lists.
+
+The Document Control section (expanded from `shared/sections/document-control.md`) uses a table format:
+
+**Correct Format**:
+```markdown
+| Field | Value |
+|-------|-------|
+| Document Owner | [PLACEHOLDER] |
+| Last Review Date | [PLACEHOLDER] |
+...
+```
+
+**WRONG Format** (DO NOT DO THIS):
+```markdown
+**Document ID**: [VALUE]
+**Template Version**: [VALUE]
+**Document Owner**: [VALUE]
+```
+
+**Validation**: The `document_control_table` validation rule will BLOCK contracts that transform tables into bold field lists.
+
+**Step 4.3: Populate Compliance Summary Table**
+
+The Compliance Summary table is the most critical section for stakeholders. It MUST follow this exact format for ALL contract types.
+
+**Table Structure (6 columns - MANDATORY):**
+```markdown
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+```
+
+**Column Definitions:**
+- **Code**: Requirement code from template (e.g., LASRE01, LAC1, LAPI01)
+- **Requirement**: Short requirement name from template (≤60 chars recommended)
+- **Category**: Classification of requirement. Use template-specific category if defined, otherwise use template type as category (e.g., "Cloud Architecture", "Security Architecture", "SRE Architecture")
+- **Status**: One of exactly four values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
+- **Source Section**: ARCHITECTURE.md section reference (e.g., "Section 10", "Section 4, 11", "Not documented")
+- **Responsible Role**: Accountable role from template (e.g., "SRE Team", "Security Architect", "Cloud Architect")
+
+**Population Logic:**
+
+1. **Extract requirement count** from contract template header
+2. **For each requirement code** (e.g., LASRE01-LASRE57 for SRE, LAC1-LAC6 for Cloud):
+
+   a. **Code**: Extract from template
+
+   b. **Requirement**: Extract requirement name from template
+
+   c. **Category**:
+      - If template defines specific category (e.g., Data/AI uses "Data" and "AI"), use that
+      - Otherwise, use template type as category:
+        - SRE Architecture → "SRE Architecture"
+        - Cloud Architecture → "Cloud Architecture"
+        - Security Architecture → "Security Architecture"
+        - Platform & IT Infrastructure → "Platform & IT Infrastructure"
+        - Development Architecture → "Development Architecture"
+        - Enterprise Architecture → "Enterprise Architecture"
+        - Integration Architecture → "Integration Architecture"
+        - Process Transformation → "Process Transformation"
+
+   d. **Status**: Determine based on ARCHITECTURE.md data availability and quality:
+      - **Compliant**: Data fully documented in ARCHITECTURE.md AND meets organizational standards
+      - **Non-Compliant**: Data missing OR does not meet organizational standards
+      - **Not Applicable**: Requirement does not apply to this architecture (e.g., cloud-only requirement for on-premise architecture)
+      - **Unknown**: Data partially documented OR quality/applicability unclear
+
+   e. **Source Section**: Extract from ARCHITECTURE.md:
+      - If data found: "Section X" or "Section X, Y" (comma-separated if multiple)
+      - If not found: "Not documented"
+
+   f. **Responsible Role**: Extract from template (usually specified per requirement)
+
+**Example Population (SRE Architecture - 57 requirements):**
+```markdown
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| LASRE01 | Define SLOs for all services | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE02 | Calculate error budgets | SRE Architecture | Compliant | Section 10 | SRE Team |
+| LASRE03 | Implement monitoring stack | SRE Architecture | Non-Compliant | Not documented | Platform Team |
+| LASRE04 | Incident response procedures | SRE Architecture | Unknown | Section 11 | SRE Team |
+...
+```
+
+**Step 4.4: Calculate Overall Compliance Summary**
+
+After populating all rows in the Compliance Summary table, calculate compliance statistics using this MANDATORY format:
+
+**Calculation Formula:**
+```
+TOTAL = Total number of requirements for this contract type
+X (Compliant) = Count of rows with Status = "Compliant"
+Y (Non-Compliant) = Count of rows with Status = "Non-Compliant"
+Z (Not Applicable) = Count of rows with Status = "Not Applicable"
+W (Unknown) = Count of rows with Status = "Unknown"
+
+Verification: X + Y + Z + W = TOTAL (counts must sum correctly)
+```
+
+**Output Format (MANDATORY - use emoji indicators and percentages):**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: X/TOTAL (X/TOTAL*100%)
+- ❌ Non-Compliant: Y/TOTAL (Y/TOTAL*100%)
+- ⊘ Not Applicable: Z/TOTAL (Z/TOTAL*100%)
+- ❓ Unknown: W/TOTAL (W/TOTAL*100%)
+
+**Completeness**: [COMPLETENESS_PERCENTAGE]% ([COMPLETED_ITEMS]/[TOTAL_ITEMS] data points documented)
+```
+
+**Example (SRE Architecture - 57 total requirements):**
+```markdown
+**Overall Compliance**:
+- ✅ Compliant: 42/57 (74%)
+- ❌ Non-Compliant: 8/57 (14%)
+- ⊘ Not Applicable: 3/57 (5%)
+- ❓ Unknown: 4/57 (7%)
+
+**Completeness**: 87% (124/142 data points documented)
+```
+
+**Percentage Calculation:**
+- Round percentages to nearest integer (e.g., 73.68% → 74%)
+- Completeness percentage measures how many total data points across ALL sections are documented
+- Completeness is separate from compliance status (a document can be 100% complete but have non-compliant items)
+
+**Format Enforcement Checklist - Automated Validation:**
+The following checks are now automated via the Template Validation Framework (executed in Phase 4.6):
+- [x] Table has exactly 6 columns: Code | Requirement | Category | Status | Source Section | Responsible Role
+- [x] Table header uses proper markdown pipe syntax: `| Col1 | Col2 | Col3 | Col4 | Col5 | Col6 |`
+- [x] Table separator line uses proper syntax: `|------|------|------|------|------|------|`
+- [x] All requirement codes present (row count matches template's total requirements)
+- [x] Category column populated (use template type if no specific category)
+- [x] Status values use EXACTLY one of: "Compliant", "Non-Compliant", "Not Applicable", "Unknown"
+- [x] Overall Compliance line uses emoji indicators: ✅ ❌ ⊘ ❓
+- [x] Compliance counts sum to TOTAL: X + Y + Z + W = TOTAL
+- [x] Percentages calculated correctly and rounded to nearest integer
+- [x] Completeness metric included with percentage and fraction format
+
+**Validation Details:**
+- Validation errors include line numbers, section references, and fix instructions
+- Generation is BLOCKED if validation fails
+- Validation rules: `/validation/template_validation_*.json`
+- See error report for detailed debugging information
+
+**Special Cases:**
+- **Business Continuity** contract uses a different format (section-based, not table-based). Do NOT apply table format to this contract.
+- **Data & AI Architecture** uses two categories: "Data" for data requirements (LAD1-LAD5) and "AI" for AI requirements (LAIA1-LAIA5)
+
+**Step 4.5: Calculate Derived Values**
+```
+Examples:
+- Error Budget from SLA (99.99% → 43.2 min/month)
+- Business Criticality from uptime (99.99% → Tier 1)
+- Integration Count from Section 7
+```
+
+**Step 4.6: Format and Comprehensive Validation**
+
+**4.6.1 Automated Template Validation:**
+
+Use the generation helper for integrated validation:
+
+```typescript
+import { validateGeneratedContract } from './utils/generation-helper';
+
+// Validate generated content before output
+const validationResult = await validateGeneratedContract(
+  generatedContent,
+  contractType  // e.g., 'sre_architecture', 'cloud_architecture', etc.
+);
+
+if (!validationResult.isValid) {
+  // BLOCK: Generation failed validation
+  console.error(validationResult.errorReport);
+
+  throw new Error(
+    `Validation failed for ${validationResult.contractDisplayName}: ` +
+    `${validationResult.validationResult.errors.length} error(s), ` +
+    `${validationResult.validationResult.warnings.length} warning(s)`
+  );
+}
+
+// SUCCESS: Proceed to Phase 5 (Output)
+console.log(validationResult.successMessage);
+```
+
+**Validation Checks:**
+1. **Compliance Summary Table**: 6-column format, row counts, markdown syntax
+2. **Status Values**: Exact case enforcement (Compliant, Non-Compliant, Not Applicable, Unknown)
+3. **Appendix A.1-A.4 Structure**: All present, correct order
+4. **Compliance Calculations**: Counts sum correctly, percentages accurate (X+Y+Z+W=TOTAL)
+5. **Template Completeness**: All required sections present
+
+**Error Handling:**
+- Validation errors include line numbers, SKILL.md references, and actionable fix instructions
+- All errors collected before reporting (not fail-fast)
+- Generation BLOCKED if any BLOCKING-severity errors found
+- Detailed error report shows exact violations and how to fix them
+
+**Supported Contract Types:**
+- `business_continuity`, `sre_architecture`, `cloud_architecture`
+- `data_ai_architecture`, `development_architecture`, `process_transformation`
+- `security_architecture`, `platform_it_infrastructure`, `enterprise_architecture`
+- `integration_architecture`
+
+**Standalone Validation CLI:**
+For validating existing contracts or testing:
+```bash
+bun run utils/validate-cli.ts compliance-docs/sre_architecture.md sre_architecture
+bun run utils/validate-cli.ts --help
+```
+
+**Integration Examples:**
+See `INTEGRATION_EXAMPLE.md` for complete workflow examples including:
+- Full generation workflow with validation
+- Batch validation for multiple contracts
+- CI/CD integration
+- Error recovery workflow
+
+**4.6.2 Manual Format Checks** (backward compatibility):
+```
+- Ensure proper markdown formatting
+- Verify tables and lists render correctly
+- Check source traceability references
+```
+
+**Step 4.7: Flag Missing Data**
+```
+For each missing data point:
+- Add [PLACEHOLDER: description]
+- Provide guidance on how to complete
+- Reference source section if applicable
+- Track for completion report
+```
+
+### Phase 5: Output
+
+**Step 5.1: Generate Filename**
+```
+Pattern: [CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md
+Example: SRE_ARCHITECTURE_JobScheduler_2025-11-26.md
+
+IMPORTANT: If file exists, it will be REPLACED (overwritten) with the new version.
+This ensures regenerated contracts reflect the latest ARCHITECTURE.md data.
+```
+
+**Step 5.2: Save to Output Directory**
+```
+Write file to /compliance-docs/ using Write tool
+The Write tool OVERWRITES existing files, ensuring regeneration replaces old content
+Preserve formatting and markdown structure
+```
+
+**Step 5.3: Generate/Update Manifest**
+
+After generating each compliance contract, update the manifest using the manifest-generator utility:
+
+```bash
+bun utils/manifest-generator.ts \
+  --mode [create|update] \
+  --project "[PROJECT_NAME]" \
+  --contract-type "[CONTRACT_TYPE_NAME]" \
+  --filename "[GENERATED_FILENAME]" \
+  --score [VALIDATION_SCORE] \
+  --status "[DOCUMENT_STATUS]" \
+  --completeness [COMPLETENESS_PERCENTAGE]
+```
+
+**Mode Selection**:
+- Use `create` if this is the FIRST contract generated (manifest doesn't exist)
+- Use `update` if manifest already exists (subsequent contracts)
+
+**Required Arguments**:
+- `--project`: Project name from ARCHITECTURE.md Document Index (e.g., "Task Scheduling System")
+- `--contract-type`: Full contract type name (e.g., "Development Architecture", "Cloud Architecture")
+- `--filename`: Generated contract filename (e.g., "DEVELOPMENT_ARCHITECTURE_Project_2025-12-14.md")
+- `--score`: Final validation score from Phase 3.5 (0-10 scale, e.g., 8.5)
+- `--status`: Document status from outcome tier mapping (e.g., "Approved", "In Review", "Draft", "Rejected")
+- `--completeness`: Completeness percentage (0-100, e.g., 85 for 85%)
+
+**Manifest Contents** (Auto-Generated):
+- Compliance Framework Reference (framework version, scoring formula, approval thresholds)
+- Validation Configuration (schema paths, validation engine version, rule files)
+- Generated Documents table (contract type, filename, score, status, completeness, date)
+- Summary statistics (total contracts, average completeness, average score, generation timestamp)
+
+**Output**: `/compliance-docs/COMPLIANCE_MANIFEST.md`
+
+**Behavior**:
+- **Create mode**: Generates new manifest with framework/validation sections + first contract entry
+- **Update mode**: Replaces existing contract entry if same type, appends if new type, recalculates summary
+
+**Example Output**:
+```markdown
+## Generated Documents
+
+| Contract Type | Filename | Score | Status | Completeness | Generated |
+|---------------|----------|-------|--------|--------------|-----------|
+| Cloud Architecture | CLOUD_ARCHITECTURE_TaskScheduling_2025-12-14.md | 7.8 | In Review | 78% | 2025-12-14 |
+| Development Architecture | DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md | 8.5 | Approved | 85% | 2025-12-14 |
+| SRE Architecture | SRE_ARCHITECTURE_TaskScheduling_2025-12-14.md | 9.2 | Approved | 92% | 2025-12-14 |
+
+## Summary
+- Total Contracts: 3
+- Average Score: 8.5/10
+- Average Completeness: 85%
+- Approved: 2, In Review: 1, Draft: 0, Rejected: 0
+- Last Updated: 2025-12-14 14:30:00
+```
+
+**Note**: The utility automatically handles manifest creation, entry merging, sorting, and summary calculation.
+
+**Step 5.4: Per-Contract Completion Report**
+```
+For each generated contract:
+- Filename and location
+- Data extraction statistics
+  - Total data points
+  - Successfully extracted
+  - Placeholders requiring manual review
+- Source sections used
+- Completeness percentage
+```
+
+**Step 5.5: Summary Report**
+```
+Overall summary:
+- Total contracts generated
+- Total placeholders across all contracts
+- Recommendations for ARCHITECTURE.md improvements
+- Next steps for user review
+```
+
+---
+
+## Batching Configuration
+
+**Automatic Batching Thresholds:**
+- **Batch Size**: 3 contracts per batch
+- **Trigger Threshold**: 4+ contracts (automatic batching enabled)
+- **Small Bulk Threshold**: 2-3 contracts (batching disabled, use parallel loading)
+
+**Batching Behavior:**
+- **4-10 contracts**: Automatic batching (batches of 3)
+- **2-3 contracts**: No batching (existing parallel loading)
+- **1 contract**: Single-contract workflow
+
+**Performance Characteristics:**
+| Contracts | Batching | Batches | Context/Batch | Total Time |
+|-----------|----------|---------|---------------|------------|
+| 1 | None | 1 | ~30 KB | ~5 sec |
+| 2-3 | Disabled | 1 | ~110-167 KB | ~10-15 sec |
+| 4-6 | Enabled | 2 | ~167 KB | ~20-30 sec |
+| 7-9 | Enabled | 3 | ~167 KB | ~30-45 sec |
+| 10 | Enabled | 4 | ~167 KB | ~40-60 sec |
+
 ---
 
 ## BULK GENERATION WORKFLOW
 
 **This section is used ONLY when selected_contracts.length > 1 (bulk mode).**
-**For single contracts, use Phase 3: Agent Invocation above (unified workflow).**
+**For single contracts, use Phase 2-5 above (existing workflow).**
 
 ### Phase 2 Bulk: Batch Workflow Routing
 
@@ -998,7 +1702,7 @@ ELSE:
 **Routing Logic:**
 ```
 IF selected_contracts.length === 1:
-    → Use Phase 3 (Agent Invocation - Single Contract)
+    → Use Phase 2-5 (Single Contract Workflow)
 ELSE IF selected_contracts.length <= 3:
     → Use Phase 2 Bulk (Parallel Data Loading - see below)
 ELSE IF selected_contracts.length >= 4:
@@ -1140,7 +1844,7 @@ IF successful_agents.length === 0:
 
     ═══════════════════════════════════════════════
 
-    → Fall back to Phase 3 (Sequential Agent Invocation)
+    → Fall back to Phase 2-5 (Single Contract Workflow)
     → Process each contract sequentially
     → EXIT Phase 2C
 ```
