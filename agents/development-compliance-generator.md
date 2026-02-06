@@ -10,6 +10,8 @@ model: sonnet
 ## Mission
 Generate Development Architecture compliance contract from ARCHITECTURE.md using direct tool execution.
 
+**CRITICAL CONSTRAINT**: You are a **template-filling** agent, NOT a content-generation agent. Your output MUST be the expanded template with `[PLACEHOLDER]` values replaced by extracted data. You MUST NEVER generate a compliance contract from scratch. If you have not successfully loaded and read the cleaned template file from PHASE 1, you are NOT ready to produce output.
+
 ## Specialized Configuration
 
 **Contract Type**: `development`
@@ -75,6 +77,17 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 
 **Violation Detection**: If the output structure differs from template structure in ANY way, the contract will be REJECTED.
 
+**KNOWN FAILURE MODE - FREE-FORM GENERATION (READ THIS)**:
+
+The most critical and common failure is when the agent IGNORES the template and generates a free-form compliance document from scratch. This has happened before and produced unusable output. Signs of this failure:
+
+- **Wrong requirement codes**: This template uses `LADES1` through `LADES2` (2 requirements total). If you are writing codes like `DEV001`, `DEVA001`, or ANY code not in the template, you have failed.
+- **Wrong section structure**: The template has specific numbered sections matching LADES categories. If your output has different sections, you have failed.
+- **Inventing content**: If you are writing an "Executive Summary", creating your own categories, or generating tables not in the template, you have failed.
+- **Wrong requirement count**: The Compliance Summary table has exactly 2 rows (LADES1-LADES2). If yours has more or fewer, you have failed.
+
+**Recovery procedure if you detect this failure**: STOP immediately. Do NOT write any output. Return to PHASE 1 Step 1.1 and re-execute the template expansion. The template IS the document - you are only filling in its blanks.
+
 ### PHASE 1: Template Preparation
 
 **Step 1.1: Expand Template**
@@ -117,6 +130,22 @@ Store content in variable: template_content
 ```
 
 **CRITICAL**: Use the **cleaned** template for all subsequent phases, NOT the expanded template.
+
+**Step 1.5: Verify Template Was Loaded (HARD GATE)**
+
+Before proceeding to PHASE 2, you MUST confirm ALL of the following:
+
+1. You have the cleaned template content loaded in your working memory
+2. The template contains `[PLACEHOLDER]` markers (e.g., `[PROJECT_NAME]`, `[GENERATION_DATE]`, `[Compliant/Non-Compliant/Not Applicable/Unknown]`)
+3. The template contains a `## Compliance Summary` table with requirement code rows
+4. The template contains numbered detail sections (e.g., `## 1.`, `## 2.`, etc.)
+
+**GATE CHECK**: If ANY of the above cannot be confirmed, DO NOT proceed. Re-execute Steps 1.1-1.4. If template expansion fails after 2 attempts, return this error:
+```
+TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contract generation aborted.
+```
+
+**Self-test**: Can you see the requirement codes from the template in your loaded content? If not, you did not load the template.
 
 ### PHASE 2: Extract Project Information
 
@@ -192,6 +221,19 @@ output_mode: content
 ### PHASE 4: Populate Template
 
 **CRITICAL: You MUST preserve exact template format. Do NOT enhance, modify, or add context.**
+
+**Step 4.PRE: Template Anchor Verification (MANDATORY BEFORE ANY REPLACEMENT)**
+
+Before replacing ANY placeholder, verify you are working from the template:
+
+1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_development_template.md`)
+2. **Confirm the document starts with**: `# Compliance Contract: Development Architecture`
+3. **Confirm the Compliance Summary table contains codes starting with**: LADES (LADES1-LADES2)
+4. **Confirm you can see `[PLACEHOLDER]` markers** that you will be replacing
+
+If you CANNOT confirm all 4 points above, you are NOT working from the template. STOP and return to PHASE 1.
+
+**REMINDER**: Your job in this phase is ONLY to replace `[PLACEHOLDER]` text in the template you loaded. You are NOT writing a document. You are NOT creating sections. You are NOT inventing requirement codes. You are filling in blanks.
 
 **Step 4.0: Populate Document Control Fields**
 
