@@ -55,14 +55,15 @@ function updateDocumentControlFields(
 ): string {
   let updated = content;
 
-  // Replace [VALIDATION_SCORE] with actual score
+  // Replace [VALIDATION_SCORE] with actual score (template already has "/10" suffix)
   updated = updated.replace(
     /\[VALIDATION_SCORE\]/g,
-    `${score.final_score.toFixed(1)}/10`
+    score.final_score.toFixed(1)
   );
   // Fallback: match already-replaced "Not performed" in validation score row
+  // Handles both "Not performed/10" (template suffix kept) and "Not performed" (suffix stripped)
   updated = updated.replace(
-    /(\| Validation Score\s*\| )Not performed( \|)/g,
+    /(\| Validation Score\s*\| )Not performed(?:\/10)?( \|)/g,
     `$1${score.final_score.toFixed(1)}/10$2`
   );
 
@@ -104,9 +105,11 @@ function updateDocumentControlFields(
     /\[REVIEW_ACTOR\]/g,
     score.outcome.review_actor
   );
-  // Fallback: match already-replaced review board names in review actor row
+  // Fallback: match already-replaced review board names in Document Control review actor row
+  // Only match rows where "Review Actor" is in the Field column (first cell), not Value column
+  // Pattern: line starts with | Review Actor | <value> | (exactly 2 cells, Field-Value table)
   updated = updated.replace(
-    /(\| Review Actor\s*\| )[^|]+( \|)/g,
+    /^(\| Review Actor\s*\| )[^|\n]+( \|)\s*$/gm,
     `$1${score.outcome.review_actor}$2`
   );
 
