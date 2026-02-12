@@ -58,7 +58,12 @@ function updateDocumentControlFields(
   // Replace [VALIDATION_SCORE] with actual score
   updated = updated.replace(
     /\[VALIDATION_SCORE\]/g,
-    score.final_score.toFixed(1)
+    `${score.final_score.toFixed(1)}/10`
+  );
+  // Fallback: match already-replaced "Not performed" in validation score row
+  updated = updated.replace(
+    /(\| Validation Score\s*\| )Not performed( \|)/g,
+    `$1${score.final_score.toFixed(1)}/10$2`
   );
 
   // Replace [VALIDATION_STATUS] with outcome status
@@ -66,11 +71,21 @@ function updateDocumentControlFields(
     /\[VALIDATION_STATUS\]/g,
     score.outcome.overall_status
   );
+  // Fallback: match already-replaced "Not performed" in validation status row
+  updated = updated.replace(
+    /(\| Validation Status\s*\| )Not performed( \|)/g,
+    `$1${score.outcome.overall_status}$2`
+  );
 
   // Replace [VALIDATION_DATE] with current date
   updated = updated.replace(
     /\[VALIDATION_DATE\]/g,
     score.validation_date
+  );
+  // Fallback: match already-replaced "Not performed" in validation date row
+  updated = updated.replace(
+    /(\| Validation Date\s*\| )Not performed( \|)/g,
+    `$1${score.validation_date}$2`
   );
 
   // Replace [DOCUMENT_STATUS] with outcome document status
@@ -78,11 +93,21 @@ function updateDocumentControlFields(
     /\[DOCUMENT_STATUS\]/g,
     score.outcome.document_status
   );
+  // Fallback: match already-replaced "Draft" in status row
+  updated = updated.replace(
+    /(\| Status\s*\| )Draft( \|)/g,
+    `$1${score.outcome.document_status}$2`
+  );
 
   // Replace [REVIEW_ACTOR] with outcome review actor
   updated = updated.replace(
     /\[REVIEW_ACTOR\]/g,
     score.outcome.review_actor
+  );
+  // Fallback: match already-replaced review board names in review actor row
+  updated = updated.replace(
+    /(\| Review Actor\s*\| )[^|]+( \|)/g,
+    `$1${score.outcome.review_actor}$2`
   );
 
   // Replace [VALIDATION_EVALUATOR] if present (some templates might have this placeholder)
@@ -105,7 +130,7 @@ function updateComplianceFooter(
   content: string,
   score: ValidationScore
 ): string {
-  const { statusCounts } = score;
+  const statusCounts = score.status_counts ?? (score as any).statusCounts;
   const total =
     statusCounts.Compliant +
     statusCounts['Non-Compliant'] +
@@ -189,7 +214,7 @@ function updateRemediationSectionContent(
   // Update "Current Status:" line
   const statusLinePattern = /Current Status:\s+\d+\s+Compliant,\s+\d+\s+Unknown,\s+\d+\s+Not Applicable/;
   if (statusLinePattern.test(updatedSection)) {
-    const { statusCounts } = score;
+    const statusCounts = score.status_counts ?? (score as any).statusCounts;
     const updatedStatusLine = `Current Status: ${statusCounts.Compliant} Compliant, ${statusCounts.Unknown} Unknown, ${statusCounts['Not Applicable']} Not Applicable`;
 
     updatedSection = updatedSection.replace(
@@ -225,7 +250,7 @@ function updateRemediationSectionContent(
  * Calculate optimistic score assuming all UNKNOWN items become PASS
  */
 function calculateOptimisticScore(score: ValidationScore): number {
-  const { statusCounts } = score;
+  const statusCounts = score.status_counts ?? (score as any).statusCounts;
   const total =
     statusCounts.Compliant +
     statusCounts['Non-Compliant'] +

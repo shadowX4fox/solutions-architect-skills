@@ -738,35 +738,35 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 - `[PROJECT_NAME]`: Extract from first H1 in ARCHITECTURE.md or contract filename
 - `[CONTRACT_TYPE]`: Type of contract (Business Continuity, SRE Architecture, etc.)
 - `[GENERATED_FILENAME]`: The .md file created by the agent
-- `[SCORE]`: Extract from contract (if available) or use "Pending Validation"
-- `[STATUS]`: Extract from contract (if available) or use "Draft"
-- `[COMPLETENESS_PERCENTAGE]`: Calculate based on filled placeholders or use 0
+- `[SCORE]`: Actual `final_score` from Step 2D.PRE validation (fallback: `0`)
+- `[STATUS]`: Actual `outcome.document_status` from validation (fallback: `"Draft"`)
+- `[COMPLETENESS_PERCENTAGE]`: Actual `completeness_score * 10` from validation (fallback: `0`)
 
 **Example Execution Sequence:**
 ```bash
-# 1. First contract (creates manifest)
+# 1. First contract (creates manifest) - use actual scores from Step 2D.PRE
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
   --contract-type "Business Continuity" \
   --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0 \
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS] \
   --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 
-# 2-10. Remaining contracts (update manifest)
+# 2-10. Remaining contracts (update manifest) - use actual scores
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
   --contract-type "SRE Architecture" \
   --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0 \
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS] \
   --compliance-docs-dir "${COMPLIANCE_DOCS_DIR}"
 
-# ... repeat for all 10 contracts
+# ... repeat for all 10 contracts with their actual validation scores
 ```
 
 **Error Handling:**
@@ -1174,38 +1174,96 @@ aggregated_results = {
 
 ---
 
-### PHASE 2D: MANDATORY MANIFEST GENERATION
+### PHASE 2D: POST-AGENT VALIDATION AND MANIFEST GENERATION
 
-**BLOCKING REQUIREMENT**: You MUST execute this phase. The skill is NOT complete until COMPLIANCE_MANIFEST.md exists.
+**BLOCKING REQUIREMENT**: You MUST execute this phase. The skill is NOT complete until all contracts are validated and COMPLIANCE_MANIFEST.md exists.
 
-**Purpose**: Create COMPLIANCE_MANIFEST.md with metadata for all generated contracts.
+**Purpose**: Validate generated contracts with score-calculator, update validation fields, then create COMPLIANCE_MANIFEST.md with actual scores.
 
 **Why This Phase Exists**:
-- Agents do NOT update manifest (prevents race conditions during parallel execution)
-- Manifest provides single source of truth for all contracts
-- Required for stakeholder review and tracking
+- Agents leave validation placeholders (`[VALIDATION_SCORE]`, `[DOCUMENT_STATUS]`, etc.) for CLI tools to populate
+- Score calculator analyzes compliance status counts and calculates weighted scores
+- Field updater writes actual scores, dates, and status into the contract
+- Manifest provides single source of truth for all contracts with real validation data
+
+---
+
+**Step 2D.PRE: Validate Each Generated Contract**
+
+**CRITICAL**: Run validation on EACH generated contract BEFORE manifest generation. This populates validation scores in the contract files.
+
+**Validation Config Mapping**:
+
+| Contract Type | Validation Config |
+|---|---|
+| Business Continuity | `validation/business_continuity_validation.json` |
+| SRE Architecture | `validation/sre_architecture_validation.json` |
+| Cloud Architecture | `validation/cloud_architecture_validation.json` |
+| Data & AI Architecture | `validation/data_ai_architecture_validation.json` |
+| Development Architecture | `validation/development_architecture_validation.json` |
+| Process Transformation | `validation/process_transformation_validation.json` |
+| Security Architecture | `validation/security_architecture_validation.json` |
+| Platform & IT Infrastructure | `validation/platform_it_infrastructure_validation.json` |
+| Enterprise Architecture | `validation/enterprise_architecture_validation.json` |
+| Integration Architecture | `validation/integration_architecture_validation.json` |
+
+**For each generated contract, run these two commands sequentially:**
+
+```bash
+# Step 1: Calculate validation score
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/score-calculator-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/[FILENAME]" \
+  validation/[CONFIG_FILE]
+
+# Step 2: Update contract with validation results (writes back to same file)
+bun skills/architecture-compliance/utils/field-updater-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/[FILENAME]" \
+  /tmp/validation_score.json \
+  "${COMPLIANCE_DOCS_DIR}/[FILENAME]"
+```
+
+**Example** (Cloud Architecture):
+```bash
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/score-calculator-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  validation/cloud_architecture_validation.json
+
+bun skills/architecture-compliance/utils/field-updater-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
+  /tmp/validation_score.json \
+  "${COMPLIANCE_DOCS_DIR}/CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md"
+```
+
+**After each validation pair**, capture the score from `/tmp/validation_score.json` for use in Step 2D.2. The key fields are:
+- `final_score` → use as `--score` value
+- `outcome.document_status` → use as `--status` value
+- `completeness_score` → use as `--completeness` value (multiply by 10 for percentage)
+
+**Error Handling**: If validation fails for a contract, use fallback values: `--score 0 --status "Draft" --completeness 0`.
 
 ---
 
 **Step 2D.1: Collect Contract Metadata**
 
-From the 10 completed agents, gather:
+From the 10 completed agents and their validation results (Step 2D.PRE), gather:
 - Project name (from ARCHITECTURE.md H1 or first contract filename)
 - Generation date (current date YYYY-MM-DD)
 - For each successfully generated contract:
   - Contract type (Business Continuity, SRE Architecture, Cloud Architecture, etc.)
   - Generated filename (full filename with .md extension)
-  - Score: `0` (validation not performed)
-  - Status: `"Draft"` (validation not performed)
-  - Completeness: `0` (validation not performed)
+  - Score: actual `final_score` from validation (fallback: `0`)
+  - Status: actual `outcome.document_status` from validation (fallback: `"Draft"`)
+  - Completeness: actual `completeness_score * 10` from validation (fallback: `0`)
 
 **Example Metadata Collection**:
 ```
 Project: "3-Tier-To-Do-List"
 Date: "2025-12-27"
 Contracts:
-  1. Type: "Business Continuity", File: "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md"
-  2. Type: "SRE Architecture", File: "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md"
+  1. Type: "Business Continuity", File: "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md", Score: 7.2, Status: "In Review", Completeness: 85
+  2. Type: "SRE Architecture", File: "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md", Score: 6.5, Status: "Draft", Completeness: 72
   ... (continue for all generated contracts)
 ```
 
@@ -1214,6 +1272,8 @@ Contracts:
 **Step 2D.2: Execute Manifest Generation Commands**
 
 **CRITICAL**: Execute these commands sequentially (NOT parallel) to prevent file conflicts.
+
+**Use actual validation scores** from Step 2D.PRE. For each contract, use the `final_score`, `outcome.document_status`, and `completeness_score * 10` captured during validation. If validation failed for a contract, fall back to `--score 0 --status "Draft" --completeness 0`.
 
 **FIRST CONTRACT - CREATE MODE**:
 
@@ -1225,9 +1285,9 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --project "[PROJECT_NAME]" \
   --contract-type "[FIRST_CONTRACT_TYPE]" \
   --filename "[FIRST_FILENAME]" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS]
 ```
 
 **Example**:
@@ -1238,9 +1298,9 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --project "3-Tier-To-Do-List" \
   --contract-type "Business Continuity" \
   --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+  --score 7.2 \
+  --status "In Review" \
+  --completeness 85
 ```
 
 **SUBSEQUENT CONTRACTS - UPDATE MODE (Sequential)**:
@@ -1253,9 +1313,9 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --project "[PROJECT_NAME]" \
   --contract-type "[CONTRACT_TYPE]" \
   --filename "[FILENAME]" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS]
 ```
 
 **Example** (Contract 2):
@@ -1266,9 +1326,9 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --project "3-Tier-To-Do-List" \
   --contract-type "SRE Architecture" \
   --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
+  --score 6.5 \
   --status "Draft" \
-  --completeness 0
+  --completeness 72
 ```
 
 **Repeat UPDATE mode for all remaining contracts** (Cloud, Data & AI, Development, Process, Security, Platform, Enterprise, Integration).
@@ -1320,122 +1380,54 @@ Generation Date: [DATE]
 
 ---
 
-### Example: Complete Manifest Generation Workflow
+### Example: Complete Validation + Manifest Generation Workflow
 
 **Scenario**: Generated all 10 contracts for "3-Tier-To-Do-List" project on 2025-12-27
 
-**Complete Command Sequence**:
+**Step 1: Validate each contract** (repeat for all 10):
+```bash
+# Validate Business Continuity contract
+cd /home/shadowx4fox/solutions-architect-skills
+bun skills/architecture-compliance/utils/score-calculator-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
+  validation/business_continuity_validation.json
 
+bun skills/architecture-compliance/utils/field-updater-cli.ts \
+  "${COMPLIANCE_DOCS_DIR}/BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
+  /tmp/validation_score.json \
+  "${COMPLIANCE_DOCS_DIR}/BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md"
+
+# Capture score from /tmp/validation_score.json for manifest
+# Repeat for all 10 contracts with their respective validation configs
+```
+
+**Step 2: Generate manifest using actual scores from validation**:
 ```bash
 # Contract 1: Business Continuity (CREATE - establishes manifest)
+# Use actual scores from Step 2D.PRE validation
 cd /home/shadowx4fox/solutions-architect-skills
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
   --contract-type "Business Continuity" \
   --filename "BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS]
 
-# Contract 2: SRE Architecture (UPDATE)
+# Contract 2-10: Use UPDATE mode with actual scores from each contract's validation
 cd /home/shadowx4fox/solutions-architect-skills
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
   --contract-type "SRE Architecture" \
   --filename "SRE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+  --score [ACTUAL_SCORE] \
+  --status "[ACTUAL_STATUS]" \
+  --completeness [ACTUAL_COMPLETENESS]
 
-# Contract 3: Cloud Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Cloud Architecture" \
-  --filename "CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 4: Data & AI Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Data & AI Architecture" \
-  --filename "DATA_AI_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 5: Development Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Development Architecture" \
-  --filename "DEVELOPMENT_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 6: Process Transformation (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Process Transformation" \
-  --filename "PROCESS_TRANSFORMATION_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 7: Security Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Security Architecture" \
-  --filename "SECURITY_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 8: Platform & IT Infrastructure (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Platform & IT Infrastructure" \
-  --filename "PLATFORM_IT_INFRASTRUCTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 9: Enterprise Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Enterprise Architecture" \
-  --filename "ENTERPRISE_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
-
-# Contract 10: Integration Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
-bun skills/architecture-compliance/utils/manifest-generator.ts \
-  --mode update \
-  --project "3-Tier-To-Do-List" \
-  --contract-type "Integration Architecture" \
-  --filename "INTEGRATION_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
-  --score 0 \
-  --status "Draft" \
-  --completeness 0
+# ... repeat UPDATE for all remaining contracts (Cloud, Data & AI, Development,
+# Process, Security, Platform, Enterprise, Integration) with their actual scores
 
 # Verify manifest was created
 # Read /compliance-docs/COMPLIANCE_MANIFEST.md

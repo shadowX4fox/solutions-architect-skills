@@ -62,8 +62,8 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 **What you CAN do**:
 - Replace `[PROJECT_NAME]` with the actual project name
 - Replace `[GENERATION_DATE]` with the current date
-- Replace `[DOCUMENT_STATUS]` with "Draft"
-- Replace `[VALIDATION_SCORE]` with "Not performed"
+- Replace `[VALIDATION_EVALUATOR]` with "Claude Code (Automated Validation Engine)"
+- Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
 - Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
@@ -258,15 +258,15 @@ If you CANNOT confirm all 4 points above, you are NOT working from the template.
 
 Replace Document Control placeholders with default values:
 
-- `[DOCUMENT_STATUS]` → `"Draft"`
-- `[VALIDATION_SCORE]` → `"Not performed"`
-- `[VALIDATION_STATUS]` → `"Not performed"`
-- `[VALIDATION_DATE]` → `"Not performed"`
 - `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
-- `[REVIEW_ACTOR]` → `"Security Architecture Review Board"`
 - `[APPROVAL_AUTHORITY]` → `"Security Architecture Review Board"`
 
-**Note**: Validation integration is tracked separately. Current defaults indicate contract has not been validated yet.
+**DO NOT REPLACE these validation placeholders** — they are populated by PHASE 4.6 CLI tools:
+- `[DOCUMENT_STATUS]` — leave as-is for PHASE 4.6
+- `[VALIDATION_SCORE]` — leave as-is for PHASE 4.6
+- `[VALIDATION_STATUS]` — leave as-is for PHASE 4.6
+- `[VALIDATION_DATE]` — leave as-is for PHASE 4.6
+- `[REVIEW_ACTOR]` — leave as-is for PHASE 4.6
 
 **Step 4.1: Replace Simple Placeholders**
 
