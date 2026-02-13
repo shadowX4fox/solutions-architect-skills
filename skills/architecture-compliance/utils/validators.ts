@@ -15,7 +15,10 @@
  */
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
+
+// Resolve skill directory from script location (works both locally and as plugin)
+const SKILL_DIR = resolve(import.meta.dir, '..');
 
 // ============================================================================
 // Types and Interfaces
@@ -174,9 +177,14 @@ export class ComplianceValidator {
    */
   private loadRules(rulesPath: string): ValidationRules {
     try {
-      const fullPath = rulesPath.startsWith('/')
+      // Strip leading slash and any skills/architecture-compliance/ prefix
+      // to get just the relative path within the skill directory
+      const normalized = rulesPath
+        .replace(/^\//, '')
+        .replace(/^skills\/architecture-compliance\//, '');
+      const fullPath = rulesPath.startsWith('/') && !rulesPath.includes('skills/architecture-compliance/')
         ? rulesPath
-        : join(process.cwd(), rulesPath);
+        : join(SKILL_DIR, normalized);
 
       const content = readFileSync(fullPath, 'utf-8');
       return JSON.parse(content) as ValidationRules;

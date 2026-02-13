@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
+
+// Resolve skill directory from script location (works both locally and as plugin)
+const SKILL_DIR = resolve(import.meta.dir, '..');
 
 /**
  * Compliance Contract Score Calculator
@@ -381,8 +384,12 @@ export function determineOutcome(
  */
 export function loadValidationConfig(configPath: string): ValidationConfig {
   try {
-    // Resolve path relative to project root
-    const fullPath = join(process.cwd(), 'skills/architecture-compliance', configPath);
+    // Strip leading slash and any skills/architecture-compliance/ prefix
+    // to get just the relative path within the skill directory (e.g., "validation/xxx.json")
+    const normalized = configPath
+      .replace(/^\//, '')
+      .replace(/^skills\/architecture-compliance\//, '');
+    const fullPath = join(SKILL_DIR, normalized);
     const content = readFileSync(fullPath, 'utf-8');
     return JSON.parse(content) as ValidationConfig;
   } catch (error) {
