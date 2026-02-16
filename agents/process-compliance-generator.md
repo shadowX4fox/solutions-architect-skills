@@ -497,8 +497,8 @@ INCORRECT (converted to bold list):
 ### PHASE 4.6: Calculate Validation Score
 
 ```bash
-bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_contract.md validation/process_transformation_validation.json
-bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_contract.md /tmp/validation_score.json /tmp/final_process_transformation_contract.md
+bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_process_contract.md validation/process_transformation_validation.json
+bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_process_contract.md /tmp/validation_score_process.json /tmp/final_process_transformation_contract.md
 ```
 
 **Error Handling**: Continue to PHASE 5 on failure (always write output).

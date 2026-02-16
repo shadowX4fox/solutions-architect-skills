@@ -568,7 +568,7 @@ bun skills/architecture-compliance/utils/score-calculator-cli.ts \
 ```bash
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_cloud_contract.md \
-  /tmp/validation_score.json \
+  /tmp/validation_score_cloud.json \
   /tmp/final_cloud_architecture_contract.md
 ```
 

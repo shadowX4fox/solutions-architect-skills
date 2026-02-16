@@ -568,7 +568,7 @@ bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   validation/sre_architecture_validation.json
 ```
 
-**Output**: JSON with validation score, written to `/tmp/validation_score.json`
+**Output**: JSON with validation score, written to `/tmp/validation_score_sre.json`
 
 **Step 4.6.2: Update Contract Fields**
 
@@ -576,13 +576,13 @@ Use Bash tool to execute field updater:
 ```bash
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_sre_contract.md \
-  /tmp/validation_score.json \
+  /tmp/validation_score_sre.json \
   /tmp/final_sre_architecture_contract.md
 ```
 
 **What This Does**:
 - Reads populated contract from Step 4.6.1 input
-- Reads validation score JSON from `/tmp/validation_score.json`
+- Reads validation score JSON from `/tmp/validation_score_sre.json`
 - Updates Document Control fields with calculated validation scores
 - Updates Overall Compliance footer with actual status counts and percentages
 - Updates Remediation Section A.3.3 with current status and score estimates

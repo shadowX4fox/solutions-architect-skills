@@ -498,8 +498,8 @@ INCORRECT (converted to bold list):
 ### PHASE 4.6: Calculate Validation Score
 
 ```bash
-bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_contract.md validation/development_architecture_validation.json
-bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_contract.md /tmp/validation_score.json /tmp/final_development_architecture_contract.md
+bun skills/architecture-compliance/utils/score-calculator-cli.ts /tmp/populated_development_contract.md validation/development_architecture_validation.json
+bun skills/architecture-compliance/utils/field-updater-cli.ts /tmp/populated_development_contract.md /tmp/validation_score_development.json /tmp/final_development_architecture_contract.md
 ```
 
 **Error Handling**: Continue to PHASE 5 on failure (always write output).

@@ -575,7 +575,7 @@ bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   validation/business_continuity_validation.json
 ```
 
-**Output**: JSON with validation score, written to `/tmp/validation_score.json`
+**Output**: JSON with validation score, written to `/tmp/validation_score_business_continuity.json`
 
 **Step 4.6.2: Update Contract Fields**
 
@@ -583,13 +583,13 @@ Use Bash tool to execute field updater:
 ```bash
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_business_continuity_contract.md \
-  /tmp/validation_score.json \
+  /tmp/validation_score_business_continuity.json \
   /tmp/final_business_continuity_contract.md
 ```
 
 **What This Does**:
 - Reads populated contract from Step 4.6.1 input
-- Reads validation score JSON from `/tmp/validation_score.json`
+- Reads validation score JSON from `/tmp/validation_score_business_continuity.json`
 - Updates Document Control fields:
   - `[VALIDATION_SCORE]` → `"8.7/10"` (actual calculated score)
   - `[VALIDATION_STATUS]` → `"PASS"` (outcome status)
