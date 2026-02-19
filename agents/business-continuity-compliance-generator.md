@@ -3,6 +3,7 @@ name: business-continuity-compliance-generator
 description: Business Continuity Compliance Contract Generator - Generates Business Continuity compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Business Continuity Compliance Generation Agent

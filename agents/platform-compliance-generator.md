@@ -3,6 +3,7 @@ name: platform-compliance-generator
 description: Platform & IT Infrastructure Compliance Contract Generator - Generates Platform & IT Infrastructure compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Platform & IT Infrastructure Compliance Generation Agent

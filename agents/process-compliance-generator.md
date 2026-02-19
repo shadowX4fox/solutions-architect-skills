@@ -3,6 +3,7 @@ name: process-compliance-generator
 description: Process Transformation Compliance Contract Generator - Generates Process Transformation compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Process Transformation Compliance Generation Agent

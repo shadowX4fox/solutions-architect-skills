@@ -3,6 +3,7 @@ name: enterprise-compliance-generator
 description: Enterprise Architecture Compliance Contract Generator - Generates Enterprise Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Enterprise Architecture Compliance Generation Agent

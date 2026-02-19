@@ -3,6 +3,7 @@ name: integration-compliance-generator
 description: Integration Architecture Compliance Contract Generator - Generates Integration Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Integration Architecture Compliance Generation Agent

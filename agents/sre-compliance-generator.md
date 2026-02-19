@@ -3,6 +3,7 @@ name: sre-compliance-generator
 description: SRE Architecture Compliance Contract Generator - Generates SRE Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # SRE Architecture Compliance Generation Agent

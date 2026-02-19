@@ -3,6 +3,7 @@ name: data-ai-compliance-generator
 description: Data & AI Architecture Compliance Contract Generator - Generates Data & AI Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Data & AI Architecture Compliance Generation Agent

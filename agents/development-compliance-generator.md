@@ -3,6 +3,7 @@ name: development-compliance-generator
 description: Development Architecture Compliance Contract Generator - Generates Development Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Development Architecture Compliance Generation Agent

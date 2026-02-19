@@ -3,6 +3,7 @@ name: cloud-compliance-generator
 description: Cloud Architecture Compliance Contract Generator - Generates Cloud Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
+permissionMode: acceptEdits
 ---
 
 # Cloud Architecture Compliance Generation Agent
