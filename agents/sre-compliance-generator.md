@@ -3,7 +3,7 @@ name: sre-compliance-generator
 description: Prometheus — SRE Architecture Compliance Contract Generator - Generates SRE Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
-permissionMode: acceptEdits
+permissionMode: bypassPermissions
 ---
 
 # SRE Architecture Compliance Generation Agent

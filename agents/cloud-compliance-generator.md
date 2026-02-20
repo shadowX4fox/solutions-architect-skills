@@ -3,7 +3,7 @@ name: cloud-compliance-generator
 description: Atlas — Cloud Architecture Compliance Contract Generator - Generates Cloud Architecture compliance contracts from ARCHITECTURE.md
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
-permissionMode: acceptEdits
+permissionMode: bypassPermissions
 ---
 
 # Cloud Architecture Compliance Generation Agent
