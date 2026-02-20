@@ -310,6 +310,7 @@ If you CANNOT confirm all 4 points above, you are NOT working from the template.
 
 Replace Document Control placeholders with default values:
 
+- `[SOLUTION_ARCHITECT or N/A]` → Extract from ARCHITECTURE.md header/metadata (look for "Author", "Architect", "Solution Architect", "Owner", or "Prepared by" fields in the first 50 lines). If not found, use `"N/A"`
 - `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
 - `[APPROVAL_AUTHORITY]` → `"SRE Architecture Review Board"`
 
