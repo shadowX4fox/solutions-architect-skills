@@ -582,18 +582,18 @@ Output: Validated contract type
 
 Based on the selected contract type(s) from Phase 2, invoke the corresponding specialized agent(s):
 
-| Contract Type | Agent Name | Subagent Type |
-|---------------|------------|---------------|
-| Business Continuity | business-continuity-compliance-generator | `solutions-architect-skills:business-continuity-compliance-generator` |
-| SRE Architecture | sre-compliance-generator | `solutions-architect-skills:sre-compliance-generator` |
-| Cloud Architecture | cloud-compliance-generator | `solutions-architect-skills:cloud-compliance-generator` |
-| Data & AI Architecture | data-ai-compliance-generator | `solutions-architect-skills:data-ai-compliance-generator` |
-| Development Architecture | development-compliance-generator | `solutions-architect-skills:development-compliance-generator` |
-| Process Transformation | process-compliance-generator | `solutions-architect-skills:process-compliance-generator` |
-| Security Architecture | security-compliance-generator | `solutions-architect-skills:security-compliance-generator` |
-| Platform & IT Infrastructure | platform-compliance-generator | `solutions-architect-skills:platform-compliance-generator` |
-| Enterprise Architecture | enterprise-compliance-generator | `solutions-architect-skills:enterprise-compliance-generator` |
-| Integration Architecture | integration-compliance-generator | `solutions-architect-skills:integration-compliance-generator` |
+| Contract Type | Agent Name | Mythos | Subagent Type |
+|---------------|------------|--------|---------------|
+| Business Continuity | business-continuity-compliance-generator | Aegis | `solutions-architect-skills:business-continuity-compliance-generator` |
+| SRE Architecture | sre-compliance-generator | Prometheus | `solutions-architect-skills:sre-compliance-generator` |
+| Cloud Architecture | cloud-compliance-generator | Atlas | `solutions-architect-skills:cloud-compliance-generator` |
+| Data & AI Architecture | data-ai-compliance-generator | Mnemosyne | `solutions-architect-skills:data-ai-compliance-generator` |
+| Development Architecture | development-compliance-generator | Hephaestus | `solutions-architect-skills:development-compliance-generator` |
+| Process Transformation | process-compliance-generator | Hermes | `solutions-architect-skills:process-compliance-generator` |
+| Security Architecture | security-compliance-generator | Argus | `solutions-architect-skills:security-compliance-generator` |
+| Platform & IT Infrastructure | platform-compliance-generator | Vulcan | `solutions-architect-skills:platform-compliance-generator` |
+| Enterprise Architecture | enterprise-compliance-generator | Athena | `solutions-architect-skills:enterprise-compliance-generator` |
+| Integration Architecture | integration-compliance-generator | Iris | `solutions-architect-skills:integration-compliance-generator` |
 
 **Agent Characteristics:**
 - Each agent is **pre-configured** with contract-specific settings:
@@ -614,7 +614,7 @@ When generating a single contract (selected_contracts.length == 1):
 Task(
     subagent_type="solutions-architect-skills:cloud-compliance-generator",
     prompt="Generate Cloud Architecture compliance contract from ./ARCHITECTURE.md",
-    description="Generate Cloud compliance"
+    description="Atlas — Generate Cloud compliance"
 )
 ```
 
@@ -635,16 +635,16 @@ When generating multiple contracts (selected_contracts.length > 1):
 # Example: Generate all 10 contracts in parallel
 # Single message with multiple Task tool calls
 
-Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:sre-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:development-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:process-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:security-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:platform-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", ...),
-Task(subagent_type="solutions-architect-skills:integration-compliance-generator", ...)
+Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Generate Business Continuity compliance", ...),
+Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — Generate SRE compliance", ...),
+Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Generate Cloud compliance", ...),
+Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Generate Data & AI compliance", ...),
+Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Generate Development compliance", ...),
+Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Generate Process compliance", ...),
+Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Generate Security compliance", ...),
+Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Generate Platform compliance", ...),
+Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Generate Enterprise compliance", ...),
+Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Generate Integration compliance", ...)
 ```
 
 **Benefits:**
@@ -1080,16 +1080,16 @@ For contract_type in contracts:
 
 **Example Spawn Calls (10 agents in parallel):**
 ```
-Task Agent 1:  Load agents/compliance-generator.md, contract_type=business_continuity, architecture_file=[PATH]
-Task Agent 2:  Load agents/compliance-generator.md, contract_type=sre_architecture, architecture_file=[PATH]
-Task Agent 3:  Load agents/compliance-generator.md, contract_type=cloud_architecture, architecture_file=[PATH]
-Task Agent 4:  Load agents/compliance-generator.md, contract_type=data_ai, architecture_file=[PATH]
-Task Agent 5:  Load agents/compliance-generator.md, contract_type=development, architecture_file=[PATH]
-Task Agent 6:  Load agents/compliance-generator.md, contract_type=process, architecture_file=[PATH]
-Task Agent 7:  Load agents/compliance-generator.md, contract_type=security, architecture_file=[PATH]
-Task Agent 8:  Load agents/compliance-generator.md, contract_type=platform, architecture_file=[PATH]
-Task Agent 9:  Load agents/compliance-generator.md, contract_type=enterprise, architecture_file=[PATH]
-Task Agent 10: Load agents/compliance-generator.md, contract_type=integration, architecture_file=[PATH]
+Task Agent 1  (Aegis):      Load agents/compliance-generator.md, contract_type=business_continuity, architecture_file=[PATH]
+Task Agent 2  (Prometheus): Load agents/compliance-generator.md, contract_type=sre_architecture, architecture_file=[PATH]
+Task Agent 3  (Atlas):      Load agents/compliance-generator.md, contract_type=cloud_architecture, architecture_file=[PATH]
+Task Agent 4  (Mnemosyne):  Load agents/compliance-generator.md, contract_type=data_ai, architecture_file=[PATH]
+Task Agent 5  (Hephaestus): Load agents/compliance-generator.md, contract_type=development, architecture_file=[PATH]
+Task Agent 6  (Hermes):     Load agents/compliance-generator.md, contract_type=process, architecture_file=[PATH]
+Task Agent 7  (Argus):      Load agents/compliance-generator.md, contract_type=security, architecture_file=[PATH]
+Task Agent 8  (Vulcan):     Load agents/compliance-generator.md, contract_type=platform, architecture_file=[PATH]
+Task Agent 9  (Athena):     Load agents/compliance-generator.md, contract_type=enterprise, architecture_file=[PATH]
+Task Agent 10 (Iris):       Load agents/compliance-generator.md, contract_type=integration, architecture_file=[PATH]
 ```
 
 **Agent Behavior:**
