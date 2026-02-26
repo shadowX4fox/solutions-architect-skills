@@ -101,6 +101,13 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 ### PHASE 1: Template Preparation
 
+**Step 1.0: Navigate to Plugin Directory**
+
+Use Bash to resolve and navigate to the plugin directory. **Required before any `bun` command** — working directory persists for the entire agent session:
+```bash
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
+```
+
 **Step 1.1: Expand Template**
 
 Use Bash tool to run resolve-includes.ts:
