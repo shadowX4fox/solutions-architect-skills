@@ -1923,7 +1923,7 @@ Contracts:
 
 Use Bash tool to run:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "[PROJECT_NAME]" \
@@ -1936,7 +1936,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 **Example**:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
@@ -1951,7 +1951,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 For each remaining contract (2-10), use Bash tool:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "[PROJECT_NAME]" \
@@ -1964,7 +1964,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 **Example** (Contract 2):
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -1978,7 +1978,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 **Repeat UPDATE mode for all remaining contracts** (Cloud, Data & AI, Development, Process, Security, Platform, Enterprise, Integration).
 
 **IMPORTANT**:
-- Use absolute path: `cd /home/shadowx4fox/solutions-architect-skills` before each command
+- Use absolute path: `PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"` before each command
 - Execute sequentially (not parallel) to prevent file conflicts
 - Capture and report any errors immediately
 - Do NOT proceed to Step 2D.3 until all contracts are added
@@ -2032,7 +2032,7 @@ Generation Date: [DATE]
 
 ```bash
 # Contract 1: Business Continuity (CREATE - establishes manifest)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
@@ -2043,7 +2043,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 2: SRE Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2054,7 +2054,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 3: Cloud Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2065,7 +2065,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 4: Data & AI Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2076,7 +2076,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 5: Development Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2087,7 +2087,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 6: Process Transformation (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2098,7 +2098,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 7: Security Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2109,7 +2109,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 8: Platform & IT Infrastructure (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2120,7 +2120,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 9: Enterprise Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -2131,7 +2131,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness 0
 
 # Contract 10: Integration Architecture (UPDATE)
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \

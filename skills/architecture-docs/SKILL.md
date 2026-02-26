@@ -663,12 +663,19 @@ Generating ADR files in ./adr/
 
 ##### Step 6.5: Load ADR Template
 
-**Template path**: `/home/shadowx4fox/solutions-architect-skills/skills/architecture-docs/adr/ADR-000-template.md`
+**Template path**: Resolve dynamically — `$PLUGIN_DIR/skills/architecture-docs/adr/ADR-000-template.md`
 
-**Load template**:
+**Resolve plugin directory** (run once per session if not already known):
 ```bash
-Read(file_path="/home/shadowx4fox/solutions-architect-skills/skills/architecture-docs/adr/ADR-000-template.md")
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1)
+echo "$PLUGIN_DIR"
 ```
+
+**Load template** using the resolved path:
+```
+Read(file_path="$PLUGIN_DIR/skills/architecture-docs/adr/ADR-000-template.md")
+```
+(Replace `$PLUGIN_DIR` with the actual path returned by the Bash command above)
 
 **Store template content** in memory for reuse across all ADR files
 

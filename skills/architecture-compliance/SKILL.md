@@ -1211,7 +1211,7 @@ aggregated_results = {
 
 ```bash
 # Step 1: Calculate validation score
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   "${COMPLIANCE_DOCS_DIR}/[FILENAME]" \
   validation/[CONFIG_FILE]
@@ -1225,7 +1225,7 @@ bun skills/architecture-compliance/utils/field-updater-cli.ts \
 
 **Example** (Cloud Architecture):
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   "${COMPLIANCE_DOCS_DIR}/CLOUD_ARCHITECTURE_3-Tier-To-Do-List_2025-12-27.md" \
   validation/cloud_architecture_validation.json
@@ -1279,7 +1279,7 @@ Contracts:
 
 Use Bash tool to run:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "[PROJECT_NAME]" \
@@ -1292,7 +1292,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 **Example**:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
@@ -1307,7 +1307,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 For each remaining contract (2-10), use Bash tool:
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "[PROJECT_NAME]" \
@@ -1320,7 +1320,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 **Example** (Contract 2):
 ```bash
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
@@ -1334,7 +1334,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 **Repeat UPDATE mode for all remaining contracts** (Cloud, Data & AI, Development, Process, Security, Platform, Enterprise, Integration).
 
 **IMPORTANT**:
-- Use absolute path: `cd /home/shadowx4fox/solutions-architect-skills` before each command
+- Use absolute path: `PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"` before each command
 - Execute sequentially (not parallel) to prevent file conflicts
 - Capture and report any errors immediately
 - Do NOT proceed to Step 2D.3 until all contracts are added
@@ -1387,7 +1387,7 @@ Generation Date: [DATE]
 **Step 1: Validate each contract** (repeat for all 10):
 ```bash
 # Validate Business Continuity contract
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   "${COMPLIANCE_DOCS_DIR}/BUSINESS_CONTINUITY_3-Tier-To-Do-List_2025-12-27.md" \
   validation/business_continuity_validation.json
@@ -1405,7 +1405,7 @@ bun skills/architecture-compliance/utils/field-updater-cli.ts \
 ```bash
 # Contract 1: Business Continuity (CREATE - establishes manifest)
 # Use actual scores from Step 2D.PRE validation
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode create \
   --project "3-Tier-To-Do-List" \
@@ -1416,7 +1416,7 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
   --completeness [ACTUAL_COMPLETENESS]
 
 # Contract 2-10: Use UPDATE mode with actual scores from each contract's validation
-cd /home/shadowx4fox/solutions-architect-skills
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 bun skills/architecture-compliance/utils/manifest-generator.ts \
   --mode update \
   --project "3-Tier-To-Do-List" \
