@@ -69,13 +69,13 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 
 #### Workflow 8: Presentation Generation
 **Triggers:**
-- Keywords: "generate", "create", "make" + "presentation", "slides", "PowerPoint", "pptx", "deck"
-- Examples: "generate presentations", "create slides", "make PowerPoint"
+- Keywords: "generate", "create", "make" + "presentation", "slides", "PowerPoint", "pptx", "deck", "markdown presentation"
+- Examples: "generate presentations", "create slides", "make PowerPoint", "generate presentation MD"
 - Stakeholder mentions: "business presentation", "architecture slides", "compliance deck"
 - Language: "presentación en español", "slides in English"
 
 **Action when detected:**
-1. Confirm: "I'll help you generate architecture presentations."
+1. Confirm: "I'll help you generate an architecture presentation Markdown file for Claude PowerPoint."
 2. Jump directly to **Workflow 8, Step 1** (Stakeholder Type Selection)
 3. Do NOT ask which workflow - proceed automatically
 
@@ -3236,12 +3236,47 @@ This workflow is activated when users request presentation generation from ARCHI
 - "Create PowerPoint from architecture"
 - "Generate presentation for [stakeholder]"
 - "Create slides for architecture review"
+- "Generate presentation markdown file"
 - User references: "business presentation", "compliance review deck", "architecture overview slides"
+
+### Output Format
+
+This workflow generates a **Markdown file** (`.md`) structured for **Claude PowerPoint** to convert into a final PowerPoint presentation. Claude directly writes the slide content using extracted ARCHITECTURE.md data — no external scripts or runtimes required.
+
+**Markdown Structure for Claude PowerPoint:**
+```markdown
+# [Presentation Title]
+## [Subtitle — Stakeholder type | Date]
+
+---
+
+## [Slide Title]
+
+Content bullets, tables, or code blocks
+
+---
+
+## SECCIÓN X: [Section Divider Title]
+
+---
+
+## [Next Slide Title]
+...
+```
+
+**Slide type conventions:**
+- **Standard slide**: `## Title` + bullet list
+- **Section divider**: `## SECCIÓN N: Title` with no body content (full-color visual break)
+- **Metrics slide**: `## Title` + markdown table with 3 metric columns
+- **Comparison slide**: `## Title` + two-column bullet list (left/right separated by `**VS**` or `| Left | Right |` table)
+- **Process slide**: `## Title` + numbered list (sequential steps)
+- **Quote slide**: `## Title` + blockquote `>` syntax
+- **Call to action**: `## Title` + bold contact info lines
 
 ### Activation Triggers
 
 **Automatic Invocation:**
-- User asks to "generate presentation", "create slides", "make PowerPoint", "create pptx"
+- User asks to "generate presentation", "create slides", "make PowerPoint", "create pptx", "generate presentation md"
 - User specifies stakeholder: "business stakeholders", "architecture team", "compliance review"
 - User specifies language: "presentación en español", "presentation in English"
 
@@ -3254,7 +3289,6 @@ This workflow is activated when users request presentation generation from ARCHI
 - **ARCHITECTURE.md file exists** in the project
 - Document has **valid 12-section structure**
 - **Document Index is present** (lines 1-50 typically)
-- **Bun 1.0+** runtime installed (PowerPoint generation uses Bun/TypeScript with officegen)
 
 ### Step-by-Step Process
 
@@ -3310,11 +3344,11 @@ Which language should the presentation use?
 ```
 **Step 3: Confirmation**
 
-I'll generate a presentation with these settings:
+I'll generate a presentation Markdown file with these settings:
 - Stakeholder: [Business/Architecture/Compliance]
 - Language: [English/Spanish]
 - Slides: ~10-12 slides (~15 minutes)
-- Output: /presentations/ARCHITECTURE_[Type]_[Lang].pptx
+- Output: /presentations/ARCHITECTURE_[Type]_[Lang].md (ready for Claude PowerPoint)
 
 Proceed with generation? [Yes/No]
 ```
@@ -3407,48 +3441,52 @@ ADRs (Slide 11):
 - `/skills/architecture-docs/presentation/language_en.json`
 - `/skills/architecture-docs/presentation/language_es.json`
 
-#### Step 8: Generate Slides Using presentation-generator.ts
+#### Step 8: Generate Markdown File for Claude PowerPoint
 
-**Command to Execute**:
-```bash
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder [business|architecture|compliance] \
-  --language [en|es] \
-  --summaries /tmp/presentation_summaries_{stakeholder}_{language}.json
-```
+**Claude directly writes the Markdown file** — no external scripts or runtime required.
 
-**Slide Generation Process**:
-1. Initialize PowerPoint presentation (10" x 7.5")
-2. Load slide template for stakeholder type
-3. Load LLM-generated summaries from JSON file
-4. Build slides sequentially using SlideBuilder:
-   - Title slide with system name and stakeholder subtitle
-   - Agenda slide with translated items
-   - Content slides using LLM summaries (no regex extraction)
-   - Summary & Q&A slide
+**Generation Process**:
+1. Use the LLM-generated summaries from Step 6 as slide content
+2. Apply the slide template structure for the selected stakeholder (see Slide Templates section)
+3. Map each slide type to its Markdown convention:
 
-**Slide Primitives** (from create-presentation.ts):
-- `addTitleSlide()` - Title/cover slides
-- `addContentSlide()` - Content slides with title/subtitle
-- `addBulletText()` - Bullet points (configurable font, color)
-- `addBox()` - Colored boxes for highlights
-- Color scheme: BLUE (#1E3A8A), GREEN (#10B981), GRAY (#6B7280)
+| Slide Type | Markdown Convention |
+|------------|-------------------|
+| Title | `# System Name\n## Subtitle — Stakeholder \| Date` |
+| Agenda | `## Agenda` + numbered list of sections |
+| Section Divider | `## SECCIÓN N: Title` (no body) |
+| Standard content | `## Title` + bullet list (3-6 points) |
+| Metrics | `## Title` + 3-column table `\| Metric \| Value \| Label \|` |
+| Comparison | `## Title` + `\| Left Column \| Right Column \|` table |
+| Process/Steps | `## Title` + numbered list (sequential steps) |
+| Quote | `## Title` + `> blockquote text` |
+| Call to Action | `## Title` + bold contact lines |
+| Summary | `## Resumen / Summary` + key takeaway bullets |
 
-**Note**: If `--summaries` parameter is not provided, presentation-generator.ts will automatically fall back to regex-based extraction.
+4. Separate every slide with `---`
+5. Apply selected language (ES/EN) to all titles, labels, and section headers
+6. Keep system names, component names, technologies, and metric values in their original language
 
-#### Step 9: Save Presentation
+**Content Writing Rules**:
+- Write concise, presentation-ready language (not documentation prose)
+- Each content slide: 3-6 bullet points maximum
+- Bullet points: one idea per line, ≤15 words
+- Metrics table: exactly 3 columns, values extracted from ARCHITECTURE.md
+- Comparison table: left = first concept, right = second concept, max 5 rows each
 
-**Output Path**: `/presentations/ARCHITECTURE_{Type}_{Lang}.pptx`
+#### Step 9: Save Markdown File
+
+**Output Path**: `/presentations/ARCHITECTURE_{Type}_{Lang}.md`
 
 **Examples**:
-- `/presentations/ARCHITECTURE_Business_EN.pptx`
-- `/presentations/ARCHITECTURE_Architecture_ES.pptx`
-- `/presentations/ARCHITECTURE_Compliance_EN.pptx`
+- `/presentations/ARCHITECTURE_Business_EN.md`
+- `/presentations/ARCHITECTURE_Architecture_ES.md`
+- `/presentations/ARCHITECTURE_Compliance_EN.md`
 
 **Process**:
-1. Ensure /presentations/ directory exists (create if needed)
-2. Save PowerPoint file with naming convention
-3. Verify file creation
+1. Ensure `/presentations/` directory exists (create if needed)
+2. Write the complete Markdown content to file using the Write tool
+3. Verify file creation and display the path to the user
 
 #### Step 10: Display Success Summary
 
@@ -3456,11 +3494,11 @@ bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md
 
 ```
 ═══════════════════════════════════════════════════════════
-   PRESENTATION GENERATION COMPLETE
+   PRESENTATION MARKDOWN GENERATION COMPLETE
 ═══════════════════════════════════════════════════════════
 
-✓ Successfully generated presentation!
-📁 Output: /presentations/ARCHITECTURE_Business_EN.pptx
+✓ Successfully generated presentation Markdown file!
+📁 Output: /presentations/ARCHITECTURE_Business_EN.md
 📊 Slides: 10 slides (~15 minute presentation)
 🎯 Stakeholder: Business
 🌐 Language: English
@@ -3472,42 +3510,35 @@ Data Sources Used:
 - Section 11: Operational Considerations (lines 1751-1950)
 
 Next Steps:
-1. Review the generated presentation
-2. Customize slide content as needed
-3. Add company branding/logos if required
+1. Open the generated .md file
+2. Use Claude PowerPoint to convert it to a .pptx file
+3. Add company branding/logos in PowerPoint as needed
 
 ═══════════════════════════════════════════════════════════
 ```
 
-### Command-Line Usage
+### Invocation
 
-For direct command-line generation without interactive prompts:
+This workflow is fully executed by Claude — no command-line tools or runtimes are required. Claude reads the relevant sections from ARCHITECTURE.md, generates the slide content using LLM summarization, and writes the resulting Markdown file directly using the Write tool.
 
-```bash
-# With LLM summaries (RECOMMENDED)
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder architecture \
-  --language es \
-  --summaries /tmp/presentation_summaries_architecture_es.json
+**Skill invocation examples:**
+```
+/skill architecture-docs
+> "Generate architecture presentation for business stakeholders in Spanish"
 
-# Without summaries (falls back to regex extraction)
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder business \
-  --language en
+/skill architecture-docs
+> "Create compliance presentation markdown"
 
-# With custom output path
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder compliance \
-  --language es \
-  --summaries /tmp/presentation_summaries_compliance_es.json \
-  --output /custom/path/presentation.pptx
+/skill architecture-docs
+> "Generate presentation for architecture team in English"
 ```
 
-**Parameters**:
-- `--stakeholder`: Target audience (business|architecture|compliance)
-- `--language`: Presentation language (en|es)
-- `--summaries`: Path to LLM-generated summaries JSON (optional - uses regex if not provided)
-- `--output`: Custom output path (optional)
+**Output file naming:**
+- `/presentations/ARCHITECTURE_Business_ES.md`
+- `/presentations/ARCHITECTURE_Architecture_EN.md`
+- `/presentations/ARCHITECTURE_Compliance_ES.md`
+
+**To convert to PowerPoint**: Open the generated `.md` file and use Claude PowerPoint to produce the final `.pptx`.
 
 ### Slide Templates by Stakeholder
 
@@ -3655,11 +3686,11 @@ Recommendation: Complete missing sections in ARCHITECTURE.md before regenerating
 
 📊 **Architecture Presentation Generation**
 
-I'll generate a presentation with these settings:
+I'll generate a presentation Markdown file with these settings:
 - Stakeholder: Business
 - Language: Spanish
 - Slides: ~10 slides (~15 minutes)
-- Output: /presentations/ARCHITECTURE_Business_ES.pptx
+- Output: /presentations/ARCHITECTURE_Business_ES.md (ready for Claude PowerPoint)
 
 Proceeding with generation...
 
@@ -3668,7 +3699,7 @@ Proceeding with generation...
 ═══════════════════════════════════════════════════════════
 Stakeholder: Business
 Language: ES
-Output: /presentations/ARCHITECTURE_Business_ES.pptx
+Output: /presentations/ARCHITECTURE_Business_ES.md
 ═══════════════════════════════════════════════════════════
 
 Step 1/6: Loading ARCHITECTURE.md Document Index...
@@ -3678,14 +3709,11 @@ Step 2/6: Loading required sections (1, 2, 10, 11)...
   ✓ Loaded 4 sections (387 lines)
   ✓ Context efficiency: 387/2,453 lines = 15.8%
 
-Step 3/6: Extracting data for business stakeholders...
-  ✓ Extracted 4 data categories
+Step 3/6: Generating slide summaries (LLM)...
+  ✓ Generated summaries for 10 slides in Spanish
 
-Step 4/6: Loading language translations (Spanish)...
-  ✓ Loaded ES translations
-
-Step 5/6: Generating slides (10 slides)...
-  - Slide 1: Title Slide ✓
+Step 4/6: Building Markdown slide structure...
+  - Slide 1: Título ✓
   - Slide 2: Agenda ✓
   - Slide 3: Resumen Ejecutivo ✓
   - Slide 4: Problema y Solución ✓
@@ -3696,15 +3724,18 @@ Step 5/6: Generating slides (10 slides)...
   - Slide 9: Principios de Arquitectura ✓
   - Slide 10: Resumen y Preguntas ✓
 
-Step 6/6: Saving presentation file...
-  ✓ Saved to /presentations/ARCHITECTURE_Business_ES.pptx
+Step 5/6: Applying Spanish translations to titles and labels...
+  ✓ All UI strings translated
+
+Step 6/6: Writing Markdown file...
+  ✓ Saved to /presentations/ARCHITECTURE_Business_ES.md
 
 ═══════════════════════════════════════════════════════════
-   PRESENTATION GENERATION COMPLETE
+   PRESENTATION MARKDOWN GENERATION COMPLETE
 ═══════════════════════════════════════════════════════════
 
-✓ Successfully generated presentation!
-📁 Output: /presentations/ARCHITECTURE_Business_ES.pptx
+✓ Successfully generated presentation Markdown file!
+📁 Output: /presentations/ARCHITECTURE_Business_ES.md
 📊 Slides: 10 slides (~15 minute presentation)
 🎯 Stakeholder: Business
 🌐 Language: Spanish
@@ -3716,13 +3747,13 @@ Data Sources Used:
 - Section 11: Operational Considerations (lines 1803-2015)
 
 Próximos Pasos:
-1. Review the generated presentation
-2. Customize slide content as needed
-3. Add company branding/logos if required
+1. Abrir el archivo /presentations/ARCHITECTURE_Business_ES.md
+2. Usar Claude PowerPoint para convertirlo a .pptx
+3. Agregar branding corporativo / logos en PowerPoint si es necesario
 
 ═══════════════════════════════════════════════════════════
 
-**Your presentation is ready!** You can find it at: `/presentations/ARCHITECTURE_Business_ES.pptx`
+**Your presentation Markdown is ready!** Open `/presentations/ARCHITECTURE_Business_ES.md` and use **Claude PowerPoint** to convert it to a `.pptx` file.
 
 ---
 

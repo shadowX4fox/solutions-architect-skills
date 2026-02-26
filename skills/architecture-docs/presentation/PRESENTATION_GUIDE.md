@@ -2,22 +2,31 @@
 
 ## Overview
 
-The presentation generation feature automatically creates professional PowerPoint presentations from your ARCHITECTURE.md files. Generate stakeholder-specific presentations in English or Spanish with a single command.
+The presentation generation feature automatically creates a structured **Markdown file** from your ARCHITECTURE.md, ready to be converted into a professional PowerPoint by **Claude PowerPoint**. Generate stakeholder-specific presentations in English or Spanish with a single command to the architecture-docs skill.
 
-**Version**: 2.0
-**Last Updated**: 2025-12-24
+**Version**: 2.1
+**Last Updated**: 2026-02-26
 
 ## Features
 
-- **3 Stakeholder Types**: Business (30 slides), Architecture (35 slides), Compliance (32 slides)
+- **3 Stakeholder Types**: Business (~10 slides), Architecture (~12 slides), Compliance (~11 slides)
 - **12 Slide Types**: Including section dividers, comparisons, metrics, quotes, process flows, and more
-- **Dark Blue Professional Theme**: Modern color palette (#0A1E3D primary)
 - **Bilingual Support**: English and Spanish
 - **Context-Efficient**: Loads only required sections (50-80% reduction)
-- **Automated Slide Generation**: 30-35 slides per presentation
-- **Professional Design**: Corporate color scheme with consistent branding
-- **Template-Based**: Predefined slide structures for each stakeholder type
-- **Comprehensive Content**: Enhanced technical details and business context
+- **No Runtime Required**: Claude generates the Markdown file directly — no Bun, Python, or scripts needed
+- **Claude PowerPoint Compatible**: Output Markdown is structured for Claude PowerPoint conversion to .pptx
+
+## Workflow
+
+```
+ARCHITECTURE.md
+      │
+      ▼  (architecture-docs Workflow 8)
+Markdown file (.md)
+      │
+      ▼  (Claude PowerPoint)
+PowerPoint (.pptx)
+```
 
 ## Quick Start
 
@@ -25,55 +34,98 @@ The presentation generation feature automatically creates professional PowerPoin
 
 1. **ARCHITECTURE.md file** exists and is complete
 2. **Document Index** is present (lines 1-50)
-3. **Bun 1.0+** runtime installed
-4. All 12 sections documented in ARCHITECTURE.md
+3. All 12 sections documented in ARCHITECTURE.md
 
 ### Basic Usage
 
-**Option 1: Through architecture-docs skill**
+**Through architecture-docs skill:**
 
 ```
-User: "Generate architecture presentation for business stakeholders"
+User: "Generate architecture presentation for business stakeholders in Spanish"
 ```
 
 The skill will guide you through:
 1. Stakeholder type selection (Business/Architecture/Compliance)
 2. Language selection (English/Spanish)
 3. Confirmation
-4. Automated generation
+4. Automated Markdown generation and file save
 
-**Option 2: Command-Line**
-
-```bash
-cd /home/shadowx4fox/solutions-architect-skills
-
-# Business presentation in English
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder business \
-  --language en
-
-# Architecture presentation in Spanish
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder architecture \
-  --language es
-
-# Compliance presentation with custom output
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder compliance \
-  --output /custom/path/presentation.pptx
-```
+**To convert to PowerPoint:**
+Open the generated `.md` file and use **Claude PowerPoint** to produce the final `.pptx`.
 
 ### Output Location
 
-Presentations are saved to:
+Presentation Markdown files are saved to:
 ```
-/presentations/ARCHITECTURE_{StakeholderType}_{Language}.pptx
+/presentations/ARCHITECTURE_{StakeholderType}_{Language}.md
 ```
 
 **Examples**:
-- `/presentations/ARCHITECTURE_Business_EN.pptx`
-- `/presentations/ARCHITECTURE_Architecture_ES.pptx`
-- `/presentations/ARCHITECTURE_Compliance_EN.pptx`
+- `/presentations/ARCHITECTURE_Business_EN.md`
+- `/presentations/ARCHITECTURE_Architecture_ES.md`
+- `/presentations/ARCHITECTURE_Compliance_EN.md`
+
+### Markdown Structure for Claude PowerPoint
+
+```markdown
+# System Name
+## Subtitle — Stakeholder Type | Date
+
+---
+
+## SECCIÓN 1: Overview
+
+---
+
+## Slide Title
+
+- Bullet point one
+- Bullet point two
+- Bullet point three
+
+---
+
+## Metrics Title
+
+| Metric | Value | Label |
+|--------|-------|-------|
+| Disponibilidad | 99.9% | SLA Uptime |
+| Usuarios Concurrentes | 10,000+ | Peak Load |
+| Tiempo de Respuesta | <200ms | Avg. Latency |
+
+---
+
+## Comparison Title
+
+| Left Concept | Right Concept |
+|-------------|--------------|
+| Item A | Item B |
+| Item C | Item D |
+
+---
+
+## Process Title
+
+1. Step One
+2. Step Two
+3. Step Three
+4. Step Four
+
+---
+
+## Quote Title
+
+> "This solution has transformed our business operations."
+> — Business Stakeholder
+
+---
+
+## Resumen
+
+- Key takeaway one
+- Key takeaway two
+- Key takeaway three
+```
 
 ## Stakeholder Types
 
@@ -911,28 +963,16 @@ bun run skills/architecture-docs/utils/presentation-generator.ts /full/path/to/A
 3. Complete missing subsections
 4. Regenerate presentation
 
-### ModuleNotFoundError: No module named 'pptx'
+### Claude PowerPoint not converting correctly
 
-**Problem**: python-pptx library not installed
-
-**Solution**:
-```bash
-pip install python-pptx
-```
-
-### ImportError: cannot import name 'add_title_slide'
-
-**Problem**: create_presentation.py not found or path incorrect
+**Problem**: The generated `.md` file isn't rendering as expected in Claude PowerPoint
 
 **Solution**:
-```bash
-# Verify create_presentation.py exists
-ls -la /home/shadowx4fox/solutions-architect-skills/create_presentation.py
-
-# Run from correct directory
-cd /home/shadowx4fox/solutions-architect-skills
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md --stakeholder business
-```
+1. Verify each slide is separated by `---` on its own line
+2. Verify slide titles use `## Heading` (not `#` or `###`)
+3. Verify the first slide uses `# Title` + `## Subtitle` pattern
+4. Check that tables use proper Markdown pipe syntax
+5. Regenerate the Markdown file if structure appears corrupted
 
 ## Best Practices
 
@@ -974,18 +1014,16 @@ bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md
 
 ### Versioning Presentations
 
-**Option 1: Date Suffix**
-```bash
-bun run skills/architecture-docs/utils/presentation-generator.ts ARCHITECTURE.md \
-  --stakeholder business \
-  --output /presentations/ARCHITECTURE_Business_EN_2025-12-21.pptx
+**Option 1: Date Suffix** — ask Claude to save with a date in the filename:
 ```
+> "Generate business presentation in English, save with today's date in the filename"
+```
+Output: `/presentations/ARCHITECTURE_Business_EN_2026-02-26.md`
 
 **Option 2: Git Versioning**
 ```bash
-# Commit presentations to version control
 git add presentations/
-git commit -m "Update architecture presentations (v1.5)"
+git commit -m "Update architecture presentation Markdown files (v1.5)"
 git tag presentation-v1.5
 ```
 
@@ -995,58 +1033,51 @@ git tag presentation-v1.5
 
 **Scenario**: Need to present system value to executives
 
-**Command**:
-```bash
-bun run skills/architecture-docs/utils/presentation-generator.ts ./ARCHITECTURE.md \
-  --stakeholder business \
-  --language en
+**Skill invocation**:
+```
+/skill architecture-docs
+> "Generate architecture presentation for business stakeholders in English"
 ```
 
 **Output**:
-- File: `/presentations/ARCHITECTURE_Business_EN.pptx`
-- Slides: 10 slides focusing on business value, ROI, use cases
+- File: `/presentations/ARCHITECTURE_Business_EN.md`
+- Slides: ~10 slides focusing on business value, ROI, use cases
 - Duration: ~15 minutes
+- Next: Open with Claude PowerPoint to produce `.pptx`
 
 ### Example 2: Generate Spanish Compliance Presentation
 
 **Scenario**: Compliance review with Spanish-speaking auditors
 
-**Command**:
-```bash
-bun run skills/architecture-docs/utils/presentation-generator.ts ./ARCHITECTURE.md \
-  --stakeholder compliance \
-  --language es
+**Skill invocation**:
+```
+/skill architecture-docs
+> "Generate compliance presentation in Spanish"
 ```
 
 **Output**:
-- File: `/presentations/ARCHITECTURE_Compliance_ES.pptx`
-- Slides: 11 slides with Spanish UI (content in original language)
+- File: `/presentations/ARCHITECTURE_Compliance_ES.md`
+- Slides: ~11 slides with Spanish titles and labels
 - Focus: Security, governance, operational standards
+- Next: Open with Claude PowerPoint to produce `.pptx`
 
-### Example 3: Batch Generate All Presentations
+### Example 3: Generate All Presentations
 
-**Scenario**: Generate presentations for all stakeholders
+**Scenario**: Generate Markdown files for all stakeholders
 
-**Script**:
-```bash
-#!/bin/bash
-
-ARCH_FILE="./ARCHITECTURE.md"
-
-# Business (English)
-bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
-  --stakeholder business --language en
-
-# Architecture (English)
-bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
-  --stakeholder architecture --language en
-
-# Compliance (Spanish)
-bun run skills/architecture-docs/utils/presentation-generator.ts $ARCH_FILE \
-  --stakeholder compliance --language es
-
-echo "All presentations generated successfully!"
+**Skill invocation** (three separate requests):
 ```
+> "Generate business presentation in English"
+> "Generate architecture team presentation in English"
+> "Generate compliance presentation in Spanish"
+```
+
+**Output files**:
+- `/presentations/ARCHITECTURE_Business_EN.md`
+- `/presentations/ARCHITECTURE_Architecture_EN.md`
+- `/presentations/ARCHITECTURE_Compliance_ES.md`
+
+Then convert all three with Claude PowerPoint.
 
 ## FAQ
 
@@ -1110,6 +1141,6 @@ For issues, questions, or feature requests:
 
 ---
 
-**Version**: 2.0
-**Plugin**: Solutions Architect Skills v1.6.0
-**Last Updated**: 2025-12-24
+**Version**: 2.1
+**Plugin**: Solutions Architect Skills v2.3.9
+**Last Updated**: 2026-02-26
