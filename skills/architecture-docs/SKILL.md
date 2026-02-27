@@ -3314,18 +3314,16 @@ Who is the target audience for this presentation?
 
 1. **Business Stakeholders** - Focus on value, ROI, business metrics, use cases
 2. **Architecture Team** - Technical details, components, patterns, decisions
-3. **Compliance/Governance** - Security, operational standards, SLAs, controls
 
-**Please select: 1, 2, or 3**
+**Please select: 1 or 2**
 ```
 
 **Stakeholder Focus Areas**:
 
 | Stakeholder | Focus | Primary Sections | Slide Count |
 |-------------|-------|------------------|-------------|
-| Business | Business value, ROI, metrics, use cases | 1, 2, 10, 11 | ~10 slides |
-| Architecture | Technical design, components, patterns | 3, 4, 5, 6, 7, 8, 12 | ~12 slides |
-| Compliance | Security, governance, standards | 7, 8, 9, 10, 11, 12 | ~11 slides |
+| Business | Business value, ROI, metrics, use cases | 1, 2, 10, 11 | ~7 slides |
+| Architecture | Technical design, components, patterns | 3, 4, 5, 6, 7, 8, 12 | ~9 slides |
 
 #### Step 2: Language Selection
 
@@ -3354,7 +3352,7 @@ Which language should the presentation use?
 I'll generate a presentation Markdown file with these settings:
 - Stakeholder: [Business/Architecture/Compliance]
 - Language: [English/Spanish]
-- Slides: ~10-12 slides (~15 minutes)
+- Slides: ~7-9 slides (~10 minutes)
 - Output: /presentations/ARCHITECTURE_[Type]_[Lang].md (ready for Claude PowerPoint)
 
 Proceed with generation? [Yes/No]
@@ -3549,47 +3547,31 @@ This workflow is fully executed by Claude — no command-line tools or runtimes 
 
 ### Slide Templates by Stakeholder
 
-#### Business Stakeholder Template (10 slides)
+#### Business Stakeholder Template (7 slides)
 
 1. **Title Slide** - System name + "Architecture Overview for Business Stakeholders"
-2. **Agenda** - Table of contents
-3. **Executive Summary** - Key metrics, business value (Section 1)
-4. **Problem & Solution** - Problem statement, solution overview (Section 2.1, 2.2)
-5. **Use Cases** - Primary use cases with success metrics (Section 2.3)
-6. **Business Value** - ROI, efficiency gains, revenue impact (Section 1)
-7. **System Availability & Performance** - SLA commitments, uptime (Section 10)
-8. **Operational Support** - Monitoring, support model (Section 11)
-9. **Architecture Principles** - Top 5 principles (Section 3)
-10. **Summary & Q&A** - Key takeaways, next steps
+2. **Executive Summary** - Key metrics, business value, availability commitment (Section 1)
+3. **Problem & Solution** - Problem statement + solution overview (Sections 2.1, 2.2)
+4. **Key Use Cases & Target Users** - Top use cases, personas (Section 2.3)
+5. **Performance & Availability** - SLA commitments, uptime, response time (Section 10)
+6. **Architecture Principles** - Top 5 guiding principles (Section 3)
+7. **Summary & Next Steps** - Key takeaways, contact, action items
 
-#### Architecture Stakeholder Template (12 slides)
+#### Architecture Stakeholder Template (9 slides)
 
 1. **Title Slide** - System name + "Technical Architecture Deep Dive"
-2. **Agenda** - Table of contents
-3. **Executive Summary** - System purpose, key technical metrics (Section 1)
-4. **Architecture Principles** - All 9-10 principles (Section 3)
-5. **Architecture Layers** - Layer diagram, layer descriptions (Section 4)
-6. **Component Overview** - Component catalog with key services (Section 5)
-7. **Technology Stack** - Backend, frontend, data, infrastructure (Section 8)
-8. **Data Flow Patterns** - How data moves through system (Section 6)
-9. **Integration Points** - External APIs, dependencies (Section 7)
-10. **Security Architecture** - Auth, encryption, controls (Section 9)
-11. **Key Architecture Decisions** - Top 5 ADRs (Section 12)
-12. **Summary & Q&A** - Key patterns, next steps
+2. **Executive Summary & Principles** - System purpose, top 5 principles (Sections 1, 3)
+3. **Architecture Layers & Components** - Layer overview + key components (Sections 4, 5)
+4. **Technology Stack** - Backend, frontend, data, infrastructure (Section 8)
+5. **Data Flow & Integration Points** - Data patterns + external APIs (Sections 6, 7)
+6. **Security Architecture** - Auth, encryption, access controls (Section 9)
+7. **Key Architecture Decisions** - Top 5 ADRs (Section 12)
+8. **Performance & Operational Model** - SLAs, monitoring, incident response (Sections 10, 11)
+9. **Summary & Q&A** - Key patterns, open questions, next steps
 
-#### Compliance Stakeholder Template (11 slides)
+#### Compliance Stakeholder Template
 
-1. **Title Slide** - System name + "Compliance & Governance Overview"
-2. **Agenda** - Table of contents
-3. **Executive Summary** - System purpose, availability commitment (Section 1)
-4. **Security Architecture Overview** - Security layers (Section 9)
-5. **Authentication & Authorization** - Auth mechanisms, access controls (Section 9.1)
-6. **Data Protection** - Encryption at rest/transit, data classification (Section 9.3)
-7. **Operational Excellence** - Monitoring, incident response (Section 11)
-8. **Disaster Recovery & Business Continuity** - RTO/RPO, backup strategies (Section 11.4)
-9. **Integration Security** - API security, external dependency controls (Section 7)
-10. **Technology Compliance** - Approved technologies, deprecation plan (Section 8)
-11. **Summary & Q&A** - Compliance posture, remediation items
+> ⚠️ **Coming soon** — Compliance presentation template is being reworked. Not available for generation at this time. If selected, inform the user and offer Business or Architecture instead.
 
 ### Error Handling
 

@@ -4,12 +4,12 @@
 
 The presentation generation feature automatically creates a structured **Markdown file** from your ARCHITECTURE.md, ready to be converted into a professional PowerPoint by **Claude PowerPoint**. Generate stakeholder-specific presentations in English or Spanish with a single command to the architecture-docs skill.
 
-**Version**: 2.1
+**Version**: 2.2
 **Last Updated**: 2026-02-26
 
 ## Features
 
-- **3 Stakeholder Types**: Business (~10 slides), Architecture (~12 slides), Compliance (~11 slides)
+- **2 Stakeholder Types**: Business (~7 slides), Architecture (~9 slides) — Compliance coming soon
 - **12 Slide Types**: Including section dividers, comparisons, metrics, quotes, process flows, and more
 - **Bilingual Support**: English and Spanish
 - **Context-Efficient**: Loads only required sections (50-80% reduction)
@@ -129,144 +129,49 @@ Presentation Markdown files are saved to:
 
 ## Stakeholder Types
 
-### Business Stakeholders (30 slides)
+### Business Stakeholders (7 slides)
 
 **Target Audience**: Executives, Product Owners, Business Analysts
 
-**Focus**: Business value, outcomes, operations, high-level architecture
+**Focus**: Business value, outcomes, key metrics, use cases
 
-**Presentation Time**: ~45 minutes
+**Presentation Time**: ~10 minutes
 
 **Slide Structure**:
 1. Title Slide
-2. Agenda
-3. **Section Divider** - Business Overview
-4. Executive Summary - Key business metrics and overview
-5. **Metrics Slide** - Key Performance Metrics (concurrent users, availability, response time)
-6. **Single Focus** - Business Value Proposition
-7. **Quote Slide** - Customer Success Story
-8. **Section Divider** - Business Context
-9. Problem & Solution - Problem statement (3 bullets)
-10. **Explanation Visual** - Solution Overview
-11. Use Cases - Part 1 (first 5 use cases)
-12. Use Cases - Part 2 (Details, use cases 6-10)
-13. Target Users & Personas
-14. **Comparison** - Before/After Transformation Impact
-15. **Section Divider** - Core Capabilities
-16. Core Capabilities - Functional requirements
-17. **Metrics Slide** - System Availability & Performance (SLAs)
-18. Performance Guarantees
-19. **Single Focus** - Scalability Overview
-20. **Section Divider** - Operational Support
-21. Support Model
-22. Monitoring & Observability
-23. **Process** - Incident Response workflow
-24. **Comparison** - Disaster Recovery (RPO/RTO)
-25. **Section Divider** - Architecture Foundation
-26. Architecture Principles - Part 1 (first 5 principles)
-27. Architecture Principles - Part 2 (principles 6-10)
-28. **Explanation Visual** - Architecture Layers Overview
-29. Summary - Key takeaways and next steps
-30. **Call to Action** - Compliance & Contact
+2. Executive Summary - Key metrics + business value (Section 1)
+3. Problem & Solution - Problem statement + solution overview (Sections 2.1, 2.2)
+4. Key Use Cases & Target Users - Top use cases, personas (Section 2.3)
+5. Performance & Availability - SLA commitments, uptime, response time (Section 10)
+6. Architecture Principles - Top 5 guiding principles (Section 3)
+7. Summary & Next Steps - Key takeaways, action items
 
-**Data Sources**: Sections 1, 2, 3, 4, 10, 11 (Primary: 1, 2, 10, 11; Secondary: 3, 4)
+**Data Sources**: Sections 1, 2, 3, 10
 
-**New Features**: Comprehensive business context, dual metrics slides, transformation impact comparison, complete operational coverage
-
-### Architecture Team (35 slides)
+### Architecture Team (9 slides)
 
 **Target Audience**: Software Architects, Tech Leads, Senior Engineers
 
 **Focus**: Technical depth, design decisions, components, integrations, security
 
-**Presentation Time**: ~60 minutes
+**Presentation Time**: ~15 minutes
 
 **Slide Structure**:
 1. Title Slide
-2. Agenda
-3. **Section Divider** - Technical Overview
-4. Executive Summary - System purpose and overview
-5. **Metrics Slide** - Key Performance Metrics
-6. Business Context - Problem and solution summary
-7. **Section Divider** - Architecture Foundation
-8. Architecture Principles - Part 1 (first 5 principles)
-9. Architecture Principles - Part 2 (principles 6-10)
-10. **Comparison** - Design Drivers & Trade-offs
-11. Architecture Layers Overview
-12. **Explanation Visual** - Architecture Diagram
-13. **Section Divider** - Component Architecture
-14. Layer 1 Components - Presentation layer
-15. Layer 2 Components - Business logic layer
-16. Layer 3 Components - Integration layer
-17. Layer 4 Components - Data layer
-18. Layer 5-6 Components - Infrastructure & cross-cutting
-19. **Explanation Visual** - Component Dependencies
-20. **Section Divider** - Data & Integration
-21. **Process** - Data Flow Patterns (5-step workflow)
-22. **Explanation Visual** - Data Architecture
-23. API Strategy
-24. Integration Points - External systems
-25. **Comparison** - Integration Patterns (Sync/Async)
-26. API Catalog
-27. **Section Divider** - Technology & Security
-28. Technology Stack - Comprehensive overview
-29. **Explanation Visual** - Security Architecture
-30. Authentication & Authorization
-31. Data Protection
-32. **Section Divider** - Key Architecture Decisions
-33. ADRs Part 1 - First 5 decisions
-34. ADRs Part 2 - Decisions 6-10
-35. Summary & Q&A
+2. Executive Summary & Principles - System purpose + top 5 principles (Sections 1, 3)
+3. Architecture Layers & Components - Layer overview + key components (Sections 4, 5)
+4. Technology Stack - Backend, frontend, data, infrastructure (Section 8)
+5. Data Flow & Integration Points - Data patterns + external APIs (Sections 6, 7)
+6. Security Architecture - Auth, encryption, access controls (Section 9)
+7. Key Architecture Decisions - Top 5 ADRs (Section 12)
+8. Performance & Operational Model - SLAs, monitoring, incident response (Sections 10, 11)
+9. Summary & Q&A - Key patterns, open questions, next steps
 
-**Data Sources**: Sections 3, 4, 5, 6, 7, 8, 9, 12 (Primary: 3, 4, 5, 6, 7, 8, 9, 12; Secondary: 1, 2)
+**Data Sources**: Sections 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
-**New Features**: Layer-by-layer component coverage, dual ADR slides, comprehensive data & integration section, security deep dive
+### Compliance/Governance
 
-### Compliance/Governance (32 slides)
-
-**Target Audience**: Compliance Officers, Security Teams, Auditors
-
-**Focus**: Security controls, governance, compliance requirements, operational reliability
-
-**Presentation Time**: ~50 minutes
-
-**Slide Structure**:
-1. Title Slide
-2. Agenda
-3. **Section Divider** - Business Overview
-4. Executive Summary
-5. **Metrics Slide** - Compliance Metrics (availability, uptime, response time)
-6. Regulatory Context
-7. **Section Divider** - Security Architecture
-8. **Explanation Visual** - Security Overview & Layers
-9. **Comparison** - Security Controls Framework (Preventive vs Detective)
-10. Authentication & Authorization (9.1, 9.2)
-11. Access Control Matrix
-12. Data Protection (9.3)
-13. Network Security (9.4, 9.5)
-14. API Security
-15. Security Monitoring & Threat Detection (9.6)
-16. Compliance Standards (9.7)
-17. **Section Divider** - Integration Security
-18. Integration Points - External systems
-19. API Security Controls
-20. Secure Data Exchange
-21. **Section Divider** - Operational Compliance
-22. Monitoring & Audit Logging (11.1, 11.2)
-23. Alerting & Response
-24. **Process** - Incident Management workflow
-25. **Comparison** - Disaster Recovery (RPO/RTO)
-26. Change Management & Governance
-27. **Metrics Slide** - SLA Compliance
-28. **Section Divider** - Technology Governance
-29. Approved Technology Stack
-30. Technology Standards & Policies
-31. Compliance-Related ADRs (Section 12)
-32. Summary & Audit - Next steps and contact
-
-**Data Sources**: Sections 9, 11, 10, 1, 7, 8, 12 (Primary: 9, 11, 10; Secondary: 1, 7, 8, 12)
-
-**New Features**: 10 slides on security architecture (Section 9 comprehensive), preventive/detective controls comparison, operational compliance deep dive, technology governance
+> ⚠️ **Coming soon** — This stakeholder type is being reworked. Use Business or Architecture in the meantime.
 
 ## Slide Type Reference
 
