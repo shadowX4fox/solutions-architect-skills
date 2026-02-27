@@ -3433,7 +3433,7 @@ ADRs (Slide 11):
 
 **Save to**: `/tmp/presentation_summaries_{stakeholder}_{language}.json`
 
-**Fallback**: If LLM summarization fails, presentation-generator.ts will fall back to regex extraction automatically.
+**Fallback**: If LLM summarization produces incomplete content, re-read the relevant ARCHITECTURE.md sections and retry the summarization step.
 
 #### Step 7: Load Language Translations
 

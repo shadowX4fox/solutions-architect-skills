@@ -659,42 +659,14 @@ The presentation generator supports **12 slide types** with the Dark Blue Profes
 
 ## Customizing Slide Templates
 
-### Adding a New Slide
+### Adding or Removing Slides
 
-1. **Edit Template JSON** (e.g., `slide_templates_business.json`)
+Presentation templates are defined inline in **Workflow 8** of `skills/architecture-docs/SKILL.md`. To customize:
 
-2. **Add slide configuration** with decimal ID for insertion:
-
-```json
-{
-  "id": 6.5,
-  "type": "metrics",
-  "title_key": "slide_titles.custom_metrics",
-  "data_sources": [...]
-}
-```
-
-3. **Add translation** in `language_en.json` and `language_es.json`:
-
-```json
-{
-  "slide_titles": {
-    "custom_metrics": "Custom Performance Metrics"
-  }
-}
-```
-
-4. **Update slide_count** in template JSON:
-
-```json
-{
-  "stakeholder_type": "business",
-  "slide_count": 14,  // Increment by 1
-  ...
-}
-```
-
-5. **Regenerate presentation**
+1. Open `skills/architecture-docs/SKILL.md`
+2. Find the relevant template under **"Slide Templates by Stakeholder"**
+3. Add, remove, or reorder slides directly in the template list
+4. Regenerate the presentation
 
 ### Supported Slide Types
 
@@ -748,45 +720,11 @@ The presentation generator supports **12 slide types** with the Dark Blue Profes
 
 ## Customization
 
-### Modifying Slide Templates
-
-Slide templates are defined in JSON files:
-- `/presentation/slide_templates_business.json`
-- `/presentation/slide_templates_architecture.json`
-- `/presentation/slide_templates_compliance.json`
-
-**Example**: Add a new slide to Business template
-
-```json
-{
-  "id": 11,
-  "type": "content",
-  "title_key": "slide_titles.custom_slide",
-  "data_sources": [
-    {
-      "section": 8,
-      "subsection": "Technology Stack",
-      "extract_type": "table"
-    }
-  ]
-}
-```
-
-Then add translation to `language_en.json`:
-```json
-{
-  "slide_titles": {
-    "custom_slide": "Technology Overview"
-  }
-}
-```
-
 ### Adding New Languages
 
 1. Create language JSON file: `/presentation/language_{code}.json`
 2. Copy structure from `language_en.json`
 3. Translate all strings
-4. Update `presentation-generator.ts` to support new language code
 
 ### Customizing Colors
 
@@ -814,18 +752,7 @@ To customize, modify these constants or create new ones.
 
 **Problem**: File doesn't exist at specified path
 
-**Solution**:
-```bash
-# Verify file exists
-ls -la ARCHITECTURE.md
-
-# Check current directory
-pwd
-
-# Provide full path
-bun run skills/architecture-docs/utils/presentation-generator.ts /full/path/to/ARCHITECTURE.md \
-  --stakeholder business
-```
+**Solution**: Ensure `ARCHITECTURE.md` exists in the project directory and ask the architecture-docs skill to generate from it using an explicit path.
 
 ### Warning: Document Index not found
 
@@ -1042,10 +969,9 @@ For issues, questions, or feature requests:
 - **ADR_GUIDE.md**: Architectural Decision Records format
 - **language_en.json**: English translations reference
 - **language_es.json**: Spanish translations reference
-- **slide_templates_*.json**: Slide structure definitions
 
 ---
 
-**Version**: 2.1
-**Plugin**: Solutions Architect Skills v2.3.9
+**Version**: 2.2
+**Plugin**: Solutions Architect Skills v2.3.13
 **Last Updated**: 2026-02-26
