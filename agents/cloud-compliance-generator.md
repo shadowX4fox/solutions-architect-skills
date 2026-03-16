@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `cloud_architecture`
 **Template**: `TEMPLATE_CLOUD_ARCHITECTURE.md`
-**Section Mapping**: Sections 4, 8, 11 (primary), 9, 10 (secondary)
+**Section Mapping**: docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md (primary), docs/07-security-architecture.md, docs/08-scalability-and-performance.md (secondary)
 
 **Key Data Points**:
 - Cloud provider (AWS, Azure, GCP)
@@ -75,7 +75,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -166,13 +166,13 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-**Step 2.1: Read Document Header**
+**Step 2.1: Read Navigation Index**
 
-Use Read tool to read first 50 lines of ARCHITECTURE.md:
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
 ```
 Read file: [architecture_file]
-Limit: 50 lines
 Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
 ```
 
 **Step 2.2: Get Current Date**
@@ -187,106 +187,93 @@ Store as: generation_date
 
 **Step 3.1: Required Sections for Cloud Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 4** (System Architecture): Cloud deployment model, architecture pattern
-- **Section 8** (Infrastructure): IaC tools, cloud resources, multi-region setup
-- **Section 11** (Operational Considerations): Cloud monitoring, backup strategies
-- **Section 9** (Security Architecture): Cloud security controls (secondary)
-- **Section 10** (Performance Requirements): Cloud scalability (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/03-architecture-layers.md** (Architecture Layers): Cloud deployment model, architecture pattern
+- **docs/06-technology-stack.md** (Technology Stack): IaC tools, cloud resources, multi-region setup
+- **docs/09-operational-considerations.md** (Operational Considerations): Cloud monitoring, backup strategies
+- **docs/07-security-architecture.md** (Security Architecture): Cloud security controls (secondary)
+- **docs/08-scalability-and-performance.md** (Scalability & Performance): Cloud scalability (secondary)
 
 **Step 3.2: Extract Section Content**
 
-For each required section:
-
-1. Use Grep tool to find section start:
-```
-pattern: "^## 4\.? |^## 4 "
-file: [architecture_file]
-output_mode: content
--n: true
-Find line number where section starts
-```
-
-2. Use Read tool to read section:
-```
-Read file: [architecture_file]
-offset: [section_start_line]
-limit: 200 (or until next section)
-```
-
-Repeat for sections 8, 11, 9, 10.
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/03-architecture-layers.md`
+- `Read file: docs/06-technology-stack.md`
+- `Read file: docs/09-operational-considerations.md`
+- `Read file: docs/07-security-architecture.md`
+- `Read file: docs/08-scalability-and-performance.md`
 
 **Step 3.3: Extract Cloud-Specific Data Points**
 
 Use Grep tool with domain-specific patterns:
 
-**Cloud Provider Detection** (Section 4 or 8):
+**Cloud Provider Detection** (docs/03-architecture-layers.md):
 ```
 pattern: "(AWS|Azure|GCP|Google Cloud|Amazon Web Services|Microsoft Azure)"
-file: [architecture_file]
+file: docs/03-architecture-layers.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Deployment Model** (Section 4):
+**Deployment Model** (docs/03-architecture-layers.md):
 ```
 pattern: "(IaaS|PaaS|SaaS|Infrastructure as a Service|Platform as a Service|Software as a Service)"
-file: [architecture_file]
+file: docs/03-architecture-layers.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Multi-Region Configuration** (Section 8):
+**Multi-Region Configuration** (docs/06-technology-stack.md):
 ```
 pattern: "(multi[- ]region|multi[- ]az|availability zone|cross[- ]region)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**IaC Tools** (Section 8):
+**IaC Tools** (docs/06-technology-stack.md):
 ```
 pattern: "(Terraform|CloudFormation|Pulumi|Infrastructure as Code|IaC|ARM template|Bicep)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Cloud-Native Services** (Section 4 or 8):
+**Cloud-Native Services** (docs/03-architecture-layers.md):
 ```
 pattern: "(Lambda|S3|ECS|EKS|CloudFront|API Gateway|Cloud Functions|Cloud Run|App Service|AKS|Cosmos)"
-file: [architecture_file]
+file: docs/03-architecture-layers.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Cost Optimization** (Section 8 or 11):
+**Cost Optimization** (docs/09-operational-considerations.md):
 ```
 pattern: "(reserved instance|spot instance|auto[- ]scaling|right[- ]sizing|cost optimization|FinOps)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Cloud Monitoring Tools** (Section 11):
+**Cloud Monitoring Tools** (docs/09-operational-considerations.md):
 ```
 pattern: "(CloudWatch|Azure Monitor|Stackdriver|Cloud Logging|X-Ray|Application Insights)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Cloud Security** (Section 9):
+**Cloud Security** (docs/07-security-architecture.md):
 ```
 pattern: "(IAM|encryption at rest|encryption in transit|VPC|security group|network ACL|WAF)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
@@ -376,15 +363,16 @@ Replacement: Multi-region deployment documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 4.2`
+- Correct: `- Source: docs/03-architecture-layers.md`
+- Correct: `- Source: docs/06-technology-stack.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 4.2, lines 87-92`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 4.2 (Cloud Infrastructure section)`
@@ -419,7 +407,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -474,7 +462,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 4.2
+- Source: docs/03-architecture-layers.md
 ```
 
 INCORRECT (added line numbers):
@@ -604,7 +592,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -661,7 +649,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Cloud Architecture
-   Sections: 4, 8, 11, 9, 10
+   Sections: docs/03, docs/06, docs/09, docs/07, docs/08
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.

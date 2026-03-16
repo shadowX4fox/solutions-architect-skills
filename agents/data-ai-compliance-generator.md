@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `data_ai`
 **Template**: `TEMPLATE_DATA_AI_ARCHITECTURE.md`
-**Section Mapping**: Sections 5, 6, 7 (primary), 8, 10 (secondary)
+**Section Mapping**: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md (primary), docs/06-technology-stack.md, docs/08-scalability-and-performance.md (secondary)
 
 **Key Data Points**:
 - Data quality metrics
@@ -76,7 +76,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -167,9 +167,14 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-**Step 2.1: Read Document Header**
+**Step 2.1: Read Navigation Index**
 
-Use Read tool to read first 50 lines of ARCHITECTURE.md
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
 
 **Step 2.2: Get Current Date**
 
@@ -182,86 +187,91 @@ date +%Y-%m-%d
 
 **Step 3.1: Required Sections for Data & AI Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 5** (Data Architecture): Data models, storage, quality
-- **Section 6** (API & Integration): Data integration patterns
-- **Section 7** (Security): Data encryption, PII protection
-- **Section 8** (Infrastructure): Data infrastructure (secondary)
-- **Section 10** (Performance): Data pipeline performance (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/components/README.md** (Component Details): Data models, storage, quality
+- **docs/04-data-flow-patterns.md** (Data Flow Patterns): Data integration patterns
+- **docs/05-integration-points.md** (Integration Points): Data encryption, PII protection
+- **docs/06-technology-stack.md** (Technology Stack): Data infrastructure (secondary)
+- **docs/08-scalability-and-performance.md** (Scalability & Performance): Data pipeline performance (secondary)
 
 **Step 3.2: Extract Section Content**
 
-For each required section (5, 6, 7, 8, 10): Use Grep and Read tools
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/components/README.md`
+- `Read file: docs/04-data-flow-patterns.md`
+- `Read file: docs/05-integration-points.md`
+- `Read file: docs/06-technology-stack.md`
+- `Read file: docs/08-scalability-and-performance.md`
 
 **Step 3.3: Extract Data & AI-Specific Data Points**
 
-**Data Quality** (Section 5):
+**Data Quality** (docs/components/README.md):
 ```
 pattern: "(data quality|data validation|data cleansing|data accuracy|data completeness)"
-file: [architecture_file]
+file: docs/components/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Data Lineage** (Section 5):
+**Data Lineage** (docs/04-data-flow-patterns.md):
 ```
 pattern: "(data lineage|data provenance|data flow|data traceability)"
-file: [architecture_file]
+file: docs/04-data-flow-patterns.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**PII Protection** (Section 7):
+**PII Protection** (docs/05-integration-points.md):
 ```
 pattern: "(PII|personally identifiable|data masking|data anonymization|pseudonymization)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**ML Model Governance** (Section 5 or 10):
+**ML Model Governance** (docs/components/README.md):
 ```
 pattern: "(ML model|machine learning|model training|model deployment|model monitoring|re-training)"
-file: [architecture_file]
+file: docs/components/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Data Retention** (Section 5):
+**Data Retention** (docs/components/README.md):
 ```
 pattern: "(retention policy|data retention|retention period|data lifecycle)"
-file: [architecture_file]
+file: docs/components/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Data Scalability** (Section 5 or 10):
+**Data Scalability** (docs/08-scalability-and-performance.md):
 ```
 pattern: "(data volume|scalability|3x growth|data growth|scaling)"
-file: [architecture_file]
+file: docs/08-scalability-and-performance.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Regulatory Compliance** (Section 7):
+**Regulatory Compliance** (docs/05-integration-points.md):
 ```
 pattern: "(GDPR|data residency|data sovereignty|privacy regulation|CCPA)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Data Pipeline** (Section 5):
+**Data Pipeline** (docs/04-data-flow-patterns.md):
 ```
 pattern: "(data pipeline|ETL|ELT|data ingestion|data processing)"
-file: [architecture_file]
+file: docs/04-data-flow-patterns.md
 output_mode: content
 -i: true
 -n: true
@@ -351,15 +361,16 @@ Replacement: Data governance documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 6.2`
+- Correct: `- Source: docs/04-data-flow-patterns.md`
+- Correct: `- Source: docs/components/README.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 6.2, lines 145-150`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 6.2 (Data Architecture section)`
@@ -394,7 +405,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -449,7 +460,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 6.2
+- Source: docs/04-data-flow-patterns.md
 ```
 
 INCORRECT (added line numbers):
@@ -565,7 +576,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -624,7 +635,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Data & AI Architecture
-   Sections: 5, 6, 7, 8, 10
+   Sections: docs/components/README.md, docs/04, docs/05, docs/06, docs/08
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

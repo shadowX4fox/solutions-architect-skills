@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `security`
 **Template**: `TEMPLATE_SECURITY_ARCHITECTURE.md`
-**Section Mapping**: Sections 4, 5, 7, 9, 11 (primary)
+**Section Mapping**: docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/07-security-architecture.md, docs/09-operational-considerations.md (primary)
 
 **Key Data Points**:
 - API authentication and authorization
@@ -77,7 +77,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -168,88 +168,112 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Security Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 4** (System Architecture): API security, service boundaries
-- **Section 5** (Infrastructure): Network security, firewalls
-- **Section 7** (Integration): API authentication, authorization
-- **Section 9** (Security Architecture): Comprehensive security controls
-- **Section 11** (Operational): Security monitoring, incident response
+PRE-CONFIGURED files to extract:
+- **docs/03-architecture-layers.md** (Architecture Layers): API security, service boundaries
+- **docs/components/README.md** (Component Details): Network security, firewalls
+- **docs/05-integration-points.md** (Integration Points): API authentication, authorization
+- **docs/07-security-architecture.md** (Security Architecture): Comprehensive security controls
+- **docs/09-operational-considerations.md** (Operational Considerations): Security monitoring, incident response
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/03-architecture-layers.md`
+- `Read file: docs/components/README.md`
+- `Read file: docs/05-integration-points.md`
+- `Read file: docs/07-security-architecture.md`
+- `Read file: docs/09-operational-considerations.md`
 
 **Step 3.3: Extract Security-Specific Data Points**
 
-**API Authentication** (Section 7 or 9):
+**API Authentication** (docs/07-security-architecture.md):
 ```
 pattern: "(API authentication|API authorization|OAuth|JWT|API key|bearer token)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Encryption Transit** (Section 9):
+**Encryption Transit** (docs/07-security-architecture.md):
 ```
 pattern: "(TLS|SSL|HTTPS|encryption in transit|transport security)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Encryption Rest** (Section 9):
+**Encryption Rest** (docs/07-security-architecture.md):
 ```
 pattern: "(encryption at rest|AES|data encryption|encrypted storage)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Authentication Method** (Section 9):
+**Authentication Method** (docs/07-security-architecture.md):
 ```
 pattern: "(authentication|SAML|OAuth 2.0|OpenID Connect|SSO|multi-factor|MFA)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Microservice Security** (Section 4 or 9):
+**Microservice Security** (docs/07-security-architecture.md):
 ```
 pattern: "(mutual TLS|mTLS|service mesh|service-to-service|inter-service security)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Secrets Management** (Section 9):
+**Secrets Management** (docs/07-security-architecture.md):
 ```
 pattern: "(secrets management|vault|key management|KMS|secrets rotation)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Vulnerability Management** (Section 11):
+**Vulnerability Management** (docs/09-operational-considerations.md):
 ```
 pattern: "(vulnerability|CVE|security patch|penetration test|security scan)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Security Monitoring** (Section 11):
+**Security Monitoring** (docs/09-operational-considerations.md):
 ```
 pattern: "(security monitoring|SIEM|security event|audit log|security alert)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
@@ -339,15 +363,16 @@ Replacement: RTO documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 11.2`
+- Correct: `- Source: docs/07-security-architecture.md`
+- Correct: `- Source: docs/09-operational-considerations.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2, lines 567-570`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2 (Monitoring section)`
@@ -382,7 +407,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -437,7 +462,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 11.2
+- Source: docs/07-security-architecture.md
 ```
 
 INCORRECT (added line numbers):
@@ -551,7 +576,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -610,7 +635,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Security Architecture
-   Sections: 4, 5, 7, 9, 11
+   Sections: docs/03, docs/components/README.md, docs/05, docs/07, docs/09
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

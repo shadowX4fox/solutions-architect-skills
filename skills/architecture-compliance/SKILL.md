@@ -241,15 +241,15 @@ Document Control MUST use table format: `| Field | Value |`
 - **Transformation**: Calculate or reformat values using explicit source data with formula shown
 
 **When Data is Missing:**
-- Mark as `[PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]`
+- Mark as `[PLACEHOLDER: Not specified in docs/NN-name.md]`
 - Provide optional industry standard reference (informational, not prescriptive)
-- Include guidance on which ARCHITECTURE.md section should contain the data
+- Include guidance on which docs/ file should contain the data
 
 **Example:**
 ```
-**RTO**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+**RTO**: [PLACEHOLDER: Not specified in docs/09-operational-considerations.md]
 Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
-Note: Add RTO value to ARCHITECTURE.md Section 11.3 (Operational Considerations → Backup and Recovery)
+Note: Add RTO value to docs/09-operational-considerations.md (Operational Considerations → Backup and Recovery)
 ```
 
 **Audit Compliance**: This policy ensures all generated compliance documents are fully auditable with verifiable sources, meeting regulatory requirements for documentation traceability.
@@ -348,61 +348,51 @@ Resolves to the Document Control table with `{{variables}}` replaced from `share
 
 ### Why Context Efficiency Matters
 
-Loading the entire ARCHITECTURE.md file (typically 2000+ lines) for each compliance document is inefficient. This skill uses **incremental section loading** to reduce context usage by 70-80%.
+Architecture documentation uses a **multi-file structure** where `ARCHITECTURE.md` is a navigation index (~130 lines) and section content lives in separate `docs/` files. This eliminates the need for line-offset based reads — each section is an independent file that can be read directly.
 
 ### Context-Efficient Workflow
 
-**Step 1: Load Document Index (Lines 1-50)**
+**Step 1: Read Navigation Index**
 ```
-Read ARCHITECTURE.md lines 1-50 to get:
-- Project name
-- Document structure
-- Section locations (line ranges)
+Read ARCHITECTURE.md (full file, ~130 lines) to get:
+- Project name (H1 header)
+- Links to docs/ section files
 ```
 
-**Step 2: Identify Required Sections**
+**Step 2: Identify Required docs/ Files**
 ```
 For each contract type, consult SECTION_MAPPING_GUIDE.md to determine:
-- Primary sections (80%+ of content)
-- Secondary sections (15-30% of content)
-- Tertiary sections (<15% of content)
+- Primary files (80%+ of content)
+- Secondary files (15-30% of content)
+- Tertiary files (<15% of content)
 ```
 
-**Step 3: Load Sections Incrementally**
+**Step 3: Read docs/ Files Directly**
 ```
-Load only required sections with ±10 line buffer
+Read only required docs/ files in full (no offset/limit needed)
 Example for SRE Architecture:
-- Section 10: Performance (lines 1550-1750, ~200 lines)
-- Section 11: Operational (lines 1750-1950, ~200 lines)
-Total: ~400 lines vs 2000+ (80% reduction)
+- docs/08-scalability-and-performance.md: SLOs, SLIs, latency targets
+- docs/09-operational-considerations.md: Monitoring, DR, runbooks
+Total: 2-3 focused files vs all 12 docs/ files
 ```
 
 **Step 4: Cache Extracted Data**
 ```
 Extract data once, cache for contract generation
-Avoid re-loading same sections for multiple contracts
+Avoid re-reading same files for multiple contracts
 ```
 
 ### Example: SRE Architecture Contract Generation
 
-**Traditional Approach:**
+**Multi-File Approach:**
 ```
-1. Load entire ARCHITECTURE.md (2000+ lines)
-2. Search for relevant information
-3. Extract SRE metrics
-4. Generate contract
-```
-
-**Context-Efficient Approach:**
-```
-1. Read Document Index (50 lines)
-2. Identify required sections: 10, 11
-3. Load Section 10 (200 lines + 10 line buffer)
-4. Extract performance metrics (SLOs, latency, throughput), cache
-5. Load Section 11 (200 lines + 10 line buffer)
-6. Extract operational data (monitoring, incidents), cache
-7. Generate contract from cached data
-Total: 460 lines vs 2000+ (77% reduction)
+1. Read ARCHITECTURE.md (~130 lines) — get project name
+2. Read docs/08-scalability-and-performance.md — SLOs, latency, throughput
+3. Extract performance metrics, cache
+4. Read docs/09-operational-considerations.md — monitoring, incidents, DR
+5. Extract operational data, cache
+6. Generate contract from cached data
+Total: 3 files, each read in full, no offset calculations needed
 ```
 
 ## Contract Listing Workflow
@@ -502,9 +492,9 @@ Search order:
 **Step 1.3: Validate Structure**
 ```
 Check for:
-- Document Index (first 50 lines)
-- 12-section structure (standard ARCHITECTURE.md)
-- Required sections exist
+- ARCHITECTURE.md as navigation index (~130 lines)
+- docs/ directory with section files
+- Required docs/ files exist for the selected contract types
 ```
 
 **Step 1.4: Clarify User Intent**
@@ -791,27 +781,25 @@ bun skills/architecture-compliance/utils/manifest-generator.ts \
 
 **Legacy Phase - Now Handled by Agents:**
 
-**Step 3.1: Load Document Index**
+**Step 3.1: Read Navigation Index**
 ```
-Read ARCHITECTURE.md lines 1-50:
-- Extract project name
-- Identify section boundaries
-- Cache section line ranges
+Read ARCHITECTURE.md (full file, ~130 lines):
+- Extract project name from H1 header
+- Note available docs/ files
 ```
 
-**Step 3.2: For Each Contract, Identify Required Sections**
+**Step 3.2: For Each Contract, Identify Required docs/ Files**
 ```
 Consult SECTION_MAPPING_GUIDE.md:
 Example for Business Continuity:
-- Primary: Section 11 (Operational Considerations)
-- Secondary: Section 10 (Performance Requirements)
+- Primary: docs/09-operational-considerations.md, docs/08-scalability-and-performance.md
+- Secondary: docs/01-system-overview.md, docs/03-architecture-layers.md
 ```
 
-**Step 3.3: Load Sections Incrementally**
+**Step 3.3: Read docs/ Files Directly**
 ```
-For each required section:
-- Calculate line range with ±10 buffer
-- Read specific line range from ARCHITECTURE.md
+For each required docs/ file:
+- Read file in full (no offset/limit needed)
 - Extract relevant data using patterns
 - Cache extracted data
 ```
@@ -822,7 +810,7 @@ For each data point:
 - Apply extraction pattern (direct, aggregation, transformation, inference)
 - Validate extracted value
 - If missing: flag for [PLACEHOLDER]
-- Store with source reference (section, line number)
+- Store with source reference (docs/ file path)
 ```
 
 **Step 3.5: Automatic Validation** (All Contract Types)
@@ -1032,8 +1020,8 @@ ELSE IF selected_contracts.length >= 4:
 
 3. **Get project metadata**
    ```
-   - Read ARCHITECTURE.md lines 1-50 (Document Index)
-   - Extract project_name from Section 1
+   - Read ARCHITECTURE.md (full file, ~130 lines — navigation index)
+   - Extract project_name from H1 header
    - Get current_date in YYYY-MM-DD format (for manifest updates)
    ```
 
@@ -1630,11 +1618,11 @@ This phase loads all templates and ARCHITECTURE.md sections in parallel to minim
 
 Execute the following operations in parallel:
 
-1. **Load ARCHITECTURE.md Document Index** (lines 1-50)
+1. **Read ARCHITECTURE.md Navigation Index** (full file, ~130 lines)
    ```
-   - Extract project name from Document Index
-   - Identify section boundaries (line ranges for sections 1-12)
-   - Cache as: document_index = { project_name, section_boundaries }
+   - Extract project name from H1 header
+   - Note available docs/ files
+   - Cache as: navigation_index = { project_name }
    ```
 
 2. **Validate output directory**
@@ -1687,48 +1675,50 @@ Read /tmp/expanded_security.md
 
 Cache results as: `expanded_templates[contract_type] = expanded_content`
 
-**Step 2B.4: Parallel Section Extraction**
+**Step 2B.4: Parallel docs/ File Loading**
 
-For each contract, determine required sections from SECTION_MAPPING_GUIDE.md (see lines 1344+):
+For each contract, determine required docs/ files from SECTION_MAPPING_GUIDE.md:
 
-**Section Requirements per Contract:**
-- Business Continuity: Section 11
-- SRE Architecture: Sections 10, 11
-- Cloud Architecture: Sections 4, 8, 11
-- Data & AI: Sections 3, 5, 6
-- Development: Sections 3, 5, 8, 12
-- Process Transformation: Sections 5, 8
-- Security: Section 9
-- Platform & IT: Sections 4, 8, 10, 11
-- Enterprise: Sections 1, 2, 3, 4
-- Integration: Section 7
+**docs/ File Requirements per Contract:**
+- Business Continuity: docs/09-operational-considerations.md, docs/08-scalability-and-performance.md
+- SRE Architecture: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
+- Cloud Architecture: docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md
+- Data & AI: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md
+- Development: docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md
+- Process Transformation: docs/01-system-overview.md, docs/04-data-flow-patterns.md
+- Security: docs/07-security-architecture.md, docs/03-architecture-layers.md, docs/05-integration-points.md
+- Platform & IT: docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md
+- Enterprise: docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md
+- Integration: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md
 
-**Identify unique sections needed across ALL validated_contracts:**
+**Identify unique docs/ files needed across ALL validated_contracts:**
 ```
-unique_sections = set()
+unique_files = set()
 for contract in validated_contracts:
-  unique_sections.add(contract.required_sections)
+  unique_files.add(contract.required_files)
 
-Example: If generating SRE (10,11), Cloud (4,8,11), Security (9)
-  → unique_sections = [4, 8, 9, 10, 11] (5 unique sections)
+Example: If generating SRE, Cloud, Security
+  → unique_files = [docs/03-architecture-layers.md, docs/06-technology-stack.md,
+                    docs/07-security-architecture.md, docs/08-scalability-and-performance.md,
+                    docs/09-operational-considerations.md]
 ```
 
-**Load all unique sections in parallel using section_boundaries from Step 2B.1:**
+**Load all unique docs/ files in parallel:**
 
 ```
-# Example: Load sections 4, 8, 9, 10, 11 in parallel
-Read ARCHITECTURE.md lines [section_4_start]:[section_4_end+10]  # ±10 buffer
-Read ARCHITECTURE.md lines [section_8_start]:[section_8_end+10]
-Read ARCHITECTURE.md lines [section_9_start]:[section_9_end+10]
-Read ARCHITECTURE.md lines [section_10_start]:[section_10_end+10]
-Read ARCHITECTURE.md lines [section_11_start]:[section_11_end+10]
+# Example: Load 5 unique docs/ files in parallel
+Read docs/03-architecture-layers.md
+Read docs/06-technology-stack.md
+Read docs/07-security-architecture.md
+Read docs/08-scalability-and-performance.md
+Read docs/09-operational-considerations.md
 ```
 
-Cache results as: `sections[section_number] = section_content`
+Cache results as: `files["docs/NN-name.md"] = file_content`
 
 **Context Efficiency:**
-- Each section loaded ONCE, shared across all contracts that need it
-- Total loaded (worst case all 10 contracts): Document Index (50 lines) + 10 templates (~500KB) + 12 sections (~100KB) = ~602KB
+- Each docs/ file loaded ONCE, shared across all contracts that need it
+- Total loaded (worst case all 10 contracts): Navigation index (~130 lines) + 10 templates (~500KB) + 12 docs/ files (variable size) = efficient per-file loading
 
 **Fallback for Context Limits:**
 - If context approaching limits, use batched loading:
@@ -1752,11 +1742,11 @@ Cache results as: `sections[section_number] = section_content`
 
 Execute in parallel:
 
-1. **Load ARCHITECTURE.md Document Index** (lines 1-50)
+1. **Read ARCHITECTURE.md Navigation Index** (full file, ~130 lines)
    ```
-   - Extract project name
-   - Identify section boundaries
-   - Cache as: document_index = { project_name, section_boundaries }
+   - Extract project name from H1 header
+   - Note available docs/ files
+   - Cache as: navigation_index = { project_name }
    ```
 
 2. **Validate output directory** (only if batch_num == 1)
@@ -2208,14 +2198,14 @@ Generated Contracts: [successful_count]/[total_requested]
 ❌ Failed: ([failed_count] contracts)
 [Only if failures occurred]
 - Integration Architecture: Validation failed (score 4.2/10)
-  Reason: Missing required data in ARCHITECTURE.md Section 7
+  Reason: Missing required data in docs/05-integration-points.md
   Missing Data:
-    • Integration catalog (Section 7.1)
-    • API standards (Section 7.2)
-    • Async patterns (Section 7.3)
+    • Integration catalog
+    • API standards
+    • Async patterns
 
   Recovery Steps:
-  1. Add Section 7 to ARCHITECTURE.md with integration details
+  1. Update docs/05-integration-points.md with integration details
   2. Regenerate: /skill architecture-compliance Integration
 
   Reference: SKILL.md lines 1400+ (Integration Architecture requirements)
@@ -2257,12 +2247,12 @@ Failed Contract: [CONTRACT_TYPE]
 ├─ Error: [SPECIFIC_ERROR_MESSAGE]
 ├─ Root Cause: [MISSING_SECTION | VALIDATION_FAILURE | TEMPLATE_NOT_FOUND]
 ├─ Missing Data Points:
-│  • [DATA_POINT_1] (should be in Section [X])
-│  • [DATA_POINT_2] (should be in Section [Y])
-│  • [DATA_POINT_3] (should be in Section [Z])
+│  • [DATA_POINT_1] (should be in [docs/NN-name.md])
+│  • [DATA_POINT_2] (should be in [docs/NN-name.md])
+│  • [DATA_POINT_3] (should be in [docs/NN-name.md])
 ├─ Recommended Actions:
-│  1. Update ARCHITECTURE.md Section [X]: Add [SPECIFIC_DATA]
-│  2. Update ARCHITECTURE.md Section [Y]: Add [SPECIFIC_DATA]
+│  1. Update [docs/NN-name.md]: Add [SPECIFIC_DATA]
+│  2. Update [docs/NN-name.md]: Add [SPECIFIC_DATA]
 │  3. Regenerate contract: /skill architecture-compliance [CONTRACT_TYPE]
 └─ Reference: SECTION_MAPPING_GUIDE.md for [CONTRACT_TYPE] requirements
 ```
@@ -2275,57 +2265,57 @@ Failed Contract: [CONTRACT_TYPE]
 
 ---
 
-## Contract Types and Required Sections
+## Contract Types and Required docs/ Files
 
 ### 1. Business Continuity
-**Primary Sections:** 11 (Operational Considerations)
-**Secondary Sections:** 10 (Performance Requirements)
+**Primary Files:** docs/09-operational-considerations.md, docs/08-scalability-and-performance.md
+**Secondary Files:** docs/01-system-overview.md, docs/03-architecture-layers.md, docs/06-technology-stack.md
 **Key Extractions:** RTO, RPO, backup strategy, DR procedures
 
 ### 2. SRE Architecture
-**Primary Sections:** 10 (Performance), 11 (Operational)
-**Secondary Sections:** 5 (System Components)
+**Primary Files:** docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
+**Secondary Files:** docs/components/README.md
 **Key Extractions:** SLOs, SLIs, error budgets, monitoring, incident management
 
 ### 3. Cloud Architecture
-**Primary Sections:** 4 (Deployment Architecture), 8 (Technology Stack), 11 (Operational)
-**Secondary Sections:** 9 (Security), 10 (Performance)
+**Primary Files:** docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md
+**Secondary Files:** docs/07-security-architecture.md, docs/08-scalability-and-performance.md
 **Key Extractions:** Cloud model, connectivity, security, monitoring, backup, best practices
 
 ### 4. Data & Analytics - AI Architecture
-**Primary Sections:** 5 (System Components), 6 (Data Flow), 7 (Integration Points)
-**Secondary Sections:** 8 (Technology Stack), 10 (Performance)
+**Primary Files:** docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md
+**Secondary Files:** docs/06-technology-stack.md, docs/08-scalability-and-performance.md
 **Key Extractions:** Data quality, governance, AI models, compliance, scalability
 
 ### 5. Development Architecture
-**Primary Sections:** 3 (Architecture Patterns), 5 (System Components), 8 (Technology Stack), 12 (ADRs)
-**Secondary Sections:** 11 (Operational)
+**Primary Files:** docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md
+**Secondary Files:** docs/09-operational-considerations.md
 **Key Extractions:** Technology stack, development practices, technical debt
 **Automatic Validation:** Stack validation checklist (26 items) automatically evaluated during generation. Results: PASS (approval unblocked) or FAIL (detailed failure report with remediation guidance)
 
 ### 6. Process Transformation and Automation
-**Primary Sections:** 1 (System Overview), 2 (Business Context), 6 (Data Flow)
-**Secondary Sections:** 5 (System Components), 7 (Integration Points)
+**Primary Files:** docs/01-system-overview.md, docs/04-data-flow-patterns.md
+**Secondary Files:** docs/components/README.md, docs/05-integration-points.md
 **Key Extractions:** Automation practices, process improvements, efficiency metrics
 
 ### 7. Security Architecture
-**Primary Sections:** 9 (Security Considerations)
-**Secondary Sections:** 7 (Integration Points), 11 (Operational)
+**Primary Files:** docs/07-security-architecture.md, docs/03-architecture-layers.md, docs/09-operational-considerations.md
+**Secondary Files:** docs/05-integration-points.md, docs/components/README.md
 **Key Extractions:** API security, authentication, encryption, communication security
 
 ### 8. Platform & IT Infrastructure
-**Primary Sections:** 4 (Deployment Architecture), 8 (Technology Stack), 11 (Operational)
-**Secondary Sections:** 10 (Performance)
+**Primary Files:** docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md
+**Secondary Files:** docs/08-scalability-and-performance.md
 **Key Extractions:** Environments, OS, databases, capacity, retention, naming
 
 ### 9. Enterprise Architecture
-**Primary Sections:** 1 (System Overview), 2 (Business Context), 3 (Architecture Patterns), 4 (Deployment)
-**Secondary Sections:** 12 (ADRs)
+**Primary Files:** docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md
+**Secondary Files:** adr/README.md
 **Key Extractions:** Modularity, cloud-first, API-first, business alignment
 
 ### 10. Integration Architecture
-**Primary Sections:** 7 (Integration Points)
-**Secondary Sections:** 5 (System Components), 6 (Data Flow), 8 (Technology Stack)
+**Primary Files:** docs/05-integration-points.md, docs/components/README.md, docs/04-data-flow-patterns.md
+**Secondary Files:** docs/07-security-architecture.md
 **Key Extractions:** Integration catalog, patterns, security, standards compliance
 
 ## User Interaction Points
@@ -2362,59 +2352,59 @@ Failed Contract: [CONTRACT_TYPE]
 
 ## Data Extraction Strategies (Strict Source Traceability)
 
-The skill uses ONLY three extraction strategies that reference actual ARCHITECTURE.md content:
+The skill uses ONLY three extraction strategies that reference actual architecture documentation content:
 
 ### 1. Direct Mapping (1:1)
-- Extract exact values from ARCHITECTURE.md without transformation
-- Source Reference Format: `Section X.Y, line Z`
+- Extract exact values from docs/ files without transformation
+- Source Reference Format: `docs/NN-name.md`
 
 ```
-ARCHITECTURE.md Input:
-"RTO: 4 hours, RPO: 1 hour" (Section 11.3, line 1823)
+docs/09-operational-considerations.md Input:
+"RTO: 4 hours, RPO: 1 hour"
 
 Contract Output:
 **RTO**: 4 hours
 **RPO**: 1 hour
-**Source**: ARCHITECTURE.md Section 11.3, line 1823
+**Source**: docs/09-operational-considerations.md
 ```
 
 ### 2. Aggregation (Multiple Sources)
-- Collect related items from multiple locations and consolidate
-- Source Reference Format: `Sections X-Y, lines A-B` (consolidated)
+- Collect related items from multiple docs/ files and consolidate
+- Source Reference Format: `docs/NN-name.md, docs/NN-name.md` (consolidated)
 
 ```
-ARCHITECTURE.md Input:
-Section 7.1, line 1005: "Integration: User Management (REST API)"
-Section 7.2, line 1020: "Integration: Payment Gateway (SOAP)"
+docs/05-integration-points.md Input:
+"Integration: User Management (REST API)"
+"Integration: Payment Gateway (SOAP)"
 
 Contract Output:
 ## Integration Catalog
 | System | Protocol | Source |
 |--------|----------|--------|
-| User Management | REST API | Section 7.1, line 1005 |
-| Payment Gateway | SOAP | Section 7.2, line 1020 |
+| User Management | REST API | docs/05-integration-points.md |
+| Payment Gateway | SOAP | docs/05-integration-points.md |
 ```
 
 ### 3. Transformation (Reformatting/Calculation)
-- Convert, calculate, or reformat data from ARCHITECTURE.md
-- Source Reference Format: `Section X.Y, line Z (calculated: [formula])`
+- Convert, calculate, or reformat data from docs/ files
+- Source Reference Format: `docs/NN-name.md (calculated: [formula])`
 - IMPORTANT: Transformations must show source data + calculation formula
 
 ```
-ARCHITECTURE.md Input:
-"SLA: 99.99% uptime" (Section 10.2, line 1576)
+docs/08-scalability-and-performance.md Input:
+"SLA: 99.99% uptime"
 
 Contract Output:
 **Availability SLO**: 99.99%
 **Error Budget**: 43.2 minutes/month
 **Calculation**: (100% - 99.99%) × 43,200 min = 43.2 min
-**Source**: Section 10.2, line 1576 (calculated)
+**Source**: docs/08-scalability-and-performance.md (calculated)
 ```
 
 **Strict Validation Rule:**
 - If value CANNOT be found using Direct, Aggregation, or Transformation → mark as [PLACEHOLDER]
-- NO INFERENCE ALLOWED: Do not derive, guess, or infer values not explicitly stated in ARCHITECTURE.md
-- Exception: None. All data must trace back to actual ARCHITECTURE.md content.
+- NO INFERENCE ALLOWED: Do not derive, guess, or infer values not explicitly stated in the docs/ files
+- Exception: None. All data must trace back to actual architecture documentation content.
 
 ## Missing Data Handling - Strict Placeholder Format
 
@@ -2424,42 +2414,42 @@ When data CANNOT be extracted using Direct, Aggregation, or Transformation strat
 
 **Standard Placeholder Template:**
 ```markdown
-**[Field Name]**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]
+**[Field Name]**: [PLACEHOLDER: Not specified in docs/NN-name.md]
 Optional Reference: [Industry standard or framework guidance - informational only]
-Note: Add [specific data point] to ARCHITECTURE.md Section X.Y ([Section Name] → [Subsection Name])
+Note: Add [specific data point] to docs/NN-name.md ([Subsection Name])
 ```
 
 **Example 1: Missing RTO**
 ```markdown
-**RTO (Recovery Time Objective)**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+**RTO (Recovery Time Objective)**: [PLACEHOLDER: Not specified in docs/09-operational-considerations.md]
 Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
-Note: Add RTO value to ARCHITECTURE.md Section 11.3 (Operational Considerations → Backup and Recovery)
+Note: Add RTO value to docs/09-operational-considerations.md (Operational Considerations → Backup and Recovery)
 ```
 
 **Example 2: Missing Authentication Method**
 ```markdown
-**Authentication Method**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 9.1]
+**Authentication Method**: [PLACEHOLDER: Not specified in docs/07-security-architecture.md]
 Optional Reference: Common patterns: OAuth 2.0 + JWT (IETF RFC 6749), SAML 2.0, or mTLS
-Note: Add authentication approach to ARCHITECTURE.md Section 9.1 (Security Architecture → Authentication & Authorization)
+Note: Add authentication approach to docs/07-security-architecture.md (Security Architecture → Authentication & Authorization)
 ```
 
 **Example 3: Missing Encryption Standard**
 ```markdown
-**Data Encryption at Rest**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 9.2]
+**Data Encryption at Rest**: [PLACEHOLDER: Not specified in docs/07-security-architecture.md]
 Optional Reference: Industry standards: AES-256, TLS 1.3+ (FIPS 140-2 compliant)
-Note: Add encryption standards to ARCHITECTURE.md Section 9.2 (Security Architecture → Data Encryption)
+Note: Add encryption standards to docs/07-security-architecture.md (Security Architecture → Data Encryption)
 ```
 
 **Placeholder Components:**
 1. **[PLACEHOLDER: ...]** - Clearly marks missing data
-2. **Section Reference** - Which ARCHITECTURE.md section should contain the data (Section X.Y)
+2. **File Reference** - Which docs/ file should contain the data
 3. **Optional Reference** - Industry standard or framework guidance (informational, not prescriptive)
-4. **Note** - Specific guidance on where to add the data in ARCHITECTURE.md (Section → Subsection path)
+4. **Note** - Specific guidance on where to add the data in the docs/ file (File → Subsection path)
 
 **Critical Rules:**
-- ❌ NEVER infer or derive values not in ARCHITECTURE.md
+- ❌ NEVER infer or derive values not in the docs/ files
 - ❌ NEVER suggest specific values as if they were extracted
-- ✅ ALWAYS reference actual section locations (Section X.Y)
+- ✅ ALWAYS reference actual docs/ file paths
 - ✅ ALWAYS provide industry standards as optional reference (not requirements)
 - ✅ ALWAYS include subsection path for adding missing data
 
@@ -2484,16 +2474,16 @@ Recommendations:
 ### With architecture-docs Skill
 
 **Dependencies:**
-- Reads ARCHITECTURE.md created by architecture-docs skill
-- Follows same 12-section structure
-- Uses same Document Index pattern (lines 1-50)
+- Reads ARCHITECTURE.md (navigation index) + docs/ files created by architecture-docs skill
+- Follows same multi-file structure (ARCHITECTURE.md + docs/ directory)
+- Uses direct file reads (no line-offset calculations needed)
 - Respects same context-efficient loading strategies
 
 **Workflow:**
 ```
-1. User creates/updates ARCHITECTURE.md (architecture-docs skill)
+1. User creates/updates ARCHITECTURE.md + docs/ files (architecture-docs skill)
 2. User invokes: "Generate compliance documents" (architecture-compliance skill)
-3. Skill reads ARCHITECTURE.md sections incrementally
+3. Skill reads ARCHITECTURE.md for project name, then reads relevant docs/ files
 4. Generates 10 compliance documents
 ```
 
@@ -2597,13 +2587,13 @@ User: "Generate all compliance documents for this project"
 **Skill Actions:**
 ```
 1. Locate ARCHITECTURE.md in current directory
-2. Load Document Index (lines 1-50)
-3. Validate 12-section structure ✓
+2. Read ARCHITECTURE.md (navigation index, ~130 lines) — get project name
+3. Validate docs/ directory exists with required files ✓
 4. Confirm: "Generate all 10 compliance contracts?"
 5. User confirms
 6. For each of 10 contracts:
-   - Identify required sections
-   - Load sections incrementally
+   - Identify required docs/ files
+   - Read docs/ files directly (no offsets)
    - Extract data
    - Apply template
    - Generate document
@@ -2622,12 +2612,12 @@ User: "Create SRE Architecture contract"
 **Skill Actions:**
 ```
 1. Locate ARCHITECTURE.md
-2. Load Document Index (lines 1-50)
+2. Read ARCHITECTURE.md (navigation index) — get project name
 3. Identify contract: SRE Architecture
-4. Required sections: 10, 11
-5. Load Section 10 (lines 1550-1760)
+4. Required files: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
+5. Read docs/08-scalability-and-performance.md
 6. Extract: SLOs (p95 < 100ms, p99 < 200ms), throughput (450 TPS)
-7. Load Section 11 (lines 1760-1950)
+7. Read docs/09-operational-considerations.md
 8. Extract: Monitoring (Prometheus, Grafana), incidents (PagerDuty)
 9. Apply template: templates/TEMPLATE_SRE_ARCHITECTURE.md
 10. Generate: SRE_ARCHITECTURE_JobScheduler_2025-11-26.md
@@ -2666,17 +2656,17 @@ User: "Generate security compliance documentation"
 - `[DOCUMENT_OWNER]` - Extracted from ARCHITECTURE.md metadata or [PLACEHOLDER]
 
 **Extracted Values:**
-- `[EXTRACTED_VALUE]` - Actual data from ARCHITECTURE.md with source reference
-- `[SOURCE_REFERENCE]` - Format: "Section X, line Y" or "Sections X-Y, lines A-B"
+- `[EXTRACTED_VALUE]` - Actual data from docs/ files with source reference
+- `[SOURCE_REFERENCE]` - Format: "docs/NN-name.md"
 
 **Calculated Values (Transformation):**
 - `[CALCULATED: formula]` - Mathematical calculation from explicit source data
 - Must show source data + calculation formula + source reference
-- Example: `[CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from Section 10.2, line 1576]`
+- Example: `[CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from docs/08-scalability-and-performance.md]`
 
 **Missing Data:**
-- `[PLACEHOLDER: Not specified in ARCHITECTURE.md Section X.Y]` - Data not found, needs manual input
-- Must include: section reference + optional industry standard + note with subsection path
+- `[PLACEHOLDER: Not specified in docs/NN-name.md]` - Data not found, needs manual input
+- Must include: file reference + optional industry standard + note with subsection path
 
 ### Example Template Excerpt
 
@@ -2685,7 +2675,7 @@ User: "Generate security compliance documentation"
 
 **Project**: [PROJECT_NAME]
 **Generated**: [GENERATION_DATE]
-**Source**: ARCHITECTURE.md (Sections 10, 11)
+**Source**: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
 **Version**: 2.0
 
 ---
@@ -2693,18 +2683,18 @@ User: "Generate security compliance documentation"
 ## 1. Service Level Objectives
 
 ### 1.1 Availability SLO
-**Target**: [EXTRACTED_VALUE from Section 10.2, line 1576]
-**Error Budget**: [CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from Section 10.2, line 1576]
-**Monitoring**: [EXTRACTED_VALUE from Section 11.1, line 1780]
+**Target**: [EXTRACTED_VALUE from docs/08-scalability-and-performance.md]
+**Error Budget**: [CALCULATED: (100% - 99.99%) × 43,200 min = 43.2 min/month from docs/08-scalability-and-performance.md]
+**Monitoring**: [EXTRACTED_VALUE from docs/09-operational-considerations.md]
 
 ### 1.2 Latency SLOs
-**p95**: [EXTRACTED_VALUE from Section 10.1, line 1558]
-**p99**: [EXTRACTED_VALUE from Section 10.1, line 1559]
+**p95**: [EXTRACTED_VALUE from docs/08-scalability-and-performance.md]
+**p99**: [EXTRACTED_VALUE from docs/08-scalability-and-performance.md]
 
 [If missing]
-**p95**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 10.1]
+**p95**: [PLACEHOLDER: Not specified in docs/08-scalability-and-performance.md]
 Optional Reference: Industry standard for user-facing APIs: p95 < 100ms
-Note: Add p95 latency target to ARCHITECTURE.md Section 10.1 (Scalability & Performance → Performance Targets)
+Note: Add p95 latency target to docs/08-scalability-and-performance.md (Scalability & Performance → Performance Targets)
 ```
 
 ## External Validation System (All Contract Types)

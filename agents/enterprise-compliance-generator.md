@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `enterprise`
 **Template**: `TEMPLATE_ENTERPRISE_ARCHITECTURE.md`
-**Section Mapping**: Sections 1, 2, 3, 4 (primary), 12 (secondary)
+**Section Mapping**: docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md (primary), adr/README.md (secondary)
 
 **Key Data Points**:
 - Business capability alignment
@@ -76,7 +76,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -167,79 +167,102 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Enterprise Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 1** (Business Context): Business capabilities, strategic alignment
-- **Section 2** (System Overview): Solution positioning, scope
-- **Section 3** (System Architecture): Modularity, bounded contexts
-- **Section 4** (System Components): Component design, service boundaries
-- **Section 12** (ADRs): Technology decisions, architecture rationale (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/01-system-overview.md** (System Overview): Business capabilities, strategic alignment
+- **docs/01-system-overview.md** (System Overview): Solution positioning, scope
+- **docs/02-architecture-principles.md** (Architecture Principles): Modularity, bounded contexts
+- **docs/03-architecture-layers.md** (Architecture Layers): Component design, service boundaries
+- **adr/README.md** (ADRs): Technology decisions, architecture rationale (secondary)
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/01-system-overview.md`
+- `Read file: docs/02-architecture-principles.md`
+- `Read file: docs/03-architecture-layers.md`
+- `Read file: adr/README.md`
 
 **Step 3.3: Extract Enterprise Architecture-Specific Data Points**
 
-**Business Capability Alignment** (Section 1 or 2):
+**Business Capability Alignment** (docs/01-system-overview.md):
 ```
 pattern: "(business capability|capability map|business alignment|business domain)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Modularity** (Section 3 or 4):
+**Modularity** (docs/02-architecture-principles.md):
 ```
 pattern: "(modularity|bounded context|domain-driven|microservice|service boundary)"
-file: [architecture_file]
+file: docs/02-architecture-principles.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Third-Party Customization** (Section 2 or 3):
+**Third-Party Customization** (docs/01-system-overview.md):
 ```
 pattern: "(third-party|COTS|vendor|customization|SaaS customization)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Cloud-First** (Section 3 or 4):
+**Cloud-First** (docs/03-architecture-layers.md):
 ```
 pattern: "(cloud-first|cloud-native|cloud adoption|cloud strategy)"
-file: [architecture_file]
+file: docs/03-architecture-layers.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Technology Lifecycle** (Section 8 or 12):
+**Technology Lifecycle** (adr/README.md):
 ```
 pattern: "(technology lifecycle|EOL|end of life|technology age|obsolescence)"
-file: [architecture_file]
+file: adr/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**API-First** (Section 3 or 7):
+**API-First** (docs/02-architecture-principles.md):
 ```
 pattern: "(API-first|API design|API strategy|RESTful|GraphQL)"
-file: [architecture_file]
+file: docs/02-architecture-principles.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Event-Driven** (Section 3 or 7):
+**Event-Driven** (docs/02-architecture-principles.md):
 ```
 pattern: "(event-driven|event sourcing|message queue|Kafka|event stream|asynchronous)"
-file: [architecture_file]
+file: docs/02-architecture-principles.md
 output_mode: content
 -i: true
 -n: true
@@ -329,15 +352,16 @@ Replacement: Enterprise architecture documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 2.1`
+- Correct: `- Source: docs/01-system-overview.md`
+- Correct: `- Source: docs/02-architecture-principles.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 2.1, lines 45-50`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 2.1 (Enterprise Architecture section)`
@@ -372,7 +396,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -427,7 +451,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 2.1
+- Source: docs/01-system-overview.md
 ```
 
 INCORRECT (added line numbers):
@@ -541,7 +565,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -600,7 +624,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Enterprise Architecture
-   Sections: 1, 2, 3, 4, 12
+   Sections: docs/01, docs/02, docs/03, adr/README.md
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

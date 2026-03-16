@@ -23,6 +23,7 @@ For supporting operations and algorithms:
 - **→ DESIGN_DRIVER_CALCULATIONS.md**: Implementation details for Design Drivers calculation
 - **→ VALIDATIONS.md**: Structure enforcement rules, required principles, section name validation
 - **→ ADR_GUIDE.md**: Architectural Decision Record format and creation guidelines
+- **→ RESTRUCTURING_GUIDE.md**: Multi-file docs/ directory structure, naming conventions, cross-reference conventions, verification checklist
 
 ## Architecture Type Selection
 
@@ -59,116 +60,103 @@ To change the architecture type of an existing ARCHITECTURE.md:
 
 ## Document Structure Overview
 
-A comprehensive architecture document should follow this hierarchical structure:
+A comprehensive architecture document follows this hierarchical structure. Each section is stored in its corresponding `docs/NN-name.md` file (see **RESTRUCTURING_GUIDE.md** for the full directory layout):
 
 ```
-1. Executive Summary
-2. System Overview
-3. Architecture Principles
-4. Architecture Layers
-5. Component Details (Per Layer)
-6. Data Flow Patterns
-7. Integration Points
-8. Technology Stack
-9. Security Architecture
-10. Scalability & Performance
-11. Operational Considerations
-12. Architecture Decision Records (ADRs)
+1. Executive Summary          → docs/01-system-overview.md  (combined with Section 2)
+2. System Overview            → docs/01-system-overview.md
+3. Architecture Principles    → docs/02-architecture-principles.md
+4. Architecture Layers        → docs/03-architecture-layers.md
+5. Component Details          → docs/components/NN-<component>.md  (one file per component)
+6. Data Flow Patterns         → docs/04-data-flow-patterns.md
+7. Integration Points         → docs/05-integration-points.md
+8. Technology Stack           → docs/06-technology-stack.md
+9. Security Architecture      → docs/07-security-architecture.md
+10. Scalability & Performance → docs/08-scalability-and-performance.md
+11. Operational Considerations→ docs/09-operational-considerations.md
+12. Architecture Decision Records (ADRs) → adr/ directory (separate files per ADR)
 ```
 
 **IMPORTANT**: Section names must match exactly as shown above. See the architecture-docs skill guide for strict section name enforcement rules.
+
+**IMPORTANT**: `ARCHITECTURE.md` at the project root is the **navigation index only** (~130 lines). All section content lives in the `docs/` files listed above.
 
 ---
 
 ## Document Index & Navigation
 
-**Purpose**: Provide line number references for efficient document traversal and context-aware editing.
+**Purpose**: `ARCHITECTURE.md` serves as the navigation index — a short (~130 lines) table linking to all `docs/NN-name.md` section files. This replaces the old line-number-based Document Index.
 
-Every ARCHITECTURE.md document should include a **Document Index** at the beginning (before Section 1) that lists all major sections with their approximate line ranges. This enables:
-- Quick navigation to specific sections without reading the entire document
-- Context-efficient editing by loading only relevant sections
-- Easy maintenance and updates to specific parts of the documentation
+Every project should have `ARCHITECTURE.md` at the project root containing:
+- A Documentation table linking to each `docs/` file
+- An ADR table linking to each `adr/` file
+- Nothing else (no section content)
 
-### Index Template
+This enables:
+- Quick navigation to specific sections by following file links
+- Context-efficient editing — read only the target `docs/` file (50–400 lines each)
+- Easy maintenance — edits go to individual `docs/` files, not a monolithic document
 
-Place this index immediately after the document title and before Section 1:
+### Navigation Index Template
+
+`ARCHITECTURE.md` should follow the template in **RESTRUCTURING_GUIDE.md** (`ARCHITECTURE.md Navigation Index Template` section). Key shape:
 
 ```markdown
-## Document Index
+# <System Name> — Architecture
 
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines [START]-[END]
-- [Section 2: System Overview](#2-system-overview) → Lines [START]-[END]
-- [Section 3: Architecture Principles](#3-architecture-principles) → Lines [START]-[END]
-- [Section 4: Architecture Layers](#4-architecture-layers) → Lines [START]-[END]
-- [Section 5: Component Details](#5-component-details) → Lines [START]-[END]
-- [Section 6: Data Flow Patterns](#6-data-flow-patterns) → Lines [START]-[END]
-- [Section 7: Integration Points](#7-integration-points) → Lines [START]-[END]
-- [Section 8: Technology Stack](#8-technology-stack) → Lines [START]-[END]
-- [Section 9: Security Architecture](#9-security-architecture) → Lines [START]-[END]
-- [Section 10: Scalability & Performance](#10-scalability--performance) → Lines [START]-[END]
-- [Section 11: Operational Considerations](#11-operational-considerations) → Lines [START]-[END]
-- [Section 12: Architecture Decision Records (ADRs)](#12-architecture-decision-records-adrs) → Lines [START]-[END]
+> <One-line system description>
 
-**Index Last Updated:** YYYY-MM-DD
+## Documentation
 
----
+| # | Section | File | Description |
+|---|---------|------|-------------|
+| 1 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | ... |
+...
+
+## Architecture Decision Records
+
+| ADR | Title | Status |
+|-----|-------|--------|
+| [ADR-001](adr/ADR-001-name.md) | Title | Accepted |
 ```
 
-### How to Use the Index
+### How to Navigate
 
 **When Reading:**
-1. Read lines 1-50 to locate the Document Index
-2. Find your target section's line range in the index
-3. Use `Read` tool with offset/limit to load only that section
-4. Add 10-20 line buffer on each side to preserve context
-
-**Example:**
-```
-# Index shows: Section 5: Component Details → Lines 601-850
-# Load with context buffer:
-Read(file_path="ARCHITECTURE.md", offset=590, limit=270)
-# This reads lines 590-860 (10-line buffer + 250 lines + 10-line buffer)
-```
+1. Read `ARCHITECTURE.md` in full (it's ~130 lines — no offset needed)
+2. Find your target section in the Documentation table
+3. Read the linked `docs/NN-name.md` file in full (50–400 lines — no offset needed)
 
 **When Editing:**
-After making significant changes to a section:
-1. Use `grep -n "^## [0-9]" ARCHITECTURE.md` to find actual line numbers
-2. Update the index with current line ranges
-3. Update the "Index Last Updated" date
+- Edit the target `docs/NN-name.md` file directly
+- Only update `ARCHITECTURE.md` when adding, removing, or renaming a `docs/` file
 
-### Context Preservation Guidelines
+### Context Guidelines
 
-When working with sections using the index:
+With the multi-file structure, context management is straightforward:
 
-**Minimal Context** (Small edits):
-- Buffer: ±5-10 lines
-- Use case: Updating a single paragraph or config value
+| Operation | What to Read | Approx Lines |
+|-----------|-------------|--------------|
+| Find target section | `ARCHITECTURE.md` | ~130 |
+| Edit one section | 1 `docs/` file | ~50–400 |
+| Edit component | 1 `docs/components/` file | ~40–200 |
+| Full architecture review | All `docs/` files | ~2,000–3,500 |
 
-**Standard Context** (Section edits):
-- Buffer: ±10-20 lines
-- Use case: Rewriting a subsection or adding new components
+### Foundational Context & Source Attribution Requirement
 
-**Extended Context** (Cross-section edits):
-- Buffer: ±20-50 lines
-- Use case: Changes that reference adjacent sections
+Architecture documentation follows a dependency hierarchy. Sections 1+2 (System Overview), Section 3 (Architecture Principles), and ADRs form the **Tier 0 foundation** — the source of truth for all downstream content. Sections 4–11 are derived content organized in tiers:
 
-**Example Workflow:**
-```bash
-# Step 1: Read index to find section
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
+- **Tier 1**: S4 (Layers) — derives from S1+2, S3, ADRs
+- **Tier 2**: S5 (Components) — derives from foundation + S4
+- **Tier 3**: S6 (Data Flow), S7 (Integration), S8 (Tech Stack) — derive from foundation + S5 and/or S4
+- **Tier 4**: S9 (Security), S10 (Scalability) — derive from foundation + S5, S7, S8
+- **Tier 5**: S11 (Operations) — derives from foundation + S5, S8, S10
 
-# Step 2: Index shows Section 8: Tech Stack → Lines 1151-1300
-# Step 3: Load with standard context (±15 lines)
-Read(file_path="ARCHITECTURE.md", offset=1136, limit=179)
-# Reads lines 1136-1315
+**Source Attribution Rule**: Every claim in a downstream section that originates from another section MUST carry a cross-reference link to its source. Metrics repeated from S1 Key Metrics, design choices governed by ADRs, and constraints from S3 principles must include traceable citations (e.g., `(see [Key Metrics](01-system-overview.md#key-metrics))`, `per [ADR-003](../adr/ADR-003-title.md))`).
 
-# Step 4: Make edits using Edit tool
-# Step 5: Verify changes
-Read(file_path="ARCHITECTURE.md", offset=1136, limit=179)
+**Unverifiable Claims**: If a specific claim (metric, decision, constraint) cannot be traced to an existing section, user input, or ADR, insert a `<!-- TODO: Add source reference -->` marker. These markers signal content that needs sourcing during review.
 
-# Step 6: Update index if section grew/shrunk significantly
-```
+For the full dependency map, loading procedure, and citation format table, see the **Foundational Context Anchor Protocol** in SKILL.md.
 
 ---
 
@@ -176,7 +164,7 @@ Read(file_path="ARCHITECTURE.md", offset=1136, limit=179)
 
 **Purpose**: High-level overview for executives and stakeholders.
 
-**Important**: Before Section 1, include the Document Index with line number references for navigation.
+**Important**: Section 1 (Executive Summary) and Section 2 (System Overview) are combined in `docs/01-system-overview.md`. The `ARCHITECTURE.md` file at the project root is the navigation index only — it does not contain section content.
 
 **Complete Template (Including Index):**
 ```markdown
@@ -756,6 +744,8 @@ Use asynchronous domain events to decouple components where temporal independenc
 
 ## Section 4: Meta Architecture
 
+> **Foundational Traceability**: Before writing/editing S4, load: **S1** (business scope/scale), **S3** (scalability/modularity principles), **ADRs** (architecture style decisions). S4 derives the layer model directly from business requirements and governing principles.
+
 **Purpose**: Define the architecture model that organizes system components according to their responsibilities and functions.
 
 **Architecture Type**: This section's structure depends on your chosen architecture type. The skill automatically loads the appropriate template based on your selection.
@@ -1278,6 +1268,8 @@ Document each microservice using this template:
 
 ## Section 5: Component Details
 
+> **Foundational Traceability**: Before writing/editing S5, load: **S1** (key metrics/use cases), **S3** (separation of concerns), **S4** (layer structure — components must map to layers), **ADRs** (component boundary decisions). Layer boundaries from S4 determine component grouping.
+
 **Purpose**: Deep dive into each component within the architecture, organized according to your chosen architecture type.
 
 **Architecture Type**: This section's organization depends on your chosen architecture type. The skill automatically loads the appropriate template based on your selection.
@@ -1391,6 +1383,8 @@ Manages user identity, authentication, and profile information.
 
 ## Section 6: Data Flow Patterns
 
+> **Foundational Traceability**: Before writing/editing S6, load: **S1** (throughput metrics), **S3** (event-driven/async principles), **S5** (component names — flows reference components as source/destination nodes), **ADRs** (data pipeline decisions). Throughput metrics from S1 Key Metrics constrain flow design.
+
 **Purpose**: Document how data moves through the system for key operations.
 
 **Template:**
@@ -1418,6 +1412,8 @@ Manages user identity, authentication, and profile information.
 ---
 
 ## Section 7: Integration Points
+
+> **Foundational Traceability**: Before writing/editing S7, load: **S1** (integration count), **S3** (loose coupling principle), **S5** (component interfaces — integrations connect to specific components), **ADRs** (protocol decisions). The loose coupling principle from S3 constrains protocol choices.
 
 **Purpose**: Document all external integrations and third-party dependencies.
 
@@ -1468,6 +1464,8 @@ Manages user identity, authentication, and profile information.
 ---
 
 ## Section 8: Technology Stack
+
+> **Foundational Traceability**: Before writing/editing S8, load: **S1** (constraints), **S3** (tech selection criteria), **S4** (architecture type — constrains tech patterns, e.g., microservices → containers/mesh), **S5** (per-component tech — S8 aggregates component-level choices), **ADRs** (technology decisions).
 
 **Purpose**: Comprehensive list of all technologies used in the system.
 
@@ -1528,6 +1526,8 @@ Manages user identity, authentication, and profile information.
 ---
 
 ## Section 9: Security Architecture
+
+> **Foundational Traceability**: Before writing/editing S9, load: **S1** (compliance requirements), **S3** (security by design principle), **S5** (component security boundaries), **S7** (integration auth mechanisms), **S8** (security tools), **ADRs** (security framework decisions). S9 has the heaviest dependency set — security controls span components, integration auth, and security tooling.
 
 **Purpose**: Document security controls, threat model, and compliance requirements.
 
@@ -1609,6 +1609,8 @@ Manages user identity, authentication, and profile information.
 
 ## Section 10: Scalability & Performance
 
+> **Foundational Traceability**: Before writing/editing S10, load: **S1** (SLO/throughput — source of truth for performance targets), **S3** (scalability principle), **S5** (per-component scaling strategies), **S8** (infrastructure capabilities), **ADRs** (scaling strategy decisions). S1 Key Metrics are the authoritative source for all performance targets repeated here.
+
 **Purpose**: Document how the system scales and performance characteristics.
 
 **Template:**
@@ -1681,6 +1683,8 @@ Manages user identity, authentication, and profile information.
 ---
 
 ## Section 11: Operational Considerations
+
+> **Foundational Traceability**: Before writing/editing S11, load: **S1** (availability targets), **S3** (observability principle), **S5** (per-component operational requirements), **S8** (infrastructure/observability tools), **S10** (alerting thresholds — S10 performance targets drive S11 monitoring alerts), **ADRs** (deployment/DR decisions).
 
 **Purpose**: Document deployment, monitoring, and operational procedures.
 

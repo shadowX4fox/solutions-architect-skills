@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `process`
 **Template**: `TEMPLATE_PROCESS_TRANSFORMATION.md`
-**Section Mapping**: Sections 1, 2, 6 (primary), 5, 7 (secondary)
+**Section Mapping**: docs/01-system-overview.md, docs/04-data-flow-patterns.md (primary), docs/components/README.md, docs/05-integration-points.md (secondary)
 
 **Key Data Points**:
 - Automation ROI (positive within 12 months)
@@ -75,7 +75,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -166,70 +166,93 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Process Transformation**
 
-PRE-CONFIGURED sections to extract:
-- **Section 1** (Business Context): Business processes, efficiency targets
-- **Section 2** (System Overview): Automation scope, process overview
-- **Section 6** (API & Integration): Automation tools, integration patterns
-- **Section 5** (Infrastructure): Automation infrastructure (secondary)
-- **Section 7** (Security): Automation security (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/01-system-overview.md** (System Overview): Business processes, efficiency targets
+- **docs/01-system-overview.md** (System Overview): Automation scope, process overview
+- **docs/04-data-flow-patterns.md** (Data Flow Patterns): Automation tools, integration patterns
+- **docs/components/README.md** (Component Details): Automation infrastructure (secondary)
+- **docs/05-integration-points.md** (Integration Points): Automation security (secondary)
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/01-system-overview.md`
+- `Read file: docs/04-data-flow-patterns.md`
+- `Read file: docs/components/README.md`
+- `Read file: docs/05-integration-points.md`
 
 **Step 3.3: Extract Process Transformation-Specific Data Points**
 
-**Automation ROI** (Section 1 or 2):
+**Automation ROI** (docs/01-system-overview.md):
 ```
 pattern: "(automation ROI|return on investment|cost savings|efficiency gain)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Hours Saved** (Section 1 or 2):
+**Hours Saved** (docs/01-system-overview.md):
 ```
 pattern: "(hours saved|time savings|manual hours|productivity gain)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Automation Tools** (Section 6):
+**Automation Tools** (docs/04-data-flow-patterns.md):
 ```
 pattern: "(RPA|robotic process|UiPath|Automation Anywhere|Power Automate|workflow automation)"
-file: [architecture_file]
+file: docs/04-data-flow-patterns.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Reusable Capabilities** (Section 6):
+**Reusable Capabilities** (docs/components/README.md):
 ```
 pattern: "(reusable|shared service|capability reuse|component library)"
-file: [architecture_file]
+file: docs/components/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**License Optimization** (Section 5):
+**License Optimization** (docs/components/README.md):
 ```
 pattern: "(license|concurrent user|named user|license optimization)"
-file: [architecture_file]
+file: docs/components/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Process Improvement** (Section 1):
+**Process Improvement** (docs/01-system-overview.md):
 ```
 pattern: "(process improvement|process optimization|lean|Six Sigma)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
@@ -319,15 +342,16 @@ Replacement: RTO documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 11.2`
+- Correct: `- Source: docs/01-system-overview.md`
+- Correct: `- Source: docs/04-data-flow-patterns.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2, lines 567-570`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2 (Monitoring section)`
@@ -362,7 +386,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -417,7 +441,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 11.2
+- Source: docs/01-system-overview.md
 ```
 
 INCORRECT (added line numbers):
@@ -533,7 +557,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -592,7 +616,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Process Transformation
-   Sections: 1, 2, 6, 5, 7
+   Sections: docs/01, docs/04, docs/components/README.md, docs/05
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

@@ -429,7 +429,7 @@ The skill automatically creates an index showing section boundaries:
 ```
 
 **Benefits:**
-- Context-efficient editing (load only needed sections)
+- Context-efficient editing with foundational anchoring — loads required upstream context (principles, metrics, ADRs, parent sections) before editing any downstream section to prevent drift and maintain cross-section consistency
 - Easy navigation in large documents
 - Auto-updated after significant changes
 

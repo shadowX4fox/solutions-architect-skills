@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `business_continuity`
 **Template**: `TEMPLATE_BUSINESS_CONTINUITY.md`
-**Section Mapping**: Sections 1, 3, 4, 5, 7, 8, 10, 11
+**Section Mapping**: docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/06-technology-stack.md, docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
 
 **Key Data Points**:
 - RTO (Recovery Time Objective)
@@ -79,7 +79,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -170,13 +170,13 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-**Step 2.1: Read Document Header**
+**Step 2.1: Read Navigation Index**
 
-Use Read tool to read first 50 lines of ARCHITECTURE.md:
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
 ```
 Read file: [architecture_file]
-Limit: 50 lines
 Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
 ```
 
 **Step 2.2: Get Current Date**
@@ -191,113 +191,106 @@ Store as: generation_date
 
 **Step 3.1: Required Sections for Business Continuity**
 
-PRE-CONFIGURED sections to extract:
-- **Section 1** (Business Context): Critical business processes, business impact
-- **Section 3** (System Architecture): Architecture pattern, SPOF identification
-- **Section 4** (System Components): Component dependencies, criticality
-- **Section 5** (Data Architecture): Data backup, retention policies
-- **Section 7** (Integration Architecture): Integration dependencies, failover
-- **Section 8** (Infrastructure): Geographic redundancy, HA configuration
-- **Section 10** (Performance): SLA targets, availability requirements
-- **Section 11** (Operational): DR procedures, backup automation, monitoring
+PRE-CONFIGURED files to extract:
+- **docs/01-system-overview.md** (System Overview): Critical business processes, business impact
+- **docs/02-architecture-principles.md** (Architecture Principles): Architecture pattern, SPOF identification
+- **docs/03-architecture-layers.md** (Architecture Layers): Component dependencies, criticality
+- **docs/components/README.md** (Component Details): Data backup, retention policies
+- **docs/05-integration-points.md** (Integration Points): Integration dependencies, failover
+- **docs/06-technology-stack.md** (Technology Stack): Geographic redundancy, HA configuration
+- **docs/08-scalability-and-performance.md** (Scalability & Performance): SLA targets, availability requirements
+- **docs/09-operational-considerations.md** (Operational Considerations): DR procedures, backup automation, monitoring
 
 **Step 3.2: Extract Section Content**
 
-For each required section (1, 3, 4, 5, 7, 8, 10, 11):
-
-1. Use Grep tool to find section start:
-```
-pattern: "^## [section_number]\.? |^## [section_number] "
-file: [architecture_file]
-output_mode: content
--n: true
-```
-
-2. Use Read tool to read section:
-```
-Read file: [architecture_file]
-offset: [section_start_line]
-limit: 200 (or until next section)
-```
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/01-system-overview.md`
+- `Read file: docs/02-architecture-principles.md`
+- `Read file: docs/03-architecture-layers.md`
+- `Read file: docs/components/README.md`
+- `Read file: docs/05-integration-points.md`
+- `Read file: docs/06-technology-stack.md`
+- `Read file: docs/08-scalability-and-performance.md`
+- `Read file: docs/09-operational-considerations.md`
 
 **Step 3.3: Extract Business Continuity-Specific Data Points**
 
-**RTO Detection** (Section 10 or 11):
+**RTO Detection** (docs/09-operational-considerations.md):
 ```
 pattern: "RTO[:\s]+([0-9]+)\s*(hour|minute|day|hr|min)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**RPO Detection** (Section 10 or 11):
+**RPO Detection** (docs/09-operational-considerations.md):
 ```
 pattern: "RPO[:\s]+([0-9]+)\s*(hour|minute|day|hr|min)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Disaster Recovery** (Section 11):
+**Disaster Recovery** (docs/09-operational-considerations.md):
 ```
 pattern: "(disaster recovery|DR procedure|DR plan|failover|recovery plan)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Backup Strategy** (Section 5 or 11):
+**Backup Strategy** (docs/09-operational-considerations.md):
 ```
 pattern: "(backup|snapshot|replication|incremental backup|full backup)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Retention Policy** (Section 5 or 11):
+**Retention Policy** (docs/09-operational-considerations.md):
 ```
 pattern: "(retention|backup retention|retention period|backup schedule)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Geographic Redundancy** (Section 8):
+**Geographic Redundancy** (docs/06-technology-stack.md):
 ```
 pattern: "(geographic|geo[- ]redundan|multi[- ]region|cross[- ]region|multi[- ]datacenter)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**High Availability** (Section 8 or 11):
+**High Availability** (docs/06-technology-stack.md):
 ```
 pattern: "(high availability|HA|active[- ]active|active[- ]passive|load balanc)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**SPOF Analysis** (Section 3 or 11):
+**SPOF Analysis** (docs/02-architecture-principles.md):
 ```
 pattern: "(single point of failure|SPOF|single point|redundancy)"
-file: [architecture_file]
+file: docs/02-architecture-principles.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Critical Processes** (Section 1):
+**Critical Processes** (docs/01-system-overview.md):
 ```
 pattern: "(critical process|business critical|mission critical|tier 1)"
-file: [architecture_file]
+file: docs/01-system-overview.md
 output_mode: content
 -i: true
 -n: true
@@ -387,15 +380,16 @@ Replacement: RTO documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 11.3`
+- Correct: `- Source: docs/09-operational-considerations.md`
+- Correct: `- Source: docs/01-system-overview.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.3, lines 234-240`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.3 (DR section)`
@@ -430,7 +424,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -485,7 +479,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 11.3
+- Source: docs/09-operational-considerations.md
 ```
 
 INCORRECT (added line numbers):
@@ -639,7 +633,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -695,7 +689,7 @@ Contract Details:
    Date: [generation_date]
    Type: Business Continuity
    Requirements: 43 (LACN001-LACN043)
-   Sections: 1, 3, 4, 5, 7, 8, 10, 11
+   Sections: docs/01, docs/02, docs/03, docs/components/README.md, docs/05, docs/06, docs/08, docs/09
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.

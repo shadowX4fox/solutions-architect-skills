@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-1.5.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.3.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -79,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v1.9.0` in the list.
+You should see `solutions-architect-skills v2.3.15` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -124,6 +124,8 @@ Create and maintain technical architecture documentation following enterprise st
 - 9 mandatory Architecture Principles + 1 optional
 - ADR (Architecture Decision Record) templates
 - **Automatic ADR file generation** from Section 12 table ⭐ NEW v1.5
+- **Foundational Context Anchor Protocol** — dependency-aware editing workflow that loads required upstream context (principles, metrics, ADRs) before any downstream section edit, enforces source attribution for derived claims, and detects cross-section impact when any section changes
+- **Multi-file structure support** — split large ARCHITECTURE.md into a `docs/` directory with per-section files; see [RESTRUCTURING_GUIDE.md](skills/architecture-docs/RESTRUCTURING_GUIDE.md)
 
 **Output:** `ARCHITECTURE.md` (2,000-3,000 lines typically)
 
@@ -133,7 +135,7 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability.
 
 **Key Features:**
 - Context-efficient generation (70-80% reduction in loaded content)
-- **v1.3.0**: 11 complete compliance contracts with external validation system ⭐ NEW
+- **v1.3.0**: 10 complete compliance contracts with external validation system ⭐ NEW
 - **Automatic Validation (0-10 scoring)**: All contracts validated with granular scoring ⭐ NEW
 - **4-Tier Approval Workflow**: Auto-approve (8.0-10), Manual review (7.0-7.9), Needs work (5.0-6.9), Rejected (0-4.9) ⭐ NEW
 - Source traceability (section + line number references)
@@ -176,7 +178,7 @@ All 10 contracts now include automatic validation with:
 - **Full Traceability**: All scores link back to ARCHITECTURE.md sources
 - **Actionable Feedback**: Clear recommendations for improving scores
 
-**Validation Configuration Files**: 11 JSON configs in `/skills/architecture-compliance/validation/`
+**Validation Configuration Files**: 22 JSON files in `/skills/architecture-compliance/validation/` — 10 main contract configs, 10 template validation configs, plus `VALIDATION_SCHEMA.json` and `VALIDATION_EXAMPLES.md`
 
 ## Architecture Types & Visualization
 
@@ -258,7 +260,7 @@ Complete end-to-end demonstration of the three-phase workflow:
 - Complete with metrics, SLOs, and ADRs
 
 **Phase 3: Compliance Documentation**
-- All 11 generated compliance contracts with v1.3.0 validation
+- All 10 generated compliance contracts with v1.3.0 validation
 - Development Architecture with 26-item stack validation
 - Security, Cloud, SRE, and Enterprise Architecture contracts
 - Full source traceability to ARCHITECTURE.md
@@ -361,7 +363,7 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v1.5.0 (Current Release) ✅
+### v2.3.15 (Current Release) ✅
 **Major Release: BIAN Full Compliance + Business Continuity v2.0**
 
 - ✅ **5th Architecture Type: Full BIAN V12.0** ⭐ MAJOR
@@ -396,7 +398,7 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 - ✅ **All 10 compliance contracts** with templates and validation ⭐ MAJOR
 - ✅ **External validation system** (0-10 scoring, 4-tier approval) ⭐ MAJOR
-- ✅ **10 validation configuration files** (JSON-based, template-specific)
+- ✅ **10 validation configuration files** (JSON-based, template-specific) + 10 template validation configs
 - ✅ **Validation documentation**:
   - `VALIDATION_SCHEMA.json` - Schema definition
   - `VALIDATION_EXAMPLES.md` - 4-tier outcome examples

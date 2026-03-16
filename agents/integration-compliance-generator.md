@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `integration`
 **Template**: `TEMPLATE_INTEGRATION_ARCHITECTURE.md`
-**Section Mapping**: Sections 5, 6, 7, 9 (primary)
+**Section Mapping**: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md, docs/07-security-architecture.md (primary)
 
 **Key Data Points**:
 - Integration catalog and documentation
@@ -76,7 +76,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -167,87 +167,110 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Integration Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 5** (Data Architecture): Data integration patterns
-- **Section 6** (API & Integration): API catalog, integration patterns
-- **Section 7** (Integration Architecture): Integration protocols, patterns
-- **Section 9** (Security): Integration security controls
+PRE-CONFIGURED files to extract:
+- **docs/components/README.md** (Component Details): Data integration patterns
+- **docs/04-data-flow-patterns.md** (Data Flow Patterns): API catalog, integration patterns
+- **docs/05-integration-points.md** (Integration Points): Integration protocols, patterns
+- **docs/07-security-architecture.md** (Security Architecture): Integration security controls
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/components/README.md`
+- `Read file: docs/04-data-flow-patterns.md`
+- `Read file: docs/05-integration-points.md`
+- `Read file: docs/07-security-architecture.md`
 
 **Step 3.3: Extract Integration-Specific Data Points**
 
-**Integration Catalog** (Section 6 or 7):
+**Integration Catalog** (docs/05-integration-points.md):
 ```
 pattern: "(integration catalog|API catalog|integration inventory|API registry)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**OpenAPI Compliance** (Section 6 or 7):
+**OpenAPI Compliance** (docs/05-integration-points.md):
 ```
 pattern: "(OpenAPI|Swagger|AsyncAPI|API specification|API schema)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Correlation IDs** (Section 7):
+**Correlation IDs** (docs/05-integration-points.md):
 ```
 pattern: "(correlation ID|trace ID|request ID|transaction ID|distributed tracing)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**API Versioning** (Section 6 or 7):
+**API Versioning** (docs/05-integration-points.md):
 ```
 pattern: "(API version|versioning strategy|version control|URI versioning|header versioning)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Integration Security** (Section 9):
+**Integration Security** (docs/07-security-architecture.md):
 ```
 pattern: "(OAuth 2.0|API key|mutual TLS|integration security|API authentication)"
-file: [architecture_file]
+file: docs/07-security-architecture.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**API Protocols** (Section 7):
+**API Protocols** (docs/05-integration-points.md):
 ```
 pattern: "(REST|GraphQL|gRPC|WebSocket|SOAP|HTTP)"
-file: [architecture_file]
+file: docs/05-integration-points.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Message Patterns** (Section 7):
+**Message Patterns** (docs/04-data-flow-patterns.md):
 ```
 pattern: "(message queue|pub/sub|publish subscribe|message broker|Kafka|RabbitMQ)"
-file: [architecture_file]
+file: docs/04-data-flow-patterns.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Async Patterns** (Section 7):
+**Async Patterns** (docs/04-data-flow-patterns.md):
 ```
 pattern: "(asynchronous|async|selective async|event notification|request/reply)"
-file: [architecture_file]
+file: docs/04-data-flow-patterns.md
 output_mode: content
 -i: true
 -n: true
@@ -337,15 +360,16 @@ Replacement: Integration patterns documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 7.2`
+- Correct: `- Source: docs/05-integration-points.md`
+- Correct: `- Source: docs/07-security-architecture.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 7.2, lines 167-172`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 7.2 (Integration Architecture section)`
@@ -380,7 +404,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -435,7 +459,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 7.2
+- Source: docs/05-integration-points.md
 ```
 
 INCORRECT (added line numbers):
@@ -549,7 +573,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -608,7 +632,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Integration Architecture
-   Sections: 5, 6, 7, 9
+   Sections: docs/components/README.md, docs/04, docs/05, docs/07
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

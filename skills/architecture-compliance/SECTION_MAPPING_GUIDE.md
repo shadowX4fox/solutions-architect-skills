@@ -40,410 +40,117 @@ This guide provides detailed mapping between ARCHITECTURE.md sections and compli
 3. **Transformation**: Calculate or reformat (e.g., SLA → error budget)
 4. **Inference**: Derive from context (e.g., 99.99% → Tier 1)
 
-### Document Index-Based Section Loading
+### Navigation Index-Based File Loading
 
 #### Overview
 
-All section references and data extractions use the **Document Index** from ARCHITECTURE.md (typically lines 5-21) to determine exact line ranges. This enables context-efficient loading and precise source traceability, minimizing token usage while maintaining accuracy.
+Architecture documentation now uses a **multi-file structure** where `ARCHITECTURE.md` is a navigation index (~130 lines) and section content lives in separate `docs/` files. This eliminates the need for line-offset based reads — each section is an independent file that can be read directly.
 
-The Document Index is a standardized navigation structure maintained in all ARCHITECTURE.md files following the architecture-docs skill template. It maps each of the 12 standard sections to their exact line ranges within the document.
+#### ARCHITECTURE.md as Navigation Index
 
-#### Document Index Structure
+`ARCHITECTURE.md` (~130 lines) contains the project name, overview, and links to the `docs/` files. Read the full file to extract the project name:
 
-The Document Index appears at the beginning of ARCHITECTURE.md (lines 5-21) with this format:
-
-```markdown
-## Document Index
-
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines 25-53
-- [Section 2: System Overview](#2-system-overview) → Lines 54-146
-- [Section 3: Architecture Principles](#3-architecture-principles) → Lines 147-300
-- [Section 4: Deployment Architecture](#4-deployment-architecture) → Lines 301-450
-- [Section 5: System Components](#5-system-components) → Lines 451-600
-- [Section 6: Data Flow](#6-data-flow) → Lines 601-750
-- [Section 7: Integration Points](#7-integration-points) → Lines 751-900
-- [Section 8: Technology Stack](#8-technology-stack) → Lines 901-1050
-- [Section 9: Security Considerations](#9-security-considerations) → Lines 1051-1250
-- [Section 10: Performance Requirements](#10-performance-requirements) → Lines 1251-1400
-- [Section 11: Operational Considerations](#11-operational-considerations) → Lines 1401-1650
-- [Section 12: Architecture Decision Records](#12-architecture-decision-records) → Lines 1651-EOF
-
-**Index Last Updated:** YYYY-MM-DD
+```
+Read file: ARCHITECTURE.md
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
 ```
 
-**Key Elements:**
-- **Section names**: Clickable markdown anchors for navigation
-- **Line ranges**: Exact start and end line numbers (`Lines X-Y`)
-- **Timestamp**: Last update date for tracking index freshness
+#### Section-to-File Mapping
 
-#### Three-Step Section Loading Workflow
+Each logical section now maps to a specific file in the `docs/` directory:
 
-##### Step 1: Load Document Index
+| Section | Content | File |
+|---------|---------|------|
+| 1, 2 (Executive Summary / System Overview) | Business context, system purpose, scope | `docs/01-system-overview.md` |
+| 3 (Architecture Principles) | Design principles, patterns, constraints | `docs/02-architecture-principles.md` |
+| 4 (Architecture Layers) | Deployment architecture, environment design | `docs/03-architecture-layers.md` |
+| 5 (Component Details) | Components, services, interfaces | `docs/components/README.md` |
+| 6 (Data Flow Patterns) | Data movement, pipelines, transformations | `docs/04-data-flow-patterns.md` |
+| 7 (Integration Points) | External systems, APIs, protocols | `docs/05-integration-points.md` |
+| 8 (Technology Stack) | Technologies, versions, frameworks | `docs/06-technology-stack.md` |
+| 9 (Security Architecture) | Security controls, compliance | `docs/07-security-architecture.md` |
+| 10 (Scalability & Performance) | SLAs, latency, throughput, SLOs | `docs/08-scalability-and-performance.md` |
+| 11 (Operational Considerations) | Monitoring, backup, incidents, DR | `docs/09-operational-considerations.md` |
+| 12 (ADRs) | Architecture Decision Records | `adr/README.md` |
+| References | External references | `docs/10-references.md` |
 
-First, read the Document Index to extract section line ranges:
+#### Two-Step File Loading Workflow
 
-```python
-# Load Document Index (first 50 lines typically contain it)
-index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
+##### Step 1: Read ARCHITECTURE.md to Get Project Name
 
-# Parse to extract section ranges
-doc_index = parse_document_index(index_content)
-# Returns: {
-#   "1": {"start": 25, "end": 53, "name": "Executive Summary"},
-#   "2": {"start": 54, "end": 146, "name": "System Overview"},
-#   ...
-#   "last_updated": "2025-11-27"
-# }
+```
+Read file: ARCHITECTURE.md
+Extract: project name from H1 header
 ```
 
-##### Step 2: Lookup Target Section
+##### Step 2: Read Specific docs/ Files Directly
 
-For a target section (e.g., Section 11 - Operational Considerations), extract its line range:
+For each section needed, read the corresponding file in full (no offset needed):
 
-```python
-section_11_range = doc_index.get_section_range(section=11)
-# Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
+```
+Read file: docs/09-operational-considerations.md
+Read file: docs/08-scalability-and-performance.md
+Read file: docs/07-security-architecture.md
+# etc.
 ```
 
-##### Step 3: Calculate Load Parameters with Buffer
+**Benefits of multi-file structure:**
+- No line-offset calculations required
+- Each file can be read in full without context waste
+- Clear 1:1 mapping between section and file
+- Source references use file paths instead of line numbers
 
-Calculate `offset` and `limit` parameters for the Read tool with context buffer:
+#### Source Reference Format
 
-```python
-section_start = 1401  # From Document Index
-section_end = 1650    # From Document Index
-buffer = 10           # Context buffer (5-20 lines recommended)
+Source references now use file paths instead of section numbers:
 
-# Calculate Read parameters
-offset = section_start - buffer - 1  # -1 for zero-indexed offset
-limit = (section_end - section_start) + (2 * buffer)
+- **Old format**: `ARCHITECTURE.md Section 11.2`
+- **New format**: `docs/09-operational-considerations.md`
 
-# Result: offset=1390, limit=259
-section_content = Read(file_path="ARCHITECTURE.md", offset=1390, limit=259)
-# Reads lines 1391-1649 (Section 11 with ±10-line buffer)
-```
-
-**Buffer Purpose:**
-- Captures context around section boundaries
-- Ensures subsection headers are included
-- Prevents data loss at edges
-- Standard sizes: minimal (5-10), standard (10-20), extended (20-50 lines)
-
-#### Buffer Size Guidelines
-
-| Extraction Type | Buffer Size | Use Case | Example |
-|----------------|-------------|----------|---------|
-| **Minimal** | 5-10 lines | Single value extraction (RTO, SLA) | Extract "RTO: 4 hours" |
-| **Standard** | 10-20 lines | Subsection extraction (Section 11.3) | Extract full backup strategy |
-| **Extended** | 20-50 lines | Full section or complex patterns | Extract all monitoring tools + config |
-
-**Selection Criteria:**
-- **Minimal**: Known value location, simple regex patterns
-- **Standard**: Subsection-level data, multiple related values
-- **Extended**: Cross-subsection relationships, aggregate data
-
-#### Subsection Detection and Loading
-
-For subsections (e.g., Section 11.3 - Backup & Recovery), use a two-step approach:
-
-**Step 1: Locate Subsection Within Section**
-
-After loading the full section (Step 3 above), use grep to find subsection boundaries:
-
-```python
-# Use Grep tool to find subsection within section range
-grep_result = grep_subsection(
-    file_path="ARCHITECTURE.md",
-    pattern="^### 11\.3",  # Subsection pattern (note escaped dot)
-    start_line=1401,       # Section 11 start (from index)
-    end_line=1650          # Section 11 end (from index)
-)
-# Returns: {"line_number": 1523, "header": "### 11.3 Backup & Recovery"}
-```
-
-**Step 2: Calculate Subsection Line Range**
-
-Find the next subsection to determine where 11.3 ends:
-
-```python
-# Grep for next subsection (11.4)
-next_subsection = grep_subsection(
-    pattern="^### 11\.4",
-    start_line=1523,       # Current subsection start
-    end_line=1650          # Section end
-)
-# Returns: {"line_number": 1575}
-
-# Calculate subsection bounds
-subsection_start = 1523
-subsection_end = next_subsection["line_number"] - 1  # 1574 (line before 11.4)
-```
-
-**Step 3: Load Subsection with Buffer**
-
-```python
-buffer = 10
-offset = subsection_start - buffer - 1  # 1512
-limit = (subsection_end - subsection_start) + (2 * buffer)  # 71
-
-subsection_content = Read(file_path="ARCHITECTURE.md", offset=1512, limit=71)
-# Reads lines 1513-1583 (Section 11.3 + 10-line buffer)
-```
-
-#### Section Boundary Detection Algorithm
-
-When the Document Index is unavailable, outdated, or needs regeneration, use this algorithm:
-
-##### Step 1: Detect All Primary Section Headers
-
-Use grep to find all numbered section headers:
-
-```bash
-grep -n "^## [0-9]" ARCHITECTURE.md
-```
-
-**Output Example:**
-```
-25:## 1. Executive Summary
-54:## 2. System Overview
-147:## 3. Architecture Principles
-301:## 4. Deployment Architecture
-451:## 5. System Components
-601:## 6. Data Flow
-751:## 7. Integration Points
-901:## 8. Technology Stack
-1051:## 9. Security Considerations
-1251:## 10. Performance Requirements
-1401:## 11. Operational Considerations
-1651:## 12. Architecture Decision Records
-```
-
-##### Step 2: Parse Grep Output to Build Index
-
-```python
-import re
-
-section_boundaries = {}
-grep_lines = grep_output.strip().split('\n')
-
-for i, line in enumerate(grep_lines):
-    # Parse: "25:## 1. Executive Summary"
-    line_num, header = line.split(':', 1)
-
-    # Extract section number (1, 2, 3, ..., 12)
-    match = re.search(r'^## (\d+)\.', header)
-    section_num = match.group(1)
-
-    # Extract section name
-    section_name = header.split('. ', 1)[1].strip()
-
-    # Calculate end line (next section start - 1, or EOF for last section)
-    if i + 1 < len(grep_lines):
-        next_line_num = int(grep_lines[i+1].split(':')[0])
-        end_line = next_line_num - 1
-    else:
-        end_line = "EOF"  # Or get file line count
-
-    section_boundaries[section_num] = {
-        "start": int(line_num),
-        "end": end_line,
-        "name": section_name
-    }
-
-# Result: Same structure as parsed Document Index
-```
-
-##### Step 3: Generate or Update Document Index
-
-Use the parsed boundaries to create/update the Document Index section:
-
-```python
-from datetime import date
-
-index_content = "## Document Index\n\n**Quick Navigation:**\n"
-
-for section_num in sorted(section_boundaries.keys(), key=int):
-    section = section_boundaries[section_num]
-    anchor = f"#{section_num}-{section['name'].lower().replace(' ', '-')}"
-    end_display = section['end'] if section['end'] != 'EOF' else 'EOF'
-
-    index_content += f"- [Section {section_num}: {section['name']}]({anchor}) → Lines {section['start']}-{end_display}\n"
-
-index_content += f"\n**Index Last Updated:** {date.today().isoformat()}\n"
-
-# Write to ARCHITECTURE.md lines 5-21 (replace existing index)
-```
-
-#### Line Number Calculation for Source References
-
-All extracted values must include precise line number references. Calculate using this formula:
-
-**Formula:**
-```
-absolute_line_number = subsection_start_line + relative_offset
-```
-
-**Implementation:**
-
-```python
-# After loading subsection content and finding a match
-rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', subsection_content)
-
-if rto_match:
-    # Calculate relative offset (newline count before match)
-    relative_offset = subsection_content[:rto_match.start()].count('\n')
-
-    # Calculate absolute line number
-    absolute_line_number = subsection_start + relative_offset
-    # Example: 1523 (subsection start) + 5 (offset) = 1528
-
-    # Store with source reference
-    rto_value = rto_match.group(1)
-    rto_source = f"Section 11.3, line {absolute_line_number}"
-
-# Return structured data
-return {
-    "rto": rto_value,
-    "rto_source": rto_source,
-    "rto_line": absolute_line_number
-}
-```
-
-**Why This Matters:**
-- **Traceability**: Compliance audits require exact source locations
-- **Consistency**: Same value must have same line reference across contracts
-- **Validation**: Enables automated consistency checking
-- **Updates**: Easy to re-extract if ARCHITECTURE.md changes
+**Examples:**
+- RTO/RPO/DR data → `docs/09-operational-considerations.md`
+- SLO/SLI/latency data → `docs/08-scalability-and-performance.md`
+- Security controls → `docs/07-security-architecture.md`
+- Integration patterns → `docs/05-integration-points.md`
+- Technology stack → `docs/06-technology-stack.md`
+- Data flow patterns → `docs/04-data-flow-patterns.md`
+- Component details → `docs/components/README.md`
+- ADR decisions → `adr/README.md`
+- Business context → `docs/01-system-overview.md`
 
 #### Context-Efficient Loading Strategy
 
-Follow this hierarchy to minimize token usage:
+With multi-file structure, loading is straightforward:
 
-1. **Document Index First** (50 lines): Always start by loading the index
-2. **Section-Level Loading** (100-300 lines): Load full section for multiple subsections
-3. **Subsection-Level Loading** (30-100 lines): Load specific subsection when possible
-4. **Targeted Extraction** (10-30 lines): Use grep + minimal buffer for single values
+1. **Read ARCHITECTURE.md** (navigation index, ~130 lines): Get project name
+2. **Read required docs/ files** (each file): Full content, no offsets needed
+3. **Apply Grep patterns** against the specific docs/ file for targeted extraction
 
-**Example Optimization:**
-
-```python
-# INEFFICIENT: Load entire file (2000+ lines)
-full_content = Read(file_path="ARCHITECTURE.md")  # DON'T DO THIS
-
-# EFFICIENT: Document Index + targeted section
-index = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)  # 50 lines
-section_11 = Read(file_path="ARCHITECTURE.md", offset=1390, limit=259)  # 259 lines
-# Total: 309 lines (vs 2000+ lines)
-
-# MOST EFFICIENT: Index + subsection only
-index = Read(offset=1, limit=50)  # 50 lines
-subsection_11_3 = Read(offset=1512, limit=71)  # 71 lines
-# Total: 121 lines (6x more efficient than full file read)
+**Example for SRE contract:**
 ```
-
-#### Complete Workflow Example
-
-Extracting RTO/RPO from Section 11.3 using index-based methodology:
-
-```python
-def extract_rto_rpo_from_architecture(architecture_md_path):
-    # Step 1: Load Document Index
-    index_content = Read(file_path=architecture_md_path, offset=1, limit=50)
-    doc_index = parse_document_index(index_content)
-
-    # Step 2: Get Section 11 range
-    section_11 = doc_index["11"]
-    # Returns: {"start": 1401, "end": 1650, "name": "Operational Considerations"}
-
-    # Step 3: Find subsection 11.3 within Section 11
-    grep_result_11_3 = grep_subsection(
-        file_path=architecture_md_path,
-        pattern="^### 11\.3",
-        start_line=section_11["start"],
-        end_line=section_11["end"]
-    )
-    subsection_start = grep_result_11_3["line_number"]  # 1523
-
-    # Step 4: Find next subsection to determine end
-    grep_result_11_4 = grep_subsection(
-        pattern="^### 11\.4",
-        start_line=subsection_start,
-        end_line=section_11["end"]
-    )
-    subsection_end = grep_result_11_4["line_number"] - 1  # 1574
-
-    # Step 5: Load subsection with buffer
-    buffer = 10
-    offset = subsection_start - buffer - 1  # 1512
-    limit = (subsection_end - subsection_start) + (2 * buffer)  # 71
-
-    subsection_content = Read(
-        file_path=architecture_md_path,
-        offset=1512,
-        limit=71
-    )
-
-    # Step 6: Extract values with line number tracking
-    rto_match = re.search(r'RTO:?\s*([0-9]+\s*hours?)', subsection_content)
-    rpo_match = re.search(r'RPO:?\s*([0-9]+\s*hours?)', subsection_content)
-
-    results = {}
-
-    if rto_match:
-        relative_offset = subsection_content[:rto_match.start()].count('\n')
-        results["rto"] = {
-            "value": rto_match.group(1),
-            "line": subsection_start + relative_offset,
-            "source": f"Section 11.3, line {subsection_start + relative_offset}"
-        }
-
-    if rpo_match:
-        relative_offset = subsection_content[:rpo_match.start()].count('\n')
-        results["rpo"] = {
-            "value": rpo_match.group(1),
-            "line": subsection_start + relative_offset,
-            "source": f"Section 11.3, line {subsection_start + relative_offset}"
-        }
-
-    return results
-
-# Example return value:
-# {
-#     "rto": {
-#         "value": "4 hours",
-#         "line": 1528,
-#         "source": "Section 11.3, line 1528"
-#     },
-#     "rpo": {
-#         "value": "1 hour",
-#         "line": 1529,
-#         "source": "Section 11.3, line 1529"
-#     }
-# }
+Read file: ARCHITECTURE.md                          # ~130 lines - get project name
+Read file: docs/08-scalability-and-performance.md   # SLOs, SLIs, latency targets
+Read file: docs/09-operational-considerations.md    # Monitoring, DR, runbooks
+Read file: docs/components/README.md                # Infrastructure resilience
 ```
-
-**Tokens Saved:**
-- Full file read: ~2000 lines
-- This approach: 121 lines (index + subsection)
-- **Efficiency: 94% reduction** in context usage
 
 ---
 
 ## Contract Summary Matrix
 
-| Contract Type | Primary Sections | Secondary | Complexity | Templates Priority |
-|---------------|------------------|-----------|------------|-------------------|
-| **1. Business Continuity v2.0** | 1, 3, 4, 5, 7, 8, 10, 11 | - | High | High (#2) |
-| **2. SRE Architecture** | 10, 11 | 5 | High | High (#1) |
-| **3. Cloud Architecture** | 4, 8, 11 | 9, 10 | High | Medium (#3) |
-| **4. Data & Analytics - AI Architecture** | 5, 6, 7 | 8, 10 | High | Medium (#4) |
-| **5. Development Architecture** | 3, 5, 8, 12 | 11 | Medium | Medium (#5) |
-| **6. Process Transformation** | 1, 2, 6 | 5, 7 | Low | Low (#6) |
-| **7. Security Architecture v2.0** | 4, 5, 7, 9, 11 | - | High | High (#7) |
-| **8. Platform & IT Infrastructure** | 4, 8, 11 | 10 | Medium | Medium (#8) |
-| **9. Enterprise Architecture** | 1, 2, 3, 4 | 12 | Medium | Medium (#9) |
-| **10. Integration Architecture v2.0** | 5, 6, 7, 9 | - | High | High (#10) |
+| Contract Type | Primary Files | Secondary Files | Complexity | Templates Priority |
+|---------------|---------------|-----------------|------------|-------------------|
+| **1. Business Continuity v2.0** | docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/06-technology-stack.md, docs/08-scalability-and-performance.md, docs/09-operational-considerations.md | - | High | High (#2) |
+| **2. SRE Architecture** | docs/08-scalability-and-performance.md, docs/09-operational-considerations.md | docs/components/README.md | High | High (#1) |
+| **3. Cloud Architecture** | docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md | docs/07-security-architecture.md, docs/08-scalability-and-performance.md | High | Medium (#3) |
+| **4. Data & Analytics - AI Architecture** | docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md | docs/06-technology-stack.md, docs/08-scalability-and-performance.md | High | Medium (#4) |
+| **5. Development Architecture** | docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md | docs/09-operational-considerations.md | Medium | Medium (#5) |
+| **6. Process Transformation** | docs/01-system-overview.md, docs/04-data-flow-patterns.md | docs/components/README.md, docs/05-integration-points.md | Low | Low (#6) |
+| **7. Security Architecture v2.0** | docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/07-security-architecture.md, docs/09-operational-considerations.md | - | High | High (#7) |
+| **8. Platform & IT Infrastructure** | docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md | docs/08-scalability-and-performance.md | Medium | Medium (#8) |
+| **9. Enterprise Architecture** | docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md | adr/README.md | Medium | Medium (#9) |
+| **10. Integration Architecture v2.0** | docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md, docs/07-security-architecture.md | - | High | High (#10) |
 
 ---
 
@@ -496,8 +203,8 @@ Status values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
 - **Source**: Section 4 (Architecture Layers) - Primary; Section 3 (Architecture Overview) - Fallback for non-typed architectures
 - **Extract**: Layer count and layer names based on architecture type
 - **Architecture-Type-Aware Extraction**:
-  - **Step 1**: Detect architecture type from `<!-- ARCHITECTURE_TYPE: [TYPE] -->` comment in Section 4
-  - **Step 2**: Load Document Index to get Section 4 line range
+  - **Step 1**: Detect architecture type from `<!-- ARCHITECTURE_TYPE: [TYPE] -->` comment in `docs/03-architecture-layers.md`
+  - **Step 2**: Read `docs/03-architecture-layers.md` in full (no offset needed)
   - **Step 3**: Apply type-specific extraction pattern:
 
   **META Architecture** (Section 4):
@@ -531,25 +238,22 @@ Status values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
   - **Note**: This fallback maintains backward compatibility with architectures that don't use the ARCHITECTURE_TYPE comment
 
 - **Extraction Workflow**:
-  1. Load Document Index (lines 1-50)
-  2. Search for `<!-- ARCHITECTURE_TYPE: META -->` or similar comment in Section 4 header
+  1. Read `docs/03-architecture-layers.md` in full
+  2. Search for `<!-- ARCHITECTURE_TYPE: META -->` or similar comment
   3. If architecture type detected:
-     - Load Section 4 using Document Index line range
      - Apply type-specific pattern to extract layer names from "## Layers Overview" or "## Tiers Overview" table
      - Count layers and extract exact names
-     - Store: layer_count, layer_names[], architecture_type, source_section="Section 4", source_line
+     - Store: layer_count, layer_names[], architecture_type, source_file="docs/03-architecture-layers.md"
   4. If architecture type NOT detected (UNKNOWN):
-     - Fall back to Section 3 search
+     - Fall back to `docs/02-architecture-principles.md`
      - Use generic "tier", "layer" pattern
-     - Store: layer_count, layer_names[], architecture_type="UNKNOWN", source_section="Section 3", source_line
+     - Store: layer_count, layer_names[], architecture_type="UNKNOWN", source_file="docs/02-architecture-principles.md"
   5. Return structured data with architecture type metadata
 
 - **Key Distinction**:
-  - **Logical Architecture Layers** (Section 4): Enterprise layers organizing system components by responsibility (META, BIAN, 3-Tier)
+  - **Logical Architecture Layers** (`docs/03-architecture-layers.md`): Enterprise layers organizing system components by responsibility (META, BIAN, 3-Tier)
   - **Deployment Infrastructure Layers** (avoid): Technical deployment topology (API Gateway, Execution, Data layers)
   - This extraction targets **logical architecture layers only**
-
-- **Line Number Tracking**: Record exact line number of "## Layers Overview" or "## Tiers Overview" table for traceability
 
 **LACN004: Infrastructure Type**
 - **Source**: Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)
@@ -803,44 +507,54 @@ Status values: `Compliant`, `Non-Compliant`, `Not Applicable`, `Unknown`
 
 #### Extraction Workflow
 
-**Step 1: Load Document Index**
+**Step 1: Read Navigation Index**
 ```
-Read ARCHITECTURE.md lines 1-50
-Parse Document Index → {1: lines 25-53, 3: lines 147-300, ...}
+Read ARCHITECTURE.md (full file, ~130 lines)
+Extract project name from H1 header
 ```
 
-**Step 2: Extract by Category (43 iterations)**
+**Step 2: Read Required docs/ Files**
+
+For each LACN category, read the relevant docs/ file:
+```
+Read docs/01-system-overview.md         # BC-GEN: project name, dependencies
+Read docs/02-architecture-principles.md  # BC-GEN: architecture type
+Read docs/03-architecture-layers.md      # BC-GEN: layers, infrastructure
+Read docs/05-integration-points.md       # BC-GEN: critical dependencies
+Read docs/06-technology-stack.md         # BC-BACKUP: sensitive data
+Read docs/08-scalability-and-performance.md  # BC-RTO: RTO/RPO, HA
+Read docs/09-operational-considerations.md   # BC-DR, BC-BACKUP, BC-AUTO: DR, backup, automation
+```
+
+**Step 3: Extract by Category (43 iterations)**
 
 For each LACN requirement:
-1. Identify source section from mapping above
-2. Load section using Document Index line range
-3. Apply extraction pattern (Grep or string search)
-4. Calculate absolute line number: section_start + relative_offset
-5. Determine status (Compliant/Non-Compliant/Not Applicable/Unknown)
-6. Populate table row
+1. Identify source file from mapping above
+2. Apply extraction pattern (Grep or string search) against docs/ file
+3. Determine status (Compliant/Non-Compliant/Not Applicable/Unknown)
+4. Populate table row
 
-**Step 3: Generate Compliance Summary**
+**Step 4: Generate Compliance Summary**
 
 Transform extracted data → 6-column table:
 ```
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LACN001 | Application Name | BC-GEN | Compliant | Section 1, line 28 | Business Team |
-| LACN012 | RTO Definition | BC-RTO | Compliant | Section 10, line 1296 | Infrastructure |
+| LACN001 | Application Name | BC-GEN | Compliant | docs/01-system-overview.md | Business Team |
+| LACN012 | RTO Definition | BC-RTO | Compliant | docs/08-scalability-and-performance.md | Infrastructure |
 ...
 ```
 
-#### Line Number Calculation Example
+#### File-Based Extraction Example
 
 **LACN012 (RTO)** extraction:
 ```
-1. Document Index → Section 10: lines 1251-1400
-2. Grep in Section 10: "RTO:?\s*([0-9]+\s*(hours?|minutes?))"
-3. Match found at offset +45 from section start
-4. Absolute line: 1251 + 45 = 1296
-5. Source reference: "Section 10 (Non-Functional Requirements), line 1296"
-6. Value: "4 hours"
-7. Status: Compliant (RTO documented)
+1. Read docs/08-scalability-and-performance.md (full file)
+2. Grep in file: "RTO:?\s*([0-9]+\s*(hours?|minutes?))"
+3. Match found
+4. Source reference: "docs/08-scalability-and-performance.md"
+5. Value: "4 hours"
+6. Status: Compliant (RTO documented)
 ```
 
 #### Cross-Contract Data Sharing
@@ -948,7 +662,7 @@ Define site reliability, observability, automation, and resilience practices thr
 
 **Extraction Pattern**:
 ```markdown
-ARCHITECTURE.md Section 11.1:
+docs/09-operational-considerations.md:
 "Logging:
 - Format: JSON structured logs
 - Levels: DEBUG, INFO, WARN, ERROR
@@ -962,16 +676,16 @@ Maps to Contract:
 - LASRE37 (Desired): Centralized logging (Splunk) ✓ Compliant
 ```
 
-##### Section 10 (Performance Requirements) - 30%
+##### docs/08-scalability-and-performance.md (Scalability & Performance) - 30%
 **Maps to**: LASRE07-11, LASRE17-19, LASRE42-44
 
 **Subsections**:
-- **10.1 Performance Metrics, Resilience**: LASRE07 (readiness probes), LASRE08 (health checks), LASRE10 (load testing), LASRE11 (auto-scaling), LASRE42-44 (resilience patterns)
-- **10.2 Availability, SLAs**: LASRE09 (HA), LASRE17-18 (availability/performance measurement), LASRE19 (thresholds)
+- **Performance Metrics, Resilience**: LASRE07 (readiness probes), LASRE08 (health checks), LASRE10 (load testing), LASRE11 (auto-scaling), LASRE42-44 (resilience patterns)
+- **Availability, SLAs**: LASRE09 (HA), LASRE17-18 (availability/performance measurement), LASRE19 (thresholds)
 
 **Extraction Pattern**:
 ```markdown
-ARCHITECTURE.md Section 10.1:
+docs/08-scalability-and-performance.md:
 "Resilience:
 - Readiness probe: /health/ready (HTTP 200)
 - Liveness probe: /health/live (HTTP 200)
@@ -1091,44 +805,39 @@ Maps to Contract:
 #### Extraction Logic (v2.0)
 
 ```python
-def extract_sre_architecture_v2(architecture_md):
+def extract_sre_architecture_v2(docs_dir):
     """
-    Extract 57 LASRE requirements from ARCHITECTURE.md
+    Extract 57 LASRE requirements from docs/ files
     Returns contract with compliance status for each requirement
     """
-    
+
     # Initialize contract with 57 requirements
     contract = {
         "version": "2.0",
         "template": "SRE Architecture",
         "requirements": []
     }
-    
-    # Load section index
-    doc_index = parse_document_index(architecture_md)
-    
-    # Extract from Section 11 (50% of requirements)
-    section_11 = load_section(architecture_md, doc_index["11"])
-    
-    # LASRE01-03: Log Management from 11.1
-    logging_data = extract_subsection(section_11, "11.1")
+
+    # Read docs/ files directly (no offset/limit needed)
+    ops_content = Read(file_path=f"{docs_dir}/09-operational-considerations.md")
+    perf_content = Read(file_path=f"{docs_dir}/08-scalability-and-performance.md")
+
+    # LASRE01-03: Log Management from docs/09-operational-considerations.md
+    logging_data = extract_subsection(ops_content, "Monitoring")
     contract["requirements"].extend([
         assess_requirement("LASRE01", "Structured logging", logging_data, "blocker"),
         assess_requirement("LASRE02", "Log levels", logging_data, "blocker"),
         assess_requirement("LASRE03", "Log accessibility", logging_data, "blocker"),
     ])
-    
-    # LASRE04: Deployment from 11.3
-    deployment_data = extract_subsection(section_11, "11.3")
+
+    # LASRE04: Deployment from docs/09-operational-considerations.md
+    deployment_data = extract_subsection(ops_content, "Deployment")
     contract["requirements"].append(
         assess_requirement("LASRE04", "Rollback mechanisms", deployment_data, "blocker")
     )
-    
-    # Extract from Section 10 (30% of requirements)
-    section_10 = load_section(architecture_md, doc_index["10"])
-    
-    # LASRE07-11: Resilience from 10.1
-    resilience_data = extract_subsection(section_10, "10.1")
+
+    # LASRE07-11: Resilience from docs/08-scalability-and-performance.md
+    resilience_data = extract_subsection(perf_content, "Resilience")
     contract["requirements"].extend([
         assess_requirement("LASRE07", "Readiness probes", resilience_data, "blocker"),
         assess_requirement("LASRE08", "Health checks", resilience_data, "blocker"),
@@ -1203,16 +912,16 @@ def assess_requirement(code, name, source_data, criticality):
 **Implementation Status**: JSON structured logging
 - Status: Compliant
 - Explanation: Implemented with consistent field schema
-- Source: ARCHITECTURE.md Section 11.1, lines 1405-1408
+- Source: docs/09-operational-considerations.md
 - Note: N/A
 
 #### 1.1.2 Validation
 **Validation Evidence**: Log parser validates JSON schema
 - Status: Compliant
 - Explanation: Automated validation in logging pipeline
-- Source: ARCHITECTURE.md Section 11.1, line 1410
+- Source: docs/09-operational-considerations.md
 
-**Source References**: ARCHITECTURE.md Section 11.1 (Monitoring and Logging)
+**Source References**: docs/09-operational-considerations.md (Monitoring and Logging)
 
 ---
 
@@ -1225,10 +934,10 @@ def assess_requirement(code, name, source_data, criticality):
 **Implementation Status**: Splunk centralized logging
 - Status: Compliant
 - Explanation: All logs aggregated to Splunk with 90-day retention
-- Source: ARCHITECTURE.md Section 11.1, line 1412
+- Source: docs/09-operational-considerations.md
 - Note: N/A
 
-**Source References**: ARCHITECTURE.md Section 11.1
+**Source References**: docs/09-operational-considerations.md
 
 ---
 ```
@@ -1237,25 +946,25 @@ def assess_requirement(code, name, source_data, criticality):
 
 **Common Placeholders in Generated Contracts**:
 
-1. **Missing Section 11.1 (Monitoring)**:
+1. **Missing monitoring data in docs/09-operational-considerations.md**:
    - LASRE20-26, 29-32: Dynatrace instrumentation, monitoring coverage
-   - Recommendation: Add observability tool configuration to Section 11.1
+   - Recommendation: Add observability tool configuration to docs/09-operational-considerations.md
 
-2. **Missing Section 11.2 (Incident Management)**:
+2. **Missing incident management data in docs/09-operational-considerations.md**:
    - LASRE12, 15, 34-35: DRP, escalation matrix, DR automation
-   - Recommendation: Document DR procedures and escalation paths in Section 11.2
+   - Recommendation: Document DR procedures and escalation paths in docs/09-operational-considerations.md
 
-3. **Missing Section 11.3 (Deployment)**:
+3. **Missing deployment data in docs/09-operational-considerations.md**:
    - LASRE04, 33, 36: Rollback, deployment consistency, service automation
-   - Recommendation: Add CI/CD pipeline and deployment automation to Section 11.3
+   - Recommendation: Add CI/CD pipeline and deployment automation to docs/09-operational-considerations.md
 
-4. **Missing Section 10.1 (Performance)**:
+4. **Missing resilience data in docs/08-scalability-and-performance.md**:
    - LASRE07-11: Readiness, health checks, HA, load testing, auto-scaling
-   - Recommendation: Document resilience patterns and performance testing in Section 10.1
+   - Recommendation: Document resilience patterns and performance testing in docs/08-scalability-and-performance.md
 
-5. **Missing Section 4.1 (Architecture)**:
+5. **Missing architecture diagrams in docs/03-architecture-layers.md**:
    - LASRE13, 46-47: C2 diagrams, critical journeys
-   - Recommendation: Add C2 diagrams and architecture documentation to Section 4.1
+   - Recommendation: Add C2 diagrams and architecture documentation to docs/03-architecture-layers.md
 
 ---
 
@@ -1498,37 +1207,37 @@ Step 3.5 Validation Process:
          "item_1": {
            "status": "PASS",
            "question": "Is Java in a supported version?",
-           "evidence": "Java 17 (LTS) (Section 8.1, line 952)",
+           "evidence": "Java 17 (LTS) (docs/06-technology-stack.md)",
            "reasoning": "Java 17 is LTS and supported (Java 11, Java 17 approved)"
          },
          "item_2": {
            "status": "PASS",
            "question": "Is Spring Boot in a supported version?",
-           "evidence": "Spring Boot 3.2 (Section 8.1, line 953)",
+           "evidence": "Spring Boot 3.2 (docs/06-technology-stack.md)",
            "reasoning": "Spring Boot 3.2 is current and supported"
          },
          "item_3": {
            "status": "PASS",
            "question": "Are official tools used?",
-           "evidence": "Maven 3.9, JUnit 5, Mockito, SonarQube (Section 8.1, lines 954-956)",
+           "evidence": "Maven 3.9, JUnit 5, Mockito, SonarQube (docs/06-technology-stack.md)",
            "reasoning": "All tools are in approved list (Maven, JUnit, SonarQube)"
          },
          "item_4": {
            "status": "PASS",
            "question": "Is deployment in authorized containers?",
-           "evidence": "Docker 24+, AKS 1.28+, Helm 3.13+ (Section 8.2, lines 960-962)",
+           "evidence": "Docker 24+, AKS 1.28+, Helm 3.13+ (docs/06-technology-stack.md)",
            "reasoning": "Docker and AKS are in approved container catalog"
          },
          "item_5": {
            "status": "PASS",
            "question": "Are only approved libraries used?",
-           "evidence": "10 Spring libraries documented (Section 8.1, line 957)",
+           "evidence": "10 Spring libraries documented (docs/06-technology-stack.md)",
            "reasoning": "All Spring libraries are in approved catalog"
          },
          "item_6": {
            "status": "UNKNOWN",
            "question": "Does naming follow standards?",
-           "evidence": "Not documented in Section 8",
+           "evidence": "Not documented in docs/06-technology-stack.md",
            "reasoning": "Repository naming conventions not explicitly specified"
          }
        },
@@ -1558,25 +1267,25 @@ Step 3.5 Validation Process:
          "item_2": {
            "status": "PASS",
            "question": "Is IaC approved?",
-           "evidence": "Helm 3.13+, Azure DevOps Pipelines (Section 8.3, lines 965-966)",
+           "evidence": "Helm 3.13+, Azure DevOps Pipelines (docs/06-technology-stack.md)",
            "reasoning": "Both Helm and Azure DevOps Pipelines are approved IaC tools"
          },
          "item_3": {
            "status": "PASS",
            "question": "Are databases authorized?",
-           "evidence": "Azure SQL Database, Azure Managed Redis (Section 8.4, lines 969-970)",
+           "evidence": "Azure SQL Database, Azure Managed Redis (docs/06-technology-stack.md)",
            "reasoning": "Both SQL Server (Azure SQL) and Redis are in authorized catalog"
          },
          "item_4": {
            "status": "UNKNOWN",
            "question": "Do APIs comply with OpenAPI 3.0?",
-           "evidence": "Not explicitly documented in Section 8",
+           "evidence": "Not explicitly documented in docs/06-technology-stack.md",
            "reasoning": "OpenAPI/Swagger not mentioned; inferred from Spring Boot but not confirmed"
          },
          "item_5": {
            "status": "PASS",
            "question": "Is CI/CD authorized?",
-           "evidence": "Azure DevOps Pipelines, GitHub Actions (Section 8.3, line 966)",
+           "evidence": "Azure DevOps Pipelines, GitHub Actions (docs/06-technology-stack.md)",
            "reasoning": "Both CI/CD platforms are in approved catalog"
          }
        },
@@ -1663,15 +1372,15 @@ Contract Output (LADES1.6 Validation Summary):
 **Stack Deviations**: None detected
 
 **Recommendations**:
-1. **Document Naming Conventions**: Add repository and resource naming conventions to Section 8 (Java Backend Item 6)
-2. **Document OpenAPI Version**: Explicitly specify OpenAPI/Swagger version in Section 8 (Other Stacks Item 4)
+1. **Document Naming Conventions**: Add repository and resource naming conventions to docs/06-technology-stack.md (Java Backend Item 6)
+2. **Document OpenAPI Version**: Explicitly specify OpenAPI/Swagger version in docs/06-technology-stack.md (Other Stacks Item 4)
 
-**Source**: ARCHITECTURE.md Section 8 (Technology Stack), lines 949-1035
+**Source**: docs/06-technology-stack.md
 
 **Legend**:
 - ✅ PASS: Complies with authorized technology catalog
 - ❌ FAIL: Non-compliant (deprecated version, unapproved technology, or missing documentation)
-- ❓ UNKNOWN: Insufficient data in Section 8 to validate
+- ❓ UNKNOWN: Insufficient data in docs/06-technology-stack.md to validate
 - ⚪ N/A: Not applicable to this architecture
 ```
 
@@ -1702,40 +1411,40 @@ Contract Output (LADES1.6 Validation Summary):
 #### Extraction Logic (Pseudo-code)
 
 ```python
-def extract_development_architecture(architecture_md):
-    # Load Section 8 (Technology Stack)
-    tech_stack_section = load_section(architecture_md, section=8)
+def extract_development_architecture(docs_dir):
+    # Read docs/06-technology-stack.md directly
+    tech_stack_content = Read(file_path=f"{docs_dir}/06-technology-stack.md")
 
     # Step 3.5: Automatic Stack Validation
-    validation_results = perform_stack_validation(tech_stack_section)
+    validation_results = perform_stack_validation(tech_stack_content)
 
     # Cache validation results
     contract_data_cache["validation_results"] = validation_results
 
-    # Load Section 3 (Architecture Patterns)
-    patterns_section = load_section(architecture_md, section=3)
+    # Read docs/02-architecture-principles.md directly
+    principles_content = Read(file_path=f"{docs_dir}/02-architecture-principles.md")
 
     # Extract design patterns (Direct)
-    architectural_style = extract_value(patterns_section, pattern="Architectural Style: (.+)")
-    design_patterns = extract_list(patterns_section, pattern="Pattern: (.+)")
+    architectural_style = extract_value(principles_content, pattern="Architectural Style: (.+)")
+    design_patterns = extract_list(principles_content, pattern="Pattern: (.+)")
 
-    # Load Section 5 (System Components)
-    components_section = load_section(architecture_md, section=5)
+    # Read docs/components/README.md directly
+    components_content = Read(file_path=f"{docs_dir}/components/README.md")
 
     # Extract components (Aggregation)
-    components = extract_components(components_section)
+    components = extract_components(components_content)
 
-    # Load Section 12 (ADRs)
-    adr_section = load_section(architecture_md, section=12)
+    # Read adr/README.md directly
+    adr_content = Read(file_path="adr/README.md")
 
     # Extract technology ADRs (Filter)
-    tech_adrs = filter_adrs(adr_section, category="technology")
+    tech_adrs = filter_adrs(adr_content, category="technology")
 
-    # Load Section 11 (Operational)
-    ops_section = load_section(architecture_md, section=11)
+    # Read docs/09-operational-considerations.md directly
+    ops_content = Read(file_path=f"{docs_dir}/09-operational-considerations.md")
 
     # Extract CI/CD (Direct)
-    cicd_tools = extract_value(ops_section, pattern="CI/CD: (.+)")
+    cicd_tools = extract_value(ops_content, pattern="CI/CD: (.+)")
 
     return {
         "validation_results": validation_results,
@@ -1799,10 +1508,10 @@ def perform_stack_validation(tech_stack_section):
 #### Missing Data Handling
 
 ```
-Scenario 1: Section 8 missing or empty
-Action: [PLACEHOLDER: Section 8 (Technology Stack) not found or empty.
+Scenario 1: docs/06-technology-stack.md missing or empty
+Action: [PLACEHOLDER: docs/06-technology-stack.md not found or empty.
         Cannot perform automatic stack validation.
-        Add technology stack details to ARCHITECTURE.md Section 8]
+        Add technology stack details to docs/06-technology-stack.md]
 
 Scenario 2: Partial Section 8 (incomplete data)
 Action: Perform validation with available data
@@ -1984,207 +1693,114 @@ Based on standard ARCHITECTURE.md templates, Section 9 typically contains:
 5. **Security Monitoring** (lines ~1259-1281)
    - Reference: `Section 9 (Security Architecture → Security Monitoring)`
 
-### Dynamic Section 9 Subsection Discovery (Index-Based)
+### Dynamic Security Architecture Subsection Discovery (File-Based)
 
-To dynamically find Section 9 subsections and their line ranges in any ARCHITECTURE.md file:
+To dynamically find security subsections in `docs/07-security-architecture.md`:
 
-#### Step 1: Load Document Index and Section 9 Range
-
-```python
-# Load Document Index
-index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-doc_index = parse_document_index(index_content)
-
-# Get Section 9 range
-section_9_range = doc_index["9"]
-# Returns: {"start": 1051, "end": 1250, "name": "Security Considerations"}
-```
-
-#### Step 2: Load Section 9 with Buffer
+#### Step 1: Read Security Architecture File Directly
 
 ```python
-buffer = 20  # Extended buffer for security section
-offset = section_9_range["start"] - buffer - 1
-limit = (section_9_range["end"] - section_9_range["start"]) + (2 * buffer)
-
-section_9_content = Read(file_path="ARCHITECTURE.md", offset=offset, limit=limit)
+# Read docs/07-security-architecture.md in full (no offset needed)
+security_content = Read(file_path="docs/07-security-architecture.md")
 ```
 
-#### Step 3: Detect All Subsections Within Section 9
+#### Step 2: Detect All Subsections Within the File
 
 ```python
 import re
 
-# Find all level-3 headers (###) in Section 9
+# Find all level-3 headers (###) in the file
 subsection_pattern = r'^###\s+(.+)$'
 subsections = []
 
-for match in re.finditer(subsection_pattern, section_9_content, re.MULTILINE):
+for match in re.finditer(subsection_pattern, security_content, re.MULTILINE):
     subsection_name = match.group(1).strip()
-    relative_offset = section_9_content[:match.start()].count('\n')
-    absolute_line = section_9_range["start"] + relative_offset
-
     subsections.append({
-        "name": subsection_name,
-        "line_start": absolute_line,
-        "relative_offset": relative_offset
+        "name": subsection_name
     })
-
-# Calculate end lines (next subsection start - 1, or section end)
-for i, subsection in enumerate(subsections):
-    if i + 1 < len(subsections):
-        subsection["line_end"] = subsections[i+1]["line_start"] - 1
-    else:
-        subsection["line_end"] = section_9_range["end"]
 
 # Example result:
 # [
-#   {"name": "Security Principles", "line_start": 1053, "line_end": 1060},
-#   {"name": "Threat Model", "line_start": 1062, "line_end": 1088},
-#   {"name": "Authentication & Authorization", "line_start": 1090, "line_end": 1114},
-#   {"name": "Network Security", "line_start": 1115, "line_end": 1172},
+#   {"name": "Security Principles"},
+#   {"name": "Threat Model"},
+#   {"name": "Authentication & Authorization"},
+#   {"name": "Network Security"},
 #   ...
 # ]
 ```
 
-#### Step 4: Generate Section 9 References Dynamically
+#### Step 3: Generate Security Architecture References Dynamically
 
 ```python
-def generate_section_9_reference(subsection_name, subsection_data):
-    """Generate standardized Section 9 reference with line numbers"""
-    return (
-        f"Section 9 (Security Architecture → {subsection_name}), "
-        f"lines {subsection_data['line_start']}-{subsection_data['line_end']}"
-    )
+def generate_security_reference(subsection_name):
+    """Generate standardized security reference with file path"""
+    return f"docs/07-security-architecture.md (→ {subsection_name})"
 
 # Usage examples:
-auth_ref = generate_section_9_reference("Authentication & Authorization", subsections[2])
-# Returns: "Section 9 (Security Architecture → Authentication & Authorization), lines 1090-1114"
+auth_ref = generate_security_reference("Authentication & Authorization")
+# Returns: "docs/07-security-architecture.md (→ Authentication & Authorization)"
 
-network_ref = generate_section_9_reference("Network Security", subsections[3])
-# Returns: "Section 9 (Security Architecture → Network Security), lines 1115-1172"
+network_ref = generate_security_reference("Network Security")
+# Returns: "docs/07-security-architecture.md (→ Network Security)"
 ```
 
-#### Step 5: Nested Subsection Support
+#### Step 4: Nested Subsection Support
 
 For nested subsections (e.g., "Data Security → Encryption in Transit"):
 
 ```python
-def find_nested_subsections(section_9_content, parent_subsection_range):
-    """Find level-4 headers (####) within a level-3 subsection"""
+def generate_nested_security_reference(parent_name, nested_name):
+    """Generate nested security reference"""
+    return f"docs/07-security-architecture.md (→ {parent_name} → {nested_name})"
 
-    # Extract parent subsection content
-    parent_start_offset = parent_subsection_range["relative_offset"]
-    if parent_subsection_range == subsections[-1]:
-        parent_content = section_9_content[parent_start_offset:]
-    else:
-        next_subsection_offset = subsections[subsections.index(parent_subsection_range) + 1]["relative_offset"]
-        parent_content = section_9_content[parent_start_offset:next_subsection_offset]
-
-    # Find level-4 headers
-    nested_pattern = r'^####\s+(.+)$'
-    nested_subsections = []
-
-    for match in re.finditer(nested_pattern, parent_content, re.MULTILINE):
-        nested_name = match.group(1).strip()
-        relative_offset = parent_content[:match.start()].count('\n')
-        absolute_line = parent_subsection_range["line_start"] + relative_offset
-
-        nested_subsections.append({
-            "name": nested_name,
-            "line_start": absolute_line,
-            "parent": parent_subsection_range["name"]
-        })
-
-    # Calculate end lines
-    for i, nested in enumerate(nested_subsections):
-        if i + 1 < len(nested_subsections):
-            nested["line_end"] = nested_subsections[i+1]["line_start"] - 1
-        else:
-            nested["line_end"] = parent_subsection_range["line_end"]
-
-    return nested_subsections
-
-# Example: Find nested subsections under "Data Security"
-data_security_subsection = subsections[4]  # Assuming index 4
-nested = find_nested_subsections(section_9_content, data_security_subsection)
-
-# Generate nested reference:
-encryption_ref = (
-    f"Section 9 (Security Architecture → {data_security_subsection['name']} → "
-    f"{nested[0]['name']}), lines {nested[0]['line_start']}-{nested[0]['line_end']}"
-)
-# Returns: "Section 9 (Security Architecture → Data Security → Encryption in Transit), lines 1168-1172"
+# Example:
+encryption_ref = generate_nested_security_reference("Data Security", "Encryption in Transit")
+# Returns: "docs/07-security-architecture.md (→ Data Security → Encryption in Transit)"
 ```
 
 #### Complete Workflow Example
 
 ```python
-def extract_section_9_subsections(architecture_md):
-    """Complete workflow: Extract all Section 9 subsections with line ranges"""
+def extract_security_subsections(docs_dir):
+    """Complete workflow: Extract all security subsections from docs/ file"""
 
-    # Step 1: Load Document Index
-    index = Read(file_path=architecture_md, offset=1, limit=50)
-    doc_index = parse_document_index(index)
+    # Step 1: Read docs/07-security-architecture.md directly
+    security_content = Read(file_path=f"{docs_dir}/07-security-architecture.md")
 
-    # Step 2: Get Section 9 range
-    section_9 = doc_index["9"]
-
-    # Step 3: Load Section 9
-    buffer = 20
-    section_9_content = Read(
-        file_path=architecture_md,
-        offset=section_9["start"] - buffer - 1,
-        limit=(section_9["end"] - section_9["start"]) + (2 * buffer)
-    )
-
-    # Step 4: Extract all subsections
+    # Step 2: Extract all subsections
     subsections = []
-    for match in re.finditer(r'^###\s+(.+)$', section_9_content, re.MULTILINE):
+    for match in re.finditer(r'^###\s+(.+)$', security_content, re.MULTILINE):
         name = match.group(1).strip()
-        offset = section_9_content[:match.start()].count('\n')
-        subsections.append({
-            "name": name,
-            "line_start": section_9["start"] + offset
-        })
+        subsections.append({"name": name})
 
-    # Calculate end lines
-    for i, sub in enumerate(subsections):
-        sub["line_end"] = (subsections[i+1]["line_start"] - 1
-                          if i+1 < len(subsections) else section_9["end"])
-
-    # Step 5: Return structured data
+    # Step 3: Return structured data
     return {
-        "section_9_range": section_9,
-        "subsections": subsections,
-        "document_index_version": doc_index["last_updated"]
+        "source_file": "docs/07-security-architecture.md",
+        "subsections": subsections
     }
 
 # Usage:
-section_9_data = extract_section_9_subsections("ARCHITECTURE.md")
+security_data = extract_security_subsections("docs")
 
 # Generate references dynamically:
-for subsection in section_9_data["subsections"]:
-    ref = (
-        f"Section 9 (Security Architecture → {subsection['name']}), "
-        f"lines {subsection['line_start']}-{subsection['line_end']}"
-    )
+for subsection in security_data["subsections"]:
+    ref = generate_security_reference(subsection["name"])
     print(ref)
 ```
 
-**Benefits of Dynamic Discovery:**
-- **Adaptability**: Works with any ARCHITECTURE.md structure
-- **Accuracy**: Line numbers always correct via Document Index
-- **No Hardcoding**: No need to update mappings when sections change
-- **Full Traceability**: Every reference includes exact line ranges
+**Benefits of Direct File Reading:**
+- **Simplicity**: No Document Index or line-offset calculations needed
+- **Accuracy**: Read the full file — no missed content from offset limits
+- **No Hardcoding**: No section line numbers to maintain
+- **Full Traceability**: Every reference includes file path and subsection name
 
 ### Validation Checklist
 
 When reviewing generated compliance documents, verify:
 
 - [ ] No references to "Section 9.1", "Section 9.2", "Section 9.3", "Section 9.4" (numbered subsections)
-- [ ] All Section 9 references include subsection path after "Security Architecture →"
-- [ ] Line numbers accurately point to referenced content
+- [ ] All security references point to `docs/07-security-architecture.md`
+- [ ] Subsection references include path within file (e.g., `→ Authentication & Authorization`)
 - [ ] Subsection path matches the actual content being referenced
 
 ### Template Compliance
@@ -2377,7 +1993,7 @@ Many data points appear in multiple contracts. Extract once, cache, and reuse:
 
 **1. Availability SLA (appears in 5 contracts)**
 ```
-Source: Section 10.2
+Source: docs/08-scalability-and-performance.md
 Used in:
 - Business Continuity (RTO/RPO justification)
 - SRE Architecture (SLO, error budget)
@@ -2386,13 +2002,13 @@ Used in:
 - Enterprise Architecture (business criticality)
 
 Extract once: "99.99% SLA"
-Cache with source: "Section 10.2, line 1576"
+Cache with source: "docs/08-scalability-and-performance.md"
 Reuse in all 5 contracts with appropriate transformations
 ```
 
 **2. Technology Stack (appears in 5 contracts)**
 ```
-Source: Section 8
+Source: docs/06-technology-stack.md
 Used in:
 - Development Architecture (technology choices)
 - Cloud Architecture (cloud services)
@@ -2407,7 +2023,7 @@ Apply different filters per contract
 
 **3. Integration Catalog (appears in 3 contracts)**
 ```
-Source: Section 7
+Source: docs/05-integration-points.md
 Used in:
 - Integration Architecture (full catalog)
 - Security Architecture (integration security)
@@ -2418,86 +2034,50 @@ Cache as structured list
 Filter by contract focus
 ```
 
-### Caching Strategy (Index-Based)
+### Caching Strategy (File-Based)
 
 ```python
 # Global cache for cross-contract data with full traceability
 contract_data_cache = {}
 
-def extract_with_caching(architecture_md, section_num, subsection_num, pattern, cache_key):
-    """Extract data with index-based caching for reuse across contracts"""
+def extract_with_caching(docs_dir, file_name, pattern, cache_key):
+    """Extract data with file-based caching for reuse across contracts"""
 
     # Check cache first
     if cache_key in contract_data_cache:
         return contract_data_cache[cache_key]
 
-    # Step 1: Load Document Index (if not already cached)
-    if "document_index" not in contract_data_cache:
-        index_content = Read(file_path=architecture_md, offset=1, limit=50)
-        contract_data_cache["document_index"] = parse_document_index(index_content)
+    # Check if file already cached
+    file_cache_key = f"file:{file_name}"
+    if file_cache_key not in contract_data_cache:
+        # Read the docs/ file in full (no offset/limit needed)
+        file_content = Read(file_path=f"{docs_dir}/{file_name}")
+        contract_data_cache[file_cache_key] = file_content
 
-    doc_index = contract_data_cache["document_index"]
+    file_content = contract_data_cache[file_cache_key]
 
-    # Step 2: Get section range from index
-    section_range = doc_index[str(section_num)]
-
-    # Step 3: Find subsection within section
-    subsection_pattern = f"^### {section_num}\.{subsection_num}"
-    grep_result = grep_subsection(
-        file_path=architecture_md,
-        pattern=subsection_pattern,
-        start_line=section_range["start"],
-        end_line=section_range["end"]
-    )
-    subsection_start = grep_result["line_number"]
-
-    # Find next subsection for boundary
-    next_subsection_num = subsection_num + 1
-    next_grep_result = grep_subsection(
-        pattern=f"^### {section_num}\.{next_subsection_num}",
-        start_line=subsection_start,
-        end_line=section_range["end"]
-    )
-    subsection_end = (next_grep_result["line_number"] - 1
-                     if next_grep_result else section_range["end"])
-
-    # Step 4: Load subsection with buffer
-    buffer = 10
-    offset = subsection_start - buffer - 1
-    limit = (subsection_end - subsection_start) + (2 * buffer)
-
-    section_content = Read(file_path=architecture_md, offset=offset, limit=limit)
-
-    # Step 5: Extract value with line number tracking
-    match = re.search(pattern, section_content)
+    # Extract value from file content
+    match = re.search(pattern, file_content)
     if not match:
         return None
 
-    relative_offset = section_content[:match.start()].count('\n')
-    absolute_line = subsection_start + relative_offset
-
-    # Cache with enhanced metadata including index-based traceability
+    # Cache with metadata including file-based traceability
     contract_data_cache[cache_key] = {
         "value": match.group(1),
         "source": {
-            "section": section_num,
-            "subsection": f"{section_num}.{subsection_num}",
-            "line_start": absolute_line,
-            "line_end": absolute_line + section_content[match.start():match.end()].count('\n'),
-            "document_index_version": doc_index["last_updated"]
+            "file": f"docs/{file_name}"
         },
-        "extraction_method": "index_lookup",
+        "extraction_method": "direct_file_read",
         "extracted_at": current_timestamp(),
-        "raw_source_string": f"Section {section_num}.{subsection_num}, line {absolute_line}"
+        "raw_source_string": f"docs/{file_name}"
     }
 
     return contract_data_cache[cache_key]
 
-# Usage across contracts with index-based extraction
+# Usage across contracts with file-based extraction
 sla_data = extract_with_caching(
-    arch_md,
-    section_num=10,
-    subsection_num=2,
+    docs_dir="docs",
+    file_name="08-scalability-and-performance.md",
     pattern=r"SLA:?\s*([0-9.]+%)",
     cache_key="availability_sla"
 )
@@ -2515,9 +2095,9 @@ sre_contract["error_budget"] = calculate_error_budget(sla_data["value"])
 
 ### Common Missing Data Scenarios
 
-**Scenario 1: Section Exists but Incomplete**
+**Scenario 1: File Exists but Incomplete**
 ```
-ARCHITECTURE.md has Section 11.3 (Backup) but missing RTO/RPO
+docs/09-operational-considerations.md has backup section but missing RTO/RPO
 
 Action:
 1. Extract available data (backup frequency, retention)
@@ -2529,9 +2109,9 @@ Example:
 RTO: [PLACEHOLDER: Define based on 99.99% SLA. Recommended: 4 hours for Tier 1]
 ```
 
-**Scenario 2: Entire Section Missing**
+**Scenario 2: Entire File Missing**
 ```
-ARCHITECTURE.md missing Section 11.2 (Incident Management)
+docs/09-operational-considerations.md missing incident management section
 
 Action:
 1. Flag entire contract section as placeholder
@@ -2541,9 +2121,9 @@ Action:
 
 Example:
 ## Incident Management
-[PLACEHOLDER: Section 11.2 (Incident Management) not found in ARCHITECTURE.md.
+[PLACEHOLDER: Incident Management not found in docs/09-operational-considerations.md.
 
-Add the following to ARCHITECTURE.md:
+Add the following to docs/09-operational-considerations.md:
 - Incident classification (P1, P2, P3)
 - Response time SLAs
 - Escalation procedures
@@ -2564,11 +2144,11 @@ Action (Strict Source Traceability):
 3. Request explicit value in completion report
 
 Example:
-RTO: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 11.3]
+RTO: [PLACEHOLDER: Not specified in docs/09-operational-considerations.md]
 Optional Reference: Industry standard for Tier 1 applications: 4 hours RTO (NIST SP 800-34)
-Note: Update ARCHITECTURE.md Section 11.3 with explicit RTO value (e.g., "RTO: 4 hours").
+Note: Update docs/09-operational-considerations.md with explicit RTO value (e.g., "RTO: 4 hours").
 Current text "generally within half a business day" is too ambiguous for compliance documentation.
-Source: ARCHITECTURE.md Section 11.3, line X (ambiguous format)
+Source: docs/09-operational-considerations.md (ambiguous format)
 ```
 
 ---
@@ -2590,7 +2170,7 @@ After extracting data for each contract:
 - [ ] Recommendations provided for gaps
 
 **Traceability**:
-- [ ] Every value includes section and line number
+- [ ] Every value includes source file path (docs/NN-name.md)
 - [ ] Transformation logic is documented
 - [ ] Inference rationale is explained
 - [ ] Cache hits are properly attributed
@@ -2603,150 +2183,89 @@ After extracting data for each contract:
 
 ---
 
-## Index-Based Mapping Validation Checklist
+## Multi-File Mapping Validation Checklist
 
-This checklist ensures full compliance with the index-based section mapping methodology documented in this guide. Use this before generating any compliance documents.
+This checklist ensures full compliance with the navigation index-based file loading methodology documented in this guide. Use this before generating any compliance documents.
 
-### Document Index Validation
+### Navigation Index Validation
 
-**Index Availability**:
-- [ ] Document Index exists in ARCHITECTURE.md (typically lines 5-21)
-- [ ] Index contains all 12 standard sections
-- [ ] Each section entry includes: section number, name, and line range
-- [ ] Index timestamp ("Index Last Updated") is present and recent
-- [ ] Index format matches standard template (markdown list with anchors)
+**ARCHITECTURE.md as Navigation Index**:
+- [ ] ARCHITECTURE.md exists and is readable (~130 lines)
+- [ ] ARCHITECTURE.md contains project name in first H1 header
+- [ ] ARCHITECTURE.md contains links/references to docs/ files
+- [ ] docs/ directory exists alongside ARCHITECTURE.md
+- [ ] adr/ directory exists (for ADR content)
 
-**Index Accuracy**:
-- [ ] Grep validation: Run `grep -n "^## [0-9]" ARCHITECTURE.md` and compare with index
-- [ ] Line ranges are sequential (no overlaps, no gaps)
-- [ ] Section 12 ends with "EOF" or actual final line number
-- [ ] Index last updated within 30 days (if architecture recently modified)
+**docs/ File Availability**:
+- [ ] `docs/01-system-overview.md` exists
+- [ ] `docs/02-architecture-principles.md` exists
+- [ ] `docs/03-architecture-layers.md` exists
+- [ ] `docs/components/README.md` exists
+- [ ] `docs/04-data-flow-patterns.md` exists
+- [ ] `docs/05-integration-points.md` exists
+- [ ] `docs/06-technology-stack.md` exists
+- [ ] `docs/07-security-architecture.md` exists
+- [ ] `docs/08-scalability-and-performance.md` exists
+- [ ] `docs/09-operational-considerations.md` exists
+- [ ] `adr/README.md` exists (for architecture decision records)
+- [ ] `docs/10-references.md` exists (if references section is needed)
 
-### Section Loading Validation
+### File Loading Validation
 
-**Offset/Limit Parameters**:
-- [ ] Every section load uses `Read(offset=X, limit=Y)` format
-- [ ] No full-file reads (`Read(file_path)` without offset/limit)
-- [ ] Offset calculated as: `section_start - buffer - 1` (zero-indexed)
-- [ ] Limit calculated as: `(section_end - section_start) + (2 * buffer)`
-- [ ] Buffer sizes appropriate:
-  - Minimal extraction (5-10 lines)
-  - Standard extraction (10-20 lines)
-  - Extended extraction (20-50 lines)
+**Two-Step Loading Workflow**:
+- [ ] Step 1: Read ARCHITECTURE.md (full file, ~130 lines) to extract project name
+- [ ] Step 2: Read each required docs/ file directly (no offset needed)
+- [ ] No line-offset calculations performed
+- [ ] No Document Index parsing required
 
-**Section Range Validation**:
-- [ ] Document Index loaded first (offset=1, limit=50)
-- [ ] Section ranges extracted from parsed index
-- [ ] Grep used to find subsection boundaries within sections
-- [ ] Subsection end calculated via next subsection start - 1
-- [ ] Last subsection ends at parent section end
+**File Read Format**:
+- [ ] Each docs/ file read in full: `Read(file_path="docs/NN-name.md")`
+- [ ] ARCHITECTURE.md read in full: `Read(file_path="ARCHITECTURE.md")`
+- [ ] No partial reads (no `offset=X, limit=Y`) for docs/ files
 
-### Line Number Calculation Validation
-
-**Absolute Line Number Formula**:
-- [ ] All line numbers calculated as: `subsection_start + relative_offset`
-- [ ] Relative offset calculated via: `content[:match.start()].count('\n')`
-- [ ] No hardcoded line numbers in extraction logic
-- [ ] Line numbers stored with extracted values for traceability
+### Source Reference Format Validation
 
 **Source Reference Format**:
-- [ ] All sources follow format: `"Section N.M, line X"` or `"Section N.M, lines X-Y"`
-- [ ] Section 9 references use: `"Section 9 (Security Architecture → Subsection Name), lines X-Y"`
-- [ ] Source references include subsection names (e.g., "Backup & Recovery", "Availability SLA")
-- [ ] Line ranges accurate (extracted value spans declared lines)
+- [ ] All sources follow format: `"docs/NN-name.md"` (file path)
+- [ ] No `"Section N.M, line X"` format references
+- [ ] No `"Section N (Name), lines X-Y"` format references
+- [ ] Source references use file paths not section numbers
 
-### Subsection Detection Validation
-
-**Grep Patterns**:
-- [ ] Primary sections detected with: `^## [0-9]`
-- [ ] Subsections detected with: `^### N\.M` (escaped dot)
-- [ ] Nested subsections (level 4) detected with: `^####`
-- [ ] Grep searches constrained to parent section ranges (start_line, end_line)
-
-**Boundary Calculation**:
-- [ ] Subsection start: grep match line number
-- [ ] Subsection end: next subsection start - 1 (or parent section end)
-- [ ] No assumptions about subsection count or structure
-- [ ] Dynamic discovery works with variable subsection counts
-
-### Caching and Reuse Validation
-
-**Cache Structure**:
-- [ ] Global cache initialized: `contract_data_cache = {}`
-- [ ] Document Index cached with key: `"document_index"`
-- [ ] Common data points cached (SLA, technology stack, integrations)
-- [ ] Cache entries include:
-  - `value`: Extracted data
-  - `source`: Dict with section, subsection, line_start, line_end
-  - `document_index_version`: Timestamp from index
-  - `extraction_method`: "index_lookup"
-  - `extracted_at`: Current timestamp
-
-**Cache Consistency**:
-- [ ] Same cache key returns identical data across contracts
-- [ ] Cache hits preserve original line numbers
-- [ ] Transformations applied after cache retrieval (not cached)
-- [ ] Document Index cached once and reused for all contracts
-
-### Pattern Example Validation
-
-**Dynamic Line Numbers**:
-- [ ] Pattern examples use `{subsection_start}+` instead of hardcoded lines
-- [ ] Line number calculation steps documented in examples
-- [ ] Examples show: Document Index lookup → Grep → Offset calculation
-- [ ] Variable syntax explained: `{rto_line}`, `{sla_line}`, etc.
-
-**Calculation Documentation**:
-- [ ] Each pattern example includes "Line Number Calculation" section
-- [ ] Calculation shows:
-  1. Document Index section range
-  2. Grep result for subsection
-  3. Relative offset calculation
-  4. Absolute line number formula
-- [ ] Examples demonstrate buffer usage
-
-### Extraction Logic Validation
-
-**Pseudo-Code Structure**:
-- [ ] All extraction functions start with: Load Document Index
-- [ ] Section ranges retrieved from parsed index (not hardcoded)
-- [ ] Grep used to find subsections dynamically
-- [ ] Offset/limit calculated for each Read operation
-- [ ] Line number tracking implemented for all extractions
-- [ ] Return values include `document_index_version`
-
-**No Old-Style References**:
-- [ ] No `load_section(architecture_md, section=11.3)` calls
-- [ ] No `get_line_number(value)` calls (use offset calculation)
-- [ ] No assumptions about section line numbers
-- [ ] All section discovery via Document Index + Grep
+**Correct Format Examples**:
+- [ ] RTO/RPO data: `docs/09-operational-considerations.md`
+- [ ] SLO/latency data: `docs/08-scalability-and-performance.md`
+- [ ] Security controls: `docs/07-security-architecture.md`
+- [ ] Integration patterns: `docs/05-integration-points.md`
+- [ ] Technology stack: `docs/06-technology-stack.md`
+- [ ] Data flow patterns: `docs/04-data-flow-patterns.md`
+- [ ] Component details: `docs/components/README.md`
+- [ ] ADR decisions: `adr/README.md`
+- [ ] Business context: `docs/01-system-overview.md`
 
 ### Context Efficiency Validation
 
 **Token Usage Optimization**:
-- [ ] Document Index loaded once (50 lines)
-- [ ] Sections loaded individually (100-300 lines each)
-- [ ] Subsections loaded when possible (30-100 lines)
-- [ ] No full-file reads (avoid loading 2000+ lines)
-- [ ] Efficiency target: 70-94% reduction vs full file read
+- [ ] ARCHITECTURE.md read once per generation run to get project name
+- [ ] Only required docs/ files are read (not all files for every contract)
+- [ ] Each agent reads only the docs/ files relevant to its contract type
+- [ ] Efficiency target: Read 3-5 files per contract (not all 12)
 
-**Loading Hierarchy**:
-- [ ] Level 1: Document Index (always first)
-- [ ] Level 2: Full section (when multiple subsections needed)
-- [ ] Level 3: Single subsection (when targeted extraction)
-- [ ] Level 4: Grep + minimal buffer (for single values)
+**Loading Strategy**:
+- [ ] Level 1: ARCHITECTURE.md (always first — get project name)
+- [ ] Level 2: Primary docs/ files for the contract type
+- [ ] Level 3: Secondary docs/ files (if additional context needed)
+- [ ] Apply Grep patterns against specific docs/ files for targeted extraction
 
 ### Cross-Contract Consistency Validation
 
 **Shared Data Points**:
 - [ ] Availability SLA: Same value in all 6 contracts (Business Continuity v2.0, SRE, Cloud, Platform, Enterprise, Risk)
-  - Business Continuity v2.0: Referenced in LACN006 (HA Requirement), extracted from Section 10
+  - Business Continuity v2.0: Referenced in LACN006 (HA Requirement), extracted from `docs/08-scalability-and-performance.md`
   - SRE Architecture: Used for SLO and error budget calculation
   - Cloud Architecture: Cloud SLA requirements
-  - All contracts must show identical value and source line number
+  - All contracts must show identical value and source file
 - [ ] Technology Stack: Same inventory in 5 contracts (Development, Cloud, Platform, Integration, Security)
 - [ ] Integration Catalog: Same list in 3 contracts (Integration, Security, Data/AI)
-- [ ] Same line numbers for same data across all contracts
 
 **Transformation Consistency**:
 - [ ] Error budget calculation: Same formula in SRE and Business Continuity v2.0
@@ -2758,18 +2277,17 @@ This checklist ensures full compliance with the index-based section mapping meth
 - [ ] Criticality inference: Same rules (99.99% → Tier 1)
 - [ ] All transformations documented and replicable
 
-### Section 9 Special Handling
+### Security Architecture Special Handling
 
 **Dynamic Discovery**:
-- [ ] Section 9 subsections discovered via regex `^###\s+(.+)$`
+- [ ] Security subsections discovered via Grep in `docs/07-security-architecture.md`
 - [ ] Nested subsections (level 4) detected when present
 - [ ] No hardcoded subsection names or line numbers
-- [ ] Reference format: `Section 9 (Security Architecture → Subsection), lines X-Y`
+- [ ] Reference format: `docs/07-security-architecture.md (→ Subsection Name)`
 
 **Validation**:
-- [ ] No references to "Section 9.1", "9.2", "9.3" (numbered subsections)
-- [ ] All Section 9 references include subsection path
-- [ ] Line numbers point to actual subsection content
+- [ ] All security references point to `docs/07-security-architecture.md`
+- [ ] Subsection references include path within file
 - [ ] Nested subsections formatted as: `Parent → Child`
 
 ### Implementation Checklist
@@ -2777,29 +2295,28 @@ This checklist ensures full compliance with the index-based section mapping meth
 Before generating compliance documents:
 
 **Preparation**:
-- [ ] ARCHITECTURE.md has valid Document Index
-- [ ] Index timestamp is current
-- [ ] All 12 sections present in ARCHITECTURE.md
-- [ ] Grep tool available for subsection detection
+- [ ] ARCHITECTURE.md exists as navigation index (~130 lines)
+- [ ] All required docs/ files exist for the contract being generated
+- [ ] adr/README.md exists if contract requires ADR content
+- [ ] Grep tool available for subsection detection within files
 
 **Execution**:
-- [ ] Load Document Index first
-- [ ] Parse index to extract section ranges
-- [ ] Use index-based loading for all sections
-- [ ] Calculate line numbers for all extracted values
-- [ ] Cache common data points with full metadata
+- [ ] Read ARCHITECTURE.md first to extract project name
+- [ ] Read each required docs/ file in full (no offsets)
+- [ ] Apply Grep patterns against specific docs/ files
+- [ ] Cache project name and common data across contracts
 
 **Validation**:
-- [ ] All source references include line numbers
-- [ ] Line numbers verified against ARCHITECTURE.md
-- [ ] Cross-contract data has identical line numbers
-- [ ] No hardcoded assumptions about document structure
+- [ ] All source references use file paths (not section numbers)
+- [ ] Source file paths are accurate and the files exist
+- [ ] Cross-contract data references same source files
+- [ ] No assumptions about section line numbers
 
 **Output Quality**:
 - [ ] Every contract section has source traceability
-- [ ] Line ranges are accurate and verifiable
-- [ ] Document Index version included in metadata
-- [ ] Extraction method documented (index_lookup)
+- [ ] Source file paths are accurate and verifiable
+- [ ] Extraction method documented (direct-file-read)
+- [ ] Project name matches H1 in ARCHITECTURE.md
 
 ---
 

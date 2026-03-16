@@ -5,7 +5,7 @@ description: Use this skill when creating, updating, or maintaining ARCHITECTURE
 
 # Architecture Documentation Skill
 
-This skill provides comprehensive guidelines for creating and maintaining ARCHITECTURE.md files using the standardized template from ARCHITECTURE_DOCUMENTATION_GUIDE.md.
+This skill provides comprehensive guidelines for creating and maintaining ARCHITECTURE.md files using the standardized template from ARCHITECTURE_DOCUMENTATION_GUIDE.md. It enforces consistency across all documentation sections through the **Foundational Context Anchor Protocol** — a dependency-aware editing workflow that loads required upstream context before any downstream section edit, requires source attribution for derived claims, and detects downstream impact when any section changes.
 
 ## When This Skill is Invoked
 
@@ -17,6 +17,7 @@ Automatically activate when:
 - User explicitly asks to "calculate design drivers" or "update design drivers"
 - User asks about architecture documentation structure or best practices
 - User edits Section 1 Executive Summary Key Metrics (triggers metric consistency check)
+- User edits any downstream section (S4–S11) → triggers Context Anchor load
 - User requests metric consistency check, verify metrics, or audit metrics
 - **User asks informational questions about the documented architecture** (if ARCHITECTURE.md exists)
   - "What is our [authentication/scaling/data flow/etc.] approach?"
@@ -91,6 +92,17 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 2. Jump directly to **Workflow 9, Step 1** (Diagram Type Selection)
 3. Do NOT ask which workflow - proceed automatically
 
+#### Workflow 10: Migrate to docs/ Structure
+**Triggers:**
+- Keywords: "migrate", "restructure", "split", "reorganize", "convert" + "architecture", "ARCHITECTURE.md"
+- Size complaints: "too large", "too long", "hard to navigate", "split into files"
+- Explicit: "migrate my architecture to the new structure", "convert to docs/ layout"
+
+**Action when detected:**
+1. Confirm: "I'll help you migrate ARCHITECTURE.md to the multi-file docs/ structure."
+2. Jump directly to **Workflow 10, Step 1**
+3. Do NOT ask which workflow - proceed automatically
+
 #### Other Workflows
 If the user's request matches other documented workflows (1-7, 9-10), follow their respective trigger patterns.
 
@@ -105,103 +117,96 @@ If the user's request doesn't match any workflow triggers:
 
 ## File Naming Convention
 
-**IMPORTANT**: All architecture documents MUST be named **ARCHITECTURE.md**
+**IMPORTANT**: All architecture documentation uses the multi-file `docs/` structure.
 
-- When creating a new architecture document, always use the filename: `ARCHITECTURE.md`
-- When updating existing architecture, work with the file: `ARCHITECTURE.md`
-- Do NOT use alternative names like: architecture.md, ARCH.md, system-architecture.md, etc.
-- Each project/system should have ONE primary ARCHITECTURE.md file
+- **`ARCHITECTURE.md`** at the project root is the **navigation index only** (~130 lines)
+- All section content lives under **`docs/`** as numbered Markdown files
+- Component details (Section 5) live under **`docs/components/`** — one file per component
+
+**File naming pattern**: `NN-kebab-case-section-name.md` (e.g., `01-system-overview.md`)
+
+See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conventions.
 
 ### Location
-- Place ARCHITECTURE.md in the root of the project or in a `/docs` directory
-- For multi-project repositories, each project subdirectory gets its own ARCHITECTURE.md
+- `ARCHITECTURE.md` — always at the **project root**
+- `docs/` — always at the **project root** (sibling to `ARCHITECTURE.md`)
+- `docs/components/` — inside `docs/`
+- For multi-project repositories, each project subdirectory gets its own `ARCHITECTURE.md` + `docs/`
 
-## Working with ARCHITECTURE.md - Context Optimization
+---
 
-**IMPORTANT**: When working with ARCHITECTURE.md, optimize for context by loading sections incrementally, NOT the entire document at once.
+## Working with Architecture Documentation — Context Optimization
+
+**IMPORTANT**: The multi-file structure makes context loading simple — individual `docs/` files are 50–400 lines each (full file fits in context). No line-offset tricks needed.
 
 ### Context-Efficient Workflow
 
-1. **Initial Assessment**
-   - Read ONLY lines 1-50 of ARCHITECTURE.md to locate the **Document Index**
-   - The Document Index provides exact line ranges for each section
-   - Use the index to plan which sections need work
-   - Identify which specific section(s) need work
+1. **Find the target section**
+   - Read `ARCHITECTURE.md` navigation table to identify which `docs/NN-name.md` file contains the target section
+   - Example: "Edit security architecture" → navigate to `docs/07-security-architecture.md`
 
-2. **Section-Based Editing**
-   - Use the Document Index to find exact line ranges for your target section
-   - Use the Read tool with `offset` and `limit` parameters to load ONLY the relevant section
-   - **Add context buffer**: Read ±10-20 lines beyond the section boundaries
-   - Work on one section at a time
-   - Example: Index shows Section 5 is lines 601-850, read lines 590-860 (with 10-line buffer)
+2. **Load Context Anchor** *(REQUIRED for downstream sections)*
+   - **SKIP** this step when editing `docs/01-system-overview.md`, `docs/02-architecture-principles.md`, or for typo/formatting-only fixes
+   - **REQUIRED** when editing any file from `docs/03-architecture-layers.md` through `docs/09-operational-considerations.md`, or any `docs/components/*.md` file
+   - **Universal Foundation**: Always load `docs/01-system-overview.md` + `docs/02-architecture-principles.md`
+   - **Relevant ADRs**: Match ADR titles from `ARCHITECTURE.md` navigation table against target section keywords; load matched ADRs
+   - **Section-Specific Parents**: Load parent sections per the Foundational Context Anchor Protocol dependency table (see below)
+   - Example for S9 (Security): load S1+2 (foundation) + S5/README (components) + S7 (integrations) + S8 (tech stack) + relevant ADRs
+   - Context budget: 250–850 lines depending on section tier
 
-3. **Incremental Updates**
-   - Make edits to individual sections using the Edit tool
-   - Avoid reading the full document unless absolutely necessary
-   - For multi-section updates, work sequentially section by section
-   - Update the Document Index line ranges if section size changes significantly
+3. **Read the entire target file**
+   - Individual `docs/` files are small enough to read in full
+   - `Read(file_path="docs/07-security-architecture.md")`  — no offset/limit needed
 
-4. **Verification**
-   - After edits, read ONLY the modified section to verify changes
-   - Use Grep to search for specific content without loading full file
-   - Update "Index Last Updated" date in the Document Index after major changes
+4. **Edit the target file directly**
+   - Use the Edit tool on the specific `docs/NN-name.md` file
+   - **Do NOT edit ARCHITECTURE.md** unless you are adding a new section/file to the navigation table
+   - **Source Attribution** *(during editing)*: When writing derived content in downstream sections, insert cross-reference links to the source:
+     - **Metrics**: When repeating a metric from S1 Key Metrics → `(see [Key Metrics](01-system-overview.md#key-metrics))`
+     - **ADR decisions**: When content implements an ADR → `per [ADR-NNN](../adr/ADR-NNN-title.md)`
+     - **Principles**: When invoking an S3 principle → `per [Principle Name](02-architecture-principles.md#anchor)`
+     - **Parent section references**: When referencing components, layers, integrations, or tech → link to the specific file
+     - **Unverifiable claims**: If a specific claim (metric, decision, constraint) cannot be traced to an existing section, user input, or ADR → insert `<!-- TODO: Add source reference -->` marker
 
-### Using the Document Index
+5. **Post-Write Alignment & Traceability Audit**
+   - **Check A — Principle traceability**: Written content does not contradict Section 3 principles
+   - **Check B — Metric consistency**: Numeric values match Section 1 Key Metrics
+   - **Check C — ADR alignment**: Content does not contradict loaded ADR decisions
+   - **Check D — Parent section alignment**: Content references valid components (S5), integrations (S7), tech (S8) as loaded
+   - **Check E — Source citation audit**: Scan the written content for:
+     - Numeric values (TPS, latency, SLO, %) → must link to S1 Key Metrics or be marked as section-local
+     - Technology names matching S8 → should link to tech stack or governing ADR
+     - Architecture pattern references → should link to S3 or S4
+     - `<!-- TODO: Add source reference -->` markers → count and report
+   - **Silent pass** if no issues found; display alignment report **only when misalignment or missing citations are detected**
 
-**Every ARCHITECTURE.md should include a Document Index** (before Section 1) with exact line ranges.
+6. **Verification**
+   - After edits, re-read the modified `docs/` file to verify changes
+   - Use Grep to search for specific content without loading multiple files
 
-**Index Format Example:**
-```markdown
-## Document Index
+### Discovering Available Files
 
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines 1-80
-- [Section 2: System Overview](#2-system-overview) → Lines 81-150
-- [Section 3: Architecture Principles](#3-architecture-principles) → Lines 151-350
-- [Section 4: Architecture Layers](#4-architecture-layers) → Lines 351-600
-- [Section 5: Component Details](#5-component-details) → Lines 601-850
-- [Section 6: Data Flow Patterns](#6-data-flow-patterns) → Lines 851-1000
-- [Section 7: Integration Points](#7-integration-points) → Lines 1001-1150
-- [Section 8: Technology Stack](#8-technology-stack) → Lines 1151-1300
-- [Section 9: Security Architecture](#9-security-architecture) → Lines 1301-1550
-- [Section 10: Scalability & Performance](#10-scalability--performance) → Lines 1551-1750
-- [Section 11: Operational Considerations](#11-operational-considerations) → Lines 1751-1950
-- [Section 12: Architecture Decision Records (ADRs)](#12-architecture-decision-records-adrs) → Lines 1951-end
+When the target section is not obvious, read `ARCHITECTURE.md` first:
 
-**Index Last Updated:** YYYY-MM-DD
+```python
+# Step 1: Read navigation table
+nav_content = Read(file_path="ARCHITECTURE.md")
+
+# Step 2: Parse the Documentation table to find the target file
+# Example row: | 8 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | ... |
+
+# Step 3: Read that specific docs/ file in full
+target_content = Read(file_path="docs/07-security-architecture.md")
 ```
 
-**How to Use the Index:**
+### Updating the Navigation Index
 
-1. **Find the Index**: Read lines 1-50 to locate the Document Index
-2. **Identify Target Section**: Check the index for exact line ranges
-3. **Load with Context Buffer**: Read target section ± 10-20 lines for context preservation
-4. **Example**:
-   ```
-   # To edit Section 5 (Component Details):
-   # Index shows: Lines 601-850
-   # Load with 10-line buffer:
-   Read(file_path="ARCHITECTURE.md", offset=590, limit=270)
-   # This reads lines 590-860
-   ```
+Update `ARCHITECTURE.md` only when:
+- A new section file is added to `docs/`
+- A new component file is added to `docs/components/`
+- A file is renamed or removed
 
-**Context Buffer Guidelines:**
-
-| Edit Type | Buffer Size | Use Case |
-|-----------|-------------|----------|
-| **Minimal** | ±5-10 lines | Small edits (single paragraph, config value) |
-| **Standard** | ±10-20 lines | Section edits (rewriting subsection, adding components) |
-| **Extended** | ±20-50 lines | Cross-section edits (changes referencing adjacent sections) |
-
-**Maintaining the Index:**
-
-After significant edits:
-1. Use `grep -n "^## [0-9]" ARCHITECTURE.md` to find actual section line numbers
-2. Update the Document Index with current line ranges
-3. Update "Index Last Updated" date
-4. Verify index accuracy periodically (quarterly reviews)
-
-**Note**: The Document Index is part of the ARCHITECTURE_DOCUMENTATION_GUIDE.md template and should be included in all new ARCHITECTURE.md files.
+**Do NOT update ARCHITECTURE.md** for content edits within existing `docs/` files.
 
 ---
 
@@ -336,25 +341,41 @@ When creating the ARCHITECTURE.md, add an HTML comment metadata tag at the begin
 - Used by Design Drivers calculation
 - Used by architecture compliance skill
 
-#### Step 5: Create ARCHITECTURE.md with Type-Specific Content
+#### Step 5: Create Multi-File Architecture Documentation
 
-Create the complete ARCHITECTURE.md using:
-- Standard sections 1-3 (same for all types)
-- Type-specific Section 4 (from loaded template)
-- Type-specific Section 5 (from loaded template)
-- Standard sections 6-12 (same for all types)
+Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs/` structure:
+
+**Creation Order:**
+1. Create `docs/` directory
+2. Create `docs/components/` directory
+3. Write each section to its corresponding `docs/NN-name.md` file (see RESTRUCTURING_GUIDE.md for file mapping):
+   - `docs/01-system-overview.md` — Sections 1+2 (Executive Summary + System Overview)
+   - `docs/02-architecture-principles.md` — Section 3 (Architecture Principles)
+   - `docs/03-architecture-layers.md` — Section 4 (Architecture Layers, type-specific template)
+   - `docs/04-data-flow-patterns.md` — Section 6 (Data Flow Patterns)
+   - `docs/05-integration-points.md` — Section 7 (Integration Points)
+   - `docs/06-technology-stack.md` — Section 8 (Technology Stack)
+   - `docs/07-security-architecture.md` — Section 9 (Security Architecture)
+   - `docs/08-scalability-and-performance.md` — Section 10 (Scalability & Performance)
+   - `docs/09-operational-considerations.md` — Section 11 (Operational Considerations)
+   - `docs/10-references.md` — References
+4. For Section 5 (Component Details): write each component as a separate `docs/components/NN-name.md` file using the type-specific Section 5 template; add breadcrumbs; create `docs/components/README.md` component index
+5. Write `ARCHITECTURE.md` as the navigation index using the template from RESTRUCTURING_GUIDE.md
+6. Add the `<!-- ARCHITECTURE_TYPE: TYPE -->` metadata comment at the top of `docs/03-architecture-layers.md`
+
+> **Note — Context Anchor on Subsequent Edits**: The sequential creation order (S1 → S2 → S3 → ... → S11) inherently satisfies the context anchor during initial documentation creation, since each section is written with prior sections fresh in context. However, the **Foundational Context Anchor Protocol MUST be followed for all subsequent edits** to any downstream section (S4–S11), as the original creation context will no longer be available.
 
 **Include:**
-- Document Index (placeholder line ranges)
-- Architecture type metadata comment in Section 4
-- All template content properly formatted
-- Placeholder values for customization
+- All template content from the type-specific templates, properly formatted
+- Placeholder values in each file for the user to customize
+- Breadcrumbs in all `docs/components/NN-name.md` files
+- Cross-references as relative Markdown links (never bare `Section X.Y`)
 
 #### Step 6: Prompt for ADR Generation (Optional)
 
-**Trigger**: Immediately after Step 5 completes successfully (ARCHITECTURE.md created)
+**Trigger**: Immediately after Step 5 completes successfully (docs/ structure created)
 
-**Objective**: Offer to generate ADR files from Section 12 table
+**Objective**: Offer to generate ADR files from the ADR table in the ARCHITECTURE.md navigation index
 
 ---
 
@@ -363,20 +384,20 @@ Create the complete ARCHITECTURE.md using:
 After ARCHITECTURE.md is successfully created, display the following prompt:
 
 ```
-✅ ARCHITECTURE.md created successfully!
+✅ Architecture documentation created successfully!
 
 ═══════════════════════════════════════════════════════════
 📋 Architecture Decision Records (ADRs) Setup
 ═══════════════════════════════════════════════════════════
 
-Section 12 of your ARCHITECTURE.md includes an ADR table with placeholder
+Your ARCHITECTURE.md navigation index includes an ADR table with placeholder
 entries. I can automatically generate these ADR files using the standard
 ADR template.
 
 Would you like me to generate the ADR files now?
 
 Options:
-1. [Yes - Generate ADRs] - Create all ADR files listed in Section 12
+1. [Yes - Generate ADRs] - Create all ADR files listed in the navigation index
 2. [Preview First] - Show me which ADRs will be created
 3. [No Thanks] - I'll create them manually later
 4. [Learn More] - Tell me about ADRs and the template
@@ -391,10 +412,10 @@ Recommended: Option 1 (Generate ADRs) - Saves time and ensures consistency
 ##### Step 6.1: Handle User Selection
 
 **If user selects Option 1 (Yes - Generate ADRs)**:
-- Proceed to Step 6.2 (Locate Section 12)
+- Proceed to Step 6.2 (Locate ADR Table)
 
 **If user selects Option 2 (Preview First)**:
-- Proceed to Step 6.2 (Locate Section 12)
+- Proceed to Step 6.2 (Locate ADR Table)
 - After Step 6.3 (Extract ADR List), show preview
 - Re-prompt: "Proceed with generation? (yes/no)"
 - If yes: Continue to Step 6.4
@@ -435,59 +456,43 @@ Would you like me to generate the ADR files now? (yes/no)
 
 ---
 
-##### Step 6.2: Locate Section 12
+##### Step 6.2: Locate ADR Table
 
-**Method 1: Use Document Index** (preferred)
+The ADR table is in the `ARCHITECTURE.md` navigation index (not in a separate Section 12).
 
-```bash
-# Read Document Index to find Section 12 line range
-grep -A 20 "^## Document Index" ARCHITECTURE.md | grep "Section 12"
-```
-
-**Expected output**: `- [Section 12: Architecture Decision Records (ADRs)](#12-architecture-decision-records-adrs) → Lines 1750-1800`
-
-**Parse line range**: Extract start line `1750` and end line `1800`
-
-**Method 2: Fallback - Find by Header**
-
-If Document Index method fails:
+**Method**: Read `ARCHITECTURE.md` in full (it's ~130 lines) and parse the ADR table:
 
 ```bash
-# Find Section 12 header line number
-grep -n "^## 12\. Architecture Decision Records" ARCHITECTURE.md
+# Read the full navigation index
+Read(file_path="ARCHITECTURE.md")
+
+# Parse ADR table rows
+grep -E "^\| \[ADR-" ARCHITECTURE.md
 ```
 
-**Expected output**: `1750:## 12. Architecture Decision Records (ADRs)`
+**Expected output**:
+```
+| [ADR-001](adr/ADR-001-name.md) | Title | Accepted |
+```
 
-**Parse line number**: Extract `1750`
-
-**Read until**: Next section header or end of file (typically 50-100 lines)
-
-**Error Handling**: If Section 12 not found:
+**Error Handling**: If no ADR table found in ARCHITECTURE.md:
 
 ```
-⚠️  Section 12: Architecture Decision Records not found in ARCHITECTURE.md
-
-This is unusual - all ARCHITECTURE.md files should include Section 12.
+⚠️  ADR table not found in ARCHITECTURE.md
 
 Would you like me to:
-1. [Add Section 12] - Add the section with empty ADR table
+1. [Add ADR Table] - Add the ADR section to ARCHITECTURE.md
 2. [Skip ADR Generation] - Continue without generating ADRs
-3. [Manual Review] - Let me check the document structure first
+3. [Manual Review] - Let me check the navigation index first
 
 Recommended: Option 3 (Manual Review)
 ```
 
 ---
 
-##### Step 6.3: Extract ADR List from Section 12
+##### Step 6.3: Extract ADR List from Navigation Index
 
-**Read Section 12 content**:
-
-```bash
-# Using Read tool with line range from Step 6.2
-Read(file_path="ARCHITECTURE.md", offset=1750, limit=50)
-```
+**Read navigation index content** (already loaded in Step 6.2 — no additional read needed):
 
 **Parse ADR table rows**:
 
@@ -1566,6 +1571,172 @@ Example: Searching for "100" also matches "100 pods", "section 100", "version 1.
 
     ═══════════════════════════════════════════════════════════
     ```
+
+---
+
+## Foundational Context Anchor Protocol
+
+**PURPOSE**: Ensure that when writing or editing any downstream section (S4–S11), the agent first loads the foundational context that governs it. This prevents downstream sections from drifting from business context, design principles, key decisions, and from each other — eliminating internal contradictions across the architecture documentation.
+
+### Foundational Hierarchy
+
+Architecture documentation follows a layered dependency graph where later sections depend on both the universal foundation AND earlier downstream sections:
+
+```
+Tier 0 (Source of Truth):  S1+2 (System Overview), S3 (Principles), ADRs
+Tier 1:                    S4 (Architecture Layers)
+Tier 2:                    S5 (Components)
+Tier 3:                    S6 (Data Flow), S7 (Integration), S8 (Tech Stack)
+Tier 4:                    S9 (Security), S10 (Scalability)
+Tier 5:                    S11 (Operations)
+```
+
+### Full Dependency Map
+
+| Target File | Foundation (always) | Section-Specific Parents | Why |
+|-------------|-------------------|-------------------------|-----|
+| **S4** `docs/03-architecture-layers.md` | S1+2, S3, ADRs | — | S4 derives directly from business scope (S1) and principles (S3). Architecture style ADRs govern the layer model. |
+| **S5** `docs/components/*.md` | S1+2, S3, ADRs | **S4** (layers) | Components must map to the layer structure defined in S4. Layer boundaries determine component grouping. |
+| **S6** `docs/04-data-flow-patterns.md` | S1+2, S3, ADRs | **S5** (components) | Flows reference specific components as source/destination nodes. Throughput metrics (S1) constrain flow design. |
+| **S7** `docs/05-integration-points.md` | S1+2, S3, ADRs | **S5** (components) | Each integration connects to specific components. Loose coupling principle (S3) constrains protocol choices. |
+| **S8** `docs/06-technology-stack.md` | S1+2, S3, ADRs | **S4** (layers), **S5** (components) | Architecture type (S4) constrains tech patterns (e.g., microservices → containers, mesh). Components (S5) specify per-component tech → S8 is the aggregate. |
+| **S9** `docs/07-security-architecture.md` | S1+2, S3, ADRs | **S5** (components), **S7** (integrations), **S8** (tech stack) | Security controls span components, integration auth, and security tooling. Compliance requirements from S1. |
+| **S10** `docs/08-scalability-and-performance.md` | S1+2, S3, ADRs | **S5** (components), **S8** (tech stack) | Per-component scaling strategies, infrastructure capabilities. SLO/throughput from S1 Key Metrics are source of truth. |
+| **S11** `docs/09-operational-considerations.md` | S1+2, S3, ADRs | **S5** (components), **S8** (tech stack), **S10** (performance) | Deployment per component, monitoring per component, alerting thresholds from S10, infrastructure tools from S8. |
+
+### Context Budget Per Section Edit
+
+| Target | Files to Load | Est. Lines |
+|--------|--------------|------------|
+| S4 | S1+2, S3, ADRs (1-3) | ~250–450 |
+| S5 | S1+2, S3, S4, ADRs | ~350–600 |
+| S6 | S1+2, S3, S5/README, ADRs | ~300–550 |
+| S7 | S1+2, S3, S5/README, ADRs | ~300–550 |
+| S8 | S1+2, S3, S4, S5/README, ADRs | ~400–700 |
+| S9 | S1+2, S3, S5/README, S7, S8, ADRs | ~500–850 |
+| S10 | S1+2, S3, S5/README, S8, ADRs | ~400–700 |
+| S11 | S1+2, S3, S5/README, S8, S10, ADRs | ~500–850 |
+
+**Note on S5**: For component files, load `docs/components/README.md` (index) as context. For individual component editing, also load S4 + the component README. Do NOT load all component files — only the index.
+
+### ADR Relevance Keyword Map
+
+When determining which ADRs to load, match ADR titles from the `ARCHITECTURE.md` navigation table against these keywords per target section:
+
+| Target Section | ADR Title Keywords to Match |
+|---------------|---------------------------|
+| S4 (Layers) | architecture, layers, style, pattern, microservice, monolith, modular |
+| S5 (Components) | component, service, boundary, domain, module, separation |
+| S6 (Data Flow) | data, flow, pipeline, stream, event, async, message, queue |
+| S7 (Integration) | integration, API, protocol, gateway, external, third-party |
+| S8 (Tech Stack) | technology, language, framework, database, infrastructure, tool |
+| S9 (Security) | security, auth, encryption, compliance, access, identity, trust |
+| S10 (Scalability) | scale, performance, capacity, throughput, latency, SLO, cache |
+| S11 (Operations) | deploy, monitor, observe, incident, DR, recovery, operational |
+
+### Pre-Write Anchor Loading Procedure
+
+1. **Determine target section tier** from the Foundational Hierarchy
+2. **Load Universal Foundation**: Read `docs/01-system-overview.md` + `docs/02-architecture-principles.md`
+3. **Load Section-Specific Parents** from the Full Dependency Map table above
+4. **Match and load relevant ADRs**: Scan `ARCHITECTURE.md` ADR navigation entries; match titles against the ADR Relevance Keyword Map for the target section; load matched ADR files (typically 1–3)
+5. **Context budget**: 250–850 lines depending on section tier — well within context limits
+
+### Source Attribution Rules
+
+Architecture documentation is an auditable artifact. A compliance auditor, new team member, or review board must be able to trace any metric, decision, or constraint back to its origin without searching the entire documentation. Unsourced claims erode trust in the entire document.
+
+Every claim in a downstream section that originates from another section MUST carry a traceable citation:
+
+| Claim Type | Source | Required Citation Format |
+|-----------|--------|-------------------------|
+| Metrics (TPS, SLO, latency, %) | S1 Key Metrics | `(see [Key Metrics](01-system-overview.md#key-metrics))` |
+| Design decisions | ADRs | `per [ADR-NNN](../adr/ADR-NNN-title.md)` |
+| Principle-driven choices | S3 | `per [Principle Name](02-architecture-principles.md#anchor)` |
+| Component references | S5 | `[Component Name](components/NN-name.md)` |
+| Technology references | S8 | `(see [Technology Stack](06-technology-stack.md))` |
+| Layer/pattern references | S4 | `(see [Architecture Layers](03-architecture-layers.md))` |
+| Integration references | S7 | `[Integration Name](05-integration-points.md#anchor)` |
+| Unverifiable claims | None found | `<!-- TODO: Add source reference -->` |
+
+### Post-Write Alignment & Traceability Validation
+
+After editing a downstream section, perform these checks:
+
+1. **Principle traceability** — Written content does not contradict Section 3 principles
+2. **Metric consistency** — Numeric values (TPS, latency, SLO, availability %) match Section 1 Key Metrics exactly
+3. **ADR alignment** — Content does not contradict loaded ADR decisions
+4. **Parent section alignment** — Content references valid components (S5), valid integrations (S7), valid tech (S8) as loaded from parent sections
+5. **Source citation audit** — Scan the written content for:
+   - Numeric values (TPS, latency, SLO, %) → must link to S1 Key Metrics or be marked as section-local
+   - Technology names matching S8 → should link to tech stack or governing ADR
+   - Architecture pattern references → should link to S3 or S4
+   - `<!-- TODO: Add source reference -->` markers → count and report
+
+**Output**: Silent pass if no issues found. When misalignment or missing citations are detected, display:
+
+```
+═══════════════════════════════════════════════════════════
+CONTEXT ANCHOR — ALIGNMENT & TRACEABILITY REPORT
+═══════════════════════════════════════════════════════════
+
+Target: docs/07-security-architecture.md (S9)
+Context Loaded: S1+2, S3, S5/README, S7, S8, ADR-003, ADR-007
+
+Alignment Issues:
+⚠ Line 42: "99.95% availability" — S1 Key Metrics specifies 99.9%
+⚠ Line 78: References "Redis caching" — not listed in S8 Technology Stack
+
+Missing Citations:
+⚠ Line 23: "OAuth 2.0 + PKCE" — no link to governing ADR
+⚠ Line 56: "TLS 1.3 everywhere" — no link to S3 Encrypt Everything principle
+
+TODO Markers: 1
+⚠ Line 91: <!-- TODO: Add source reference --> for "SOC 2 Type II compliance"
+
+Recommendation: Resolve alignment issues before finalizing this section.
+═══════════════════════════════════════════════════════════
+```
+
+### Change Propagation Detection
+
+When ANY section is edited (not just S1–S3), identify downstream sections that may need review using the dependency map in reverse:
+
+| Modified Section | Downstream Impact |
+|-----------------|-------------------|
+| S1+2 (System Overview) | All sections (S4–S11) |
+| S3 (Principles) | All sections (S4–S11) |
+| ADRs | Sections matched by ADR relevance keywords |
+| S4 (Layers) | S5, S8 (and transitively S6, S7, S9, S10, S11) |
+| S5 (Components) | S6, S7, S8, S9, S10, S11 |
+| S7 (Integrations) | S9 |
+| S8 (Tech Stack) | S9, S10, S11 |
+| S10 (Scalability) | S11 |
+
+After editing a section, generate a propagation report presenting affected downstream sections to the user. **Do NOT auto-edit downstream sections** — present the report and let the user decide which sections to review.
+
+```
+═══════════════════════════════════════════════════════════
+CHANGE PROPAGATION — DOWNSTREAM IMPACT REPORT
+═══════════════════════════════════════════════════════════
+
+Modified: docs/06-technology-stack.md (S8)
+Changes: Added Redis 7.2 to caching layer, removed Memcached
+
+Potentially Affected Downstream Sections:
+→ docs/07-security-architecture.md (S9) — may reference caching security controls
+→ docs/08-scalability-and-performance.md (S10) — may reference caching strategy
+→ docs/09-operational-considerations.md (S11) — may reference caching deployment/monitoring
+
+Action Required: Review listed sections for consistency with S8 changes.
+═══════════════════════════════════════════════════════════
+```
+
+### Integration with Existing Mechanisms
+
+- **Metric Consistency Audit** (see above) handles numeric propagation from S1 → S6, S7, S10. The Context Anchor Protocol adds **semantic alignment** — ensuring principles, decisions, and parent section references remain consistent.
+- **Design Drivers Calculation** (see below) reads S1, S2, S5, S8 to compute metrics. The Context Anchor Protocol adds the **reverse check** — ensuring S5 and S8 align BACK to S1/S2 when edited.
+- **Cross-reference conventions** (RESTRUCTURING_GUIDE.md) define the *syntax* for links between docs/ files. The Context Anchor Protocol **requires** using those links when writing derived content, making the syntax convention enforceable rather than optional.
 
 ---
 
@@ -2660,76 +2831,54 @@ Classify the user's question to determine which section(s) to reference:
 
 **See QUERY_SECTION_MAPPING.md for detailed query-to-section mapping guide.**
 
-#### Step 2: Load Document Index
+#### Step 2: Discover Target File via Navigation Index
 
-Use context-efficient loading to get the Document Index:
-
-```python
-# Load Document Index (lines 1-50)
-index_content = Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-doc_index = parse_document_index(index_content)
-```
-
-**Expected Index Format**:
-```markdown
-## Document Index
-
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines 1-80
-- [Section 2: System Overview](#2-system-overview) → Lines 81-150
-...
-- [Section 12: Architecture Decision Records](#12-architecture-decision-records-adrs) → Lines 1951-end
-
-**Index Last Updated:** YYYY-MM-DD
-```
-
-#### Step 3: Load Relevant Section(s)
-
-Using index-based loading for efficiency:
+Read `ARCHITECTURE.md` navigation table to find which `docs/` file contains the target section:
 
 ```python
-# Get section range from Document Index
-section_range = doc_index[section_number]
+# Read ARCHITECTURE.md navigation index (it's short — ~130 lines)
+nav_content = Read(file_path="ARCHITECTURE.md")
 
-# Calculate load parameters
-buffer = 20  # Standard buffer for context
-offset = section_range["start"] - buffer - 1  # -1 for zero-indexing
-limit = (section_range["end"] - section_range["start"]) + (2 * buffer)
-
-# Load section
-section_content = Read(file_path="ARCHITECTURE.md", offset=offset, limit=limit)
+# Parse Documentation table to find the file for the target section
+# Section routing:
+# - Authentication/Security   → docs/07-security-architecture.md
+# - Data flow/pipelines       → docs/04-data-flow-patterns.md
+# - Components/services       → docs/components/README.md (then individual component files)
+# - Technology stack          → docs/06-technology-stack.md
+# - Integrations              → docs/05-integration-points.md
+# - Scaling/performance       → docs/08-scalability-and-performance.md
+# - Deployment/Layers         → docs/03-architecture-layers.md
+# - Patterns/principles       → docs/02-architecture-principles.md
+# - Problem/solution          → docs/01-system-overview.md
+# - Operations                → docs/09-operational-considerations.md
+# - Decisions/ADRs            → adr/ directory
+# - General overview          → docs/01-system-overview.md
 ```
 
-**Example**:
-```python
-# User asks: "What technologies do we use for the backend?"
-# Detected section: Section 8 (Technology Stack)
+#### Step 3: Load Relevant File(s) in Full
 
-# Index shows: Section 8 → Lines 912-998
-buffer = 20
-offset = 912 - 20 - 1 = 891
-limit = (998 - 912) + (2 * 20) = 86 + 40 = 126
-
-# Load: Read(file_path="ARCHITECTURE.md", offset=891, limit=126)
-# This reads lines 891-1017 (Section 8 with 20-line buffers)
-```
-
-**Multi-Section Queries**:
-
-For questions requiring multiple sections:
+Individual `docs/` files are 50–400 lines — load the entire file(s) needed:
 
 ```python
-# User asks: "How does authentication work with external systems?"
-# Detected sections: Section 9 (Security) + Section 7 (Integrations)
+# Single-section query
+section_content = Read(file_path="docs/07-security-architecture.md")
 
-# Load Section 9 first
-section_9_content = Read(file_path="ARCHITECTURE.md", offset=section_9_start-20-1, limit=section_9_length+40)
+# Multi-section query: load each relevant file in full
+section_a = Read(file_path="docs/01-system-overview.md")
+section_b = Read(file_path="docs/08-scalability-and-performance.md")
 
-# Load Section 7 second
-section_7_content = Read(file_path="ARCHITECTURE.md", offset=section_7_start-20-1, limit=section_7_length+40)
-
-# Synthesize answer from both sections
+# Component-specific query
+component = Read(file_path="docs/components/01-api-gateway.md")
 ```
+
+**Context budget** (multi-file structure is more efficient):
+
+| Query Type | Files Loaded | Approx Lines |
+|------------|-------------|--------------|
+| Single section | 1 docs/ file | ~50–400 |
+| Multi-section | 2–4 docs/ files | ~200–800 |
+| Component detail | 1 component file | ~40–200 |
+| Full architecture | All docs/ files | ~2,000–3,500 |
 
 #### Step 4: Extract Relevant Information
 
@@ -3358,27 +3507,25 @@ I'll generate a presentation Markdown file with these settings:
 Proceed with generation? [Yes/No]
 ```
 
-#### Step 4: Load Document Index
+#### Step 4: Discover Section Files via Navigation Index
 
 **Process**:
-1. Read lines 1-50 of ARCHITECTURE.md
-2. Parse Document Index to extract section line ranges
-3. Validate 12-section structure
-4. Extract system name from first heading
+1. Read `ARCHITECTURE.md` navigation table (it's ~130 lines — read it in full)
+2. Parse the Documentation table to extract the `docs/NN-name.md` file paths
+3. Identify system name from the first heading
+4. Validate that listed `docs/` files exist
 
-**Fallback**: If Document Index not found, use default line ranges with warning
+**Fallback**: If `ARCHITECTURE.md` not found or navigation table is missing, check for `docs/` directory and list its files directly.
 
-#### Step 5: Load Required Sections Incrementally
+#### Step 5: Load Required Section Files
 
 **Context-Efficient Loading**:
-- Load only sections required for the selected stakeholder
-- Use ±10 line buffer around each section
-- Minimize total lines loaded (50-80% reduction vs. full document)
+- Load only the `docs/` files required for the selected stakeholder
+- Each docs/ file is small enough to read in full (no line-offset tricks needed)
 
-**Sections by Stakeholder**:
-- **Business**: Sections 1, 2, 10, 11 (~400 lines, 80% reduction)
-- **Architecture**: Sections 3, 4, 5, 6, 7, 8, 12 (~1000 lines, 50% reduction)
-- **Compliance**: Sections 7, 8, 9, 10, 11, 12 (~700 lines, 65% reduction)
+**Files by Stakeholder**:
+- **Business**: `docs/01-system-overview.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md` (~3 files, ~600–900 lines)
+- **Architecture**: `docs/02-architecture-principles.md`, `docs/03-architecture-layers.md`, `docs/components/README.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md` (~6 files, ~1,000–1,800 lines)
 
 #### Step 6: Generate Summaries Using LLM (NEW - Recommended)
 
@@ -3772,9 +3919,8 @@ This workflow is activated when users request diagram generation from ARCHITECTU
 
 ### Prerequisites
 
-- **ARCHITECTURE.md file exists** in the project
-- Document has **valid 12-section structure** (or at least core sections 1-4)
-- **Document Index is present** (lines 1-50 typically)
+- **`docs/` directory exists** with numbered section files
+- **`ARCHITECTURE.md`** navigation index exists at project root
 - **MERMAID_DIAGRAMS_GUIDE.md** available for templates (optional but recommended)
 
 ### Step-by-Step Process
@@ -3812,9 +3958,9 @@ What diagrams would you like to generate?
 - Suitable for executive presentations and documentation
 
 **Default Set Diagram Details**:
-1. **High-Level System Architecture** → Section 4.1 (Architecture Layers)
-2. **Infrastructure & Deployment** → Section 9.2 (Deployment Architecture)
-3. **High Availability & Failover** → Section 8.3 (Availability & Reliability)
+1. **High-Level System Architecture** → `docs/03-architecture-layers.md`
+2. **Infrastructure & Deployment** → `docs/09-operational-considerations.md`
+3. **High Availability & Failover** → `docs/08-scalability-and-performance.md`
 
 #### Step 2: Target Location Selection
 
@@ -3833,11 +3979,11 @@ Where should the diagrams be placed?
 ```
 
 **Recommended Placements**:
-- **High-Level Architecture**: Section 4.1 or Section 4 introduction
-- **Data Flow Diagrams**: Section 5.3 (Data Flow Patterns)
-- **Infrastructure Diagram**: Section 9.2 (Deployment Architecture)
-- **HA Diagram**: Section 8.3 (Availability & Reliability)
-- **Performance Diagram**: Section 8.1 (Performance Requirements)
+- **High-Level Architecture**: `docs/03-architecture-layers.md`
+- **Data Flow Diagrams**: `docs/04-data-flow-patterns.md`
+- **Infrastructure Diagram**: `docs/09-operational-considerations.md`
+- **HA Diagram**: `docs/08-scalability-and-performance.md`
+- **Performance Diagram**: `docs/08-scalability-and-performance.md`
 
 #### Step 3: Confirmation
 
@@ -3987,6 +4133,106 @@ Generated diagrams (Default Set):
 
 ---
 
+## Workflow 10: Migrate Existing ARCHITECTURE.md to docs/ Structure
+
+**⚡ Auto-triggers**: This workflow activates when migration/restructuring keywords are detected.
+
+### Automatic Workflow Detection
+
+Add this trigger pattern to the `## 🎯 AUTOMATIC WORKFLOW DETECTION` section:
+
+#### Workflow 10: Migrate Existing ARCHITECTURE.md to docs/ Structure
+
+**Triggers:**
+- Keywords: "migrate", "restructure", "split", "reorganize", "convert" + "architecture", "ARCHITECTURE.md"
+- Size complaints: "too large", "too long", "hard to navigate", "split into files"
+- Explicit: "migrate my architecture to the new structure", "convert to docs/ layout"
+
+**Action when detected:**
+1. Confirm: "I'll help you migrate ARCHITECTURE.md to the multi-file docs/ structure."
+2. Jump directly to Workflow 10, Step 1
+
+### When to Use
+
+- Existing project has a monolithic `ARCHITECTURE.md` (typically 2,000–5,000+ lines)
+- User wants to split into the multi-file `docs/` structure
+- User mentions the file is "too large", "hard to navigate", or wants it "split into files"
+
+### Step-by-Step Process
+
+#### Step 1: Analyze Current Document
+
+```bash
+# Count total lines
+wc -l ARCHITECTURE.md
+
+# Find all major sections
+grep -n "^## [0-9]" ARCHITECTURE.md
+```
+
+Report to user:
+- Total lines in ARCHITECTURE.md
+- Sections found (list with line numbers)
+- Estimated destination files with line count estimates
+
+#### Step 2: Propose Target Structure
+
+Show the user the exact target layout based on what was found in Step 1:
+
+```
+I'll split ARCHITECTURE.md into these files:
+
+docs/
+├── 01-system-overview.md           (~NNN lines — Sections 1+2)
+├── 02-architecture-principles.md   (~NNN lines — Section 3)
+├── 03-architecture-layers.md       (~NNN lines — Section 4)
+├── 04-data-flow-patterns.md        (~NNN lines — Section 6)
+├── 05-integration-points.md        (~NNN lines — Section 7)
+├── 06-technology-stack.md          (~NNN lines — Section 8)
+├── 07-security-architecture.md     (~NNN lines — Section 9)
+├── 08-scalability-and-performance.md (~NNN lines — Section 10)
+├── 09-operational-considerations.md (~NNN lines — Section 11)
+├── 10-references.md                (~NNN lines — References)
+└── components/
+    ├── README.md                   (component index)
+    └── NN-<component>.md           (one per Section 5 subsection)
+
+ARCHITECTURE.md → rewritten as navigation index (~130 lines)
+
+Proceed? [Yes/No]
+```
+
+**Wait for user approval before making any changes.**
+
+#### Step 3: Extract Files (Safe Order)
+
+**CRITICAL**: Do NOT delete content from `ARCHITECTURE.md` until all destination files are verified.
+
+1. Create `docs/` and `docs/components/` directories
+2. **Extract Section 5 sub-components first** (each subsection → `docs/components/NN-name.md`):
+   - Add breadcrumb at top: `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>`
+   - Adjust ADR link depth from `adr/` to `../../adr/`
+   - Convert any `(Section X.Y)` references to relative Markdown links
+3. Create `docs/components/README.md` as component index (links to all component files)
+4. Extract remaining sections in order → `docs/NN-name.md` files:
+   - Update `(Section X.Y)` references to relative Markdown links
+   - Adjust ADR links from `adr/` to `../adr/`
+
+#### Step 4: Rewrite ARCHITECTURE.md as Navigation Index
+
+Use the navigation index template from **RESTRUCTURING_GUIDE.md** to replace the full content of `ARCHITECTURE.md` with the navigation table + ADR table.
+
+#### Step 5: Update External References
+
+- `adr/README.md` — update any "Section 12 of ARCHITECTURE.md" references to point to `ARCHITECTURE.md` directly
+- `compliance-docs/COMPLIANCE_MANIFEST.md` — check for stale section/line references
+
+#### Step 6: Verify
+
+Run the verification checklist from **RESTRUCTURING_GUIDE.md**.
+
+---
+
 ## Optional Enhancements
 
 - Data Flow Patterns (for complex flows)
@@ -4006,6 +4252,7 @@ This skill includes the following asset files:
 
 - **ARCHITECTURE_DOCUMENTATION_GUIDE.md**: Primary template and structure guide (located in skill assets)
 - **ADR_GUIDE.md**: Architectural Decision Record format and guidelines (located in skill assets)
+- **RESTRUCTURING_GUIDE.md**: Multi-file docs/ structure reference — directory layout, naming conventions, cross-reference conventions, and verification checklist
 
 These reference documents are bundled with this skill and will be available when the skill is active.
 

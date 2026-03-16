@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `development`
 **Template**: `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md`
-**Section Mapping**: Sections 3, 5, 8, 12 (primary), 11 (secondary)
+**Section Mapping**: docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md (primary), docs/09-operational-considerations.md (secondary)
 
 **Key Data Points**:
 - Technology stack (languages, frameworks, versions)
@@ -76,7 +76,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -167,70 +167,94 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Development Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 3** (System Architecture): Architecture patterns, design principles
-- **Section 5** (Infrastructure): Development infrastructure, CI/CD
-- **Section 8** (Technology Stack): Languages, frameworks, versions
-- **Section 12** (ADRs): Architectural decisions, technology choices
-- **Section 11** (Operational): Build/deployment automation (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/02-architecture-principles.md** (Architecture Principles): Architecture patterns, design principles
+- **docs/components/README.md** (Component Details): Development infrastructure, CI/CD
+- **docs/06-technology-stack.md** (Technology Stack): Languages, frameworks, versions
+- **adr/README.md** (ADRs): Architectural decisions, technology choices
+- **docs/09-operational-considerations.md** (Operational Considerations): Build/deployment automation (secondary)
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/02-architecture-principles.md`
+- `Read file: docs/components/README.md`
+- `Read file: docs/06-technology-stack.md`
+- `Read file: adr/README.md`
+- `Read file: docs/09-operational-considerations.md`
 
 **Step 3.3: Extract Development-Specific Data Points**
 
-**Technology Stack** (Section 8):
+**Technology Stack** (docs/06-technology-stack.md):
 ```
 pattern: "(language|framework|library|Java|Python|Node|React|Spring|.NET)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Code Coverage** (Section 11):
+**Code Coverage** (docs/09-operational-considerations.md):
 ```
 pattern: "(code coverage|test coverage|unit test|integration test)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Technical Debt** (Section 12):
+**Technical Debt** (adr/README.md):
 ```
 pattern: "(technical debt|tech debt|refactoring|code quality|code smell)"
-file: [architecture_file]
+file: adr/README.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Dependency Management** (Section 8):
+**Dependency Management** (docs/06-technology-stack.md):
 ```
 pattern: "(dependency|vulnerability|CVE|security patch|version upgrade)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**CI/CD Pipeline** (Section 5 or 11):
+**CI/CD Pipeline** (docs/09-operational-considerations.md):
 ```
 pattern: "(CI/CD|continuous integration|continuous deployment|Jenkins|GitHub Actions|GitLab CI)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Code Review** (Section 11):
+**Code Review** (docs/09-operational-considerations.md):
 ```
 pattern: "(code review|peer review|pull request|PR review)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
@@ -320,15 +344,16 @@ Replacement: CI/CD pipeline documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 3.2`
+- Correct: `- Source: docs/06-technology-stack.md`
+- Correct: `- Source: adr/README.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 3.2, lines 67-72`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 3.2 (Development Practices section)`
@@ -363,7 +388,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -418,7 +443,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 3.2
+- Source: docs/02-architecture-principles.md
 ```
 
 INCORRECT (added line numbers):
@@ -534,7 +559,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -593,7 +618,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Development Architecture
-   Sections: 3, 5, 8, 12, 11
+   Sections: docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

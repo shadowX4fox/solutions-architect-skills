@@ -789,28 +789,27 @@ Check locations:
 If not found: Ask user for location or suggest creating with architecture-docs skill
 ```
 
-**Step 2: Load Document Index**
+**Step 2: Read Navigation Index**
 ```
-Read ARCHITECTURE.md lines 1-50 to extract:
-- Project name (Section 1 title)
-- Document structure (12-section format)
-- Section boundaries (line ranges)
+Read ARCHITECTURE.md (full file, ~130 lines) to extract:
+- Project name (H1 header)
+- Links to docs/ section files
 
-Example Document Index:
-Line 1: # Project Name: Job Scheduling Platform
-Line 5: ## Section 1: System Overview (lines 5-150)
-Line 151: ## Section 2: Business Context (lines 151-300)
+Example Navigation Index:
+Line 1: # Job Scheduling Platform
+Line 5: Architecture documentation is split across docs/ files
+Line 10: - [System Overview](docs/01-system-overview.md)
+Line 11: - [Architecture Principles](docs/02-architecture-principles.md)
 ...
-Line 1950: ## Section 12: ADRs (lines 1950-2100)
 ```
 
 **Step 3: Validate Structure**
 ```
 Required checks:
-✓ ARCHITECTURE.md follows 12-section standard format
-✓ Document Index present (first 50 lines)
-✓ All sections numbered and titled correctly
-✓ Section line ranges don't overlap
+✓ ARCHITECTURE.md exists as navigation index (~130 lines)
+✓ docs/ directory exists with section files
+✓ adr/ directory exists (for ADR content)
+✓ Required docs/ files exist for selected contract types
 
 If validation fails: Suggest running architecture-docs skill
 ```
@@ -876,34 +875,33 @@ Action:
 
 **For Each Selected Contract:**
 
-**Step 3.1: Identify Required Sections**
+**Step 3.1: Identify Required docs/ Files**
 ```
 Consult SECTION_MAPPING_GUIDE.md for contract type
 
 Example: SRE Architecture
-- Primary: Sections 10, 11 (70% of content)
-- Secondary: Section 5 (10% of content)
+- Primary: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md (70% of content)
+- Secondary: docs/components/README.md (10% of content)
 
-Prioritize loading: Primary sections first, secondary only if needed
+Prioritize loading: Primary files first, secondary only if needed
 ```
 
-**Step 3.2: Load Sections Incrementally**
+**Step 3.2: Read docs/ Files Directly**
 ```
-For each required section:
-1. Get line range from Document Index
-2. Add ±10 line buffer (capture section context)
-3. Read specific lines from ARCHITECTURE.md
-4. Parse and extract relevant data
+For each required docs/ file:
+1. Read the file in full (no offset or limit needed)
+2. Parse and extract relevant data
 
-Example:
-Section 10: Performance Requirements (lines 1550-1750)
-Load with buffer: lines 1540-1760 (220 lines total)
+Example for SRE Architecture:
+Read docs/08-scalability-and-performance.md  # SLOs, SLIs, latency targets
+Read docs/09-operational-considerations.md    # Monitoring, DR, runbooks
+Read docs/components/README.md               # Infrastructure resilience
 
 Benefits:
-- Avoid loading entire 2000+ line document
-- Reduce context usage by 70-80%
-- Faster processing
-- More focused extraction
+- No line-offset calculations required
+- Clear 1:1 mapping between section and file
+- Each file readable in full without context waste
+- Source references use file paths instead of line numbers
 ```
 
 **Step 3.3: Extract Data Using Patterns**
@@ -937,13 +935,13 @@ Store extracted data with metadata:
     {
       "key": "availability_slo",
       "value": "99.99%",
-      "source": "Section 10.2, line 1576",
+      "source": "docs/08-scalability-and-performance.md",
       "extraction_type": "direct"
     },
     {
       "key": "error_budget",
       "value": "43.2 minutes/month",
-      "source": "Section 10.2, line 1576 (calculated)",
+      "source": "docs/08-scalability-and-performance.md (calculated)",
       "extraction_type": "transformation"
     }
   ]
@@ -1046,8 +1044,8 @@ Cache Structure:
             "item_id": "java_version",
             "status": "PASS",
             "score": 10,
-            "evidence": "Java 17 LTS (Section 8.1, line 1234)",
-            "source": "Section 8.1, line 1234"
+            "evidence": "Java 17 LTS (docs/06-technology-stack.md)",
+            "source": "docs/06-technology-stack.md"
           }
         ]
       }
@@ -1084,14 +1082,14 @@ The template format MUST be preserved exactly as written. Do NOT transform, rewr
 ```
 Replace standard placeholders:
 
-[PROJECT_NAME] → "Job Scheduling Platform" (from Document Index)
+[PROJECT_NAME] → "Job Scheduling Platform" (from ARCHITECTURE.md H1 header)
 [GENERATION_DATE] → "2025-12-07" (use `date +%Y-%m-%d` bash command to get local system date)
 [EXTRACTED_VALUE] → Actual value from cached data
-[SOURCE_REFERENCE] → "Section X, line Y" (from cache)
+[SOURCE_REFERENCE] → "docs/NN-name.md" (from cache)
 
 Example:
 Template: **Availability SLO**: [EXTRACTED_VALUE]
-Output: **Availability SLO**: 99.99% (Section 10.2, line 1576)
+Output: **Availability SLO**: 99.99% (docs/08-scalability-and-performance.md)
 ```
 
 **Template Format Preservation Rules:**
@@ -1153,7 +1151,7 @@ Generated (ALSO WRONG - custom prose):
 Using validation_results from Step 3.5, populate Document Control fields:
 
 Standard Placeholders:
-[SOLUTION_ARCHITECT] → Extract from ARCHITECTURE.md Section 1 metadata
+[SOLUTION_ARCHITECT] → Extract from ARCHITECTURE.md or docs/01-system-overview.md metadata
 [GENERATION_DATE] → Current date (YYYY-MM-DD) - Use `date +%Y-%m-%d` bash command to get local system date
 [NEXT_REVIEW_DATE] → GENERATION_DATE + 6 months (or per policy)
 
@@ -1250,7 +1248,7 @@ For each missing data point:
    Recommended: Tier 1 = 4 hours, Tier 2 = 8 hours]
 
 3. Reference source section
-   [PLACEHOLDER: See ARCHITECTURE.md Section 11.3 for backup strategy.
+   [PLACEHOLDER: See docs/09-operational-considerations.md for backup strategy.
    Add RTO/RPO values to complete this section.]
 
 4. Track for completion report
@@ -1327,42 +1325,42 @@ For each requirement, analyze ARCHITECTURE.md and assign the appropriate status:
 #### Example Scenarios
 
 **Scenario 1: SRE Architecture - LASRE01 "Define SLOs"**
-- ARCHITECTURE.md Section 10 contains: "SLO: 99.9% availability, p99 latency < 200ms"
+- `docs/08-scalability-and-performance.md` contains: "SLO: 99.9% availability, p99 latency < 200ms"
 - **Status**: `Compliant` (SLOs are clearly defined with specific metrics)
-- **Source Section**: "Section 10"
+- **Source File**: "docs/08-scalability-and-performance.md"
 - **Category**: "SRE Architecture"
 
 **Scenario 2: SRE Architecture - LASRE15 "Runbook Coverage"**
-- ARCHITECTURE.md Section 11 mentions: "operational procedures documented in Confluence"
+- `docs/09-operational-considerations.md` mentions: "operational procedures documented in Confluence"
 - No specific runbook coverage percentage or systematic approach described
 - **Status**: `Unknown` (runbooks mentioned but coverage metrics unclear)
-- **Source Section**: "Section 11"
+- **Source File**: "docs/09-operational-considerations.md"
 - **Category**: "SRE Architecture"
 
 **Scenario 3: Security Architecture - LAS3 "API Rate Limiting"**
-- ARCHITECTURE.md Section 9 (Security) does not mention rate limiting at all
-- API endpoints are described in Section 7 but no rate limiting controls
+- `docs/07-security-architecture.md` does not mention rate limiting at all
+- API endpoints are described in `docs/05-integration-points.md` but no rate limiting controls
 - **Status**: `Non-Compliant` (required security control is missing)
-- **Source Section**: "Not documented"
+- **Source File**: "Not documented"
 - **Category**: "Security Architecture"
 
 **Scenario 4: Cloud Architecture - LAC4 "Multi-Region Deployment"**
-- ARCHITECTURE.md Section 4 states: "Deployment: On-premise data center, single region"
+- `docs/03-architecture-layers.md` states: "Deployment: On-premise data center, single region"
 - Architecture has no cloud deployment
 - **Status**: `Not Applicable` (cloud requirement for on-premise architecture)
-- **Source Section**: "Section 4"
+- **Source File**: "docs/03-architecture-layers.md"
 - **Category**: "Cloud Architecture"
 
 **Scenario 5: Data & AI Architecture - LAD1 "Data Quality"**
-- ARCHITECTURE.md Section 6 contains: "Data validation: Schema checks, null handling, deduplication"
+- `docs/04-data-flow-patterns.md` contains: "Data validation: Schema checks, null handling, deduplication"
 - **Status**: `Compliant` (data quality measures are documented)
-- **Source Section**: "Section 6"
+- **Source File**: "docs/04-data-flow-patterns.md"
 - **Category**: "Data" (template specifies "Data" category for LAD1-LAD5)
 
 **Scenario 6: Data & AI Architecture - LAIA2 "AI Model Monitoring"**
-- ARCHITECTURE.md mentions AI models but no monitoring strategy
+- `docs/components/README.md` mentions AI models but no monitoring strategy
 - **Status**: `Non-Compliant` (AI models present but monitoring missing)
-- **Source Section**: "Section 5"
+- **Source File**: "docs/components/README.md"
 - **Category**: "AI" (template specifies "AI" category for LAIA1-LAIA5)
 
 #### Overall Compliance Summary Calculation
@@ -1819,26 +1817,24 @@ Data Extraction Statistics:
 - Total data points: 20
 - Successfully extracted: 17
 - Placeholders: 3
-- Source sections used: 10, 11 (400 lines loaded vs 2000+ total)
+- Source files used: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
 
 Missing Data (Requires Manual Review):
 1. Incident response team contacts
    Location: Section "On-Call Management"
-   Recommendation: Add to ARCHITECTURE.md Section 11.2
+   Recommendation: Add to docs/09-operational-considerations.md
 
 2. On-call rotation schedule
    Location: Section "On-Call Management"
-   Recommendation: Add to ARCHITECTURE.md Section 11.2
+   Recommendation: Add to docs/09-operational-considerations.md
 
 3. Runbook repository location
    Location: Section "Operational Runbooks"
-   Recommendation: Add to ARCHITECTURE.md Section 11.4
+   Recommendation: Add to docs/09-operational-considerations.md
 
 Source Traceability:
-- Section 10.1 (lines 1558-1560): Latency SLOs
-- Section 10.2 (line 1576): Availability SLO
-- Section 11.1 (lines 1780-1785): Monitoring tools
-- Section 11.2 (lines 1810-1820): Incident procedures
+- docs/08-scalability-and-performance.md: Latency SLOs, Availability SLO
+- docs/09-operational-considerations.md: Monitoring tools, Incident procedures
 
 Next Steps:
 1. Review ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md
@@ -1931,19 +1927,19 @@ Next Steps:
 
 **Example 1: RTO/RPO**
 ```
-ARCHITECTURE.md Input (Section 11.3, line 1823):
+docs/09-operational-considerations.md Input:
 "Recovery Time Objective (RTO): 4 hours
 Recovery Point Objective (RPO): 1 hour"
 
 Contract Output:
 **RTO**: 4 hours
 **RPO**: 1 hour
-**Source**: ARCHITECTURE.md Section 11.3, lines 1823-1824
+**Source**: docs/09-operational-considerations.md
 ```
 
 **Example 2: Technology Stack**
 ```
-ARCHITECTURE.md Input (Section 8.1, line 1350):
+docs/06-technology-stack.md Input:
 "Backend: Python 3.11, FastAPI 0.104
 Database: PostgreSQL 15.2"
 
@@ -1955,7 +1951,7 @@ Contract Output:
 **Database**:
 - PostgreSQL 15.2
 
-**Source**: ARCHITECTURE.md Section 8.1, lines 1350-1351
+**Source**: docs/06-technology-stack.md
 ```
 
 ---
@@ -1995,45 +1991,45 @@ Contract Output:
 
 | System | Protocol | Authentication | Source |
 |--------|----------|----------------|--------|
-| Active Directory | LDAP, REST API | Service Account | Section 7.1, line 1005 |
-| Stripe Payment Gateway | REST API | API Key | Section 7.2, line 1020 |
-| SendGrid Email | REST API | Bearer Token | Section 7.3, line 1035 |
+| Active Directory | LDAP, REST API | Service Account | docs/05-integration-points.md |
+| Stripe Payment Gateway | REST API | API Key | docs/05-integration-points.md |
+| SendGrid Email | REST API | Bearer Token | docs/05-integration-points.md |
 
 **Total Integrations**: 3
 ```
 
 **Example 2: Technology Inventory**
 ```
-ARCHITECTURE.md Input:
+docs/06-technology-stack.md Input:
 
-Section 8.1 (Backend): "Python 3.11, FastAPI"
-Section 8.2 (Frontend): "React 18, TypeScript 5.0"
-Section 8.3 (Database): "PostgreSQL 15.2, Redis 7.0"
-Section 8.4 (Infrastructure): "Docker, Kubernetes 1.28"
-Section 8.5 (Monitoring): "Prometheus, Grafana"
+"Backend: Python 3.11, FastAPI
+Frontend: React 18, TypeScript 5.0
+Database: PostgreSQL 15.2, Redis 7.0
+Infrastructure: Docker, Kubernetes 1.28
+Monitoring: Prometheus, Grafana"
 
 Contract Output:
 ## Technology Stack Inventory
 
 **Backend**:
-- Python 3.11 (Section 8.1)
-- FastAPI 0.104 (Section 8.1)
+- Python 3.11 (docs/06-technology-stack.md)
+- FastAPI 0.104 (docs/06-technology-stack.md)
 
 **Frontend**:
-- React 18 (Section 8.2)
-- TypeScript 5.0 (Section 8.2)
+- React 18 (docs/06-technology-stack.md)
+- TypeScript 5.0 (docs/06-technology-stack.md)
 
 **Data Layer**:
-- PostgreSQL 15.2 (Section 8.3)
-- Redis 7.0 (Section 8.3)
+- PostgreSQL 15.2 (docs/06-technology-stack.md)
+- Redis 7.0 (docs/06-technology-stack.md)
 
 **Infrastructure**:
-- Docker (Section 8.4)
-- Kubernetes 1.28 (Section 8.4)
+- Docker (docs/06-technology-stack.md)
+- Kubernetes 1.28 (docs/06-technology-stack.md)
 
 **Observability**:
-- Prometheus (Section 8.5)
-- Grafana (Section 8.5)
+- Prometheus (docs/06-technology-stack.md)
+- Grafana (docs/06-technology-stack.md)
 
 **Total Technologies**: 9
 **Categories**: 5
@@ -2054,7 +2050,7 @@ Contract Output:
 
 **Example 1: Error Budget Calculation**
 ```
-ARCHITECTURE.md Input (Section 10.2, line 1576):
+docs/08-scalability-and-performance.md Input:
 "Service Level Agreement (SLA): 99.99% uptime"
 
 Contract Output:
@@ -2064,13 +2060,13 @@ Contract Output:
 **Quarterly Allowance**: 129.6 minutes/quarter
 **Annual Allowance**: 525.6 minutes/year (8.76 hours)
 
-**Source**: ARCHITECTURE.md Section 10.2, line 1576
+**Source**: docs/08-scalability-and-performance.md
 **Transformation**: Error budget calculated from SLA
 ```
 
 **Example 2: Capacity Conversion**
 ```
-ARCHITECTURE.md Input (Section 10.1, line 1562):
+docs/08-scalability-and-performance.md Input:
 "Throughput: 450 transactions per second (design capacity)"
 
 Contract Output:
@@ -2079,13 +2075,13 @@ Contract Output:
 **Daily Capacity**: 38,880,000 transactions
 **Monthly Capacity**: ~1.2 billion transactions
 
-**Source**: ARCHITECTURE.md Section 10.1, line 1562
+**Source**: docs/08-scalability-and-performance.md
 **Transformation**: TPS converted to hourly/daily/monthly volumes
 ```
 
 **Example 3: Data Size Formatting**
 ```
-ARCHITECTURE.md Input (Section 5.3, line 850):
+docs/components/README.md Input:
 "Database storage: 2048 GB allocated"
 
 Contract Output:
@@ -2093,7 +2089,7 @@ Contract Output:
 **Current Usage**: [PLACEHOLDER: Add current usage from monitoring]
 **Utilization**: [PLACEHOLDER: Calculate usage %]
 
-**Source**: ARCHITECTURE.md Section 5.3, line 850
+**Source**: docs/components/README.md
 **Transformation**: GB converted to TB for readability
 ```
 
@@ -2101,17 +2097,17 @@ Contract Output:
 
 ### Strict Source Traceability Rules
 
-**Principle**: Every data point in compliance contracts must trace back to actual ARCHITECTURE.md content. No inference, derivation, or guessing is permitted.
+**Principle**: Every data point in compliance contracts must trace back to actual docs/ file content. No inference, derivation, or guessing is permitted.
 
 **Allowed Extraction Methods:**
 
-1. **Direct Extraction**: Value explicitly stated in ARCHITECTURE.md
-   - Example: "RTO: 4 hours" in Section 11.3, line 1842
-   - Extract as-is with source reference
+1. **Direct Extraction**: Value explicitly stated in a docs/ file
+   - Example: "RTO: 4 hours" in docs/09-operational-considerations.md
+   - Extract as-is with source file reference
 
-2. **Aggregation**: Multiple related values consolidated from different sections
-   - Example: Integration catalog from Section 7.1, 7.2, 7.3
-   - Source reference includes all sections
+2. **Aggregation**: Multiple related values consolidated from different docs/ files
+   - Example: Integration catalog from docs/05-integration-points.md
+   - Source reference includes all files used
 
 3. **Transformation**: Mathematical calculation or format conversion from explicit source data
    - Example: 99.99% SLA → Error budget: (100% - 99.99%) × 43,200 min = 43.2 min/month
@@ -2127,9 +2123,9 @@ Contract Output:
 - Example: Do NOT derive RTO from SLA percentages
 - Even if formula exists, do not apply without explicit source data
 
-❌ **NEVER guess section locations**
-- Example: Do NOT cite "Section 10.2" if you didn't read that section
-- All section references must be from actual Document Index or section reads
+❌ **NEVER guess file locations**
+- Example: Do NOT cite "docs/08-scalability-and-performance.md" if you didn't read that file
+- All source references must be from actual docs/ file reads
 
 ❌ **NEVER create placeholder sections**
 - Example: Do NOT suggest "Add Section 12.5" if Section 12 doesn't exist
@@ -2155,9 +2151,9 @@ Note: Add [specific data point] to ARCHITECTURE.md Section X.Y ([Section Name] �
 
 **Example Placeholder:**
 ```markdown
-**Business Criticality**: [PLACEHOLDER: Not specified in ARCHITECTURE.md Section 2.2]
+**Business Criticality**: [PLACEHOLDER: Not specified in docs/01-system-overview.md]
 Optional Reference: Industry tiers based on availability - Tier 1: 99.99%+, Tier 2: 99.9%+, Tier 3: 99.5%+
-Note: Add business criticality classification to ARCHITECTURE.md Section 2.2 (System Overview → Solution Overview)
+Note: Add business criticality classification to docs/01-system-overview.md (System Overview → Solution Overview)
 ```
 
 ---
@@ -2180,20 +2176,20 @@ Checklist:
 **2. Validate Structure**
 ```
 Run architecture-docs skill first:
-- Ensures 12-section standard format
-- Creates Document Index
+- Ensures ARCHITECTURE.md + docs/ multi-file structure
+- Creates/validates all docs/ section files
 - Validates section completeness
 - Checks for metric consistency
 ```
 
-**3. Review Section 11 (Critical for Most Contracts)**
+**3. Review docs/09-operational-considerations.md (Critical for Most Contracts)**
 ```
-Section 11 subsections needed by contracts:
-- 11.1 Monitoring → SRE Architecture, Cloud Architecture
-- 11.2 Incidents → SRE Architecture
-- 11.3 Backup & Recovery → Business Continuity, Cloud Architecture
-- 11.4 DR → Business Continuity
-- 11.5 Capacity Planning → Platform & IT Infrastructure
+Subsections needed by contracts:
+- Monitoring → SRE Architecture, Cloud Architecture
+- Incidents → SRE Architecture
+- Backup & Recovery → Business Continuity, Cloud Architecture
+- DR → Business Continuity
+- Capacity Planning → Platform & IT Infrastructure
 ```
 
 **4. Check for Quantified Metrics**
@@ -2209,18 +2205,18 @@ Replace vague with specific:
 
 ### During Generation
 
-**1. Load Incrementally (Context Efficiency)**
+**1. Load Efficiently (Context Efficiency)**
 ```
 DO:
-- Load Document Index (50 lines)
-- Load only required sections per contract
-- Use ±10 line buffer
-- Average: 400-500 lines per contract
+- Read ARCHITECTURE.md (navigation index, ~130 lines) once
+- Read only required docs/ files per contract
+- Each docs/ file is standalone and complete
+- Average: 3-5 docs/ files per contract
 
 DON'T:
-- Load entire ARCHITECTURE.md (2000+ lines)
-- Load sections you don't need
-- Load same section multiple times (cache instead)
+- Read all 12 docs/ files for every contract
+- Read docs/ files you don't need
+- Read same docs/ file multiple times (cache instead)
 ```
 
 **2. Cache Extracted Data**
@@ -2365,13 +2361,13 @@ For each generated contract:
 
 ### Issue: Invalid Structure
 
-**Symptoms**: ARCHITECTURE.md doesn't follow 12-section format
+**Symptoms**: ARCHITECTURE.md or docs/ directory missing/incomplete
 
 **Solutions**:
-1. Run architecture-docs skill to validate structure
-2. Check for Document Index in first 50 lines
-3. Verify all 12 sections present and numbered
-4. Suggest restructuring to standard format
+1. Run architecture-docs skill to validate and create structure
+2. Check ARCHITECTURE.md is navigation index (~130 lines)
+3. Verify docs/ directory exists with all required section files
+4. Suggest using architecture-docs skill to create missing files
 
 ---
 
@@ -2386,9 +2382,9 @@ For each generated contract:
 
 **Solutions**:
 1. Review completion report recommendations
-2. Expand ARCHITECTURE.md Section 11 (Operational)
-3. Add quantified metrics to Section 10 (Performance)
-4. Complete Section 9 (Security) details
+2. Expand docs/09-operational-considerations.md
+3. Add quantified metrics to docs/08-scalability-and-performance.md
+4. Complete docs/07-security-architecture.md details
 5. Regenerate after improvements
 
 ---
@@ -2467,9 +2463,9 @@ Purpose: Generate compliance documents, ensure standards adherence
 - Stakeholder list feeds into contract ownership
 
 **From architecture-docs to architecture-compliance**:
-- ARCHITECTURE.md is primary data source
-- Document Index enables context-efficient loading
-- 12-section structure ensures complete coverage
+- ARCHITECTURE.md (navigation index) + docs/ files are primary data sources
+- Multi-file structure enables context-efficient loading (read only needed files)
+- 12-section coverage spread across docs/ files ensures complete coverage
 - Metrics consistency checked across contracts
 
 **Feedback Loop**:
@@ -2521,7 +2517,7 @@ Automatic stack validation (Step 3.5) must handle various edge cases gracefully 
 
 **Scenario**: Architecture has backend components (Java or .NET) but no frontend framework.
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
 ### 8.1 Backend Stack
 - Language: Java 17
@@ -2533,7 +2529,7 @@ Automatic stack validation (Step 3.5) must handle various edge cases gracefully 
 ```
 
 **Detection**:
-- LLM analyzes Section 8 for frontend keywords: React, Angular, Vue, TypeScript, JavaScript, NPM, Yarn, Webpack
+- LLM analyzes docs/06-technology-stack.md for frontend keywords: React, Angular, Vue, TypeScript, JavaScript, NPM, Yarn, Webpack
 - No frontend framework detected → `architecture_pattern: "backend-only"`
 
 **Validation Behavior**:
@@ -2563,7 +2559,7 @@ Automatic stack validation (Step 3.5) must handle various edge cases gracefully 
 
 **Scenario**: Architecture has both backend and frontend components.
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
 ### 8.1 Backend Stack
 - Language: Java 17
@@ -2597,7 +2593,7 @@ Automatic stack validation (Step 3.5) must handle various edge cases gracefully 
 
 **Scenario**: Architecture uses both Java and .NET backends (microservices, migration scenario).
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
 ### 8.1 Backend Stack (Microservices)
 - Service A: Java 17 + Spring Boot 3.2
@@ -2666,19 +2662,19 @@ Automatic stack validation (Step 3.5) must handle various edge cases gracefully 
 ```
 ### 1.6 Stack Validation Checklist Compliance (Automatic Validation)
 
-**Validation Status**: ⚠️ **NOT PERFORMED** (Section 8 Missing)
+**Validation Status**: ⚠️ **NOT PERFORMED** (docs/06-technology-stack.md Missing)
 **Validation Date**: Not performed
 **Validation Evaluator**: N/A
 
-**Error**: ARCHITECTURE.md Section 8 (Technology Stack) not found or empty. Automatic stack validation cannot be performed without technology stack documentation.
+**Error**: docs/06-technology-stack.md not found or empty. Automatic stack validation cannot be performed without technology stack documentation.
 
 **Required Action**:
-1. Add Section 8 (Technology Stack) to ARCHITECTURE.md
+1. Create docs/06-technology-stack.md
 2. Document all technology components: backend language/framework, frontend framework (if applicable), databases, containers, IaC tools, CI/CD platforms
 3. Include version numbers for all technologies
-4. Regenerate compliance document after Section 8 is complete
+4. Regenerate compliance document after docs/06-technology-stack.md is complete
 
-**Manual Fallback**: Complete STACK_VALIDATION_CHECKLIST.md manually until Section 8 is documented.
+**Manual Fallback**: Complete STACK_VALIDATION_CHECKLIST.md manually until docs/06-technology-stack.md is documented.
 
 **Contract Status**: Draft (BLOCKED - validation required for approval)
 ```
@@ -2701,7 +2697,7 @@ Priority: CRITICAL (blocks compliance document approval)
 
 **Scenario**: Section 8 exists with some content but missing critical details (versions, tools, libraries).
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
 ### 8.1 Backend Stack
 - Language: Java (version not specified)
@@ -2758,7 +2754,7 @@ Priority: HIGH (4 UNKNOWN items block approval)
 
 **Scenario**: Section 8 documents technology versions that are deprecated or EOL.
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
 ### 8.1 Backend Stack
 - Language: Java 8
@@ -2783,17 +2779,17 @@ Priority: HIGH (4 UNKNOWN items block approval)
 ```
 #### Java Backend (6 items): 1 PASS, 3 FAIL, 2 UNKNOWN
 
-- ❌ Is Java in a supported version? (Java 8 detected - DEPRECATED/EOL since 2022 - Section 8.1, line 952)
-- ❌ Is Spring Boot in a supported version? (Spring Boot 2.3 detected - EOL - Section 8.1, line 953)
-- ✅ Are official tools used? (Maven 3.6 - Section 8.1, line 954)
+- ❌ Is Java in a supported version? (Java 8 detected - DEPRECATED/EOL since 2022 - docs/06-technology-stack.md)
+- ❌ Is Spring Boot in a supported version? (Spring Boot 2.3 detected - EOL - docs/06-technology-stack.md)
+- ✅ Are official tools used? (Maven 3.6 - docs/06-technology-stack.md)
 - ❓ Is deployment in authorized containers? (Not documented)
 - ❓ Are only approved libraries used? (Library inventory not documented)
 - ❓ Does naming follow standards? (Not documented)
 
 #### Frontend (6 items): 2 FAIL, 4 PASS
 
-- ❌ Is frontend framework in supported version? (Angular 11 detected - deprecated, upgrade to v12+ - Section 8.2, line 960)
-- ❌ Is frontend language current? (JavaScript ES5 detected - deprecated, upgrade to ES6+ or TypeScript - Section 8.2, line 961)
+- ❌ Is frontend framework in supported version? (Angular 11 detected - deprecated, upgrade to v12+ - docs/06-technology-stack.md)
+- ❌ Is frontend language current? (JavaScript ES5 detected - deprecated, upgrade to ES6+ or TypeScript - docs/06-technology-stack.md)
 ...
 ```
 
@@ -2802,22 +2798,22 @@ Priority: HIGH (4 UNKNOWN items block approval)
 **Stack Deviations**:
 ```
 **Stack Deviations**:
-1. **Java 8 (DEPRECATED/EOL)**: Detected in Section 8.1, line 952. Java 8 reached EOL in March 2022 and no longer receives security updates. CRITICAL security risk.
+1. **Java 8 (DEPRECATED/EOL)**: Detected in docs/06-technology-stack.md. Java 8 reached EOL in March 2022 and no longer receives security updates. CRITICAL security risk.
    - **Remediation**: Migrate to Java 17 LTS (recommended) or Java 11 LTS (minimum)
    - **Priority**: CRITICAL
-   - **Action Required**: Create ADR in Section 12 documenting migration plan with timeline
+   - **Action Required**: Create ADR in adr/README.md documenting migration plan with timeline
 
-2. **Spring Boot 2.3 (EOL)**: Detected in Section 8.1, line 953. No longer supported.
+2. **Spring Boot 2.3 (EOL)**: Detected in docs/06-technology-stack.md. No longer supported.
    - **Remediation**: Upgrade to Spring Boot 3.2 (current LTS)
    - **Priority**: HIGH
    - **Action Required**: Document upgrade plan in LADES2
 
-3. **Angular 11 (Deprecated)**: Detected in Section 8.2, line 960. Version < v12 not authorized.
+3. **Angular 11 (Deprecated)**: Detected in docs/06-technology-stack.md. Version < v12 not authorized.
    - **Remediation**: Upgrade to Angular 17+ (current)
    - **Priority**: MEDIUM
    - **Action Required**: Plan frontend framework upgrade
 
-4. **JavaScript ES5 (Deprecated)**: Detected in Section 8.2, line 961. ES6+ or TypeScript required.
+4. **JavaScript ES5 (Deprecated)**: Detected in docs/06-technology-stack.md. ES6+ or TypeScript required.
    - **Remediation**: Migrate to TypeScript 5.0+ or JavaScript ES6+
    - **Priority**: MEDIUM
 ```
@@ -2842,16 +2838,16 @@ Priority: HIGH (4 UNKNOWN items block approval)
 
 ### Edge Case 7: Unapproved Technology Detected
 
-**Scenario**: Section 8 documents technologies not in the authorized catalog.
+**Scenario**: docs/06-technology-stack.md documents technologies not in the authorized catalog.
 
-**Example ARCHITECTURE.md Section 8**:
+**Example docs/06-technology-stack.md**:
 ```
-### 8.1 Backend Stack
+### Backend Stack
 - Language: Python 3.11
 - Framework: Django 4.2
 - Database: CouchDB 3.3
 
-### 8.2 Frontend Stack
+### Frontend Stack
 - Framework: Svelte 4.0
 - State Management: MobX 6.0
 ```
@@ -2935,7 +2931,7 @@ Priority: HIGH (4 UNKNOWN items block approval)
 - ✅ Is Spring Boot in a supported version? (Spring Boot 3.2)
 - ✅ Are official tools used? (Maven, JUnit, SonarQube)
 - ✅ Is deployment in authorized containers? (Docker, AKS)
-- ❌ Are only approved libraries used? (Lodash detected - unapproved JavaScript library - Section 8.1, line 957)
+- ❌ Are only approved libraries used? (Lodash detected - unapproved JavaScript library - docs/06-technology-stack.md)
 - ❓ Does naming follow standards? (Not documented)
 ```
 
@@ -2944,8 +2940,8 @@ Priority: HIGH (4 UNKNOWN items block approval)
 **Stack Deviations**:
 ```
 **Stack Deviations**:
-1. **Unapproved Library: Lodash**: Detected in Section 8.1, line 957. Lodash is a JavaScript utility library and not appropriate for Java backend. May indicate inappropriate dependency or documentation error.
-   - **Remediation**: If Lodash is used, replace with Apache Commons Lang or Guava (Java equivalents). If documentation error, remove from Section 8.
+1. **Unapproved Library: Lodash**: Detected in docs/06-technology-stack.md. Lodash is a JavaScript utility library and not appropriate for Java backend. May indicate inappropriate dependency or documentation error.
+   - **Remediation**: If Lodash is used, replace with Apache Commons Lang or Guava (Java equivalents). If documentation error, remove from docs/06-technology-stack.md.
    - **Exception Path**: If Lodash is genuinely required (e.g., for Node.js tooling), document usage context and request chapter approval.
    - **Priority**: MEDIUM
 ```

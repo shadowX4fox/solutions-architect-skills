@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `sre_architecture`
 **Template**: `TEMPLATE_SRE_ARCHITECTURE.md`
-**Section Mapping**: Sections 10, 11 (primary), 5 (secondary)
+**Section Mapping**: docs/08-scalability-and-performance.md (primary), docs/09-operational-considerations.md (primary), docs/components/README.md (secondary)
 
 **Key Data Points**:
 - SLO (Service Level Objectives)
@@ -81,7 +81,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -172,13 +172,13 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-**Step 2.1: Read Document Header**
+**Step 2.1: Read Navigation Index**
 
-Use Read tool to read first 50 lines of ARCHITECTURE.md:
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
 ```
 Read file: [architecture_file]
-Limit: 50 lines
 Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
 ```
 
 **Step 2.2: Get Current Date**
@@ -193,104 +193,104 @@ Store as: generation_date
 
 **Step 3.1: Required Sections for SRE Architecture**
 
-PRE-CONFIGURED sections to extract:
-- **Section 10** (Performance Requirements): SLO, SLI, latency targets (30%)
-- **Section 11** (Operational Considerations): Monitoring, DR, deployment (50%)
-- **Section 5** (Infrastructure Architecture): Infrastructure resilience (10%)
+PRE-CONFIGURED files to extract:
+- **docs/08-scalability-and-performance.md** (Scalability & Performance): SLO, SLI, latency targets (30%)
+- **docs/09-operational-considerations.md** (Operational Considerations): Monitoring, DR, deployment (50%)
+- **docs/components/README.md** (Component Details): Infrastructure resilience (10%)
 
 **Step 3.2: Extract Section Content**
 
-For each required section (10, 11, 5):
-
-1. Use Grep tool to find section start
-2. Use Read tool to read section content
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/08-scalability-and-performance.md`
+- `Read file: docs/09-operational-considerations.md`
+- `Read file: docs/components/README.md`
 
 **Step 3.3: Extract SRE-Specific Data Points**
 
-**SLO Detection** (Section 10):
+**SLO Detection** (docs/08-scalability-and-performance.md):
 ```
 pattern: "SLO[:\s]+([0-9]+\.?[0-9]*)%"
-file: [architecture_file]
+file: docs/08-scalability-and-performance.md
 output_mode: content
 -n: true
 ```
 
-**SLI Detection** (Section 10):
+**SLI Detection** (docs/08-scalability-and-performance.md):
 ```
 pattern: "(SLI|service level indicator|availability|latency|throughput|error rate)"
-file: [architecture_file]
+file: docs/08-scalability-and-performance.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Error Budget** (Section 11):
+**Error Budget** (docs/09-operational-considerations.md):
 ```
 pattern: "error budget[:\s]+([0-9]+\.?[0-9]*)%"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**MTTR** (Section 11):
+**MTTR** (docs/09-operational-considerations.md):
 ```
 pattern: "MTTR[:\s]+([0-9]+)\s*(minute|hour|min|hr)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**MTBF** (Section 11):
+**MTBF** (docs/09-operational-considerations.md):
 ```
 pattern: "MTBF[:\s]+([0-9]+)\s*(day|hour|week)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Monitoring Tools** (Section 11):
+**Monitoring Tools** (docs/09-operational-considerations.md):
 ```
 pattern: "(Prometheus|Grafana|Datadog|New Relic|CloudWatch|Azure Monitor|Stackdriver|Dynatrace)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Observability Triad** (Section 11):
+**Observability Triad** (docs/09-operational-considerations.md):
 ```
 pattern: "(metrics|logs|traces|distributed tracing|log aggregation|metric collection)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Incident Response** (Section 11):
+**Incident Response** (docs/09-operational-considerations.md):
 ```
 pattern: "(incident response|on[- ]call|P1|P2|P3|incident severity|postmortem|post[- ]incident)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Runbooks** (Section 11):
+**Runbooks** (docs/09-operational-considerations.md):
 ```
 pattern: "(runbook|operational procedure|troubleshooting guide|playbook)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Deployment Automation** (Section 11):
+**Deployment Automation** (docs/09-operational-considerations.md):
 ```
 pattern: "(CI/CD|deployment automation|blue[- ]green|canary|rolling deployment)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
@@ -380,15 +380,16 @@ Replacement: RTO documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 11.2`
+- Correct: `- Source: docs/09-operational-considerations.md`
+- Correct: `- Source: docs/08-scalability-and-performance.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2, lines 567-570`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2 (Monitoring section)`
@@ -423,7 +424,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -478,7 +479,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 10.1
+- Source: docs/08-scalability-and-performance.md
 ```
 
 INCORRECT (added line numbers):
@@ -627,7 +628,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -684,7 +685,7 @@ Contract Details:
    Type: SRE Architecture
    Requirements: 57 (36 Blocker + 21 Desired)
    Scoring: Blocker 70% + Desired 30%
-   Sections: 10, 11, 5
+   Sections: docs/08-scalability-and-performance.md, docs/09-operational-considerations.md, docs/components/README.md
 ```
 
 **IMPORTANT**:

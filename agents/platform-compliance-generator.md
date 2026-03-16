@@ -27,7 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 **Contract Type**: `platform`
 **Template**: `TEMPLATE_PLATFORM_IT_INFRASTRUCTURE.md`
-**Section Mapping**: Sections 4, 8, 11 (primary), 10 (secondary)
+**Section Mapping**: docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md (primary), docs/08-scalability-and-performance.md (secondary)
 
 **Key Data Points**:
 - Environment isolation (network, IAM)
@@ -76,7 +76,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[APPROVAL_AUTHORITY]` with the appropriate review board name
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
-- Replace `[Source Section]` with "ARCHITECTURE.md Section X.Y"
+- Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace `[Role or N/A]` with extracted role or "N/A"
 
 **How to work**:
@@ -167,78 +167,101 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 ### PHASE 2: Extract Project Information
 
-Standard project information extraction
+**Step 2.1: Read Navigation Index**
+
+Use Read tool to read the full ARCHITECTURE.md (now a navigation index, ~130 lines):
+```
+Read file: [architecture_file]
+Extract project name from first H1 (line starting with "# ")
+Note: ARCHITECTURE.md is a navigation index only — section content lives in docs/ files
+```
+
+**Step 2.2: Get Current Date**
+
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
+Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
 
 **Step 3.1: Required Sections for Platform & IT Infrastructure**
 
-PRE-CONFIGURED sections to extract:
-- **Section 4** (System Architecture): Component topology, environment design
-- **Section 8** (Infrastructure): Infrastructure specifications, IaC
-- **Section 11** (Operational): Operational infrastructure requirements
-- **Section 10** (Performance): Capacity requirements (secondary)
+PRE-CONFIGURED files to extract:
+- **docs/03-architecture-layers.md** (Architecture Layers): Component topology, environment design
+- **docs/06-technology-stack.md** (Technology Stack): Infrastructure specifications, IaC
+- **docs/09-operational-considerations.md** (Operational Considerations): Operational infrastructure requirements
+- **docs/08-scalability-and-performance.md** (Scalability & Performance): Capacity requirements (secondary)
+
+**Step 3.2: Extract Section Content**
+
+For each required file, use Read tool to read the full file (no offset needed):
+- `Read file: docs/03-architecture-layers.md`
+- `Read file: docs/06-technology-stack.md`
+- `Read file: docs/09-operational-considerations.md`
+- `Read file: docs/08-scalability-and-performance.md`
 
 **Step 3.3: Extract Platform-Specific Data Points**
 
-**Environment Isolation** (Section 4 or 8):
+**Environment Isolation** (docs/03-architecture-layers.md):
 ```
 pattern: "(environment isolation|production environment|staging|development|network isolation)"
-file: [architecture_file]
+file: docs/03-architecture-layers.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Operating Systems** (Section 8):
+**Operating Systems** (docs/06-technology-stack.md):
 ```
 pattern: "(operating system|OS|Linux|Windows Server|Ubuntu|RHEL|CentOS)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Database** (Section 8):
+**Database** (docs/06-technology-stack.md):
 ```
 pattern: "(database|PostgreSQL|MySQL|MongoDB|SQL Server|Oracle|database capacity)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Retention Policies** (Section 8 or 11):
+**Retention Policies** (docs/09-operational-considerations.md):
 ```
 pattern: "(retention policy|data retention|backup retention|log retention)"
-file: [architecture_file]
+file: docs/09-operational-considerations.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Naming Conventions** (Section 8):
+**Naming Conventions** (docs/06-technology-stack.md):
 ```
 pattern: "(naming convention|naming standard|resource naming|nomenclature)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Capacity Planning** (Section 10):
+**Capacity Planning** (docs/08-scalability-and-performance.md):
 ```
 pattern: "(capacity|TPS|transactions per second|throughput|scalability|3x growth)"
-file: [architecture_file]
+file: docs/08-scalability-and-performance.md
 output_mode: content
 -i: true
 -n: true
 ```
 
-**Infrastructure as Code** (Section 8):
+**Infrastructure as Code** (docs/06-technology-stack.md):
 ```
 pattern: "(Infrastructure as Code|IaC|Terraform|CloudFormation|Ansible|Puppet)"
-file: [architecture_file]
+file: docs/06-technology-stack.md
 output_mode: content
 -i: true
 -n: true
@@ -328,15 +351,16 @@ Replacement: RTO documented
 ```
 
 **Replacement Rules:**
-1. If data found in ARCHITECTURE.md:
-   - Format: `ARCHITECTURE.md Section X.Y` (section number only)
+1. If data found in docs/ files:
+   - Format: `docs/NN-name.md` (file path, e.g., `docs/09-operational-considerations.md`)
    - Do NOT add line numbers unless template explicitly shows them
    - Do NOT add quotes or extra context
 2. If data not found:
    - Use literal: "Not documented"
 
 **Examples:**
-- Correct: `- Source: ARCHITECTURE.md Section 11.2`
+- Correct: `- Source: docs/06-technology-stack.md`
+- Correct: `- Source: docs/09-operational-considerations.md`
 - Correct: `- Source: "Not documented"`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2, lines 567-570`
 - INCORRECT: `- Source: ARCHITECTURE.md Section 11.2 (Monitoring section)`
@@ -371,7 +395,7 @@ Before writing output, verify:
 - [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `ARCHITECTURE.md Section X.Y` or `"Not documented"`
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
@@ -426,7 +450,7 @@ Template:
 
 Correct:
 ```
-- Source: ARCHITECTURE.md Section 11.2
+- Source: docs/09-operational-considerations.md
 ```
 
 INCORRECT (added line numbers):
@@ -540,7 +564,7 @@ Before writing the output file, verify the following:
 - [ ] **Table format preserved**: All `| Field | Value |` tables intact
 - [ ] **Status values standardized**: Only Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] **Conditional placeholders**: Extracted ONLY matching branch (no modifications)
-- [ ] **Source references**: Format `ARCHITECTURE.md Section X.Y` (no line numbers)
+- [ ] **Source references**: Format `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`)
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
@@ -599,7 +623,7 @@ Contract Details:
    Project: [project_name]
    Date: [generation_date]
    Type: Platform & IT Infrastructure
-   Sections: 4, 8, 11, 10
+   Sections: docs/03, docs/06, docs/09, docs/08
 ```
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.

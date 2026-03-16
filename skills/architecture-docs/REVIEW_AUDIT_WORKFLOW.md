@@ -970,6 +970,27 @@ All structural validation checks passed. Proceeding to Phase 2: Content Improvem
 
 ---
 
+### Foundational Context Anchor Protocol Integration
+
+**Relationship**: The Context Anchor Protocol in SKILL.md defines pre-write context
+loading requirements and post-write traceability validation that complement Phase 1
+and Phase 2 of this audit workflow.
+
+**How they relate**:
+- **Phase 1 (Form Validation)**: The protocol's Principle Traceability check and
+  ADR Alignment check extend Phase 1 with semantic cross-section validation
+- **Phase 2 (Content Improvement)**: When recommending edits to any downstream
+  section, this workflow should note which context anchor files must be loaded
+  before implementing the recommendation (see SKILL.md dependency table)
+- **Source Attribution**: Phase 2 issues should flag missing citation links as
+  LOW-priority findings — untraced metrics, unsourced ADR decisions, or
+  uncited principle references all violate the Source Attribution Rules
+- **Change Propagation**: When Phase 1 or Phase 2 identifies changes in any
+  section, consult the Change Propagation Detection table in SKILL.md to surface
+  all transitively affected downstream sections
+
+---
+
 ## Maintenance Notes
 
 ### When to Update This File
