@@ -9,7 +9,7 @@ This repository follows the Claude Code plugin structure:
 - `.claude-plugin/` - Plugin configuration and marketplace metadata
   - `plugin.json` - Plugin manifest (name, version, description)
   - `marketplace.json` - Marketplace registry configuration
-- `skills/` - Three skill directories (architecture-readiness, architecture-docs, architecture-compliance)
+- `skills/` - Four skill directories (architecture-readiness, architecture-docs, architecture-compliance, component-index-guardian)
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
 
@@ -129,3 +129,35 @@ The skill includes:
 **Output**: All generated compliance documents are saved to `/compliance-docs/` directory with full traceability to ARCHITECTURE.md sources. The skill orchestrator generates `COMPLIANCE_MANIFEST.md` after all contracts complete.
 
 **Migration**: See `docs/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.
+
+### Using the Component Index Guardian Skill
+
+The `component-index-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 4-column table schema on every write.
+
+To manually activate the skill, use: `/skill component-index-guardian`
+
+**When to use**:
+- After adding, removing, or renaming a component file in `docs/components/`
+- To sync the index after a migration that produces the `docs/components/` structure
+- Any time `docs/components/README.md` needs to change (redirect direct-edit requests here)
+
+**Output**: Generates `docs/components/README.md` with a managed-by comment, breadcrumb, and a 4-column table (`#`, `Component`, `File`, `Type`).
+
+---
+
+## Component Index
+
+`docs/components/README.md` is managed exclusively by the
+`solutions-architect-skills:component-index-guardian` skill.
+
+Do NOT edit it directly. Use the skill for any change:
+
+| Change | How |
+|--------|-----|
+| Add a component | Invoke skill with "add component \<name\>" |
+| Remove a component | Invoke skill with "remove component \<name\>" |
+| Update a component | Invoke skill with "update component \<name\>" |
+| Re-sync index | Invoke skill with "sync" |
+
+If a user requests a direct edit to `docs/components/README.md`
+(adding columns, reformatting, or any change), redirect to this skill.
