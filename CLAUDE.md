@@ -128,4 +128,4 @@ The skill includes:
 
 **Output**: All generated compliance documents are saved to `/compliance-docs/` directory with full traceability to ARCHITECTURE.md sources. The skill orchestrator generates `COMPLIANCE_MANIFEST.md` after all contracts complete.
 
-**Migration**: See `agents/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.
+**Migration**: See `docs/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.
