@@ -67,748 +67,1164 @@
 
 ## Detailed Requirements
 
-#### LACN001: Application or Initiative Name {#LACN001}
+## 1. Application or Initiative Name (LACN001)
+
+**Requirement**: Document the official name of the application, system, or business initiative covered by this Business Continuity plan.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-GEN
-**Status**: [Status]
-**Source Section**: Section 1 (Business Context) or Section 2 (System Overview)
 
-##### Implementation
-Provide the complete and official name of the application or business initiative. This should match the name used in enterprise architecture documentation, project charters, and business documentation. Include any acronyms or alternative names commonly used within the organization.
+### 1.1 Implementation
 
-##### Validation
-- [ ] Official application/initiative name is documented
-- [ ] Name matches enterprise architecture registry
-- [ ] Alternative names or acronyms are listed if applicable
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Application name documented and matches enterprise registry. If Non-Compliant: Name not specified or not matching registry. If Not Applicable: N/A. If Unknown: Name mentioned but not clearly defined]
+- Source: [ARCHITECTURE.md Section 1 (Business Context) or Section 2 (System Overview) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document official application name in Section 1 (Business Context)]
+
+### 1.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 1 or Section 2 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN001]
 
 ---
 
-#### LACN002: Architecture Type and Deployment Model {#LACN002}
+## 2. Architecture Type and Deployment Model (LACN002)
+
+**Requirement**: Specify the architectural pattern (e.g., monolithic, microservices, serverless) and deployment model (e.g., on-premises, cloud, hybrid) used by the system.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-GEN
-**Status**: [Status]
-**Source Section**: Section 3 (Architecture Overview) or Section 4 (Deployment Architecture)
 
-##### Implementation
-Document the high-level architecture pattern and deployment model. Architecture types may include: monolithic, N-tier, microservices, event-driven, serverless, or hybrid. Deployment models may include: on-premises, IaaS, PaaS, SaaS, hybrid cloud, or multi-cloud. This information is critical for disaster recovery planning as different architectures require different recovery strategies.
+### 2.1 Implementation
 
-##### Validation
-- [ ] Architecture pattern is clearly documented (e.g., microservices)
-- [ ] Deployment model is specified (e.g., AWS cloud, hybrid)
-- [ ] Rationale for architecture choice is provided if non-standard
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Architecture pattern and deployment model documented. If Non-Compliant: Not specified. If Not Applicable: N/A. If Unknown: Partially mentioned but incomplete]
+- Source: [ARCHITECTURE.md Section 3 (Architecture Overview) or Section 4 (Deployment Architecture) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document architecture type and deployment model in Section 3]
+
+### 2.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 3 or Section 4 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN002]
 
 ---
 
-#### LACN003: Number of Architecture Layers {#LACN003}
+## 3. Number of Architecture Layers (LACN003)
+
+**Requirement**: Define the number of logical or physical layers in the system architecture (e.g., presentation, business logic, data access, persistence).
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-GEN
-**Status**: [Status]
-**Source Section**: Section 4 (Architecture Layers) - Primary; Section 3 (Architecture Overview) - Fallback
 
-##### Implementation
-Specify how many distinct layers or tiers comprise the architecture based on the architecture type:
+### 3.1 Implementation
 
-**Architecture Type**: [Detected type: META/BIAN/3-TIER/MICROSERVICES/NLAYER/UNKNOWN]
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Layer count and names documented. If Non-Compliant: Not documented. If Not Applicable: N/A. If Unknown: Architecture type not clearly identified]
+- Source: [ARCHITECTURE.md Section 4 (Architecture Layers) or Section 3 (Architecture Overview) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Define architecture layers in Section 4]
 
-**Number of Layers**: [Count]
+### 3.2 Validation
 
-**Layer Names**: [Exact layer names from ARCHITECTURE.md Section 4]
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 4 or Section 3 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
 
-**Examples by Architecture Type**:
-- **META**: 6 layers - Channels, User Experience, Business Scenarios, Business, Domain, Core
-- **BIAN**: 5 layers - Channels, BIAN Business Scenarios, BIAN Business Capabilities, BIAN Service Domains, Core
-- **3-Tier**: 3 tiers - Presentation, Application/Business Logic, Data
-- **Microservices**: Variable count - [List service names or bounded contexts]
-- **N-Layer**: 4-7 layers - [Custom layer names from Section 4]
-- **UNKNOWN (fallback)**: Layers from Section 3 - [Generic layer count and names]
-
-**Source**: ARCHITECTURE.md Section 4 (Architecture Layers, lines [XXX-YYY])
-
-Understanding layer count helps determine dependencies and recovery sequence during disaster recovery scenarios.
-
-##### Validation
-- [ ] Number of layers is documented in Section 4 or Section 3
-- [ ] Architecture type is detected (or marked as UNKNOWN)
-- [ ] Each layer is named with exact names from ARCHITECTURE.md
-- [ ] Layer names match architecture type expectations (e.g., META has 6 specific layers)
-- [ ] Layer responsibilities are defined in source section
-- [ ] Layer dependencies are identified for DR sequencing
-- [ ] Source line numbers are tracked for traceability
+**Source References**: [ARCHITECTURE.md sections used for LACN003]
 
 ---
 
-#### LACN004: Infrastructure Type {#LACN004}
+## 4. Infrastructure Type (LACN004)
+
+**Requirement**: Document the infrastructure type: physical servers, virtual machines, containers, serverless, or a combination thereof.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-GEN
-**Status**: [Status]
-**Source Section**: Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure)
 
-##### Implementation
-Specify the infrastructure foundation supporting the application. Options include: bare-metal physical servers, virtual machines (VMware, Hyper-V), containerized workloads (Docker, Kubernetes), serverless functions (AWS Lambda, Azure Functions), or hybrid combinations. Infrastructure type significantly impacts backup strategies, failover mechanisms, and recovery time objectives.
+### 4.1 Implementation
 
-##### Validation
-- [ ] Infrastructure type is documented (physical, virtual, containers, serverless)
-- [ ] Infrastructure provider/platform is specified
-- [ ] Infrastructure-specific BC considerations are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Infrastructure type documented. If Non-Compliant: Not specified. If Not Applicable: N/A. If Unknown: Partially mentioned but incomplete]
+- Source: [ARCHITECTURE.md Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document infrastructure type in Section 4 or Section 11]
+
+### 4.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 4 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN004]
 
 ---
 
-#### LACN005: Critical System Dependencies {#LACN005}
+## 5. Critical System Dependencies (LACN005)
+
+**Requirement**: Identify all critical dependencies including internal systems, external services, third-party APIs, databases, and infrastructure components required for operation.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-GEN
-**Status**: [Status]
-**Source Section**: Section 1 (Business Context → Dependencies) or Section 5 (System Integrations)
 
-##### Implementation
-Document all upstream and downstream dependencies that are critical for system operation. Include: internal services, external APIs, SaaS platforms, authentication providers, payment gateways, databases, message queues, and infrastructure services. For each dependency, note: service name, provider, criticality level, and impact if unavailable. This forms the foundation for dependency mapping in business continuity planning.
+### 5.1 Implementation
 
-##### Validation
-- [ ] All critical dependencies are identified and documented
-- [ ] Each dependency includes: name, provider, criticality, failure impact
-- [ ] Dependency diagram or architecture showing relationships is provided
-- [ ] Mitigation strategies for critical dependencies are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: All critical dependencies identified with impact analysis. If Non-Compliant: Dependencies not documented. If Not Applicable: N/A. If Unknown: Some dependencies mentioned but incomplete]
+- Source: [ARCHITECTURE.md Section 1 (Business Context → Dependencies) or Section 5 (System Integrations) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document all critical dependencies in Section 1 or Section 5]
+
+### 5.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 1 or Section 5 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN005]
 
 ---
 
-#### LACN006: High Availability Requirement {#LACN006}
+## 6. High Availability Requirement (LACN006)
+
+**Requirement**: Determine whether the solution requires high availability (HA) design patterns to minimize downtime and ensure continuous operation.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 10 (Non-Functional Requirements → Availability)
 
-##### Implementation
-Assess whether the system must be designed for high availability. HA systems typically target 99.9% (three nines) or higher uptime, requiring redundant components, automatic failover, and fault-tolerant architecture. Consider: business criticality, revenue impact of downtime, user expectations, and SLA commitments. If HA is required, specify the target availability percentage (e.g., 99.95% = ~22 minutes/month downtime).
+### 6.1 Implementation
 
-##### Validation
-- [ ] HA requirement is clearly stated (Yes/No)
-- [ ] If Yes: target availability percentage is specified
-- [ ] Business justification for HA requirement is documented
-- [ ] Downtime tolerance and business impact are assessed
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: HA requirement stated with target availability percentage. If Non-Compliant: HA requirement not documented. If Not Applicable: HA not required for this system. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements → Availability) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document HA requirement in Section 10]
+
+### 6.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 10 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN006]
 
 ---
 
-#### LACN007: High Availability Component Scope {#LACN007}
+## 7. High Availability Component Scope (LACN007)
+
+**Requirement**: If HA is required, identify which specific system components, services, or tiers must be designed for high availability.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → High Availability)
 
-##### Implementation
-Not all components may require HA design. Specify which components need redundancy and failover: web servers, application servers, databases, caches, message queues, load balancers, etc. For each HA component, document: deployment pattern (active-active, active-passive), redundancy level (N+1, N+2), geographic distribution (single AZ, multi-AZ, multi-region), and failover mechanism (automatic, manual).
+### 7.1 Implementation
 
-##### Validation
-- [ ] All HA components are explicitly listed
-- [ ] For each component: deployment pattern (active-active/passive) is specified
-- [ ] Redundancy level and geographic distribution are documented
-- [ ] Automatic vs manual failover approach is defined
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: HA components listed with deployment patterns. If Non-Compliant: HA components not identified. If Not Applicable: HA not required. If Unknown: Components partially identified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → High Availability) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: List HA components with active-active/passive patterns in Section 11]
+
+### 7.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN007]
 
 ---
 
-#### LACN008: Local Contingency Requirement {#LACN008}
+## 8. Local Contingency Requirement (LACN008)
+
+**Requirement**: Determine if the solution requires local contingency measures (within same data center or availability zone) to handle component failures.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → High Availability)
 
-##### Implementation
-Local contingency refers to failover capabilities within the same data center or availability zone. This addresses component-level failures (server crash, network issue, software bug) without requiring geographic failover. Local contingency typically involves: redundant servers in same location, load balancing, automatic health checks, and rapid component replacement. This is distinct from disaster recovery which handles site-wide failures.
+### 8.1 Implementation
 
-##### Validation
-- [ ] Local contingency requirement is clearly stated (Yes/No)
-- [ ] If Yes: local failover strategy is documented
-- [ ] Component redundancy within same location is specified
-- [ ] Health check and automatic failover mechanisms are defined
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Local contingency strategy documented. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → High Availability) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document local contingency strategy in Section 11]
+
+### 8.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN008]
 
 ---
 
-#### LACN009: Disaster Recovery Requirement {#LACN009}
+## 9. Disaster Recovery Requirement (LACN009)
+
+**Requirement**: Determine if the solution requires disaster recovery (DR) capabilities to recover from catastrophic site-wide or regional failures.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery)
 
-##### Implementation
-Disaster Recovery addresses catastrophic failures affecting entire data centers, availability zones, or regions. DR capabilities include: secondary site/region with standby infrastructure, data replication to DR site, documented recovery procedures, and tested failover processes. DR is critical for mission-critical systems where even extended outages are unacceptable. Consider: business impact of prolonged outage, regulatory requirements, data sovereignty, and recovery cost vs. risk.
+### 9.1 Implementation
 
-##### Validation
-- [ ] DR requirement is clearly stated (Yes/No)
-- [ ] If Yes: disaster scenarios addressed are identified (regional outage, data center loss, etc.)
-- [ ] Business justification for DR investment is documented
-- [ ] RTO and RPO targets are defined
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: DR requirement stated with disaster scenarios identified. If Non-Compliant: DR requirement not documented. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document DR requirement in Section 11]
+
+### 9.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN009]
 
 ---
 
-#### LACN010: Disaster Recovery Architecture Pattern {#LACN010}
+## 10. Disaster Recovery Architecture Pattern (LACN010)
+
+**Requirement**: Specify the DR architecture pattern: cold standby, warm standby, hot standby, or active-active multi-region.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery)
 
-##### Implementation
-Document the DR architecture pattern based on RTO and cost considerations. Options include: (1) Cold standby: minimal infrastructure, manual activation, RTO hours-days; (2) Warm standby: infrastructure provisioned but not running, RTO minutes-hours; (3) Hot standby: infrastructure running with data replication, RTO seconds-minutes; (4) Active-Active: both sites serving traffic, immediate failover, RTO near-zero. Each pattern has different cost, complexity, and recovery time implications.
+### 10.1 Implementation
 
-##### Validation
-- [ ] DR pattern is clearly specified (cold/warm/hot/active-active)
-- [ ] Primary and DR site locations are documented
-- [ ] Justification for selected DR pattern based on RTO/cost is provided
-- [ ] Failover trigger criteria and procedures are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: DR pattern specified with primary and DR site locations. If Non-Compliant: DR pattern not documented. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document DR architecture pattern in Section 11]
+
+### 10.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN010]
 
 ---
 
-#### LACN011: Data Replication Method for DR {#LACN011}
+## 11. Data Replication Method for DR (LACN011)
+
+**Requirement**: Specify the data replication method used for DR: synchronous, asynchronous, snapshot-based, or backup-restore.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery → Data Replication)
 
-##### Implementation
-Document how data is replicated from primary to DR site. Replication methods include: (1) Synchronous: real-time replication, zero data loss (RPO=0), higher latency, requires low-latency network; (2) Asynchronous: near-real-time replication, minimal data loss (RPO minutes), lower latency impact, tolerates higher network latency; (3) Snapshot-based: periodic snapshots, RPO = snapshot frequency; (4) Backup-restore: tape/object storage backups, RPO = backup frequency. Choice depends on RPO requirements, network bandwidth, and acceptable performance impact.
+### 11.1 Implementation
 
-##### Validation
-- [ ] Replication method is specified (synchronous, asynchronous, snapshot, backup)
-- [ ] Replication frequency/lag is documented
-- [ ] RPO achieved by replication method is stated
-- [ ] Network bandwidth and performance impact are assessed
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Replication method specified with RPO achievement. If Non-Compliant: Replication method not documented. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery → Data Replication) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document data replication method in Section 11]
+
+### 11.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN011]
 
 ---
 
-#### LACN012: Recovery Time Objective (RTO) Definition {#LACN012}
+## 12. Recovery Time Objective (RTO) Definition (LACN012)
+
+**Requirement**: Establish a Recovery Time Objective (RTO) - the maximum acceptable time to restore service after a failure.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-RTO
-**Status**: [Status]
-**Source Section**: Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR)
 
-##### Implementation
-Define the RTO which represents the maximum tolerable downtime before business impact becomes unacceptable. RTO drives DR architecture decisions: RTO < 1 hour typically requires hot standby or active-active; RTO 1-4 hours may use warm standby; RTO > 4 hours can use cold standby. RTO should be: (1) Business-driven, based on revenue loss and operational impact; (2) Realistic, considering technical constraints and cost; (3) Documented with stakeholder approval. Include RTO for different failure scenarios (component failure vs. site disaster).
+### 12.1 Implementation
 
-##### Validation
-- [ ] RTO value is clearly documented (e.g., 4 hours)
-- [ ] RTO is differentiated by failure type (local vs. disaster)
-- [ ] Business justification for RTO is provided
-- [ ] RTO is approved by business stakeholders
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RTO value documented with business justification and stakeholder approval. If Non-Compliant: RTO not defined. If Not Applicable: N/A. If Unknown: Partially mentioned but not formally defined]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Define RTO with business justification in Section 10]
+
+### 12.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 10 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN012]
 
 ---
 
-#### LACN013: Contingency and DR Testing Requirement {#LACN013}
+## 13. Contingency and DR Testing Requirement (LACN013)
+
+**Requirement**: Determine if contingency and disaster recovery procedures must be regularly tested and validated.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery → Testing)
 
-##### Implementation
-DR testing is critical to validate that recovery procedures work and RTO/RPO can be achieved. Testing types include: (1) Tabletop exercises: walkthrough of procedures, no actual failover; (2) Partial failover: test specific components; (3) Full failover: complete production failover to DR site. Testing frequency depends on criticality: monthly tabletop exercises, quarterly partial tests, annual full DR drill. Document: test scenarios, success criteria, test schedule, roles/responsibilities, and post-test review process.
+### 13.1 Implementation
 
-##### Validation
-- [ ] DR testing requirement is clearly stated (Yes/No)
-- [ ] If Yes: testing frequency is specified (monthly, quarterly, annually)
-- [ ] Test types and scenarios are documented
-- [ ] Success criteria and validation procedures are defined
-- [ ] Post-test review and improvement process is established
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: DR testing requirement stated with frequency and test types. If Non-Compliant: Testing not planned. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery → Testing) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document DR testing plan in Section 11]
+
+### 13.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN013]
 
 ---
 
-#### LACN014: Resilience to Transient Component Failures {#LACN014}
+## 14. Resilience to Transient Component Failures (LACN014)
+
+**Requirement**: Verify that the application can continue operating gracefully when individual components or dependencies experience transient failures.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns)
 
-##### Implementation
-The application should implement resilience patterns to handle transient failures of internal or external components. Resilience strategies include: circuit breakers (prevent cascading failures), retries with exponential backoff (handle temporary network issues), timeouts (prevent blocking), fallbacks (degraded functionality), and bulkheads (isolate failures). For each critical dependency, document: failure handling strategy, retry policy, timeout values, fallback behavior, and user experience during partial outage.
+### 14.1 Implementation
 
-##### Validation
-- [ ] Resilience to component failures is documented (Yes/No)
-- [ ] Resilience patterns implemented are specified (circuit breaker, retry, etc.)
-- [ ] For each critical dependency: failure handling strategy is defined
-- [ ] Graceful degradation behavior is documented
-- [ ] Monitoring and alerting for component failures is configured
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Resilience patterns implemented and documented. If Non-Compliant: No resilience patterns. If Not Applicable: N/A. If Unknown: Partially mentioned but incomplete]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document resilience patterns in Section 7 or Section 11]
+
+### 14.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN014]
 
 ---
 
-#### LACN015: Batch Processing Requirement {#LACN015}
+## 15. Batch Processing Requirement (LACN015)
+
+**Requirement**: Determine if the platform will execute batch processing jobs or scheduled workloads.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational)
 
-##### Implementation
-Batch processing refers to scheduled or triggered execution of data processing jobs, ETL pipelines, report generation, or other non-real-time workloads. Batch jobs have unique BC considerations: job state persistence, restart/resume capability, idempotency, output validation, and error handling. Document: batch job inventory, execution schedule, dependencies, data volumes, and criticality. Critical batch jobs may require prioritized recovery during DR scenarios.
+### 15.1 Implementation
 
-##### Validation
-- [ ] Batch processing requirement is clearly stated (Yes/No)
-- [ ] If Yes: batch job inventory is documented
-- [ ] Execution schedule and triggers are defined
-- [ ] Criticality and recovery priority for each job is specified
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Batch processing requirement stated with job inventory. If Non-Compliant: Not documented. If Not Applicable: No batch processing required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document batch processing requirements in Section 7 or Section 11]
+
+### 15.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN015]
 
 ---
 
-#### LACN016: Batch Execution Type {#LACN016}
+## 16. Batch Execution Type (LACN016)
+
+**Requirement**: Specify the type of batch execution: scheduled (time-based), event-triggered, manual, or on-demand.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Batch Processing)
 
-##### Implementation
-Classify batch job execution patterns. Types include: (1) Scheduled: time-based execution (daily, hourly, cron schedule); (2) Event-triggered: executes based on data arrival or system event; (3) Manual: operator-initiated for ad-hoc needs; (4) On-demand: API-triggered by other systems. Execution type impacts DR recovery sequencing - scheduled jobs may need to catch up after outage, while event-triggered jobs may need message queue replay.
+### 16.1 Implementation
 
-##### Validation
-- [ ] Batch execution type is documented for each job
-- [ ] Execution schedule or trigger conditions are specified
-- [ ] Catch-up or replay strategy after DR failover is defined
-- [ ] Job orchestration and dependency management is documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Batch execution type documented for each job. If Non-Compliant: Not documented. If Not Applicable: No batch processing. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Batch Processing) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document batch execution types in Section 7]
+
+### 16.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN016]
 
 ---
 
-#### LACN017: Batch Job Reprocessing on Failure {#LACN017}
+## 17. Batch Job Reprocessing on Failure (LACN017)
+
+**Requirement**: Determine if failed batch jobs must support reprocessing or retry to avoid data inconsistencies.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-DR
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Batch Processing → Error Handling)
 
-##### Implementation
-Critical batch jobs should support safe reprocessing when failures occur. Requirements include: (1) Idempotency: running the same job multiple times produces same result; (2) State tracking: record job progress to enable resume from last checkpoint; (3) Transactional consistency: all-or-nothing processing to avoid partial updates; (4) Input validation: verify data integrity before processing; (5) Output validation: verify results after processing. Document: which jobs support reprocessing, retry logic, checkpoint strategy, and data validation procedures.
+### 17.1 Implementation
 
-##### Validation
-- [ ] Reprocessing requirement is stated for each critical batch job
-- [ ] Idempotency design is documented
-- [ ] Checkpoint/resume mechanism is implemented
-- [ ] Error handling and retry logic is specified
-- [ ] Data validation before and after processing is defined
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Reprocessing capability documented with idempotency design. If Non-Compliant: Not documented. If Not Applicable: No batch processing. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Batch Processing → Error Handling) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document batch reprocessing strategy in Section 7]
+
+### 17.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN017]
 
 ---
 
-#### LACN018: Periodic Data Backup Requirement {#LACN018}
+## 18. Periodic Data Backup Requirement (LACN018)
+
+**Requirement**: Determine if periodic backups of application data are required for recovery purposes.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore)
 
-##### Implementation
-Data backups are essential for recovering from data corruption, accidental deletion, ransomware attacks, or catastrophic failures. Backup requirements depend on: data criticality, change frequency, compliance mandates, and acceptable data loss (RPO). Even systems with real-time DR replication typically need backups for point-in-time recovery and protection against logical errors that replicate to DR site. Document: backup scope (databases, file storage, configurations), retention requirements, and recovery scenarios addressed.
+### 18.1 Implementation
 
-##### Validation
-- [ ] Backup requirement is clearly stated (Yes/No)
-- [ ] If Yes: backup scope is defined (which data stores, configurations)
-- [ ] Recovery scenarios requiring backups are documented
-- [ ] Compliance or regulatory backup requirements are identified
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Backup requirement stated with scope and recovery scenarios. If Non-Compliant: Not documented. If Not Applicable: No backup required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document backup requirements in Section 11]
+
+### 18.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN018]
 
 ---
 
-#### LACN019: Backup Frequency {#LACN019}
+## 19. Backup Frequency (LACN019)
+
+**Requirement**: Specify the frequency of data backups: continuous, hourly, daily, weekly, or custom schedule based on RPO requirements.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Schedule)
 
-##### Implementation
-Backup frequency determines RPO (maximum acceptable data loss). Common frequencies include: (1) Continuous: transaction log backups, RPO minutes; (2) Hourly: high-change systems, RPO 1 hour; (3) Daily: standard for most systems, RPO 24 hours; (4) Weekly: low-change data, RPO 7 days. Consider: full backups (complete data copy, slower) vs. incremental (changes since last backup, faster but requires full backup for restore). Backup frequency should align with business-defined RPO and data change rate.
+### 19.1 Implementation
 
-##### Validation
-- [ ] Backup frequency is specified (continuous, hourly, daily, weekly)
-- [ ] Full vs. incremental backup strategy is documented
-- [ ] RPO achieved by backup frequency is stated
-- [ ] Backup schedule accounts for maintenance windows and system load
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Backup frequency specified with RPO alignment. If Non-Compliant: Not documented. If Not Applicable: No backup required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Schedule) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document backup frequency in Section 11]
+
+### 19.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN019]
 
 ---
 
-#### LACN020: Backup Retention Period {#LACN020}
+## 20. Backup Retention Period (LACN020)
+
+**Requirement**: Define how long backup copies must be retained before deletion: days, months, years, or permanent archival.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Retention)
 
-##### Implementation
-Backup retention balances recovery needs with storage costs and compliance requirements. Retention strategies include: (1) Short-term: 7-30 days for operational recovery; (2) Medium-term: 1-12 months for audits and historical recovery; (3) Long-term: 7+ years for regulatory compliance; (4) Tiered: recent backups on fast storage, older on cheaper archive storage. Consider: regulatory requirements (financial records, healthcare data), litigation hold requirements, and point-in-time recovery needs for ransomware scenarios.
+### 20.1 Implementation
 
-##### Validation
-- [ ] Retention period is specified (days, months, years)
-- [ ] Retention is differentiated by backup type (daily, weekly, monthly)
-- [ ] Regulatory or compliance retention requirements are documented
-- [ ] Tiered storage strategy for cost optimization is defined
-- [ ] Backup deletion and cleanup procedures are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Retention period specified with compliance requirements. If Non-Compliant: Not documented. If Not Applicable: No backup required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Retention) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document backup retention policy in Section 11]
+
+### 20.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN020]
 
 ---
 
-#### LACN021: Backup Versioning Strategy {#LACN021}
+## 21. Backup Versioning Strategy (LACN021)
+
+**Requirement**: Determine if backups should overwrite previous versions or maintain historical versions for point-in-time recovery.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Versioning)
 
-##### Implementation
-Backup versioning strategy affects recovery capabilities and storage costs. Options include: (1) Overwrite: only latest backup retained, minimal storage, limited recovery options; (2) Historical versioning: multiple restore points, point-in-time recovery, higher storage costs. Versioning is critical for: recovering from data corruption that isn't immediately detected, ransomware scenarios (restore to pre-infection point), auditing and compliance (historical data access), and accidental deletion recovery.
+### 21.1 Implementation
 
-##### Validation
-- [ ] Versioning strategy is clearly specified (overwrite vs. historical)
-- [ ] If historical: number of versions retained is documented
-- [ ] Point-in-time recovery requirements are defined
-- [ ] Storage cost impact of versioning is assessed and approved
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Versioning strategy specified with number of versions retained. If Non-Compliant: Not documented. If Not Applicable: No backup required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Versioning) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document backup versioning strategy in Section 11]
+
+### 21.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN021]
 
 ---
 
-#### LACN022: Data Recreation Difficulty Assessment {#LACN022}
+## 22. Data Recreation Difficulty Assessment (LACN022)
+
+**Requirement**: Assess the difficulty and effort required to recreate lost data if backups are unavailable.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore) or Section 1 (Business Context)
 
-##### Implementation
-Understanding data recreation difficulty informs backup priority and investment. Categories include: (1) Impossible: unique transactional data, customer records - requires robust backup; (2) Very difficult: months of work, complex data collection - needs frequent backup; (3) Moderately difficult: days-weeks of effort, significant business impact; (4) Easy: can be regenerated from source systems or external data feeds. For difficult-to-recreate data, implement: more frequent backups, multiple backup copies, geographic distribution, and tested restore procedures.
+### 22.1 Implementation
 
-##### Validation
-- [ ] Data recreation difficulty is assessed for each data store
-- [ ] Assessment includes time, cost, and business impact
-- [ ] Backup frequency and redundancy align with recreation difficulty
-- [ ] Critical (impossible to recreate) data has enhanced protection
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Recreation difficulty assessed for each data store with time and cost. If Non-Compliant: Not assessed. If Not Applicable: N/A. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore) or Section 1 (Business Context) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Assess data recreation difficulty in Section 11 or Section 1]
+
+### 22.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or Section 1 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN022]
 
 ---
 
-#### LACN023: Business Impact of Data Loss {#LACN023}
+## 23. Business Impact of Data Loss (LACN023)
+
+**Requirement**: Quantify the business impact if data is lost: revenue loss, operational disruption, regulatory penalties, reputation damage.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 1 (Business Context → Business Impact Analysis)
 
-##### Implementation
-Business impact analysis (BIA) of data loss drives backup investment decisions. Impact categories include: (1) Revenue impact: lost sales, transaction data, customer orders; (2) Operational impact: inability to deliver services, process disruption; (3) Compliance impact: regulatory fines, audit failures, legal liability; (4) Reputation impact: customer trust, brand damage, competitive disadvantage. Quantify impact: revenue per hour, penalty amounts, customer churn. High-impact data requires aggressive RPO (frequent backups) and verified restore procedures.
+### 23.1 Implementation
 
-##### Validation
-- [ ] Business impact of data loss is quantified (revenue, penalties, operational cost)
-- [ ] Impact assessment is documented and approved by business stakeholders
-- [ ] Backup strategy (frequency, redundancy, testing) aligns with impact severity
-- [ ] Critical data with high business impact has enhanced protection measures
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Business impact quantified and approved by stakeholders. If Non-Compliant: Impact not assessed. If Not Applicable: N/A. If Unknown: Partially assessed but not quantified]
+- Source: [ARCHITECTURE.md Section 1 (Business Context → Business Impact Analysis) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document business impact analysis in Section 1]
+
+### 23.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 1 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN023]
 
 ---
 
-#### LACN024: RPO Validation with Business Stakeholders {#LACN024}
+## 24. RPO Validation with Business Stakeholders (LACN024)
+
+**Requirement**: Confirm that the Recovery Point Objective (RPO) - maximum acceptable data loss - has been validated and approved by business stakeholders.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-RTO
-**Status**: [Status]
-**Source Section**: Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR)
 
-##### Implementation
-RPO defines the maximum amount of data loss acceptable, measured in time (e.g., RPO 1 hour = can lose up to 1 hour of data). RPO must be business-driven, not technically-driven. Validation process: (1) Present business scenarios showing data loss impact; (2) Quantify cost of achieving different RPO levels (tighter RPO = higher backup/replication costs); (3) Obtain stakeholder approval of RPO vs. cost tradeoff; (4) Document approval in architecture sign-off. For critical business processes, RPO should be explicitly validated, not assumed.
+### 24.1 Implementation
 
-##### Validation
-- [ ] RPO value is clearly documented (e.g., 1 hour)
-- [ ] RPO has been presented to and approved by business stakeholders
-- [ ] Approval documentation (meeting notes, email, sign-off) is available
-- [ ] RPO aligns with business impact analysis and criticality
-- [ ] Technical implementation (backup frequency, replication) achieves approved RPO
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RPO documented and approved by business stakeholders. If Non-Compliant: RPO not defined or approved. If Not Applicable: N/A. If Unknown: Partially mentioned but not formally validated]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Define and validate RPO with business stakeholders in Section 10]
+
+### 24.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 10 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN024]
 
 ---
 
-#### LACN025: Geographic Backup Distribution {#LACN025}
+## 25. Geographic Backup Distribution (LACN025)
+
+**Requirement**: Determine if backups must be stored in a geographically separate location to protect against site-wide disasters.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Geographic Distribution)
 
-##### Implementation
-Geographic backup distribution protects against regional disasters: earthquakes, floods, fires, power grid failures, or data center outages. Best practices: (1) 3-2-1 rule: 3 copies of data, 2 different media types, 1 offsite; (2) Geographic separation: minimum 100+ miles between sites to avoid correlated failures; (3) Different risk zones: avoid earthquake zones, flood plains, or political jurisdictions with same risks. Implementation options: cloud object storage (S3, Azure Blob), tape vaulting, secondary data center, or disaster recovery site.
+### 25.1 Implementation
 
-##### Validation
-- [ ] Geographic distribution requirement is clearly stated (Yes/No)
-- [ ] If Yes: secondary backup location is documented
-- [ ] Geographic distance and risk separation are verified
-- [ ] Backup transfer mechanism (network, physical media) is specified
-- [ ] Bandwidth and transfer time to secondary site are assessed
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Geographic distribution specified with secondary backup location. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document geographic backup distribution in Section 11]
+
+### 25.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN025]
 
 ---
 
-#### LACN026: Infrastructure Configuration Backup {#LACN026}
+## 26. Infrastructure Configuration Backup (LACN026)
+
+**Requirement**: Determine if infrastructure configurations, operating system settings, and system files require backup (often called BDI - Base de Infraestructura).
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Infrastructure)
 
-##### Implementation
-Infrastructure backups enable rapid server recovery and disaster recovery. Scope includes: (1) OS configurations: network settings, security policies, user accounts; (2) Application configurations: web server configs, app server settings; (3) System files: binaries, libraries, scripts; (4) Security configurations: firewall rules, certificates, keys. Modern approaches: Infrastructure as Code (IaC) with version-controlled configuration (Terraform, Ansible), VM snapshots, or container images. For traditional infrastructure, use configuration management tools or image-based backups.
+### 26.1 Implementation
 
-##### Validation
-- [ ] Infrastructure backup requirement is clearly stated (Yes/No)
-- [ ] Backup scope includes: OS configs, application configs, system files
-- [ ] Backup mechanism is specified (IaC, snapshots, image-based)
-- [ ] Restore and rebuild procedures are documented
-- [ ] Configuration drift detection is implemented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Infrastructure backup scope documented with mechanism. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document infrastructure backup strategy in Section 11]
+
+### 26.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN026]
 
 ---
 
-#### LACN027: Infrastructure Change Log Backup {#LACN027}
+## 27. Infrastructure Change Log Backup (LACN027)
+
+**Requirement**: Determine if audit logs of infrastructure changes must be backed up for compliance, troubleshooting, and forensic analysis.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Logging & Monitoring or Backup & Restore)
 
-##### Implementation
-Infrastructure change logs provide audit trail, forensic evidence, and troubleshooting history. Log types include: (1) Configuration change logs: who changed what, when, and why; (2) System logs: OS events, security events, service start/stop; (3) Access logs: who logged in, privileged operations; (4) Deployment logs: software installations, updates, patches. Logs are often legally required for compliance (SOX, HIPAA, PCI-DSS). Retention: operational logs 30-90 days, audit logs 1-7 years. Implement centralized logging (SIEM, ELK stack) with backup to immutable storage.
+### 27.1 Implementation
 
-##### Validation
-- [ ] Log backup requirement is clearly stated (Yes/No)
-- [ ] Log types requiring backup are specified
-- [ ] Log retention period meets compliance requirements
-- [ ] Centralized logging solution is implemented
-- [ ] Log integrity and immutability protections are in place
-- [ ] Restore and analysis procedures are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Log backup requirement stated with retention period. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Logging & Monitoring or Backup & Restore) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document infrastructure log backup in Section 11]
+
+### 27.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN027]
 
 ---
 
-#### LACN028: Full Application Restore Capability {#LACN028}
+## 28. Full Application Restore Capability (LACN028)
+
+**Requirement**: Verify that the complete application can be restored from backups if all components fail simultaneously (worst-case scenario).
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Testing)
 
-##### Implementation
-Full application restore tests business continuity preparedness for catastrophic failures. Restore scope includes: (1) All application data from backups; (2) All infrastructure from IaC or images; (3) All configurations from version control; (4) All dependencies and integrations. Test: documented restore procedures, RTO achievement, data integrity verification, application functionality validation. Perform annual full restore tests to production-equivalent environment. Document: restore runbook, expected RTO, component restore order, and validation checklist.
+### 28.1 Implementation
 
-##### Validation
-- [ ] Full restore capability is confirmed (Yes/No)
-- [ ] Restore procedures are documented step-by-step
-- [ ] Full restore test has been successfully performed
-- [ ] RTO for full restore is documented and acceptable to business
-- [ ] Restore testing is scheduled regularly (annually minimum)
-- [ ] Dependencies and prerequisites for restore are documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Full restore procedures documented and tested. If Non-Compliant: Not documented or tested. If Not Applicable: N/A. If Unknown: Partially documented but not tested]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Testing) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document and test full restore procedures in Section 11]
+
+### 28.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN028]
 
 ---
 
-#### LACN029: Sensitive Data Classification {#LACN029}
+## 29. Sensitive Data Classification (LACN029)
+
+**Requirement**: Identify if the platform handles sensitive data such as customer PII, financial data, or other regulated information requiring enhanced backup protection.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 8 (Security Architecture → Data Classification) or Section 11 (Operational)
 
-##### Implementation
-Sensitive data requires enhanced backup security controls. Data types include: (1) PII: names, addresses, SSN, email, phone; (2) Financial: credit cards, bank accounts, transaction history; (3) Health: medical records, diagnoses, treatment history; (4) Confidential business: trade secrets, contracts, M&A data. Enhanced controls: backup encryption (AES-256), access controls (RBAC, MFA), geographic restrictions (data sovereignty), immutability (WORM storage), audit logging, and secure disposal. Compliance: GDPR, HIPAA, PCI-DSS, SOX have specific backup requirements.
+### 29.1 Implementation
 
-##### Validation
-- [ ] Sensitive data classification is documented
-- [ ] Data types are identified (PII, financial, health, confidential)
-- [ ] Applicable compliance requirements are listed (GDPR, HIPAA, PCI-DSS)
-- [ ] Enhanced backup security controls are implemented (encryption, access control)
-- [ ] Data sovereignty and geographic restrictions are enforced
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Sensitive data classified with enhanced backup controls. If Non-Compliant: Not documented. If Not Applicable: No sensitive data. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 8 (Security Architecture → Data Classification) or Section 11 (Operational) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document sensitive data classification in Section 8 or Section 11]
+
+### 29.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 8 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN029]
 
 ---
 
-#### LACN030: Backup Responsibility Assignment {#LACN030}
+## 30. Backup Responsibility Assignment (LACN030)
+
+**Requirement**: Define who is responsible for executing, monitoring, and validating backups: infrastructure team, DBA team, application team, or managed service provider.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Responsibilities)
 
-##### Implementation
-Clear backup responsibility prevents gaps and failures. Responsibility model depends on deployment: (1) On-premises: infrastructure or DBA team manages backup software, schedules, monitoring; (2) IaaS cloud: infrastructure team configures cloud backup services; (3) PaaS/SaaS: provider handles backups, customer validates and tests restores; (4) Shared responsibility: provider handles infrastructure backups, customer handles application data backups. Document: primary responsible team, backup schedule, monitoring and alerting ownership, restore testing responsibility, and escalation procedures for failures.
+### 30.1 Implementation
 
-##### Validation
-- [ ] Backup responsibility is clearly assigned to a specific team/role
-- [ ] Backup monitoring and alerting ownership is defined
-- [ ] Restore testing responsibility is assigned
-- [ ] Escalation procedures for backup failures are documented
-- [ ] RACI matrix for backup operations is provided
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Backup responsibility clearly assigned with RACI. If Non-Compliant: Not assigned. If Not Applicable: No backup required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Responsibilities) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Assign backup responsibility in Section 11]
+
+### 30.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN030]
 
 ---
 
-#### LACN031: Backup Download to Local/On-Premises Repository {#LACN031}
+## 31. Backup Download to Local/On-Premises Repository (LACN031)
+
+**Requirement**: Determine if backups stored in cloud or managed services can be downloaded to local or on-premises storage for additional protection.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Backup & Restore → Hybrid Strategy)
 
-##### Implementation
-Hybrid backup strategy provides additional protection and vendor independence. Use cases: (1) Cloud to on-premises: download cloud backups to local storage for air-gap protection, ransomware defense, or regulatory requirements; (2) On-premises to cloud: upload local backups to cloud for geographic distribution. Considerations: bandwidth requirements, transfer time, storage costs, security during transfer (encryption, VPN), and automation. Implement tiered strategy: recent backups in cloud for fast restore, older backups downloaded to on-premises for long-term retention.
+### 31.1 Implementation
 
-##### Validation
-- [ ] Backup download capability is documented (Yes/No)
-- [ ] If Yes: download frequency and retention strategy are specified
-- [ ] Bandwidth and transfer time requirements are assessed
-- [ ] Security during transfer (encryption, VPN) is documented
-- [ ] Local storage capacity and management are planned
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Hybrid backup strategy documented with download frequency. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Hybrid Strategy) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document hybrid backup strategy in Section 11]
+
+### 31.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN031]
 
 ---
 
-#### LACN032: DR Activation Automation Capability {#LACN032}
+## 32. DR Activation Automation Capability (LACN032)
+
+**Requirement**: Assess if disaster recovery activation can be automated rather than requiring manual procedures.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-AUTO
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery → Automation)
 
-##### Implementation
-DR automation reduces RTO and human error. Automation levels include: (1) Fully automated: health checks detect failure, automatic failover to DR site, no human intervention; (2) Semi-automated: automated runbooks with human approval gates; (3) Manual: documented procedures requiring operator execution. Automation components: health monitoring, failover triggers, DNS switching, traffic routing, database failover, application startup, validation testing. Consider: false positive risk (premature failover), rollback procedures, and notification workflows. Start with semi-automated approach, progress to full automation as confidence increases.
+### 32.1 Implementation
 
-##### Validation
-- [ ] DR automation capability is assessed (fully automated, semi-automated, manual)
-- [ ] Automation scope is documented (which components can be automated)
-- [ ] Automated failover triggers and health checks are defined
-- [ ] Human approval gates and override procedures are documented
-- [ ] Rollback and failback automation is specified
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: DR automation capability assessed with automation scope. If Non-Compliant: Not assessed. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery → Automation) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document DR automation capability in Section 11]
+
+### 32.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN032]
 
 ---
 
-#### LACN033: Automatable DR Components {#LACN033}
+## 33. Automatable DR Components (LACN033)
+
+**Requirement**: Identify which specific components and procedures can be automated during disaster recovery activation.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-AUTO
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery → Automation)
 
-##### Implementation
-Automation candidates vary by architecture. Common automatable components include: (1) DNS failover: Route 53 health checks, DNS TTL management; (2) Load balancer reconfiguration: traffic routing to DR site; (3) Database failover: automated promotion of standby to primary; (4) Application startup: auto-scaling groups, container orchestration (Kubernetes); (5) Network reconfiguration: VPN tunnels, firewall rules; (6) Monitoring reconfiguration: point to DR endpoints. Document: automation tooling (Terraform, Ansible, CloudFormation), runbook automation (AWS Systems Manager, Azure Automation), testing frequency, and manual override procedures.
+### 33.1 Implementation
 
-##### Validation
-- [ ] Automatable components are explicitly listed with automation approach
-- [ ] Automation tooling and scripts are documented
-- [ ] Automated runbooks are version-controlled and tested
-- [ ] Non-automatable (manual) steps are identified with procedures
-- [ ] DR automation is tested regularly (at least quarterly)
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Automatable components listed with tooling. If Non-Compliant: Not identified. If Not Applicable: DR not required. If Unknown: Not clearly specified]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery → Automation) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document automatable DR components in Section 11]
 
----
+### 33.2 Validation
 
-#### LACN034: Circuit Breaker Pattern Requirement {#LACN034}
-**Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Resilience Patterns)
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
 
-##### Implementation
-Circuit Breaker is a resilience pattern that prevents cascading failures in distributed systems. States: (1) Closed: normal operation, requests flow through; (2) Open: failure threshold exceeded, requests fail fast without calling service; (3) Half-Open: periodic retry to check if service recovered. Benefits: prevents thread exhaustion, reduces latency for end users, allows failed services to recover. Implementation: Netflix Hystrix, Resilience4j, Polly, AWS App Mesh. Configuration: failure threshold (e.g., 50% failures), timeout duration (30 seconds), and retry interval (60 seconds). Apply to external APIs, database calls, and internal microservices.
-
-##### Validation
-- [ ] Circuit breaker requirement is stated (Yes/No)
-- [ ] If Yes: which service calls require circuit breakers are identified
-- [ ] Circuit breaker library/implementation is specified
-- [ ] Configuration: failure threshold, timeout, retry interval are documented
-- [ ] Fallback behavior when circuit is open is defined
-- [ ] Monitoring and alerting for circuit state changes is configured
+**Source References**: [ARCHITECTURE.md sections used for LACN033]
 
 ---
 
-#### LACN035: Retry with Exponential Backoff Pattern {#LACN035}
+## 34. Circuit Breaker Pattern Requirement (LACN034)
+
+**Requirement**: Determine if the application requires circuit breaker pattern to prevent cascading failures when downstream services are unavailable or slow.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Resilience Patterns)
 
-##### Implementation
-Retry with Exponential Backoff handles transient failures: network glitches, temporary service unavailability, rate limiting. Pattern: retry failed operations with increasing delays (e.g., 1s, 2s, 4s, 8s, 16s) to avoid overwhelming recovering services. Configuration: (1) Max retries: 3-5 attempts; (2) Initial delay: 1-2 seconds; (3) Backoff multiplier: 2x; (4) Jitter: randomization to prevent thundering herd; (5) Max delay: 60 seconds. Apply to: HTTP API calls, database connections, message queue operations. Combine with circuit breaker for comprehensive resilience.
+### 34.1 Implementation
 
-##### Validation
-- [ ] Retry with exponential backoff requirement is stated (Yes/No)
-- [ ] Operations requiring retry logic are identified
-- [ ] Retry configuration is documented: max retries, initial delay, backoff multiplier
-- [ ] Jitter implementation to prevent thundering herd is specified
-- [ ] Non-retriable errors (4xx client errors) are distinguished from retriable errors (5xx, timeouts)
-- [ ] Monitoring for retry metrics is configured
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Circuit breaker implemented with configuration documented. If Non-Compliant: Not implemented. If Not Applicable: No distributed service calls. If Unknown: Partially mentioned but not configured]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Resilience Patterns) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement circuit breaker pattern in Section 7]
+
+### 34.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN034]
 
 ---
 
-#### LACN036: Timeout Configuration for External Services {#LACN036}
+## 35. Retry with Exponential Backoff Pattern (LACN035)
+
+**Requirement**: Implement retry logic with exponential backoff to handle transient failures in distributed systems and third-party integrations.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations)
 
-##### Implementation
-Timeouts prevent thread exhaustion and improve user experience when external services are slow or unresponsive. Timeout types: (1) Connection timeout: max time to establish connection (e.g., 5 seconds); (2) Read/socket timeout: max time to receive response (e.g., 30 seconds); (3) Total request timeout: end-to-end including retries. Configuration strategy: aggressive timeouts for non-critical services, generous timeouts for critical services, differentiate by SLA. Combine with circuit breaker and fallback. Monitor p95/p99 latency to set realistic timeouts. Document timeout values per external service.
+### 35.1 Implementation
 
-##### Validation
-- [ ] Timeout requirement is stated (Yes/No)
-- [ ] Timeout values are specified for each external service integration
-- [ ] Connection timeout and read timeout are separately configured
-- [ ] Timeout values are based on p95/p99 latency analysis
-- [ ] Timeout exceeded handling (error response, fallback) is documented
-- [ ] Monitoring and alerting for timeout events is configured
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Retry with backoff implemented with configuration documented. If Non-Compliant: Not implemented. If Not Applicable: No external calls. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Resilience Patterns) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement retry with exponential backoff in Section 7]
+
+### 35.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN035]
 
 ---
 
-#### LACN037: Timeboxing for Automated Contingency/DRP Activation {#LACN037}
+## 36. Timeout Configuration for External Services (LACN036)
+
+**Requirement**: Implement appropriate timeout values for calls to third-party and external services to prevent blocking and cascading slowness.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Disaster Recovery → Automation)
 
-##### Implementation
-Timeboxing sets maximum time windows for automated DR decisions. Examples: (1) If primary site is unreachable for > 5 minutes, trigger automatic failover; (2) If database replication lag > 10 minutes, alert and consider manual intervention; (3) If service degradation persists > 15 minutes, activate contingency mode. Timeboxing prevents: premature failover from brief outages, indefinite waiting during actual disasters. Implementation: health check intervals, consecutive failure thresholds, evaluation windows. Balance: too aggressive causes false positives, too conservative delays recovery.
+### 36.1 Implementation
 
-##### Validation
-- [ ] Timeboxing for DR activation is defined (Yes/No)
-- [ ] Time thresholds for automated actions are documented (e.g., failover after 5 min outage)
-- [ ] Health check frequency and consecutive failure thresholds are specified
-- [ ] Manual override and abort procedures are documented
-- [ ] False positive mitigation strategies are implemented
-- [ ] Notification and escalation timelines are defined
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Timeout values documented per external service. If Non-Compliant: Not configured. If Not Applicable: No external service calls. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document timeout configuration in Section 7 or Section 5]
+
+### 36.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or Section 5 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN036]
 
 ---
 
-#### LACN038: Fallback Response Pattern {#LACN038}
+## 37. Timeboxing for Automated Contingency/DRP Activation (LACN037)
+
+**Requirement**: Define time-bound triggers for automated contingency or disaster recovery activation to limit blast radius and ensure timely response.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Resilience Patterns)
 
-##### Implementation
-Fallback pattern provides graceful degradation rather than complete failure. Strategies: (1) Cached response: return stale data with cache-control headers; (2) Default/static response: generic response when personalization fails; (3) Feature toggle: disable non-critical features to preserve core functionality; (4) Alternative service: route to backup provider or internal mock. Examples: return cached product catalog when database is down, show static recommendations when ML service fails, disable real-time pricing when pricing service is unavailable. Document: which features have fallbacks, fallback behavior, user communication.
+### 37.1 Implementation
 
-##### Validation
-- [ ] Fallback requirement is stated (Yes/No)
-- [ ] Features with fallback support are explicitly listed
-- [ ] Fallback strategy for each feature is documented (cache, default, feature toggle)
-- [ ] User experience during fallback mode is defined
-- [ ] Monitoring to detect fallback activation is configured
-- [ ] Testing of fallback scenarios is performed regularly
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Timeboxing thresholds documented with health check configuration. If Non-Compliant: Not defined. If Not Applicable: Manual DR only. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Disaster Recovery → Automation) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document timeboxing triggers in Section 11]
+
+### 37.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN037]
 
 ---
 
-#### LACN039: Bulkhead Isolation Pattern {#LACN039}
+## 38. Fallback Response Pattern (LACN038)
+
+**Requirement**: Implement fallback responses or degraded functionality when primary services or features are unavailable.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Resilience Patterns)
 
-##### Implementation
-Bulkhead pattern isolates failures by partitioning resources. Implementation: (1) Thread pool isolation: separate thread pools per service (prevents one slow service from exhausting all threads); (2) Connection pool isolation: separate DB connection pools per tenant or feature; (3) Rate limiting: protect services from overload; (4) Resource quotas: CPU, memory limits per component. Benefits: failure in one partition doesn't impact others, controlled degradation, easier capacity planning. Example: checkout service gets dedicated thread pool, separate from search, so slow checkout doesn't block search.
+### 38.1 Implementation
 
-##### Validation
-- [ ] Bulkhead isolation requirement is stated (Yes/No)
-- [ ] Isolation strategy is specified (thread pools, connection pools, rate limiting)
-- [ ] Resource partition boundaries are defined
-- [ ] Capacity and sizing for each partition is documented
-- [ ] Monitoring for resource exhaustion per partition is configured
-- [ ] Overload and throttling behavior is documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Fallback strategy documented per feature with user experience defined. If Non-Compliant: Not implemented. If Not Applicable: No degradable features. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Resilience Patterns) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement fallback responses in Section 7]
+
+### 38.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN038]
 
 ---
 
-#### LACN040: Auto-Scaling with Health-Based Instance Replacement {#LACN040}
+## 39. Bulkhead Isolation Pattern (LACN039)
+
+**Requirement**: Implement bulkhead pattern to isolate failing components and prevent cascading failures across services.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture)
 
-##### Implementation
-Auto-scaling with health-based replacement provides automatic recovery from instance failures. Components: (1) Health checks: HTTP endpoint, TCP check, or custom script; (2) Auto-scaling group: maintains desired instance count; (3) Multi-AZ deployment: distribute instances across availability zones; (4) Replacement policy: terminate unhealthy, launch replacement. Configuration: health check frequency (30 seconds), grace period (300 seconds for startup), scaling policies (CPU, memory, custom metrics). Benefits: automatic recovery, reduced MTTR, improved availability. Combine with immutable infrastructure (replace, don't repair).
+### 39.1 Implementation
 
-##### Validation
-- [ ] Auto-scaling with health replacement is required (Yes/No)
-- [ ] Health check type and endpoint are specified
-- [ ] Health check frequency and grace period are configured
-- [ ] Multi-AZ deployment strategy is documented
-- [ ] Minimum, desired, and maximum instance counts are defined
-- [ ] Scaling policies and triggers are documented
-- [ ] Instance replacement testing is performed regularly
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Bulkhead isolation implemented with resource partitions documented. If Non-Compliant: Not implemented. If Not Applicable: No shared resource contention risk. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Resilience Patterns) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement bulkhead pattern in Section 7]
+
+### 39.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN039]
 
 ---
 
-#### LACN041: Load Balancing for Automatic Traffic Distribution {#LACN041}
+## 40. Auto-Scaling with Health-Based Instance Replacement (LACN040)
+
+**Requirement**: Implement auto-scaling with health checks to automatically replace failed instances across multiple availability zones.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational)
 
-##### Implementation
-Load balancing distributes traffic for performance and availability. Types: (1) Application LB (Layer 7): HTTP/HTTPS, path-based routing, host-based routing, SSL termination; (2) Network LB (Layer 4): TCP/UDP, high throughput, low latency; (3) Global LB: DNS-based, geo-routing, disaster recovery. Configuration: health checks, sticky sessions, idle timeout, cross-zone load balancing. Algorithms: round-robin, least connections, weighted. Benefits: horizontal scaling, automatic failover, zero-downtime deployments. For multi-AZ HA, enable cross-zone load balancing.
+### 40.1 Implementation
 
-##### Validation
-- [ ] Load balancing requirement is stated (Yes/No)
-- [ ] Load balancer type is specified (Application, Network, Global)
-- [ ] Load balancing algorithm is chosen and documented
-- [ ] Health check configuration is defined
-- [ ] Sticky session and timeout settings are specified
-- [ ] Cross-zone load balancing is enabled for multi-AZ deployments
-- [ ] SSL/TLS termination and certificate management is documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Auto-scaling configured with health checks and multi-AZ deployment. If Non-Compliant: Not configured. If Not Applicable: Not required. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Configure auto-scaling with health checks in Section 4 or Section 11]
+
+### 40.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 11 or Section 4 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN040]
 
 ---
 
-#### LACN042: Queue-Based Load Leveling Pattern {#LACN042}
+## 41. Load Balancing for Automatic Traffic Distribution (LACN041)
+
+**Requirement**: Implement load balancing to automatically distribute traffic across multiple instances and availability zones.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 7 (Application Architecture → Asynchronous Processing)
 
-##### Implementation
-Queue-based load leveling decouples request acceptance from processing. Pattern: (1) Producer: API accepts requests, writes to queue, returns 202 Accepted; (2) Queue: message queue buffers requests (SQS, Kafka, RabbitMQ); (3) Consumer: workers process at sustainable rate. Benefits: absorb traffic spikes without overload, graceful degradation under load, improved availability. Use cases: order processing, report generation, notifications, batch imports. Configuration: queue depth monitoring, DLQ (dead letter queue) for failures, consumer auto-scaling based on queue depth.
+### 41.1 Implementation
 
-##### Validation
-- [ ] Queue-based load leveling requirement is stated (Yes/No)
-- [ ] Use cases requiring asynchronous processing are identified
-- [ ] Message queue technology is specified (SQS, Kafka, RabbitMQ)
-- [ ] Queue configuration: retention, DLQ, visibility timeout is documented
-- [ ] Consumer scaling policy based on queue depth is defined
-- [ ] Monitoring for queue depth and message age is configured
-- [ ] Error handling and retry logic for queue messages is documented
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Load balancer type and configuration documented. If Non-Compliant: Not configured. If Not Applicable: Not required. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document load balancing configuration in Section 4 or Section 11]
+
+### 41.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 4 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN041]
 
 ---
 
-#### LACN043: Single Points of Failure (SPOF) Identification {#LACN043}
+## 42. Queue-Based Load Leveling Pattern (LACN042)
+
+**Requirement**: Implement queue-based load leveling to absorb traffic spikes and process workloads asynchronously without impacting service availability.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
 **Category**: BC-CLOUD
-**Status**: [Status]
-**Source Section**: Section 3 (Architecture Overview) or Section 11 (Operational → High Availability)
 
-##### Implementation
-Single Point of Failure (SPOF) analysis identifies components whose failure causes complete service outage. Common SPOFs: (1) Single database instance: implement primary-replica or multi-master; (2) Single load balancer: use multiple load balancers or cloud-managed LB; (3) Single AZ deployment: deploy across multiple AZs; (4) Single region: implement multi-region for critical systems; (5) Critical third-party dependency without fallback. For each SPOF: assess impact, probability, and mitigation options. Document accepted SPOFs with business justification (cost vs. risk tradeoff).
+### 42.1 Implementation
 
-##### Validation
-- [ ] SPOF analysis is documented
-- [ ] Each potential SPOF is listed with impact assessment
-- [ ] Mitigation strategy for each SPOF is specified or justified as accepted risk
-- [ ] Architecture diagrams highlight redundancy and SPOF mitigation
-- [ ] Critical dependencies without alternatives are documented
-- [ ] Business acceptance of residual SPOFs is obtained
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Queue technology and consumer scaling documented. If Non-Compliant: Not implemented. If Not Applicable: No async processing required. If Unknown: Not documented]
+- Source: [ARCHITECTURE.md Section 7 (Application Architecture → Asynchronous Processing) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement queue-based load leveling in Section 7]
+
+### 42.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 7 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN042]
+
+---
+
+## 43. Single Points of Failure (SPOF) Identification (LACN043)
+
+**Requirement**: Identify all potential single points of failure in the architecture that could cause complete service outage if they fail.
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
+**Category**: BC-CLOUD
+
+### 43.1 Implementation
+
+**Implementation Status**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: SPOF analysis documented with mitigation strategies. If Non-Compliant: Analysis not performed. If Not Applicable: N/A. If Unknown: Not clearly documented]
+- Source: [ARCHITECTURE.md Section 3 (Architecture Overview) or Section 11 (Operational → High Availability) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Perform SPOF analysis and document in Section 3 or Section 11]
+
+### 43.2 Validation
+
+**Validation Evidence**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [Validation results and evidence]
+- Source: [ARCHITECTURE.md Section 3 or Section 11 or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document validation approach]
+
+**Source References**: [ARCHITECTURE.md sections used for LACN043]
 
 ---
 

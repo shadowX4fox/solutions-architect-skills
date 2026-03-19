@@ -109,13 +109,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-## 1. Practice Requirements (LASRE01-LASRE16)
-
-**Section Requirements**: 16 total (16 Blocker, 0 Desired)
-
----
-
-### 1.1 Log Management (LASRE01 - Blocker)
+## 1. Log Management (LASRE01)
 
 **Requirement**: Operational and audit logs must be recorded in a structured format, using defined and consistent fields, or following a standard to ensure uniformity and facilitate analysis.
 
@@ -123,7 +117,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.1.1 Implementation
+### 1.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -131,7 +125,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.1.2 Validation
+### 1.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -143,7 +137,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.2 Log Management (LASRE02 - Blocker)
+## 2. Log Management (LASRE02)
 
 **Requirement**: Operational logs must record relevant information, classified into levels such as debug, info, or error according to the system's needs and characteristics.
 
@@ -151,7 +145,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.2.1 Implementation
+### 2.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -159,7 +153,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.2.2 Validation
+### 2.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -171,7 +165,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.3 Log Management (LASRE03 - Blocker)
+## 3. Log Management (LASRE03)
 
 **Requirement**: Logs must be accessible without depending on third parties, either through internal mechanisms or automated processes that allow efficient and secure consultation of these records.
 
@@ -179,7 +173,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.3.1 Implementation
+### 3.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -187,7 +181,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.3.2 Validation
+### 3.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -199,7 +193,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.4 Application Deployment (LASRE04 - Blocker)
+## 4. Application Deployment (LASRE04)
 
 **Requirement**: Automatic rollback mechanisms must be in place in case of failures during deployment, ensuring that the system can revert to a previous stable version.
 
@@ -207,7 +201,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: DevOps Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.4.1 Implementation
+### 4.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -215,7 +209,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.4.2 Validation
+### 4.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -227,7 +221,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.5 Configuration Management (LASRE05 - Blocker)
+## 5. Configuration Management (LASRE05)
 
 **Requirement**: All configurations must be stored in official and secure repositories, such as authorized repositories or specialized services like Azure Repos, to ensure protection and controlled access to information.
 
@@ -235,7 +229,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: DevOps Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.5.1 Implementation
+### 5.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -243,7 +237,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.5.2 Validation
+### 5.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -255,7 +249,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.6 Operational Documentation (LASRE06 - Blocker)
+## 6. Operational Documentation (LASRE06)
 
 **Requirement**: Application documentation and operational procedures (SOP) will be maintained in official repositories, accessible to the entire team.
 
@@ -263,7 +257,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Team Lead or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.6.1 Implementation
+### 6.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -271,7 +265,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.6.2 Validation
+### 6.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -283,7 +277,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.7 Operational Resilience (LASRE07 - Blocker)
+## 7. Operational Resilience (LASRE07)
 
 **Requirement**: The application must implement mechanisms that allow identifying when it is ready to receive load, ensuring that services are available and operational before starting processes or receiving requests.
 
@@ -291,7 +285,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.7.1 Implementation
+### 7.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -299,7 +293,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.7.2 Validation
+### 7.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -311,7 +305,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.8 Operational Resilience (LASRE08 - Blocker)
+## 8. Operational Resilience (LASRE08)
 
 **Requirement**: The application must implement health check mechanisms that allow identifying if it is functioning correctly, ensuring timely detection of possible service failures.
 
@@ -319,7 +313,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.8.1 Implementation
+### 8.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -327,7 +321,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.8.2 Validation
+### 8.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -339,7 +333,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.9 Operational Resilience (LASRE09 - Blocker)
+## 9. Operational Resilience (LASRE09)
 
 **Requirement**: The application must have high availability mechanisms, through the implementation of more than one replica, to ensure service continuity and minimize possible interruptions.
 
@@ -347,7 +341,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.9.1 Implementation
+### 9.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -355,7 +349,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.9.2 Validation
+### 9.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -367,7 +361,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.10 Operational Resilience (LASRE10 - Blocker)
+## 10. Operational Resilience (LASRE10)
 
 **Requirement**: Load tests must be executed and documented on all application components before production release, ensuring that performance is adequate and results are available for consultation and analysis.
 
@@ -375,7 +369,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.10.1 Implementation
+### 10.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -383,7 +377,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.10.2 Validation
+### 10.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -395,7 +389,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.11 Operational Resilience (LASRE11 - Blocker)
+## 11. Operational Resilience (LASRE11)
 
 **Requirement**: The application must have automatic adjustment mechanisms in the number of instances, allowing scaling according to service load to ensure optimal performance and continuous availability.
 
@@ -403,7 +397,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.11.1 Implementation
+### 11.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -411,7 +405,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.11.2 Validation
+### 11.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -423,7 +417,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.12 Recovery and Resilience Testing (LASRE12 - Blocker)
+## 12. Recovery and Resilience Testing (LASRE12)
 
 **Requirement**: A documented recovery plan (DRP) must be in place, establishing the necessary procedures and resources to restore service in case of incidents or disasters, guaranteeing operational continuity.
 
@@ -431,7 +425,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Business Continuity Manager or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.12.1 Implementation
+### 12.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -439,7 +433,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.12.2 Validation
+### 12.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -451,7 +445,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.13 Information and Architecture (LASRE13 - Blocker)
+## 13. Information and Architecture (LASRE13)
 
 **Requirement**: Has C2 application and deployment diagrams in IcePanel.
 
@@ -459,7 +453,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Enterprise Architect or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.13.1 Implementation
+### 13.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -467,7 +461,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.13.2 Validation
+### 13.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -479,7 +473,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.14 Information and Architecture (LASRE14 - Blocker)
+## 14. Information and Architecture (LASRE14)
 
 **Requirement**: The application is registered in the Bank's application portfolio and business criticality has been categorized.
 
@@ -487,7 +481,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Enterprise Architect or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.14.1 Implementation
+### 14.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -495,7 +489,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.14.2 Validation
+### 14.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -507,7 +501,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.15 Information and Architecture (LASRE15 - Blocker)
+## 15. Information and Architecture (LASRE15)
 
 **Requirement**: The escalation matrix is defined and resolving groups are registered in the application portfolio.
 
@@ -515,7 +509,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Enterprise Architect or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.15.1 Implementation
+### 15.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -523,7 +517,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.15.2 Validation
+### 15.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -535,7 +529,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 1.16 Information and Architecture (LASRE16 - Blocker)
+## 16. Information and Architecture (LASRE16)
 
 **Requirement**: Has generated a request for implementation or modification of application observability.
 
@@ -543,7 +537,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Enterprise Architect or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 1.16.1 Implementation
+### 16.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -551,7 +545,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 1.16.2 Validation
+### 16.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -563,13 +557,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-## 2. Observability Requirements (LASRE17-LASRE42)
-
-**Section Requirements**: 26 total (20 Blocker, 6 Desired)
-
----
-
-### 2.1 Key Metrics (LASRE17 - Blocker)
+## 17. Key Metrics (LASRE17)
 
 **Requirement**: Has defined the mechanism and criteria for measuring application availability.
 
@@ -577,7 +565,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.1.1 Implementation
+### 17.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -585,7 +573,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.1.2 Validation
+### 17.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -597,7 +585,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.2 Key Metrics (LASRE18 - Blocker)
+## 18. Key Metrics (LASRE18)
 
 **Requirement**: Has defined the mechanism and criteria for measuring application performance.
 
@@ -605,7 +593,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.2.1 Implementation
+### 18.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -613,7 +601,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.2.2 Validation
+### 18.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -625,7 +613,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.3 Key Metrics (LASRE19 - Blocker)
+## 19. Key Metrics (LASRE19)
 
 **Requirement**: Monitored components have dynamic or static thresholds correctly configured.
 
@@ -633,7 +621,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.3.1 Implementation
+### 19.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -641,7 +629,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.3.2 Validation
+### 19.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -653,7 +641,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.4 Backend Application (LASRE20 - Blocker)
+## 20. Backend Application (LASRE20)
 
 **Requirement**: Has validated that microservices are instrumented with Dynatrace (automatic or manual instrumentation).
 
@@ -661,7 +649,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.4.1 Implementation
+### 20.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -669,7 +657,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.4.2 Validation
+### 20.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -681,7 +669,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.5 Backend Application (LASRE21 - Blocker)
+## 21. Backend Application (LASRE21)
 
 **Requirement**: Internal APIs of the application are monitored.
 
@@ -689,7 +677,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.5.1 Implementation
+### 21.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -697,7 +685,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.5.2 Validation
+### 21.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -709,7 +697,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.6 Backend Application (LASRE22 - Blocker)
+## 22. Backend Application (LASRE22)
 
 **Requirement**: Has validated that microservice requests correctly handle exceptions at code level in test environment, to avoid increase in monitoring failure rate in production.
 
@@ -717,7 +705,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.6.1 Implementation
+### 22.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -725,7 +713,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.6.2 Validation
+### 22.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -737,7 +725,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.7 Frontend Application (LASRE23 - Blocker)
+## 23. Frontend Application (LASRE23)
 
 **Requirement**: The application URL has synthetic availability validation.
 
@@ -745,7 +733,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Frontend SRE or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.7.1 Implementation
+### 23.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -753,7 +741,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.7.2 Validation
+### 23.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -765,7 +753,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.8 User Experience (LASRE24 - Blocker)
+## 24. User Experience (LASRE24)
 
 **Requirement**: The application frontend allows injection of Dynatrace JavaScript for RUM (Real User Experience) capture. Note: Applies to applications with business transactionality.
 
@@ -773,7 +761,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.8.1 Implementation
+### 24.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -781,7 +769,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.8.2 Validation
+### 24.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -793,7 +781,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.9 User Experience (LASRE25 - Blocker)
+## 25. User Experience (LASRE25)
 
 **Requirement**: Confirms that in security components like WAF, firewall, frontdoor, etc., there are no blocks to Dynatrace injection and beacons. Note: Applies to applications with business transactionality.
 
@@ -801,7 +789,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.9.1 Implementation
+### 25.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -809,7 +797,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.9.2 Validation
+### 25.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -821,7 +809,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.10 User Experience (LASRE26 - Blocker)
+## 26. User Experience (LASRE26)
 
 **Requirement**: The application has UX monitoring. Note: Applies to applications with business transactionality.
 
@@ -829,7 +817,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.10.1 Implementation
+### 26.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -837,7 +825,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.10.2 Validation
+### 26.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -849,7 +837,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.11 Cost Estimation (LASRE27 - Blocker)
+## 27. Cost Estimation (LASRE27)
 
 **Requirement**: Has performed Dynatrace licensing cost estimation using the official calculator and has Observability team approval for coverage and/or budget allocation.
 
@@ -857,7 +845,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Team Lead or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.11.1 Implementation
+### 27.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -865,7 +853,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.11.2 Validation
+### 27.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -877,7 +865,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.12 Cost Estimation (LASRE28 - Blocker)
+## 28. Cost Estimation (LASRE28)
 
 **Requirement**: Prerequisites necessary to ensure coverage of all components have been considered in the budget, such as manual code instrumentation, additional development by the provider, cloud service activation, infrastructure, among others.
 
@@ -885,7 +873,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Team Lead or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.12.1 Implementation
+### 28.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -893,7 +881,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.12.2 Validation
+### 28.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -905,7 +893,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.13 Infrastructure (LASRE29 - Blocker)
+## 29. Infrastructure (LASRE29)
 
 **Requirement**: Onpremise or cloud servers of the application have Dynatrace agent installed (OneAgent).
 
@@ -913,7 +901,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Platform Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.13.1 Implementation
+### 29.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -921,7 +909,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.13.2 Validation
+### 29.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -933,7 +921,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.14 Infrastructure (LASRE30 - Blocker)
+## 30. Infrastructure (LASRE30)
 
 **Requirement**: Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent deployed.
 
@@ -941,7 +929,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Platform Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.14.1 Implementation
+### 30.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -949,7 +937,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.14.2 Validation
+### 30.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -961,7 +949,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.15 Infrastructure (LASRE31 - Blocker)
+## 31. Infrastructure (LASRE31)
 
 **Requirement**: Onpremise and/or cloud dependencies like DB, load balancers, Redis, frontdoor, etc. of the application are monitored.
 
@@ -969,7 +957,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Platform Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.15.1 Implementation
+### 31.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -977,7 +965,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.15.2 Validation
+### 31.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -989,7 +977,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.16 Batch Processing (LASRE32 - Blocker)
+## 32. Batch Processing (LASRE32)
 
 **Requirement**: Has monitoring of batch processes not managed by Control-M.
 
@@ -997,7 +985,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: SRE Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.16.1 Implementation
+### 32.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1005,7 +993,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.16.2 Validation
+### 32.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1017,7 +1005,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.17 Application Deployment (LASRE33 - Blocker)
+## 33. Application Deployment (LASRE33)
 
 **Requirement**: Consistency between applications and their source code will be ensured through automated deployment and configuration processes.
 
@@ -1025,7 +1013,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: DevOps Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.17.1 Implementation
+### 33.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1033,7 +1021,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.17.2 Validation
+### 33.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1045,7 +1033,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.18 Disaster Recovery (LASRE34 - Blocker)
+## 34. Disaster Recovery (LASRE34)
 
 **Requirement**: Must have automation of the Disaster Recovery process.
 
@@ -1053,7 +1041,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Business Continuity Manager or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.18.1 Implementation
+### 34.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1061,7 +1049,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.18.2 Validation
+### 34.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1073,7 +1061,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.19 Disaster Recovery (LASRE35 - Blocker)
+## 35. Disaster Recovery (LASRE35)
 
 **Requirement**: Must have automation of the process to validate the state of what is required to start the application at the Alternate Site.
 
@@ -1081,7 +1069,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: Business Continuity Manager or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.19.1 Implementation
+### 35.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1089,7 +1077,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.19.2 Validation
+### 35.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1101,7 +1089,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.20 Application Operational Tasks (LASRE36 - Blocker)
+## 36. Application Operational Tasks (LASRE36)
 
 **Requirement**: Must have an automated process for managing application services (start, stop, restart).
 
@@ -1109,7 +1097,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Responsible Role**: DevOps Engineer or N/A
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
-#### 2.20.1 Implementation
+### 36.1 Implementation
 
 **Implementation Status**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1117,7 +1105,7 @@ This template uses a two-tier scoring system for SRE requirements:
 - Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Implement in ARCHITECTURE.md Section 10 or 11]
 
-#### 2.20.2 Validation
+### 36.2 Validation
 
 **Validation Evidence**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
@@ -1129,7 +1117,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.21 Log Management (LASRE37 - Desired)
+## 37. Log Management (LASRE37)
 
 **Requirement**: Generated logs must be centralized in an analysis or monitoring tool, such as Dynatrace or Splunk, to facilitate their management, consultation, and analysis.
 
@@ -1147,7 +1135,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.22 Log Management (LASRE38 - Desired)
+## 38. Log Management (LASRE38)
 
 **Requirement**: Operational logs must allow modification of verbosity level, thus facilitating adjustment of the amount and type of information recorded according to monitoring or diagnostic needs.
 
@@ -1165,7 +1153,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.23 Configuration Management (LASRE39 - Desired)
+## 39. Configuration Management (LASRE39)
 
 **Requirement**: Configurations must be subject to version control, ensuring that any change is recorded and can be audited or reverted if necessary.
 
@@ -1183,7 +1171,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.24 Integration, Deployment and Delivery (LASRE40 - Desired)
+## 40. Integration, Deployment and Delivery (LASRE40)
 
 **Requirement**: Deployments of new versions will be performed gradually, using strategies such as Canary Release, to minimize risks and ensure a controlled transition before applying changes to all users.
 
@@ -1201,7 +1189,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.25 Integration, Deployment and Delivery (LASRE41 - Desired)
+## 41. Integration, Deployment and Delivery (LASRE41)
 
 **Requirement**: Appropriate traffic management strategies will be applied to the application's target audience, such as the Friends & Family approach, to control access and use according to defined needs.
 
@@ -1219,7 +1207,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 2.26 Operational Resilience (LASRE42 - Desired)
+## 42. Operational Resilience (LASRE42)
 
 **Requirement**: Will have a defined 7x24 maintenance procedure that guarantees continuous application availability, allowing preventive and corrective tasks to be performed without affecting service for users.
 
@@ -1237,13 +1225,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-## 3. Automation Requirements (LASRE43-LASRE57)
-
-**Section Requirements**: 15 total (0 Blocker, 15 Desired)
-
----
-
-### 3.1 Operational Resilience (LASRE43 - Desired)
+## 43. Operational Resilience (LASRE43)
 
 **Requirement**: Must have alternative mechanisms that allow managing backend failures, such as Fallback or Circuit Breaker strategies, ensuring service continuity and resilience in case of possible interruptions.
 
@@ -1261,7 +1243,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.2 Operational Resilience (LASRE44 - Desired)
+## 44. Operational Resilience (LASRE44)
 
 **Requirement**: Automatic retries and proper management of timeouts for both client and backend must be implemented, ensuring resilience and proper handling of wait or failure situations in communications.
 
@@ -1279,7 +1261,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.3 Recovery and Resilience Testing (LASRE45 - Desired)
+## 45. Recovery and Resilience Testing (LASRE45)
 
 **Requirement**: The application must execute chaos tests, with the objective of evaluating its resilience and recovery capacity in adverse scenarios or unexpected failures.
 
@@ -1297,7 +1279,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.4 Information and Architecture (LASRE46 - Desired)
+## 46. Information and Architecture (LASRE46)
 
 **Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
 
@@ -1315,7 +1297,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.5 Information and Architecture (LASRE47 - Desired)
+## 47. Information and Architecture (LASRE47)
 
 **Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
 
@@ -1333,7 +1315,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.6 Backend Application (LASRE48 - Desired)
+## 48. Backend Application (LASRE48)
 
 **Requirement**: Microservices and workloads contain labels that allow differentiating the application and its vital functions (for example: application name, application id, resolving group, vital function, tribe, cell, etc.).
 
@@ -1351,7 +1333,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.7 Backend Application (LASRE49 - Desired)
+## 49. Backend Application (LASRE49)
 
 **Requirement**: Has validated with the external system provider that they have APIs that allow monitoring the state of their system/APIs synthetically.
 
@@ -1369,7 +1351,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.8 Backend Application (LASRE50 - Desired)
+## 50. Backend Application (LASRE50)
 
 **Requirement**: Critical services have advanced monitoring configurations and threshold customization (traffic load, anomaly detection, latency, key request, etc.).
 
@@ -1387,7 +1369,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.9 Backend Application (LASRE51 - Desired)
+## 51. Backend Application (LASRE51)
 
 **Requirement**: Application logs are correctly ingested into observability tools.
 
@@ -1405,7 +1387,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.10 Frontend Application (LASRE52 - Desired)
+## 52. Frontend Application (LASRE52)
 
 **Requirement**: The application allows performing synthetic validations through authentication of generic Observability user without MFA (only user and password).
 
@@ -1423,7 +1405,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.11 Infrastructure (LASRE53 - Desired)
+## 53. Infrastructure (LASRE53)
 
 **Requirement**: Cloud components (MS Azure, GCP, AWS) of the application are tagged at the source for easy identification.
 
@@ -1441,7 +1423,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.12 Infrastructure (LASRE54 - Desired)
+## 54. Infrastructure (LASRE54)
 
 **Requirement**: Has health or state detection of critical processes or OS services (process group) on hosts.
 
@@ -1459,7 +1441,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.13 Application Operational Tasks (LASRE55 - Desired)
+## 55. Application Operational Tasks (LASRE55)
 
 **Requirement**: Must have generation of reports on application components.
 
@@ -1477,7 +1459,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.14 Application Operational Tasks (LASRE56 - Desired)
+## 56. Application Operational Tasks (LASRE56)
 
 **Requirement**: Will have an automated process to sanitize or copy data to previous environments.
 
@@ -1495,7 +1477,7 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-### 3.15 Auto-remediation (LASRE57 - Desired)
+## 57. Auto-remediation (LASRE57)
 
 **Requirement**: Will have automation to remediate application failures automatically.
 

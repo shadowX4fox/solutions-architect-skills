@@ -71,8 +71,8 @@ const POST_APPENDIX_SECTIONS = [
  * Scoring model identifiers for each contract type
  */
 const SCORING_MODEL_MAP: Record<string, string> = {
-  'sre_architecture': 'two-tier',
-  'development_architecture': 'stack-validation'
+  'sre-architecture': 'two-tier',
+  'sre_architecture': 'two-tier'
 };
 
 /**
@@ -572,4 +572,20 @@ export function generateTemplateValidationReport(
   }
 
   return lines.join('\n');
+}
+
+// CLI entry point
+if (import.meta.main) {
+  const args = process.argv.slice(2);
+  if (args.length < 2) {
+    console.error('Usage: bun template-prevalidator.ts <expanded-template-file> <contract-type>');
+    process.exit(1);
+  }
+  const [filePath, contractType] = args;
+  const { readFile } = await import('fs/promises');
+  const content = await readFile(filePath, 'utf-8');
+  const result = await validateTemplateStructure(content, contractType);
+  const report = generateTemplateValidationReport(result, contractType);
+  console.log(report);
+  process.exit(result.isValid ? 0 : 1);
 }

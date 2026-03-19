@@ -1090,8 +1090,6 @@
 
 ---
 
-### A.2 Validation Methodology
-
 <!-- @include-with-config shared/sections/validation-methodology.md config=data-ai-architecture -->
 
 ---

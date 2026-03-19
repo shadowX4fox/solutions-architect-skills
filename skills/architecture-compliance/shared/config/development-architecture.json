@@ -44,5 +44,5 @@
     "padding": 0,
     "families": ["LADES"]
   },
-  "scoring_model": "stack-validation"
+  "scoring_model": "default"
 }
