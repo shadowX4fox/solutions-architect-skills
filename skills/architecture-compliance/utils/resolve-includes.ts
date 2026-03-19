@@ -225,23 +225,20 @@ async function main() {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.error('Usage: bun resolve-includes.ts <template-file> [output-file] [--validate] [--strip-internal]');
+    console.error('Usage: bun resolve-includes.ts <template-file> [output-file] [--validate]');
     console.error('');
     console.error('Options:');
-    console.error('  --validate         Run template structure pre-validation after expansion');
-    console.error('  --strip-internal   Remove <!-- BEGIN_INTERNAL_INSTRUCTIONS --> blocks from output');
+    console.error('  --validate    Run template structure pre-validation after expansion');
     console.error('');
     console.error('Example:');
     console.error('  bun resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md');
     console.error('  bun resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate');
-    console.error('  bun resolve-includes.ts templates/TEMPLATE_INTEGRATION_ARCHITECTURE.md /tmp/cleaned.md --strip-internal');
     console.error('  ./resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md --validate');
     process.exit(1);
   }
 
   // Parse arguments
   const validateFlag = args.includes('--validate');
-  const stripInternalFlag = args.includes('--strip-internal');
   const nonFlagArgs = args.filter(arg => !arg.startsWith('--'));
 
   const templatePath = nonFlagArgs[0];
@@ -275,14 +272,6 @@ async function main() {
     // This catches variables in the template itself (not in included files)
     if (config) {
       expanded = replaceVariables(expanded, config);
-    }
-
-    // Strip internal instruction blocks if --strip-internal flag is set
-    if (stripInternalFlag) {
-      expanded = expanded.replace(
-        /<!-- BEGIN_INTERNAL_INSTRUCTIONS -->[\s\S]*?<!-- END_INTERNAL_INSTRUCTIONS -->\n?/g,
-        ''
-      );
     }
 
     // Pre-validation (Phase 4.1)

@@ -1,7 +1,7 @@
 ---
 name: cloud-compliance-generator
 description: Atlas — Cloud Architecture Compliance Contract Generator - Generates Cloud Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
-tools: Read, Write, Grep, Glob
+tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 ---
 
@@ -99,15 +99,53 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 ### PHASE 1: Template Preparation
 
-**Step 1.1: Read Cleaned Template**
+**Step 1.0: Navigate to Plugin Directory**
 
-The orchestrator has already expanded and cleaned the template. Read the path provided in the orchestrator prompt ("Cleaned template: ..."). If not specified in the prompt, use the default path:
-```
-Read file: /tmp/cleaned_cloud_architecture_template.md
-Store content as: template_content
+Use Bash to resolve and navigate to the plugin directory. **Required before any `bun` command** — working directory persists for the entire agent session:
+```bash
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" ! -path "*/.claude/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
 ```
 
-**CRITICAL**: Use this cleaned template for ALL subsequent phases.
+**Step 1.1: Expand Template**
+
+Use Bash tool to run resolve-includes.ts:
+```bash
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  skills/architecture-compliance/templates/TEMPLATE_CLOUD_ARCHITECTURE.md \
+  /tmp/expanded_cloud_template.md
+```
+
+**Step 1.2: Read Expanded Template**
+
+Use Read tool:
+```
+Read file: /tmp/expanded_cloud_template.md
+Store content in variable: template_content
+```
+
+**Step 1.3: Remove Instructional Sections**
+
+Use Bash tool to remove internal agent instructions from expanded template:
+
+```bash
+sed '/<!-- BEGIN_INTERNAL_INSTRUCTIONS -->/,/<!-- END_INTERNAL_INSTRUCTIONS -->/d' \
+  /tmp/expanded_cloud_template.md > /tmp/cleaned_cloud_template.md
+```
+
+**What This Does**:
+- Removes all content between `<!-- BEGIN_INTERNAL_INSTRUCTIONS -->` and `<!-- END_INTERNAL_INSTRUCTIONS -->`
+- Preserves only contract-facing content
+- Prevents instructional metadata from appearing in final output
+
+**Step 1.4: Read Cleaned Template**
+
+Use Read tool:
+```
+Read file: /tmp/cleaned_cloud_template.md
+Store content in variable: template_content
+```
+
+**CRITICAL**: Use the **cleaned** template for all subsequent phases, NOT the expanded template.
 
 **Step 1.5: Verify Template Was Loaded (HARD GATE)**
 
@@ -118,7 +156,7 @@ Before proceeding to PHASE 2, you MUST confirm ALL of the following:
 3. The template contains a `## Compliance Summary` table with requirement code rows
 4. The template contains numbered detail sections (e.g., `## 1.`, `## 2.`, etc.)
 
-**GATE CHECK**: If ANY of the above cannot be confirmed, DO NOT proceed. Re-execute Steps 1.0-1.1. If template expansion fails after 2 attempts, return this error:
+**GATE CHECK**: If ANY of the above cannot be confirmed, DO NOT proceed. Re-execute Steps 1.1-1.4. If template expansion fails after 2 attempts, return this error:
 ```
 TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contract generation aborted.
 ```
@@ -138,7 +176,10 @@ Note: ARCHITECTURE.md is a navigation index only — section content lives in do
 
 **Step 2.2: Get Current Date**
 
-Extract the generation date from the orchestrator prompt (provided as "Generation date: YYYY-MM-DD").
+Use Bash tool:
+```bash
+date +%Y-%m-%d
+```
 Store as: generation_date
 
 ### PHASE 3: Extract Data from Required Sections
@@ -245,7 +286,7 @@ output_mode: content
 
 Before replacing ANY placeholder, verify you are working from the template:
 
-1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.1 (file: `/tmp/cleaned_cloud_architecture_template.md`)
+1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_cloud_template.md`)
 2. **Confirm the document starts with**: `# Compliance Contract: Cloud Architecture`
 3. **Confirm the Compliance Summary table contains these exact codes**: LAC1, LAC2, LAC3, LAC4, LAC5, LAC6
 4. **Confirm you can see `[PLACEHOLDER]` markers** that you will be replacing
@@ -516,15 +557,47 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
-### PHASE 4.6: Validation Score (Handled by Orchestrator)
+### PHASE 4.6: Calculate Validation Score
 
-Score calculation and field updates are performed by the orchestrator AFTER this agent completes.
-Leave these placeholders as-is in the output — the orchestrator handles post-processing:
-- `[DOCUMENT_STATUS]`
-- `[VALIDATION_SCORE]`
-- `[VALIDATION_STATUS]`
-- `[VALIDATION_DATE]`
-- `[REVIEW_ACTOR]`
+**CRITICAL**: This phase calculates validation score and updates contract fields BEFORE writing output.
+
+**Step 4.6.1: Run Score Calculation**
+
+Use Bash tool to execute score calculator:
+```bash
+bun skills/architecture-compliance/utils/score-calculator-cli.ts \
+  /tmp/populated_cloud_contract.md \
+  validation/cloud_architecture_validation.json
+```
+
+**Output**: JSON with validation score, written to `/tmp/validation_score_cloud.json`
+
+**Step 4.6.2: Update Contract Fields**
+
+Use Bash tool to execute field updater:
+```bash
+bun skills/architecture-compliance/utils/field-updater-cli.ts \
+  /tmp/populated_cloud_contract.md \
+  /tmp/validation_score_cloud.json \
+  /tmp/final_cloud_architecture_contract.md
+```
+
+**What This Does**:
+- Reads populated contract from Step 4.6.1 input
+- Reads validation score JSON from `/tmp/validation_score_cloud.json`
+- Updates Document Control fields with calculated validation scores
+- Updates Overall Compliance footer with actual status counts and percentages
+- Updates Remediation Section A.3.3 with current status and score estimates
+- Writes final contract to `/tmp/final_cloud_architecture_contract.md`
+
+**Step 4.6.3: Error Handling**
+
+If validation fails (e.g., malformed table, missing sections):
+- Log error to stderr
+- Write contract with "Error" placeholders in validation fields
+- Continue to PHASE 5 (always write contract output)
+
+**CRITICAL**: Never block contract generation due to validation failure. Always produce output.
 
 ### PHASE 5: Write Output
 
@@ -563,15 +636,27 @@ Format: `/compliance-docs/CLOUD_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 Example: `/compliance-docs/CLOUD_ARCHITECTURE_PaymentPlatform_2025-12-27.md`
 
-**Step 5.4: Write Contract to Output**
+**Step 5.2: Create Output Directory**
 
-Use Write tool to write the populated template content (from PHASE 4 placeholder replacement) directly to the output file:
+Use Bash tool:
+```bash
+mkdir -p compliance-docs
+```
+
+**Step 5.3: Read and Write Final Contract**
+
+Use Read tool to load the validated contract:
+```
+file_path: /tmp/final_cloud_architecture_contract.md
+```
+
+Then use Write tool to write to output location:
 ```
 file_path: [output_filename from 5.1]
-content: [populated template content from PHASE 4]
+content: [content from Read tool above]
 ```
 
-**Step 5.5: Return Success with Metadata**
+**Step 5.4: Return Success with Metadata**
 
 Return formatted result:
 ```

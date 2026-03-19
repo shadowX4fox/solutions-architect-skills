@@ -14,6 +14,16 @@
     "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
   },
 
+  "// BASH PERMISSIONS": "Required for compliance generation agents (plugin agents cannot use permissionMode frontmatter)",
+  "permissions": {
+    "allow": [
+      "Bash(bun skills/architecture-compliance/utils/*)",
+      "Bash(sed *)",
+      "Bash(date *)",
+      "Bash(mkdir -p compliance-docs)"
+    ]
+  },
+
   "// USAGE NOTES": [
     "1. Copy this file to your project: cp .claude/settings.json.example /path/to/your/project/.claude/settings.json",
     "2. Remove the comment fields (lines starting with '//')",
