@@ -359,7 +359,28 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    - `docs/08-scalability-and-performance.md` — Section 10 (Scalability & Performance)
    - `docs/09-operational-considerations.md` — Section 11 (Operational Considerations)
    - `docs/10-references.md` — References
-4. For Section 5 (Component Details): write each component as a separate `docs/components/NN-name.md` file using the type-specific Section 5 template; add breadcrumbs; create `docs/components/README.md` component index
+4. **Section 5 — Create Individual Component Files** (MANDATORY)
+
+   Every component identified during architecture design MUST get its own file. Do NOT write Section 5 content into a single monolithic file.
+
+   **4a.** Identify all components from the architecture discussion (services, modules, infrastructure components, etc.)
+   **4b.** For each component, create `docs/components/NN-<component-name>.md`:
+      - `NN` = two-digit zero-padded index (01, 02, 03, ...)
+      - Name = lowercase kebab-case (e.g., `01-api-gateway.md`, `02-order-service.md`)
+      - Add breadcrumb: `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>`
+      - Add `# <Component Name>` heading
+      - Add `**Type:** <type>` field (e.g., Microservice, Infrastructure, Module, Service Domain)
+      - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
+      - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+   **4c.** Create `docs/components/README.md` component index using the component-index-guardian format:
+      - Line 1: `<!-- managed by solutions-architect-skills:component-index-guardian -- do not edit manually -->`
+      - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
+      - 4-column table: `#`, `Component`, `File`, `Type`
+      - One row per component file created in 4b
+   **4d.** Verify: count of component files created must match count of rows in README.md table
+
+   > **HARD GATE**: Do NOT proceed to Step 5 (ARCHITECTURE.md index) until at least one component file exists in `docs/components/`. If no components were identified, ask the user to define at least the primary components before continuing.
+
 5. Write `ARCHITECTURE.md` as the navigation index using the template from RESTRUCTURING_GUIDE.md
 6. Add the `<!-- ARCHITECTURE_TYPE: TYPE -->` metadata comment at the top of `docs/03-architecture-layers.md`
 
@@ -370,6 +391,9 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 - Placeholder values in each file for the user to customize
 - Breadcrumbs in all `docs/components/NN-name.md` files
 - Cross-references as relative Markdown links (never bare `Section X.Y`)
+- At least one `docs/components/NN-name.md` file per identified component
+- `docs/components/README.md` with 4-column index matching all component files
+- Each component file has: breadcrumb, `# Heading`, `**Type:**` field
 
 #### Step 6: Prompt for ADR Generation (Optional)
 
