@@ -564,14 +564,18 @@ INCORRECT (converted to bold list):
 
 **Step 4.6.1: Run Score Calculation**
 
+Use Bash tool to execute score calculator:
 ```bash
 bun skills/architecture-compliance/utils/score-calculator-cli.ts \
   /tmp/populated_cloud_contract.md \
   validation/cloud_architecture_validation.json
 ```
 
+**Output**: JSON with validation score, written to `/tmp/validation_score_cloud.json`
+
 **Step 4.6.2: Update Contract Fields**
 
+Use Bash tool to execute field updater:
 ```bash
 bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/populated_cloud_contract.md \
@@ -579,7 +583,22 @@ bun skills/architecture-compliance/utils/field-updater-cli.ts \
   /tmp/final_cloud_architecture_contract.md
 ```
 
-**Step 4.6.3: Error Handling** - Continue to PHASE 5 on validation failure (always write output).
+**What This Does**:
+- Reads populated contract from Step 4.6.1 input
+- Reads validation score JSON from `/tmp/validation_score_cloud.json`
+- Updates Document Control fields with calculated validation scores
+- Updates Overall Compliance footer with actual status counts and percentages
+- Updates Remediation Section A.3.3 with current status and score estimates
+- Writes final contract to `/tmp/final_cloud_architecture_contract.md`
+
+**Step 4.6.3: Error Handling**
+
+If validation fails (e.g., malformed table, missing sections):
+- Log error to stderr
+- Write contract with "Error" placeholders in validation fields
+- Continue to PHASE 5 (always write contract output)
+
+**CRITICAL**: Never block contract generation due to validation failure. Always produce output.
 
 ### PHASE 5: Write Output
 
@@ -654,21 +673,6 @@ Contract Details:
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.
 
-## Simplified Workflow for Testing
-
-For initial testing, follow this minimal workflow:
-
-1. **Expand template** (Bash: resolve-includes.ts)
-2. **Read template** (Read tool)
-3. **Read ARCHITECTURE.md header** (Read tool, first 50 lines)
-4. **Extract project name** (from H1)
-5. **Get current date** (Bash: date command)
-6. **Replace [PROJECT_NAME] and [GENERATION_DATE]** in template
-7. **Write output** (Write tool to /compliance-docs/)
-8. **Return success message with metadata**
-
-Additional data extraction can be added incrementally after basic workflow works.
-
 ## Error Handling
 
 - If ARCHITECTURE.md not found → Return error message with guidance
@@ -683,21 +687,6 @@ Additional data extraction can be added incrementally after basic workflow works
 - **Cost optimization**: Identify cost-saving opportunities (reserved instances, auto-scaling)
 - **Cloud-native adoption**: Measure usage of managed services vs. custom deployments
 - **Regional redundancy**: Verify multi-region setup for high availability
-
-## Output Format
-
-The generated compliance contract includes:
-
-1. **Document Control Section**: Project name, generation date, version
-2. **Compliance Summary Table**: All Cloud Architecture requirements with status
-3. **Detailed Requirements**: Each requirement with:
-   - Requirement code (LACL001, LACL002, etc.)
-   - Description
-   - Status (Compliant/Non-Compliant/Unknown/Not Applicable)
-   - Source reference (Section X, line Y)
-   - Responsible role
-4. **Gap Analysis**: Missing requirements and recommendations
-5. **Source Traceability**: Full audit trail to ARCHITECTURE.md
 
 ## Performance Optimization
 

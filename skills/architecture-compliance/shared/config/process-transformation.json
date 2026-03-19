@@ -36,5 +36,12 @@
   "framework_description": "business processes, automation opportunities, digitization strategy, and process optimization",
   "compliance_framework_code": "LAP (Process Transformation)",
   "v2_domain_features": "",
-  "v2_data_point_count": "10"
+  "v2_data_point_count": "10",
+
+  "code_format": {
+    "prefix": "LAP",
+    "padding": 0,
+    "families": ["LAP"]
+  },
+  "scoring_model": "default"
 }

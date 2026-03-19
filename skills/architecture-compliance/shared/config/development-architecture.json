@@ -37,5 +37,12 @@
   "framework_description": "development stack, build pipelines, dependency management, code quality, and artifact management",
   "compliance_framework_code": "LADES (Development Architecture)",
   "v2_domain_features": "",
-  "v2_data_point_count": "6"
+  "v2_data_point_count": "6",
+
+  "code_format": {
+    "prefix": "LADES",
+    "padding": 0,
+    "families": ["LADES"]
+  },
+  "scoring_model": "stack-validation"
 }

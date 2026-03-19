@@ -37,5 +37,12 @@
   "framework_description": "compute platforms, storage systems, network infrastructure, monitoring, and database platforms",
   "compliance_framework_code": "LAPI (Platform IT Infrastructure)",
   "v2_domain_features": "",
-  "v2_data_point_count": "7"
+  "v2_data_point_count": "7",
+
+  "code_format": {
+    "prefix": "LAPI",
+    "padding": 2,
+    "families": ["LAPI"]
+  },
+  "scoring_model": "default"
 }

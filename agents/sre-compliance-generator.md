@@ -46,7 +46,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 - Incident management
 - Performance monitoring
 
-**Requirements**: 57 (LASRE001-LASRE057)
+**Requirements**: 57 (LASRE01-LASRE57)
 **Tiers**: 36 Blocker (mandatory) + 21 Desired (optional)
 **Scoring**: Two-tier (Blocker 70%, Desired 30%)
 
@@ -97,7 +97,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 
 The most critical and common failure is when the agent IGNORES the template and generates a free-form compliance document from scratch. This has happened before and produced unusable output. Signs of this failure:
 
-- **Wrong requirement codes**: This template uses `LASRE01` through `LASRE57` (57 requirements total). If you are writing codes like `SRE001`, `SREA001`, or ANY code not in the template, you have failed.
+- **Wrong requirement codes**: This template uses `LASRE01` through `LASRE57` (2-digit padding, 57 requirements total). If you are writing codes like `SRE001`, `SREA001`, `LASRE001`, or ANY code not in the template, you have failed.
 - **Wrong section structure**: The template has specific numbered sections matching LASRE categories. If your output has different sections, you have failed.
 - **Inventing content**: If you are writing an "Executive Summary", creating your own categories, or generating tables not in the template, you have failed.
 - **Wrong requirement count**: The Compliance Summary table has exactly 57 rows (LASRE01-LASRE57). If yours has more or fewer, you have failed.
@@ -319,7 +319,7 @@ Replace Document Control placeholders with default values:
 
 - `[SOLUTION_ARCHITECT or N/A]` → Extract from ARCHITECTURE.md header/metadata (look for "Author", "Architect", "Solution Architect", "Owner", or "Prepared by" fields in the first 50 lines). If not found, use `"N/A"`
 - `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
-- `[APPROVAL_AUTHORITY]` → `"SRE Architecture Review Board"`
+- `[APPROVAL_AUTHORITY]` → `"SRE Leadership/Operations"`
 
 **DO NOT REPLACE these validation placeholders** — they are populated by PHASE 4.6 CLI tools:
 - `[DOCUMENT_STATUS]` — leave as-is for PHASE 4.6

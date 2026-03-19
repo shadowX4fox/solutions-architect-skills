@@ -304,12 +304,13 @@ output_mode: content
 
 Before replacing ANY placeholder, verify you are working from the template:
 
-1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_business_continuity_template.md`)
+1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_bc_template.md`)
 2. **Confirm the document starts with**: `# Compliance Contract: Business Continuity`
-3. **Confirm the Compliance Summary table contains codes starting with**: LACN (LACN001 through LACN043)
-4. **Confirm you can see `[PLACEHOLDER]` markers** that you will be replacing
+3. **Confirm the Compliance Summary table contains codes starting with**: LACN (LACN001 through LACN043, 43 rows total)
+4. **Confirm the Detailed Requirements use unified format**: Look for `## 1. Application or Initiative Name (LACN001)` with `### 1.1` sub-sections and `**Field**: [Value or "Not specified"]` + 4-bullet pattern
+5. **Confirm you can see `[PLACEHOLDER]` markers** that you will be replacing
 
-If you CANNOT confirm all 4 points above, you are NOT working from the template. STOP and return to PHASE 1.
+If you CANNOT confirm all 5 points above, you are NOT working from the template. STOP and return to PHASE 1.
 
 **REMINDER**: Your job in this phase is ONLY to replace `[PLACEHOLDER]` text in the template you loaded. You are NOT writing a document. You are NOT creating sections. You are NOT inventing requirement codes. You are filling in blanks.
 
@@ -504,25 +505,33 @@ Status: Non-Compliant → Use:
 
 ---
 
-**Example 5: Table Preservation**
+**Example 5: Field-Oriented Format Preservation**
+
+The Business Continuity template uses field-oriented format (NOT table format). Do NOT convert fields to table format.
 
 Template:
 ```
-| Field | Value |
-|-------|-------|
-| RTO | [Value or "Not specified"] |
+**RTO Value**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RTO documented. If Non-Compliant: RTO not specified. If Unknown: RTO unclear]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Define RTO in Section 10]
 ```
 
 Correct:
 ```
+**RTO Value**: 4 hours
+- Status: Compliant
+- Explanation: RTO documented
+- Source: docs/09-operational-considerations.md
+```
+(Note: Remove entire `- Note:` line when Status is Compliant)
+
+INCORRECT (converted to table):
+```
 | Field | Value |
 |-------|-------|
 | RTO | 4 hours |
-```
-
-INCORRECT (converted to bold list):
-```
-**RTO**: 4 hours
 ```
 
 ### PHASE 4.5: Comprehensive Pre-Write Template Validation

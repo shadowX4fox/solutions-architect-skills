@@ -1,0 +1,250 @@
+# Compliance Contract Template Schema v2.0
+
+This document defines the canonical structure all 10 compliance contract templates must follow.
+Use this as the authoritative reference when creating or modifying templates.
+
+---
+
+## 1. Header Block
+
+```markdown
+# Compliance Contract: {Domain Name}
+
+**Project**: [PROJECT_NAME]
+**Generation Date**: [GENERATION_DATE]
+**Source**: ARCHITECTURE.md (Sections N, N, N)
+**Version**: 2.0
+```
+
+Rules:
+- H1 title must be `# Compliance Contract: {Domain Name}`
+- Version must be `2.0` (not 1.0)
+- Source sections should list the primary ARCHITECTURE.md sections used
+
+---
+
+## 2. Document Control
+
+```markdown
+<!-- @include-with-config shared/sections/document-control.md config={config-name} -->
+```
+
+Rules:
+- Always uses `@include-with-config` (not plain `@include`)
+- Config name matches the JSON config file in `shared/config/`
+
+---
+
+## 3. Dynamic Field Instructions
+
+```markdown
+<!-- @include-with-config shared/sections/dynamic-field-instructions.md config={config-name} -->
+```
+
+Rules:
+- Same config name as Document Control
+
+---
+
+## 4. Scoring Model
+
+Two valid forms:
+
+### 4a. DEFAULT (most templates — 8 of 10)
+
+```markdown
+<!-- @include shared/fragments/compliance-score-calculation.md -->
+```
+
+Formula: `Score = (PASS + N/A + EXCEPTION) / Total × 10`
+
+### 4b. OVERRIDE (SRE and Development only)
+
+```markdown
+**CRITICAL - {Model Name} Scoring**:
+{inline scoring block with domain-specific formula}
+```
+
+Override templates must include:
+- Header: `**CRITICAL - {Model Name} Scoring**:` (standardized prefix)
+- Clear tier/weight definitions
+- The same N/A counting rule as default
+
+Which templates use override:
+- `TEMPLATE_SRE_ARCHITECTURE.md` → `two-tier` (Blocker 70% + Desired 30%)
+- `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md` → `stack-validation`
+
+---
+
+## 5. Compliance Summary Table
+
+```markdown
+## Compliance Summary
+
+| Code | Requirement | Category | Status | Source Section | Responsible Role |
+|------|-------------|----------|--------|----------------|------------------|
+| {CODE} | {description} | {CATEGORY} | [Status] | Section N ({Name}) | [Role or N/A] |
+```
+
+Rules:
+- Section heading must be exactly `## Compliance Summary` (H2, no numbering)
+- Exactly 6 columns in this order: `Code | Requirement | Category | Status | Source Section | Responsible Role`
+- One row per requirement
+- Status placeholder: `[Status]` (replaced during population)
+- Role placeholder: `[Role or N/A]`
+
+---
+
+## 6. Compliance Summary Footer
+
+```markdown
+<!-- @include shared/fragments/compliance-summary-footer.md -->
+```
+
+---
+
+## 7. Detailed Requirements — UNIFIED FORMAT
+
+All 10 templates use this structure:
+
+```markdown
+## N. Requirement Title (CODE)
+
+**Requirement**: [description of what must be satisfied]
+**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Responsible Role**: [Role or N/A]
+[Optional domain-specific fields: **Category**, **Criticality**, etc.]
+
+### N.M Sub-section Name
+
+**Field Name**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: X. If Non-Compliant: Y. If Not Applicable: N/A. If Unknown: W]
+- Source: [ARCHITECTURE.md Section X.Y or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Remediation guidance]
+
+**Source References**: [Consolidated list of ARCHITECTURE.md sections used]
+```
+
+Rules:
+- Top-level requirements: `## N.` (H2) with `(CODE)` suffix
+- Required fields on every requirement: `**Requirement**:`, `**Status**:`, `**Responsible Role**:`
+- Domain-specific extra fields (e.g., `**Criticality**:` for SRE) are allowed after `**Responsible Role**:`
+- Sub-sections: `### N.M` (H3)
+- Each field within sub-section: `**Field Name**: [value]` followed by the 4-bullet pattern
+- 4-bullet pattern always in order: Status / Explanation / Source / Note
+- Every requirement ends with `**Source References**:`
+
+---
+
+## 8. Appendix Structure
+
+```markdown
+### A.1 Definitions and Terminology
+
+{definitions prose}
+
+<!-- @include shared/fragments/status-codes.md -->
+
+**Abbreviations**:
+{domain-specific abbreviations}
+
+---
+
+### A.2 Validation Methodology
+
+<!-- @include-with-config shared/sections/validation-methodology.md config={config-name} -->
+
+---
+
+### A.3 Completion Guide
+
+<!-- @include shared/sections/completion-guide-intro.md -->
+
+#### A.3.1 Identified Gaps
+{gap table}
+
+#### A.3.2 Remediation Priorities
+{remediation guidance}
+
+#### A.3.3 Completion Status and Score Estimates
+{score estimate table — updated by PHASE 4.6 CLI tools}
+
+---
+
+### A.4 Change History
+
+<!-- @include shared/sections/change-history-template.md -->
+```
+
+Rules:
+- BC template: A.2 omitted (uses `['A.1', 'A.3', 'A.4']`)
+- All other templates: A.1 through A.4 required in order
+- No A.5+ numbered appendices — additional sections use unnumbered H2
+
+---
+
+## 9. Post-Appendix Sections (H2, no numbering)
+
+After A.4, additional sections use H2 with no `A.N` prefix:
+
+```markdown
+## Data Extracted Successfully
+{table of successfully extracted data points}
+
+## Missing Data Requiring Attention
+<!-- @include shared/sections/missing-data-table-template.md -->
+
+## Not Applicable Items
+<!-- @include shared/sections/not-applicable-template.md -->
+
+## Unknown Status Items
+<!-- @include shared/sections/unknown-status-table-template.md -->
+
+## Generation Metadata
+<!-- @include shared/sections/generation-metadata.md -->
+```
+
+Rules:
+- Do NOT use `## A.5`, `## A.6`, etc. — use plain H2 section names
+- These sections appear after `### A.4` in all templates
+
+---
+
+## Validation Checklist
+
+When reviewing a template for schema compliance, verify:
+
+- [ ] Header: H1 title + 4 metadata lines + `**Version**: 2.0`
+- [ ] Document Control: `@include-with-config`
+- [ ] Dynamic Field Instructions: `@include-with-config`
+- [ ] Scoring Model: `@include` default OR inline override with `**CRITICAL - {Name} Scoring**:` header
+- [ ] Compliance Summary: H2 heading + 6-column table
+- [ ] Compliance Summary Footer: `@include`
+- [ ] Detailed Requirements: `## N. Title (CODE)` + unified 4-bullet format
+- [ ] Appendix A.1–A.4 (or A.1, A.3, A.4 for BC)
+- [ ] Post-appendix sections: unnumbered H2 (no A.5+)
+
+---
+
+## Config Fields Reference
+
+Each `shared/config/*.json` should include:
+
+```json
+{
+  "domain_name": "...",
+  "compliance_prefix": "LAC...",
+  "review_board": "...",
+  "approval_authority": "...",
+  "code_format": {
+    "prefix": "LAC",
+    "padding": 0,
+    "families": ["LAC"]
+  },
+  "scoring_model": "default"
+}
+```
+
+Special values for `scoring_model`: `"default"`, `"two-tier"` (SRE), `"stack-validation"` (Development)
+Special values for `padding`: `0` (no padding, e.g. LAC1), `2` (2-digit, e.g. LASRE01), `3` (3-digit, e.g. LACN001)

@@ -39,5 +39,12 @@
   "framework_description": "data governance, data pipelines, ML lifecycle, feature stores, model registry, and MLOps",
   "compliance_framework_code": "LAD / LAIA (Data & AI Architecture)",
   "v2_domain_features": "",
-  "v2_data_point_count": "45"
+  "v2_data_point_count": "45",
+
+  "code_format": {
+    "prefix": "LAD",
+    "padding": 0,
+    "families": ["LAD", "LAIA"]
+  },
+  "scoring_model": "default"
 }

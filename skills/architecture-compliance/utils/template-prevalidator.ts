@@ -57,6 +57,25 @@ const TABLE_BASED_REQUIRED_SECTIONS = [
 ];
 
 /**
+ * Expected post-appendix section names (H2, no A.N prefix)
+ */
+const POST_APPENDIX_SECTIONS = [
+  'Data Extracted Successfully',
+  'Missing Data Requiring Attention',
+  'Not Applicable Items',
+  'Unknown Status Items',
+  'Generation Metadata'
+];
+
+/**
+ * Scoring model identifiers for each contract type
+ */
+const SCORING_MODEL_MAP: Record<string, string> = {
+  'sre_architecture': 'two-tier',
+  'development_architecture': 'stack-validation'
+};
+
+/**
  * Validate that minimum required sections are present in the template
  */
 function validateRequiredSections(
@@ -288,6 +307,163 @@ function validateMarkdownStructure(
 }
 
 /**
+ * Validate Version header is 2.0
+ */
+function validateVersionHeader(
+  content: string,
+  errors: TemplateValidationError[]
+): number {
+  const versionPattern = /^\*\*Version\*\*:\s*2\.0\s*$/m;
+  if (!versionPattern.test(content)) {
+    errors.push({
+      errorId: 'TEMPLATE_VERSION_MISMATCH',
+      severity: 'BLOCKING',
+      location: 'Template Header',
+      expected: '**Version**: 2.0',
+      found: 'Version field missing or not 2.0',
+      fix: 'Set **Version**: 2.0 in the template header block.'
+    });
+  }
+  return 1;
+}
+
+/**
+ * Validate that the scoring model directive is present and correct
+ */
+function validateScoringModel(
+  content: string,
+  contractType: string,
+  errors: TemplateValidationError[]
+): number {
+  const model = SCORING_MODEL_MAP[contractType] ?? 'default';
+
+  if (model === 'default') {
+    // Default: must use the @include fragment (already resolved, so check the fragment content)
+    const defaultPattern = /CRITICAL\s*-\s*Compliance Score Calculation/;
+    if (!defaultPattern.test(content)) {
+      errors.push({
+        errorId: 'TEMPLATE_SCORING_MODEL_MISSING',
+        severity: 'WARNING',
+        location: 'Scoring Model Section',
+        expected: 'Default scoring model content (compliance-score-calculation.md)',
+        found: 'Default scoring model content not found',
+        fix: 'Add <!-- @include shared/fragments/compliance-score-calculation.md --> to the template.'
+      });
+    }
+  } else {
+    // Override: must have inline block with standardized header
+    const overridePattern = new RegExp(`CRITICAL\\s*-\\s*.+\\s*Scoring`, 'i');
+    if (!overridePattern.test(content)) {
+      errors.push({
+        errorId: 'TEMPLATE_SCORING_MODEL_MISSING',
+        severity: 'WARNING',
+        location: 'Scoring Model Section',
+        expected: `Override scoring model with "**CRITICAL - {Name} Scoring**:" header (model: ${model})`,
+        found: 'Override scoring model header not found',
+        fix: `Add inline scoring block with "**CRITICAL - {Model Name} Scoring**:" header for ${model} scoring.`
+      });
+    }
+  }
+  return 1;
+}
+
+/**
+ * Validate the Compliance Summary table has 6 columns
+ */
+function validateSummaryTable(
+  content: string,
+  contractType: string,
+  errors: TemplateValidationError[]
+): number {
+  if (contractType === 'business_continuity') {
+    return 0; // BC uses narrative format, no summary table required
+  }
+
+  const summaryHeaderPattern = /\|\s*Code\s*\|\s*Requirement\s*\|\s*Category\s*\|\s*Status\s*\|\s*Source Section\s*\|\s*Responsible Role\s*\|/;
+  if (!summaryHeaderPattern.test(content)) {
+    errors.push({
+      errorId: 'TEMPLATE_SUMMARY_TABLE_COLUMNS',
+      severity: 'BLOCKING',
+      location: 'Compliance Summary Table',
+      expected: '6-column table: Code | Requirement | Category | Status | Source Section | Responsible Role',
+      found: 'Summary table header does not match expected 6-column format',
+      fix: 'Update the Compliance Summary table header to exactly: | Code | Requirement | Category | Status | Source Section | Responsible Role |'
+    });
+  }
+  return 1;
+}
+
+/**
+ * Validate post-appendix sections use unnumbered H2 (no A.5+)
+ */
+function validatePostAppendixStructure(
+  content: string,
+  errors: TemplateValidationError[]
+): number {
+  // Check for A.5 or higher numbered appendices (forbidden)
+  const invalidAppendixPattern = /^###\s+A\.[5-9]\d*\s+/m;
+  if (invalidAppendixPattern.test(content)) {
+    errors.push({
+      errorId: 'TEMPLATE_INVALID_APPENDIX_NUMBERING',
+      severity: 'BLOCKING',
+      location: 'Post-Appendix Sections',
+      expected: 'Sections after A.4 use unnumbered H2 (## Section Name)',
+      found: 'Found A.5 or higher appendix numbering',
+      fix: 'Replace ### A.5+ headings with plain ## headings (e.g., "## Data Extracted Successfully")'
+    });
+  }
+  return 1;
+}
+
+/**
+ * Validate Detailed Requirements use unified format (for converted templates)
+ * Checks that requirements follow: ## N. Title (CODE) pattern
+ */
+function validateDetailedRequirementsFormat(
+  content: string,
+  contractType: string,
+  errors: TemplateValidationError[]
+): number {
+  // Find the Detailed Requirements section
+  const detailedSectionMatch = content.match(/^## Detailed Requirements\s*$/m);
+  if (!detailedSectionMatch) {
+    // Not all templates have a "## Detailed Requirements" heading — skip
+    return 0;
+  }
+
+  const detailedStart = content.indexOf(detailedSectionMatch[0]);
+  const detailedContent = content.slice(detailedStart);
+
+  // Check that requirements use ## N. format (H2 with number)
+  const h4RequirementPattern = /^####\s+[A-Z]+\d+:/m;
+  if (h4RequirementPattern.test(detailedContent)) {
+    errors.push({
+      errorId: 'TEMPLATE_REQUIREMENTS_WRONG_HEADING_LEVEL',
+      severity: 'BLOCKING',
+      location: 'Detailed Requirements Section',
+      expected: 'Requirements use ## N. Title (CODE) format (H2)',
+      found: 'Requirements use #### CODE: Title format (H4) — old BC narrative format',
+      fix: 'Convert requirements to unified format: ## N. Title (CODE) with **Requirement**/**Status**/**Responsible Role** fields and ### N.M sub-sections.'
+    });
+  }
+
+  // Check that fields use 4-bullet pattern (Status/Explanation/Source/Note)
+  const fieldBulletPattern = /^- Status:/m;
+  if (detailedContent.length > 500 && !fieldBulletPattern.test(detailedContent)) {
+    errors.push({
+      errorId: 'TEMPLATE_REQUIREMENTS_MISSING_BULLET_PATTERN',
+      severity: 'WARNING',
+      location: 'Detailed Requirements Section',
+      expected: 'Fields use 4-bullet pattern: - Status: / - Explanation: / - Source: / - Note:',
+      found: '4-bullet pattern not found in Detailed Requirements',
+      fix: 'Add 4-bullet pattern (Status/Explanation/Source/Note) under each field in sub-sections.'
+    });
+  }
+
+  return 1;
+}
+
+/**
  * Main validation function
  */
 export async function validateTemplateStructure(
@@ -312,6 +488,21 @@ export async function validateTemplateStructure(
 
   // 5. Validate placeholder format (warnings only)
   checksPerformed += validatePlaceholderFormat(expandedTemplate, warnings);
+
+  // 6. Validate version header is 2.0
+  checksPerformed += validateVersionHeader(expandedTemplate, errors);
+
+  // 7. Validate scoring model directive
+  checksPerformed += validateScoringModel(expandedTemplate, contractType, errors);
+
+  // 8. Validate Compliance Summary table has 6 columns
+  checksPerformed += validateSummaryTable(expandedTemplate, contractType, errors);
+
+  // 9. Validate post-appendix sections (no A.5+)
+  checksPerformed += validatePostAppendixStructure(expandedTemplate, errors);
+
+  // 10. Validate Detailed Requirements use unified format
+  checksPerformed += validateDetailedRequirementsFormat(expandedTemplate, contractType, errors);
 
   const checksPassed = checksPerformed - errors.length - warnings.length;
 

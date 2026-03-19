@@ -35,5 +35,12 @@
   "framework_description": "business capabilities, target state architecture, roadmap alignment, and governance",
   "compliance_framework_code": "LAE (Enterprise Architecture)",
   "v2_domain_features": "",
-  "v2_data_point_count": "6"
+  "v2_data_point_count": "6",
+
+  "code_format": {
+    "prefix": "LAE",
+    "padding": 0,
+    "families": ["LAE"]
+  },
+  "scoring_model": "default"
 }

@@ -50,5 +50,12 @@
   "framework_description": "RTO/RPO, backup, DR, high availability, resilience patterns, and cloud continuity",
   "compliance_framework_code": "LACN (Business Continuity)",
   "v2_domain_features": "43 requirements organized into 6 categories: BC-GEN (5), BC-RTO (2), BC-DR (11), BC-BACKUP (13), BC-AUTO (2), BC-CLOUD (10). Includes cloud resilience patterns, auto-scaling, load balancing, and SPOF analysis.",
-  "v2_data_point_count": "43"
+  "v2_data_point_count": "43",
+
+  "code_format": {
+    "prefix": "LACN",
+    "padding": 3,
+    "families": ["LACN"]
+  },
+  "scoring_model": "default"
 }

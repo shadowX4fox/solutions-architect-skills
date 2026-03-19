@@ -35,5 +35,12 @@
   "framework_description": "cloud models, service justification, multi-region design, and IaC",
   "compliance_framework_code": "LAC (Cloud Architecture)",
   "v2_domain_features": "",
-  "v2_data_point_count": "6"
+  "v2_data_point_count": "6",
+
+  "code_format": {
+    "prefix": "LAC",
+    "padding": 0,
+    "families": ["LAC"]
+  },
+  "scoring_model": "default"
 }
