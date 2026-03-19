@@ -72,7 +72,6 @@ Override templates must include:
 
 Which templates use override:
 - `TEMPLATE_SRE_ARCHITECTURE.md` → `two-tier` (Blocker 70% + Desired 30%)
-- `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md` → `stack-validation`
 
 ---
 
@@ -246,5 +245,5 @@ Each `shared/config/*.json` should include:
 }
 ```
 
-Special values for `scoring_model`: `"default"`, `"two-tier"` (SRE), `"stack-validation"` (Development)
+Special values for `scoring_model`: `"default"` (9 templates), `"two-tier"` (SRE only)
 Special values for `padding`: `0` (no padding, e.g. LAC1), `2` (2-digit, e.g. LASRE01), `3` (3-digit, e.g. LACN001)
