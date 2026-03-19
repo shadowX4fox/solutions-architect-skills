@@ -31,6 +31,17 @@ This skill is **manually activated** when users request compliance document gene
 - General architecture documentation tasks (use `architecture-docs` skill)
 - Business requirements documentation (use `architecture-readiness` skill)
 
+## INVOCATION REQUIREMENT — BLOCKING
+
+The compliance generator agents (`*-compliance-generator`) are **internal agents**.
+They MUST ONLY be spawned from within this skill's Phase 3 workflow.
+
+**NEVER call a compliance generator agent directly via the Agent tool.**
+Doing so skips: template validation, manifest update, and orchestration routing.
+
+If a user requests any compliance contract → invoke this skill first.
+This skill then routes to the appropriate agent.
+
 ## Purpose
 
 This skill generates compliance documents from ARCHITECTURE.md, producing 10 separate documents:

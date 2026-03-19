@@ -1,6 +1,6 @@
 ---
 name: enterprise-compliance-generator
-description: Athena — Enterprise Architecture Compliance Contract Generator - Generates Enterprise Architecture compliance contracts from ARCHITECTURE.md
+description: Athena — Enterprise Architecture Compliance Contract Generator - Generates Enterprise Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 permissionMode: bypassPermissions

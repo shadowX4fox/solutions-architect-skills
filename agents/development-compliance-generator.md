@@ -1,6 +1,6 @@
 ---
 name: development-compliance-generator
-description: Hephaestus — Development Architecture Compliance Contract Generator - Generates Development Architecture compliance contracts from ARCHITECTURE.md
+description: Hephaestus — Development Architecture Compliance Contract Generator - Generates Development Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 permissionMode: bypassPermissions

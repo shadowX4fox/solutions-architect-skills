@@ -1,6 +1,6 @@
 ---
 name: integration-compliance-generator
-description: Iris — Integration Architecture Compliance Contract Generator - Generates Integration Architecture compliance contracts from ARCHITECTURE.md
+description: Iris — Integration Architecture Compliance Contract Generator - Generates Integration Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 permissionMode: bypassPermissions

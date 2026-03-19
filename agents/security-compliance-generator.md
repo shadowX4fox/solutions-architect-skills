@@ -1,6 +1,6 @@
 ---
 name: security-compliance-generator
-description: Argus — Security Architecture Compliance Contract Generator - Generates Security Architecture compliance contracts from ARCHITECTURE.md
+description: Argus — Security Architecture Compliance Contract Generator - Generates Security Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 permissionMode: bypassPermissions

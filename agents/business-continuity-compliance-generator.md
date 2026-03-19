@@ -1,6 +1,6 @@
 ---
 name: business-continuity-compliance-generator
-description: Aegis — Business Continuity Compliance Contract Generator - Generates Business Continuity compliance contracts from ARCHITECTURE.md
+description: Aegis — Business Continuity Compliance Contract Generator - Generates Business Continuity compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 permissionMode: bypassPermissions
