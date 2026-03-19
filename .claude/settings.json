@@ -1,10 +1,1 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
-      "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
-    ]
-  }
-}
+{}

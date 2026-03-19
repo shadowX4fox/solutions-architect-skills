@@ -87,35 +87,6 @@ Error: bun command not found
 
 ---
 
-## Bash Permissions Setup
-
-> **Required for compliance generation agents.**
-
-Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). The compliance agents need Bash access for template expansion, sed cleanup, date stamping, and output directory creation. You must grant these permissions in your project's `.claude/settings.json`.
-
-### Add Permissions to Your Project Settings
-
-Create or update `.claude/settings.json` in your project root:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
-      "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
-    ]
-  }
-}
-```
-
-If the file already exists, merge the `permissions.allow` array with any existing entries.
-
-**Restart Claude Code** after saving to apply the permissions.
-
----
-
 ## Understanding Marketplaces & Plugins
 
 **What is a Marketplace?**
@@ -553,33 +524,6 @@ CHANGELOG.md
    # If generating compliance docs in current directory
    chmod 755 .
    ```
-
-### Issue: Compliance Agents Prompt for Bash Permission
-
-**Symptom:** When running `/skill architecture-compliance`, Claude Code prompts you to approve Bash commands (bun, sed, mkdir, date) for each agent call.
-
-**Cause:** Plugin agents cannot use `permissionMode: bypassPermissions` in frontmatter — it is silently ignored by Claude Code. Bash permissions must be granted via `.claude/settings.json`.
-
-**Solution:**
-
-Create or update `.claude/settings.json` in your project root with:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
-      "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
-    ]
-  }
-}
-```
-
-Then restart Claude Code. The compliance agents will now execute Bash commands without permission prompts.
-
----
 
 ### Issue: Old Version Persisting
 

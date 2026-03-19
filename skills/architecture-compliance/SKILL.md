@@ -575,6 +575,64 @@ Output: Validated contract type
 3. Output: validated_contracts = [contracts with templates available]
 ```
 
+### Phase 2.5: Pre-Processing (Orchestrator Bash Operations)
+
+This phase runs in the main session (which has Bash access) and prepares everything agents need. Execute BEFORE invoking any agents.
+
+**Step 2.5.0: Create Output Directory**
+
+```bash
+mkdir -p compliance-docs
+```
+
+**Step 2.5.1: Get Generation Date**
+
+```bash
+date +%Y-%m-%d
+```
+
+Store result as `generation_date`. Pass this to all agents — they do not call `date` themselves.
+
+**Step 2.5.2: Resolve Plugin Directory**
+
+```bash
+PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" ! -path "*/.claude/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
+```
+
+**Step 2.5.3: Expand and Clean Templates**
+
+For each contract in `selected_contracts`, run `resolve-includes.ts` with `--strip-internal` to produce a pre-expanded, pre-cleaned template that agents can read directly with no Bash calls:
+
+```bash
+bun skills/architecture-compliance/utils/resolve-includes.ts \
+  skills/architecture-compliance/templates/TEMPLATE_<TYPE>.md \
+  /tmp/cleaned_<type>_template.md \
+  --strip-internal
+```
+
+Template mapping (10 entries):
+
+| Contract | Template File | Cleaned Output Path |
+|----------|---------------|---------------------|
+| Business Continuity | `TEMPLATE_BUSINESS_CONTINUITY.md` | `/tmp/cleaned_business_continuity_template.md` |
+| SRE Architecture | `TEMPLATE_SRE_ARCHITECTURE.md` | `/tmp/cleaned_sre_architecture_template.md` |
+| Cloud Architecture | `TEMPLATE_CLOUD_ARCHITECTURE.md` | `/tmp/cleaned_cloud_architecture_template.md` |
+| Data & AI | `TEMPLATE_DATA_AI_ARCHITECTURE.md` | `/tmp/cleaned_data_ai_architecture_template.md` |
+| Development | `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md` | `/tmp/cleaned_development_architecture_template.md` |
+| Process Transformation | `TEMPLATE_PROCESS_TRANSFORMATION.md` | `/tmp/cleaned_process_transformation_template.md` |
+| Security | `TEMPLATE_SECURITY_ARCHITECTURE.md` | `/tmp/cleaned_security_architecture_template.md` |
+| Platform & IT | `TEMPLATE_PLATFORM_IT_INFRASTRUCTURE.md` | `/tmp/cleaned_platform_it_infrastructure_template.md` |
+| Enterprise | `TEMPLATE_ENTERPRISE_ARCHITECTURE.md` | `/tmp/cleaned_enterprise_architecture_template.md` |
+| Integration | `TEMPLATE_INTEGRATION_ARCHITECTURE.md` | `/tmp/cleaned_integration_architecture_template.md` |
+
+If any expansion fails, exclude that contract, warn the user, and continue with the rest.
+
+**What agents receive (via prompt):**
+- Cleaned template path (pre-expanded, internal instructions stripped)
+- Generation date (no need for `date` command in agent)
+- Confirmation that `compliance-docs/` exists (no need for `mkdir` in agent)
+- Instruction that score calculation is handled by orchestrator post-processing
+
 ### Phase 3: Agent Invocation (v2.0+)
 
 **IMPORTANT**: As of v2.0.0, this skill uses specialized compliance generation agents (one per contract type) instead of direct generation. This section documents the agent routing logic.
@@ -605,6 +663,7 @@ Based on the selected contract type(s) from Phase 2, invoke the corresponding sp
 - Agents are **self-contained** (no shared state)
 - Agents support **parallel execution** (unique output filenames)
 - Agents **DO NOT** generate COMPLIANCE_MANIFEST.md (skill handles this)
+- Agents **DO NOT use Bash** (v2.5+) — all Bash operations run in orchestrator (Phase 2.5)
 
 **Step 3.2: Single Contract Invocation**
 
@@ -612,9 +671,10 @@ When generating a single contract (selected_contracts.length == 1):
 
 ```python
 # Example: Generate Cloud Architecture contract
+# Use values from Phase 2.5 (generation_date, cleaned template path, compliance-docs/ already exists)
 Task(
     subagent_type="solutions-architect-skills:cloud-compliance-generator",
-    prompt="Generate Cloud Architecture compliance contract from ./ARCHITECTURE.md",
+    prompt="Generate Cloud Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_cloud_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing.",
     description="Atlas — Generate Cloud compliance"
 )
 ```
@@ -635,17 +695,18 @@ When generating multiple contracts (selected_contracts.length > 1):
 ```python
 # Example: Generate all 10 contracts in parallel
 # Single message with multiple Task tool calls
+# Use values from Phase 2.5 (generation_date, cleaned template paths, compliance-docs/ already exists)
 
-Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Generate Business Continuity compliance", ...),
-Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — Generate SRE compliance", ...),
-Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Generate Cloud compliance", ...),
-Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Generate Data & AI compliance", ...),
-Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Generate Development compliance", ...),
-Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Generate Process compliance", ...),
-Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Generate Security compliance", ...),
-Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Generate Platform compliance", ...),
-Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Generate Enterprise compliance", ...),
-Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Generate Integration compliance", ...)
+Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Generate Business Continuity compliance", prompt="Generate Business Continuity compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_business_continuity_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — Generate SRE compliance", prompt="Generate SRE Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_sre_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Generate Cloud compliance", prompt="Generate Cloud Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_cloud_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Generate Data & AI compliance", prompt="Generate Data & AI Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_data_ai_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Generate Development compliance", prompt="Generate Development Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_development_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Generate Process compliance", prompt="Generate Process Transformation compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_process_transformation_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Generate Security compliance", prompt="Generate Security Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_security_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Generate Platform compliance", prompt="Generate Platform & IT Infrastructure compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_platform_it_infrastructure_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Generate Enterprise compliance", prompt="Generate Enterprise Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_enterprise_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing."),
+Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Generate Integration compliance", prompt="Generate Integration Architecture compliance contract. Architecture file: ./ARCHITECTURE.md. Cleaned template: /tmp/cleaned_integration_architecture_template.md. Generation date: {generation_date}. Output directory compliance-docs/ already exists. Do NOT run score-calculator or field-updater — the orchestrator handles post-processing.")
 ```
 
 **Benefits:**

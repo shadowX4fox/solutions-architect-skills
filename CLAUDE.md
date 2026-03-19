@@ -130,7 +130,7 @@ The skill includes:
 
 **Migration**: See `docs/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.
 
-**Bash Permissions (Plugin Limitation)**: Claude Code plugin agents do not support `permissionMode` in frontmatter (silently ignored). The compliance agents require Bash access for template expansion, sed cleanup, date stamping, and mkdir. These permissions must be granted via the project's `.claude/settings.json`. A pre-configured example is provided at `.claude/settings.json.example`. Users installing the plugin must copy or merge the `permissions.allow` block into their project's `.claude/settings.json`.
+**Agent Architecture (v2.5+)**: Compliance agents do not use Bash — all shell operations (template expansion, score calculation, manifest generation) run in the orchestrator. Agents use only Read, Write, Grep, and Glob tools, avoiding the Claude Code plugin limitation where sub-agents cannot inherit Bash permissions.
 
 ### Using the Component Index Guardian Skill
 
