@@ -3,7 +3,6 @@ name: data-ai-compliance-generator
 description: Mnemosyne — Data & AI Architecture Compliance Contract Generator - Generates Data & AI Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
-permissionMode: bypassPermissions
 ---
 
 # Data & AI Architecture Compliance Generation Agent

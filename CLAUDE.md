@@ -130,6 +130,8 @@ The skill includes:
 
 **Migration**: See `docs/MIGRATION.md` for v1.9.0 → v2.0.0 upgrade guide.
 
+**Bash Permissions (Plugin Limitation)**: Claude Code plugin agents do not support `permissionMode` in frontmatter (silently ignored). The compliance agents require Bash access for template expansion, sed cleanup, date stamping, and mkdir. These permissions must be granted via the project's `.claude/settings.json`. A pre-configured example is provided at `.claude/settings.json.example`. Users installing the plugin must copy or merge the `permissions.allow` block into their project's `.claude/settings.json`.
+
 ### Using the Component Index Guardian Skill
 
 The `component-index-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 4-column table schema on every write.
