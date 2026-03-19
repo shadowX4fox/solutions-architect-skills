@@ -932,82 +932,130 @@
 
 ## 24. RPO Validation with Business Stakeholders (LACN024)
 
-**Requirement**: Confirm that the Recovery Point Objective (RPO) - maximum acceptable data loss - has been validated and approved by business stakeholders.
-**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Requirement**: Confirm that the Recovery Point Objective (RPO) — the maximum acceptable data loss — has been validated and approved by business stakeholders, with documentation of approval and technical implementation aligned to the approved RPO.
+**Status**: [Status]
 **Responsible Role**: [Role or N/A]
 **Category**: BC-RTO
 
-### 24.1 Implementation
+### 24.1 RPO Validation
 
-**Implementation Status**: [Value or "Not specified"]
+**RPO Value**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: RPO documented and approved by business stakeholders. If Non-Compliant: RPO not defined or approved. If Not Applicable: N/A. If Unknown: Partially mentioned but not formally validated]
+- Explanation: [If Compliant: RPO value is clearly documented (e.g., 1 hour). If Non-Compliant: RPO not defined. If Not Applicable: N/A. If Unknown: Cannot determine from source.]
 - Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR) or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Define and validate RPO with business stakeholders in Section 10]
+- Note: [If Non-Compliant or Unknown: Define RPO value in ARCHITECTURE.md Section 10.]
 
-### 24.2 Validation
-
-**Validation Evidence**: [Value or "Not specified"]
+**Stakeholder Approval of RPO**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [Validation results and evidence]
-- Source: [ARCHITECTURE.md Section 10 or Section 11 or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Document validation approach]
+- Explanation: [If Compliant: RPO has been presented to and approved by business stakeholders. If Non-Compliant: Not approved. If Not Applicable: N/A. If Unknown: Approval status not verifiable.]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Obtain business stakeholder approval of RPO and document in ARCHITECTURE.md Section 10.]
 
-**Source References**: [ARCHITECTURE.md sections used for LACN024]
+**Approval Documentation Available**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Approval documentation (meeting notes, email, sign-off) is available. If Non-Compliant: Documentation not available. If Not Applicable: N/A. If Unknown: Not verifiable.]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Reference approval documentation in ARCHITECTURE.md Section 10 (meeting notes, email, formal sign-off).]
+
+**RPO Aligns with Business Impact Analysis**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: RPO aligns with business impact analysis and criticality. If Non-Compliant: Misaligned. If Not Applicable: N/A. If Unknown: Not verifiable.]
+- Source: [ARCHITECTURE.md Section 10 (Non-Functional Requirements) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Reconcile RPO with business impact analysis findings in ARCHITECTURE.md Section 10.]
+
+**Technical Implementation Achieves Approved RPO**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Technical implementation (backup frequency, replication) achieves approved RPO. If Non-Compliant: Implementation does not meet RPO. If Not Applicable: N/A. If Unknown: Not verifiable.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & DR) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Ensure backup frequency and replication method achieve the approved RPO in ARCHITECTURE.md Section 11.]
+
+**Source References**: [ARCHITECTURE.md Section 10 (Non-Functional Requirements), Section 11 (Operational → Backup & DR)]
 
 ---
 
 ## 25. Geographic Backup Distribution (LACN025)
 
-**Requirement**: Determine if backups must be stored in a geographically separate location to protect against site-wide disasters.
-**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Requirement**: Determine if backups must be stored in a geographically separate location to protect against site-wide disasters (earthquakes, floods, regional power failures), implementing the 3-2-1 rule and ensuring geographic risk separation.
+**Status**: [Status]
 **Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
 
-### 25.1 Implementation
+### 25.1 Geographic Distribution Configuration
 
-**Implementation Status**: [Value or "Not specified"]
+**Geographic Distribution Requirement (Yes/No)**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Geographic distribution specified with secondary backup location. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Explanation: [If Compliant: Geographic distribution requirement is clearly stated. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified.]
 - Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Document geographic backup distribution in Section 11]
+- Note: [If Non-Compliant or Unknown: Add geographic distribution requirement to ARCHITECTURE.md Section 11.]
 
-### 25.2 Validation
-
-**Validation Evidence**: [Value or "Not specified"]
+**Secondary Backup Location**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [Validation results and evidence]
-- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Document validation approach]
+- Explanation: [If Compliant: Secondary backup location is documented. If Non-Compliant: Location not specified. If Not Applicable: Geographic distribution not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Specify secondary backup location in ARCHITECTURE.md Section 11.]
 
-**Source References**: [ARCHITECTURE.md sections used for LACN025]
+**Geographic Distance and Risk Separation**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Geographic distance and risk separation are verified. If Non-Compliant: Not verified. If Not Applicable: Geographic distribution not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Verify geographic distance (100+ miles) and risk separation in ARCHITECTURE.md Section 11.]
+
+**Backup Transfer Mechanism**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Backup transfer mechanism is specified. If Non-Compliant: Not specified. If Not Applicable: Geographic distribution not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Specify backup transfer mechanism (network replication, physical media) in ARCHITECTURE.md Section 11.]
+
+**Bandwidth and Transfer Time to Secondary Site**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Bandwidth and transfer time to secondary site are assessed. If Non-Compliant: Not assessed. If Not Applicable: Geographic distribution not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Assess and document bandwidth and transfer time requirements in ARCHITECTURE.md Section 11.]
+
+**Source References**: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Geographic Distribution)]
 
 ---
 
 ## 26. Infrastructure Configuration Backup (LACN026)
 
-**Requirement**: Determine if infrastructure configurations, operating system settings, and system files require backup (often called BDI - Base de Infraestructura).
-**Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
+**Requirement**: Determine if infrastructure configurations, operating system settings, and system files (BDI - Base de Infraestructura) require backup, specifying the backup mechanism (IaC, snapshots, image-based) and documenting restore and rebuild procedures.
+**Status**: [Status]
 **Responsible Role**: [Role or N/A]
 **Category**: BC-BACKUP
 
-### 26.1 Implementation
+### 26.1 Infrastructure Backup Scope
 
-**Implementation Status**: [Value or "Not specified"]
+**Infrastructure Backup Requirement (Yes/No)**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Infrastructure backup scope documented with mechanism. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified]
+- Explanation: [If Compliant: Infrastructure backup requirement is clearly stated. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not clearly specified.]
 - Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Document infrastructure backup strategy in Section 11]
+- Note: [If Non-Compliant or Unknown: Add infrastructure backup requirement to ARCHITECTURE.md Section 11.]
 
-### 26.2 Validation
-
-**Validation Evidence**: [Value or "Not specified"]
+**Backup Scope (OS Configs, App Configs, System Files)**: [Value or "Not specified"]
 - Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [Validation results and evidence]
-- Source: [ARCHITECTURE.md Section 11 or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Document validation approach]
+- Explanation: [If Compliant: Backup scope includes OS configurations, application configurations, and system files. If Non-Compliant: Scope not defined. If Not Applicable: Not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Define infrastructure backup scope (OS configs, app configs, system files) in ARCHITECTURE.md Section 11.]
 
-**Source References**: [ARCHITECTURE.md sections used for LACN026]
+**Backup Mechanism (IaC, Snapshots, Image-Based)**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Backup mechanism is specified. If Non-Compliant: Mechanism not specified. If Not Applicable: Not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Specify backup mechanism (IaC/Terraform, VM snapshots, container images) in ARCHITECTURE.md Section 11.]
+
+**Restore and Rebuild Procedures**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Restore and rebuild procedures are documented. If Non-Compliant: Not documented. If Not Applicable: Not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Document restore and rebuild procedures for infrastructure in ARCHITECTURE.md Section 11.]
+
+**Configuration Drift Detection**: [Value or "Not specified"]
+- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
+- Explanation: [If Compliant: Configuration drift detection is implemented. If Non-Compliant: Not implemented. If Not Applicable: Not required. If Unknown: Not found.]
+- Source: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure) or "Not documented"]
+- Note: [If Non-Compliant or Unknown: Implement configuration drift detection and document in ARCHITECTURE.md Section 11.]
+
+**Source References**: [ARCHITECTURE.md Section 11 (Operational → Backup & Restore → Infrastructure)]
 
 ---
 
