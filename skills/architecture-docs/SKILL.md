@@ -3967,10 +3967,9 @@ What diagrams would you like to generate?
    - Or shows all 6 META layers for META architectures
    - Includes all major components and data flows
 
-**2. Default Set** - 3 core diagrams
+**2. Default Set** - 2 core diagrams
    - High-Level System Architecture (3-tier overview)
-   - Infrastructure & Deployment (Azure AKS setup)
-   - Component Interactions (Frontend ↔ Backend ↔ Database)
+   - Sequence Diagrams (key interaction flows between components)
 
 **Please select: 1 or 2**
 ```
@@ -3983,8 +3982,7 @@ What diagrams would you like to generate?
 
 **Default Set Diagram Details**:
 1. **High-Level System Architecture** → `docs/03-architecture-layers.md`
-2. **Infrastructure & Deployment** → `docs/09-operational-considerations.md`
-3. **High Availability & Failover** → `docs/08-scalability-and-performance.md`
+2. **Sequence Diagrams** → `docs/04-data-flow-patterns.md`
 
 #### Step 2: Target Location Selection
 
@@ -4004,10 +4002,9 @@ Where should the diagrams be placed?
 
 **Recommended Placements**:
 - **High-Level Architecture**: `docs/03-architecture-layers.md`
-- **Data Flow Diagrams**: `docs/04-data-flow-patterns.md`
-- **Infrastructure Diagram**: `docs/09-operational-considerations.md`
-- **HA Diagram**: `docs/08-scalability-and-performance.md`
-- **Performance Diagram**: `docs/08-scalability-and-performance.md`
+- **Sequence Diagrams**: `docs/04-data-flow-patterns.md`
+
+> **Placement Rule**: Diagrams targeting `docs/03-architecture-layers.md` MUST be appended at the **end** of the document, never inserted mid-content.
 
 #### Step 3: Confirmation
 
@@ -4015,9 +4012,9 @@ Where should the diagrams be placed?
 **Step 3: Confirmation**
 
 I'll generate diagrams with these settings:
-- Diagram Type: [High-Level Only (1)/Default Set (3)]
+- Diagram Type: [High-Level Only (1)/Default Set (2)]
 - Target Location: [Inline/Section 4 Subsection/Both]
-- Total Diagrams: 1-6 diagrams (typically 3 for Default Set)
+- Total Diagrams: 1-2 diagrams
 - Output: Mermaid code blocks embedded in ARCHITECTURE.md
 
 Proceed with generation? [Yes/No]
@@ -4047,10 +4044,7 @@ Proceed with generation? [Yes/No]
 
 **Sections by Diagram Type**:
 - **High-Level Architecture Only (1 diagram)**: Section 4 (~150-300 lines, 85-90% reduction vs. full document)
-- **Default Set (3 diagrams)**: Sections 4, 8, 9 (~500-800 lines, 60-75% reduction vs. full document)
-- **Infrastructure Only**: Section 9 (~150-250 lines)
-- **HA/Performance**: Section 8 (~200-350 lines)
-- **Extended Set (6 diagrams)**: Sections 4, 5, 6, 8, 9 (~800-1200 lines, 40-60% reduction vs. full document)
+- **Default Set (2 diagrams)**: Sections 4, 5 (~400-600 lines, 70-80% reduction vs. full document)
 
 #### Step 6: Generate Diagrams Using MERMAID_DIAGRAMS_GUIDE Templates
 
@@ -4065,9 +4059,7 @@ Proceed with generation? [Yes/No]
 
 **Mermaid Diagram Types**:
 - **High-Level Architecture**: `graph TB` (top-to-bottom flowchart)
-- **Data Flow**: `sequenceDiagram` (participant interactions)
-- **Infrastructure**: `graph TB` with subgraphs (nested component groups)
-- **HA/Performance**: `graph TB` or `graph LR` (left-to-right)
+- **Sequence Diagrams**: `sequenceDiagram` (participant interactions)
 
 **Color Scheme** (from MERMAID_DIAGRAMS_GUIDE):
 ```
@@ -4082,12 +4074,13 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 
 **Process**:
 1. For inline placement:
-   - Read target section (e.g., Section 4.1)
-   - Find appropriate insertion point (after section header or before subsection)
+   - Read target `docs/` file
+   - For `docs/03-architecture-layers.md`: **ALWAYS append the diagram at the end of the document**
+   - For other files: find appropriate insertion point (after section header or before subsection)
    - Use Edit tool to insert diagram with proper heading
 
 2. For Section 4 subsection:
-   - Create new `### 4.X Architecture Diagrams` subsection
+   - Append new `### 4.X Architecture Diagrams` subsection at the **end** of `docs/03-architecture-layers.md`
    - Insert all diagrams with individual headings
 
 3. Maintain proper markdown structure:
@@ -4115,9 +4108,8 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 ✅ **Diagram Generation Complete**
 
 Generated diagrams (Default Set):
-- High-Level System Architecture (Section 4.1)
-- Infrastructure & Deployment (Section 9.2)
-- High Availability & Failover (Section 8.3)
+- High-Level System Architecture (docs/03-architecture-layers.md)
+- Sequence Diagrams (docs/04-data-flow-patterns.md)
 
 **Location**: ARCHITECTURE.md (inline in respective sections)
 
