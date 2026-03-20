@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.5.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.5.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -79,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.5.7` in the list.
+You should see `solutions-architect-skills v2.5.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -384,7 +384,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.5.6 (Current Release) ✅
+### v2.5.8 (Current Release) ✅
+**README accuracy: multi-file structure + release command improvement**
+
+- ✅ **README updated to reflect multi-file ARCHITECTURE.md structure** — replaced stale single-file references (12-section, 2000+ lines, Automatic Document Index lines 1-50) with accurate multi-file output tree (`ARCHITECTURE.md` as ~130-line nav index, `docs/` numbered section files, `docs/components/` per-component files)
+- ✅ **`/release` command updated** — README is now updated as the first step of every release (version badge, installation reference, roadmap entry)
+
+### v2.5.6 (Previous Release) ✅
 **Requirements Elicitation for architecture-readiness**
 
 - ✅ **Requirements Elicitation — 3rd function in architecture-readiness skill** ⭐ MAJOR
