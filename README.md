@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.3.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.5.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -33,7 +33,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 ### What's Included
 
 - **3 Integrated Skills**
-  - `architecture-readiness`: Product Owner Specifications
+  - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
   - `architecture-compliance`: Generate 10 compliance contracts
 
@@ -79,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.3.15` in the list.
+You should see `solutions-architect-skills v2.5.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -100,13 +100,18 @@ You should see `solutions-architect-skills v2.3.15` in the list.
 
 ### Phase 1: Architecture Readiness (Product Owner)
 
-Create comprehensive Product Owner Specifications before technical design begins.
+Create comprehensive Product Owner Specifications before technical design begins. Now includes a structured discovery interview when starting from scratch.
 
 **Key Features:**
+- **Requirements Elicitation** ⭐ NEW v2.5.6 — 4-phase guided discovery interview (Foundation → Value & Boundaries → Behavior → Experience & Measurement)
+  - Probing techniques: scenario walking, quantification, negative probing, assumption surfacing
+  - Industry defaults when PO is unsure; unknowns logged as Open Questions
+  - Discovery Summary checkpoint before drafting; self-scoring gap loop until ≥7.5
 - 8-section template (Business Context, User Personas, Use Cases, Success Criteria, etc.)
 - Weighted scoring methodology (0-10 scale)
 - Readiness threshold: ≥7.5 for architecture handoff
 - Focus: Business requirements, no technical implementation
+- Bilingual interview support (language auto-detected from user's first message)
 
 **Output:** `PRODUCT_OWNER_SPEC.md`
 
@@ -363,7 +368,25 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.3.15 (Current Release) ✅
+### v2.5.6 (Current Release) ✅
+**Requirements Elicitation for architecture-readiness**
+
+- ✅ **Requirements Elicitation — 3rd function in architecture-readiness skill** ⭐ MAJOR
+  - New `REQUIREMENTS_ELICITATION_GUIDE.md` with complete 4-phase interview methodology
+  - Phase 1 — Foundation: business problem, market context, stakeholders, personas
+  - Phase 2 — Value & Boundaries: objectives with metrics/timeframes, all constraint types (budget, timeline, regulatory, integration, resource, operational)
+  - Phase 3 — Behavior: scenario walking technique, min 3 use cases with flows + edge cases, derived user stories
+  - Phase 4 — Experience & Measurement: UX expectations, KPIs with baselines and targets
+  - 8 probing techniques (broadening, deepening, scenario walking, negative probing, quantification, assumption surfacing, priority forcing, stakeholder perspective)
+  - Industry defaults for common unknowns (load time, SLA, abandonment rate, API latency)
+  - Question batching (2–3 per message), phase progress summaries, skip protection on high-weight sections
+  - Discovery Summary checkpoint (confidence levels + open questions per section) before drafting
+  - Self-scoring gap loop: iterates until PO Spec reaches ≥7.5/10 or PO explicitly accepts
+  - Score-aware priority matrix (Use Cases 2.5, Constraints 2.0, Objectives 1.5)
+  - Auto-detects existing PO Spec files before starting (offers Evaluation/Creation instead)
+  - Bilingual support: interview language adapts to user's first message
+
+### v2.3.15 (Previous Release) ✅
 **Major Release: BIAN Full Compliance + Business Continuity v2.0**
 
 - ✅ **5th Architecture Type: Full BIAN V12.0** ⭐ MAJOR
