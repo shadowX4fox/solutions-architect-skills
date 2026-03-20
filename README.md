@@ -120,19 +120,35 @@ Create comprehensive Product Owner Specifications before technical design begins
 Create and maintain technical architecture documentation following enterprise standards.
 
 **Key Features:**
-- 12-section standardized structure (Executive Summary → ADRs)
-- Automatic Document Index (lines 1-50)
+- **Multi-file structure** — `ARCHITECTURE.md` at project root is a navigation index (~130 lines); all content lives in `docs/` as numbered section files; components in `docs/components/` (one file per component); see [RESTRUCTURING_GUIDE.md](skills/architecture-docs/RESTRUCTURING_GUIDE.md)
 - 5 architecture type templates (META, 3-Tier, Microservices, N-Layer, BIAN) ⭐ UPDATED v1.5
-- Interactive Mermaid diagrams in Section 4
+- Interactive Mermaid diagrams in `docs/03-architecture-layers.md`
 - Metric consistency validation across document
 - Design Drivers calculation (Value Delivery %, Scale, Impacts)
 - 9 mandatory Architecture Principles + 1 optional
-- ADR (Architecture Decision Record) templates
-- **Automatic ADR file generation** from Section 12 table ⭐ NEW v1.5
+- ADR (Architecture Decision Record) templates with automatic file generation
 - **Foundational Context Anchor Protocol** — dependency-aware editing workflow that loads required upstream context (principles, metrics, ADRs) before any downstream section edit, enforces source attribution for derived claims, and detects cross-section impact when any section changes
-- **Multi-file structure support** — split large ARCHITECTURE.md into a `docs/` directory with per-section files; see [RESTRUCTURING_GUIDE.md](skills/architecture-docs/RESTRUCTURING_GUIDE.md)
+- All files kept under ~400 lines each for context efficiency
 
-**Output:** `ARCHITECTURE.md` (2,000-3,000 lines typically)
+**Output structure:**
+```
+<project-root>/
+├── ARCHITECTURE.md          (~130 lines — navigation index only)
+├── adr/                     (ADR files)
+└── docs/
+    ├── 01-system-overview.md
+    ├── 02-architecture-principles.md
+    ├── 03-architecture-layers.md
+    ├── 04-data-flow-patterns.md
+    ├── 05-integration-points.md
+    ├── 06-technology-stack.md
+    ├── 07-security-architecture.md
+    ├── 08-scalability-and-performance.md
+    ├── 09-operational-considerations.md
+    └── components/
+        ├── README.md        (component index)
+        └── NN-<name>.md     (one file per component)
+```
 
 ### Phase 3: Compliance Documentation
 
@@ -258,9 +274,9 @@ Complete end-to-end demonstration of the three-phase workflow:
 - Weighted readiness scoring (8.3/10)
 
 **Phase 2: Technical Architecture (ARCHITECTURE.md)**
-- 12-section comprehensive architecture document
+- Multi-file structure: navigation index + `docs/` section files + `docs/components/`
 - Microservices architecture pattern
-- Interactive Mermaid diagrams
+- Interactive Mermaid diagrams in `docs/03-architecture-layers.md`
 - Technology stack documentation
 - Complete with metrics, SLOs, and ADRs
 
@@ -279,7 +295,7 @@ Complete end-to-end demonstration of the three-phase workflow:
 The `examples/` directory contains reference templates:
 
 - **PRODUCT_OWNER_SPEC_example.md** - PO Spec template (Job Scheduling Platform)
-- **ARCHITECTURE_example.md** - Full ARCHITECTURE.md template (2000+ lines)
+- **ARCHITECTURE_example.md** - Full ARCHITECTURE.md example (multi-file structure: navigation index + `docs/` section files)
 
 ---
 
