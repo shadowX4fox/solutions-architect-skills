@@ -3967,9 +3967,9 @@ What diagrams would you like to generate?
    - Or shows all 6 META layers for META architectures
    - Includes all major components and data flows
 
-**2. Default Set** - 2 core diagrams
+**2. Default Set** - 1 High-Level + 1 Sequence Diagram per data flow
    - High-Level System Architecture (3-tier overview)
-   - Sequence Diagrams (key interaction flows between components)
+   - One Sequence Diagram per H3 flow subsection in Section 6 (e.g., one per `### [Flow Name] Flow` in `docs/04-data-flow-patterns.md`)
 
 **Please select: 1 or 2**
 ```
@@ -3984,25 +3984,11 @@ What diagrams would you like to generate?
 1. **High-Level System Architecture** → `docs/03-architecture-layers.md`
 2. **Sequence Diagrams** → `docs/04-data-flow-patterns.md`
 
-#### Step 2: Target Location Selection
+#### Step 2: Target Location (Fixed)
 
-After diagram type selection:
-
-```
-**Step 2: Select Target Location**
-
-Where should the diagrams be placed?
-
-1. **Inline in ARCHITECTURE.md** - Embed diagrams directly in relevant sections (Recommended)
-2. **Separate Section 4 Subsection** - Create dedicated "### Architecture Diagrams" subsection
-3. **Both** - Inline for key diagrams + comprehensive set in Section 4
-
-**Please select: 1, 2, or 3**
-```
-
-**Recommended Placements**:
-- **High-Level Architecture**: `docs/03-architecture-layers.md`
-- **Sequence Diagrams**: `docs/04-data-flow-patterns.md`
+Diagrams are placed **inline in their relevant `docs/` files**:
+- **High-Level Architecture**: appended at the end of `docs/03-architecture-layers.md`
+- **Sequence Diagrams**: each diagram inserted immediately after its corresponding H3 flow subsection in `docs/04-data-flow-patterns.md`
 
 > **Placement Rule**: Diagrams targeting `docs/03-architecture-layers.md` MUST be appended at the **end** of the document, never inserted mid-content.
 
@@ -4013,8 +3999,7 @@ Where should the diagrams be placed?
 
 I'll generate diagrams with these settings:
 - Diagram Type: [High-Level Only (1)/Default Set (2)]
-- Target Location: [Inline/Section 4 Subsection/Both]
-- Total Diagrams: 1-2 diagrams
+- Total Diagrams: 1 (High-Level Only) or 1 + N (Default Set, where N = number of data flows in Section 6)
 - Output: Mermaid code blocks embedded in ARCHITECTURE.md
 
 Proceed with generation? [Yes/No]
@@ -4044,22 +4029,29 @@ Proceed with generation? [Yes/No]
 
 **Sections by Diagram Type**:
 - **High-Level Architecture Only (1 diagram)**: Section 4 (~150-300 lines, 85-90% reduction vs. full document)
-- **Default Set (2 diagrams)**: Sections 4, 5 (~400-600 lines, 70-80% reduction vs. full document)
+- **Default Set**: Sections 4, 5, 6 (~400-700 lines, 70-80% reduction vs. full document) — Section 6 contains the flow definitions (steps, components, performance) that drive sequence diagram generation
 
 #### Step 6: Generate Diagrams Using MERMAID_DIAGRAMS_GUIDE Templates
 
 **Process**:
 1. Load MERMAID_DIAGRAMS_GUIDE.md for reference templates
-2. For each diagram to generate:
-   - Identify appropriate Mermaid diagram type (graph TB, sequenceDiagram, etc.)
-   - Extract key components, data flows, or infrastructure elements from sections
+2. For High-Level Architecture:
+   - Identify appropriate Mermaid diagram type (`graph TB`)
+   - Extract key components from Section 4 (Architecture Layers)
    - Apply color scheme and styling from templates
    - Generate complete Mermaid code block
-3. Format with proper markdown code block syntax
+3. For Sequence Diagrams (Default Set only):
+   - Parse `docs/04-data-flow-patterns.md` (Section 6) to identify every H3 subsection (`### [Flow Name] Flow`)
+   - For **each** H3 flow subsection, generate one `sequenceDiagram`:
+     - Extract participants and step-by-step interactions from that flow's description
+     - Map each step as `ComponentA->>ComponentB: Action` entries
+     - Title the diagram `#### Diagram: [Flow Name] Sequence`
+   - Total sequence diagrams = number of H3 flow subsections found in Section 6
+4. Format all diagrams with proper markdown code block syntax
 
 **Mermaid Diagram Types**:
 - **High-Level Architecture**: `graph TB` (top-to-bottom flowchart)
-- **Sequence Diagrams**: `sequenceDiagram` (participant interactions)
+- **Sequence Diagrams**: `sequenceDiagram` (one per H3 flow in Section 6)
 
 **Color Scheme** (from MERMAID_DIAGRAMS_GUIDE):
 ```
@@ -4073,17 +4065,12 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 #### Step 7: Insert Diagrams into ARCHITECTURE.md
 
 **Process**:
-1. For inline placement:
-   - Read target `docs/` file
+1. Read target `docs/` file
    - For `docs/03-architecture-layers.md`: **ALWAYS append the diagram at the end of the document**
-   - For other files: find appropriate insertion point (after section header or before subsection)
+   - For `docs/04-data-flow-patterns.md`: for each generated sequence diagram, insert it **immediately after its corresponding H3 flow subsection** (`### [Flow Name] Flow`). Process flows in document order.
    - Use Edit tool to insert diagram with proper heading
 
-2. For Section 4 subsection:
-   - Append new `### 4.X Architecture Diagrams` subsection at the **end** of `docs/03-architecture-layers.md`
-   - Insert all diagrams with individual headings
-
-3. Maintain proper markdown structure:
+2. Maintain proper markdown structure:
    ```markdown
    #### Diagram: High-Level System Architecture
 
@@ -4109,7 +4096,10 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 
 Generated diagrams (Default Set):
 - High-Level System Architecture (docs/03-architecture-layers.md)
-- Sequence Diagrams (docs/04-data-flow-patterns.md)
+[List each sequence diagram individually, e.g.:]
+- Sequence: [Flow Name 1] (docs/04-data-flow-patterns.md)
+- Sequence: [Flow Name 2] (docs/04-data-flow-patterns.md)
+[...one line per H3 flow found in Section 6]
 
 **Location**: ARCHITECTURE.md (inline in respective sections)
 
