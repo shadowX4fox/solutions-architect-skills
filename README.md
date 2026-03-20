@@ -85,16 +85,46 @@ You should see `solutions-architect-skills v2.5.8` in the list.
 
 ### First Workflow
 
+**Phase 1 — Business Requirements (Product Owner)**
+
 ```bash
-# Phase 1: Create Product Owner Spec
 /skill architecture-readiness
+```
 
-# Phase 2: Create ARCHITECTURE.md
+The skill auto-detects whether a PO Spec already exists:
+
+- **No PO Spec found** → starts a guided discovery interview (4 phases, ~35 min):
+  1. Foundation — business problem, stakeholders, personas
+  2. Value & Boundaries — goals with targets, budget, timeline, regulatory constraints
+  3. Behavior — use cases (scenario walking), user stories
+  4. Experience & Measurement — UX expectations, KPIs with baselines and targets
+
+  After the interview: Discovery Summary for your review → draft PO Spec → self-scored to ≥ 7.5/10 → saved as `PRODUCT_OWNER_SPEC.md`
+
+- **PO Spec found** → offers Evaluation (scored out of 10) or Creation (template-guided)
+
+**Phase 2 — Technical Architecture**
+
+```bash
 /skill architecture-docs
+```
 
-# Phase 3: Generate compliance documents
+Hand off `PRODUCT_OWNER_SPEC.md` to your architecture team. The skill produces a multi-file structure:
+
+```
+ARCHITECTURE.md          ← navigation index (~130 lines)
+docs/                    ← all section content
+└── components/          ← one file per architectural component
+adr/                     ← Architecture Decision Records
+```
+
+**Phase 3 — Compliance Documents**
+
+```bash
 /skill architecture-compliance
 ```
+
+Generates 10 compliance contracts from `ARCHITECTURE.md` into `/compliance-docs/`.
 
 ## Features
 
