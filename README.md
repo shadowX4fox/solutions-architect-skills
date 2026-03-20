@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.5.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.5.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -79,7 +79,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.5.8` in the list.
+You should see `solutions-architect-skills v2.5.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -414,7 +414,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.5.8 (Current Release) ✅
+### v2.5.9 (Current Release) ✅
+**First Workflow documentation update**
+
+- ✅ **First Workflow section expanded** — now documents the full elicitation interview flow: auto-detection of existing PO Spec, 4 interview phases with time estimate, Discovery Summary → draft → self-score → save path, and the alternate Evaluation/Creation path when a PO Spec already exists
+- ✅ Multi-file ARCHITECTURE.md output structure shown inline in Phase 2
+
+### v2.5.8 (Previous Release) ✅
 **README accuracy: multi-file structure + release command improvement**
 
 - ✅ **README updated to reflect multi-file ARCHITECTURE.md structure** — replaced stale single-file references (12-section, 2000+ lines, Automatic Document Index lines 1-50) with accurate multi-file output tree (`ARCHITECTURE.md` as ~130-line nav index, `docs/` numbered section files, `docs/components/` per-component files)
