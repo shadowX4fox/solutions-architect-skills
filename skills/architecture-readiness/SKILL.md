@@ -1,6 +1,6 @@
 ---
 name: architecture-readiness
-description: Use this skill to create Product Owner Specifications documenting business requirements before architecture design
+description: Use this skill for requirements elicitation, discovery interviews, and creating or evaluating Product Owner Specifications documenting business requirements before architecture design
 ---
 
 # Architecture Readiness Skill
@@ -9,13 +9,17 @@ description: Use this skill to create Product Owner Specifications documenting b
 
 This skill helps Product Owners document business requirements and context before architecture design begins. It provides templates and guidance for creating Product Owner Specifications that feed into technical ARCHITECTURE.md documents.
 
-The skill includes two primary functions:
-1. **PO Spec Creation**: Templates and guidance for documenting business requirements
-2. **PO Spec Evaluation**: Scoring methodology to assess if a PO Spec is ready for architecture team handoff
+The skill includes three primary functions:
+1. **Requirements Elicitation**: Guided discovery interview to surface business requirements when no PO Spec exists
+2. **PO Spec Creation**: Templates and guidance for documenting business requirements
+3. **PO Spec Evaluation**: Scoring methodology to assess if a PO Spec is ready for architecture team handoff
 
 ## When to Use This Skill
 
 Invoke this skill when:
+- No existing PO Spec is found in the project and the user needs to capture business requirements
+- User says they don't know where to start with business requirements
+- User asks for requirements discovery, elicitation, or a requirements interview
 - User asks to create a Product Owner Specification
 - User asks about documenting business requirements for architecture
 - User mentions "business context", "product requirements", or "requirements gathering" in relation to architecture
@@ -25,11 +29,30 @@ Invoke this skill when:
 
 ## Files in This Skill
 
+- **REQUIREMENTS_ELICITATION_GUIDE.md**: Structured discovery interview methodology — 4 phases, probing techniques, Discovery Summary, and transition to PO Spec drafting
 - **PRODUCT_OWNER_SPEC_GUIDE.md**: Comprehensive guide with 8-section template, examples, and best practices
 - **templates/PO_SPEC_TEMPLATE.md**: Quick-start template for creating a new PO Specification
 - **PO_SPEC_SCORING_GUIDE.md**: Weighted scoring methodology to evaluate PO Spec readiness (0-10 scale)
 
 ## How to Use This Skill
+
+### For Requirements Elicitation
+
+When this skill is activated and no existing PO Spec is found (or the user requests discovery/elicitation):
+
+1. **Detect existing PO Spec**: Search for `PRODUCT_OWNER_SPEC.md`, `PO_SPEC.md`, `**/po-spec*`, `**/product-owner*`
+   - If found: offer Evaluation or Creation workflows instead
+   - If not found: proceed with elicitation
+2. **Load the guide**: Read `REQUIREMENTS_ELICITATION_GUIDE.md` fully before starting
+3. **Detect language**: Infer from user's first message; ask if ambiguous
+4. **Conduct the 4-phase interview**:
+   - Phase 1 — Foundation (Business Context, Stakeholders)
+   - Phase 2 — Value & Boundaries (Objectives, Constraints) ← highest weight, invest depth here
+   - Phase 3 — Behavior (Use Cases, User Stories) ← deepest phase, min 3 use cases
+   - Phase 4 — Experience & Measurement (UX Requirements, Success Metrics)
+5. **Produce Discovery Summary**: Structured by all 8 sections with confidence levels and open questions; present for PO confirmation before drafting
+6. **Draft PO Spec**: Load `templates/PO_SPEC_TEMPLATE.md`, fill from elicited data, self-score against `PO_SPEC_SCORING_GUIDE.md`
+7. **Gap loop if needed**: If score < 7.5, ask targeted follow-ups on weakest sections; re-score; save final as `PRODUCT_OWNER_SPEC.md`
 
 ### For PO Spec Creation
 
@@ -78,7 +101,7 @@ When this skill is activated to evaluate a PO Spec:
 
 ## Example Invocations
 
-### Example 1: Creating a PO Spec
+### Example 2: Creating a PO Spec
 
 ```
 User: "I want to create a Product Owner Specification for a new mobile payment feature"
@@ -103,7 +126,37 @@ Claude (with architecture-readiness skill activated):
 5. Explain how completed PO Spec feeds into ARCHITECTURE.md
 ```
 
-### Example 2: Evaluating a PO Spec
+### Example 1: Requirements Elicitation (No Existing PO Spec)
+
+```
+User: "I have an idea for a loyalty program app but I don't know where to start with requirements."
+
+Claude (with architecture-readiness skill activated):
+1. Search project for existing PO Spec files → none found
+2. Load REQUIREMENTS_ELICITATION_GUIDE.md
+3. Detect language from user message → English
+4. Open interview: "I'll guide you through a discovery interview across 4 phases..."
+5. Phase 1 — Foundation:
+   - "What business problem does the loyalty program solve?"
+   - "Who are your target users — existing customers, new customers, both?"
+   - "Who are the key stakeholders — marketing team, store managers, IT?"
+6. Phase 2 — Value & Boundaries:
+   - "What are the top 3 business outcomes? (e.g., increase repeat purchases by X%)"
+   - "Any regulatory requirements — data privacy laws, financial regulations?"
+   - "Is there an approved budget range and a launch deadline?"
+7. Phase 3 — Behavior (Scenario Walking):
+   - "Walk me through: a customer earns points after a purchase. What's the first thing they do?"
+   - "What happens if a points redemption fails at checkout?"
+   - "Describe the experience for a store employee who manages loyalty accounts."
+8. Phase 4 — Experience & Measurement:
+   - "How fast should the points balance update after a purchase?"
+   - "What 3 metrics will prove the loyalty program is working at 6 months?"
+9. Discovery Summary: Present structured summary with confidence levels → PO confirms
+10. Draft PO Spec from template, self-score → 7.9/10
+11. Save as PRODUCT_OWNER_SPEC.md, report score and next steps
+```
+
+### Example 3: Evaluating a PO Spec
 
 ```
 User: "Can you evaluate my Product Owner Spec and tell me if it's ready for the architecture team?"
@@ -130,6 +183,13 @@ Claude (with architecture-readiness skill activated):
 
 ## Common User Requests
 
+**Requirements Elicitation:**
+- "I don't know where to start with requirements" → Use REQUIREMENTS_ELICITATION_GUIDE.md, begin Phase 1
+- "Can you interview me about my project requirements?" → Use REQUIREMENTS_ELICITATION_GUIDE.md, begin interview
+- "Help me discover requirements for [project]" → Use REQUIREMENTS_ELICITATION_GUIDE.md
+- "I have a business idea, what do I need to document?" → Detect PO Spec, if none → elicitation flow
+- "Requirements discovery / elicitation / interview" → Use REQUIREMENTS_ELICITATION_GUIDE.md
+
 **PO Spec Creation:**
 - "Help me document business requirements" → Use PRODUCT_OWNER_SPEC_GUIDE.md
 - "I need a template for product specifications" → Provide templates/PO_SPEC_TEMPLATE.md
@@ -143,6 +203,18 @@ Claude (with architecture-readiness skill activated):
 - "How can I improve my PO Spec score?" → Provide actionable recommendations based on section weights
 
 ## Success Criteria
+
+### For Requirements Elicitation
+
+A quality elicitation should:
+- ✅ Detect the absence of an existing PO Spec before starting the interview
+- ✅ Conduct all 4 interview phases with appropriate depth (Use Cases and Constraints receive most time)
+- ✅ Apply probing techniques (scenario walking, quantification, negative probing) to increase answer depth
+- ✅ Offer industry defaults when PO is unsure, and record unknowns as Open Questions
+- ✅ Produce a Discovery Summary organized by all 8 sections with confidence levels
+- ✅ Confirm Discovery Summary with PO before drafting
+- ✅ Draft a PO Spec from the template, self-score it, and iterate until score ≥ 7.5/10
+- ✅ Save final PO Spec as `PRODUCT_OWNER_SPEC.md` with score and next-step guidance
 
 ### For PO Spec Creation
 
