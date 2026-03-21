@@ -38,6 +38,12 @@ This project follows a three-phase documentation approach:
 2. **Technical Architecture Phase** (Architecture Team)
    - Use the `architecture-docs` skill to create ARCHITECTURE.md
    - Translates business requirements into technical architecture
+   - Defines components, integrations, and technical decisions
+   - **Prerequisite Gate**: When no PO Spec exists, the user chooses from three options:
+     (1) run the full `/skill architecture-readiness` elicitation, (2) provide business
+     context inline (evaluated against the PO Spec scoring rubric with gap interviews),
+     or (3) skip with `SKIP PO SPEC` (warning recorded). Gate applies only to new
+     document creation, not editing existing documents.
 
 3. **Compliance Documentation Phase** (Compliance Team)
    - Use the `architecture-compliance` skill to generate compliance documents
@@ -77,6 +83,16 @@ The skill includes:
 - 12-section structure template
 - Best practices for documentation maintenance
 - Integration with ARCHITECTURE_DOCUMENTATION_GUIDE.md and ADR_GUIDE.md
+
+**Note**: The skill is optimized to minimize context usage by loading document sections incrementally rather than reading entire files.
+
+**Diagram Enforcement Policy** (Workflow 9):
+- **Mandatory diagrams**: High-Level Architecture and Data Flow diagrams are always generated (not optional)
+- **Canonical locations**: All diagrams must reside in their designated `docs/` file — not configurable, no override
+- **Source of truth**: Architecture docs are authoritative — diagrams for undocumented flows are discarded
+- **Completeness audit**: Every documented flow is checked for a corresponding Mermaid diagram after generation
+- **External reconciliation**: Diagrams from external files are classified, validated against architecture docs, then relocated or discarded
+
 
 ### Using the Architecture Compliance Skill
 

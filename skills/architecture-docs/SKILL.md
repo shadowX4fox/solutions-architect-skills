@@ -86,6 +86,10 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 - Examples: "generate my architecture diagrams", "create diagrams from ARCHITECTURE.md", "add diagrams to my architecture"
 - Section-specific: "generate diagrams for Section 4", "create data flow diagrams"
 - Format mentions: "Mermaid diagrams", "visual diagrams", "architecture diagrams"
+- Reconciliation: "reconcile diagrams", "move diagrams", "consolidate diagrams"
+- Audit/coverage: "check diagram coverage", "audit diagrams", "diagram completeness", "diagram audit"
+- Placement: "diagrams in wrong location", "fix diagram placement", "diagram location"
+- External intake: user provides external file path and mentions diagrams
 
 **Action when detected:**
 1. Confirm: "I'll help you generate architecture diagrams."
@@ -105,6 +109,8 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 
 #### Other Workflows
 If the user's request matches other documented workflows (1-7, 9-10), follow their respective trigger patterns.
+
+**Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check) before Step 1 (type selection).
 
 ### If No Pattern Matches
 
@@ -221,6 +227,8 @@ Update `ARCHITECTURE.md` only when:
 - ✅ User explicitly requests to "change architecture type" or "select architecture type"
 - ✅ User is updating an existing ARCHITECTURE.md and mentions changing from one architecture type to another
 
+**Prerequisite**: Step 0 (PO Spec check) runs before Step 1 for all new document creation triggers
+
 **Skip this workflow when:**
 - ❌ Editing an existing ARCHITECTURE.md (type already selected)
 - ❌ User is only updating specific sections unrelated to architecture type
@@ -237,6 +245,186 @@ Update `ARCHITECTURE.md` only when:
 **BIAN Standard for META**: BIAN V12.0 is the default and recommended version for META architecture. Use the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify and define service domains for Layer 5 (Domain).
 
 ### Workflow Steps
+
+#### Step 0: Product Owner Specification Prerequisite Check
+
+Before proceeding with new ARCHITECTURE.md creation, verify that a Product Owner Specification exists.
+
+**Detection procedure** (ordered — stop at first match):
+1. Check for `PRODUCT_OWNER_SPEC.md` at project root
+2. Check for `PO_SPEC.md` at project root
+3. Glob search: `**/PRODUCT_OWNER_SPEC*.md`, `**/PO_SPEC*.md`
+4. Grep fallback: search for header pattern `# .* - Product Owner Specification`
+
+---
+
+**If PO Spec FOUND → Gate passes:**
+
+- Display: `✅ Product Owner Specification found: [filename]`
+- Show scoring reminder: "If you haven't evaluated it yet, consider running `/skill architecture-readiness` to score it (recommended threshold: ≥7.5/10)."
+- Load high-weight PO Spec sections into context for pre-populating ARCHITECTURE.md:
+  - Section 1: Business Context
+  - Section 3: Business Objectives
+  - Section 4: Use Cases
+  - Section 7: Business Constraints
+- Record traceability metadata (embed in `docs/01-system-overview.md` during Step 5):
+  ```
+  <!-- PO_SPEC_SOURCE: [filename] (loaded YYYY-MM-DD) -->
+  ```
+- Proceed to Step 1
+
+---
+
+**If PO Spec NOT FOUND → Present 3-option menu:**
+
+Display the following message:
+
+```
+🚫 No Product Owner Specification Found
+
+The three-phase workflow requires business context before architecture design:
+
+  Phase 1 → Product Owner Specification  ← MISSING
+  Phase 2 → ARCHITECTURE.md              ← You are here
+  Phase 3 → Compliance Contracts
+
+How would you like to proceed?
+
+  1️⃣  Run the full elicitation flow
+      → Launches /skill architecture-readiness to create a complete PO Spec
+      → Recommended for new projects with no documented requirements
+
+  2️⃣  Provide business context now
+      → Type your business context here and I'll evaluate it against the
+        PO Spec scoring rubric, then interview you for any gaps
+      → Best when you have context in mind but no formal document yet
+
+  3️⃣  Skip (SKIP PO SPEC)
+      → Proceed without any business context
+      → A PO_SPEC_GATE: SKIPPED warning will be recorded
+
+Enter 1, 2, or 3:
+```
+
+Wait for user response before proceeding.
+
+---
+
+**Option 1 — Full elicitation flow:**
+
+- Invoke `/skill architecture-readiness`
+- After the PO Spec is created, re-run Step 0 detection (the new file should now be found)
+- Proceed with the standard "PO Spec FOUND" path
+
+---
+
+**Option 2 — Provide business context now (inline elicitation):**
+
+**Step 0.2a: Capture initial context**
+
+Prompt the user:
+
+```
+Please describe your business context — the problem you're solving, who it's for,
+key objectives, constraints, and any other business requirements you have in mind.
+```
+
+Wait for user input.
+
+**Step 0.2b: Evaluate against PO Spec scoring rubric**
+
+- Load `skills/architecture-readiness/PO_SPEC_SCORING_GUIDE.md`
+- Map the user's input to the 8 PO Spec sections
+- Score each section using the weighted rubric:
+  - Section 4: Use Cases (weight 2.5) — HIGH priority
+  - Section 7: Business Constraints (weight 2.0) — HIGH priority
+  - Section 3: Business Objectives (weight 1.5) — HIGH priority
+  - Section 1: Business Context (weight 1.0)
+  - Section 6: UX Requirements (weight 1.0)
+  - Section 8: Success Metrics (weight 1.0)
+  - Section 2: Stakeholders & Users (weight 0.5)
+  - Section 5: User Stories (weight 0.5)
+- Display the evaluation results:
+  ```
+  📊 Business Context Evaluation (scored against PO Spec rubric)
+
+  Section                    | Score | Weight | Weighted
+  ---------------------------|-------|--------|--------
+  1. Business Context        | X%    | 1.0    | X.XX
+  2. Stakeholders & Users    | X%    | 0.5    | X.XX
+  3. Business Objectives     | X%    | 1.5    | X.XX
+  4. Use Cases               | X%    | 2.5    | X.XX
+  5. User Stories            | X%    | 0.5    | X.XX
+  6. UX Requirements         | X%    | 1.0    | X.XX
+  7. Business Constraints    | X%    | 2.0    | X.XX
+  8. Success Metrics & KPIs  | X%    | 1.0    | X.XX
+  ─────────────────────────────────────────────
+  Total                                        X.XX/10.0
+  ```
+
+**Step 0.2c: Interview for gaps (if score < 7.5)**
+
+- Identify sections scoring below 50% (Critical Gaps) and 50–74% (Moderate Gaps)
+- Prioritize by weight: ask about HIGH-priority gaps first (Use Cases → Business Constraints → Business Objectives)
+- For each gap, ask targeted questions derived from that section's evaluation criteria in the scoring guide
+- After each answer, re-score the affected section
+- Continue until score reaches ≥7.5 or all HIGH-priority sections are ≥75%
+- If score still < 7.5 after addressing HIGH-priority sections, ask about MEDIUM-priority gaps
+- Display updated scorecard after the interview round
+
+**Step 0.2d: Generate inline PO Spec and proceed**
+
+- Compile all gathered context into a structured PO Spec document
+- Save as `PRODUCT_OWNER_SPEC.md` at project root (using the template from `skills/architecture-readiness/templates/PO_SPEC_TEMPLATE.md`)
+- Display: `✅ Product Owner Specification created: PRODUCT_OWNER_SPEC.md (score: X.X/10.0)`
+- Load high-weight sections (1, 3, 4, 7) into context for pre-populating ARCHITECTURE.md
+- Record traceability (embed in `docs/01-system-overview.md` during Step 5):
+  ```
+  <!-- PO_SPEC_SOURCE: PRODUCT_OWNER_SPEC.md (inline-generated YYYY-MM-DD, score: X.X/10.0) -->
+  ```
+- Proceed to Step 1
+
+---
+
+**Option 3 — Skip:**
+
+Display the following warning and proceed:
+
+```
+⚠️  PO Spec gate overridden. Proceeding without a Product Owner Specification.
+
+   Consequences to be aware of:
+   - Architecture decisions will not be traceable to validated business requirements
+   - The compliance phase may flag gaps due to missing business context
+   - A PO_SPEC_GATE: SKIPPED note will be embedded in the generated documentation
+
+Proceeding to architecture type selection...
+```
+
+Record override metadata (embed in `docs/01-system-overview.md` during Step 5):
+```
+<!-- PO_SPEC_GATE: SKIPPED (user override at YYYY-MM-DD) -->
+```
+
+No PO Spec context is available for section pre-population — proceed to Step 1 without it.
+
+---
+
+**If multiple PO Spec files found:**
+
+List all matches and ask the user to select which one applies before proceeding:
+
+```
+📋 Multiple Product Owner Specifications found. Which one applies to this architecture?
+
+  1. [path/to/first/PRODUCT_OWNER_SPEC.md]
+  2. [path/to/second/PO_SPEC.md]
+  ...
+
+Please enter the number of the specification to use.
+```
+
+---
 
 #### Step 1: Present Architecture Type Options
 
@@ -350,6 +538,9 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 2. Create `docs/components/` directory
 3. Write each section to its corresponding `docs/NN-name.md` file (see RESTRUCTURING_GUIDE.md for file mapping):
    - `docs/01-system-overview.md` — Sections 1+2 (Executive Summary + System Overview)
+     - Include PO Spec traceability metadata at the top of this file:
+       - `<!-- PO_SPEC_SOURCE: [filename] (loaded YYYY-MM-DD) -->` if a PO Spec was found and used
+       - `<!-- PO_SPEC_GATE: SKIPPED (user override at YYYY-MM-DD) -->` if the gate was overridden
    - `docs/02-architecture-principles.md` — Section 3 (Architecture Principles)
    - `docs/03-architecture-layers.md` — Section 4 (Architecture Layers, type-specific template)
    - `docs/04-data-flow-patterns.md` — Section 6 (Data Flow Patterns)
@@ -3951,61 +4142,186 @@ This workflow is activated when users request diagram generation from ARCHITECTU
 
 #### Step 1: Detect Request & Present Diagram Type Options
 
-When diagram generation is requested, present the following options:
+When diagram generation is requested, present the following:
 
 ```
 📊 **Architecture Diagram Generation**
 
-I'll generate Mermaid architecture diagrams for your ARCHITECTURE.md file.
+I'll generate Mermaid architecture diagrams for your architecture documentation.
 
-**Step 1: Select Diagram Type**
+**Mandatory Diagrams** (always generated — not optional):
+- ✅ High-Level Architecture Diagram → `docs/03-architecture-layers.md`
+- ✅ Data Flow Diagrams → `docs/04-data-flow-patterns.md`
 
-What diagrams would you like to generate?
+**Additional Diagrams** (opt-in — select any or none):
+A. Infrastructure & Deployment → `docs/09-operational-considerations.md`
+B. High Availability & Failover → `docs/08-scalability-and-performance.md`
+C. Performance & Scaling → `docs/08-scalability-and-performance.md`
+D. Integration Diagrams → `docs/05-integration-points.md`
+E. Security Architecture Diagrams → `docs/07-security-architecture.md`
 
-**1. High-Level Architecture Only (Recommended)** - Single comprehensive diagram
-   - Shows Presentation → Application → Data layers (3-tier)
-   - Or shows all 6 META layers for META architectures
-   - Includes all major components and data flows
-
-**2. Default Set** - 1 High-Level + 1 Sequence Diagram per data flow
-   - High-Level System Architecture (3-tier overview)
-   - One Sequence Diagram per H3 flow subsection in Section 6 (e.g., one per `### [Flow Name] Flow` in `docs/04-data-flow-patterns.md`)
-
-**Please select: 1 or 2**
+Would you like any additional diagrams? Reply with letters (e.g., "A, C") or "None".
 ```
 
-**High-Level Architecture Diagram Details**:
-- Single comprehensive Mermaid flowchart showing all tiers/layers
-- Includes component relationships and data flows
-- Color-coded by tier for easy visualization
-- Suitable for executive presentations and documentation
+**Mandatory Diagram Details**:
+- **High-Level Architecture**: `graph TB` flowchart — all tiers/layers, color-coded, component relationships
+- **Data Flow Diagrams**: `sequenceDiagram` — participant interactions, message flows, pipeline descriptions
 
-**Default Set Diagram Details**:
-1. **High-Level System Architecture** → `docs/03-architecture-layers.md`
-2. **Sequence Diagrams** → `docs/04-data-flow-patterns.md`
+**On-Request Diagram Details**:
+- **Infrastructure / Deployment**: `graph TB` with subgraphs — AKS, pods, containers, load balancers
+- **HA / Failover**: `graph TB` or `graph LR` — replica sets, failover paths, health checks
+- **Performance / Scaling**: `graph LR` — autoscaling groups, cache layers, throughput flows
+- **Integration**: `sequenceDiagram` or `graph LR` — API endpoints, event flows, webhooks
+- **Security**: `graph TB` — auth flows, encryption boundaries, identity providers
 
-#### Step 2: Target Location (Fixed)
+---
 
-Diagrams are placed **inline in their relevant `docs/` files**:
-- **High-Level Architecture**: appended at the end of `docs/03-architecture-layers.md`
-- **Sequence Diagrams**: each diagram inserted immediately after its corresponding H3 flow subsection in `docs/04-data-flow-patterns.md`
+#### Step 2: External Diagram Detection & Intake
 
-> **Placement Rule**: Diagrams targeting `docs/03-architecture-layers.md` MUST be appended at the **end** of the document, never inserted mid-content.
+**Check for external diagrams**:
+- Has the user provided or referenced an external file path containing diagrams?
+- Has the user pasted mermaid code blocks directly in their message?
 
-#### Step 3: Confirmation
+**If NO external diagrams detected** → Skip to Step 4.
+
+**If external diagrams detected**:
+
+1. Scan the external file for all ` ```mermaid ` code blocks
+2. For each diagram found, extract: heading/title, mermaid type (`graph TB`, `sequenceDiagram`, etc.), key node labels
+3. **Classify each diagram** using keyword analysis of mermaid content:
+
+   | Keywords Found | Diagram Category | Canonical Target |
+   |----------------|-----------------|-----------------|
+   | Subgraph + layer/tier/presentation/application/data | Architecture Layer | `docs/03-architecture-layers.md` |
+   | `sequenceDiagram` OR data/message/pipeline/flow patterns | Data Flow | `docs/04-data-flow-patterns.md` |
+   | AKS/VM/cluster/pod/container/LB/namespace | Infrastructure | `docs/09-operational-considerations.md` |
+   | HA/failover/replica/primary/secondary/standby | High Availability | `docs/08-scalability-and-performance.md` |
+   | autoscale/performance/throughput/scaling/cache | Performance | `docs/08-scalability-and-performance.md` |
+   | API/endpoint/webhook/integration/event/queue | Integration | `docs/05-integration-points.md` |
+   | auth/token/encryption/TLS/identity/RBAC/security | Security | `docs/07-security-architecture.md` |
+   | (none of the above match) | **UNCLASSIFIABLE** | Ask user |
+
+4. Present intake inventory to user:
 
 ```
-**Step 3: Confirmation**
+📥 **External Diagram Intake**
 
-I'll generate diagrams with these settings:
-- Diagram Type: [High-Level Only (1)/Default Set (2)]
-- Total Diagrams: 1 (High-Level Only) or 1 + N (Default Set, where N = number of data flows in Section 6)
-- Output: Mermaid code blocks embedded in ARCHITECTURE.md
+Found [N] diagrams in [filename]:
 
-Proceed with generation? [Yes/No]
+| # | Title | Type | Detected Category | Proposed Target |
+|---|-------|------|-------------------|----------------|
+| 1 | [title] | graph TB | Architecture Layer | docs/03-architecture-layers.md |
+| 2 | [title] | sequenceDiagram | Data Flow | docs/04-data-flow-patterns.md |
+| 3 | [title] | graph TB | UNCLASSIFIABLE | ❓ Please classify |
+
+For unclassifiable diagrams, choose: A) Architecture Layer  B) Data Flow  C) Infrastructure
+D) High Availability  E) Performance  F) Integration  G) Security  H) Discard
 ```
 
-#### Step 4: Load Document & Identify Architecture Type
+---
+
+#### Step 3: External Diagram Reconciliation
+
+**Architecture docs are the single source of truth. A diagram is valid ONLY if its flow or component is documented.**
+
+**Reconciliation logic**:
+1. Load relevant architecture doc sections incrementally (03, 04, 05, 07, 08, 09) — read headings and key entity names only (±30 lines per section)
+2. For each external diagram, extract key entities: node names, subgraph labels, participant names, component identifiers
+3. Match each diagram's entities against documented components and flows in architecture docs
+4. Score and classify each diagram:
+
+   | Score | Classification | Action |
+   |-------|---------------|--------|
+   | All entities match documented components | **MATCH** | RELOCATE to canonical location |
+   | 50%+ entities match, some undocumented | **PARTIAL** | RELOCATE with WARNING listing undocumented entities |
+   | < 50% entities match documented components | **NO MATCH** | **DISCARD** — notify user |
+
+5. Present reconciliation report and wait for confirmation:
+
+```
+📋 **Reconciliation Report**
+
+| # | Title | Category | Action | Notes |
+|---|-------|----------|--------|-------|
+| 1 | [title] | Architecture Layer | ✅ RELOCATE | Full match |
+| 2 | [title] | Data Flow | ⚠️ RELOCATE | Warning: "ServiceX" not documented |
+| 3 | [title] | Infrastructure | ❌ DISCARD | No matching components found |
+
+Summary: [N] to relocate, [N] discarded (undocumented flows)
+
+⚠️ Discarded diagrams cannot be relocated until their flows are documented in the architecture docs.
+To retain a discarded diagram, document its flow first, then re-run this workflow.
+
+Proceed with reconciliation? [Yes/No]
+```
+
+**STRICT ENFORCEMENT**: No override for discarded diagrams. "Insert anyway" is not an option.
+
+---
+
+#### Step 4: Canonical Location Enforcement (Mandatory — No Override)
+
+**All diagrams — whether newly generated or relocated from external files — MUST go to their canonical location. This is not configurable.**
+
+**Mandatory diagrams** (always generated):
+
+| Diagram Type | Canonical Location | Section |
+|-------------|-------------------|---------|
+| High-Level Architecture | `docs/03-architecture-layers.md` | Section 4 |
+| Data Flow Diagrams | `docs/04-data-flow-patterns.md` | Section 6 |
+
+**On-request diagrams** (generated only when user opts in):
+
+| Diagram Type | Canonical Location | Section |
+|-------------|-------------------|---------|
+| Integration Diagrams | `docs/05-integration-points.md` | Section 7 |
+| Security Diagrams | `docs/07-security-architecture.md` | Section 9 |
+| Infrastructure / Deployment | `docs/09-operational-considerations.md` | Section 11 |
+| HA / Failover | `docs/08-scalability-and-performance.md` | Section 10 |
+| Performance / Scaling | `docs/08-scalability-and-performance.md` | Section 10 |
+
+**Enforcement behavior**: If user requests non-canonical placement (e.g., "put it in ARCHITECTURE.md inline" or "add it to a different section"), DENY the request and explain:
+
+```
+⛔ **Non-Canonical Placement Denied**
+
+Diagrams must be placed in their canonical docs/ file. This is a regulatory-grade
+enforcement rule and cannot be overridden.
+
+The canonical location for [Diagram Type] is: [canonical file]
+
+All placements follow the canonical location table above.
+```
+
+---
+
+#### Step 5: Confirmation (with Reconciliation Summary)
+
+```
+**Step 5: Confirmation**
+
+I'll proceed with the following actions:
+
+**Diagrams to Generate** ([N] total):
+- ✅ High-Level Architecture → docs/03-architecture-layers.md [REQUIRED]
+- ✅ Data Flow Diagrams → docs/04-data-flow-patterns.md [REQUIRED]
+- [optional diagrams selected by user]
+
+**External Diagrams to Relocate** ([N] total):
+- ✅ [title] → docs/03-architecture-layers.md (full match)
+- ⚠️ [title] → docs/04-data-flow-patterns.md (partial match — warning noted)
+
+**Discarded External Diagrams** ([N] total):
+- ❌ [title] — No matching documented flow found
+
+**Placement Rule**: All diagrams follow canonical location enforcement (not configurable).
+
+Proceed? [Yes/No]
+```
+
+---
+
+#### Step 6: Load Document & Identify Architecture Type
 
 **Process**:
 1. Read lines 1-50 of ARCHITECTURE.md (Document Index)
@@ -4020,24 +4336,32 @@ Proceed with generation? [Yes/No]
 - **META (6-Layer)**: Channels → UX → Business Scenarios → Service Orchestration → Atomic Services → Data
 - **N-Layer**: Custom layered architecture (N > 3)
 
-#### Step 5: Load Required Sections Incrementally
+---
+
+#### Step 7: Load Required Sections Incrementally
 
 **Context-Efficient Loading**:
-- Load only sections required for the selected diagram type
+- Load only sections required for the selected diagram types
 - Use ±10 line buffer around each section
-- Minimize total lines loaded (similar to Workflow 8 approach)
+- Minimize total lines loaded
 
 **Sections by Diagram Type**:
-- **High-Level Architecture Only (1 diagram)**: Section 4 (~150-300 lines, 85-90% reduction vs. full document)
-- **Default Set**: Sections 4, 5, 6 (~400-700 lines, 70-80% reduction vs. full document) — Section 6 contains the flow definitions (steps, components, performance) that drive sequence diagram generation
+- **Mandatory (High-Level + Data Flow)**: Sections 3, 4 (~300-500 lines, 80-90% reduction vs. full document)
+- **+ Infrastructure**: add Section 9 (~150-250 lines additional)
+- **+ HA / Performance**: add Section 8 (~200-350 lines additional)
+- **+ Integration**: add Section 5 (~150-250 lines additional)
+- **+ Security**: add Section 7 (~150-250 lines additional)
+- **Full set (all 7 types)**: Sections 3, 4, 5, 7, 8, 9 (~800-1200 lines, 40-60% reduction)
 
-#### Step 6: Generate Diagrams Using MERMAID_DIAGRAMS_GUIDE Templates
+---
+
+#### Step 8: Generate Diagrams Using MERMAID_DIAGRAMS_GUIDE Templates
 
 **Process**:
 1. Load MERMAID_DIAGRAMS_GUIDE.md for reference templates
-2. For High-Level Architecture:
-   - Identify appropriate Mermaid diagram type (`graph TB`)
-   - Extract key components from Section 4 (Architecture Layers)
+2. For each diagram to generate:
+   - Identify appropriate Mermaid diagram type (graph TB, sequenceDiagram, etc.)
+   - Extract key components, data flows, or infrastructure elements from loaded sections
    - Apply color scheme and styling from templates
    - Generate complete Mermaid code block
 3. For Sequence Diagrams (Default Set only):
@@ -4051,7 +4375,11 @@ Proceed with generation? [Yes/No]
 
 **Mermaid Diagram Types**:
 - **High-Level Architecture**: `graph TB` (top-to-bottom flowchart)
-- **Sequence Diagrams**: `sequenceDiagram` (one per H3 flow in Section 6)
+- **Data Flow**: `sequenceDiagram` (participant interactions)
+- **Infrastructure**: `graph TB` with subgraphs (nested component groups)
+- **HA/Performance**: `graph TB` or `graph LR` (left-to-right)
+- **Integration**: `sequenceDiagram` or `graph LR`
+- **Security**: `graph TB` with trust boundary annotations
 
 **Color Scheme** (from MERMAID_DIAGRAMS_GUIDE):
 ```
@@ -4062,13 +4390,18 @@ classDef cache fill:#BD10E0,stroke:#8A0CA3,stroke-width:3px,color:#fff
 classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 ```
 
-#### Step 7: Insert Diagrams into ARCHITECTURE.md
+---
+
+#### Step 9: Insert Diagrams into Canonical Docs Files
 
 **Process**:
-1. Read target `docs/` file
-   - For `docs/03-architecture-layers.md`: **ALWAYS append the diagram at the end of the document**
-   - For `docs/04-data-flow-patterns.md`: for each generated sequence diagram, insert it **immediately after its corresponding H3 flow subsection** (`### [Flow Name] Flow`). Process flows in document order.
-   - Use Edit tool to insert diagram with proper heading
+1. For each diagram (generated or relocated):
+   - Identify the canonical target file from the location table
+   - Read target file to find appropriate insertion point:
+     - For `docs/03-architecture-layers.md`: **ALWAYS append at the end of the document**
+     - For `docs/04-data-flow-patterns.md`: insert each sequence diagram **immediately after its corresponding H3 flow subsection** (`### [Flow Name] Flow`), in document order
+     - For all other files: insert after the section header, before the next subsection
+   - Use Edit tool to insert diagram with proper heading and description
 
 2. Maintain proper markdown structure:
    ```markdown
@@ -4082,26 +4415,93 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
    **Description**: This diagram shows...
    ```
 
-#### Step 8: Verification & User Notification
+3. For relocated external diagrams: prepend a note indicating the diagram was relocated and from which file.
 
-**Verification**:
-- ✅ All diagrams inserted successfully
-- ✅ Mermaid syntax is valid (no unclosed code blocks)
-- ✅ Proper headings and descriptions added
-- ✅ Document structure maintained
+---
+
+#### Step 10: Flow-Diagram Completeness Audit
+
+**This step always runs and cannot be skipped.**
+
+**Audit scope**: Check all canonical diagram types. Missing REQUIRED diagrams produce a compliance warning. Missing OPTIONAL diagrams are informational gaps.
+
+**Audit logic**:
+
+1. **Extract all documented flows** from each canonical file by scanning headings and content:
+
+   | Canonical File | Looks For | Diagram Type | Tag |
+   |---------------|-----------|--------------|-----|
+   | `docs/03-architecture-layers.md` | Layer headings, component relationships | High-Level Architecture | `[REQUIRED]` |
+   | `docs/04-data-flow-patterns.md` | Flow names, sequence descriptions, pipeline descriptions | Data Flow | `[REQUIRED]` |
+   | `docs/05-integration-points.md` | Integration endpoints, API interactions, event flows | Integration | `[OPTIONAL]` |
+   | `docs/07-security-architecture.md` | Auth flows, encryption flows | Security | `[OPTIONAL]` |
+   | `docs/08-scalability-and-performance.md` | Scaling flows, HA/failover flows | HA / Performance | `[OPTIONAL]` |
+   | `docs/09-operational-considerations.md` | Deployment flows, CI/CD pipelines | Infrastructure | `[OPTIONAL]` |
+
+2. **Match flows to existing mermaid blocks**: search each canonical file for ` ```mermaid ` blocks within ±30 lines of the flow heading, with entity name matching
+
+3. **Generate completeness report**:
+
+```
+📊 **Flow-Diagram Completeness Audit**
+
+| Section File | Flows Found | With Diagram | Missing | Coverage |
+|-------------|-------------|--------------|---------|----------|
+| 03-architecture-layers.md | 3 | 3 | 0 | 100% ✅ [REQUIRED] |
+| 04-data-flow-patterns.md | 4 | 3 | 1 | 75% ⚠️ [REQUIRED] |
+| 05-integration-points.md | 2 | 0 | 2 | 0% ℹ️ [OPTIONAL] |
+| 07-security-architecture.md | 1 | 1 | 0 | 100% ✅ [OPTIONAL] |
+| 08-scalability-and-performance.md | 2 | 2 | 0 | 100% ✅ [OPTIONAL] |
+| 09-operational-considerations.md | 1 | 0 | 1 | 0% ℹ️ [OPTIONAL] |
+
+**Missing Diagrams**:
+1. [Flow Name] in docs/04-data-flow-patterns.md — suggested type: sequenceDiagram [REQUIRED]
+2. [Integration Name] in docs/05-integration-points.md — suggested type: graph LR [OPTIONAL]
+3. [Deployment Pipeline] in docs/09-operational-considerations.md — suggested type: graph TB [OPTIONAL]
+
+Generate missing diagrams? [Yes/All | Yes/Select | No]
+```
+
+4. **If user selects Yes/All**: Generate all missing diagrams and insert at canonical locations, then re-run audit to confirm 100% coverage on REQUIRED types
+5. **If user selects Yes/Select**: Present numbered list, user picks which to generate
+6. **If user selects No**: Log audit result, proceed to verification
+
+**Compliance rule**: If any `[REQUIRED]` diagram is missing after the audit step, verification includes a compliance warning.
+
+---
+
+#### Step 11: Verification & User Notification
+
+**Verification Checklist**:
+- ✅ / ❌ All diagrams in canonical locations
+- ✅ / ❌ No diagrams outside canonical locations
+- ✅ / ❌ Mermaid syntax valid (no unclosed code blocks)
+- ✅ / ❌ Proper headings and descriptions added
+- ✅ / ❌ Document structure maintained
+- ✅ / ❌ / N/A External reconciliation complete (N/A if no external file)
+- ✅ / ❌ Flow-diagram completeness audit complete
 
 **Notification**:
 ```
 ✅ **Diagram Generation Complete**
 
-Generated diagrams (Default Set):
-- High-Level System Architecture (docs/03-architecture-layers.md)
-[List each sequence diagram individually, e.g.:]
-- Sequence: [Flow Name 1] (docs/04-data-flow-patterns.md)
-- Sequence: [Flow Name 2] (docs/04-data-flow-patterns.md)
-[...one line per H3 flow found in Section 6]
+**Actions Performed**:
+- Generated: [N] new diagrams
+- Relocated: [N] external diagrams (from [source file])
+- Discarded: [N] external diagrams (undocumented flows — see reconciliation report)
 
-**Location**: ARCHITECTURE.md (inline in respective sections)
+**Diagram Inventory**:
+| Diagram | Type | Location | Status |
+|---------|------|----------|--------|
+| High-Level Architecture | graph TB | docs/03-architecture-layers.md | ✅ GENERATED |
+| [Data Flow Name] | sequenceDiagram | docs/04-data-flow-patterns.md | ✅ GENERATED |
+| [External Diagram] | graph TB | docs/09-operational-considerations.md | ✅ RELOCATED |
+
+**Completeness Coverage**:
+- REQUIRED diagrams: [N]/[N] (100% ✅) — or — ⚠️ COMPLIANCE WARNING: [N] REQUIRED diagrams missing
+- OPTIONAL diagrams: [N]/[N] ([%])
+
+**Placement**: All diagrams follow canonical location enforcement.
 
 **Rendering**:
 - GitHub/GitLab: Diagrams will render automatically
@@ -4124,7 +4524,12 @@ Generated diagrams (Default Set):
 | Document Index missing | Generate index first or use default line ranges with warning |
 | Section not found | Skip that diagram type or prompt user to add section |
 | Invalid Mermaid syntax | Validate syntax using mermaid-cli or fallback to simpler diagram |
-| Insertion point conflict | Ask user for preferred location |
+| External file not found | Prompt user for correct file path |
+| External file has no mermaid blocks | Notify user, skip reconciliation, proceed to generation |
+| Diagram category unclassifiable | Present to user, ask for manual classification (A–H options) |
+| Flow documented but diagram generation fails | Log failure, continue with remaining diagrams, report in audit |
+| User requests non-canonical placement | DENY — explain canonical rule and display location table |
+| Completeness audit finds 0 flows in any section | Warn that architecture docs section may be incomplete |
 
 ### Integration with Other Workflows
 
