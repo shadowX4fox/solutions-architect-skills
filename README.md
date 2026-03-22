@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.5` in the list.
+You should see `solutions-architect-skills v2.8.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.5 (Current Release) ✅
+### v2.8.6 (Current Release) ✅
+**Add `Read(/tmp/*)` and `Write(/tmp/*)` permissions**
+
+- ✅ **Root cause**: Agents expand templates to `/tmp/` via bun then read them back with the Read tool — Claude Code prompts for files outside the project directory
+- ✅ **Fix**: Added `Read(/tmp/*)` and `Write(/tmp/*)` to all permission blocks
+
+### v2.8.5 (Previous Release) ✅
 **Fix Bash permission format — use `command:*` syntax (not `command *`)**
 
 - ✅ **Root cause confirmed**: `Bash(command *)` patterns cannot match arguments containing `/` — `*` can never cross path separators. Both `Bash(bun */skills/...)` and `Bash(bun *)` fail for absolute paths like `/home/user/.claude/plugins/cache/.../script.ts`
