@@ -628,7 +628,7 @@ Final Score = (7.5 × 0.35) + (6.4 × 0.55) + (8.0 × 0.10)
 
 ---
 
-**Remediation Steps** (following Section A.3.2 workflow):
+**Remediation Steps** (use `/skill architecture-docs` to address gaps):
 
 **Step 1: Activate architecture-docs skill**
 ```

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.14-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.14` in the list.
+You should see `solutions-architect-skills v2.8.15` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -126,7 +126,7 @@ adr/                     ← Architecture Decision Records
 /skill architecture-compliance
 ```
 
-Generates 10 compliance contracts from `ARCHITECTURE.md` into `/compliance-docs/`.
+Generates 10 compliance contracts from `ARCHITECTURE.md` into `/compliance-docs/`. To remediate gaps found in compliance contracts, use `/skill architecture-docs` — the skill guides you through updating `ARCHITECTURE.md` for each finding.
 
 ## Features
 
@@ -454,7 +454,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.14 (Current Release) ✅
+### v2.8.15 (Current Release) ✅
+**Remove A.3.2 Remediation Steps from compliance contracts — save ~13,000 tokens per run**
+
+- ✅ **Deleted** `shared/sections/remediation-workflow-guide.md` (232-line shared fragment)
+- ✅ **Removed A.3.2 sections** from all 10 templates (~806 lines total): the Step-by-Step Remediation Workflow heading, `@include` directive, and all domain-specific examples
+- ✅ **Schema updated**: A.3.2 renumbered to "Completion Status and Score Estimates" (A.3.3 → A.3.2) in `TEMPLATE_SCHEMA.md`
+- ✅ **Docs updated**: `COMPLIANCE_GENERATION_GUIDE.md` and `VALIDATION_EXAMPLES.md` references cleaned up
+- ✅ **README**: added remediation guidance — use `/skill architecture-docs` to remediate gaps found in contracts
+
+### v2.8.14 (Previous Release) ✅
 **Add `check-dir.ts` Bun utility — eliminate shell operator safety prompts in dir check**
 
 - ✅ **Root cause**: `[ -d compliance-docs ] && echo "..."` (v2.8.13) triggered Claude Code's "ambiguous command separator" safety prompt due to `&&`, blocking autonomous execution

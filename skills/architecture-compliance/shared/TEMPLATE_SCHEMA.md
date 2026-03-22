@@ -163,10 +163,7 @@ Rules:
 #### A.3.1 Identified Gaps
 {gap table}
 
-#### A.3.2 Remediation Priorities
-{remediation guidance}
-
-#### A.3.3 Completion Status and Score Estimates
+#### A.3.2 Completion Status and Score Estimates
 {score estimate table — updated by PHASE 4.6 CLI tools}
 
 ---
