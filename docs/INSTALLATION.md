@@ -113,7 +113,6 @@ Create or update `.claude/settings.json` in your project root:
   "permissions": {
     "allow": [
       "Bash(bun *)",
-      "Bash([ *)",
       "Bash(mkdir *)",
       "Bash(date *)",
       "Bash(cat *)",

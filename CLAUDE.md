@@ -128,7 +128,6 @@ The skill includes:
 "permissions": {
   "allow": [
     "Bash(bun *)",
-    "Bash([ *)",
     "Bash(mkdir *)",
     "Bash(date *)",
     "Bash(cat *)",

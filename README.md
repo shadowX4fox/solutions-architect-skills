@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.14-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.13` in the list.
+You should see `solutions-architect-skills v2.8.14` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,15 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.13 (Current Release) ✅
+### v2.8.14 (Current Release) ✅
+**Add `check-dir.ts` Bun utility — eliminate shell operator safety prompts in dir check**
+
+- ✅ **Root cause**: `[ -d compliance-docs ] && echo "..."` (v2.8.13) triggered Claude Code's "ambiguous command separator" safety prompt due to `&&`, blocking autonomous execution
+- ✅ **Fix**: new `skills/architecture-compliance/utils/check-dir.ts` TypeScript utility called via `bun [plugin_dir]/skills/architecture-compliance/utils/check-dir.ts compliance-docs` — no shell operators, no prompts
+- ✅ **Permission cleanup**: removed `Bash([ *)` from all 4 permission files — no longer needed since check-dir.ts is covered by existing `Bash(bun *)`
+- ✅ **All 10 agents updated**: ALLOWED commands section and Step 5.2 now reference `check-dir.ts`
+
+### v2.8.13 (Previous Release) ✅
 **Replace Glob-check with Bash `[ -d ]` for compliance-docs directory existence check**
 
 - ✅ **Root cause**: model consistently hallucinated `Search` (Grep) instead of `Glob` to check if `compliance-docs/` exists — text warnings ("NOT Search, NOT Grep") in v2.8.12 were ignored
