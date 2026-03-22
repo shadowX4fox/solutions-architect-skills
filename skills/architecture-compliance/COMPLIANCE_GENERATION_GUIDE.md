@@ -3013,19 +3013,15 @@ A table listing the most common gaps for that domain:
 
 **Purpose**: Quick lookup for identifying gaps during contract review.
 
-#### A.3.2 Completion Status and Score Estimates
+#### A.3.2 Achieving Auto-Approve Status (8.0+ Score)
 
 Contains:
 
-- **Target Score Breakdown**: Shows how completeness/compliance/quality weights affect final score
-- **Prioritized Remediation Actions**: 3 groups of actions organized by estimated impact
-  - Group 1: Highest impact (+0.4-0.6 points)
-  - Group 2: Medium impact (+0.3 points)
-  - Group 3: Lower impact (+0.2 points)
-- **Priority Order**: Recommended sequence for addressing compliance requirements
-- **Estimated Final Score**: Expected score range after full remediation (typically 8.3-8.9/10)
+- **Current Status**: Live counts of Compliant, Unknown, and Not Applicable requirements
+- **Estimated Final Score After Remediation**: Score range assuming Unknown items resolve to Compliant
+- **Auto-Approve Threshold**: Guidance on reaching 8.0+ for AUTO_APPROVE outcome
 
-**Purpose**: Clear path from current score to AUTO_APPROVE threshold with impact-driven prioritization.
+**Purpose**: Clear path from current score to AUTO_APPROVE threshold. For detailed remediation workflow, see the plugin README.
 
 ### Architecture-Docs Skill Integration
 
@@ -3077,7 +3073,7 @@ Impact: LAS2 → Compliant (+0.6 points)
 
 **Template Updates** (all 10 templates):
 1. Restructured A.3 from flat list to two-tier structure (A.3.1, A.3.2)
-2. Added prioritized auto-approve guidance with impact estimates
+2. A.3.2 contains auto-approve guidance with score estimates (updated by CLI tools)
 3. Expanded gap tables with Impact column and more entries
 
 **Files Modified**:
@@ -3094,8 +3090,8 @@ Impact: LAS2 → Compliant (+0.6 points)
 ### Backward Compatibility
 
 All changes are non-breaking:
-- Existing A.3 gap tables preserved (now A.3.1)
-- New content is purely additive (A.3.2)
+- Existing A.3 gap tables preserved (A.3.1)
+- A.3.2 contains Achieving Auto-Approve Status guidance (renamed from A.3.3)
 - Uses existing `@include` mechanism
 - No changes to validation JSON schemas
 - Previously generated contracts remain valid

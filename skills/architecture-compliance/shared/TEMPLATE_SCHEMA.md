@@ -163,8 +163,8 @@ Rules:
 #### A.3.1 Identified Gaps
 {gap table}
 
-#### A.3.2 Completion Status and Score Estimates
-{score estimate table — updated by PHASE 4.6 CLI tools}
+#### A.3.2 Achieving Auto-Approve Status (8.0+ Score)
+{auto-approve guidance and score estimates}
 
 ---
 

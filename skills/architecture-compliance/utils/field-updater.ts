@@ -8,7 +8,7 @@ import { ValidationScore } from './score-calculator';
  * Updates contract markdown content with validation scores by:
  * 1. Replacing Document Control placeholder fields
  * 2. Updating Overall Compliance footer with actual counts
- * 3. Updating Remediation Section A.3.3 with current status and estimates
+ * 3. Updating Section A.3.2 with current status and estimates
  *
  * @module field-updater
  */
@@ -36,7 +36,7 @@ export function updateContractWithValidation(
   // 2. Update Overall Compliance footer
   updatedContent = updateComplianceFooter(updatedContent, validationScore);
 
-  // 3. Update Remediation Section A.3.3
+  // 3. Update Section A.3.2
   updatedContent = updateRemediationSection(updatedContent, validationScore);
 
   return updatedContent;
@@ -172,28 +172,28 @@ function updateComplianceFooter(
 }
 
 // ============================================================================
-// Remediation Section A.3.3
+// Section A.3.2 — Achieving Auto-Approve Status
 // ============================================================================
 
 /**
- * Update Remediation Section A.3.3 with current status and score estimates
+ * Update Section A.3.2 with current status and score estimates
  */
 function updateRemediationSection(
   content: string,
   score: ValidationScore
 ): string {
-  // Find Section A.3.3 (or similar heading patterns)
-  const remediationPattern = /(####\s+A\.3\.3\s+Achieving Auto-Approve Status[\s\S]*?)(?=####\s+A\.|---\s*\n###\s+A\.4|$)/;
+  // Find Section A.3.2 (or similar heading patterns)
+  const remediationPattern = /(####\s+A\.3\.2\s+Achieving Auto-Approve Status[\s\S]*?)(?=####\s+A\.|---\s*\n###\s+A\.4|$)/;
   const match = content.match(remediationPattern);
 
   if (!match) {
-    // Try alternative pattern (## A.3.3 or ### A.3.3)
-    const altPattern = /(###?\s+A\.3\.3\s+Achieving Auto-Approve Status[\s\S]*?)(?=###?\s+A\.|---\s*\n##|$)/;
+    // Try alternative pattern (## A.3.2 or ### A.3.2)
+    const altPattern = /(###?\s+A\.3\.2\s+Achieving Auto-Approve Status[\s\S]*?)(?=###?\s+A\.|---\s*\n##|$)/;
     const altMatch = content.match(altPattern);
 
     if (!altMatch) {
       // Graceful degradation: section not found
-      console.warn('Remediation Section A.3.3 not found, skipping update');
+      console.warn('Section A.3.2 not found, skipping update');
       return content;
     }
 

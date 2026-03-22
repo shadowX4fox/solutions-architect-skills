@@ -9,4 +9,4 @@ If this contract shows "Non-Compliant" or "Unknown" items, use the **architectur
 3. **Request remediation**: Ask skill to add missing content to specified sections
 4. **Regenerate contract**: Run compliance generation to verify improvements
 
-**Detailed workflow, common commands, and domain-specific examples in Section A.3.2 below.**
+**For detailed remediation workflow and commands, see the [plugin README](https://github.com/shadowX4fox/solutions-architect-skills#using-the-architecture-compliance-skill).**

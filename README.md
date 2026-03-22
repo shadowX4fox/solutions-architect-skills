@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.16-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.15 (Current Release) ✅
+### v2.8.16 (Current Release) ✅
+**Fix stale A.3.2 reference and rename A.3.3 → A.3.2 across all compliance templates**
+
+- ✅ **`completion-guide-intro.md`**: replaced stale "Section A.3.2 below" with link to plugin README
+- ✅ **All 10 templates**: renamed `#### A.3.3 Achieving Auto-Approve Status` → `#### A.3.2 Achieving Auto-Approve Status` (section is now correctly the second subsection under A.3)
+- ✅ **`TEMPLATE_SCHEMA.md`**: updated A.3.2 placeholder to reflect `Achieving Auto-Approve Status`
+- ✅ **`COMPLIANCE_GENERATION_GUIDE.md`**: updated stale A.3.2 section description and implementation notes
+- ✅ **`field-updater.ts`**: updated all A.3.3 comments to A.3.2 (regex patterns were already correct)
+
+### v2.8.15 (Previous Release) ✅
 **Remove A.3.2 Remediation Steps from compliance contracts — save ~13,000 tokens per run**
 
 - ✅ **Deleted** `shared/sections/remediation-workflow-guide.md` (232-line shared fragment)

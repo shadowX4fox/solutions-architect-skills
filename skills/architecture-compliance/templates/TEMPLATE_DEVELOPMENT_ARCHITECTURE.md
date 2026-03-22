@@ -476,7 +476,7 @@
 ---
 
 
-#### A.3.3 Achieving Auto-Approve Status (8.0+ Score)
+#### A.3.2 Achieving Auto-Approve Status (8.0+ Score)
 
 **Target Score Breakdown**:
 - Completeness ({{completeness_percent}} weight): Fill all required development architecture fields
