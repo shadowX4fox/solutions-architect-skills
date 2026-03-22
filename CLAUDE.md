@@ -127,7 +127,7 @@ The skill includes:
 ```json
 "permissions": {
   "allow": [
-    "Bash(bun */skills/architecture-compliance/utils/*)",
+    "Bash(bun *)",
     "Bash(mkdir -p *)",
     "Bash(date *)",
     "Bash(cat *)",

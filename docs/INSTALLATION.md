@@ -94,7 +94,7 @@ Error: bun command not found
 Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). You must grant Bash and Agent permissions in your project's `.claude/settings.json`.
 
 **Why these permissions are needed:**
-- `Bash(bun */skills/architecture-compliance/utils/*)` — template expansion and post-generation pipeline (uses absolute plugin paths)
+- `Bash(bun *)` — allows any bun command (required because plugin is installed at a deep cache path with multiple `/`-separated directories that a glob `*` can't cross)
 - `Bash(mkdir -p *)` — creates compliance-docs output directory
 - `Bash(date *)` — date stamping in generated contracts
 - `Bash(cat *)`, `Bash(cp *)`, `Bash(grep *)`, `Bash(python3 /tmp/*)` — safety-net rules that prevent prompts if the model improvises file operations
@@ -108,7 +108,7 @@ Create or update `.claude/settings.json` in your project root:
 {
   "permissions": {
     "allow": [
-      "Bash(bun */skills/architecture-compliance/utils/*)",
+      "Bash(bun *)",
       "Bash(mkdir -p *)",
       "Bash(date *)",
       "Bash(cat *)",

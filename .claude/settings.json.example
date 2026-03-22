@@ -19,7 +19,7 @@
   "// AGENT PERMISSIONS": "Agent() rules allow Claude to spawn compliance generators without manual prompts",
   "permissions": {
     "allow": [
-      "Bash(bun */skills/architecture-compliance/utils/*)",
+      "Bash(bun *)",
       "Bash(mkdir -p *)",
       "Bash(date *)",
       "Bash(cat *)",

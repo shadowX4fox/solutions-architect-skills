@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.3` in the list.
+You should see `solutions-architect-skills v2.8.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.3 (Current Release) ✅
+### v2.8.4 (Current Release) ✅
+**Fix `Bash(bun *)` permission — glob `*` can't cross path separators**
+
+- ✅ **Root cause**: `Bash(bun */skills/architecture-compliance/utils/*)` uses a single `*` which can't match across `/` separators in the deep plugin cache path (`/home/.../.claude/plugins/cache/.../2.8.3/skills/...`). Claude Code's permission checker requires `*` to match within a single path segment.
+- ✅ **Fix**: Changed to `Bash(bun *)` — bun is a safe runtime, no risk in allowing any bun command
+
+### v2.8.3 (Previous Release) ✅
 **Autonomous compliance agent execution — eliminate permission prompts**
 
 - ✅ **Root cause fixed**: Agents improvised with `python3`/`cat`/`cp` because Step 5.3 referenced `/tmp/populated_*_contract.md` (a file never created). Removed the intermediate temp file — agents now Write the populated contract directly from working memory in one step
