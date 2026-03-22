@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.0` in the list.
+You should see `solutions-architect-skills v2.8.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,12 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.0 (Current Release) ✅
+### v2.8.1 (Current Release) ✅
+**Switch compliance agents from Sonnet to Haiku**
+
+- ✅ **All 10 compliance agents now use `model: haiku`** — agents are template-filling machines (extract data → replace `[PLACEHOLDER]` tokens); Haiku is sufficient and faster/cheaper than Sonnet for this mechanical task
+
+### v2.8.0 (Previous Release) ✅
 **Compliance agent orchestration simplification + post-generation pipeline**
 
 - ✅ **Removed `find && cd` Bash blocker** — all 10 compliance agents now receive `plugin_dir` as an input parameter instead of running `find "$HOME" ... && cd` (compound command blocked by Claude Code's `&&`-aware permission checker)

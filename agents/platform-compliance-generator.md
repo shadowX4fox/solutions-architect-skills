@@ -2,7 +2,7 @@
 name: platform-compliance-generator
 description: Vulcan — Platform & IT Infrastructure Compliance Contract Generator - Generates Platform & IT Infrastructure compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
-model: sonnet
+model: haiku
 ---
 
 # Platform & IT Infrastructure Compliance Generation Agent
