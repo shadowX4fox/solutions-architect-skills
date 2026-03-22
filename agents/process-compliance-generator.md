@@ -2,7 +2,7 @@
 name: process-compliance-generator
 description: Hermes — Process Transformation Compliance Contract Generator - Generates Process Transformation compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
-model: haiku
+model: sonnet
 ---
 
 # Process Transformation Compliance Generation Agent
