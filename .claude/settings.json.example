@@ -15,13 +15,17 @@
   },
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
-  "// BASH PERMISSIONS": "bun with wildcard prefix handles absolute plugin paths; mkdir -p * covers any output dir",
+  "// BASH PERMISSIONS": "bun handles template expansion; safety-net rules (cat/cp/grep/python3) prevent prompts if model improvises",
   "// AGENT PERMISSIONS": "Agent() rules allow Claude to spawn compliance generators without manual prompts",
   "permissions": {
     "allow": [
       "Bash(bun */skills/architecture-compliance/utils/*)",
       "Bash(mkdir -p *)",
       "Bash(date *)",
+      "Bash(cat *)",
+      "Bash(cp *)",
+      "Bash(grep *)",
+      "Bash(python3 /tmp/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
       "Agent(solutions-architect-skills:cloud-compliance-generator)",

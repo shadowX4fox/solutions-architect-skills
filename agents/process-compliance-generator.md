@@ -98,6 +98,27 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 **Recovery procedure if you detect this failure**: STOP immediately. Do NOT write any output. Return to PHASE 1 Step 1.1 and re-execute the template expansion. The template IS the document - you are only filling in its blanks.
 
+### TOOL DISCIPLINE (MANDATORY)
+
+**ALLOWED Bash commands** (these 3 ONLY):
+1. `bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts ...` (template expansion)
+2. `date +%Y-%m-%d` (get current date)
+3. `mkdir -p compliance-docs` (create output directory)
+
+**FORBIDDEN** — do NOT use Bash for:
+- ❌ `python3`, `python`, `node` or ANY scripting language
+- ❌ `cat`, `cp`, `mv`, `sed`, `awk` or ANY file manipulation
+- ❌ `grep`, `rg`, `find` or ANY search command
+- ❌ `echo`, heredocs, or pipe chains
+
+**Use dedicated tools instead**:
+- File reading → **Read tool**
+- File writing → **Write tool**
+- Pattern search → **Grep tool**
+- File finding → **Glob tool**
+
+Violating this rule causes permission prompts that block autonomous execution.
+
 ### PHASE 1: Template Preparation
 
 **Step 1.0: Resolve Plugin Directory**
@@ -559,22 +580,15 @@ Use Bash tool:
 mkdir -p compliance-docs
 ```
 
-**Step 5.3: Read Populated Contract**
+**Step 5.3: Write Output Contract**
 
-Use Read tool:
+Use Write tool to write the fully populated contract directly from your working memory (the populated template from PHASE 4):
 ```
-file_path: /tmp/populated_process_contract.md
+file_path: [output_filename from 5.1]
+content: [the populated template — all [PLACEHOLDER] values replaced in PHASE 4]
 ```
 
 **Note**: The post-generation pipeline run by the orchestrator will calculate validation scores and update `COMPLIANCE_MANIFEST.md` after all agents complete.
-
-**Step 5.4: Write Contract to Output**
-
-Use Write tool:
-```
-file_path: [output_filename from 5.1]
-content: [content from Step 5.3 Read operation]
-```
 
 **Step 5.5: Return Success with Metadata**
 

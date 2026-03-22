@@ -97,6 +97,7 @@ Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silentl
 - `Bash(bun */skills/architecture-compliance/utils/*)` — template expansion and post-generation pipeline (uses absolute plugin paths)
 - `Bash(mkdir -p *)` — creates compliance-docs output directory
 - `Bash(date *)` — date stamping in generated contracts
+- `Bash(cat *)`, `Bash(cp *)`, `Bash(grep *)`, `Bash(python3 /tmp/*)` — safety-net rules that prevent prompts if the model improvises file operations
 - `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 ### Add Permissions to Your Project Settings
@@ -110,6 +111,10 @@ Create or update `.claude/settings.json` in your project root:
       "Bash(bun */skills/architecture-compliance/utils/*)",
       "Bash(mkdir -p *)",
       "Bash(date *)",
+      "Bash(cat *)",
+      "Bash(cp *)",
+      "Bash(grep *)",
+      "Bash(python3 /tmp/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
       "Agent(solutions-architect-skills:cloud-compliance-generator)",

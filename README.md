@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.2` in the list.
+You should see `solutions-architect-skills v2.8.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.2 (Current Release) ✅
+### v2.8.3 (Current Release) ✅
+**Autonomous compliance agent execution — eliminate permission prompts**
+
+- ✅ **Root cause fixed**: Agents improvised with `python3`/`cat`/`cp` because Step 5.3 referenced `/tmp/populated_*_contract.md` (a file never created). Removed the intermediate temp file — agents now Write the populated contract directly from working memory in one step
+- ✅ **TOOL DISCIPLINE block added** to all 10 agents: explicit forbidden list (`python3`, `cat`, `cp`, `sed`, `awk`, `grep` via Bash) with redirect to dedicated Read/Write/Grep/Glob tools
+- ✅ **Safety-net Bash permissions**: `Bash(cat *)`, `Bash(cp *)`, `Bash(grep *)`, `Bash(python3 /tmp/*)` added to settings.json so any model improvisation still runs without prompting
+
+### v2.8.2 (Previous Release) ✅
 **Revert compliance agents back to Sonnet**
 
 - ✅ **All 10 compliance agents reverted to `model: sonnet`** — live testing confirmed Haiku is insufficient for certain contract sections that require Sonnet's reasoning capability
