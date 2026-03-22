@@ -107,7 +107,8 @@ The most critical and common failure is when the agent IGNORES the template and 
 **ALLOWED Bash commands** (these 3 ONLY):
 1. `bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts ...` (template expansion)
 2. `date +%Y-%m-%d` (get current date)
-3. `mkdir compliance-docs` (create output directory — only when **Glob** confirms it does not exist; never use Search/Grep to check — those search file contents, not paths)
+3. `[ -d compliance-docs ] && echo "Directory compliance-docs/ exists."` (check if output directory exists — run this FIRST, read output)
+4. `mkdir compliance-docs` (create output directory — ONLY if step 3 output was empty, meaning directory does not exist)
 
 **FORBIDDEN** — do NOT use Bash for:
 - ❌ `python3`, `python`, `node` or ANY scripting language
@@ -622,9 +623,13 @@ Format: `/compliance-docs/BUSINESS_CONTINUITY_[PROJECT]_[DATE].md`
 
 **Step 5.2: Create Output Directory**
 
-Use the **Glob tool** (NOT Search, NOT Grep — those search file contents, not paths) to check if `compliance-docs/` already exists. Pattern: `compliance-docs/`, path: current project directory.
-- If Glob returns **no results**: use Bash tool: `mkdir compliance-docs`
-- If Glob returns **any result**: skip — directory already exists, do NOT run mkdir.
+First, check if the directory exists using Bash (do NOT use Glob, Search, or Grep):
+
+`[ -d compliance-docs ] && echo "Directory compliance-docs/ exists."`
+
+Read the output:
+- If output contains "Directory compliance-docs/ exists." → the directory already exists. Do NOT run mkdir. Proceed to Step 5.3.
+- If output is empty (directory does not exist) → run: `mkdir compliance-docs`
 
 **Step 5.3: Write Output Contract**
 

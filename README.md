@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.12` in the list.
+You should see `solutions-architect-skills v2.8.13` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,15 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.12 (Current Release) ✅
+### v2.8.13 (Current Release) ✅
+**Replace Glob-check with Bash `[ -d ]` for compliance-docs directory existence check**
+
+- ✅ **Root cause**: model consistently hallucinated `Search` (Grep) instead of `Glob` to check if `compliance-docs/` exists — text warnings ("NOT Search, NOT Grep") in v2.8.12 were ignored
+- ✅ **Structural fix**: eliminated the tool-choice decision point entirely — directory existence is now checked via `[ -d compliance-docs ] && echo "Directory compliance-docs/ exists."` in a Bash call, with mkdir only triggered when output is empty
+- ✅ **New permission**: `Bash([ *)` added to all 4 permission files (settings.json, settings.json.example, CLAUDE.md, INSTALLATION.md)
+- ✅ **All 10 agents updated**: ALLOWED Bash commands section (now 4 commands) and Step 5.2 rewritten
+
+### v2.8.12 (Previous Release) ✅
 **Fix tool confusion: agents must use Glob (not Search/Grep) to check directory existence**
 
 - ✅ **Root cause identified**: compliance agents used `Search` (Grep) instead of `Glob` to check if `compliance-docs/` exists — Grep searches file *contents*, so it always returned no results, triggering `mkdir` on a directory that already existed
