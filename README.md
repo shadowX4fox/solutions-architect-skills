@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.6.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -24,7 +24,7 @@ This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Ma
 
 - **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
 - **Plugin**: This repository, installable from the marketplace
-- **Skills**: Three specialized tools within the plugin
+- **Skills**: Five specialized tools within the plugin
 
 For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
 
@@ -32,10 +32,12 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **3 Integrated Skills**
+- **5 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
   - `architecture-compliance`: Generate 10 compliance contracts
+  - `component-index-guardian`: Manages `docs/components/README.md` index
+  - `architecture-peer-review`: Interactive peer review with playground tool ⭐ NEW v2.7.0
 
 - **10 Compliance Templates**
   - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
@@ -79,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.6.0` in the list.
+You should see `solutions-architect-skills v2.7.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -230,6 +232,29 @@ All 10 contracts now include automatic validation with:
 - **Actionable Feedback**: Clear recommendations for improving scores
 
 **Validation Configuration Files**: 22 JSON files in `/skills/architecture-compliance/validation/` — 10 main contract configs, 10 template validation configs, plus `VALIDATION_SCHEMA.json` and `VALIDATION_EXAMPLES.md`
+
+### Phase 3.5: Architecture Peer Review ⭐ NEW v2.7.0
+
+Perform Solution Architect peer reviews of your ARCHITECTURE.md before finalizing for implementation.
+
+**Key Features:**
+- **3 depth levels**: Light (structural, 22 checks), Medium (content quality, 44 checks), Hard (deep analysis, 82 checks)
+- **13 review categories**: Structural Completeness, Naming & Conventions, Section Completeness, Content Coherence, Technology Alignment, Integration Soundness, Metric Realism, Scalability Design, Security Posture, Performance Design, Operational Readiness, ADR Quality, Trade-off Honesty
+- **Interactive HTML playground** (via `playground` plugin): approve/reject/comment on each finding, live scorecard
+- **Weighted 0–10 scorecard**: per category and overall, with rating bands (Production-ready → Major rework)
+- **Fix prompt generation**: copy approved findings as a structured prompt for Claude to apply
+
+**Output:** Interactive HTML peer review file (`architecture-peer-review-YYYY-MM-DD.html`) + scored findings
+
+```
+/skill architecture-peer-review
+→ Locate ARCHITECTURE.md
+→ Choose depth: Light / Medium / Hard
+→ Run review (22–82 checks)
+→ Generate scorecard + open playground in browser
+→ Triage findings: Approve / Reject / Comment
+→ Copy fix prompt → paste back to apply changes
+```
 
 ## Architecture Types & Visualization
 
@@ -429,7 +454,19 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.6.0 (Current Release) ✅
+### v2.7.0 (Current Release) ✅
+**Architecture Peer Review skill**
+
+- ✅ **New skill: `architecture-peer-review`** — Solution Architect peer review with interactive HTML playground ⭐ MAJOR
+  - 3 review depth levels: Light (22 checks), Medium (44 checks), Hard (82 checks)
+  - 13 review categories with weighted 0–10 scoring and rating bands
+  - Interactive HTML playground via `playground` plugin — approve/reject/comment on each finding
+  - Fix prompt generation for approved findings
+  - Fallback plain-text report when playground plugin is not installed
+- ✅ **CLAUDE.md updated** — registered new skill under "Using the Architecture Peer Review Skill"
+- ✅ **README updated** — Phase 3.5 section + skill listing
+
+### v2.6.0 (Previous Release) ✅
 **Diagram enforcement, external reconciliation & completeness audit**
 
 - ✅ **Workflow 9 fully restructured** — 11-step process replacing the old 2-step flow ⭐ MAJOR
@@ -537,7 +574,6 @@ The Development Architecture contract validates against a **26-item checklist**:
 ### Future Releases 🚀
 
 - **Agent permission fixes** — resolve parallel execution permission issues in compliance generation agents
-- **Peer-review skill** — acts as a solutions architect to review and critique architecture documents
 - **Component asset generation skill** — generates component-level technical assets (OpenAPI specs, technical documents, and more) from architecture documentation
 
 ---

@@ -9,7 +9,7 @@ This repository follows the Claude Code plugin structure:
 - `.claude-plugin/` - Plugin configuration and marketplace metadata
   - `plugin.json` - Plugin manifest (name, version, description)
   - `marketplace.json` - Marketplace registry configuration
-- `skills/` - Four skill directories (architecture-readiness, architecture-docs, architecture-compliance, component-index-guardian)
+- `skills/` - Five skill directories (architecture-readiness, architecture-docs, architecture-compliance, component-index-guardian, architecture-peer-review)
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
 
@@ -145,3 +145,18 @@ To manually activate the skill, use: `/skill component-index-guardian`
 | Re-sync index | Invoke skill with "sync" |
 
 If a user requests a direct edit to `docs/components/README.md` (adding columns, reformatting, or any change), redirect to this skill.
+
+### Using the Architecture Peer Review Skill
+
+The `architecture-peer-review` skill performs Solution Architect peer reviews of ARCHITECTURE.md documents, generating an interactive HTML playground for triaging findings.
+
+To manually activate the skill, use: `/skill architecture-peer-review`
+
+The skill includes:
+- **3 review depth levels**: Light (structural, 22 checks), Medium (content quality, 44 checks), Hard (deep analysis, 82 checks)
+- **13 review categories** with weighted scoring: Structural Completeness, Naming & Conventions, Section Completeness, Content Coherence, Technology Alignment, Integration Soundness, Metric Realism, Scalability Design, Security Posture, Performance Design, Operational Readiness, ADR Quality, Trade-off Honesty
+- **Interactive HTML playground** via the `playground` plugin — approve/reject/comment workflow
+- **Weighted 0–10 scorecard** per category and overall
+- **Fix prompt generation** for approved findings to paste back into Claude
+
+**When to use**: After ARCHITECTURE.md passes form validation (use `architecture-docs` review first), when a peer review or architectural quality assessment is needed, or before finalizing architecture for implementation.
