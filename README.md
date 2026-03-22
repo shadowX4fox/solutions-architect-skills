@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.11` in the list.
+You should see `solutions-architect-skills v2.8.12` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.11 (Current Release) ✅
+### v2.8.12 (Current Release) ✅
+**Fix tool confusion: agents must use Glob (not Search/Grep) to check directory existence**
+
+- ✅ **Root cause identified**: compliance agents used `Search` (Grep) instead of `Glob` to check if `compliance-docs/` exists — Grep searches file *contents*, so it always returned no results, triggering `mkdir` on a directory that already existed
+- ✅ **Fix applied to all 10 agents**: Step 5.2 and the ALLOWED Bash commands section now explicitly state `NOT Search, NOT Grep — those search file contents, not paths`
+- ✅ **Affects**: all 10 compliance generator agents (sre, cloud, data-ai, development, enterprise, integration, platform, process, security, business-continuity)
+
+### v2.8.11 (Previous Release) ✅
 **Fully autonomous compliance generation confirmed — permission fix journey complete**
 
 All 10 compliance agents now run end-to-end without any permission prompts. No human intervention required after invoking `/skill architecture-compliance`.
