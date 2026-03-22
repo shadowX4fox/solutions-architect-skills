@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.7` in the list.
+You should see `solutions-architect-skills v2.8.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.7 (Current Release) ✅
+### v2.8.8 (Current Release) ✅
+**Switch Bash permissions to `command *` space format (not legacy `command:*`)**
+
+- ✅ **Root cause**: `Bash(mkdir:*)` legacy colon format may match differently from the current recommended `Bash(mkdir *)` space format. Docs confirm `*` in Bash patterns **does** match across `/` separators.
+- ✅ **Fix**: All 7 Bash rules updated to space format: `bun *`, `mkdir *`, `date *`, `cat *`, `cp *`, `grep *`, `python3 *`
+- ✅ **Updated docs**: Corrected permission format guidance — `Bash(command *)` with space is recommended; `command:*` colon syntax is legacy/deprecated
+
+### v2.8.7 (Previous Release) ✅
 **Fix Read/Write /tmp/ permissions — use `//` prefix for absolute paths**
 
 - ✅ **Root cause**: `Read(/tmp/*)` is treated as relative to the project root — Claude Code requires `//` prefix for absolute paths (documented: "Use `//Users/alice/file` for absolute paths")

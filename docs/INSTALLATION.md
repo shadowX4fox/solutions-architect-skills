@@ -101,8 +101,8 @@ Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silentl
 - `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 > **Important**: Two permission format rules:
-> 1. Use `command:*` for Bash (e.g. `Bash(bun:*)`), **not** `command *` — the `*` wildcard cannot cross `/` path separators
-> 2. Use `//` prefix for absolute paths (e.g. `Read(//tmp/*)`), **not** `/` — a single leading `/` is treated as relative to the project root
+> 1. Use `Bash(command *)` with a **space** (e.g. `Bash(bun *)`). The `*` wildcard matches across `/` path separators so absolute paths work. The `:*` colon syntax is legacy/deprecated.
+> 2. For Read/Write, use `//` prefix for absolute paths (e.g. `Read(//tmp/*)`). A single `/` is treated as relative to the project root.
 
 ### Add Permissions to Your Project Settings
 
@@ -112,13 +112,13 @@ Create or update `.claude/settings.json` in your project root:
 {
   "permissions": {
     "allow": [
-      "Bash(bun:*)",
-      "Bash(mkdir:*)",
-      "Bash(date:*)",
-      "Bash(cat:*)",
-      "Bash(cp:*)",
-      "Bash(grep:*)",
-      "Bash(python3:*)",
+      "Bash(bun *)",
+      "Bash(mkdir *)",
+      "Bash(date *)",
+      "Bash(cat *)",
+      "Bash(cp *)",
+      "Bash(grep *)",
+      "Bash(python3 *)",
       "Read(//tmp/*)",
       "Write(//tmp/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
