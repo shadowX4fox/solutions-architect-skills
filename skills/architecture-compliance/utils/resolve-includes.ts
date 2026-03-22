@@ -7,11 +7,12 @@
  * Optimized for performance using Bun's fast file I/O APIs.
  *
  * Usage:
- *   bun resolve-includes.ts <template-file> [output-file] [--validate]
- *   ./resolve-includes.ts <template-file> [output-file] [--validate]
+ *   bun resolve-includes.ts <template-file> [output-file] [--validate] [--strip-internal]
+ *   ./resolve-includes.ts <template-file> [output-file] [--validate] [--strip-internal]
  *
  * Options:
- *   --validate    Run template structure pre-validation after expansion
+ *   --validate        Run template structure pre-validation after expansion
+ *   --strip-internal  Remove <!-- BEGIN_INTERNAL_INSTRUCTIONS --> blocks from output
  *
  * If output-file is omitted, outputs to stdout.
  */
@@ -239,6 +240,7 @@ async function main() {
 
   // Parse arguments
   const validateFlag = args.includes('--validate');
+  const stripInternalFlag = args.includes('--strip-internal');
   const nonFlagArgs = args.filter(arg => !arg.startsWith('--'));
 
   const templatePath = nonFlagArgs[0];
@@ -272,6 +274,16 @@ async function main() {
     // This catches variables in the template itself (not in included files)
     if (config) {
       expanded = replaceVariables(expanded, config);
+    }
+
+    // Strip internal instruction blocks if requested
+    if (stripInternalFlag) {
+      expanded = expanded.replace(
+        /<!-- BEGIN_INTERNAL_INSTRUCTIONS -->[\s\S]*?<!-- END_INTERNAL_INSTRUCTIONS -->/g,
+        ''
+      );
+      // Collapse consecutive blank lines left by removed blocks
+      expanded = expanded.replace(/\n{3,}/g, '\n\n');
     }
 
     // Pre-validation (Phase 4.1)

@@ -87,11 +87,17 @@ Error: bun command not found
 
 ---
 
-## Bash Permissions Setup
+## Permissions Setup
 
 > **Required for compliance generation agents.**
 
-Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). The compliance agents need Bash access for template expansion, sed cleanup, date stamping, and output directory creation. You must grant these permissions in your project's `.claude/settings.json`.
+Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). You must grant Bash and Agent permissions in your project's `.claude/settings.json`.
+
+**Why these permissions are needed:**
+- `Bash(bun */skills/architecture-compliance/utils/*)` — template expansion and post-generation pipeline (uses absolute plugin paths)
+- `Bash(mkdir -p *)` — creates compliance-docs output directory
+- `Bash(date *)` — date stamping in generated contracts
+- `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 ### Add Permissions to Your Project Settings
 
@@ -101,10 +107,19 @@ Create or update `.claude/settings.json` in your project root:
 {
   "permissions": {
     "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
+      "Bash(bun */skills/architecture-compliance/utils/*)",
+      "Bash(mkdir -p *)",
       "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
+      "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
+      "Agent(solutions-architect-skills:sre-compliance-generator)",
+      "Agent(solutions-architect-skills:cloud-compliance-generator)",
+      "Agent(solutions-architect-skills:data-ai-compliance-generator)",
+      "Agent(solutions-architect-skills:development-compliance-generator)",
+      "Agent(solutions-architect-skills:process-compliance-generator)",
+      "Agent(solutions-architect-skills:security-compliance-generator)",
+      "Agent(solutions-architect-skills:platform-compliance-generator)",
+      "Agent(solutions-architect-skills:enterprise-compliance-generator)",
+      "Agent(solutions-architect-skills:integration-compliance-generator)"
     ]
   }
 }
@@ -554,30 +569,17 @@ CHANGELOG.md
    chmod 755 .
    ```
 
-### Issue: Compliance Agents Prompt for Bash Permission
+### Issue: Compliance Agents Prompt for Permission
 
-**Symptom:** When running `/skill architecture-compliance`, Claude Code prompts you to approve Bash commands (bun, sed, mkdir, date) for each agent call.
+**Symptom:** When running `/skill architecture-compliance`, Claude Code prompts you to approve Bash commands or agent spawning for each compliance agent.
 
-**Cause:** Plugin agents cannot use `permissionMode: bypassPermissions` in frontmatter — it is silently ignored by Claude Code. Bash permissions must be granted via `.claude/settings.json`.
+**Cause:** Plugin agents cannot use `permissionMode: bypassPermissions` in frontmatter — it is silently ignored by Claude Code. Bash and Agent permissions must be granted via `.claude/settings.json`.
 
 **Solution:**
 
-Create or update `.claude/settings.json` in your project root with:
+Create or update `.claude/settings.json` in your project root with the full permissions block from the [Permissions Setup](#permissions-setup) section above.
 
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
-      "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
-    ]
-  }
-}
-```
-
-Then restart Claude Code. The compliance agents will now execute Bash commands without permission prompts.
+Then restart Claude Code. The compliance agents will execute without permission prompts.
 
 ---
 

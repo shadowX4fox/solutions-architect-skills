@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.7.0` in the list.
+You should see `solutions-architect-skills v2.8.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,17 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.7.0 (Current Release) ✅
+### v2.8.0 (Current Release) ✅
+**Compliance agent orchestration simplification + post-generation pipeline**
+
+- ✅ **Removed `find && cd` Bash blocker** — all 10 compliance agents now receive `plugin_dir` as an input parameter instead of running `find "$HOME" ... && cd` (compound command blocked by Claude Code's `&&`-aware permission checker)
+- ✅ **`post-generation-pipeline.ts`** (new) — single `bun` call that scans compliance-docs, calculates validation scores, updates contract fields, and writes `COMPLIANCE_MANIFEST.md` in one pass via direct TypeScript imports
+- ✅ **`resolve-includes.ts` `--strip-internal` flag** — strips `BEGIN_INTERNAL_INSTRUCTIONS` blocks during template expansion, eliminating the separate `sed` step from all agents
+- ✅ **SKILL.md reduced from 2,863 → 701 lines** — simplified to: resolve `plugin_dir` → spawn N agents in parallel → run pipeline in one Bash call
+- ✅ **`Agent()` permissions** — 10 `Agent(solutions-architect-skills:*-compliance-generator)` rules in `settings.json` using the Claude Code permissions API so agent spawning needs no manual approval
+- ✅ **Bash permissions updated** — `bun */skills/.../*` (wildcard prefix for absolute paths), `sed *` removed, `mkdir -p *` broadened
+
+### v2.7.0 (Previous Release) ✅
 **Architecture Peer Review skill**
 
 - ✅ **New skill: `architecture-peer-review`** — Solution Architect peer review with interactive HTML playground ⭐ MAJOR

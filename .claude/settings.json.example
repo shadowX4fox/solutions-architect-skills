@@ -14,13 +14,24 @@
     "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
   },
 
-  "// BASH PERMISSIONS": "Required for compliance generation agents (plugin agents cannot use permissionMode frontmatter)",
+  "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
+  "// BASH PERMISSIONS": "bun with wildcard prefix handles absolute plugin paths; mkdir -p * covers any output dir",
+  "// AGENT PERMISSIONS": "Agent() rules allow Claude to spawn compliance generators without manual prompts",
   "permissions": {
     "allow": [
-      "Bash(bun skills/architecture-compliance/utils/*)",
-      "Bash(sed *)",
+      "Bash(bun */skills/architecture-compliance/utils/*)",
+      "Bash(mkdir -p *)",
       "Bash(date *)",
-      "Bash(mkdir -p compliance-docs)"
+      "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
+      "Agent(solutions-architect-skills:sre-compliance-generator)",
+      "Agent(solutions-architect-skills:cloud-compliance-generator)",
+      "Agent(solutions-architect-skills:data-ai-compliance-generator)",
+      "Agent(solutions-architect-skills:development-compliance-generator)",
+      "Agent(solutions-architect-skills:process-compliance-generator)",
+      "Agent(solutions-architect-skills:security-compliance-generator)",
+      "Agent(solutions-architect-skills:platform-compliance-generator)",
+      "Agent(solutions-architect-skills:enterprise-compliance-generator)",
+      "Agent(solutions-architect-skills:integration-compliance-generator)"
     ]
   },
 

@@ -50,6 +50,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 ## Input Parameters
 
 - `architecture_file`: Path to ARCHITECTURE.md (default: ./ARCHITECTURE.md)
+- `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (provided by the skill orchestrator). If not provided, use Glob to find `**/solutions-architect-skills/skills/architecture-compliance/SKILL.md` and strip the `/skills/architecture-compliance/SKILL.md` suffix.
 
 ## Workflow
 
@@ -103,20 +104,22 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 ### PHASE 1: Template Preparation
 
-**Step 1.0: Navigate to Plugin Directory**
+**Step 1.0: Resolve Plugin Directory**
 
-Use Bash to resolve and navigate to the plugin directory. **Required before any `bun` command** — working directory persists for the entire agent session:
-```bash
-PLUGIN_DIR=$(find "$HOME" -maxdepth 10 -type d -name "solutions-architect-skills" ! -path "*/node_modules/*" ! -path "*/.claude/*" 2>/dev/null | head -1) && cd "$PLUGIN_DIR"
+Confirm `plugin_dir` from input parameters. If not provided, use Glob to locate the skill:
+```
+Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL.md
+Strip the "/skills/architecture-compliance/SKILL.md" suffix to get plugin_dir
 ```
 
 **Step 1.1: Expand Template**
 
-Use Bash tool to run resolve-includes.ts:
+Use Bash tool to run resolve-includes.ts with `--strip-internal` (removes internal instruction blocks in one pass, no separate `sed` step needed):
 ```bash
-bun skills/architecture-compliance/utils/resolve-includes.ts \
-  skills/architecture-compliance/templates/TEMPLATE_BUSINESS_CONTINUITY.md \
-  /tmp/expanded_bc_template.md
+bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts \
+  [plugin_dir]/skills/architecture-compliance/templates/TEMPLATE_BUSINESS_CONTINUITY.md \
+  /tmp/expanded_bc_template.md \
+  --strip-internal
 ```
 
 **Step 1.2: Read Expanded Template**
@@ -127,40 +130,18 @@ Read file: /tmp/expanded_bc_template.md
 Store content in variable: template_content
 ```
 
-**Step 1.3: Remove Instructional Sections**
+**CRITICAL**: This is already the clean template — `--strip-internal` removed all `BEGIN_INTERNAL_INSTRUCTIONS` blocks during expansion. Use this for all subsequent phases.
 
-Use Bash tool to remove internal agent instructions from expanded template:
-
-```bash
-sed '/<!-- BEGIN_INTERNAL_INSTRUCTIONS -->/,/<!-- END_INTERNAL_INSTRUCTIONS -->/d' \
-  /tmp/expanded_bc_template.md > /tmp/cleaned_bc_template.md
-```
-
-**What This Does**:
-- Removes all content between `<!-- BEGIN_INTERNAL_INSTRUCTIONS -->` and `<!-- END_INTERNAL_INSTRUCTIONS -->`
-- Preserves only contract-facing content
-- Prevents instructional metadata from appearing in final output
-
-**Step 1.4: Read Cleaned Template**
-
-Use Read tool:
-```
-Read file: /tmp/cleaned_bc_template.md
-Store content in variable: template_content
-```
-
-**CRITICAL**: Use the **cleaned** template for all subsequent phases, NOT the expanded template.
-
-**Step 1.5: Verify Template Was Loaded (HARD GATE)**
+**Step 1.3: Verify Template Was Loaded (HARD GATE)**
 
 Before proceeding to PHASE 2, you MUST confirm ALL of the following:
 
-1. You have the cleaned template content loaded in your working memory
+1. You have the template content loaded in your working memory
 2. The template contains `[PLACEHOLDER]` markers (e.g., `[PROJECT_NAME]`, `[GENERATION_DATE]`, `[Compliant/Non-Compliant/Not Applicable/Unknown]`)
 3. The template contains a `## Compliance Summary` table with requirement code rows
 4. The template contains numbered detail sections (e.g., `## 1.`, `## 2.`, etc.)
 
-**GATE CHECK**: If ANY of the above cannot be confirmed, DO NOT proceed. Re-execute Steps 1.1-1.4. If template expansion fails after 2 attempts, return this error:
+**GATE CHECK**: If ANY of the above cannot be confirmed, DO NOT proceed. Re-execute Steps 1.1-1.2. If template expansion fails after 2 attempts, return this error:
 ```
 TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contract generation aborted.
 ```
@@ -321,12 +302,12 @@ Replace Document Control placeholders with default values:
 - `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
 - `[APPROVAL_AUTHORITY]` → `"Business Continuity Review Board"`
 
-**DO NOT REPLACE these validation placeholders** — they are populated by PHASE 4.6 CLI tools:
-- `[DOCUMENT_STATUS]` — leave as-is for PHASE 4.6
-- `[VALIDATION_SCORE]` — leave as-is for PHASE 4.6
-- `[VALIDATION_STATUS]` — leave as-is for PHASE 4.6
-- `[VALIDATION_DATE]` — leave as-is for PHASE 4.6
-- `[REVIEW_ACTOR]` — leave as-is for PHASE 4.6
+**DO NOT REPLACE these validation placeholders** — they are populated by the post-generation pipeline:
+- `[DOCUMENT_STATUS]` — leave as-is for the post-generation pipeline
+- `[VALIDATION_SCORE]` — leave as-is for the post-generation pipeline
+- `[VALIDATION_STATUS]` — leave as-is for the post-generation pipeline
+- `[VALIDATION_DATE]` — leave as-is for the post-generation pipeline
+- `[REVIEW_ACTOR]` — leave as-is for the post-generation pipeline
 
 **Step 4.1: Replace Simple Placeholders**
 
@@ -583,53 +564,6 @@ INCORRECT (converted to table):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
-### PHASE 4.6: Calculate Validation Score
-
-**CRITICAL**: This phase calculates validation score and updates contract fields BEFORE writing output.
-
-**Step 4.6.1: Run Score Calculation**
-
-Use Bash tool to execute score calculator:
-```bash
-bun skills/architecture-compliance/utils/score-calculator-cli.ts \
-  /tmp/populated_business_continuity_contract.md \
-  validation/business_continuity_validation.json
-```
-
-**Output**: JSON with validation score, written to `/tmp/validation_score_business_continuity.json`
-
-**Step 4.6.2: Update Contract Fields**
-
-Use Bash tool to execute field updater:
-```bash
-bun skills/architecture-compliance/utils/field-updater-cli.ts \
-  /tmp/populated_business_continuity_contract.md \
-  /tmp/validation_score_business_continuity.json \
-  /tmp/final_business_continuity_contract.md
-```
-
-**What This Does**:
-- Reads populated contract from Step 4.6.1 input
-- Reads validation score JSON from `/tmp/validation_score_business_continuity.json`
-- Updates Document Control fields:
-  - `[VALIDATION_SCORE]` → `"8.7/10"` (actual calculated score)
-  - `[VALIDATION_STATUS]` → `"PASS"` (outcome status)
-  - `[VALIDATION_DATE]` → `"2025-12-30"` (current date)
-  - `[DOCUMENT_STATUS]` → `"Approved"` (based on score tier)
-  - `[REVIEW_ACTOR]` → `"System (Auto-Approved)"` (based on outcome)
-- Updates Overall Compliance footer with actual status counts and percentages
-- Updates Remediation Section A.3.3 with current status and score estimates
-- Writes final contract to `/tmp/final_business_continuity_contract.md`
-
-**Step 4.6.3: Error Handling**
-
-If validation fails (e.g., malformed table, missing sections):
-- Log error to stderr
-- Write contract with "Error" placeholders in validation fields
-- Continue to PHASE 5 (always write contract output)
-
-**CRITICAL**: Never block contract generation due to validation failure. Always produce output.
-
 ### PHASE 5: Write Output
 
 **Step 5.0: Pre-Flight Format Validation**
@@ -672,12 +606,14 @@ Use Bash tool:
 mkdir -p compliance-docs
 ```
 
-**Step 5.3: Read and Write Final Contract**
+**Step 5.3: Read Populated Contract**
 
-Use Read tool to load the validated contract:
+Use Read tool:
 ```
-file_path: /tmp/final_business_continuity_contract.md
+file_path: /tmp/populated_business_continuity_contract.md
 ```
+
+**Note**: The post-generation pipeline run by the orchestrator will calculate validation scores and update `COMPLIANCE_MANIFEST.md` after all agents complete.
 
 Then use Write tool to write to output location:
 ```

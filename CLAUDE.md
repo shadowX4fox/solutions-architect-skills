@@ -122,7 +122,29 @@ The skill includes:
 
 **When to use**: After ARCHITECTURE.md is complete, when compliance documentation is required, or when organizational standards validation is needed.
 
-**Bash Permissions (Plugin Limitation)**: Claude Code plugin agents do not support `permissionMode` in frontmatter (silently ignored). The compliance agents require Bash access for template expansion, sed cleanup, date stamping, and mkdir. These permissions must be granted via the project's `.claude/settings.json`. A pre-configured example is provided at `.claude/settings.json.example`. Users installing the plugin must copy or merge the `permissions.allow` block into their project's `.claude/settings.json`.
+**Permissions (Plugin Limitation)**: Claude Code plugin agents do not support `permissionMode` in frontmatter (silently ignored). Permissions must be granted via the project's `.claude/settings.json`. Required permissions:
+
+```json
+"permissions": {
+  "allow": [
+    "Bash(bun */skills/architecture-compliance/utils/*)",
+    "Bash(mkdir -p *)",
+    "Bash(date *)",
+    "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
+    "Agent(solutions-architect-skills:sre-compliance-generator)",
+    "Agent(solutions-architect-skills:cloud-compliance-generator)",
+    "Agent(solutions-architect-skills:data-ai-compliance-generator)",
+    "Agent(solutions-architect-skills:development-compliance-generator)",
+    "Agent(solutions-architect-skills:process-compliance-generator)",
+    "Agent(solutions-architect-skills:security-compliance-generator)",
+    "Agent(solutions-architect-skills:platform-compliance-generator)",
+    "Agent(solutions-architect-skills:enterprise-compliance-generator)",
+    "Agent(solutions-architect-skills:integration-compliance-generator)"
+  ]
+}
+```
+
+A pre-configured example is provided at `.claude/settings.json.example`. Users installing the plugin must copy or merge the `permissions.allow` block into their project's `.claude/settings.json`.
 
 ### Using the Component Index Guardian Skill
 
