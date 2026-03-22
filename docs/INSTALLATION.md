@@ -94,11 +94,12 @@ Error: bun command not found
 Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). You must grant Bash and Agent permissions in your project's `.claude/settings.json`.
 
 **Why these permissions are needed:**
-- `Bash(bun *)` — allows any bun command (required because plugin is installed at a deep cache path with multiple `/`-separated directories that a glob `*` can't cross)
-- `Bash(mkdir -p *)` — creates compliance-docs output directory
-- `Bash(date *)` — date stamping in generated contracts
-- `Bash(cat *)`, `Bash(cp *)`, `Bash(grep *)`, `Bash(python3 /tmp/*)` — safety-net rules that prevent prompts if the model improvises file operations
+- `Bash(bun:*)` — allows any bun command. Uses `command:*` format because `Bash(command *)` patterns cannot match arguments containing `/` path separators
+- `Bash(mkdir:*)`, `Bash(date:*)` — directory creation and date stamping in generated contracts
+- `Bash(cat:*)`, `Bash(cp:*)`, `Bash(grep:*)`, `Bash(python3:*)` — safety-net rules that prevent prompts if the model improvises file operations
 - `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
+
+> **Important**: Use `command:*` format (e.g. `Bash(bun:*)`), **not** `command *` (e.g. `Bash(bun *)`). The `*` wildcard in `Bash()` patterns cannot cross `/` path separators — it would fail to match absolute paths like `/home/user/.claude/plugins/cache/.../script.ts`.
 
 ### Add Permissions to Your Project Settings
 
@@ -108,13 +109,13 @@ Create or update `.claude/settings.json` in your project root:
 {
   "permissions": {
     "allow": [
-      "Bash(bun *)",
-      "Bash(mkdir -p *)",
-      "Bash(date *)",
-      "Bash(cat *)",
-      "Bash(cp *)",
-      "Bash(grep *)",
-      "Bash(python3 /tmp/*)",
+      "Bash(bun:*)",
+      "Bash(mkdir:*)",
+      "Bash(date:*)",
+      "Bash(cat:*)",
+      "Bash(cp:*)",
+      "Bash(grep:*)",
+      "Bash(python3:*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
       "Agent(solutions-architect-skills:cloud-compliance-generator)",

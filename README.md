@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.4` in the list.
+You should see `solutions-architect-skills v2.8.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.4 (Current Release) ✅
+### v2.8.5 (Current Release) ✅
+**Fix Bash permission format — use `command:*` syntax (not `command *`)**
+
+- ✅ **Root cause confirmed**: `Bash(command *)` patterns cannot match arguments containing `/` — `*` can never cross path separators. Both `Bash(bun */skills/...)` and `Bash(bun *)` fail for absolute paths like `/home/user/.claude/plugins/cache/.../script.ts`
+- ✅ **Fix**: All Bash patterns now use `command:*` format (e.g. `Bash(bun:*)`) — this matches the auto-learn syntax Claude Code itself uses when you select "don't ask again"
+- ✅ **All 7 Bash rules updated**: `bun:*`, `mkdir:*`, `date:*`, `cat:*`, `cp:*`, `grep:*`, `python3:*`
+
+### v2.8.4 (Previous Release) ✅
 **Fix `Bash(bun *)` permission — glob `*` can't cross path separators**
 
 - ✅ **Root cause**: `Bash(bun */skills/architecture-compliance/utils/*)` uses a single `*` which can't match across `/` separators in the deep plugin cache path (`/home/.../.claude/plugins/cache/.../2.8.3/skills/...`). Claude Code's permission checker requires `*` to match within a single path segment.

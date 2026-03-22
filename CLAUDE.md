@@ -127,13 +127,13 @@ The skill includes:
 ```json
 "permissions": {
   "allow": [
-    "Bash(bun *)",
-    "Bash(mkdir -p *)",
-    "Bash(date *)",
-    "Bash(cat *)",
-    "Bash(cp *)",
-    "Bash(grep *)",
-    "Bash(python3 /tmp/*)",
+    "Bash(bun:*)",
+    "Bash(mkdir:*)",
+    "Bash(date:*)",
+    "Bash(cat:*)",
+    "Bash(cp:*)",
+    "Bash(grep:*)",
+    "Bash(python3:*)",
     "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
     "Agent(solutions-architect-skills:sre-compliance-generator)",
     "Agent(solutions-architect-skills:cloud-compliance-generator)",
