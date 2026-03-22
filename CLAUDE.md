@@ -136,6 +136,7 @@ The skill includes:
     "Bash(python3 *)",
     "Read(//tmp/*)",
     "Write(//tmp/*)",
+    "Write(compliance-docs/*)",
     "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
     "Agent(solutions-architect-skills:sre-compliance-generator)",
     "Agent(solutions-architect-skills:cloud-compliance-generator)",

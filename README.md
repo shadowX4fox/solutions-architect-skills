@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.16-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.17-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.16 (Current Release) ✅
+### v2.8.17 (Current Release) ✅
+**Fix missing `Write(compliance-docs/*)` permission — agents were blocked writing output contracts**
+
+- ✅ **Root cause**: compliance agents write contracts directly to `compliance-docs/` via the Write tool, but `Write(compliance-docs/*)` was never included in the required permissions
+- ✅ **`.claude/settings.json.example`**: added `Write(compliance-docs/*)` after `Write(//tmp/*)`
+- ✅ **`.claude/settings.json`**: same fix for local dev runs
+- ✅ **`CLAUDE.md`**: permissions block updated with the new entry
+- ✅ **`docs/INSTALLATION.md`**: permissions block and explanation updated
+
+### v2.8.16 (Previous Release) ✅
 **Fix stale A.3.2 reference and rename A.3.3 → A.3.2 across all compliance templates**
 
 - ✅ **`completion-guide-intro.md`**: replaced stale "Section A.3.2 below" with link to plugin README

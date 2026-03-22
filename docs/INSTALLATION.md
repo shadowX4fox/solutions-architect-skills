@@ -98,6 +98,7 @@ Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silentl
 - `Bash(mkdir:*)`, `Bash(date:*)` — directory creation and date stamping in generated contracts
 - `Bash(cat:*)`, `Bash(cp:*)`, `Bash(grep:*)`, `Bash(python3:*)` — safety-net rules that prevent prompts if the model improvises file operations
 - `Read(//tmp/*)`, `Write(//tmp/*)` — agents expand templates to `/tmp/` then read them back. Note: `//` prefix is required for absolute paths — `/tmp/*` would be interpreted as relative to the project root
+- `Write(compliance-docs/*)` — agents write generated compliance contracts directly to `compliance-docs/` in your project root
 - `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 > **Important**: Two permission format rules:
@@ -121,6 +122,7 @@ Create or update `.claude/settings.json` in your project root:
       "Bash(python3 *)",
       "Read(//tmp/*)",
       "Write(//tmp/*)",
+      "Write(compliance-docs/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
       "Agent(solutions-architect-skills:cloud-compliance-generator)",
