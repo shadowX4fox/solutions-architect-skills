@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.9` in the list.
+You should see `solutions-architect-skills v2.8.10` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.9 (Current Release) ✅
+### v2.8.10 (Current Release) ✅
+**Replace `mkdir -p` with Glob-check + plain `mkdir` in all 10 compliance agents**
+
+- ✅ **Root cause**: `Bash(mkdir -p *)` permission didn't match `mkdir -p compliance-docs` even with the explicit pattern added. The `-p` flag is fundamentally incompatible with the permission matcher.
+- ✅ **Fix**: All 10 agent Step 5.2 blocks now use Glob tool to check if `compliance-docs/` exists, then run plain `mkdir compliance-docs` (no `-p`) only if not found — covered by the existing `Bash(mkdir *)` permission.
+- ✅ **Cleanup**: Removed `Bash(mkdir -p *)` from all 4 permission files — no longer needed.
+
+### v2.8.9 (Previous Release) ✅
 **Add explicit `Bash(mkdir -p *)` permission pattern**
 
 - ✅ **Root cause**: `Bash(mkdir *)` matches `mkdir compliance-docs` but not `mkdir -p compliance-docs` — the `-p` flag is part of the command string and requires its own pattern (per Claude Code docs `Bash(npm run *)` pattern)

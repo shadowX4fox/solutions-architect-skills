@@ -104,7 +104,7 @@ The most critical and common failure is when the agent IGNORES the template and 
 **ALLOWED Bash commands** (these 3 ONLY):
 1. `bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts ...` (template expansion)
 2. `date +%Y-%m-%d` (get current date)
-3. `mkdir -p compliance-docs` (create output directory)
+3. `mkdir compliance-docs` (create output directory — only when Glob confirms it does not exist)
 
 **FORBIDDEN** — do NOT use Bash for:
 - ❌ `python3`, `python`, `node` or ANY scripting language
@@ -577,10 +577,9 @@ Format: `/compliance-docs/DEVELOPMENT_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **Step 5.2: Create Output Directory**
 
-Use Bash tool:
-```bash
-mkdir -p compliance-docs
-```
+Use Glob tool to check if `compliance-docs/` already exists (pattern: `compliance-docs/`).
+- If Glob returns **no results**: use Bash tool: `mkdir compliance-docs`
+- If Glob returns a result: skip — directory already exists.
 
 **Step 5.3: Write Output Contract**
 
