@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.10` in the list.
+You should see `solutions-architect-skills v2.8.11` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,45 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.10 (Current Release) ✅
+### v2.8.11 (Current Release) ✅
+**Fully autonomous compliance generation confirmed — permission fix journey complete**
+
+All 10 compliance agents now run end-to-end without any permission prompts. No human intervention required after invoking `/skill architecture-compliance`.
+
+**Confirmed working permission set** (copy into your project's `.claude/settings.json`):
+```json
+"permissions": {
+  "allow": [
+    "Bash(bun *)",
+    "Bash(mkdir *)",
+    "Bash(date *)",
+    "Bash(cat *)",
+    "Bash(cp *)",
+    "Bash(grep *)",
+    "Bash(python3 *)",
+    "Read(//tmp/*)",
+    "Write(//tmp/*)",
+    "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
+    "Agent(solutions-architect-skills:sre-compliance-generator)",
+    "Agent(solutions-architect-skills:cloud-compliance-generator)",
+    "Agent(solutions-architect-skills:data-ai-compliance-generator)",
+    "Agent(solutions-architect-skills:development-compliance-generator)",
+    "Agent(solutions-architect-skills:process-compliance-generator)",
+    "Agent(solutions-architect-skills:security-compliance-generator)",
+    "Agent(solutions-architect-skills:platform-compliance-generator)",
+    "Agent(solutions-architect-skills:enterprise-compliance-generator)",
+    "Agent(solutions-architect-skills:integration-compliance-generator)"
+  ]
+}
+```
+
+**Key lessons from the v2.8.x permission fix series:**
+- Use `Bash(command *)` with a **space** — `Bash(command:*)` colon syntax is legacy/deprecated
+- Use `//` prefix for absolute paths in Read/Write: `Read(//tmp/*)` not `Read(/tmp/*)`
+- Flags change the command string: `mkdir -p` is a different pattern from `mkdir` — avoid flags by redesigning the command (Glob-check + plain `mkdir`)
+- Agents must not improvise with unauthorized tools — TOOL DISCIPLINE block enforces allowed commands
+
+### v2.8.10 (Previous Release) ✅
 **Replace `mkdir -p` with Glob-check + plain `mkdir` in all 10 compliance agents**
 
 - ✅ **Root cause**: `Bash(mkdir -p *)` permission didn't match `mkdir -p compliance-docs` even with the explicit pattern added. The `-p` flag is fundamentally incompatible with the permission matcher.
