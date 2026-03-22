@@ -129,6 +129,7 @@ The skill includes:
   "allow": [
     "Bash(bun *)",
     "Bash(mkdir *)",
+    "Bash(mkdir -p *)",
     "Bash(date *)",
     "Bash(cat *)",
     "Bash(cp *)",

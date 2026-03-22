@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -81,7 +81,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.8` in the list.
+You should see `solutions-architect-skills v2.8.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.8 (Current Release) ✅
+### v2.8.9 (Current Release) ✅
+**Add explicit `Bash(mkdir -p *)` permission pattern**
+
+- ✅ **Root cause**: `Bash(mkdir *)` matches `mkdir compliance-docs` but not `mkdir -p compliance-docs` — the `-p` flag is part of the command string and requires its own pattern (per Claude Code docs `Bash(npm run *)` pattern)
+- ✅ **Fix**: Added `Bash(mkdir -p *)` alongside `Bash(mkdir *)` in all 4 permission files (`.claude/settings.json`, `.claude/settings.json.example`, `CLAUDE.md`, `docs/INSTALLATION.md`)
+
+### v2.8.8 (Previous Release) ✅
 **Switch Bash permissions to `command *` space format (not legacy `command:*`)**
 
 - ✅ **Root cause**: `Bash(mkdir:*)` legacy colon format may match differently from the current recommended `Bash(mkdir *)` space format. Docs confirm `*` in Bash patterns **does** match across `/` separators.

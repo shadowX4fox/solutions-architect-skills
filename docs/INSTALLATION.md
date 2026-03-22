@@ -114,6 +114,7 @@ Create or update `.claude/settings.json` in your project root:
     "allow": [
       "Bash(bun *)",
       "Bash(mkdir *)",
+      "Bash(mkdir -p *)",
       "Bash(date *)",
       "Bash(cat *)",
       "Bash(cp *)",
