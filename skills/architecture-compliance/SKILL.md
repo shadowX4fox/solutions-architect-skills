@@ -585,34 +585,15 @@ Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL
 ```
 If a result is returned: strip the `"/skills/architecture-compliance/SKILL.md"` suffix → `plugin_dir`. Done — skip Step B.
 
-**Step B — Write and run a temporary discovery script (works for any installation path):**
-If Glob returned nothing:
-
-First, call the **Write tool** directly — do **NOT** use `cat`, Bash, or heredoc for this step (they require approval). Replace `[UUID]` with 8 random hex chars (e.g. `a3f7c2b1`):
-
-Write tool call:
-- file_path: `//tmp/sas-discover-plugin-dir-[UUID].ts` ← **use double-slash `//tmp/` to match the `Write(//tmp/*)` permission exactly**
-- content:
-```typescript
-import { Glob } from "bun";
-import { homedir } from "os";
-import { resolve } from "path";
-
-for await (const f of new Glob("**/architecture-compliance/utils/resolve-plugin-dir.ts").scan({ cwd: homedir(), absolute: true })) {
-  console.log(resolve(f, "..", "..", "..", ".."));
-  process.exit(0);
-}
-process.exit(1);
-```
-
-Then run it:
+**Step B — Call resolve-plugin-dir.ts from the marketplace installation (installed plugin):**
+If Glob returned nothing, run:
 ```bash
-bun /tmp/sas-discover-plugin-dir-[UUID].ts
+bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-compliance/utils/resolve-plugin-dir.ts
 ```
 Capture stdout. If non-empty: use it as `plugin_dir`. Done.
 
 If both steps yield nothing: **STOP** and report:
-> ERROR: Cannot resolve plugin_dir. Ensure the solutions-architect-skills plugin is installed (marketplace or git clone) under your home directory.
+> ERROR: Cannot resolve plugin_dir. Run from within the plugin dev directory, or ensure the plugin is installed via the shadowx4fox-solution-architect-marketplace.
 
 Store `plugin_dir` for inclusion in all agent prompts.
 

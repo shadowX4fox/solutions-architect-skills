@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.23 (Current Release) ✅
+### v2.8.24 (Current Release) ✅
+**Fix: drop temp-file approach in Step B — call resolve-plugin-dir.ts directly from marketplace path**
+
+- ✅ **Root cause**: every temp-file approach hit an approval wall — heredoc security check, Write tool relative-path rewriting, `//tmp/` double-slash not helping — all required user approval
+- ✅ **`SKILL.md` Step B**: replaced the entire Write-then-run temp-file block with a single `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-compliance/utils/resolve-plugin-dir.ts` call — uses `Bash(bun *)` (already permitted), no Write tool, no temp file, no approval prompt
+- ✅ `resolve-plugin-dir.ts` uses `import.meta.dir` so calling it from any location returns the correct `plugin_dir` for that installation
+
+### v2.8.23 (Previous Release) ✅
 **Fix: use `//tmp/` (double-slash) in Step B Write file_path to match `Write(//tmp/*)` permission exactly**
 
 - ✅ **Root cause**: Claude Code's permission system uses `//` prefix for absolute paths — `Write(//tmp/*)` requires the path to be `//tmp/filename`, not `/tmp/filename`; single-slash path kept getting rewritten as a relative traversal `../../../../../tmp/...` which didn't match the permission
