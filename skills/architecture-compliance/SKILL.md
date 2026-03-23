@@ -579,11 +579,21 @@ Output: Validated contract type
 
 **Step 3.1: Resolve Plugin Directory**
 
-Use Glob to locate this skill file and derive the plugin root:
+**Step A — Try Glob (dev mode / running from within the plugin directory):**
 ```
 Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL.md
-Strip "/skills/architecture-compliance/SKILL.md" suffix → plugin_dir (absolute path)
 ```
+If a result is returned: strip the `"/skills/architecture-compliance/SKILL.md"` suffix → `plugin_dir`. Done — skip Step B.
+
+**Step B — Use resolve-plugin-dir utility (installed plugin / external project):**
+If Glob returned nothing, run:
+```bash
+bun ~/.claude/plugins/solutions-architect-skills/skills/architecture-compliance/utils/resolve-plugin-dir.ts
+```
+Capture stdout. If non-empty: use it as `plugin_dir`. Done.
+
+If both steps yield nothing: **STOP** and report:
+> ERROR: Cannot resolve plugin_dir. Ensure the solutions-architect-skills plugin is installed at `~/.claude/plugins/solutions-architect-skills/` or run from within the plugin directory.
 
 Store `plugin_dir` for inclusion in all agent prompts.
 

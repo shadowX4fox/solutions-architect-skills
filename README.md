@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.18-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.18 (Current Release) ✅
+### v2.8.19 (Current Release) ✅
+**Fix: robust plugin_dir resolution — add resolve-plugin-dir.ts Bun utility + two-step fallback in SKILL.md**
+
+- ✅ **Root cause**: `SKILL.md` Step 3.1 used a single Glob to find the plugin root, which silently fails when the skill runs from a project outside the plugin directory — passing empty `plugin_dir` to agents, causing them to go off-script with `find` and read unrelated files
+- ✅ **New utility** `skills/architecture-compliance/utils/resolve-plugin-dir.ts`: uses `import.meta.dir` to compute and output the plugin root from its own location — always correct regardless of the calling directory
+- ✅ **`SKILL.md` Step 3.1**: added Step B fallback — if Glob fails, runs `bun ~/.claude/plugins/solutions-architect-skills/.../resolve-plugin-dir.ts`; hard error if both steps fail
+
+### v2.8.18 (Previous Release) ✅
 **Fix: remove leading slash from agent output paths — compliance agents now write directly without permission denial**
 
 - ✅ **Root cause**: all 10 compliance agents used `` `/compliance-docs/FILENAME.md` `` (absolute path from filesystem root) in PHASE 5 Step 5.1, but `Write(compliance-docs/*)` permission only covers project-relative paths — causing permission denial and requiring a manual recovery workaround
