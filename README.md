@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -24,7 +24,7 @@ This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Ma
 
 - **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
 - **Plugin**: This repository, installable from the marketplace
-- **Skills**: Five specialized tools within the plugin
+- **Skills**: Six specialized tools within the plugin
 
 For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
 
@@ -32,12 +32,13 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **5 Integrated Skills**
+- **6 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
   - `architecture-compliance`: Generate 10 compliance contracts
+  - `architecture-compliance-review`: Compliance portfolio health review + gap explorer ⭐ NEW v2.8.25
   - `component-index-guardian`: Manages `docs/components/README.md` index
-  - `architecture-peer-review`: Interactive peer review with playground tool ⭐ NEW v2.7.0
+  - `architecture-peer-review`: Interactive peer review with playground tool
 
 - **10 Compliance Templates**
   - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
@@ -454,7 +455,18 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.24 (Current Release) ✅
+### v2.8.25 (Current Release) ✅
+**feat: add `architecture-compliance-review` skill — compliance portfolio health review with interactive gap explorer**
+
+- ✅ **New skill**: `skills/architecture-compliance-review/SKILL.md` — validates all 10 compliance contracts are present and ≤6 months old; offers to regenerate expired/missing contracts via `architecture-compliance` skill before proceeding
+- ✅ **Gap extraction**: reads each contract's compliance summary table and extracts Non-Compliant and Unknown requirements with priority (Blocker/Desired), source section, and concept tags
+- ✅ **Concept clustering**: groups gaps across all contracts by underlying ARCHITECTURE.md concept (load testing, DR/RTO, IAM, observability, etc.); ranks clusters by cross-contract impact score
+- ✅ **Interactive playground**: `PLAYGROUND_TEMPLATE.md` defines a three-panel compliance gap explorer — portfolio health panel (all 10 contracts with color-coded scores), concept cluster gap explorer with filters, and fix prompt generator
+- ✅ **Fix prompt generation**: produces targeted prompts specifying which ARCHITECTURE.md sections to update and what to document, grouped by impact level
+- ✅ **CLAUDE.md**: documented new skill, updated skills count to 6, added `Read(compliance-docs/*)` to required permissions block
+- ✅ **settings.json + settings.json.example**: added `Read(compliance-docs/*)` permission for contract file reading
+
+### v2.8.24 (Previous Release) ✅
 **Fix: drop temp-file approach in Step B — call resolve-plugin-dir.ts directly from marketplace path**
 
 - ✅ **Root cause**: every temp-file approach hit an approval wall — heredoc security check, Write tool relative-path rewriting, `//tmp/` double-slash not helping — all required user approval

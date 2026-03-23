@@ -30,6 +30,7 @@
       "Read(//tmp/*)",
       "Write(//tmp/*)",
       "Write(compliance-docs/*)",
+      "Read(compliance-docs/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
       "Agent(solutions-architect-skills:cloud-compliance-generator)",

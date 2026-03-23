@@ -9,7 +9,7 @@ This repository follows the Claude Code plugin structure:
 - `.claude-plugin/` - Plugin configuration and marketplace metadata
   - `plugin.json` - Plugin manifest (name, version, description)
   - `marketplace.json` - Marketplace registry configuration
-- `skills/` - Five skill directories (architecture-readiness, architecture-docs, architecture-compliance, component-index-guardian, architecture-peer-review)
+- `skills/` - Six skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, component-index-guardian, architecture-peer-review)
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
 
@@ -137,6 +137,7 @@ The skill includes:
     "Read(//tmp/*)",
     "Write(//tmp/*)",
     "Write(compliance-docs/*)",
+    "Read(compliance-docs/*)",
     "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
     "Agent(solutions-architect-skills:sre-compliance-generator)",
     "Agent(solutions-architect-skills:cloud-compliance-generator)",
@@ -189,3 +190,26 @@ The skill includes:
 - **Fix prompt generation** for approved findings to paste back into Claude
 
 **When to use**: After ARCHITECTURE.md passes form validation (use `architecture-docs` review first), when a peer review or architectural quality assessment is needed, or before finalizing architecture for implementation.
+
+### Using the Architecture Compliance Review Skill
+
+The `architecture-compliance-review` skill validates compliance contract portfolio health and generates an interactive playground for exploring what needs to be fixed in ARCHITECTURE.md to reach the auto-approve threshold (≥8.0/10) across all 10 contracts.
+
+To manually activate the skill, use: `/skill architecture-compliance-review`
+
+The skill includes:
+- **Coverage validation**: Checks all 10 required contracts are present and ≤6 months old
+- **Expired/missing contract handling**: Offers to regenerate stale contracts via the `architecture-compliance` skill before proceeding
+- **Gap extraction**: Reads every contract's compliance summary table and extracts Non-Compliant and Unknown requirements
+- **Concept clustering**: Groups gaps across contracts by underlying ARCHITECTURE.md concept (load testing, DR/RTO, IAM, observability, etc.) ranked by cross-contract impact
+- **Interactive HTML playground** via the `playground` plugin — compliance gap explorer with portfolio health panel, filter controls, and fix prompt generator
+- **Fix prompt generation**: Produces targeted prompts specifying which ARCHITECTURE.md sections to update and what to document
+
+**When to use**: After compliance contracts are generated (use `architecture-compliance` first), when you want to understand what ARCHITECTURE.md improvements are needed to reach auto-approval across all contracts, or for periodic compliance health checks.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Read(compliance-docs/*)"
+```
+
