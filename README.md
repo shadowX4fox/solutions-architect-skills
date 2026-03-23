@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.21-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.22-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.21 (Current Release) ✅
+### v2.8.22 (Current Release) ✅
+**Fix: force absolute `/tmp/` path in Write tool call — prevents relative-path traversal that broke permission match**
+
+- ✅ **Root cause**: Write tool was called with `../../../../../tmp/sas-discover-plugin-dir-[UUID].ts` (relative from project root) instead of absolute `/tmp/...` — relative path doesn't match `Write(//tmp/*)` permission, causing approval prompt
+- ✅ **`SKILL.md` Step B**: annotated `file_path` with explicit warning — absolute path starting with `/tmp/` — do NOT convert to relative
+
+### v2.8.21 (Previous Release) ✅
 **Fix: enforce Write tool for temp file creation in Step B — eliminates heredoc approval prompt**
 
 - ✅ **Root cause**: Step B instructed "write using the Write tool" but the orchestrator used `cat > file << 'EOF'` (Bash heredoc), which triggers a security prompt ("expansion obfuscation") requiring manual approval
