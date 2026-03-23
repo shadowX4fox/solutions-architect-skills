@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.17-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.18-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.17 (Current Release) ✅
+### v2.8.18 (Current Release) ✅
+**Fix: remove leading slash from agent output paths — compliance agents now write directly without permission denial**
+
+- ✅ **Root cause**: all 10 compliance agents used `` `/compliance-docs/FILENAME.md` `` (absolute path from filesystem root) in PHASE 5 Step 5.1, but `Write(compliance-docs/*)` permission only covers project-relative paths — causing permission denial and requiring a manual recovery workaround
+- ✅ **All 10 agent files**: removed leading `/` from 21 occurrences across Allowed Output and Format lines so agents write to `compliance-docs/FILENAME.md` (relative, matches permission)
+- ✅ **Agents affected**: Vulcan, Aegis, Prometheus, Atlas, Mnemosyne, Hephaestus, Hermes, Argus, Athena, Iris
+
+### v2.8.17 (Previous Release) ✅
 **Fix missing `Write(compliance-docs/*)` permission — agents were blocked writing output contracts**
 
 - ✅ **Root cause**: compliance agents write contracts directly to `compliance-docs/` via the Write tool, but `Write(compliance-docs/*)` was never included in the required permissions

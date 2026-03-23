@@ -587,11 +587,11 @@ Before writing the output file, verify the following:
 - ❌ DO NOT create any files other than the contract .md file
 
 **Allowed Output**:
-- ✅ ONLY: `/compliance-docs/SECURITY_ARCHITECTURE_[PROJECT]_[DATE].md`
+- ✅ ONLY: `compliance-docs/SECURITY_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **Step 5.1: Determine Output Filename**
 
-Format: `/compliance-docs/SECURITY_ARCHITECTURE_[PROJECT]_[DATE].md`
+Format: `compliance-docs/SECURITY_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
 
