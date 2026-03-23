@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.21-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.20 (Current Release) ✅
+### v2.8.21 (Current Release) ✅
+**Fix: enforce Write tool for temp file creation in Step B — eliminates heredoc approval prompt**
+
+- ✅ **Root cause**: Step B instructed "write using the Write tool" but the orchestrator used `cat > file << 'EOF'` (Bash heredoc), which triggers a security prompt ("expansion obfuscation") requiring manual approval
+- ✅ **`SKILL.md` Step B**: reworded to explicitly call the **Write tool** and forbid `cat`/Bash/heredoc for this step — `Write(//tmp/*)` is pre-approved so no prompt fires
+
+### v2.8.20 (Previous Release) ✅
 **Fix: replace hardcoded Step B path with temp-file discovery — works for marketplace and dev installs alike**
 
 - ✅ **Root cause**: Step B in v2.8.19 hardcoded `~/.claude/plugins/solutions-architect-skills/` — wrong for marketplace installs (which land at `~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/`) and custom dev paths

@@ -588,10 +588,12 @@ If a result is returned: strip the `"/skills/architecture-compliance/SKILL.md"` 
 **Step B — Write and run a temporary discovery script (works for any installation path):**
 If Glob returned nothing:
 
-First, write this discovery script using the Write tool (replace `[UUID]` with a short random hex string, e.g. `a3f7c2b1`):
-```
-file_path: /tmp/sas-discover-plugin-dir-[UUID].ts
-content:
+First, call the **Write tool** directly — do **NOT** use `cat`, Bash, or heredoc for this step (they require approval). Replace `[UUID]` with 8 random hex chars (e.g. `a3f7c2b1`):
+
+Write tool call:
+- file_path: `/tmp/sas-discover-plugin-dir-[UUID].ts`
+- content:
+```typescript
 import { Glob } from "bun";
 import { homedir } from "os";
 import { resolve } from "path";
