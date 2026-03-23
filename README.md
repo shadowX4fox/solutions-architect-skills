@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.19 (Current Release) ✅
+### v2.8.20 (Current Release) ✅
+**Fix: replace hardcoded Step B path with temp-file discovery — works for marketplace and dev installs alike**
+
+- ✅ **Root cause**: Step B in v2.8.19 hardcoded `~/.claude/plugins/solutions-architect-skills/` — wrong for marketplace installs (which land at `~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/`) and custom dev paths
+- ✅ **`SKILL.md` Step 3.1 Step B**: replaced hardcoded `bun` call with instructions to Write a temporary TS file to `/tmp/sas-discover-plugin-dir-[UUID].ts` and run it — the script uses Bun's `Glob` + `os.homedir()` to scan `$HOME` for `resolve-plugin-dir.ts` at any installation path
+- ✅ **No settings changes needed**: `Write(//tmp/*)` and `Bash(bun *)` are already in allowed permissions
+
+### v2.8.19 (Previous Release) ✅
 **Fix: robust plugin_dir resolution — add resolve-plugin-dir.ts Bun utility + two-step fallback in SKILL.md**
 
 - ✅ **Root cause**: `SKILL.md` Step 3.1 used a single Glob to find the plugin root, which silently fails when the skill runs from a project outside the plugin directory — passing empty `plugin_dir` to agents, causing them to go off-script with `find` and read unrelated files

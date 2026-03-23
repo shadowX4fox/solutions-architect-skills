@@ -585,15 +585,32 @@ Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL
 ```
 If a result is returned: strip the `"/skills/architecture-compliance/SKILL.md"` suffix → `plugin_dir`. Done — skip Step B.
 
-**Step B — Use resolve-plugin-dir utility (installed plugin / external project):**
-If Glob returned nothing, run:
+**Step B — Write and run a temporary discovery script (works for any installation path):**
+If Glob returned nothing:
+
+First, write this discovery script using the Write tool (replace `[UUID]` with a short random hex string, e.g. `a3f7c2b1`):
+```
+file_path: /tmp/sas-discover-plugin-dir-[UUID].ts
+content:
+import { Glob } from "bun";
+import { homedir } from "os";
+import { resolve } from "path";
+
+for await (const f of new Glob("**/architecture-compliance/utils/resolve-plugin-dir.ts").scan({ cwd: homedir(), absolute: true })) {
+  console.log(resolve(f, "..", "..", "..", ".."));
+  process.exit(0);
+}
+process.exit(1);
+```
+
+Then run it:
 ```bash
-bun ~/.claude/plugins/solutions-architect-skills/skills/architecture-compliance/utils/resolve-plugin-dir.ts
+bun /tmp/sas-discover-plugin-dir-[UUID].ts
 ```
 Capture stdout. If non-empty: use it as `plugin_dir`. Done.
 
 If both steps yield nothing: **STOP** and report:
-> ERROR: Cannot resolve plugin_dir. Ensure the solutions-architect-skills plugin is installed at `~/.claude/plugins/solutions-architect-skills/` or run from within the plugin directory.
+> ERROR: Cannot resolve plugin_dir. Ensure the solutions-architect-skills plugin is installed (marketplace or git clone) under your home directory.
 
 Store `plugin_dir` for inclusion in all agent prompts.
 
