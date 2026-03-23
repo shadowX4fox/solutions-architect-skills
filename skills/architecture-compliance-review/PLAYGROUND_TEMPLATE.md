@@ -1,6 +1,6 @@
 # Compliance Gap Explorer Template
 
-Use this template when the playground generates the interactive compliance review tool. It provides a three-panel compliance portfolio dashboard: a contract health panel showing all 10 contracts with scores and status, a concept cluster gap explorer for navigating required ARCHITECTURE.md fixes, and a fix prompt generator for copying actionable remediation prompts back into Claude.
+Use this template when the playground generates the interactive compliance review tool. It provides a two-panel compliance portfolio dashboard: a contract health panel showing all 10 contracts with scores and status, and a concept cluster gap explorer for understanding which ARCHITECTURE.md areas fall short of the auto-approve threshold.
 
 ## Layout
 
@@ -25,12 +25,8 @@ Use this template when the playground generates the interactive compliance revie
 |  3/10 above threshold ≥8.0  |  Integration · Development        |
 |  5/10 below threshold       |  2 gaps · 1 Blocker · 1 Desired  |
 |  2/10 not reviewed          |  Impact: Medium · Section 6.2    |
+|  [ Copy Portfolio Summary ] |                                   |
 +-----------------------------+-----------------------------------+
-|  Fix Prompt Output                                              |
-|  Generating prompt for selected concepts...                     |
-|                                                                 |
-|  [ Copy Fix Prompt ]    [ Copy Portfolio Summary ]             |
-+-----------------------------------------------------------------+
 ```
 
 ## Key Components
@@ -100,7 +96,6 @@ Each **concept cluster card** displays:
 - **Effort badge**: `High` / `Medium` / `Low` pill
 - **Architecture section**: `Section X.Y` reference
 - **Description**: one-line explanation of what documentation is needed (collapsed by default, expandable)
-- **Fix guidance**: specific actionable guidance for what to write in ARCHITECTURE.md (collapsed by default, expandable)
 - **Gap detail list** (collapsed by default, expandable): shows individual requirement rows:
   ```
   ├─ [SRE-B-023] Unknown · Blocker · Performance Testing
@@ -108,14 +103,7 @@ Each **concept cluster card** displays:
   ├─ [DEV-B-011] Unknown · Blocker · Testing Strategy
   │   "Performance benchmark baselines defined"
   ```
-- **Select checkbox**: user can select concepts to include in the fix prompt
-
-### Fix Prompt Output (bottom)
-
-- **Generates from** selected concept cluster cards (those with checkbox checked)
-- If no concepts selected: shows *"Select concept clusters above to generate a fix prompt."*
-- Two buttons: **Copy Fix Prompt** and **Copy Portfolio Summary**
-- "Copied!" flash feedback on each button
+The Portfolio Panel includes a **Copy Portfolio Summary** button with "Copied!" flash feedback.
 
 ---
 
@@ -176,7 +164,6 @@ const reviewData = {
       impactScore: 8,
       estimatedEffort: "High",
       architectureSection: "Section 10.3 (Performance Testing) and Section 7.4 (Testing Strategy)",
-      fixGuidance: "Add a load testing subsection specifying: (1) tooling choice (k6, JMeter, or Gatling), (2) test scenarios (ramp-up, spike, soak), (3) acceptance thresholds (e.g., p95 < 500ms at 1000 RPS), (4) CI/CD integration point, (5) baseline comparison strategy."
     }
     // ... more concept clusters, sorted by impactScore desc
   ],
@@ -187,7 +174,6 @@ const reviewData = {
   activePriorityFilter: "all",          // "all" | "blocker" | "desired"
   activeEffortFilter: "all",            // "all" | "High" | "Medium" | "Low"
   activeStatusFilter: "all",            // "all" | "Unknown" | "Non-Compliant"
-  selectedConceptIds: []                // array of concept.id values (for fix prompt)
 };
 ```
 
@@ -255,7 +241,6 @@ function renderClusterCard(cluster) {
     : '🟡';
 
   const effortColors = { High: '#cf222e', Medium: '#bf5700', Low: '#1a7f37' };
-  const isSelected = reviewData.selectedConceptIds.includes(cluster.id);
 
   const contractPills = cluster.affectedContracts
     .map(ct => `<span class="contract-pill">${ct.split(' ')[0]}</span>`)
@@ -271,11 +256,8 @@ function renderClusterCard(cluster) {
         </div>`).join('')
     : '';
 
-  return `<div class="cluster-card ${impactClass} ${isSelected ? 'cluster-selected' : ''}">
+  return `<div class="cluster-card ${impactClass}">
     <div class="cluster-header" onclick="toggleCluster('${cluster.id}')">
-      <input type="checkbox" class="cluster-check"
-             ${isSelected ? 'checked' : ''}
-             onclick="event.stopPropagation(); toggleConceptSelection('${cluster.id}')">
       <span class="impact-icon">${impactIcon}</span>
       <span class="cluster-name">${cluster.concept}</span>
       <div class="cluster-meta">
@@ -287,7 +269,6 @@ function renderClusterCard(cluster) {
     </div>
     <div class="cluster-body" id="body-${cluster.id}">
       <div class="cluster-description">${cluster.description}</div>
-      <div class="cluster-guidance"><strong>Fix Guidance:</strong> ${cluster.fixGuidance}</div>
       <div class="gap-list">${gapRows}</div>
     </div>
   </div>`;
@@ -301,62 +282,6 @@ function getGapsForCluster(clusterId) {
       reviewData.conceptClusters.find(cl => cl.id === clusterId)
         && cluster.concept.toLowerCase().includes(tag.split('-')[0])
     ));
-}
-```
-
----
-
-## Fix Prompt Generation
-
-```javascript
-function updateFixPrompt() {
-  const selectedClusters = reviewData.conceptClusters
-    .filter(c => reviewData.selectedConceptIds.includes(c.id));
-
-  if (selectedClusters.length === 0) {
-    promptEl.textContent = 'Select concept clusters above to generate a fix prompt.';
-    return;
-  }
-
-  let prompt = `Please update the ARCHITECTURE.md to address the following compliance gaps.\n`;
-  prompt += `Compliance Review Date: ${reviewData.reviewDate} | Project: ${reviewData.project}\n`;
-  prompt += `Auto-Approve Threshold: ≥${reviewData.autoApproveThreshold}/10 per contract\n\n`;
-
-  const highImpact = selectedClusters.filter(c => c.estimatedEffort === 'High');
-  const medImpact  = selectedClusters.filter(c => c.estimatedEffort === 'Medium');
-  const lowImpact  = selectedClusters.filter(c => c.estimatedEffort === 'Low');
-
-  for (const [label, clusters] of [['High Impact', highImpact], ['Medium Impact', medImpact], ['Low Impact', lowImpact]]) {
-    if (clusters.length === 0) continue;
-    prompt += `## ${label} Fixes\n\n`;
-    for (const cluster of clusters) {
-      prompt += `### ${cluster.concept}\n`;
-      prompt += `- **Architecture Section**: ${cluster.architectureSection}\n`;
-      prompt += `- **Affected Contracts**: ${cluster.affectedContracts.join(', ')}\n`;
-      prompt += `- **Gaps**: ${cluster.blockerGaps} Blocker + ${cluster.desiredGaps} Desired (${cluster.totalGaps} total)\n`;
-      prompt += `- **What to Document**: ${cluster.fixGuidance}\n\n`;
-    }
-  }
-
-  const allGaps = reviewData.contracts.flatMap(c => c.gaps || [])
-    .filter(g => selectedClusters.some(cl =>
-      g.conceptTags.some(tag => cl.id.includes(tag.split('-')[0]))
-    ));
-
-  if (allGaps.length > 0) {
-    prompt += `## Requirement Codes to Resolve\n\n`;
-    for (const contract of reviewData.contracts.filter(c => c.contractStatus === 'valid')) {
-      const contractGaps = allGaps.filter(g => contract.gaps?.some(cg => cg.id === g.id));
-      if (contractGaps.length === 0) continue;
-      prompt += `**${contract.type}** (current: ${contract.score}/10, target: ≥${reviewData.autoApproveThreshold})\n`;
-      for (const g of contractGaps) {
-        prompt += `- ${g.code}: [${g.priority.toUpperCase()}][${g.status}] ${g.requirement}\n`;
-      }
-      prompt += '\n';
-    }
-  }
-
-  promptEl.textContent = prompt;
 }
 ```
 
@@ -429,7 +354,6 @@ function copyPortfolioSummary() {
   background: #161b22; border-radius: 6px; margin-bottom: 8px;
   overflow: hidden; border: 1px solid #30363d;
 }
-.cluster-card.cluster-selected { border-color: #58a6ff; }
 .cluster-header {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 10px 12px; cursor: pointer;
@@ -464,14 +388,6 @@ function copyPortfolioSummary() {
 /* Arch section */
 .arch-section { color: #58a6ff; font-size: 11px; }
 
-/* Fix prompt area */
-.fix-prompt-area {
-  background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
-  padding: 12px; font-family: monospace; font-size: 12px;
-  color: #c9d1d9; white-space: pre-wrap; min-height: 80px;
-  max-height: 200px; overflow-y: auto;
-}
-
 /* Coverage summary */
 .coverage-summary { font-size: 11px; color: #8b949e; padding: 6px 10px; border-top: 1px solid #30363d; }
 
@@ -483,15 +399,6 @@ function copyPortfolioSummary() {
 }
 .req-breakdown .proj-score { color: #58a6ff; font-weight: 600; }
 ```
-
----
-
-## Presets
-
-Include 3 named presets accessible via a "Presets" dropdown in the Gap Explorer toolbar:
-- **Select All Clusters** — checks all concept cluster cards (for bulk fix prompt)
-- **Blocker Only** — auto-selects only clusters with `blockerGaps > 0`, unchecks the rest
-- **Clear Selection** — unchecks all selected concept clusters, resets fix prompt
 
 ---
 

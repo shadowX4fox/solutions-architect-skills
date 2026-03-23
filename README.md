@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -455,14 +455,21 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.25 (Current Release) ✅
+### v2.8.26 (Current Release) ✅
+**refactor: compliance-review skill — remove fix prompt generation, focus on exploration**
+
+- ✅ **`PLAYGROUND_TEMPLATE.md`**: removed Fix Prompt Output panel, cluster checkboxes, `updateFixPrompt()` function, presets dropdown, `selectedConceptIds` state, `fixGuidance` field, `.fix-prompt-area` CSS, and `cluster-selected` styling — playground is now a pure exploration tool
+- ✅ **`SKILL.md`**: removed `fixGuidance` from concept cluster spec and JSON schema, updated Step 7 and success criteria to reflect exploration-only purpose, updated integration table description for `architecture-docs`
+- ✅ **`CLAUDE.md` / `README.md`**: removed fix prompt references from compliance-review skill descriptions
+- ✅ Fix prompt generation remains exclusively in `architecture-peer-review` skill
+
+### v2.8.25 (Previous Release) ✅
 **feat: add `architecture-compliance-review` skill — compliance portfolio health review with interactive gap explorer**
 
 - ✅ **New skill**: `skills/architecture-compliance-review/SKILL.md` — validates all 10 compliance contracts are present and ≤6 months old; offers to regenerate expired/missing contracts via `architecture-compliance` skill before proceeding
 - ✅ **Gap extraction**: reads each contract's compliance summary table and extracts Non-Compliant and Unknown requirements with priority (Blocker/Desired), source section, and concept tags
 - ✅ **Concept clustering**: groups gaps across all contracts by underlying ARCHITECTURE.md concept (load testing, DR/RTO, IAM, observability, etc.); ranks clusters by cross-contract impact score
-- ✅ **Interactive playground**: `PLAYGROUND_TEMPLATE.md` defines a three-panel compliance gap explorer — portfolio health panel (all 10 contracts with color-coded scores), concept cluster gap explorer with filters, and fix prompt generator
-- ✅ **Fix prompt generation**: produces targeted prompts specifying which ARCHITECTURE.md sections to update and what to document, grouped by impact level
+- ✅ **Interactive playground**: `PLAYGROUND_TEMPLATE.md` defines a two-panel compliance gap explorer — portfolio health panel (all 10 contracts with color-coded scores) and concept cluster gap explorer with filters for exploring gap areas across all contracts
 - ✅ **CLAUDE.md**: documented new skill, updated skills count to 6, added `Read(compliance-docs/*)` to required permissions block
 - ✅ **settings.json + settings.json.example**: added `Read(compliance-docs/*)` permission for contract file reading
 

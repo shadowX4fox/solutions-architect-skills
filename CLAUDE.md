@@ -202,8 +202,7 @@ The skill includes:
 - **Expired/missing contract handling**: Offers to regenerate stale contracts via the `architecture-compliance` skill before proceeding
 - **Gap extraction**: Reads every contract's compliance summary table and extracts Non-Compliant and Unknown requirements
 - **Concept clustering**: Groups gaps across contracts by underlying ARCHITECTURE.md concept (load testing, DR/RTO, IAM, observability, etc.) ranked by cross-contract impact
-- **Interactive HTML playground** via the `playground` plugin — compliance gap explorer with portfolio health panel, filter controls, and fix prompt generator
-- **Fix prompt generation**: Produces targeted prompts specifying which ARCHITECTURE.md sections to update and what to document
+- **Interactive HTML playground** via the `playground` plugin — compliance gap explorer with portfolio health panel and filter controls for exploring concept gaps across all contracts
 
 **When to use**: After compliance contracts are generated (use `architecture-compliance` first), when you want to understand what ARCHITECTURE.md improvements are needed to reach auto-approval across all contracts, or for periodic compliance health checks.
 
