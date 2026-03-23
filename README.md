@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.22-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -454,7 +454,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.22 (Current Release) ✅
+### v2.8.23 (Current Release) ✅
+**Fix: use `//tmp/` (double-slash) in Step B Write file_path to match `Write(//tmp/*)` permission exactly**
+
+- ✅ **Root cause**: Claude Code's permission system uses `//` prefix for absolute paths — `Write(//tmp/*)` requires the path to be `//tmp/filename`, not `/tmp/filename`; single-slash path kept getting rewritten as a relative traversal `../../../../../tmp/...` which didn't match the permission
+- ✅ **`SKILL.md` Step B**: changed `file_path` from `` `/tmp/sas-discover-plugin-dir-[UUID].ts` `` to `` `//tmp/sas-discover-plugin-dir-[UUID].ts` `` so it matches `Write(//tmp/*)` directly and fires no approval prompt
+
+### v2.8.22 (Previous Release) ✅
 **Fix: force absolute `/tmp/` path in Write tool call — prevents relative-path traversal that broke permission match**
 
 - ✅ **Root cause**: Write tool was called with `../../../../../tmp/sas-discover-plugin-dir-[UUID].ts` (relative from project root) instead of absolute `/tmp/...` — relative path doesn't match `Write(//tmp/*)` permission, causing approval prompt

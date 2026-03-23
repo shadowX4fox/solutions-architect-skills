@@ -591,7 +591,7 @@ If Glob returned nothing:
 First, call the **Write tool** directly — do **NOT** use `cat`, Bash, or heredoc for this step (they require approval). Replace `[UUID]` with 8 random hex chars (e.g. `a3f7c2b1`):
 
 Write tool call:
-- file_path: `/tmp/sas-discover-plugin-dir-[UUID].ts` ← **absolute path starting with `/tmp/` — do NOT convert to relative**
+- file_path: `//tmp/sas-discover-plugin-dir-[UUID].ts` ← **use double-slash `//tmp/` to match the `Write(//tmp/*)` permission exactly**
 - content:
 ```typescript
 import { Glob } from "bun";
