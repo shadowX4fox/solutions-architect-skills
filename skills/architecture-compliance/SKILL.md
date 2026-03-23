@@ -12,6 +12,8 @@ This skill is **manually activated** when users request compliance document gene
 **Activation Triggers:**
 - "Generate compliance documents"
 - "Create Compliance Contracts"
+- "Recreate compliance contracts" / "Regenerate compliance contracts" / "Rebuild compliance contracts"
+- "Recreate the compliance manifest" / "Regenerate the compliance manifest" / "Rebuild the compliance manifest"
 - "Generate [specific contract type]" (e.g., "Generate SRE Architecture contract")
 - "Create compliance documentation"
 - `/skill architecture-compliance`

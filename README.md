@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.27-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.28-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -455,7 +455,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.27 (Current Release) ✅
+### v2.8.28 (Current Release) ✅
+**fix: correct skill routing — "recreate compliance manifest" no longer triggers architecture-compliance-review**
+
+- ✅ **`architecture-compliance/SKILL.md`**: added "recreate/regenerate/rebuild" activation triggers for both compliance contracts and the compliance manifest — ensures generation requests route to the correct skill
+- ✅ **`architecture-compliance-review/SKILL.md`**: added explicit "Do NOT invoke for: recreating, regenerating, or rebuilding compliance contracts or the manifest" exclusion, redirecting to `architecture-compliance`
+
+### v2.8.27 (Previous Release) ✅
 **fix: compliance manifest date accuracy — use contract's embedded generation date and local timezone**
 
 - ✅ **`generation-helper.ts`**: added `getLocalDateString()` helper returning YYYY-MM-DD in local timezone (mirrors bash `date +%Y-%m-%d`), avoiding UTC date shift from `toISOString()` in negative-offset timezones

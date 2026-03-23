@@ -25,6 +25,7 @@ This skill acts as a **compliance portfolio health reviewer**. It validates that
 
 **Do NOT invoke for:**
 - Generating new compliance contracts → use `architecture-compliance` skill
+- **Recreating, regenerating, or rebuilding compliance contracts or the compliance manifest** → use `architecture-compliance` skill
 - Creating or editing ARCHITECTURE.md → use `architecture-docs` skill
 - Architecture quality peer review → use `architecture-peer-review` skill
 - Business requirements documentation → use `architecture-readiness` skill
