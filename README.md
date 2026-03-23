@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.8.27-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -455,7 +455,15 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.26 (Current Release) ✅
+### v2.8.27 (Current Release) ✅
+**fix: compliance manifest date accuracy — use contract's embedded generation date and local timezone**
+
+- ✅ **`generation-helper.ts`**: added `getLocalDateString()` helper returning YYYY-MM-DD in local timezone (mirrors bash `date +%Y-%m-%d`), avoiding UTC date shift from `toISOString()` in negative-offset timezones
+- ✅ **`post-generation-pipeline.ts`**: manifest table's `Generated` column now reads the date embedded in each contract file (`**Generation Date**: YYYY-MM-DD`) instead of re-computing a fresh UTC date at pipeline run time; `today` fallback also uses local timezone
+- ✅ **`manifest-generator.ts`**: `**Validation Date**:`, `Last Updated`, and CLI path all use `getLocalDateString()` — no more UTC drift in manifest header
+- ✅ **`score-calculator.ts`**: `validation_date` field uses `getLocalDateString()` for consistent local-timezone date across all contract Document Control sections
+
+### v2.8.26 (Previous Release) ✅
 **refactor: compliance-review skill — remove fix prompt generation, focus on exploration**
 
 - ✅ **`PLAYGROUND_TEMPLATE.md`**: removed Fix Prompt Output panel, cluster checkboxes, `updateFixPrompt()` function, presets dropdown, `selectedConceptIds` state, `fixGuidance` field, `.fix-prompt-area` CSS, and `cluster-selected` styling — playground is now a pure exploration tool

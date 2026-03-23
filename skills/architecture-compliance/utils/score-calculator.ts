@@ -2,6 +2,7 @@
 
 import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
+import { getLocalDateString } from './generation-helper';
 
 // Resolve skill directory from script location (works both locally and as plugin)
 const SKILL_DIR = resolve(import.meta.dir, '..');
@@ -135,7 +136,7 @@ export function calculateComplianceScore(
     quality_score: parseFloat(qualityScore.toFixed(1)),
     status_counts: tableData.statusCounts,
     outcome: outcome,
-    validation_date: new Date().toISOString().split('T')[0],
+    validation_date: getLocalDateString(),
   };
 }
 

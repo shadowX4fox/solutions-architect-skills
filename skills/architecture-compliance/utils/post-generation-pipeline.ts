@@ -27,7 +27,7 @@ import {
   type ContractMetadata,
   type ManifestData
 } from './manifest-generator';
-import { getContractDisplayName } from './generation-helper';
+import { getContractDisplayName, getLocalDateString } from './generation-helper';
 
 // Configuration
 const MANIFEST_FILENAME = 'COMPLIANCE_MANIFEST.md';
@@ -67,6 +67,7 @@ interface ContractResult {
   score: number;
   status: string;
   completeness: number;
+  generationDate: string;
   success: boolean;
   error?: string;
 }
@@ -87,12 +88,16 @@ function getContractTypeFromFilename(filename: string): string | null {
 /**
  * Process a single contract: calculate score, update fields, write back.
  */
-async function processContract(contractPath: string, contractType: string): Promise<ContractResult> {
+async function processContract(contractPath: string, contractType: string, fallbackDate: string): Promise<ContractResult> {
   const filename = basename(contractPath);
   const displayName = getContractDisplayName(contractType);
 
   try {
     const content = await Bun.file(contractPath).text();
+
+    // Extract the generation date embedded by the agent (e.g. "**Generation Date**: 2025-03-23")
+    const dateMatch = content.match(/\*\*Generation Date\*\*:\s*(\d{4}-\d{2}-\d{2})/);
+    const generationDate = dateMatch?.[1] ?? fallbackDate;
 
     const validationConfig = CONTRACT_TYPE_TO_VALIDATION[contractType];
     if (!validationConfig) {
@@ -116,6 +121,7 @@ async function processContract(contractPath: string, contractType: string): Prom
       score: score.final_score,
       status: score.outcome.document_status,
       completeness,
+      generationDate,
       success: true,
     };
   } catch (error) {
@@ -127,6 +133,7 @@ async function processContract(contractPath: string, contractType: string): Prom
       score: 0,
       status: 'Draft',
       completeness: 0,
+      generationDate: fallbackDate,
       success: false,
       error: (error as Error).message,
     };
@@ -157,7 +164,7 @@ async function runPipeline(complianceDocsDir: string, projectName: string): Prom
 
   // Process each contract
   const results: ContractResult[] = [];
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
 
   for (const filename of contractFiles) {
     const contractPath = join(complianceDocsDir, filename);
@@ -168,7 +175,7 @@ async function runPipeline(complianceDocsDir: string, projectName: string): Prom
       continue;
     }
 
-    const result = await processContract(contractPath, contractType);
+    const result = await processContract(contractPath, contractType, today);
     results.push(result);
   }
 
@@ -187,7 +194,7 @@ async function runPipeline(complianceDocsDir: string, projectName: string): Prom
       score: r.score,
       status: r.status,
       completeness: r.completeness,
-      generatedDate: today,
+      generatedDate: r.generationDate,
     }));
 
   const manifestData: ManifestData = {

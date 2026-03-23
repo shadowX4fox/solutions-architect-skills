@@ -17,6 +17,7 @@
 
 import { resolve, join } from 'path';
 import { existsSync } from 'fs';
+import { getLocalDateString } from './generation-helper';
 
 // Configuration
 const SKILL_DIR = resolve(import.meta.dir, '..');
@@ -190,7 +191,7 @@ function generateValidationSection(): string {
 **Validation Schema**: \`/skills/architecture-compliance/validation/TEMPLATE_VALIDATION_SCHEMA.json\`
 **Schema Version**: 1.0.0
 **Validation Engine**: ComplianceValidator v1.0
-**Validation Date**: ${new Date().toISOString().split('T')[0]}
+**Validation Date**: ${getLocalDateString()}
 
 **Validation Stages**:
 - Stage 1 (Pre-Validation): Template structure validation
@@ -221,7 +222,8 @@ function generateDocumentsTable(contracts: ContractMetadata[]): string {
  */
 function generateSummarySection(contracts: ContractMetadata[]): string {
   const summary = calculateSummary(contracts);
-  const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  const _d = new Date();
+  const timestamp = `${getLocalDateString()} ${String(_d.getHours()).padStart(2, '0')}:${String(_d.getMinutes()).padStart(2, '0')}:${String(_d.getSeconds()).padStart(2, '0')}`;
 
   return `## Summary
 - Total Contracts: ${summary.total}
@@ -464,7 +466,7 @@ Examples:
     score: parsed.score,
     status: parsed.status,
     completeness: parsed.completeness,
-    generatedDate: new Date().toISOString().split('T')[0]
+    generatedDate: getLocalDateString()
   };
 
   try {
