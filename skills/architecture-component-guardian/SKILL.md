@@ -1,9 +1,9 @@
 ---
-name: component-index-guardian
+name: architecture-component-guardian
 description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when: adding a component, removing a component, updating a component name or type, syncing the index after a migration, or any time docs/components/README.md needs to change.
 ---
 
-# Component Index Guardian Skill
+# Architecture Component Guardian Skill
 
 ## Purpose
 
@@ -23,7 +23,8 @@ write and refuses ad-hoc direct edits.
 - Any request to modify `docs/components/README.md` directly → redirect here instead
 
 **Do NOT invoke for**: questions about individual components (use `architecture-docs`
-skill), compliance generation, or presentation creation.
+skill), compliance generation, presentation creation, or **component development handoffs**
+(use `architecture-dev-handoff` skill — it manages `docs/handoffs/` independently).
 
 ---
 
@@ -32,7 +33,7 @@ skill), compliance generation, or presentation creation.
 The generated `docs/components/README.md` MUST follow this exact structure:
 
 ```
-Line 1:  <!-- managed by solutions-architect-skills:component-index-guardian — do not edit manually -->
+Line 1:  <!-- managed by solutions-architect-skills:architecture-component-guardian — do not edit manually -->
 Line 2:  [Architecture](../../ARCHITECTURE.md) > Components
 Line 3:  (blank)
 Line 4:  # Component Details
@@ -78,6 +79,7 @@ Line 12: | 5.1 | ... | ... | ... |
 | Component relationships | `## Key Relationships` section of this README |
 | Scaling details | `docs/08-scalability-and-performance.md` |
 | Extra index columns | **Not permitted** — update this skill's format spec first |
+| Development handoff docs | `docs/handoffs/NN-*-handoff.md` — managed by `architecture-dev-handoff` skill |
 
 ---
 

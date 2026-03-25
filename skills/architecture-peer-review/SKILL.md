@@ -28,7 +28,7 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 - Compliance contract generation → use `architecture-compliance` skill
 - Creating or editing ARCHITECTURE.md → use `architecture-docs` skill
 - Business requirements review → use `architecture-readiness` skill
-- Component index updates → use `component-index-guardian` skill
+- Component index updates → use `architecture-component-guardian` skill
 
 ---
 

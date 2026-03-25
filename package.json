@@ -1,15 +1,12 @@
 {
   "name": "solutions-architect-skills",
   "version": "1.6.1",
-  "description": "Claude Code plugin for architecture documentation and presentation generation",
+  "description": "Claude Code plugin for architecture documentation and compliance generation",
   "type": "module",
+  "workspaces": ["tools/docgen"],
   "scripts": {
-    "gen:presentation": "bun run skills/architecture-docs/utils/presentation-generator.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "officegen": "^0.6.5"
   },
   "devDependencies": {
     "@types/bun": "latest",

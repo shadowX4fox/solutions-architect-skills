@@ -1,7 +1,7 @@
 {
   "name": "solutions-architect-skills",
-  "version": "2.8.28",
-  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → Compliance documents (10 specialized compliance agents)",
+  "version": "2.10.0",
+  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → Compliance documents → Development handoffs → Word export (8 skills, 10 compliance agents, per-component asset generation)",
   "author": {
     "name": "shadowX4fox",
     "email": "your-email@example.com",
@@ -21,7 +21,8 @@
     "cloud",
     "governance",
     "technical-writing",
-    "presentations",
-    "powerpoint"
+    "docx",
+    "export",
+    "word"
   ]
 }

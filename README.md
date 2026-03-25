@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.8.28-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -32,13 +32,15 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **6 Integrated Skills**
+- **8 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
   - `architecture-compliance`: Generate 10 compliance contracts
-  - `architecture-compliance-review`: Compliance portfolio health review + gap explorer ⭐ NEW v2.8.25
-  - `component-index-guardian`: Manages `docs/components/README.md` index
+  - `architecture-compliance-review`: Compliance portfolio health review + gap explorer
+  - `architecture-component-guardian`: Manages `docs/components/README.md` index
   - `architecture-peer-review`: Interactive peer review with playground tool
+  - `architecture-dev-handoff`: Component development handoffs with deliverable assets ⭐ NEW
+  - `architecture-doc-export`: On-demand Word (.docx) export for architecture docs and handoffs ⭐ NEW
 
 - **10 Compliance Templates**
   - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
@@ -82,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.8.15` in the list.
+You should see `solutions-architect-skills v2.10.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -455,7 +457,19 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.8.28 (Current Release) ✅
+### v2.10.0 (Current Release) ✅
+**feat: architecture-doc-export skill + architecture-dev-handoff skill + remove presentation generation + workflow renumbering**
+
+- ✅ **`skills/architecture-doc-export/`** (new skill): On-demand Word (.docx) export for Solution Architecture documents and Component Development Handoffs — powered by `docx` v8; corporate blue for SA/ADR artifacts, teal for dev handoffs; cover page, TOC, headers/footers, inline styling
+- ✅ **`tools/docgen/generate-doc.js`**: Professional Word generator adapted for 3 doc types: `solution-architecture`, `adr`, `handoff`; Bun runtime (`#!/usr/bin/env bun`); CHANGELOG directive support; auto-creates output directory
+- ✅ **`tools/docgen/package.json`**: Isolated `docx ^8.5.0` workspace dependency
+- ✅ **`skills/architecture-dev-handoff/`** (new skill): Per-component handoff documents — 16-section template, component-type-specific asset generation (OpenAPI, DDL, K8s Deployment, AsyncAPI, Avro/Protobuf schemas, CronJob), gap detection, compliance enrichment
+- ✅ **`skills/architecture-component-guardian/`**: Renamed from `component-index-guardian` for consistent `architecture-*` prefix
+- ✅ **`skills/architecture-docs/SKILL.md`**: Removed Presentation Generation workflow (~500 lines); removed `officegen` dependency; renumbered Workflow 9 (Diagrams) → 8, Workflow 10 (Migrate) → 9; cleaned all cross-references
+- ✅ **`CLAUDE.md`**: Updated to 8 skills, 4-phase workflow, added doc-export and dev-handoff sections
+- ✅ **`package.json`**: Added `"workspaces": ["tools/docgen"]`
+
+### v2.8.28 (Previous Release) ✅
 **fix: correct skill routing — "recreate compliance manifest" no longer triggers architecture-compliance-review**
 
 - ✅ **`architecture-compliance/SKILL.md`**: added "recreate/regenerate/rebuild" activation triggers for both compliance contracts and the compliance manifest — ensures generation requests route to the correct skill

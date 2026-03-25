@@ -1,0 +1,13 @@
+{
+  "name": "sa-docgen",
+  "version": "1.0.0",
+  "description": "Solution Architecture Word Document Generator",
+  "main": "generate-doc.js",
+  "dependencies": {
+    "docx": "^8.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating presentations/slides/PowerPoint from architecture documentation, when generating diagrams from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating diagrams from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
 ---
 
 # Architecture Documentation Skill
@@ -24,7 +24,7 @@ Automatically activate when:
   - "How does [component/system/integration] work?"
   - "What technologies do we use for [purpose]?"
   - "Tell me about the architecture of [system]"
-- **User asks to generate, create, or add diagrams to architecture documentation** (triggers Workflow 9)
+- **User asks to generate, create, or add diagrams to architecture documentation** (triggers Workflow 8)
   - "Generate my architecture diagrams"
   - "Create Mermaid diagrams from ARCHITECTURE.md"
   - "Add diagrams to my architecture"
@@ -68,19 +68,7 @@ This skill automatically activates when users ask questions about documented arc
 
 Check the user's original message (before `/architecture-docs` was invoked) for these patterns:
 
-#### Workflow 8: Presentation Generation
-**Triggers:**
-- Keywords: "generate", "create", "make" + "presentation", "slides", "PowerPoint", "pptx", "deck", "markdown presentation"
-- Examples: "generate presentations", "create slides", "make PowerPoint", "generate presentation MD"
-- Stakeholder mentions: "business presentation", "architecture slides", "compliance deck"
-- Language: "presentación en español", "slides in English"
-
-**Action when detected:**
-1. Confirm: "I'll help you generate an architecture presentation Markdown file for Claude PowerPoint."
-2. Jump directly to **Workflow 8, Step 1** (Stakeholder Type Selection)
-3. Do NOT ask which workflow - proceed automatically
-
-#### Workflow 9: Diagram Generation
+#### Workflow 8: Diagram Generation
 **Triggers:**
 - Keywords: "generate", "create", "add", "update", "make" + "diagram", "diagrams", "Mermaid diagram", "architecture diagram"
 - Examples: "generate my architecture diagrams", "create diagrams from ARCHITECTURE.md", "add diagrams to my architecture"
@@ -93,10 +81,10 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 
 **Action when detected:**
 1. Confirm: "I'll help you generate architecture diagrams."
-2. Jump directly to **Workflow 9, Step 1** (Diagram Type Selection)
+2. Jump directly to **Workflow 8, Step 1** (Diagram Type Selection)
 3. Do NOT ask which workflow - proceed automatically
 
-#### Workflow 10: Migrate to docs/ Structure
+#### Workflow 9: Migrate to docs/ Structure
 **Triggers:**
 - Keywords: "migrate", "restructure", "split", "reorganize", "convert" + "architecture", "ARCHITECTURE.md"
 - Size complaints: "too large", "too long", "hard to navigate", "split into files"
@@ -104,11 +92,11 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 
 **Action when detected:**
 1. Confirm: "I'll help you migrate ARCHITECTURE.md to the multi-file docs/ structure."
-2. Jump directly to **Workflow 10, Step 1**
+2. Jump directly to **Workflow 9, Step 1**
 3. Do NOT ask which workflow - proceed automatically
 
 #### Other Workflows
-If the user's request matches other documented workflows (1-7, 9-10), follow their respective trigger patterns.
+If the user's request matches other documented workflows (1-9), follow their respective trigger patterns.
 
 **Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check) before Step 1 (type selection).
 
@@ -563,8 +551,8 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
       - Add `**Type:** <type>` field (e.g., Microservice, Infrastructure, Module, Service Domain)
       - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
       - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
-   **4c.** Create `docs/components/README.md` component index using the component-index-guardian format:
-      - Line 1: `<!-- managed by solutions-architect-skills:component-index-guardian -- do not edit manually -->`
+   **4c.** Create `docs/components/README.md` component index using the architecture-component-guardian format:
+      - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
       - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
       - 4-column table: `#`, `Component`, `File`, `Type`
       - One row per component file created in 4b
@@ -1969,7 +1957,7 @@ Action Required: Review listed sections for consistency with S8 changes.
 **Manual Trigger:**
 - User explicitly requests: "Calculate design drivers", "Update Section 2.2.1", "Assess design impact"
 - During quarterly documentation review or architecture validation
-- When preparing architecture presentations or business justifications
+- When preparing architecture business justifications
 
 **Do NOT Trigger:**
 - ❌ Minor edits unrelated to architecture (typos, formatting, dates)
@@ -2426,7 +2414,7 @@ Data Sources:
 
 Next Steps:
 • Review Section 2.2.1 for accuracy
-• Use these metrics in architecture presentations
+• Use these metrics in architecture reviews and stakeholder discussions
 • Recalculate after significant architecture changes
 • Include in quarterly architecture reviews
 
@@ -2612,7 +2600,7 @@ Method will be marked as: "Manual Override (2025-01-26)"
 **DO:**
 - ✅ Calculate after major architecture changes (new components, technologies)
 - ✅ Recalculate quarterly during architecture reviews
-- ✅ Use metrics in stakeholder presentations and justifications
+- ✅ Use metrics in stakeholder reviews and justifications
 - ✅ Document assumptions in justifications (which metric was used, why)
 - ✅ Update source sections (1, 2.3, 5, 8) before calculating for accuracy
 - ✅ Review calculation report carefully before applying
@@ -3596,519 +3584,7 @@ All references to Job Execution Capacity are now consistent.
 
 ---
 
-## Workflow 8: Presentation Generation (Generate Architecture Presentations)
-
-**⚡ Auto-triggers**: This workflow automatically activates when presentation-related keywords are detected (see Automatic Workflow Detection section above).
-
-### When to Use
-
-This workflow is activated when users request presentation generation from ARCHITECTURE.md:
-- "Generate architecture presentation"
-- "Create PowerPoint from architecture"
-- "Generate presentation for [stakeholder]"
-- "Create slides for architecture review"
-- "Generate presentation markdown file"
-- User references: "business presentation", "compliance review deck", "architecture overview slides"
-
-### Output Format
-
-This workflow generates a **Markdown file** (`.md`) structured for **Claude PowerPoint** to convert into a final PowerPoint presentation. Claude directly writes the slide content using extracted ARCHITECTURE.md data — no external scripts or runtimes required.
-
-**Markdown Structure for Claude PowerPoint:**
-```markdown
-# [Presentation Title]
-## [Subtitle — Stakeholder type | Date]
-
----
-
-## [Slide Title]
-
-Content bullets, tables, or code blocks
-
----
-
-## SECCIÓN X: [Section Divider Title]
-
----
-
-## [Next Slide Title]
-...
-```
-
-**Slide type conventions:**
-- **Standard slide**: `## Title` + bullet list
-- **Section divider**: `## SECCIÓN N: Title` with no body content (full-color visual break)
-- **Metrics slide**: `## Title` + markdown table with 3 metric columns
-- **Comparison slide**: `## Title` + two-column bullet list (left/right separated by `**VS**` or `| Left | Right |` table)
-- **Process slide**: `## Title` + numbered list (sequential steps)
-- **Quote slide**: `## Title` + blockquote `>` syntax
-- **Call to action**: `## Title` + bold contact info lines
-
-### Activation Triggers
-
-**Automatic Invocation:**
-- User asks to "generate presentation", "create slides", "make PowerPoint", "create pptx", "generate presentation md"
-- User specifies stakeholder: "business stakeholders", "architecture team", "compliance review"
-- User specifies language: "presentación en español", "presentation in English"
-
-**Manual Invocation:**
-- User explicitly: "Run presentation generation workflow"
-- User references: `/workflow presentation`
-
-### Prerequisites
-
-- **ARCHITECTURE.md file exists** in the project
-- Document has **valid 12-section structure**
-- **Document Index is present** (lines 1-50 typically)
-
-### Step-by-Step Process
-
-#### Step 1: Detect Request & Present Stakeholder Options
-
-When presentation generation is requested, present the following options:
-
-```
-📊 **Architecture Presentation Generation**
-
-I'll generate a PowerPoint presentation from your ARCHITECTURE.md file.
-
-**Step 1: Select Stakeholder Type**
-
-Who is the target audience for this presentation?
-
-1. **Business Stakeholders** - Focus on value, ROI, business metrics, use cases
-2. **Architecture Team** - Technical details, components, patterns, decisions
-
-**Please select: 1 or 2**
-```
-
-**Stakeholder Focus Areas**:
-
-| Stakeholder | Focus | Primary Sections | Slide Count |
-|-------------|-------|------------------|-------------|
-| Business | Business value, ROI, metrics, use cases | 1, 2, 10, 11 | ~7 slides |
-| Architecture | Technical design, components, patterns | 3, 4, 5, 6, 7, 8, 12 | ~9 slides |
-
-#### Step 2: Language Selection
-
-After stakeholder selection:
-
-```
-**Step 2: Select Language**
-
-Which language should the presentation use?
-
-1. **English (EN)** - Default
-2. **Spanish (ES)** - Español
-
-**Please select: 1 or 2** (or type: en/es)
-```
-
-**Translation Scope**:
-- ✅ **Translate**: Slide titles, section headers, labels, UI elements
-- ❌ **Do NOT translate**: System names, component names, technologies, metrics, code snippets
-
-#### Step 3: Confirmation
-
-```
-**Step 3: Confirmation**
-
-I'll generate a presentation Markdown file with these settings:
-- Stakeholder: [Business/Architecture/Compliance]
-- Language: [English/Spanish]
-- Slides: ~7-9 slides (~10 minutes)
-- Output: /presentations/ARCHITECTURE_[Type]_[Lang].md (ready for Claude PowerPoint)
-
-Proceed with generation? [Yes/No]
-```
-
-#### Step 4: Discover Section Files via Navigation Index
-
-**Process**:
-1. Read `ARCHITECTURE.md` navigation table (it's ~130 lines — read it in full)
-2. Parse the Documentation table to extract the `docs/NN-name.md` file paths
-3. Identify system name from the first heading
-4. Validate that listed `docs/` files exist
-
-**Fallback**: If `ARCHITECTURE.md` not found or navigation table is missing, check for `docs/` directory and list its files directly.
-
-#### Step 5: Load Required Section Files
-
-**Context-Efficient Loading**:
-- Load only the `docs/` files required for the selected stakeholder
-- Each docs/ file is small enough to read in full (no line-offset tricks needed)
-
-**Files by Stakeholder**:
-- **Business**: `docs/01-system-overview.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md` (~3 files, ~600–900 lines)
-- **Architecture**: `docs/02-architecture-principles.md`, `docs/03-architecture-layers.md`, `docs/components/README.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md` (~6 files, ~1,000–1,800 lines)
-
-#### Step 6: Generate Summaries Using LLM (NEW - Recommended)
-
-**IMPORTANT**: Use LLM capabilities to generate slide summaries instead of regex extraction.
-
-**Process**:
-1. Load slide template for stakeholder type
-2. For each content slide in template:
-   - Identify `data_sources` from slide config (section numbers)
-   - Read those sections from ARCHITECTURE.md
-   - Generate summary using LLM based on slide type + stakeholder
-   - Format as 3-6 bullet points
-3. Save all summaries to JSON file
-
-**Summarization Prompts by Slide Type**:
-
-```
-Executive Summary (Slide 3):
-"Summarize the key metrics and system purpose in 3-4 bullet points for [stakeholder] stakeholders. Focus on quantifiable metrics and business value. Language: [language]"
-
-Architecture Principles (Slide 4):
-"List the top 5 architecture principles from this content. For each, provide the principle name and a 1-sentence description. Language: [language]"
-
-Components (Slide 6):
-"Summarize the main system components in 4-5 bullet points. Focus on component responsibilities and interactions. Language: [language]"
-
-Technology Stack (Slide 7):
-"List the key technologies used, organized by category (Backend, Frontend, Data, Infrastructure). Keep it concise. Language: [language]"
-
-Data Flow (Slide 8):
-"Describe the main data flow patterns in 3-4 bullet points. Focus on how data moves through the system. Language: [language]"
-
-Integration Points (Slide 9):
-"List the main external integrations in 4-5 bullet points. Include system names and integration methods. Language: [language]"
-
-Security Architecture (Slide 10):
-"Summarize security controls in 4-5 bullet points. Cover authentication, encryption, and access controls. Language: [language]"
-
-ADRs (Slide 11):
-"List the top 5 most important architecture decisions in format: ADR-### : [Decision title]. Language: [language]"
-```
-
-**Output Format (JSON)**:
-```json
-{
-  "3": ["Metric bullet 1", "Metric bullet 2", "Metric bullet 3"],
-  "4": ["Principle 1", "Principle 2", "Principle 3"],
-  "5": ["Layer description 1", "Layer description 2"],
-  ...
-}
-```
-
-**Save to**: `/tmp/presentation_summaries_{stakeholder}_{language}.json`
-
-**Fallback**: If LLM summarization produces incomplete content, re-read the relevant ARCHITECTURE.md sections and retry the summarization step.
-
-#### Step 7: Load Language Translations
-
-**Process**:
-1. Load appropriate language JSON file (language_en.json or language_es.json)
-2. Initialize LanguageManager with translations
-3. Prepare slide titles, labels, and UI strings in target language
-
-**Translation Files Location**:
-- `/skills/architecture-docs/presentation/language_en.json`
-- `/skills/architecture-docs/presentation/language_es.json`
-
-#### Step 8: Generate Markdown File for Claude PowerPoint
-
-**Claude directly writes the Markdown file** — no external scripts or runtime required.
-
-**Generation Process**:
-1. Use the LLM-generated summaries from Step 6 as slide content
-2. Apply the slide template structure for the selected stakeholder (see Slide Templates section)
-3. Map each slide type to its Markdown convention:
-
-| Slide Type | Markdown Convention |
-|------------|-------------------|
-| Title | `# System Name\n## Subtitle — Stakeholder \| Date` |
-| Agenda | `## Agenda` + numbered list of sections |
-| Section Divider | `## SECCIÓN N: Title` (no body) |
-| Standard content | `## Title` + bullet list (3-6 points) |
-| Metrics | `## Title` + 3-column table `\| Metric \| Value \| Label \|` |
-| Comparison | `## Title` + `\| Left Column \| Right Column \|` table |
-| Process/Steps | `## Title` + numbered list (sequential steps) |
-| Quote | `## Title` + `> blockquote text` |
-| Call to Action | `## Title` + bold contact lines |
-| Summary | `## Resumen / Summary` + key takeaway bullets |
-
-4. Separate every slide with `---`
-5. Apply selected language (ES/EN) to all titles, labels, and section headers
-6. Keep system names, component names, technologies, and metric values in their original language
-
-**Content Writing Rules**:
-- Write concise, presentation-ready language (not documentation prose)
-- Each content slide: 3-6 bullet points maximum
-- Bullet points: one idea per line, ≤15 words
-- Metrics table: exactly 3 columns, values extracted from ARCHITECTURE.md
-- Comparison table: left = first concept, right = second concept, max 5 rows each
-
-#### Step 9: Save Markdown File
-
-**Output Path**: `/presentations/ARCHITECTURE_{Type}_{Lang}.md`
-
-**Examples**:
-- `/presentations/ARCHITECTURE_Business_EN.md`
-- `/presentations/ARCHITECTURE_Architecture_ES.md`
-- `/presentations/ARCHITECTURE_Compliance_EN.md`
-
-**Process**:
-1. Ensure `/presentations/` directory exists (create if needed)
-2. Write the complete Markdown content to file using the Write tool
-3. Verify file creation and display the path to the user
-
-#### Step 10: Display Success Summary
-
-**Success Message Template**:
-
-```
-═══════════════════════════════════════════════════════════
-   PRESENTATION MARKDOWN GENERATION COMPLETE
-═══════════════════════════════════════════════════════════
-
-✓ Successfully generated presentation Markdown file!
-📁 Output: /presentations/ARCHITECTURE_Business_EN.md
-📊 Slides: 10 slides (~15 minute presentation)
-🎯 Stakeholder: Business
-🌐 Language: English
-
-Data Sources Used:
-- Section 1: Executive Summary (lines 25-65)
-- Section 2: System Overview (lines 66-120)
-- Section 10: Scalability & Performance (lines 1551-1750)
-- Section 11: Operational Considerations (lines 1751-1950)
-
-Next Steps:
-1. Open the generated .md file
-2. Use Claude PowerPoint to convert it to a .pptx file
-3. Add company branding/logos in PowerPoint as needed
-
-═══════════════════════════════════════════════════════════
-```
-
-### Invocation
-
-This workflow is fully executed by Claude — no command-line tools or runtimes are required. Claude reads the relevant sections from ARCHITECTURE.md, generates the slide content using LLM summarization, and writes the resulting Markdown file directly using the Write tool.
-
-**Skill invocation examples:**
-```
-/skill architecture-docs
-> "Generate architecture presentation for business stakeholders in Spanish"
-
-/skill architecture-docs
-> "Create compliance presentation markdown"
-
-/skill architecture-docs
-> "Generate presentation for architecture team in English"
-```
-
-**Output file naming:**
-- `/presentations/ARCHITECTURE_Business_ES.md`
-- `/presentations/ARCHITECTURE_Architecture_EN.md`
-- `/presentations/ARCHITECTURE_Compliance_ES.md`
-
-**To convert to PowerPoint**: Open the generated `.md` file and use Claude PowerPoint to produce the final `.pptx`.
-
-### Slide Templates by Stakeholder
-
-#### Business Stakeholder Template (7 slides)
-
-1. **Title Slide** - System name + "Architecture Overview for Business Stakeholders"
-2. **Executive Summary** - Key metrics, business value, availability commitment (Section 1)
-3. **Problem & Solution** - Problem statement + solution overview (Sections 2.1, 2.2)
-4. **Key Use Cases & Target Users** - Top use cases, personas (Section 2.3)
-5. **Performance & Availability** - SLA commitments, uptime, response time (Section 10)
-6. **Architecture Principles** - Top 5 guiding principles (Section 3)
-7. **Summary & Next Steps** - Key takeaways, contact, action items
-
-#### Architecture Stakeholder Template (9 slides)
-
-1. **Title Slide** - System name + "Technical Architecture Deep Dive"
-2. **Executive Summary & Principles** - System purpose, top 5 principles (Sections 1, 3)
-3. **Architecture Layers & Components** - Layer overview + key components (Sections 4, 5)
-4. **Technology Stack** - Backend, frontend, data, infrastructure (Section 8)
-5. **Data Flow & Integration Points** - Data patterns + external APIs (Sections 6, 7)
-6. **Security Architecture** - Auth, encryption, access controls (Section 9)
-7. **Key Architecture Decisions** - Top 5 ADRs (Section 12)
-8. **Performance & Operational Model** - SLAs, monitoring, incident response (Sections 10, 11)
-9. **Summary & Q&A** - Key patterns, open questions, next steps
-
-#### Compliance Stakeholder Template
-
-> ⚠️ **Coming soon** — Compliance presentation template is being reworked. Not available for generation at this time. If selected, inform the user and offer Business or Architecture instead.
-
-### Error Handling
-
-**Missing ARCHITECTURE.md**:
-```
-❌ Error: ARCHITECTURE.md not found at: [path]
-
-Presentation generation requires a valid ARCHITECTURE.md file.
-Please create one using the architecture-docs skill first.
-
-To create ARCHITECTURE.md:
-1. Use the architecture-docs skill
-2. Select architecture type (Microservices, META, 3-Tier, BIAN, N-Layer)
-3. Complete all 12 sections
-4. Ensure Document Index is present
-```
-
-**Invalid Document Index**:
-```
-⚠️ Warning: Document Index not found or incomplete.
-Using default line ranges. Presentation may have incomplete data.
-
-Recommendation: Update Document Index in ARCHITECTURE.md
-(See Workflow 4: Automatic Index Updates)
-```
-
-**Missing Sections**:
-```
-⚠️ Warning: Section [X] not found in ARCHITECTURE.md.
-Slides requiring this section will show: "[Not documented in Section X]"
-
-Affected slides:
-- Slide 5: Use Cases (requires Section 2.3)
-- Slide 8: Operational Support (requires Section 11)
-
-Recommendation: Complete missing sections in ARCHITECTURE.md before regenerating.
-```
-
-**Empty Subsections**:
-- Placeholder slides added: "[Not specified in ARCHITECTURE.md Section X.Y]"
-- User notified of missing data in success summary
-- Recommendation to complete documentation
-
-### Context Efficiency
-
-**Context Usage Comparison**:
-
-| Approach | Lines Loaded | Context Usage | Savings |
-|----------|-------------|---------------|---------|
-| Full Document Load | 2,000-3,000 | 100% | - |
-| Business Presentation | ~400 | 15-20% | 80-85% |
-| Architecture Presentation | ~1,000 | 40-50% | 50-60% |
-| Compliance Presentation | ~700 | 25-35% | 65-75% |
-
-**Efficiency Techniques**:
-- Document Index-based section location
-- Incremental section loading with ±10 line buffers
-- Load only stakeholder-relevant sections
-- Reuse loaded sections across multiple extractions
-
-### Integration with Other Workflows
-
-**Typical Workflow Sequence**:
-1. **Workflow 1**: Create ARCHITECTURE.md (select architecture type)
-2. **Workflow 2**: Generate ADRs from Section 12
-3. **Workflow 4**: Update Document Index after edits
-4. **Workflow 5**: Verify metric consistency
-5. **→ Workflow 8**: Generate presentations for stakeholders ✓
-
-**Presentation Regeneration**:
-- Regenerate presentations after ARCHITECTURE.md updates
-- No need to recreate ARCHITECTURE.md, just regenerate presentations
-- Presentations reflect latest documented architecture
-- Version presentations by adding date suffix if needed
-
-### Best Practices
-
-**DO:**
-- ✅ Generate presentations AFTER completing ARCHITECTURE.md
-- ✅ Verify Document Index is up-to-date before generation
-- ✅ Select stakeholder type based on presentation audience
-- ✅ Regenerate presentations when architecture changes
-- ✅ Review generated slides for accuracy
-- ✅ Customize branding/logos after generation
-
-**DON'T:**
-- ❌ Generate presentations from incomplete ARCHITECTURE.md
-- ❌ Manually edit ARCHITECTURE.md after presentation generation (regenerate instead)
-- ❌ Assume all sections will be present (handle missing data gracefully)
-- ❌ Translate technical content (system names, metrics remain as-is)
-
-### Example Workflow Execution
-
-**User**: "Generate architecture presentation for business stakeholders in Spanish"
-
-**Skill Response**:
-
-*Step 1: Detect request → Workflow 8 (Presentation Generation)*
-*Step 2: Parse request → Stakeholder: Business, Language: Spanish*
-*Step 3: Confirm settings*
-
-📊 **Architecture Presentation Generation**
-
-I'll generate a presentation Markdown file with these settings:
-- Stakeholder: Business
-- Language: Spanish
-- Slides: ~10 slides (~15 minutes)
-- Output: /presentations/ARCHITECTURE_Business_ES.md (ready for Claude PowerPoint)
-
-Proceeding with generation...
-
-═══════════════════════════════════════════════════════════
-   ARCHITECTURE PRESENTATION GENERATION
-═══════════════════════════════════════════════════════════
-Stakeholder: Business
-Language: ES
-Output: /presentations/ARCHITECTURE_Business_ES.md
-═══════════════════════════════════════════════════════════
-
-Step 1/6: Loading ARCHITECTURE.md Document Index...
-  ✓ Loaded index for 12 sections
-
-Step 2/6: Loading required sections (1, 2, 10, 11)...
-  ✓ Loaded 4 sections (387 lines)
-  ✓ Context efficiency: 387/2,453 lines = 15.8%
-
-Step 3/6: Generating slide summaries (LLM)...
-  ✓ Generated summaries for 10 slides in Spanish
-
-Step 4/6: Building Markdown slide structure...
-  - Slide 1: Título ✓
-  - Slide 2: Agenda ✓
-  - Slide 3: Resumen Ejecutivo ✓
-  - Slide 4: Problema y Solución ✓
-  - Slide 5: Casos de Uso ✓
-  - Slide 6: Valor de Negocio ✓
-  - Slide 7: Disponibilidad del Sistema ✓
-  - Slide 8: Soporte Operacional ✓
-  - Slide 9: Principios de Arquitectura ✓
-  - Slide 10: Resumen y Preguntas ✓
-
-Step 5/6: Applying Spanish translations to titles and labels...
-  ✓ All UI strings translated
-
-Step 6/6: Writing Markdown file...
-  ✓ Saved to /presentations/ARCHITECTURE_Business_ES.md
-
-═══════════════════════════════════════════════════════════
-   PRESENTATION MARKDOWN GENERATION COMPLETE
-═══════════════════════════════════════════════════════════
-
-✓ Successfully generated presentation Markdown file!
-📁 Output: /presentations/ARCHITECTURE_Business_ES.md
-📊 Slides: 10 slides (~15 minute presentation)
-🎯 Stakeholder: Business
-🌐 Language: Spanish
-
-Data Sources Used:
-- Section 1: Executive Summary (lines 25-87)
-- Section 2: System Overview (lines 88-201)
-- Section 10: Scalability & Performance (lines 1678-1802)
-- Section 11: Operational Considerations (lines 1803-2015)
-
-Próximos Pasos:
-1. Abrir el archivo /presentations/ARCHITECTURE_Business_ES.md
-2. Usar Claude PowerPoint para convertirlo a .pptx
-3. Agregar branding corporativo / logos en PowerPoint si es necesario
-
-═══════════════════════════════════════════════════════════
-
-**Your presentation Markdown is ready!** Open `/presentations/ARCHITECTURE_Business_ES.md` and use **Claude PowerPoint** to convert it to a `.pptx` file.
-
----
-
-## Workflow 9: Diagram Generation (Generate Architecture Diagrams)
+## Workflow 8: Diagram Generation (Generate Architecture Diagrams)
 
 **⚡ Auto-triggers**: This workflow automatically activates when diagram-related keywords are detected (see Automatic Workflow Detection section above).
 
@@ -4535,16 +4011,14 @@ Generate missing diagrams? [Yes/All | Yes/Select | No]
 
 **Workflow Dependencies**:
 - **Workflow 1 (Create ARCHITECTURE.md)**: Must run first if document doesn't exist
-- **Workflow 8 (Presentation Generation)**: Can use generated diagrams in presentations
 - **Workflow 7 (Informational Query)**: Can answer questions about generated diagrams
 
 **Complementary Actions**:
-- After diagram generation, suggest running Workflow 8 to create presentation
 - Recommend adding diagram descriptions to ADRs (Workflow 2) if design decisions are visualized
 
 ---
 
-## Workflow 10: Migrate Existing ARCHITECTURE.md to docs/ Structure
+## Workflow 9: Migrate Existing ARCHITECTURE.md to docs/ Structure
 
 **⚡ Auto-triggers**: This workflow activates when migration/restructuring keywords are detected.
 
@@ -4552,7 +4026,7 @@ Generate missing diagrams? [Yes/All | Yes/Select | No]
 
 Add this trigger pattern to the `## 🎯 AUTOMATIC WORKFLOW DETECTION` section:
 
-#### Workflow 10: Migrate Existing ARCHITECTURE.md to docs/ Structure
+#### Workflow 9: Migrate Existing ARCHITECTURE.md to docs/ Structure
 
 **Triggers:**
 - Keywords: "migrate", "restructure", "split", "reorganize", "convert" + "architecture", "ARCHITECTURE.md"
@@ -4561,7 +4035,7 @@ Add this trigger pattern to the `## 🎯 AUTOMATIC WORKFLOW DETECTION` section:
 
 **Action when detected:**
 1. Confirm: "I'll help you migrate ARCHITECTURE.md to the multi-file docs/ structure."
-2. Jump directly to Workflow 10, Step 1
+2. Jump directly to Workflow 9, Step 1
 
 ### When to Use
 

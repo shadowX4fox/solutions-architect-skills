@@ -9,7 +9,7 @@ This repository follows the Claude Code plugin structure:
 - `.claude-plugin/` - Plugin configuration and marketplace metadata
   - `plugin.json` - Plugin manifest (name, version, description)
   - `marketplace.json` - Marketplace registry configuration
-- `skills/` - Six skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, component-index-guardian, architecture-peer-review)
+- `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-doc-export)
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
 
@@ -29,7 +29,7 @@ This project maintains architecture documentation using standardized templates a
 
 ### Architecture Documentation Workflow
 
-This project follows a three-phase documentation approach:
+This project follows a four-phase documentation approach:
 
 1. **Business Requirements Phase** (Product Owner)
    - Use the `architecture-readiness` skill to create Product Owner Specifications
@@ -48,6 +48,12 @@ This project follows a three-phase documentation approach:
 3. **Compliance Documentation Phase** (Compliance Team)
    - Use the `architecture-compliance` skill to generate compliance documents
    - Generates 10 compliance contracts from ARCHITECTURE.md
+
+4. **Development Handoff Phase** (Development Team)
+   - Use the `architecture-dev-handoff` skill to generate per-component handoff documents
+   - Produces a 16-section handoff document per component plus deliverable assets
+   - Assets are scaffolded based on component type: `openapi.yaml` (API), `ddl.sql` (DB), `deployment.yaml` (K8s), `asyncapi.yaml` (messaging), `cronjob.yaml` (scheduled jobs)
+   - **Prerequisite**: ARCHITECTURE.md and `docs/components/` must exist (Phase 2 complete); compliance contracts optional (used for enrichment if present)
 
 ### Using the Architecture-Readiness Skill
 
@@ -86,7 +92,7 @@ The skill includes:
 
 **Note**: The skill is optimized to minimize context usage by loading document sections incrementally rather than reading entire files.
 
-**Diagram Enforcement Policy** (Workflow 9):
+**Diagram Enforcement Policy** (Workflow 8):
 - **Mandatory diagrams**: High-Level Architecture and Data Flow diagrams are always generated (not optional)
 - **Canonical locations**: All diagrams must reside in their designated `docs/` file — not configurable, no override
 - **Source of truth**: Architecture docs are authoritative — diagrams for undocumented flows are discarded
@@ -154,11 +160,11 @@ The skill includes:
 
 A pre-configured example is provided at `.claude/settings.json.example`. Users installing the plugin must copy or merge the `permissions.allow` block into their project's `.claude/settings.json`.
 
-### Using the Component Index Guardian Skill
+### Using the Architecture Component Guardian Skill
 
-The `component-index-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 4-column table schema on every write.
+The `architecture-component-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 4-column table schema on every write.
 
-To manually activate the skill, use: `/skill component-index-guardian`
+To manually activate the skill, use: `/skill architecture-component-guardian`
 
 **When to use**:
 - After adding, removing, or renaming a component file in `docs/components/`
@@ -175,6 +181,8 @@ To manually activate the skill, use: `/skill component-index-guardian`
 | Re-sync index | Invoke skill with "sync" |
 
 If a user requests a direct edit to `docs/components/README.md` (adding columns, reformatting, or any change), redirect to this skill.
+
+**Note**: Development handoff documents (`docs/handoffs/`) are managed separately by the `architecture-dev-handoff` skill.
 
 ### Using the Architecture Peer Review Skill
 
@@ -210,5 +218,64 @@ The skill includes:
 
 ```json
 "Read(compliance-docs/*)"
+```
+
+### Using the Architecture Dev Handoff Skill
+
+The `architecture-dev-handoff` skill generates per-component **Component Development Handoff** documents that give development teams everything needed to implement a component without reading the full ARCHITECTURE.md suite.
+
+To manually activate the skill, use: `/skill architecture-dev-handoff`
+
+The skill includes:
+- **16-section handoff document** per component — metadata, overview, scope, API contract, data model, integrations, security, performance, configuration, observability, error handling, technology constraints, acceptance criteria, ADRs, deliverable assets, open questions
+- **Component-type-specific asset generation** — scaffolded artifacts based on component type:
+  - API/REST/Service → `openapi.yaml` (OpenAPI 3.1 specification)
+  - Database/Data Store → `ddl.sql` (DDL with tables, indexes, constraints)
+  - Kubernetes workload → `deployment.yaml` (Deployment + Service + HPA manifests)
+  - Message Consumer/Producer → `asyncapi.yaml` (AsyncAPI 3.0 specification)
+  - Kafka + Avro serialization → `schema.avsc` (Avro schema for Schema Registry)
+  - Kafka + Protobuf serialization → `schema.proto` (Protobuf message definition)
+  - Scheduled Job → `cronjob.yaml` (Kubernetes CronJob manifest)
+- **Gap detection** — fields not found in architecture docs are marked `[NOT DOCUMENTED]` and listed in Section 15 (Open Questions) as a remediation checklist
+- **Compliance enrichment** — if `compliance-docs/` exists, security/SRE/development contract gaps are surfaced in relevant sections
+- **Managed index** at `docs/handoffs/README.md` — 6-column table tracking all handoff docs
+
+**Output location**: `docs/handoffs/NN-<component-name>-handoff.md` + `docs/handoffs/assets/NN-<component-name>/`
+
+**When to use**: After ARCHITECTURE.md and `docs/components/` are complete (Phase 2), when handing off a component to the development team for implementation, or when generating implementation specs for one or more components.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Write(docs/handoffs/*)",
+"Read(docs/handoffs/*)"
+```
+
+### Using the Architecture Doc Export Skill
+
+The `architecture-doc-export` skill exports architecture documents and component handoffs to professional Word (.docx) files on demand. Exports are **never automatic** — invoke explicitly when ready to produce deliverables.
+
+To manually activate the skill, use: `/skill architecture-doc-export`
+
+The skill has two export modes:
+
+| Mode | What it exports | Output |
+|------|----------------|--------|
+| **Solution Architecture** | `ARCHITECTURE.md` + all `ADR-*.md` files | `exports/SA-<name>.docx` + `exports/ADR-NNN-<title>.docx` per ADR |
+| **Dev Handoff** | Selected component handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
+
+**Document styling**:
+- Corporate blue (`#1F4E79`) — reserved for architecture artifacts (SA docs and ADRs)
+- Teal (`#0D7377`) — component handoffs (development phase deliverables)
+
+**Output location**: `exports/` at project root (auto-created).
+
+**When to use**: When you need a Word-format deliverable from ARCHITECTURE.md, ADR files, or component handoff documents generated by the `architecture-dev-handoff` skill.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Bash(bun run tools/docgen/generate-doc.js *)",
+"Write(exports/*)"
 ```
 
