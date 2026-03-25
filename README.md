@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.16-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.15` in the list.
+You should see `solutions-architect-skills v2.10.16` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.15 (Current Release) ✅
+### v2.10.16 (Current Release) ✅
+**feat: add architecture-blueprint skill for generating Business and Application blueprint files**
+
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: New skill — generates `BLUEPRINT_BUSINESS.md` and `BLUEPRINT_APPLICATION.md` by extracting data from `ARCHITECTURE.md` and filling organizational templates; 7-step workflow with mode detection, plugin-dir resolution, context loading, field mapping, NOT FOUND handling with keyword suggestions, overwrite protection, and a fill summary report
+- ✅ **`skills/architecture-blueprint/BUSINESS_TEMPLATE.md`**: Business template ("Datos de la Iniciativa") with 20 placeholders covering initiative metadata, team roles, business strategy, and reference links; Application template slot available for future addition
+- ✅ **`CLAUDE.md`**: Added `### Using the Architecture Blueprint Skill` documentation section
+
+### v2.10.15 (Previous Release) ✅
 **feat: add architecture principles to executive summary export + plugin cache read permission**
 
 - ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `docs/02-architecture-principles.md` as a required source file in Step A.1 — architecture principles (Section 3) are now included in the executive summary export

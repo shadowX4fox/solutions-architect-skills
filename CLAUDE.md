@@ -296,6 +296,30 @@ The skill includes:
 "Read(docs/handoffs/*)"
 ```
 
+### Using the Architecture Blueprint Skill
+
+The `architecture-blueprint` skill generates standardized organizational blueprint markdown files by extracting data from the architecture documentation and filling predefined templates. It produces two output files — **Business** and **Application** — written to the same directory as `ARCHITECTURE.md`.
+
+To manually activate the skill, use: `/skill architecture-blueprint`
+
+The skill includes:
+- **Business blueprint** (`BLUEPRINT_BUSINESS.md`) — fills the "Datos de la Iniciativa" organizational template with architecture-derived data (business domain, strategy, deployment location, team roles)
+- **Application blueprint** (`BLUEPRINT_APPLICATION.md`) — fills an application-level template (template pending; skipped until `APPLICATION_TEMPLATE.md` is added)
+- **Smart field extraction** — maps each `<placeholder>` to the relevant architecture doc section using a field mapping table
+- **NOT FOUND handling** — fields not found in architecture docs are marked `NOT FOUND` with a recommended keyword or section to add the missing data
+- **Selective generation** — generate both, business-only, or application-only based on request
+- **Summary report** — lists all filled fields and all NOT FOUND gaps with remediation suggestions
+
+**Output location**: same directory as `ARCHITECTURE.md` (project root or subdirectory).
+
+**Templates location**: `skills/architecture-blueprint/` in the plugin directory.
+- `BUSINESS_TEMPLATE.md` — provided (Datos de la Iniciativa format)
+- `APPLICATION_TEMPLATE.md` — **pending** (add when ready; skill auto-skips if missing)
+
+**When to use**: When generating initiative data sheets, organizational architecture forms, or standardized business/application blueprints from an existing architecture document.
+
+---
+
 ### Using the Architecture Doc Export Skill
 
 The `architecture-doc-export` skill exports architecture documents and component handoffs to professional Word (.docx) files on demand. Exports are **never automatic** — invoke explicitly when ready to produce deliverables.
