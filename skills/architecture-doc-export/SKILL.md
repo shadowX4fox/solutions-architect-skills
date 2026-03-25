@@ -1,10 +1,11 @@
 ---
 name: architecture-doc-export
 description: >
-  On-demand export of Solution Architecture documents and Component Development Handoffs
-  to professional Word (.docx) files. Exports are never automatic — invoke explicitly.
-  Produces: one docx for ARCHITECTURE.md + one per ADR (Solution Architecture export),
-  or one docx per selected component handoff (Handoff export).
+  On-demand export of architecture documents to professional Word (.docx) files.
+  Exports are never automatic — invoke explicitly when ready to produce deliverables.
+  Solution Architecture mode synthesizes an Executive Summary from docs/01-system-overview.md,
+  the component index, and the compliance manifest (if present), then exports individual ADR docs.
+  Handoff mode exports selected component development handoffs from docs/handoffs/.
 triggers:
   - export architecture
   - export to word
@@ -30,45 +31,95 @@ Exports architecture documents to professional Word files on demand.
 
 ## What Gets Exported
 
-| Export Mode | Input | Output |
-|-------------|-------|--------|
-| Solution Architecture | `ARCHITECTURE.md` + all `ADR-*.md` files | One `.docx` per file in `exports/` |
-| Component Handoff | Selected component handoff(s) from `docs/handoffs/` | One `.docx` per selected component |
+| Export Mode | Input Sources | Output |
+|-------------|--------------|--------|
+| Solution Architecture | `docs/01-system-overview.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
+| Component Handoff | Selected handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
 
 ---
 
 ## Workflow A — Export Solution Architecture
 
-**Trigger phrases**: "export architecture", "export to Word", "export ARCHITECTURE.md"
+**Trigger phrases**: "export architecture", "export to Word", "export solution architecture"
 
-### Step A.1 — Locate ARCHITECTURE.md
+### Step A.1 — Gather Source Files
 
-Search the project root and `docs/` for `ARCHITECTURE.md`. If not found:
+Read these files:
+
+| File | Required | Purpose |
+|------|----------|---------|
+| `docs/01-system-overview.md` | ✅ Yes | Executive Summary + System Overview sections |
+| `docs/components/README.md` | ✅ Yes | Component index table (4-column: #, Component, File, Type) |
+| `compliance-docs/COMPLIANCE_MANIFEST.md` | ⬜ Optional | Compliance summary table and scores |
+
+If `docs/01-system-overview.md` is not found:
 
 ```
-❌ ARCHITECTURE.md not found. Generate it first with /skill architecture-docs.
+❌ docs/01-system-overview.md not found.
+   Generate architecture documentation first with /skill architecture-docs.
 ```
 
-### Step A.2 — Export ARCHITECTURE.md
+### Step A.2 — Compose the Executive Summary
+
+Build a temporary markdown document (`/tmp/sa-executive-summary-<slug>.md`) with the following structure:
+
+---
+
+```markdown
+# <Solution Name> — Executive Summary
+
+<!-- source: docs/01-system-overview.md -->
+## Executive Summary
+<Extract the content under the "Executive Summary" heading from docs/01-system-overview.md
+ through (but not including) the "System Overview" heading>
+
+## System Overview
+<Extract the content under the "System Overview" heading from docs/01-system-overview.md
+ through end of file (or the next H1/H2 boundary)>
+
+<!-- source: docs/components/README.md -->
+## Architecture Components
+<Paste the Markdown table from docs/components/README.md (the 4-column # / Component / File / Type table only — skip the managed-by comment, breadcrumb, and prose)>
+
+<!-- source: compliance-docs/COMPLIANCE_MANIFEST.md — only if file exists -->
+## Compliance Summary
+**Overall**: <Total Contracts> contracts · Average Score: <X.X>/10 · Average Completeness: <N>%
+
+<Paste the "Generated Documents" table from COMPLIANCE_MANIFEST.md (Contract Type / Filename / Score / Status / Completeness / Generated)>
+
+**Status breakdown**: Approved: N · In Review: N · Draft: N · Rejected: N
+
+## Architecture Decision Records
+<Build a Markdown table from the ADR files found in Step A.4 search:>
+| # | Title | Status | File |
+|---|-------|--------|------|
+| ADR-001 | <title from H1> | <status from frontmatter or "Draft"> | ADR-001-<slug>.md |
+...
+```
+
+---
+
+Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-case it for the output filename).
+
+### Step A.3 — Export Executive Summary to Word
 
 ```bash
 bun run tools/docgen/generate-doc.js \
   --type    solution-architecture \
-  --input   <path-to-ARCHITECTURE.md> \
+  --input   /tmp/sa-executive-summary-<slug>.md \
   --output  exports/SA-<solution-name>.docx \
   --author  "Solution Architecture" \
   --version "1.0" \
   --status  "Draft"
 ```
 
-Use the solution name from the `# <Title>` heading in ARCHITECTURE.md as `<solution-name>` (kebab-cased, spaces → hyphens).
+### Step A.4 — Find and Export Individual ADRs
 
-### Step A.3 — Find and Export ADRs
-
-Scan for ADR files matching:
-- `ADR-*.md` in project root
+Scan for ADR files in these locations (in order):
+- `adr/ADR-*.md`
 - `docs/adr/ADR-*.md`
 - `docs/decisions/ADR-*.md`
+- `ADR-*.md` in project root
 
 For each ADR found:
 
@@ -82,15 +133,16 @@ bun run tools/docgen/generate-doc.js \
   --status  "Draft"
 ```
 
-### Step A.4 — Report
+### Step A.5 — Clean Up and Report
 
-List every file produced:
+Delete the temporary markdown file (`/tmp/sa-executive-summary-<slug>.md`), then report:
 
 ```
 ✅ Solution Architecture Export Complete
-   exports/SA-<name>.docx        (ARCHITECTURE.md)
-   exports/ADR-001-<title>.docx  (ADR-001)
-   exports/ADR-002-<title>.docx  (ADR-002)
+
+   exports/SA-<solution-name>.docx          (Executive Summary)
+   exports/ADR-001-<title>.docx             (Architecture Decision 001)
+   exports/ADR-002-<title>.docx             (Architecture Decision 002)
    ...
 ```
 
@@ -98,7 +150,7 @@ List every file produced:
 
 ## Workflow B — Export Component Handoff
 
-**Trigger phrases**: "export handoff", "export component handoff", "export <component-name> to Word"
+**Trigger phrases**: "export handoff", "export dev handoff", "export <component-name> to Word"
 
 ### Step B.1 — List Available Handoffs
 
@@ -150,35 +202,23 @@ bun run tools/docgen/generate-doc.js \
 
 | Document | Type Code | Color | Purpose |
 |----------|-----------|-------|---------|
-| ARCHITECTURE.md | `SA` | Corporate blue `#1F4E79` | Technical architecture |
+| Executive Summary | `SA` | Corporate blue `#1F4E79` | Architecture overview deliverable |
 | ADR-*.md | `ADR` | Corporate blue `#1F4E79` | Architecture decisions |
 | Component handoffs | `HANDOFF` | Teal `#0D7377` | Dev team deliverables |
 
-Corporate blue is reserved exclusively for architecture artifacts. Handoff documents use teal to signal their role in the development phase.
-
----
-
-## CHANGELOG Directive (Optional)
-
-Add this to any `ARCHITECTURE.md` to render a version history table before the document body:
-
-```markdown
-<!-- CHANGELOG: 1.0|2024-01-10|Solution Architecture|Initial draft;1.1|2024-02-01|Solution Architecture|Added diagrams -->
-```
-
-Format: `version|date|author|description`, entries separated by `;`.
+Corporate blue is reserved for architecture artifacts. Handoff documents use teal to signal their role in the development phase.
 
 ---
 
 ## Output Location
 
-All exports land in `exports/` at the project root. The generator auto-creates the directory.
+All exports land in `exports/` at the project root (auto-created).
 
 ```
 exports/
-├── SA-payment-gateway.docx
-├── ADR-001-api-gateway-choice.docx
-├── ADR-002-database-selection.docx
+├── SA-payment-gateway.docx              ← Executive Summary
+├── ADR-001-api-gateway-choice.docx      ← Individual ADR
+├── ADR-002-database-selection.docx      ← Individual ADR
 ├── HANDOFF-payment-api.docx
 └── HANDOFF-user-service.docx
 ```
@@ -187,20 +227,19 @@ exports/
 
 ## Dependency Check
 
-The generator requires `docx` (npm). On first run the generator will fail if `node_modules` is absent.
-
 If you see a `Cannot find module 'docx'` error:
 
 ```bash
 cd tools/docgen && bun install
 ```
 
-This installs the `docx` package into `tools/docgen/node_modules/`. Only needed once.
+Only needed once.
 
 ---
 
 ## Prerequisites
 
-- ARCHITECTURE.md created by `/skill architecture-docs`
-- ADR files created by `/skill architecture-docs` (Workflow — ADR)
+- `docs/01-system-overview.md` and `docs/components/README.md` created by `/skill architecture-docs`
+- ADR files created by `/skill architecture-docs` (ADR workflow)
+- Compliance manifest created by `/skill architecture-compliance`
 - Component handoffs created by `/skill architecture-dev-handoff`

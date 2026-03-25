@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.3` in the list.
+You should see `solutions-architect-skills v2.10.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.3 (Current Release) ✅
+### v2.10.4 (Current Release) ✅
+**feat: architecture export now generates synthesized executive summary instead of raw ARCHITECTURE.md conversion**
+
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Workflow A completely redesigned — reads `docs/01-system-overview.md` (executive summary + system overview), `docs/components/README.md` (component index), and `compliance-docs/COMPLIANCE_MANIFEST.md` (optional compliance summary); synthesizes them into a single executive summary markdown then exports to `exports/SA-<name>.docx`; ADRs are still exported individually as `exports/ADR-NNN-<title>.docx`
+- ✅ **`CLAUDE.md`**: Updated doc-export section to reflect synthesized executive summary approach
+
+### v2.10.3 (Previous Release) ✅
 **fix: replace Word TOC field with pre-rendered table of contents — works in all readers**
 
 - ✅ **`tools/docgen/generate-doc.js`**: Replaced `TableOfContents` field code with `buildManualToc()` — a new function that iterates parsed heading blocks (H1–H3) and renders styled paragraphs with level-based indentation; TOC is now pre-rendered at generation time and visible in Word, LibreOffice, Google Docs, and Word Online without any "update fields" step
