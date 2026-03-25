@@ -27,6 +27,13 @@ Exports architecture documents to professional Word files on demand.
 > **On-demand only** — this skill never runs automatically after document generation.
 > Invoke it explicitly when you are ready to produce deliverable Word files.
 
+> **Runtime: Bun only — never Node.** All generator calls MUST use `bun run`. Never use `node` or fall back to it under any circumstances.
+> If `bun run` appears to hang or produces no output:
+> 1. Ensure the `docx` package is installed: `cd tools/docgen && bun install`
+> 2. Use an **absolute path** to `generate-doc.js` — resolve it from the plugin install location
+> 3. Run **foreground** (not in background) to capture output immediately
+> Do NOT attempt `node generate-doc.js` as an alternative — it is not an authorized runtime.
+
 ---
 
 ## What Gets Exported
@@ -61,7 +68,7 @@ If `docs/01-system-overview.md` is not found:
 
 ### Step A.2 — Compose the Executive Summary
 
-Build a temporary markdown document (`/tmp/sa-executive-summary-<slug>.md`) with the following structure:
+Build a temporary markdown document (`sa-executive-summary.md`) with the following structure:
 
 ---
 
@@ -104,9 +111,10 @@ Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-
 ### Step A.3 — Export Executive Summary to Word
 
 ```bash
+# MUST use bun — never node
 bun run tools/docgen/generate-doc.js \
   --type    solution-architecture \
-  --input   /tmp/sa-executive-summary-<slug>.md \
+  --input   sa-executive-summary.md \
   --output  exports/SA-<solution-name>.docx \
   --author  "Solution Architecture" \
   --version "1.0" \
@@ -124,6 +132,7 @@ Scan for ADR files in these locations (in order):
 For each ADR found:
 
 ```bash
+# MUST use bun — never node
 bun run tools/docgen/generate-doc.js \
   --type    adr \
   --input   <path-to-ADR-NNN-name.md> \
@@ -135,7 +144,7 @@ bun run tools/docgen/generate-doc.js \
 
 ### Step A.5 — Clean Up and Report
 
-Delete the temporary markdown file (`/tmp/sa-executive-summary-<slug>.md`), then report:
+Delete the temporary markdown file (`sa-executive-summary.md`), then report:
 
 ```
 ✅ Solution Architecture Export Complete
@@ -179,6 +188,7 @@ Which component(s) to export?
 For each selected handoff:
 
 ```bash
+# MUST use bun — never node
 bun run tools/docgen/generate-doc.js \
   --type    handoff \
   --input   docs/handoffs/<NN>-<component>-handoff.md \

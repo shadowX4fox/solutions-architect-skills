@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.4` in the list.
+You should see `solutions-architect-skills v2.10.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.4 (Current Release) ✅
+### v2.10.5 (Current Release) ✅
+**fix: enforce Bun runtime and write executive summary temp file to project root**
+
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added explicit runtime enforcement callout — prohibits falling back to `node`, includes troubleshooting steps for when `bun run` appears to hang; added `# MUST use bun — never node` comment to all 3 bash code blocks
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Changed executive summary temp file location from `/tmp/sa-executive-summary-<slug>.md` to `sa-executive-summary.md` at project root — fixes path resolution issues when skill runs from plugin cache directory
+
+### v2.10.4 (Previous Release) ✅
 **feat: architecture export now generates synthesized executive summary instead of raw ARCHITECTURE.md conversion**
 
 - ✅ **`skills/architecture-doc-export/SKILL.md`**: Workflow A completely redesigned — reads `docs/01-system-overview.md` (executive summary + system overview), `docs/components/README.md` (component index), and `compliance-docs/COMPLIANCE_MANIFEST.md` (optional compliance summary); synthesizes them into a single executive summary markdown then exports to `exports/SA-<name>.docx`; ADRs are still exported individually as `exports/ADR-NNN-<title>.docx`
