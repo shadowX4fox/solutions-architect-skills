@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.8` in the list.
+You should see `solutions-architect-skills v2.10.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -392,6 +392,22 @@ The architecture-compliance skill uses Bun for:
 
 **Installation:** See [INSTALLATION.md](docs/INSTALLATION.md#installing-bun) for Bun setup instructions.
 
+## Recommended VS Code Setup
+
+For the best experience working with this plugin, install these three VS Code extensions:
+
+| Extension | Publisher | Purpose |
+|-----------|-----------|---------|
+| [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) | Anthropic | Run Claude Code skills directly from the editor |
+| [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) | Mermaid OSS | Live preview of Mermaid diagrams in architecture docs |
+| [Office Viewer](https://marketplace.visualstudio.com/items?itemName=cweijan.vscode-office) | Database Client | Preview `.docx` exports without leaving VS Code |
+
+### Why these extensions?
+
+- **Claude Code** is required to run the plugin's 8 skills from VS Code
+- **Mermaid Preview** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated
+- **Office Viewer** lets you open and review `.docx` files produced by the `architecture-doc-export` skill directly in the editor
+
 ## Use Cases
 
 Perfect for:
@@ -457,7 +473,12 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.8 (Current Release) ✅
+### v2.10.9 (Current Release) ✅
+**docs: add Recommended VS Code Setup section**
+
+- ✅ **`README.md`**: New `## Recommended VS Code Setup` section added between Requirements and Use Cases — documents the 3 VS Code extensions that complement the plugin workflow (Claude Code for VS Code, Mermaid Preview, Office Viewer) with purpose descriptions for each
+
+### v2.10.8 (Previous Release) ✅
 **feat: assign distinct amber/gold color to ADR exports**
 
 - ✅ **`tools/docgen/generate-doc.js`**: ADR document type now uses amber/gold (`#8B6914`) instead of corporate blue — each type has its own distinct identity (SA = corporate blue, ADR = amber/gold, Handoff = teal)
