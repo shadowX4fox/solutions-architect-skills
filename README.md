@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.6` in the list.
+You should see `solutions-architect-skills v2.10.7` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.6 (Current Release) ✅
+### v2.10.7 (Current Release) ✅
+**fix: markdown parser robustness and I/O error handling hardening**
+
+- ✅ **`tools/docgen/generate-doc.js`**: Added `i < lines.length` guard before skipping closing ` ``` ` — prevents out-of-bounds read on unclosed code fences at EOF
+- ✅ **`tools/docgen/generate-doc.js`**: CHANGELOG directive parsing now uses destructuring with defaults — malformed entries no longer produce `undefined` values in output
+- ✅ **`tools/docgen/generate-doc.js`**: `parseTable()` guards against empty header row before dividing `PAGE.content / headers.length` — prevents `Infinity` column width corrupting the docx
+- ✅ **`tools/docgen/generate-doc.js`**: `get()` CLI helper now checks `i + 1 < args.length` before reading the flag value — prevents silent `undefined` when a flag is the last arg with no value
+- ✅ **`tools/docgen/generate-doc.js`**: `fs.mkdirSync()` and `fs.writeFileSync()` wrapped in try-catch — disk full or permission errors now print a clean message instead of a raw stack trace
+
+### v2.10.6 (Previous Release) ✅
 **fix: resolve SA generation freeze caused by H5/H6 headings + add input file validation**
 
 - ✅ **`tools/docgen/generate-doc.js`**: Expanded markdown heading regex from `#{1,4}` to `#{1,6}` — `#####` and `######` headings no longer cause an infinite loop in the parser; H5/H6 rendered as H4 in docx output

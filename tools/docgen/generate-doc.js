@@ -128,7 +128,7 @@ function parseMarkdown(text) {
         codeLines.push(lines[i]);
         i++;
       }
-      i++; // skip closing ```
+      if (i < lines.length) i++; // skip closing ``` (guard: unclosed fence at EOF)
       blocks.push({ type: 'code', lang, text: codeLines.join('\n') });
       continue;
     }
@@ -234,8 +234,8 @@ function extractDirectives(content) {
   const cl = content.match(/<!--\s*CHANGELOG:\s*([^-]+)-->/);
   if (cl) {
     directives.changelog = cl[1].trim().split(';').map(function(row) {
-      const p = row.split('|');
-      return { version: p[0], date: p[1], author: p[2], description: p[3] };
+      const [version = '', date = '', author = '', description = ''] = row.split('|');
+      return { version, date, author, description };
     });
   }
   directives.cleanContent = content
@@ -360,6 +360,7 @@ function parseTable(lines) {
     line.split('|').slice(1, -1).map(c => c.trim());
 
   const headers = parseRow(dataLines[0]);
+  if (!headers.length) return null; // guard: empty header row would cause division by zero
   const rows    = dataLines.slice(1).map(parseRow);
   const colW    = Math.floor(PAGE.content / headers.length);
 
@@ -634,7 +635,7 @@ function extractTitle(content) {
 // ─── CLI entry point ──────────────────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);
-  const get  = (flag) => { const i = args.indexOf(flag); return i !== -1 ? args[i + 1] : null; };
+  const get  = (flag) => { const i = args.indexOf(flag); return (i !== -1 && i + 1 < args.length) ? args[i + 1] : null; };
 
   const docType  = (get('--type') || 'solution-architecture').toLowerCase();
   const input    = get('--input');
@@ -678,10 +679,20 @@ async function main() {
   // Ensure output directory exists
   const outDir = path.dirname(output);
   if (outDir && outDir !== '.' && !fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
+    try {
+      fs.mkdirSync(outDir, { recursive: true });
+    } catch (e) {
+      console.error(`Cannot create output directory: ${outDir}\n${e.message}`);
+      process.exit(1);
+    }
   }
 
-  fs.writeFileSync(output, buffer);
+  try {
+    fs.writeFileSync(output, buffer);
+  } catch (e) {
+    console.error(`Cannot write output file: ${output}\n${e.message}`);
+    process.exit(1);
+  }
   console.log(`✓ Written to: ${output}`);
 }
 
