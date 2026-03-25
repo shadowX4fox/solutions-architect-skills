@@ -127,8 +127,11 @@ Read the following files (load all — they are small enough to fit in context):
 | `docs/03-architecture-layers.md` | Architecture layers and component grouping |
 | `docs/components/README.md` | Component index (names and types) |
 | `ARCHITECTURE.md` | Navigation index, metadata, ADR table |
+| `docs/08-scalability-and-performance.md` | Capacity sizing: users, TPS, storage, scaling strategy *(Application template)* |
+| `adr/ADR-*.md` | Architecture decisions, alternatives, criteria, assumptions *(Application template)* |
+| `compliance-docs/COMPLIANCE_MANIFEST.md` | Compliance status per contract area *(Application template — optional)* |
 
-If additional `docs/` files are needed for specific template fields, load them on demand (e.g., `docs/07-security-architecture.md` for security-related fields, `docs/09-operational-considerations.md` for deployment/location fields).
+If additional `docs/` files are needed for specific template fields, load them on demand (e.g., `docs/07-security-architecture.md` for security-related fields, `docs/09-operational-considerations.md` for deployment/location and debt fields).
 
 Also check for a PO Spec file at the project root (glob: `**/PRODUCT_OWNER_SPEC*.md`, `**/PO_SPEC*.md`) — if found, load it as a supplementary source for business context fields.
 
@@ -172,6 +175,88 @@ For each `<placeholder>` in the template:
 | `<URL_CAPABILITY_MAP>` | `<URL_MAPA_CAPACIDADES>` | URL to capability map | Architecture docs do not typically contain this | `NOT FOUND — suggest: add capability map URL to docs/10-references.md` |
 | `<URL_TARGET_VALUE_FLOW>` | `<URL_FLUJO_VALOR_OBJETIVO>` | URL to value flow diagram | Architecture docs do not typically contain this | `NOT FOUND — suggest: add value flow URL to docs/10-references.md` |
 | `<URL_REFERENCE_ARCHITECTURE>` | `<URL_ARQ_REFERENCIA>` | URL to reference architecture diagram | `docs/03-architecture-layers.md` → check for Mermaid diagrams | `NOT FOUND — suggest: export diagram from docs/03-architecture-layers.md` |
+
+### Field Mapping: Application Template (EN and ES)
+
+#### Design Drivers
+
+| EN Placeholder | ES Placeholder | Intent | Primary Source | Fallback |
+|---|---|---|---|---|
+| `<Effective change in customer experience.>` | `<Cambio efectivo en la experiencia de los clientes.>` | Value delivery description | `docs/01-system-overview.md` → Business Value / Design Drivers section | PO Spec → Success Criteria |
+| `<LOW/HIGH>` (Value Delivery) | `<BAJO/ALTO>` (Entrega de valor) | Impact rating | `docs/01-system-overview.md` → Design Drivers impact metrics; apply threshold: >50% = HIGH, <50% = LOW | `NOT FOUND — suggest: add Design Drivers metrics to docs/01-system-overview.md` |
+| `<Estimated number of customers impacted by the change.>` | `<Cantidad estimada de clientes impactados por el cambio.>` | Scale description | `docs/01-system-overview.md` → Key Metrics (users, reach) or Design Drivers | PO Spec → Business Context |
+| `<LOW/HIGH>` (Scale) | `<BAJO/ALTO>` (Escala) | Scale impact rating | Apply threshold from Key Metrics: >100K customers = HIGH | `NOT FOUND — suggest: add user count to docs/01-system-overview.md Key Metrics` |
+| `<Number of impacts on configuration, development, or implementation in applications.>` | `<Cantidad de impactos en configuración, desarrollo o implementación en las aplicaciones.>` | Implementation impacts description | `docs/01-system-overview.md` → Design Drivers or `docs/components/README.md` → component count | `NOT FOUND — suggest: add implementation impact count to docs/01-system-overview.md` |
+| `<LOW/HIGH>` (Impacts) | `<BAJO/ALTO>` (Impactos) | Impacts rating | Apply threshold: >5 application impacts = HIGH | `NOT FOUND — suggest: add impact count to docs/01-system-overview.md Design Drivers` |
+
+#### Architecture Decisions
+
+For each ADR found in `adr/ADR-*.md`, extract one entry per ADR. If multiple ADRs exist, generate one block per ADR:
+
+| EN Placeholder | ES Placeholder | Intent | Source |
+|---|---|---|---|
+| `<Description of the problem or need that prompted the architecture decision>` | `<Descripción del problema o necesidad que generó la decisión de arquitectura>` | ADR problem statement | ADR file → "Context" or "Problem Statement" section |
+| `<Description of the decision made>` | `<Descripción de la decisión tomada>` | ADR decision | ADR file → "Decision" section |
+| `<Description of the technical implications of the decision>` | `<Descripción de las implicaciones técnicas de la decisión>` | Technical consequences | ADR file → "Consequences" section — technical items only |
+| `<Description of non-technical implications>` | `<Descripción de implicaciones no técnicas>` | Operational/business consequences | ADR file → "Consequences" section — non-technical items |
+| `<Description of alternative 1>` ... `<Description of alternative N>` | `<Descripción de la alternativa 1>` ... `<Descripción de la alternativa N>` | Evaluated alternatives | ADR file → "Options Considered" or "Alternatives" section |
+| `<Description of criterion or principle 1>` ... `<Description of criterion or principle N>` | `<Descripción del criterio o principio 1>` ... `<Descripción del criterio o principio N>` | Decision criteria / principles | ADR file → "Decision Criteria" section or `docs/02-architecture-principles.md` |
+| `<Description of assumption 1>` ... `<Description of assumption N>` | `<Descripción de la suposición 1>` ... `<Descripción de la suposición N>` | Assumptions | ADR file → "Assumptions" section |
+
+If NO ADR files found: fill each placeholder with `NOT FOUND — suggest: create ADRs using /skill architecture-docs`.
+
+#### Capacity Sizing
+
+| EN Placeholder | ES Placeholder | Intent | Primary Source | Fallback |
+|---|---|---|---|---|
+| `<Describe normal user demand>` | `<Describir la demanda normal de usuarios>` | Normal user load | `docs/08-scalability-and-performance.md` → Scaling targets or current load | `docs/01-system-overview.md` → Key Metrics (Read TPS, users) |
+| `<Describe peak user demand, how many users are estimated and when>` | `<Describir la demanda pico de usuarios, cuántos usuarios se estiman y cuándo>` | Peak user load | `docs/08-scalability-and-performance.md` → Peak load / burst capacity | `docs/01-system-overview.md` → Key Metrics (Peak TPS) |
+| `<Describe normal transaction demand>` | `<Describir la demanda normal de transacciones>` | Normal TPS | `docs/01-system-overview.md` → Key Metrics (Average Read/Write TPS) | `docs/08-scalability-and-performance.md` → Performance targets |
+| `<Describe peak transaction demand, how many transactions are estimated and when>` | `<Describir la demanda pico de transacciones, cuántas transacciones se estiman y cuándo>` | Peak TPS | `docs/01-system-overview.md` → Key Metrics (Peak TPS) | `docs/08-scalability-and-performance.md` |
+| `<Describe average payload size per transaction in storage units (bytes)>` | `<Describir el tamaño de la carga útil promedio por transacción en unidades de almacenamiento (bytes)>` | Payload size | `docs/08-scalability-and-performance.md` → Payload / message size | `NOT FOUND — suggest: add average payload size to docs/08-scalability-and-performance.md` |
+| `<Minimum estimated GB of storage in the transactional database>` | `<Estimado mínimo en GB de almacenamiento en la base de datos transaccional>` | Min operational storage | `docs/08-scalability-and-performance.md` → Storage requirements | `NOT FOUND — suggest: add storage estimates to docs/08-scalability-and-performance.md` |
+| `<Maximum estimated GB of storage in the transactional database>` | `<Estimado máximo en GB de almacenamiento en la base de datos transaccional>` | Max operational storage | `docs/08-scalability-and-performance.md` → Storage requirements | `NOT FOUND` |
+| `<Minimum estimated GB of backup storage>` | `<Estimado mínimo en GB de almacenamiento en almacenamiento de respaldo>` | Min backup storage | `docs/09-operational-considerations.md` → Backup strategy | `NOT FOUND — suggest: add backup storage estimates to docs/09-operational-considerations.md` |
+| `<Maximum estimated GB of backup storage>` | `<Estimado máximo en GB de almacenamiento en almacenamiento de respaldo>` | Max backup storage | `docs/09-operational-considerations.md` → Backup strategy | `NOT FOUND` |
+| `<Minimum estimated GB of analytical storage>` | `<Estimado mínimo en GB de almacenamiento en almacenamiento analítico>` | Min analytical storage | `docs/08-scalability-and-performance.md` → Data/analytics layer | `NOT FOUND — suggest: add analytical storage estimates` |
+| `<Maximum estimated GB of analytical storage>` | `<Estimado máximo en GB de almacenamiento en almacenamiento analítico>` | Max analytical storage | `docs/08-scalability-and-performance.md` | `NOT FOUND` |
+
+#### Architecture Risks and Debt
+
+| EN Placeholder | ES Placeholder | Intent | Primary Source | Fallback |
+|---|---|---|---|---|
+| `<Description of the architecture debt>` | `<Descripción de la deuda de Arquitectura>` | Debt description | `docs/09-operational-considerations.md` → Technical debt section | ADR files → rejected/deferred decisions |
+| `<Description of the justification for the debt's existence>` | `<Descripción de la justificación de la existencia de la deuda>` | Debt justification | ADR file → Context section of related ADR | `NOT FOUND — suggest: document debt justification in an ADR` |
+| `<Description of the risk associated with the debt>` | `<Descripción del riesgo asociado a la deuda>` | Debt risk | `docs/09-operational-considerations.md` → Risks section | `NOT FOUND` |
+| `<Approximate date for debt remediation>` | `<Fecha aproximada de remediación de la deuda>` | Remediation timeline | `docs/09-operational-considerations.md` → Roadmap or milestones | `NOT FOUND — suggest: add remediation timeline to docs/09-operational-considerations.md` |
+
+#### Compliance Contract — Approvals
+
+For each of the 10 compliance areas, extract the Status and Observations from `compliance-docs/COMPLIANCE_MANIFEST.md`.
+
+**Compliance area mapping** (ES name → EN name → contract file pattern):
+
+| ES Area | EN Area | Manifest Contract Type |
+|---------|---------|----------------------|
+| Continuidad de Negocio | Business Continuity | `Continuidad de Negocio` |
+| Arquitectura SRE | SRE Architecture | `Arquitectura SRE` |
+| Arquitectura Cloud | Cloud Architecture | `Arquitectura Cloud` |
+| Arquitectura Datos y Analítica - IA | Data & Analytics Architecture - AI | `Arquitectura Datos y Analítica` |
+| Arquitectura Desarrollo | Development Architecture | `Arquitectura Desarrollo` |
+| Transformación de Procesos y Automatización | Process Transformation and Automation | `Transformación de Procesos` |
+| Arquitectura Seguridad | Security Architecture | `Arquitectura Seguridad` |
+| Plataformas e Infraestructura TI | Platforms and IT Infrastructure | `Plataformas e Infraestructura` |
+| Arquitectura Empresarial | Enterprise Architecture | `Arquitectura Empresarial` |
+| Arquitectura de Integración | Integration Architecture | `Arquitectura de Integración` |
+
+**Status mapping from manifest score**:
+- Score ≥ 8.0 → `Cumple` / `Compliant`
+- Score 5.0–7.9 → `No cumple` / `Non-compliant`
+- Contract missing or score = N/A → `No aplica` / `Not applicable`
+
+**Observations**: Extract the top gap or note from the manifest's observations column, if present. If not present: write `NOT FOUND — suggest: run /skill architecture-compliance to generate contracts`.
+
+**If `compliance-docs/COMPLIANCE_MANIFEST.md` does not exist**: fill all statuses with `NOT FOUND — suggest: run /skill architecture-compliance to generate compliance contracts`.
 
 ---
 

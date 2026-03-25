@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.17-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.18-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.17` in the list.
+You should see `solutions-architect-skills v2.10.18` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,15 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.17 (Current Release) ✅
+### v2.10.18 (Current Release) ✅
+**feat: add Application templates (ES + EN) with full field mapping to architecture-blueprint skill**
+
+- ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_ES.md`**: Spanish Application template verbatim from provided source — covers Design Drivers, Architecture Decisions, Capacity Sizing, Architecture Debt, and 10-area Compliance Contract Approvals
+- ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_EN.md`**: English translation of the Application template with matching structure and EN placeholders
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Step 3 extended with `docs/08-scalability-and-performance.md`, `adr/ADR-*.md`, and `compliance-docs/COMPLIANCE_MANIFEST.md` as context sources
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Added Application field mapping section — Design Drivers with threshold-based HIGH/LOW logic, Architecture Decisions iterating all ADR files, Capacity Sizing across 11 sizing parameters, Compliance Approvals with score-based status mapping (≥8.0 Compliant, 5–7.9 Non-compliant, missing = Not applicable)
+
+### v2.10.17 (Previous Release) ✅
 **feat: add language matching and English template to architecture-blueprint skill**
 
 - ✅ **`skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md`**: New English Business template — same structure as the Spanish template with EN placeholders (`<The what>`, `<The how>`, `<The why>`, `<URL_REFERENCE_ARCHITECTURE>`, etc.)
