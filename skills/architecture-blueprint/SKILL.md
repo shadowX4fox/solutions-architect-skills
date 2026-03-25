@@ -1,6 +1,6 @@
 ---
 name: architecture-blueprint
-description: Generate Business and Application blueprint markdown files from ARCHITECTURE.md. Extracts architecture data to fill standardized organizational templates (datos de iniciativa). Invoke when the user asks to generate blueprints, initiative data sheets, datos de iniciativa, or organizational architecture forms.
+description: Generate Business and Application blueprint markdown files from ARCHITECTURE.md. Extracts architecture data to fill standardized organizational templates (datos de iniciativa / initiative data). Detects architecture document language and selects the matching template automatically. Invoke when the user asks to generate blueprints, initiative data sheets, datos de iniciativa, or organizational architecture forms.
 triggers:
   - generate blueprint
   - create blueprint
@@ -13,7 +13,13 @@ triggers:
 
 # Architecture Blueprint Skill
 
-Generates standardized blueprint markdown files by extracting data from the architecture documentation and filling organizational templates. Produces two output files — Business and Application — written to the same directory as `ARCHITECTURE.md`.
+Generates standardized blueprint markdown files by extracting data from the architecture documentation and filling organizational templates. Detects the language of the architecture docs, selects the matching-language template, and produces output files written to the same directory as `ARCHITECTURE.md`.
+
+**Available templates**:
+| Language | Business | Application |
+|----------|----------|-------------|
+| English (`en`) | `BUSINESS_TEMPLATE_EN.md` | `APPLICATION_TEMPLATE_EN.md` *(pending)* |
+| Spanish (`es`) | `BUSINESS_TEMPLATE_ES.md` | `APPLICATION_TEMPLATE_ES.md` *(pending)* |
 
 ---
 
@@ -24,7 +30,7 @@ This skill activates automatically when the user's message contains any of:
 - "datos de iniciativa", "business blueprint", "application blueprint"
 - "blueprint files", "fill blueprint", "generate initiative data"
 
-**Action when detected**: proceed directly to Step 1.
+**Action when detected**: proceed directly to Step 0.
 
 ---
 
@@ -48,14 +54,34 @@ Resolve `$plugin_dir` to locate the templates:
 
 **Step A — Development mode** (glob):
 ```
-Glob: **/solutions-architect-skills/skills/architecture-blueprint/BUSINESS_TEMPLATE.md
+Glob: **/solutions-architect-skills/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md
 ```
-If found, strip `/skills/architecture-blueprint/BUSINESS_TEMPLATE.md` to get `plugin_dir`.
+If found, strip `/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md` to get `plugin_dir`.
 
 **Step B — Marketplace fallback**:
 ```bash
 plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-compliance/utils/resolve-plugin-dir.ts)
 ```
+
+---
+
+## Step 0.5: Detect Architecture Language
+
+Read the first 30 lines of `docs/01-system-overview.md` and scan for language indicator keywords:
+
+**English indicators**: "Executive Summary", "System Overview", "Problem Statement", "Business Value", "Architecture Principles", "Key Metrics", "Solution"
+
+**Spanish indicators**: "Resumen Ejecutivo", "Descripción del Sistema", "Planteamiento del Problema", "Valor de Negocio", "Principios de Arquitectura", "Métricas Clave", "Solución"
+
+**Decision rules**:
+- If 3+ English indicators found → `lang = en`
+- If 3+ Spanish indicators found → `lang = es`
+- If ambiguous (fewer than 3 matches in either language) → ask the user:
+  ```
+  🌐 Could not confidently detect architecture language.
+  Use which template language? [en = English / es = Spanish]
+  ```
+- If the user explicitly passes a language flag (e.g., "generate blueprint in spanish", "use english template") → override detection with the specified language
 
 ---
 
@@ -73,15 +99,19 @@ Determine which blueprints to generate based on the user's request:
 
 ## Step 2: Load Templates
 
-Load the template(s) required for the selected mode from `$plugin_dir`:
+Load the template(s) required for the selected mode and detected language from `$plugin_dir`:
 
-**Business template**: `$plugin_dir/skills/architecture-blueprint/BUSINESS_TEMPLATE.md`
+**Business template**:
+- `lang = en` → `$plugin_dir/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md`
+- `lang = es` → `$plugin_dir/skills/architecture-blueprint/BUSINESS_TEMPLATE_ES.md`
 
-**Application template**: `$plugin_dir/skills/architecture-blueprint/APPLICATION_TEMPLATE.md`
-- If this file does NOT exist → skip Application generation and display:
+**Application template**:
+- `lang = en` → `$plugin_dir/skills/architecture-blueprint/APPLICATION_TEMPLATE_EN.md`
+- `lang = es` → `$plugin_dir/skills/architecture-blueprint/APPLICATION_TEMPLATE_ES.md`
+- If the file does NOT exist → skip Application generation and display:
   ```
-  ℹ️  Application template not yet configured. Skipping Application blueprint.
-     To add it: place APPLICATION_TEMPLATE.md in skills/architecture-blueprint/
+  ℹ️  Application template ([lang]) not yet configured. Skipping Application blueprint.
+     To add it: place APPLICATION_TEMPLATE_EN.md or APPLICATION_TEMPLATE_ES.md in skills/architecture-blueprint/
   ```
 
 ---
@@ -116,32 +146,32 @@ For each `<placeholder>` in the template:
    ```
 4. **Preserve all template formatting** — only replace content inside `< >` angle brackets; never alter surrounding text, markdown structure, heading levels, bold/italic markers, or static prose
 
-### Field Mapping: Business Template (`BUSINESS_TEMPLATE.md`)
+### Field Mapping: Business Template (EN and ES)
 
-| Template Placeholder | Intent | Primary Source | Fallback |
-|---|---|---|---|
-| `<Quito, otras sedes>` | Physical location / deployment region | `docs/09-operational-considerations.md` → deployment region or cloud region | `docs/01-system-overview.md` → Deployment section |
-| `<Dominio de negocio – Según mapa de capacidades>` | Business domain | `docs/01-system-overview.md` → System Overview paragraph or Business Value section | PO Spec → Business Context |
-| `<Proyecto transversal, Proyecto regulatorio, Proyecto incremento producto, Proyecto>` | Project classification type | `docs/01-system-overview.md` → Problem Statement or Business Value | PO Spec → Business Objectives |
-| `<Nombre de Tribu>` | Tribe name (org structure) | Architecture docs do not typically contain this | `NOT FOUND — suggest: add to docs/01-system-overview.md under Team/Org section` |
-| `<Nombre de Célula>` | Cell name (org structure) | Architecture docs do not typically contain this | `NOT FOUND — suggest: add to docs/01-system-overview.md under Team/Org section` |
-| `<Nombre del dueño de producto> <email>` | Product Owner name and email | PO Spec if available | `NOT FOUND — suggest: add to PRODUCT_OWNER_SPEC.md` |
-| `<Nombre de líder de tribu> <email>` | Tribe Lead name and email | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de líder técnico de tribu> <email>` | Technical Tribe Lead | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto empresarial asignado> <email>` | Enterprise Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto de soluciones asignado> <email>` | Solutions Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto de integración asignado> <email>` | Integration Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto de datos asignado> <email>` | Data Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto de seguridad asignado> <email>` | Security Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<Nombre de arquitecto de software asignado> <email>` | Software Architect | Architecture docs do not typically contain this | `NOT FOUND` |
-| `<ID de aplicación en el portafolio de arquitectura empresarial>` | Enterprise portfolio app ID | Architecture docs do not typically contain this | `NOT FOUND — suggest: obtain from enterprise architecture portfolio system` |
-| `<El qué>` | What the initiative does | `docs/01-system-overview.md` → Problem Statement or Solution description (first sentence) | PO Spec → Business Objectives |
-| `<El cómo>` | How the initiative achieves it | `docs/01-system-overview.md` → Solution section (approach/method) | `docs/02-architecture-principles.md` → key principles |
-| `<El para>` | Purpose / outcome | `docs/01-system-overview.md` → Business Value section (impact statements) | PO Spec → Success Criteria |
-| `<URL_DOC_DETALLE_FUNCIONAL>` | URL to functional detail doc | Architecture docs do not typically contain this | `NOT FOUND — suggest: add functional spec URL to docs/10-references.md` |
-| `<URL_MAPA_CAPACIDADES>` | URL to capability map | Architecture docs do not typically contain this | `NOT FOUND — suggest: add capability map URL to docs/10-references.md` |
-| `<URL_FLUJO_VALOR_OBJETIVO>` | URL to value flow diagram | Architecture docs do not typically contain this | `NOT FOUND — suggest: add value flow URL to docs/10-references.md` |
-| `<URL_ARQ_REFERENCIA>` | URL to reference architecture diagram | Architecture docs: check `docs/03-architecture-layers.md` for Mermaid diagrams | `NOT FOUND — suggest: export diagram from docs/03-architecture-layers.md` |
+| EN Placeholder | ES Placeholder | Intent | Primary Source | Fallback |
+|---|---|---|---|---|
+| `<City, other locations>` | `<Quito, otras sedes>` | Physical location / deployment region | `docs/09-operational-considerations.md` → deployment region or cloud region | `docs/01-system-overview.md` → Deployment section |
+| `<Business domain – Per capability map>` | `<Dominio de negocio – Según mapa de capacidades>` | Business domain | `docs/01-system-overview.md` → System Overview or Business Value section | PO Spec → Business Context |
+| `<Cross-cutting project, Regulatory project, Product increment project, Project>` | `<Proyecto transversal, Proyecto regulatorio, Proyecto incremento producto, Proyecto>` | Project classification type | `docs/01-system-overview.md` → Problem Statement or Business Value | PO Spec → Business Objectives |
+| `<Tribe Name>` | `<Nombre de Tribu>` | Tribe name (org structure) | Architecture docs do not typically contain this | `NOT FOUND — suggest: add to docs/01-system-overview.md under Team/Org section` |
+| `<Cell Name>` | `<Nombre de Célula>` | Cell name (org structure) | Architecture docs do not typically contain this | `NOT FOUND — suggest: add to docs/01-system-overview.md under Team/Org section` |
+| `<Product owner name> <email>` | `<Nombre del dueño de producto> <email>` | Product Owner name and email | PO Spec if available | `NOT FOUND — suggest: add to PRODUCT_OWNER_SPEC.md` |
+| `<Tribe lead name> <email>` | `<Nombre de líder de tribu> <email>` | Tribe Lead | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Technical tribe lead name> <email>` | `<Nombre de líder técnico de tribu> <email>` | Technical Tribe Lead | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned enterprise architect> <email>` | `<Nombre de arquitecto empresarial asignado> <email>` | Enterprise Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned solutions architect> <email>` | `<Nombre de arquitecto de soluciones asignado> <email>` | Solutions Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned integration architect> <email>` | `<Nombre de arquitecto de integración asignado> <email>` | Integration Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned data architect> <email>` | `<Nombre de arquitecto de datos asignado> <email>` | Data Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned security architect> <email>` | `<Nombre de arquitecto de seguridad asignado> <email>` | Security Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Assigned software architect> <email>` | `<Nombre de arquitecto de software asignado> <email>` | Software Architect | Architecture docs do not typically contain this | `NOT FOUND` |
+| `<Application ID in the enterprise architecture portfolio>` | `<ID de aplicación en el portafolio de arquitectura empresarial>` | Enterprise portfolio app ID | Architecture docs do not typically contain this | `NOT FOUND — suggest: obtain from enterprise architecture portfolio system` |
+| `<The what>` | `<El qué>` | What the initiative does | `docs/01-system-overview.md` → Problem Statement or Solution description (first sentence) | PO Spec → Business Objectives |
+| `<The how>` | `<El cómo>` | How the initiative achieves it | `docs/01-system-overview.md` → Solution section (approach/method) | `docs/02-architecture-principles.md` → key principles |
+| `<The why>` | `<El para>` | Purpose / outcome | `docs/01-system-overview.md` → Business Value section (impact statements) | PO Spec → Success Criteria |
+| `<URL_FUNCTIONAL_DETAIL_DOC>` | `<URL_DOC_DETALLE_FUNCIONAL>` | URL to functional detail doc | Architecture docs do not typically contain this | `NOT FOUND — suggest: add functional spec URL to docs/10-references.md` |
+| `<URL_CAPABILITY_MAP>` | `<URL_MAPA_CAPACIDADES>` | URL to capability map | Architecture docs do not typically contain this | `NOT FOUND — suggest: add capability map URL to docs/10-references.md` |
+| `<URL_TARGET_VALUE_FLOW>` | `<URL_FLUJO_VALOR_OBJETIVO>` | URL to value flow diagram | Architecture docs do not typically contain this | `NOT FOUND — suggest: add value flow URL to docs/10-references.md` |
+| `<URL_REFERENCE_ARCHITECTURE>` | `<URL_ARQ_REFERENCIA>` | URL to reference architecture diagram | `docs/03-architecture-layers.md` → check for Mermaid diagrams | `NOT FOUND — suggest: export diagram from docs/03-architecture-layers.md` |
 
 ---
 
@@ -151,9 +181,11 @@ The output directory is the same directory that contains `ARCHITECTURE.md`:
 - If `ARCHITECTURE.md` is at project root → write to `./`
 - If `ARCHITECTURE.md` is in a subdirectory (e.g., `projects/foo/ARCHITECTURE.md`) → write to `projects/foo/`
 
-Output filenames:
-- Business: `BLUEPRINT_BUSINESS.md`
-- Application: `BLUEPRINT_APPLICATION.md`
+Output filenames include the language suffix:
+- Business (EN): `BLUEPRINT_BUSINESS_EN.md`
+- Business (ES): `BLUEPRINT_BUSINESS_ES.md`
+- Application (EN): `BLUEPRINT_APPLICATION_EN.md`
+- Application (ES): `BLUEPRINT_APPLICATION_ES.md`
 
 ---
 
@@ -163,7 +195,7 @@ Write each filled template to its output path using the Write tool.
 
 If the output file already exists, display:
 ```
-⚠️  BLUEPRINT_BUSINESS.md already exists. Overwrite? [Yes/No]
+⚠️  BLUEPRINT_BUSINESS_EN.md already exists. Overwrite? [Yes/No]
 ```
 Wait for confirmation before overwriting.
 
@@ -178,18 +210,20 @@ After writing, display the fill summary:
 BLUEPRINT GENERATION COMPLETE
 ═══════════════════════════════════════════════════════════
 
-📄 BLUEPRINT_BUSINESS.md → [output_dir]
+🌐 Language detected: English (en)
+
+📄 BLUEPRINT_BUSINESS_EN.md → [output_dir]
 
 Field Fill Summary:
 ✅ Filled (N):
-   - Sede: [extracted value]
-   - Dominio: [extracted value]
-   - El qué / El cómo / El para: [extracted values]
+   - Headquarters: [extracted value]
+   - Domain: [extracted value]
+   - The what / The how / The why: [extracted values]
    ...
 
 ⚠️  NOT FOUND (N) — requires manual input:
-   - Tribu → suggest: add to docs/01-system-overview.md
-   - Célula → suggest: add to docs/01-system-overview.md
+   - Tribe → suggest: add to docs/01-system-overview.md
+   - Cell → suggest: add to docs/01-system-overview.md
    - Product Owner → suggest: add to PRODUCT_OWNER_SPEC.md
    - All architect names/emails → suggest: add to docs/01-system-overview.md
    - All URLs → suggest: add to docs/10-references.md

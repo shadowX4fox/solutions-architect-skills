@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.16-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.17-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.16` in the list.
+You should see `solutions-architect-skills v2.10.17` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.16 (Current Release) ✅
+### v2.10.17 (Current Release) ✅
+**feat: add language matching and English template to architecture-blueprint skill**
+
+- ✅ **`skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md`**: New English Business template — same structure as the Spanish template with EN placeholders (`<The what>`, `<The how>`, `<The why>`, `<URL_REFERENCE_ARCHITECTURE>`, etc.)
+- ✅ **`skills/architecture-blueprint/BUSINESS_TEMPLATE_ES.md`**: Renamed from `BUSINESS_TEMPLATE.md` for clarity; content unchanged
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Added Step 0.5 (language detection) — reads `docs/01-system-overview.md`, counts English vs. Spanish keyword indicators, auto-selects matching template; prompts user when ambiguous; accepts explicit language override in request
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Step 2 template paths now language-suffixed (`BUSINESS_TEMPLATE_EN.md` / `BUSINESS_TEMPLATE_ES.md`); Application template slots defined for both languages
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Field mapping table extended with EN/ES placeholder pairs; output filenames include language suffix (`BLUEPRINT_BUSINESS_EN.md` / `BLUEPRINT_BUSINESS_ES.md`)
+
+### v2.10.16 (Previous Release) ✅
 **feat: add architecture-blueprint skill for generating Business and Application blueprint files**
 
 - ✅ **`skills/architecture-blueprint/SKILL.md`**: New skill — generates `BLUEPRINT_BUSINESS.md` and `BLUEPRINT_APPLICATION.md` by extracting data from `ARCHITECTURE.md` and filling organizational templates; 7-step workflow with mode detection, plugin-dir resolution, context loading, field mapping, NOT FOUND handling with keyword suggestions, overwrite protection, and a fill summary report
