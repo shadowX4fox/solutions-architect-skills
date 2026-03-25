@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.22-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.22` in the list.
+You should see `solutions-architect-skills v2.10.23` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -479,7 +479,7 @@ Perfect for:
 ## Workflow Integration
 
 ```mermaid
-graph LR
+graph TD
     A[Product Owner] -->|Creates| B[PO Spec]
     B -->|Input to| C[Architecture Team]
     C -->|Creates| D[ARCHITECTURE.md]
@@ -527,12 +527,17 @@ Where:
 
 ## Roadmap
 
-### v2.10.22 (Current Release) ✅
+### v2.10.23 (Current Release) ✅
+**docs: convert Workflow Integration diagram to top-down layout**
+
+Changed the Workflow Integration mermaid diagram from left-to-right (`graph LR`) to top-down (`graph TD`) for better readability on standard screen widths.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v2.10.22 (Previous Release) ✅
 **docs: overhaul README to reflect four-phase workflow and migrate version history to CHANGELOG**
 
 Rewrote README from ~1048 to ~581 lines: corrected three-phase → four-phase workflow, updated overview diagram, Quick Start, and Features section to include Phase 4 (Dev Handoff + Doc Export); documented `architecture-blueprint` and quality gate skills (peer review, compliance review); removed stale version markers; replaced the 530-line roadmap/changelog block with a slim current-version summary linked to CHANGELOG.md; migrated all version history (v1.2.0–v2.10.21) to CHANGELOG.md.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ### v2.10.21 (Previous Release) ✅
 **feat: add redis-key-schema.md asset type for Redis/Cache components in dev handoff**
