@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.5` in the list.
+You should see `solutions-architect-skills v2.10.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.5 (Current Release) ✅
+### v2.10.6 (Current Release) ✅
+**fix: resolve SA generation freeze caused by H5/H6 headings + add input file validation**
+
+- ✅ **`tools/docgen/generate-doc.js`**: Expanded markdown heading regex from `#{1,4}` to `#{1,6}` — `#####` and `######` headings no longer cause an infinite loop in the parser; H5/H6 rendered as H4 in docx output
+- ✅ **`tools/docgen/generate-doc.js`**: Added `else { i++ }` safety fallback in paragraph collector — prevents infinite loop if any other unrecognized line pattern is encountered
+- ✅ **`tools/docgen/generate-doc.js`**: Added `fs.existsSync(input)` check before `readFileSync` — produces a clear "Input file not found" error instead of an unhandled ENOENT crash
+
+### v2.10.5 (Previous Release) ✅
 **fix: enforce Bun runtime and write executive summary temp file to project root**
 
 - ✅ **`skills/architecture-doc-export/SKILL.md`**: Added explicit runtime enforcement callout — prohibits falling back to `node`, includes troubleshooting steps for when `bun run` appears to hang; added `# MUST use bun — never node` comment to all 3 bash code blocks

@@ -74,7 +74,7 @@ function parseMarkdown(text) {
     const line = lines[i];
 
     // Headings
-    const h = line.match(/^(#{1,4})\s+(.+)$/);
+    const h = line.match(/^(#{1,6})\s+(.+)$/);
     if (h) {
       blocks.push({ type: 'heading', level: h[1].length, text: h[2].trim() });
       i++; continue;
@@ -156,7 +156,11 @@ function parseMarkdown(text) {
       paraLines.push(lines[i]);
       i++;
     }
-    if (paraLines.length) blocks.push({ type: 'paragraph', text: paraLines.join(' ') });
+    if (paraLines.length) {
+      blocks.push({ type: 'paragraph', text: paraLines.join(' ') });
+    } else {
+      i++; // Skip unrecognized line to prevent infinite loop
+    }
   }
 
   return blocks;
@@ -647,6 +651,11 @@ async function main() {
 
   if (!DOC_TYPES[docType]) {
     console.error(`Unknown type "${docType}". Use: solution-architecture, adr, handoff`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(input)) {
+    console.error(`Input file not found: ${input}`);
     process.exit(1);
   }
 
