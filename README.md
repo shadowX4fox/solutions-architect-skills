@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.9` in the list.
+You should see `solutions-architect-skills v2.10.10` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.9 (Current Release) ✅
+### v2.10.10 (Current Release) ✅
+**fix: resolve generator path when running from plugin cache**
+
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added Step 0 — plugin directory resolution before all workflows; uses Glob → `resolve-plugin-dir.ts` fallback pattern (same as compliance skill) to locate `generate-doc.js` regardless of CWD
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: All 3 bash code blocks updated to use `$plugin_dir/tools/docgen/generate-doc.js` (absolute path) instead of bare relative `tools/docgen/generate-doc.js`
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Runtime note updated to reference Step 0 and absolute path requirement explicitly
+
+### v2.10.9 (Previous Release) ✅
 **docs: add Recommended VS Code Setup section**
 
 - ✅ **`README.md`**: New `## Recommended VS Code Setup` section added between Requirements and Use Cases — documents the 3 VS Code extensions that complement the plugin workflow (Claude Code for VS Code, Mermaid Preview, Office Viewer) with purpose descriptions for each

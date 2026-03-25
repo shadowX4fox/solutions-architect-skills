@@ -27,10 +27,10 @@ Exports architecture documents to professional Word files on demand.
 > **On-demand only** — this skill never runs automatically after document generation.
 > Invoke it explicitly when you are ready to produce deliverable Word files.
 
-> **Runtime: Bun only — never Node.** All generator calls MUST use `bun run`. Never use `node` or fall back to it under any circumstances.
+> **Runtime: Bun only — never Node.** All generator calls MUST use `bun run $plugin_dir/tools/docgen/generate-doc.js` (absolute path resolved in Step 0). Never use `node` or a relative path under any circumstances.
 > If `bun run` appears to hang or produces no output:
-> 1. Ensure the `docx` package is installed: `cd tools/docgen && bun install`
-> 2. Use an **absolute path** to `generate-doc.js` — resolve it from the plugin install location
+> 1. Ensure the `docx` package is installed: `cd $plugin_dir/tools/docgen && bun install`
+> 2. Confirm `plugin_dir` was resolved correctly in Step 0 — re-run the Glob if unsure
 > 3. Run **foreground** (not in background) to capture output immediately
 > Do NOT attempt `node generate-doc.js` as an alternative — it is not an authorized runtime.
 
@@ -42,6 +42,33 @@ Exports architecture documents to professional Word files on demand.
 |-------------|--------------|--------|
 | Solution Architecture | `docs/01-system-overview.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
 | Component Handoff | Selected handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
+
+---
+
+## Step 0 — Resolve Plugin Directory
+
+Before running any export workflow, resolve the absolute path to the plugin installation. The generator is bundled inside the plugin — never at the user's project root.
+
+**Step A — Glob (dev/local mode)**:
+
+Glob for: `**/solutions-architect-skills/tools/docgen/generate-doc.js`
+
+If found, strip `/tools/docgen/generate-doc.js` from the result to get `plugin_dir`.
+
+**Step B — Marketplace fallback**:
+
+If Glob returns nothing, run:
+
+```bash
+plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-compliance/utils/resolve-plugin-dir.ts)
+```
+
+If both steps fail, stop and report:
+```
+❌ Cannot locate plugin directory. Ensure the plugin is installed correctly.
+```
+
+All subsequent `bun run` calls MUST use `$plugin_dir/tools/docgen/generate-doc.js`.
 
 ---
 
@@ -112,7 +139,7 @@ Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-
 
 ```bash
 # MUST use bun — never node
-bun run tools/docgen/generate-doc.js \
+bun run $plugin_dir/tools/docgen/generate-doc.js \
   --type    solution-architecture \
   --input   sa-executive-summary.md \
   --output  exports/SA-<solution-name>.docx \
@@ -133,7 +160,7 @@ For each ADR found:
 
 ```bash
 # MUST use bun — never node
-bun run tools/docgen/generate-doc.js \
+bun run $plugin_dir/tools/docgen/generate-doc.js \
   --type    adr \
   --input   <path-to-ADR-NNN-name.md> \
   --output  exports/ADR-NNN-<name>.docx \
@@ -189,7 +216,7 @@ For each selected handoff:
 
 ```bash
 # MUST use bun — never node
-bun run tools/docgen/generate-doc.js \
+bun run $plugin_dir/tools/docgen/generate-doc.js \
   --type    handoff \
   --input   docs/handoffs/<NN>-<component>-handoff.md \
   --output  exports/HANDOFF-<component>.docx \
