@@ -532,6 +532,9 @@ function buildDocument(docType, title, markdownContent, meta) {
   }
 
   return new Document({
+    features: {
+      updateFields: true,  // auto-populates TOC (and all field codes) on open
+    },
     numbering: {
       config: [
         { reference: 'bullets',

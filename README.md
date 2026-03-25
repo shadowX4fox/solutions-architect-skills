@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.0` in the list.
+You should see `solutions-architect-skills v2.10.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,12 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.0 (Current Release) ✅
+### v2.10.1 (Current Release) ✅
+**fix: Word document Table of Contents now auto-populates on open**
+
+- ✅ **`tools/docgen/generate-doc.js`**: Added `features: { updateFields: true }` to the `Document` constructor — instructs Word/LibreOffice to auto-update all field codes (including the `TOC` field) when the document is opened, so the Table of Contents page renders with headings and page numbers without manual intervention
+
+### v2.10.0 (Previous Release) ✅
 **feat: architecture-doc-export skill + architecture-dev-handoff skill + remove presentation generation + workflow renumbering**
 
 - ✅ **`skills/architecture-doc-export/`** (new skill): On-demand Word (.docx) export for Solution Architecture documents and Component Development Handoffs — powered by `docx` v8; corporate blue for SA/ADR artifacts, teal for dev handoffs; cover page, TOC, headers/footers, inline styling
