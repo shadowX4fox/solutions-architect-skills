@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.11` in the list.
+You should see `solutions-architect-skills v2.10.12` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,18 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.11 (Current Release) ✅
+### v2.10.12 (Current Release) ✅
+**feat: enforce handoff document fidelity to architecture docs**
+
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Renamed "Asset-Documentation Fidelity Policy" to **"Documentation Fidelity Policy"** — scope extended to cover generated handoff documents in addition to asset files
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Rules updated to specify `[NOT DOCUMENTED — add to <source-file>]` for handoff sections and `# TODO: [NOT DOCUMENTED]` for asset files
+- ✅ **`skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`**: Standardized all fallback tokens — removed `TBD`, `None documented`, `any`, and example hints; all gaps now use canonical `NOT DOCUMENTED`
+- ✅ **`skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`**: Removed example hint from health check placeholder to prevent example values being used as substitutes
+- ✅ **`skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md`**: Eliminated permissive "infer" instructions for Architecture Layer (§1) and Out of Scope (§2) — replaced with strict extraction-only rules
+- ✅ **`skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md`**: Global-to-component value substitution (§7 Latency, §8 Per-Environment) now requires explicit `[GLOBAL — not component-specific]` annotation
+- ✅ **`skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md`**: Section 12 (Acceptance Criteria) synthesis constrained — every criterion must cite its source section; assumptions and industry standards prohibited
+
+### v2.10.11 (Previous Release) ✅
 **feat: enforce asset-documentation fidelity in dev handoff skill**
 
 - ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Added new **Asset-Documentation Fidelity Policy** section with 5 rules (EXACT MATCH, NO DEFAULTS, NO EXTRA FIELDS, NO OMISSIONS, COMPLETENESS CHECK)

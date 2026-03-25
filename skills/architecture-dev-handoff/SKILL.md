@@ -81,16 +81,16 @@ All handoff documents must trace data back to architecture docs.
 
 ---
 
-## Asset-Documentation Fidelity Policy
+## Documentation Fidelity Policy
 
-**CRITICAL REQUIREMENT**: Every generated asset file MUST be an exact representation of what is specified in the architecture documentation. No more, no less.
+**CRITICAL REQUIREMENT**: Every generated handoff document and asset file MUST be an exact representation of what is specified in the architecture documentation. No more, no less.
 
 **Rules:**
-1. ✅ **EXACT MATCH** — every value in a generated asset (endpoint, field, schema, resource limit, env var, port, path, etc.) must come verbatim from the architecture docs
-2. ❌ **NO DEFAULTS** — do not fill in default/fallback values (e.g., `localhost:8080`, `1.0.0`, `256Mi`). If the value is not documented, use `# TODO: [NOT DOCUMENTED]`
+1. ✅ **EXACT MATCH** — every value in a generated handoff or asset (endpoint, field, schema, resource limit, env var, port, path, version, etc.) must come verbatim from the architecture docs
+2. ❌ **NO DEFAULTS** — do not fill in default/fallback values in either handoff documents or asset files. If the value is not documented, use `[NOT DOCUMENTED — add to <source-file>]` in handoff sections or `# TODO: [NOT DOCUMENTED]` in asset files
 3. ❌ **NO EXTRA FIELDS** — do not add fields, endpoints, schemas, columns, or resources beyond what is explicitly documented
-4. ❌ **NO OMISSIONS** — every documented value relevant to the asset type MUST appear in the generated asset
-5. ✅ **COMPLETENESS CHECK** — after generating each asset, verify it against the source documentation: every documented item has a corresponding entry, and every entry traces back to a documented item
+4. ❌ **NO OMISSIONS** — every documented value relevant to the section or asset type MUST appear in the generated output
+5. ✅ **COMPLETENESS CHECK** — after generating each handoff section and asset, verify it against the source documentation: every documented item has a corresponding entry, and every entry traces back to a documented item
 
 ---
 

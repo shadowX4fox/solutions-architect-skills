@@ -13,7 +13,7 @@
 | Handoff Version | 1.0 |
 | Generated | [GENERATION_DATE] |
 | Status | Ready |
-| Architect | [ARCHITECT_NAME or "Not specified"] |
+| Architect | [ARCHITECT_NAME or NOT DOCUMENTED] |
 | Source Component Doc | [docs/components/NN-component-name.md](../components/[COMPONENT_FILE]) |
 | Architecture Doc | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
 
@@ -244,7 +244,7 @@
 
 ### Health Check Endpoint
 
-[HEALTH_CHECK_SPEC or NOT DOCUMENTED — e.g., GET /health → 200 OK with {"status": "ok"}]
+[HEALTH_CHECK_SPEC or NOT DOCUMENTED — add to docs/09-operational-considerations.md]
 
 ### Alert Conditions
 
@@ -290,9 +290,9 @@
 
 | Category | Technology | Version Constraint |
 |----------|-----------|-------------------|
-| Language | [LANGUAGE] | [VERSION or any] |
-| Framework | [FRAMEWORK] | [VERSION or any] |
-| Runtime | [RUNTIME] | [VERSION or any] |
+| Language | [LANGUAGE] | [VERSION or NOT DOCUMENTED] |
+| Framework | [FRAMEWORK] | [VERSION or NOT DOCUMENTED] |
+| Runtime | [RUNTIME] | [VERSION or NOT DOCUMENTED] |
 
 ### Required Libraries / Dependencies
 
@@ -302,7 +302,7 @@
 
 ### Prohibited Technologies
 
-[PROHIBITED_TECH or None documented]
+[PROHIBITED_TECH or NOT DOCUMENTED]
 
 ### Coding Standards Reference
 
@@ -322,7 +322,7 @@
 
 ### Non-Functional Acceptance Criteria
 
-- [ ] Latency: p95 ≤ [P95_TARGET or TBD]
+- [ ] Latency: p95 ≤ [P95_TARGET or NOT DOCUMENTED]
 - [ ] Availability: ≥ [AVAILABILITY_TARGET or NOT DOCUMENTED]
 - [ ] All endpoints authenticated per §6 requirements
 - [ ] All required metrics emitted per §9

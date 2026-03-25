@@ -34,7 +34,7 @@ is extracted, and defines the extraction rules for each field.
 |-------|---------------|-----------------|-----------------|
 | Purpose | `docs/components/NN-*.md` | — | First paragraph or `**Purpose:**` field |
 | Type | `docs/components/NN-*.md` | — | `**Type:**` field value |
-| Architecture Layer | `docs/components/NN-*.md` | `docs/03-architecture-layers.md` | `**Layer:**` field; if absent, infer from layer diagram only if explicit |
+| Architecture Layer | `docs/components/NN-*.md` | `docs/03-architecture-layers.md` | `**Layer:**` field; if absent, use value only if explicitly labeled in the layer diagram text. Do NOT interpret or deduce layer from component position or naming |
 | Business Context | `docs/01-system-overview.md` | `docs/components/NN-*.md` | Use cases that reference this component by name |
 | Key Responsibilities | `docs/components/NN-*.md` | — | `**Responsibilities:**` or `## Responsibilities` section; extract each bullet |
 
@@ -45,7 +45,7 @@ is extracted, and defines the extraction rules for each field.
 | Field | Primary Source | Secondary Source | Extraction Rule |
 |-------|---------------|-----------------|-----------------|
 | In Scope | `docs/components/NN-*.md` | — | `**Responsibilities:**` list — what this component explicitly owns |
-| Out of Scope | `docs/components/NN-*.md` | `docs/03-architecture-layers.md` | `**Dependencies:**` or `**Calls:**` fields reference other components → infer those components own those responsibilities |
+| Out of Scope | `docs/components/NN-*.md` | `docs/03-architecture-layers.md` | `**Dependencies:**` or `**Calls:**` fields reference other components → note those components as external dependencies. Do NOT infer scope boundaries — only state what is explicitly documented as in-scope or out-of-scope |
 | Upstream Consumers | `docs/05-integration-points.md` | `docs/components/NN-*.md` | Find all integration entries that show this component as the TARGET/receiver |
 | Downstream Dependencies | `docs/components/NN-*.md` | `docs/05-integration-points.md` | `**Dependencies:**` or `**Calls:**` fields; find each named component |
 
@@ -115,7 +115,7 @@ is extracted, and defines the extraction rules for each field.
 
 | Field | Primary Source | Secondary Source | Extraction Rule |
 |-------|---------------|-----------------|-----------------|
-| Latency (p50/p95/p99) | `docs/08-scalability-and-performance.md` | `docs/components/NN-*.md` | Per-component latency targets; if only global targets exist, use global and note it |
+| Latency (p50/p95/p99) | `docs/08-scalability-and-performance.md` | `docs/components/NN-*.md` | Per-component latency targets; if only global targets exist, use global value and annotate: `[GLOBAL — not component-specific, sourced from docs/08-scalability-and-performance.md]` |
 | Peak / Sustained TPS | `docs/08-scalability-and-performance.md` | `docs/components/NN-*.md` | Throughput figures for this component |
 | CPU/Memory Limits | `docs/components/NN-*.md` | `docs/08-scalability-and-performance.md` | `**Resources:**` or `**Resource Limits:**` field |
 | Scaling Config | `docs/components/NN-*.md` | `docs/08-scalability-and-performance.md` | `**Scaling:**` field — min/max replicas, HPA trigger |
@@ -132,7 +132,7 @@ is extracted, and defines the extraction rules for each field.
 | Configuration Parameters | `docs/components/NN-*.md` | — | `**Configuration:**` or `## Configuration` section; extract each param with description and default |
 | Environment Variables | `docs/components/NN-*.md` | `docs/09-operational-considerations.md` | `**Environment Variables:**` or `**Env Vars:**` field |
 | Feature Flags | `docs/components/NN-*.md` | `docs/09-operational-considerations.md` | `**Feature Flags:**` field; if absent, write `NOT DOCUMENTED` |
-| Per-Environment Values | `docs/09-operational-considerations.md` | `docs/components/NN-*.md` | Environment-specific configuration table; if global, note it applies to this component |
+| Per-Environment Values | `docs/09-operational-considerations.md` | `docs/components/NN-*.md` | Environment-specific configuration table; if global, use global value and annotate: `[GLOBAL — not component-specific, sourced from docs/09-operational-considerations.md]` |
 
 > If generating `deployment.yaml`, env vars from this section populate the container `env:` block.
 > See `ASSET_GENERATION_GUIDE.md § Kubernetes Deployment Manifest`.
@@ -183,20 +183,20 @@ is extracted, and defines the extraction rules for each field.
 
 ## Section 12 — Acceptance Criteria
 
-This section is **synthesized** — not extracted directly from a single source.
+This section is **synthesized** from values already extracted in prior sections. Every criterion MUST reference its source section number and value. Do NOT compose criteria from assumptions or industry standards — only include what is derivable from documented architecture values.
 
 **Functional criteria** — derive from:
 - Component responsibilities (Section 1)
 - API contract endpoints (Section 3): one criterion per endpoint or behavior
 - Use cases in `docs/01-system-overview.md` that involve this component
 
-**Non-functional criteria** — derive directly from:
-- Latency targets in Section 7
+**Non-functional criteria** — derive directly from (cite source section for each):
+- Latency targets in Section 7 (e.g., "p95 ≤ [value from §7]")
 - Availability targets in `docs/08-scalability-and-performance.md`
 - Security requirements in Section 6
 - Observability requirements in Section 9
 
-**Coverage target** — look in `docs/06-technology-stack.md` or `adr/` for a test coverage policy.
+**Coverage target** — look in `docs/06-technology-stack.md` or `adr/` for a test coverage policy. If not documented, write `NOT DOCUMENTED`.
 
 ---
 
