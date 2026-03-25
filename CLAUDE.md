@@ -265,7 +265,8 @@ The skill has two export modes:
 | **Dev Handoff** | Selected component handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
 
 **Document styling**:
-- Corporate blue (`#1F4E79`) — reserved for architecture artifacts (SA executive summary and ADRs)
+- Corporate blue (`#1F4E79`) — SA executive summary
+- Amber/Gold (`#8B6914`) — Architecture Decision Records (ADRs)
 - Teal (`#0D7377`) — component handoffs (development phase deliverables)
 
 **Output location**: `exports/` at project root (auto-created).

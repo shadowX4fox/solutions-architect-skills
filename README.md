@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.7` in the list.
+You should see `solutions-architect-skills v2.10.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.7 (Current Release) ✅
+### v2.10.8 (Current Release) ✅
+**feat: assign distinct amber/gold color to ADR exports**
+
+- ✅ **`tools/docgen/generate-doc.js`**: ADR document type now uses amber/gold (`#8B6914`) instead of corporate blue — each type has its own distinct identity (SA = corporate blue, ADR = amber/gold, Handoff = teal)
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Updated color table to reflect 3-color scheme
+- ✅ **`CLAUDE.md`**: Updated document styling section with new 3-color breakdown
+
+### v2.10.7 (Previous Release) ✅
 **fix: markdown parser robustness and I/O error handling hardening**
 
 - ✅ **`tools/docgen/generate-doc.js`**: Added `i < lines.length` guard before skipping closing ` ``` ` — prevents out-of-bounds read on unclosed code fences at EOF

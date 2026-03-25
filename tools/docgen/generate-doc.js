@@ -32,8 +32,7 @@ const COLORS = {
 };
 
 // ─── Document type metadata ───────────────────────────────────────────────────
-// Corporate blue is reserved for architecture docs (SA, ADR).
-// Handoff uses teal — visually distinct from architecture artifacts.
+// Corporate blue is reserved for SA docs. ADR uses amber/gold. Handoff uses teal.
 const DOC_TYPES = {
   'solution-architecture': {
     label:   'Solution Architecture',
@@ -44,7 +43,7 @@ const DOC_TYPES = {
   adr: {
     label:   'Architecture Decision Record',
     code:    'ADR',
-    color:   COLORS.primary,          // Corporate blue — part of the architecture bundle
+    color:   '8B6914',                // Amber/Gold — distinct from SA blue
     tagline: 'Solution Architecture · Architecture Decisions',
   },
   handoff: {

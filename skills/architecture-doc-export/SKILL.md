@@ -213,10 +213,10 @@ bun run tools/docgen/generate-doc.js \
 | Document | Type Code | Color | Purpose |
 |----------|-----------|-------|---------|
 | Executive Summary | `SA` | Corporate blue `#1F4E79` | Architecture overview deliverable |
-| ADR-*.md | `ADR` | Corporate blue `#1F4E79` | Architecture decisions |
+| ADR-*.md | `ADR` | Amber/Gold `#8B6914` | Architecture decisions |
 | Component handoffs | `HANDOFF` | Teal `#0D7377` | Dev team deliverables |
 
-Corporate blue is reserved for architecture artifacts. Handoff documents use teal to signal their role in the development phase.
+Each document type has a distinct color: corporate blue for the SA executive summary, amber/gold for ADRs, and teal for development handoffs.
 
 ---
 
