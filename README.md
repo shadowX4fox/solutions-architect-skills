@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.18-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.18` in the list.
+You should see `solutions-architect-skills v2.10.19` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.18 (Current Release) ✅
+### v2.10.19 (Current Release) ✅
+**feat: convert Design Drivers threshold values to placeholders in Application templates**
+
+- ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_ES.md`**: 6 hardcoded threshold lines (`Mayor que 50% Impacto Alto`, etc.) replaced with `<placeholder>` fields for LLM analysis
+- ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_EN.md`**: Same 6 lines in English (`Greater than 50% High Impact`, etc.) replaced with `<placeholder>` fields
+- ✅ **`skills/architecture-blueprint/SKILL.md`**: Design Drivers field mapping table extended with 6 new rows mapping each threshold placeholder to `docs/01-system-overview.md` Key Metrics, with logic to derive actual values and express them as "Greater/Less than X [unit] High/Low Impact"
+
+### v2.10.18 (Previous Release) ✅
 **feat: add Application templates (ES + EN) with full field mapping to architecture-blueprint skill**
 
 - ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_ES.md`**: Spanish Application template verbatim from provided source — covers Design Drivers, Architecture Decisions, Capacity Sizing, Architecture Debt, and 10-area Compliance Contract Approvals

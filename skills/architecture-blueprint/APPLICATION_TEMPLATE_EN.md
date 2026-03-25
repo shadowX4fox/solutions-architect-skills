@@ -2,20 +2,20 @@
 
 - **Value Delivery:** <Effective change in customer experience.>
     - **Threshold:**
-        - Greater than 50% High Impact
-        - Less than 50% Low Impact
+        - <Upper threshold for value delivery and impact>
+        - <Lower threshold for value delivery and impact>
     - **Impact:**
         - <LOW/HIGH>
 - **Scale:** <Estimated number of customers impacted by the change.>
     - **Threshold:**
-        - Greater than 100K High Impact
-        - Less than 100K Low Impact
+        - <Upper threshold for scale and impact>
+        - <Lower threshold for scale and impact>
     - **Impact:**
         - <LOW/HIGH>
 - **Impacts:** <Number of impacts on configuration, development, or implementation in applications.>
     - **Threshold:**
-        - Greater than 5 High Impact
-        - Less than 5 Low Impact
+        - <Upper threshold for application impacts>
+        - <Lower threshold for application impacts>
     - **Impact:**
         - <LOW/HIGH>
 

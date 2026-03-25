@@ -2,20 +2,20 @@
 
 - **Entrega de valor:** <Cambio efectivo en la experiencia de los clientes.>
     - **Umbral:**
-        - Mayor que 50% Impacto Alto
-        - Menor que 50% Impacto Bajo
+        - <Umbral superior de entrega de valor e impacto>
+        - <Umbral inferior de entrega de valor e impacto>
     - **Impacto:**
         - <BAJO/ALTO>
 - **Escala:** <Cantidad estimada de clientes impactados por el cambio.>
     - **Umbral:**
-        - Mayor que 100K Impacto Alto
-        - Menor que 100K Impacto Bajo
+        - <Umbral superior de escala e impacto>
+        - <Umbral inferior de escala e impacto>
     - **Impacto:**
         - <BAJO/ALTO>
 - **Impactos:** <Cantidad de impactos en configuración, desarrollo o implementación en las aplicaciones.>
     - **Umbral:**
-        - Mayor que 5 Impacto Alto
-        - Menor que 5 Impacto Bajo
+        - <Umbral superior de impactos en aplicaciones>
+        - <Umbral inferior de impactos en aplicaciones>
     - **Impacto:**
         - <BAJO/ALTO>
 
