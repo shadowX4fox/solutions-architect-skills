@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.2` in the list.
+You should see `solutions-architect-skills v2.10.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,13 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.2 (Current Release) ✅
+### v2.10.3 (Current Release) ✅
+**fix: replace Word TOC field with pre-rendered table of contents — works in all readers**
+
+- ✅ **`tools/docgen/generate-doc.js`**: Replaced `TableOfContents` field code with `buildManualToc()` — a new function that iterates parsed heading blocks (H1–H3) and renders styled paragraphs with level-based indentation; TOC is now pre-rendered at generation time and visible in Word, LibreOffice, Google Docs, and Word Online without any "update fields" step
+- ✅ **`tools/docgen/generate-doc.js`**: Removed `TableOfContents` from `docx` imports and removed `features: { updateFields: true }` — no longer needed
+
+### v2.10.2 (Previous Release) ✅
 **fix: correct skill routing for dev handoff — export phrases route to doc-export, component selection always prompted**
 
 - ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Added `triggers:` frontmatter with explicit generation phrases (generate handoff, create handoff, component handoff, etc.) — prevents router from fuzzy-matching the description and stealing "export" phrases

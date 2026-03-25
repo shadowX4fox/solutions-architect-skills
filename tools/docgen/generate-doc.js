@@ -15,7 +15,7 @@ const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   Header, Footer, AlignmentType, HeadingLevel, LevelFormat, BorderStyle,
   WidthType, ShadingType, VerticalAlign, PageNumber, PageBreak,
-  TableOfContents, ExternalHyperlink, ImageRun
+  ExternalHyperlink, ImageRun
 } = require('docx');
 
 // ─── Corporate Blue Palette (reserved for Solution Architecture docs) ─────────
@@ -508,6 +508,30 @@ function makeFooter(docType) {
   });
 }
 
+// ─── Pre-rendered TOC from heading blocks ────────────────────────────────────
+function buildManualToc(blocks, docType) {
+  const dt = DOC_TYPES[docType];
+  const entries = [];
+
+  for (const block of blocks) {
+    if (block.type !== 'heading' || block.level > 3) continue;
+
+    // H1 = no indent, H2 = 360 twips, H3 = 720 twips
+    const indent    = (block.level - 1) * 360;
+    const fontSize  = block.level === 1 ? 22 : block.level === 2 ? 20 : 18;
+    const isBold    = block.level <= 2;
+    const color     = block.level === 1 ? dt.color : COLORS.subtext;
+
+    entries.push(new Paragraph({
+      children: [new TextRun({ text: block.text, font: 'Arial', size: fontSize, bold: isBold, color })],
+      spacing:  { before: block.level === 1 ? 120 : 40, after: 40 },
+      indent:   { left: indent },
+    }));
+  }
+
+  return entries;
+}
+
 // ─── Build full Document ──────────────────────────────────────────────────────
 function buildDocument(docType, title, markdownContent, meta) {
   const directives = extractDirectives(markdownContent);
@@ -532,9 +556,6 @@ function buildDocument(docType, title, markdownContent, meta) {
   }
 
   return new Document({
-    features: {
-      updateFields: true,  // auto-populates TOC (and all field codes) on open
-    },
     numbering: {
       config: [
         { reference: 'bullets',
@@ -591,10 +612,7 @@ function buildDocument(docType, title, markdownContent, meta) {
             heading: HeadingLevel.HEADING_1,
             children: [new TextRun({ text: 'Table of Contents', font: 'Arial', bold: true })],
           }),
-          new TableOfContents('Table of Contents', {
-            hyperlink: true,
-            headingStyleRange: '1-3',
-          }),
+          ...buildManualToc(blocks, docType),
           new Paragraph({ children: [new PageBreak()] }),
           ...bodyElms,
         ],
