@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.12` in the list.
+You should see `solutions-architect-skills v2.10.13` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,17 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.12 (Current Release) ✅
+### v2.10.13 (Current Release) ✅
+**feat: add check-dir.ts directory validation to doc-export skill + executive summary fidelity**
+
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `check-dir.ts` directory validation step before Step A.3 (executive summary export) — uses `bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports` + `mkdir exports` if missing, consistent with compliance agent pattern
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added same `check-dir.ts` validation before Step B.2 (handoff export) — replaces spontaneous `mkdir -p exports` behavior
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Updated Output Location note from "(auto-created)" to "(validated via `check-dir.ts`, created if missing)"
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added **Documentation Fidelity** policy — all executive summary content must be extracted verbatim from source files; no paraphrasing, embellishment, or fabrication; `[NOT DOCUMENTED]` markers for empty sections
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added extraction fidelity rules to Step A.2 — verbatim extraction, gap markers, strict manifest computation, no column reformatting
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Fixed ADR status fallback from `or "Draft"` to `or NOT DOCUMENTED`
+
+### v2.10.12 (Previous Release) ✅
 **feat: enforce handoff document fidelity to architecture docs**
 
 - ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Renamed "Asset-Documentation Fidelity Policy" to **"Documentation Fidelity Policy"** — scope extended to cover generated handoff documents in addition to asset files

@@ -34,6 +34,8 @@ Exports architecture documents to professional Word files on demand.
 > 3. Run **foreground** (not in background) to capture output immediately
 > Do NOT attempt `node generate-doc.js` as an alternative — it is not an authorized runtime.
 
+> **Documentation Fidelity**: All executive summary content MUST be extracted verbatim from source files. Do not paraphrase, summarize in your own words, embellish, or generate content not present in the source documents. If a required section or heading exists in the source file but is empty, write `[NOT DOCUMENTED — add content to <source-file>]`. Compliance statistics must be computed strictly from manifest table values — do not estimate or round.
+
 ---
 
 ## What Gets Exported
@@ -127,15 +129,31 @@ Build a temporary markdown document (`sa-executive-summary.md`) with the followi
 <Build a Markdown table from the ADR files found in Step A.4 search:>
 | # | Title | Status | File |
 |---|-------|--------|------|
-| ADR-001 | <title from H1> | <status from frontmatter or "Draft"> | ADR-001-<slug>.md |
+| ADR-001 | <title from H1> | <status from frontmatter or NOT DOCUMENTED> | ADR-001-<slug>.md |
 ...
 ```
 
 ---
 
+**Extraction fidelity rules**:
+1. Extract content **verbatim** from source files — do not paraphrase, rewrite, or add commentary
+2. If a heading exists but has no content beneath it, write: `[NOT DOCUMENTED — add content to <source-file>]`
+3. Compliance statistics (score, completeness, status counts) must be **computed from the manifest table** — do not estimate
+4. The component table must be pasted exactly as it appears in `docs/components/README.md` — do not reformat or add columns
+5. Do not add sections, content, or data not present in the source files
+
 Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-case it for the output filename).
 
 ### Step A.3 — Export Executive Summary to Word
+
+Validate the output directory exists:
+```bash
+bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
+```
+If output is empty (directory does not exist), create it:
+```bash
+mkdir exports
+```
 
 ```bash
 # MUST use bun — never node
@@ -212,6 +230,15 @@ Which component(s) to export?
 
 ### Step B.2 — Export Selected Components
 
+Validate the output directory exists:
+```bash
+bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
+```
+If output is empty (directory does not exist), create it:
+```bash
+mkdir exports
+```
+
 For each selected handoff:
 
 ```bash
@@ -249,7 +276,7 @@ Each document type has a distinct color: corporate blue for the SA executive sum
 
 ## Output Location
 
-All exports land in `exports/` at the project root (auto-created).
+All exports land in `exports/` at the project root (validated via `check-dir.ts`, created if missing).
 
 ```
 exports/
