@@ -13,6 +13,8 @@ triggers:
   - generate docx
   - export handoff
   - export component handoff
+  - export dev handoff
+  - export dev handoffs
   - convert to word
   - download as word
 ---

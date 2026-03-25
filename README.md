@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.1` in the list.
+You should see `solutions-architect-skills v2.10.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -457,7 +457,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.1 (Current Release) ✅
+### v2.10.2 (Current Release) ✅
+**fix: correct skill routing for dev handoff — export phrases route to doc-export, component selection always prompted**
+
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Added `triggers:` frontmatter with explicit generation phrases (generate handoff, create handoff, component handoff, etc.) — prevents router from fuzzy-matching the description and stealing "export" phrases
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Phase 2 component selection now **always** prompts with the component list; previously only asked "if ambiguous", causing the skill to auto-process all components silently
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `export dev handoff` and `export dev handoffs` triggers to ensure those phrases unambiguously route to the Word export skill
+
+### v2.10.1 (Previous Release) ✅
 **fix: Word document Table of Contents now auto-populates on open**
 
 - ✅ **`tools/docgen/generate-doc.js`**: Added `features: { updateFields: true }` to the `Document` constructor — instructs Word/LibreOffice to auto-update all field codes (including the `TOC` field) when the document is opened, so the Table of Contents page renders with headings and page numbers without manual intervention

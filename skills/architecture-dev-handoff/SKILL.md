@@ -1,6 +1,19 @@
 ---
 name: architecture-dev-handoff
 description: Generate Component Development Handoff documents from architecture documentation. Creates per-component implementation guides with deliverable assets (OpenAPI specs, DDL scripts, Kubernetes manifests) for development teams. Invoke when handing off a component for implementation, when a dev team needs implementation specs, or when generating development handoff documents.
+triggers:
+  - generate handoff
+  - create handoff
+  - handoff document
+  - handoff documents
+  - component handoff
+  - dev handoff document
+  - generate dev handoff
+  - create dev handoff
+  - handoff for development
+  - generate implementation spec
+  - create implementation spec
+  - prepare component for development
 ---
 
 # Architecture Dev Handoff Skill
@@ -101,15 +114,20 @@ Present the component list to the user.
 
 ### Phase 2: Component Selection
 
-**Step 2.1: Parse User Request**
+**Step 2.1: Component Selection**
 ```
-Selection modes:
-1. "all"  → process every component in the index
-2. Component name or number → process that single component
-3. Comma-separated list → process that subset
+ALWAYS show the component index and ask:
+"Which component(s) would you like to generate a handoff for?
+  (Enter a number, component name, comma-separated list, or 'all')"
 
-If ambiguous, show the component index and ask:
-"Which component(s) would you like to generate a handoff for? (Enter name, number, or 'all')"
+Exception: If the user explicitly named specific component(s) in their original
+request (e.g., "generate handoff for payment-api"), skip the prompt and use those.
+
+Selection modes:
+1. "all"               → process every component in the index
+2. Number (e.g. "3")   → process that component by index position
+3. Component name      → process that single component
+4. Comma-separated     → process that subset (e.g. "1, 3" or "payment-api, auth-service")
 ```
 
 ### Phase 3: Per-Component Generation
