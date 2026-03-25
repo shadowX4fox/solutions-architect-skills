@@ -223,7 +223,7 @@ function updatePrompt() {
   }
 
   const { scorecard, depthLevel } = reviewData;
-  let prompt = `Please update the ARCHITECTURE.md with the following peer review findings.\n`;
+  let prompt = `Use /skill architecture-docs to update the ARCHITECTURE.md with the following peer review findings.\n`;
   prompt += `Review depth: ${depthLevel.toUpperCase()} | Overall score: ${scorecard.overall}/10 (${scorecard.rating})\n\n`;
 
   if (approved.length > 0) {

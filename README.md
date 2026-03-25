@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.19` in the list.
+You should see `solutions-architect-skills v2.10.20` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,15 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.19 (Current Release) ✅
+### v2.10.20 (Current Release) ✅
+**feat: embed /skill architecture-docs in peer review fix prompts + add Bash(ls *) permission**
+
+- ✅ **`skills/architecture-peer-review/PLAYGROUND_TEMPLATE.md`**: Fix prompt header changed from `"Please update the ARCHITECTURE.md..."` to `"Use /skill architecture-docs to update the ARCHITECTURE.md..."` — ensures remediation always routes through the architecture-docs skill workflow regardless of conversation context
+- ✅ **`.claude/settings.json`**: Added `"Bash(ls *)"` permission to prevent approval prompts when skills run `ls` on the plugin marketplace directory
+- ✅ **`.claude/settings.json.example`**: Same `"Bash(ls *)"` entry added for users installing the plugin
+- ✅ **`CLAUDE.md`**: Permissions block updated to include `"Bash(ls *)"`
+
+### v2.10.19 (Previous Release) ✅
 **feat: convert Design Drivers threshold values to placeholders in Application templates**
 
 - ✅ **`skills/architecture-blueprint/APPLICATION_TEMPLATE_ES.md`**: 6 hardcoded threshold lines (`Mayor que 50% Impacto Alto`, etc.) replaced with `<placeholder>` fields for LLM analysis
