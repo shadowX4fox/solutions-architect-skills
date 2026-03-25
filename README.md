@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.10` in the list.
+You should see `solutions-architect-skills v2.10.11` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.10 (Current Release) ✅
+### v2.10.11 (Current Release) ✅
+**feat: enforce asset-documentation fidelity in dev handoff skill**
+
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Added new **Asset-Documentation Fidelity Policy** section with 5 rules (EXACT MATCH, NO DEFAULTS, NO EXTRA FIELDS, NO OMISSIONS, COMPLETENESS CHECK)
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Strengthened Step 3.4 to require exact match and post-generation completeness check against source documentation
+- ✅ **`skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`**: Added **CRITICAL — Asset Fidelity Rule** to Overview section
+- ✅ **`skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`**: Removed all ~50 `[VALUE or fallback]` default patterns from scaffold templates (openapi.yaml, ddl.sql, deployment.yaml, asyncapi.yaml, cronjob.yaml, schema.avsc, schema.proto)
+- ✅ **`skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`**: Added **Post-generation check** after each of the 7 asset scaffold sections enforcing 1:1 correspondence between generated asset and architecture docs
+
+### v2.10.10 (Previous Release) ✅
 **fix: resolve generator path when running from plugin cache**
 
 - ✅ **`skills/architecture-doc-export/SKILL.md`**: Added Step 0 — plugin directory resolution before all workflows; uses Glob → `resolve-plugin-dir.ts` fallback pattern (same as compliance skill) to locate `generate-doc.js` regardless of CWD

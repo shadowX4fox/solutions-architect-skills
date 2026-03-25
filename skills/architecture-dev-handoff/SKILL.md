@@ -81,6 +81,19 @@ All handoff documents must trace data back to architecture docs.
 
 ---
 
+## Asset-Documentation Fidelity Policy
+
+**CRITICAL REQUIREMENT**: Every generated asset file MUST be an exact representation of what is specified in the architecture documentation. No more, no less.
+
+**Rules:**
+1. ✅ **EXACT MATCH** — every value in a generated asset (endpoint, field, schema, resource limit, env var, port, path, etc.) must come verbatim from the architecture docs
+2. ❌ **NO DEFAULTS** — do not fill in default/fallback values (e.g., `localhost:8080`, `1.0.0`, `256Mi`). If the value is not documented, use `# TODO: [NOT DOCUMENTED]`
+3. ❌ **NO EXTRA FIELDS** — do not add fields, endpoints, schemas, columns, or resources beyond what is explicitly documented
+4. ❌ **NO OMISSIONS** — every documented value relevant to the asset type MUST appear in the generated asset
+5. ✅ **COMPLETENESS CHECK** — after generating each asset, verify it against the source documentation: every documented item has a corresponding entry, and every entry traces back to a documented item
+
+---
+
 ## Generation Workflow
 
 ### Phase 1: Initialization
@@ -172,7 +185,7 @@ For any section where source data is absent:
 
 For each asset type detected in Step 3.2, generate the corresponding artifact file following `ASSET_GENERATION_GUIDE.md`.
 
-Assets are scaffolds: populate all values extractable from architecture docs. Use `# TODO: <description>` comments for values the development team must fill in.
+Assets MUST exactly match the architecture documentation. Populate ONLY values explicitly stated in the docs — no defaults, no inferred values. For any value not found in the docs, use `# TODO: [NOT DOCUMENTED — add to <source-file>]`. After generating each asset, perform a completeness check: every documented item must appear in the asset, and every asset entry must trace to a documented item.
 
 Write assets to `docs/handoffs/assets/NN-<component-name>/`.
 
