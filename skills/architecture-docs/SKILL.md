@@ -24,10 +24,12 @@ Automatically activate when:
   - "How does [component/system/integration] work?"
   - "What technologies do we use for [purpose]?"
   - "Tell me about the architecture of [system]"
-- **User asks to generate, create, or add diagrams to architecture documentation** (triggers Workflow 8)
+- **User asks to generate, create, add, or update diagrams in architecture documentation** (triggers Workflow 8)
   - "Generate my architecture diagrams"
   - "Create Mermaid diagrams from ARCHITECTURE.md"
   - "Add diagrams to my architecture"
+  - "Update my architecture diagrams"
+  - "Refresh / regenerate diagrams to reflect recent changes"
 
 ### Query Pattern Triggers
 
@@ -1084,11 +1086,101 @@ To create ADRs manually:
 For guidance, see: skills/architecture-docs/ADR_GUIDE.md
 ```
 
+---
+
+#### Step 7: Mandatory Diagram Generation
+
+**This step is not optional.** It always runs immediately after Step 6 completes (or is skipped). The two mandatory diagrams — High-Level Architecture and Data Flow — are generated now, before the workflow ends.
+
+> **Why here**: `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md` were just written in Step 5, so their content is fully in context. Generating diagrams now ensures a freshly created architecture is never delivered without its mandatory visual documentation.
+
+---
+
+##### Step 7.1: Generate Mandatory Diagrams
+
+**Process**:
+
+1. Load `MERMAID_DIAGRAMS_GUIDE.md` for templates and color scheme
+2. Read `docs/03-architecture-layers.md` in full (just created in Step 5)
+3. Read `docs/04-data-flow-patterns.md` in full (just created in Step 5)
+4. Determine architecture type from the `<!-- ARCHITECTURE_TYPE: ... -->` comment inserted in Step 4 (already known in context)
+
+**Generate Diagram A — High-Level Architecture**:
+- Type: `graph TB` (top-to-bottom flowchart)
+- Source: `docs/03-architecture-layers.md` — extract all layers, tiers, and component relationships
+- Apply color scheme from MERMAID_DIAGRAMS_GUIDE (`classDef presentation`, `classDef application`, `classDef data`, etc.)
+- Placement: **append at the end of `docs/03-architecture-layers.md`** with heading `#### Diagram: High-Level System Architecture`
+
+**Generate Diagram B — Data Flow Diagrams**:
+- Type: `sequenceDiagram` (one per H3 flow subsection)
+- Source: `docs/04-data-flow-patterns.md` — parse every `### [Flow Name] Flow` H3 subsection
+- For each H3 flow: extract participants and interactions, generate one `sequenceDiagram`
+- Placement: insert each diagram **immediately after its corresponding H3 subsection** in `docs/04-data-flow-patterns.md`
+- Heading: `#### Diagram: [Flow Name] Sequence`
+
+**Canonical location rule**: Same as Workflow 8 Step 4 — placements above are not configurable and cannot be overridden.
+
+---
+
+##### Step 7.2: Offer Optional Diagrams
+
+After mandatory diagrams are written, present the optional diagram menu:
+
+```
+✅ Mandatory diagrams generated:
+- High-Level Architecture → docs/03-architecture-layers.md
+- Data Flow Diagrams ([N] sequence diagrams) → docs/04-data-flow-patterns.md
+
+**Additional Diagrams** (opt-in — select any or none):
+A. Infrastructure & Deployment → docs/09-operational-considerations.md
+B. High Availability & Failover → docs/08-scalability-and-performance.md
+C. Performance & Scaling → docs/08-scalability-and-performance.md
+D. Integration Diagrams → docs/05-integration-points.md
+E. Security Architecture Diagrams → docs/07-security-architecture.md
+
+Reply with letters (e.g., "A, C") or "None" to skip.
+```
+
+Generate any selected optional diagrams using the same Workflow 8 Step 8 rules and canonical locations.
+
+---
+
+##### Step 7.3: Mandatory Diagram Completeness Audit
+
+Run the completeness audit on the two mandatory types only (scoped version of Workflow 8 Step 10):
+
+1. Re-read `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`
+2. Verify at least one `mermaid` block exists in each file
+3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a diagram within 30 lines below it
+
+**If any REQUIRED diagram is missing**: generate it now (do not skip or defer).
+
+---
+
+##### Step 7.4: Workflow Completion
+
+```
+✅ Architecture creation complete.
+
+**Structure created**:
+- docs/ with [N] section files
+- docs/components/ with [N] component files + README.md
+- ARCHITECTURE.md navigation index
+[- adr/ with [N] ADR files]  ← only if Step 6 generated ADRs
+
+**Diagrams generated**:
+- ✅ High-Level Architecture → docs/03-architecture-layers.md [REQUIRED]
+- ✅ Data Flow Diagrams ([N]) → docs/04-data-flow-patterns.md [REQUIRED]
+[- ✅ [Optional diagram name] → [file]]  ← only if user opted in
+
+All diagrams follow canonical location enforcement (Workflow 8 policy).
+```
+
 **Return to main workflow**: Architecture Type Selection Workflow completes successfully
 
 ---
 
-**End of Step 6**
+**End of Step 7**
 
 ### Detecting Existing Architecture Type
 
@@ -1911,12 +2003,14 @@ When ANY section is edited (not just S1–S3), identify downstream sections that
 | S3 (Principles) | All sections (S4–S11) |
 | ADRs | Sections matched by ADR relevance keywords |
 | S4 (Layers) | S5, S8 (and transitively S6, S7, S9, S10, S11) |
-| S5 (Components) | S6, S7, S8, S9, S10, S11 |
+| S5 (Components) | S6, S7, S8, S9, S10, S11 — **auto-triggered** by `architecture-component-guardian` for `add`/`remove`/`update` operations |
 | S7 (Integrations) | S9 |
 | S8 (Tech Stack) | S9, S10, S11 |
 | S10 (Scalability) | S11 |
 
 After editing a section, generate a propagation report presenting affected downstream sections to the user. **Do NOT auto-edit downstream sections** — present the report and let the user decide which sections to review.
+
+> **S5 exception — auto-propagation**: When a component is added, removed, or updated via the `architecture-component-guardian` skill, that skill **automatically** executes the Context Anchor Protocol and updates all S6–S11 sections as part of its Step 6. Manual propagation through this workflow is only needed for direct edits to `docs/components/*.md` files that bypass the guardian skill.
 
 ```
 ═══════════════════════════════════════════════════════════
@@ -3590,19 +3684,27 @@ All references to Job Execution Capacity are now consistent.
 
 ### When to Use
 
-This workflow is activated when users request diagram generation from ARCHITECTURE.md:
+This workflow is activated when users request diagram generation **or update** from ARCHITECTURE.md:
 - "Generate architecture diagrams"
 - "Create Mermaid diagrams from architecture"
 - "Generate diagrams for my architecture"
 - "Add diagrams to ARCHITECTURE.md"
+- "Update my architecture diagrams"
+- "Refresh diagrams to reflect recent changes"
+- "Regenerate diagrams for Section 4"
 - User references: "visual diagrams", "data flow diagrams", "component diagrams"
+
+> **Update parity rule**: All guardrails that apply to diagram creation apply equally to diagram updates — Context Anchor Protocol, architecture-docs as source of truth, canonical location enforcement, reconciliation, and the completeness audit. There are no exceptions for "just update" requests.
+
+> **New architecture note**: For architectures created via Workflow 1, the two mandatory diagrams are **already generated** as part of Step 7 of that workflow. When Workflow 8 is invoked on a freshly created architecture, Step 5a (Existing Diagram Detection) will detect those diagrams and the workflow operates in **update mode** — not create mode.
 
 ### Activation Triggers
 
 **Automatic Invocation:**
 - User asks to "generate diagrams", "create diagrams", "add diagrams", "make diagrams"
+- User asks to "update diagrams", "refresh diagrams", "regenerate diagrams", "sync diagrams"
 - User specifies: "Mermaid diagrams", "architecture diagrams", "visual diagrams"
-- User references sections: "generate diagrams for Section 4"
+- User references sections: "generate diagrams for Section 4", "update diagrams for Section 6"
 
 **Manual Invocation:**
 - User explicitly: "Run diagram generation workflow"
@@ -3618,7 +3720,14 @@ This workflow is activated when users request diagram generation from ARCHITECTU
 
 #### Step 1: Detect Request & Present Diagram Type Options
 
-When diagram generation is requested, present the following:
+When diagram generation **or update** is requested, detect the mode first:
+
+- **Create mode**: no existing `mermaid` blocks found in canonical files for the requested diagram types
+- **Update mode**: one or more existing `mermaid` blocks already exist in the relevant canonical files
+
+Both modes follow **identical steps** (Steps 2–11). The only difference is that Update mode adds an existing-diagram detection pass in **Step 5a** (between Step 5 and Step 6) before generating.
+
+Present the following:
 
 ```
 📊 **Architecture Diagram Generation**
@@ -3797,6 +3906,39 @@ Proceed? [Yes/No]
 
 ---
 
+#### Step 5a: Existing Diagram Detection (Update Mode)
+
+**Always runs** — even for "generate" requests — to surface any pre-existing diagrams that would be overwritten.
+
+**Process**:
+1. For each canonical target file selected in Step 5, scan for existing ` ```mermaid ` blocks
+2. For each block found, extract: nearest heading (H3/H4 within 10 lines above), mermaid type, first 3 node/participant labels
+3. Present inventory to user:
+
+```
+🔍 **Existing Diagrams Detected**
+
+The following diagrams already exist in the canonical files and will be **replaced**:
+
+| # | Title | Type | Location | Action |
+|---|-------|------|----------|--------|
+| 1 | [heading] | graph TB | docs/03-architecture-layers.md | 🔄 REPLACE |
+| 2 | [heading] | sequenceDiagram | docs/04-data-flow-patterns.md | 🔄 REPLACE |
+
+All replacement diagrams will be regenerated from the current ARCHITECTURE.md content.
+The same source-traceability and canonical-location rules apply as for new diagrams.
+
+Proceed? [Yes/No]
+```
+
+4. **If NO existing diagrams found**: skip display, continue silently to Step 6
+5. **If user answers No**: abort the workflow
+6. **If user answers Yes**: continue to Step 6 — replacement follows the same Steps 7–9 as new diagram generation; old mermaid blocks are overwritten in place (not appended)
+
+> **Guardrail**: Existing diagrams are NEVER carried forward unchanged. Every update re-derives the diagram content from the current architecture docs. If a flow no longer exists in the docs, the diagram for that flow is discarded (same reconciliation rule as external intake).
+
+---
+
 #### Step 6: Load Document & Identify Architecture Type
 
 **Process**:
@@ -3868,16 +4010,18 @@ classDef azure fill:#0078D4,stroke:#005A9E,stroke-width:2px,color:#fff
 
 ---
 
-#### Step 9: Insert Diagrams into Canonical Docs Files
+#### Step 9: Insert or Replace Diagrams in Canonical Docs Files
 
 **Process**:
 1. For each diagram (generated or relocated):
    - Identify the canonical target file from the location table
-   - Read target file to find appropriate insertion point:
-     - For `docs/03-architecture-layers.md`: **ALWAYS append at the end of the document**
-     - For `docs/04-data-flow-patterns.md`: insert each sequence diagram **immediately after its corresponding H3 flow subsection** (`### [Flow Name] Flow`), in document order
-     - For all other files: insert after the section header, before the next subsection
-   - Use Edit tool to insert diagram with proper heading and description
+   - **Check if a diagram for this flow already exists** (detected in Step 5a):
+     - **Update mode (existing block found)**: use Edit tool to replace the entire ` ```mermaid ` … ` ``` ` block in place — do NOT append a duplicate
+     - **Create mode (no existing block)**: find the appropriate insertion point:
+       - For `docs/03-architecture-layers.md`: **ALWAYS append at the end of the document**
+       - For `docs/04-data-flow-patterns.md`: insert each sequence diagram **immediately after its corresponding H3 flow subsection** (`### [Flow Name] Flow`), in document order
+       - For all other files: insert after the section header, before the next subsection
+   - Use Edit tool to insert or replace the diagram with proper heading and description
 
 2. Maintain proper markdown structure:
    ```markdown

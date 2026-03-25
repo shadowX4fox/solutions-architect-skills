@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.14-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.13` in the list.
+You should see `solutions-architect-skills v2.10.14` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,18 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.13 (Current Release) ✅
+### v2.10.14 (Current Release) ✅
+**feat: enforce diagram guardrails on update + mandatory diagrams on creation + component-change architecture propagation**
+
+- ✅ **`skills/architecture-docs/SKILL.md`**: Diagram update parity rule — all creation guardrails (Context Anchor, source of truth, canonical locations, reconciliation, completeness audit) apply equally to update requests
+- ✅ **`skills/architecture-docs/SKILL.md`**: New Step 5a (Existing Diagram Detection) in Workflow 8 — inventories pre-existing mermaid blocks before any update; existing diagrams are never carried forward unchanged
+- ✅ **`skills/architecture-docs/SKILL.md`**: Step 9 updated to differentiate update mode (replace in place) vs create mode (insert at canonical location)
+- ✅ **`skills/architecture-docs/SKILL.md`**: Workflow 1 now includes **Step 7: Mandatory Diagram Generation** — High-Level Architecture + Data Flow diagrams are generated automatically at architecture creation time (Steps 7.1–7.4: generate mandatory, offer optional, completeness audit, summary)
+- ✅ **`skills/architecture-component-guardian/SKILL.md`**: Added **Step 6: Update architecture documentation** — triggered automatically on `add`, `remove`, `update` operations; loads Context Anchor, runs Post-Write Audit, updates all S6–S11 downstream sections, updates ARCHITECTURE.md nav index, prompts for diagram update, generates Change Propagation Report
+- ✅ **`skills/architecture-docs/SKILL.md`**: Change Propagation table updated — S5 row flags auto-propagation via guardian skill; note added explaining manual propagation is only needed when bypassing the guardian
+- ✅ **`CLAUDE.md`**: Diagram enforcement policy updated with update parity documentation
+
+### v2.10.13 (Previous Release) ✅
 **feat: add check-dir.ts directory validation to doc-export skill + executive summary fidelity**
 
 - ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `check-dir.ts` directory validation step before Step A.3 (executive summary export) — uses `bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports` + `mkdir exports` if missing, consistent with compliance agent pattern

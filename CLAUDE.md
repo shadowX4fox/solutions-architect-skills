@@ -1,19 +1,63 @@
-# Project Guidelines
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **Note**: This is a Claude Code Plugin. For plugin development documentation, see [Claude Code Plugin Development Guide](https://docs.anthropic.com/claude/docs/claude-code-plugins).
+
+## Development Commands
+
+```bash
+# Type-check all TypeScript files
+bun run typecheck
+
+# Compile TypeScript to dist/
+bun run build
+
+# Run unit tests (Bun test framework)
+bun test
+
+# Run tests in a specific file
+bun test skills/architecture-compliance/tests/validators.test.ts
+
+# Install all workspace dependencies (root + tools/docgen)
+bun install
+
+# Build a release package (ZIP + SHA256)
+bash scripts/build-release.sh
+```
 
 ## Plugin Structure
 
 This repository follows the Claude Code plugin structure:
 
-- `.claude-plugin/` - Plugin configuration and marketplace metadata
-  - `plugin.json` - Plugin manifest (name, version, description)
-  - `marketplace.json` - Marketplace registry configuration
+- `.claude-plugin/` - Plugin manifest (`plugin.json`) and marketplace registry (`marketplace.json`) — version is tracked here (authoritative)
+- `package.json` - Root Bun workspace config; `bun run build` / `bun run typecheck` operate here
+- `agents/` - 10 Markdown agent definitions, one per compliance contract type; invoked by the `architecture-compliance` skill via the Agent tool
 - `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-doc-export)
+- `tools/docgen/` - Standalone `generate-doc.js` (Word/.docx generation via `docx` v8); its own `package.json` under the Bun workspace
+- `scripts/build-release.sh` - Packages a release ZIP with SHA256 checksum
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
 
 For more on plugin structure, see [Plugin Directory Structure](https://docs.anthropic.com/claude/docs/claude-code-plugins#directory-structure).
+
+## Code Architecture
+
+**Skill anatomy**: Each skill is a directory under `skills/` containing a `SKILL.md` frontmatter file plus supporting Markdown guides, templates, and JSON validation schemas. Skills are pure Markdown — no compiled code — except `architecture-compliance`, which includes TypeScript utilities.
+
+**TypeScript utilities** live exclusively in `skills/architecture-compliance/utils/`:
+- `validators.ts` — compliance table/section validation logic
+- `post-generation-pipeline.ts` — runs after each contract is generated
+- `manifest-generator.ts` — writes `COMPLIANCE_MANIFEST.md`
+- `check-dir.ts` — validates output directory before writing
+- `resolve-plugin-dir.ts` — resolves the plugin cache path at runtime (needed because the skill is invoked from arbitrary project directories)
+- CLI wrappers (`*-cli.ts`) — thin Bun entrypoints for each utility
+
+**Agents vs. Skills**: The `agents/` directory holds 10 agent definitions consumed by Claude Code's Agent tool. They are **not** skills; they are spawned as sub-agents from the `architecture-compliance` skill to run compliance generation in parallel. NEVER invoke them directly from user-facing prompts.
+
+**Versioning**: The canonical version lives in `.claude-plugin/plugin.json`. Commits follow `feat: <description> v<semver>` and the `/release` skill bumps the version, commits, and pushes.
+
+**Word export**: `tools/docgen/generate-doc.js` is invoked with `bun run tools/docgen/generate-doc.js <type> <input.md> <output.docx>`. It has its own `node_modules` under `tools/docgen/` managed separately from the root workspace.
 
 ---
 
