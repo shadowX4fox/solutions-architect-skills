@@ -184,6 +184,7 @@ The skill includes:
     "Bash(cp *)",
     "Bash(grep *)",
     "Bash(python3 *)",
+    "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
     "Read(//tmp/*)",
     "Write(//tmp/*)",
     "Write(compliance-docs/*)",

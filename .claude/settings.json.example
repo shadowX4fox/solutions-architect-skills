@@ -17,6 +17,7 @@
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
   "// BASH PERMISSIONS": "Use 'Bash(command *)' format with space — * matches across / separators for absolute paths",
   "// TMP PERMISSIONS": "Agents expand templates to /tmp/ then read them back — Read/Write /tmp/* required",
+  "// PLUGIN READ PERMISSIONS": "Skills read templates and guides from the plugin cache — this prevents approval prompts on every file access",
   "// AGENT PERMISSIONS": "Agent() rules allow Claude to spawn compliance generators without manual prompts",
   "permissions": {
     "allow": [
@@ -27,6 +28,7 @@
       "Bash(cp *)",
       "Bash(grep *)",
       "Bash(python3 *)",
+      "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
       "Read(//tmp/*)",
       "Write(//tmp/*)",
       "Write(compliance-docs/*)",

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.14-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.14` in the list.
+You should see `solutions-architect-skills v2.10.15` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,16 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.14 (Current Release) ✅
+### v2.10.15 (Current Release) ✅
+**feat: add architecture principles to executive summary export + plugin cache read permission**
+
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `docs/02-architecture-principles.md` as a required source file in Step A.1 — architecture principles (Section 3) are now included in the executive summary export
+- ✅ **`skills/architecture-doc-export/SKILL.md`**: Added `## Architecture Principles` section to the Step A.2 composed document structure — positioned between System Overview and Architecture Components, extracted verbatim with Description, Implementation, and Trade-offs subsections
+- ✅ **`.claude/settings.json`**: Added `Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)` permission — prevents approval prompts when skills read templates and guides from the plugin cache
+- ✅ **`.claude/settings.json.example`**: Added same Read permission + explanatory comment for users installing the plugin
+- ✅ **`CLAUDE.md`**: Updated documented permissions block to include the plugin cache Read permission
+
+### v2.10.14 (Previous Release) ✅
 **feat: enforce diagram guardrails on update + mandatory diagrams on creation + component-change architecture propagation**
 
 - ✅ **`skills/architecture-docs/SKILL.md`**: Diagram update parity rule — all creation guardrails (Context Anchor, source of truth, canonical locations, reconciliation, completeness audit) apply equally to update requests

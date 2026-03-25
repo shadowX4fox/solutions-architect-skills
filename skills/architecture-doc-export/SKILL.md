@@ -85,6 +85,7 @@ Read these files:
 | File | Required | Purpose |
 |------|----------|---------|
 | `docs/01-system-overview.md` | ✅ Yes | Executive Summary + System Overview sections |
+| `docs/02-architecture-principles.md` | ✅ Yes | Architecture principles that drove the design |
 | `docs/components/README.md` | ✅ Yes | Component index table (4-column: #, Component, File, Type) |
 | `compliance-docs/COMPLIANCE_MANIFEST.md` | ⬜ Optional | Compliance summary table and scores |
 
@@ -112,6 +113,11 @@ Build a temporary markdown document (`sa-executive-summary.md`) with the followi
 ## System Overview
 <Extract the content under the "System Overview" heading from docs/01-system-overview.md
  through end of file (or the next H1/H2 boundary)>
+
+<!-- source: docs/02-architecture-principles.md -->
+## Architecture Principles
+<Extract the full content from docs/02-architecture-principles.md — all principles with their
+ Description, Implementation, and Trade-offs subsections, verbatim>
 
 <!-- source: docs/components/README.md -->
 ## Architecture Components
