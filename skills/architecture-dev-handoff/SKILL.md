@@ -163,7 +163,8 @@ From the component file's `**Type:**` field, determine which asset types to gene
 | Type Keyword(s) | Asset(s) |
 |-----------------|---------|
 | API, REST, GraphQL, gRPC, Service | `openapi.yaml` |
-| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB, Redis | `ddl.sql` |
+| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB | `ddl.sql` |
+| Redis, Cache, ElastiCache, Memcached, Valkey | `redis-key-schema.md` |
 | Kubernetes, K8s, Deployment, Pod, Service (k8s) | `deployment.yaml` |
 | Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ | `asyncapi.yaml` |
 | Kafka component AND doc/integration mentions `Avro` or `Schema Registry` | `schema.avsc` |

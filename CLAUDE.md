@@ -96,7 +96,7 @@ This project follows a four-phase documentation approach:
 4. **Development Handoff Phase** (Development Team)
    - Use the `architecture-dev-handoff` skill to generate per-component handoff documents
    - Produces a 16-section handoff document per component plus deliverable assets
-   - Assets are scaffolded based on component type: `openapi.yaml` (API), `ddl.sql` (DB), `deployment.yaml` (K8s), `asyncapi.yaml` (messaging), `cronjob.yaml` (scheduled jobs)
+   - Assets are scaffolded based on component type: `openapi.yaml` (API), `ddl.sql` (DB), `redis-key-schema.md` (Redis/Cache), `deployment.yaml` (K8s), `asyncapi.yaml` (messaging), `cronjob.yaml` (scheduled jobs)
    - **Prerequisite**: ARCHITECTURE.md and `docs/components/` must exist (Phase 2 complete); compliance contracts optional (used for enrichment if present)
 
 ### Using the Architecture-Readiness Skill
@@ -277,6 +277,7 @@ The skill includes:
 - **Component-type-specific asset generation** — scaffolded artifacts based on component type:
   - API/REST/Service → `openapi.yaml` (OpenAPI 3.1 specification)
   - Database/Data Store → `ddl.sql` (DDL with tables, indexes, constraints)
+  - Redis / Cache → `redis-key-schema.md` (key patterns, TTL, eviction, fail-open behavior)
   - Kubernetes workload → `deployment.yaml` (Deployment + Service + HPA manifests)
   - Message Consumer/Producer → `asyncapi.yaml` (AsyncAPI 3.0 specification)
   - Kafka + Avro serialization → `schema.avsc` (Avro schema for Schema Registry)

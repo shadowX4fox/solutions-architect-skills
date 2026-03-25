@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.21-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -84,7 +84,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.20` in the list.
+You should see `solutions-architect-skills v2.10.21` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -473,7 +473,14 @@ The Development Architecture contract validates against a **26-item checklist**:
 
 ## Roadmap
 
-### v2.10.20 (Current Release) ✅
+### v2.10.21 (Current Release) ✅
+**feat: add redis-key-schema.md asset type for Redis/Cache components in dev handoff**
+
+- ✅ **`skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`**: Removed `Redis` from the `ddl.sql` detection row; added new Asset 7 section with `redis-key-schema.md` scaffold template covering instance configuration, connection pooling, key patterns table, TTL strategy, eviction policy, memory sizing, and fail-open behavior (7 sections)
+- ✅ **`skills/architecture-dev-handoff/SKILL.md`**: Updated Step 3.2 type detection table — Redis removed from `ddl.sql` row, new row added mapping `Redis`, `Cache`, `ElastiCache`, `Memcached`, `Valkey` → `redis-key-schema.md`
+- ✅ **`CLAUDE.md`**: Added `redis-key-schema.md (Redis/Cache)` to both the brief asset list and the detailed component-type-specific asset bullet list
+
+### v2.10.20 (Previous Release) ✅
 **feat: embed /skill architecture-docs in peer review fix prompts + add Bash(ls *) permission**
 
 - ✅ **`skills/architecture-peer-review/PLAYGROUND_TEMPLATE.md`**: Fix prompt header changed from `"Please update the ARCHITECTURE.md..."` to `"Use /skill architecture-docs to update the ARCHITECTURE.md..."` — ensures remediation always routes through the architecture-docs skill workflow regardless of conversation context
