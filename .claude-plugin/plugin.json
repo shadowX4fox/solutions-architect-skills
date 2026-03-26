@@ -1,6 +1,6 @@
 {
   "name": "solutions-architect-skills",
-  "version": "2.10.25",
+  "version": "2.10.26",
   "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → Compliance documents → Development handoffs → Word export (8 skills, 10 compliance agents, per-component asset generation)",
   "author": {
     "name": "shadowX4fox",

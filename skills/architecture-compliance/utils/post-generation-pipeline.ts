@@ -19,7 +19,7 @@
  */
 
 import { resolve, join, basename } from 'path';
-import { readdirSync, existsSync } from 'fs';
+import { readdirSync, existsSync, unlinkSync } from 'fs';
 import { calculateComplianceScore } from './score-calculator';
 import { updateContractWithValidation } from './field-updater';
 import {
@@ -70,6 +70,15 @@ interface ContractResult {
   generationDate: string;
   success: boolean;
   error?: string;
+}
+
+/**
+ * Extract date string (YYYY-MM-DD) from a contract filename, or null if not present.
+ * Example: "SRE_ARCHITECTURE_Project_2026-03-25.md" → "2026-03-25"
+ */
+function extractDateFromFilename(filename: string): string | null {
+  const match = filename.match(/_(\d{4}-\d{2}-\d{2})\.md$/);
+  return match ? match[1] : null;
 }
 
 /**
@@ -162,11 +171,43 @@ async function runPipeline(complianceDocsDir: string, projectName: string): Prom
 
   console.log(`Found ${contractFiles.length} contract(s) to process:`);
 
+  // Detect and remove superseded contracts (same type, older date)
+  const removedContracts: string[] = [];
+  const byType: Record<string, string[]> = {};
+  for (const f of contractFiles) {
+    const type = getContractTypeFromFilename(f);
+    if (type) {
+      if (!byType[type]) byType[type] = [];
+      byType[type].push(f);
+    }
+  }
+  for (const [, files] of Object.entries(byType)) {
+    if (files.length <= 1) continue;
+    // Sort descending by date: files without a date sort last (treated as oldest)
+    files.sort((a, b) => {
+      const da = extractDateFromFilename(a) ?? '0000-00-00';
+      const db = extractDateFromFilename(b) ?? '0000-00-00';
+      return db.localeCompare(da);
+    });
+    const newest = files[0];
+    for (const old of files.slice(1)) {
+      unlinkSync(join(complianceDocsDir, old));
+      removedContracts.push(old);
+      console.log(`🗑️  Removed superseded contract: ${old} (superseded by ${newest})`);
+    }
+  }
+  if (removedContracts.length > 0) {
+    console.log(`\nNote: Removed ${removedContracts.length} superseded contract(s) — only the latest per type is kept.\n`);
+  }
+
+  // Re-filter contractFiles to exclude deleted files
+  const activeContractFiles = contractFiles.filter(f => !removedContracts.includes(f));
+
   // Process each contract
   const results: ContractResult[] = [];
   const today = getLocalDateString();
 
-  for (const filename of contractFiles) {
+  for (const filename of activeContractFiles) {
     const contractPath = join(complianceDocsDir, filename);
     const contractType = getContractTypeFromFilename(filename);
 
@@ -219,6 +260,7 @@ async function runPipeline(complianceDocsDir: string, projectName: string): Prom
     totalContracts: results.length,
     successful: successfulResults.length,
     failed: failedCount,
+    removedContracts,
     manifestPath,
     contracts: results,
   };

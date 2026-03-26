@@ -674,8 +674,9 @@ bun [plugin_dir]/skills/architecture-compliance/utils/post-generation-pipeline.t
 
 **What the pipeline does**:
 1. Scans `compliance-docs-dir` for `*.md` files (excluding `COMPLIANCE_MANIFEST.md`)
-2. For each contract: calculates validation score, updates Document Control fields
-3. Writes `COMPLIANCE_MANIFEST.md` with all contracts in one pass
+2. Detects and removes superseded contracts (same type, older date) — only the newest per type is kept
+3. For each contract: calculates validation score, updates Document Control fields
+4. Writes `COMPLIANCE_MANIFEST.md` with all contracts in one pass
 
 **Error handling**: If pipeline fails, report the error. Contracts are already written — only scoring and manifest are affected. The user can re-run the pipeline manually.
 
@@ -702,6 +703,13 @@ Manifest: [compliance_docs_dir]/COMPLIANCE_MANIFEST.md
 Contracts:
   ✓ [Contract Type] — [filename] (Score: X.X/10, Status: Approved)
   ✗ [Contract Type] — FAILED: [reason]
+```
+
+If the pipeline JSON summary includes `removedContracts` (non-empty array), append:
+
+```
+🗑️  Cleaned up [N] superseded contract(s):
+  - [old_filename] (superseded by [newer_filename])
 ```
 
 ---

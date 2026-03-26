@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.25` in the list.
+You should see `solutions-architect-skills v2.10.26` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -530,12 +530,17 @@ Where:
 
 ## Roadmap
 
-### v2.10.25 (Current Release) ✅
+### v2.10.26 (Current Release) ✅
+**feat: auto-delete superseded compliance contracts in post-generation pipeline**
+
+The pipeline now detects when multiple contracts of the same type exist with different dates, keeps only the newest, and deletes the older ones automatically. Each removal is logged. The JSON summary includes a `removedContracts` field and the SKILL.md orchestrator reporting was updated to relay the cleanup notice to the user.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v2.10.25 (Previous Release) ✅
 **docs: expand compliance approval paths in Workflow Integration diagram**
 
 Updated the Workflow Integration diagram to show both compliance approval paths: auto-approval (score ≥8.0) and manual review (score 7.0–7.9), with both converging on Dev Handoffs before proceeding to Export.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ### v2.10.24 (Previous Release) ✅
 **docs: add refinement feedback edge from peer review Quality Gate back to Architecture Team**
