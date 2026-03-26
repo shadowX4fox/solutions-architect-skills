@@ -105,10 +105,11 @@ The `architecture-readiness` skill helps Product Owners document business requir
 
 To manually activate the skill, use: `/skill architecture-readiness`
 
-The skill has three primary functions:
+The skill has four primary functions:
 1. **Requirements Elicitation**: Guided discovery interview when starting from scratch (no existing PO Spec)
 2. **PO Spec Creation**: Template-guided document creation for business requirements
 3. **PO Spec Evaluation**: Weighted scoring (0–10) to assess architecture team readiness
+4. **Async Intake**: File-based requirements extraction from tickets, emails, or documents — scores against the PO Spec rubric and produces a gap report with ready-to-send questions for the requester
 
 The skill includes:
 - Requirements Elicitation Guide (4-phase discovery interview methodology)
@@ -119,7 +120,7 @@ The skill includes:
 - Mapping guide: PO Spec → ARCHITECTURE.md
 - User personas, use cases, and user stories
 
-**When to use**: When starting from scratch with no existing PO Spec (elicitation), before creating ARCHITECTURE.md, when documenting business requirements, or when Product Owners need to communicate context to the architecture team.
+**When to use**: When starting from scratch with no existing PO Spec (elicitation), before creating ARCHITECTURE.md, when documenting business requirements, when Product Owners need to communicate context to the architecture team, or when business context arrives asynchronously via ticket, email, or document (async intake).
 
 ### Using the Architecture Documentation Skill
 

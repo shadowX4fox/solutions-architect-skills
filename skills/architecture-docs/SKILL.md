@@ -293,7 +293,12 @@ How would you like to proceed?
       → Proceed without any business context
       → A PO_SPEC_GATE: SKIPPED warning will be recorded
 
-Enter 1, 2, or 3:
+  4️⃣  Async intake from a file
+      → Provide a file (ticket export, email, requirements doc) and I'll
+        extract requirements, score them, and generate a gap report
+      → Best when business context arrived asynchronously via ticket or email
+
+Enter 1, 2, 3, or 4:
 ```
 
 Wait for user response before proceeding.
@@ -397,6 +402,16 @@ Record override metadata (embed in `docs/01-system-overview.md` during Step 5):
 ```
 
 No PO Spec context is available for section pre-population — proceed to Step 1 without it.
+
+---
+
+**Option 4 — Async intake from a file:**
+
+Ask the user for the file path (ticket export, email, requirements document). Then:
+
+- Invoke the `architecture-readiness` skill's Async Intake workflow: read the file, map content to 8 PO Spec sections, score, and generate `PO_SPEC_GAP_REPORT.md`
+- **If score ≥ 7.5**: A draft `PRODUCT_OWNER_SPEC.md` is also created — re-run Step 0 detection (it will now be found), then proceed with the standard "PO Spec FOUND" path
+- **If score < 7.5**: Present the gap report to the user, advise them to send the gap questions to the requester and re-run intake once answers arrive — do NOT proceed to architecture creation yet
 
 ---
 

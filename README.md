@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.27-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.26` in the list.
+You should see `solutions-architect-skills v2.10.27` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -171,6 +171,11 @@ Create comprehensive Product Owner Specifications before technical design begins
   - Probing techniques: scenario walking, quantification, negative probing, assumption surfacing
   - Industry defaults when PO is unsure; unknowns logged as Open Questions
   - Discovery Summary checkpoint before drafting; self-scoring gap loop until ≥7.5
+- **Async Intake** — file-based requirements extraction from tickets, emails, or documents
+  - Scores input against the PO Spec rubric (same 8 sections, same weights)
+  - Produces `PO_SPEC_GAP_REPORT.md` with ready-to-send questions per gap, prioritized by section weight
+  - No interactive interview — output is a written gap report the architect forwards to the requester
+  - If score ≥ 7.5, also drafts `PRODUCT_OWNER_SPEC.md` automatically
 - 8-section template (Business Context, User Personas, Use Cases, Success Criteria, etc.)
 - Weighted scoring methodology (0-10 scale)
 - Readiness threshold: ≥7.5 for architecture handoff
@@ -530,12 +535,17 @@ Where:
 
 ## Roadmap
 
-### v2.10.26 (Current Release) ✅
+### v2.10.27 (Current Release) ✅
+**feat: add Async Intake mode to architecture-readiness skill**
+
+New 4th mode for file-based requirements extraction from tickets, emails, or documents. Reads a context file, maps content to the 8 PO Spec sections using keyword indicators, scores against the weighted rubric, and produces `PO_SPEC_GAP_REPORT.md` with ready-to-send questions prioritized by section weight. If score ≥7.5, also drafts `PRODUCT_OWNER_SPEC.md` automatically. No interactive interview — fully async. Added `ASYNC_INTAKE_GUIDE.md`, updated `architecture-docs` PO Spec gate with Option 4, and updated CLAUDE.md and README.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v2.10.26 (Previous Release) ✅
 **feat: auto-delete superseded compliance contracts in post-generation pipeline**
 
 The pipeline now detects when multiple contracts of the same type exist with different dates, keeps only the newest, and deletes the older ones automatically. Each removal is logged. The JSON summary includes a `removedContracts` field and the SKILL.md orchestrator reporting was updated to relay the cleanup notice to the user.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ### v2.10.25 (Previous Release) ✅
 **docs: expand compliance approval paths in Workflow Integration diagram**
