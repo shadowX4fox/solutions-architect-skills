@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.24` in the list.
+You should see `solutions-architect-skills v2.10.25` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -486,9 +486,11 @@ graph TD
     D -->|Peer Review| E{Quality Gate}
     E -->|Approved| F[10 Compliance Contracts]
     E -->|Refine| C
-    F -->|Compliance Review| G{Quality Gate}
-    G -->|Approved| H[Dev Handoffs + Assets]
-    H -->|Export| I[Word .docx Deliverables]
+    F -->|Score ≥ 8.0| G[Auto-Approved]
+    F -->|Score 7.0–7.9| H[Manual Review]
+    G --> J[Dev Handoffs + Assets]
+    H -->|Approved| J
+    J -->|Export| K[Word .docx Deliverables]
 ```
 
 ## External Validation System
@@ -528,12 +530,17 @@ Where:
 
 ## Roadmap
 
-### v2.10.24 (Current Release) ✅
+### v2.10.25 (Current Release) ✅
+**docs: expand compliance approval paths in Workflow Integration diagram**
+
+Updated the Workflow Integration diagram to show both compliance approval paths: auto-approval (score ≥8.0) and manual review (score 7.0–7.9), with both converging on Dev Handoffs before proceeding to Export.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v2.10.24 (Previous Release) ✅
 **docs: add refinement feedback edge from peer review Quality Gate back to Architecture Team**
 
 Added `Refine` edge from the peer review Quality Gate back to the Architecture Team node in the Workflow Integration diagram, reflecting that failed reviews loop back for architecture refinement before re-submission.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ### v2.10.23 (Previous Release) ✅
 **docs: convert Workflow Integration diagram to top-down layout**
