@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.23` in the list.
+You should see `solutions-architect-skills v2.10.24` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -485,6 +485,7 @@ graph TD
     C -->|Creates| D[ARCHITECTURE.md]
     D -->|Peer Review| E{Quality Gate}
     E -->|Approved| F[10 Compliance Contracts]
+    E -->|Refine| C
     F -->|Compliance Review| G{Quality Gate}
     G -->|Approved| H[Dev Handoffs + Assets]
     H -->|Export| I[Word .docx Deliverables]
@@ -527,12 +528,17 @@ Where:
 
 ## Roadmap
 
-### v2.10.23 (Current Release) ✅
+### v2.10.24 (Current Release) ✅
+**docs: add refinement feedback edge from peer review Quality Gate back to Architecture Team**
+
+Added `Refine` edge from the peer review Quality Gate back to the Architecture Team node in the Workflow Integration diagram, reflecting that failed reviews loop back for architecture refinement before re-submission.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v2.10.23 (Previous Release) ✅
 **docs: convert Workflow Integration diagram to top-down layout**
 
 Changed the Workflow Integration mermaid diagram from left-to-right (`graph LR`) to top-down (`graph TD`) for better readability on standard screen widths.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ### v2.10.22 (Previous Release) ✅
 **docs: overhaul README to reflect four-phase workflow and migrate version history to CHANGELOG**
