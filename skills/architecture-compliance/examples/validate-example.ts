@@ -6,11 +6,11 @@
  * to validate compliance contract documents.
  *
  * Usage:
- *   bun run utils/validate-example.ts
+ *   bun run examples/validate-example.ts
  */
 
-import { ComplianceValidator } from './validators';
-import { ErrorReporter } from './error_reporter';
+import { ComplianceValidator } from '../utils/validators';
+import { ErrorReporter } from '../utils/error-reporter';
 
 // Example document with validation errors
 const EXAMPLE_DOCUMENT_WITH_ERRORS = `# Compliance Contract: SRE Architecture

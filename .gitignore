@@ -45,3 +45,11 @@ yarn-error.log*
 *.tmp
 *.temp
 .cache/
+
+# Stale backup files
+*.backup
+*.bak
+*.old
+
+# Test temp artifacts
+**/tests/.temp/

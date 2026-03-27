@@ -27,7 +27,7 @@
  */
 
 import { ComplianceValidator } from './validators';
-import { ErrorReporter } from './error_reporter';
+import { ErrorReporter } from './error-reporter';
 import type { ValidationResult } from './validators';
 
 /**

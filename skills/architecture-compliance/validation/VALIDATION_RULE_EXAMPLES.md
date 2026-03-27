@@ -603,4 +603,4 @@ console.log(result.errors);    // Array of validation errors
 - **Validation Schema**: `/validation/TEMPLATE_VALIDATION_SCHEMA.json`
 - **Validation Rules**: `/validation/template_validation_*.json`
 - **Validators**: `/utils/validators.ts`
-- **Error Reporter**: `/utils/error_reporter.ts`
+- **Error Reporter**: `/utils/error-reporter.ts`

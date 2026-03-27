@@ -39,7 +39,7 @@ import {
   getContractDisplayName,
   printValidationResult,
 } from './generation-helper';
-import { ErrorReporter } from './error_reporter';
+import { ErrorReporter } from './error-reporter';
 
 // Parse command line arguments
 const args = process.argv.slice(2);

@@ -7,7 +7,7 @@
  * - Actionable fix instructions
  * - Clear visual separation
  *
- * @module error_reporter
+ * @module error-reporter
  */
 
 import type { ValidationError, ValidationResult } from './validators';

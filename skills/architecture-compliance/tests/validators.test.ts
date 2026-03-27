@@ -11,9 +11,9 @@
  * @module validators.test
  */
 
-import { describe, test, expect, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterAll } from 'bun:test';
 import { ComplianceValidator } from '../utils/validators';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 
 // ============================================================================
@@ -28,6 +28,11 @@ try {
 } catch {
   // Directory already exists
 }
+
+// Clean up temp directory after all tests to prevent accumulation of stale artifacts
+afterAll(() => {
+  rmSync(TEMP_DIR, { recursive: true, force: true });
+});
 
 const VALID_TABLE = `## Compliance Summary
 

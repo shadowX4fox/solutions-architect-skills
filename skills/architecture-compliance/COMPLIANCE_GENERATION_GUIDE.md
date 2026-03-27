@@ -1500,7 +1500,7 @@ The Template Validation Framework enforces format compliance across 5 critical a
 
 ```typescript
 import { ComplianceValidator } from './utils/validators';
-import { ErrorReporter } from './utils/error_reporter';
+import { ErrorReporter } from './utils/error-reporter';
 
 // Load contract-specific validation rules
 const validator = new ComplianceValidator(

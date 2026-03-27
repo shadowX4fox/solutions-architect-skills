@@ -350,7 +350,7 @@ Test your integration with the provided example:
 ```bash
 # Run integration test
 cd skills/architecture-compliance
-bun run utils/validate-example.ts
+bun run examples/validate-example.ts
 
 # Expected output:
 # ✅ Example 1: Document with errors - Shows error report

@@ -177,14 +177,10 @@ export class ComplianceValidator {
    */
   private loadRules(rulesPath: string): ValidationRules {
     try {
-      // Strip leading slash and any skills/architecture-compliance/ prefix
-      // to get just the relative path within the skill directory
-      const normalized = rulesPath
-        .replace(/^\//, '')
-        .replace(/^skills\/architecture-compliance\//, '');
-      const fullPath = rulesPath.startsWith('/') && !rulesPath.includes('skills/architecture-compliance/')
+      // Absolute paths are used as-is; relative paths are resolved from SKILL_DIR
+      const fullPath = rulesPath.startsWith('/')
         ? rulesPath
-        : join(SKILL_DIR, normalized);
+        : join(SKILL_DIR, rulesPath);
 
       const content = readFileSync(fullPath, 'utf-8');
       return JSON.parse(content) as ValidationRules;

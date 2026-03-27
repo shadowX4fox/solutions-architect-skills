@@ -54,7 +54,7 @@ Validate populated contract before output:
 
 ```typescript
 import { ComplianceValidator } from './utils/validators';
-import { ErrorReporter } from './utils/error_reporter';
+import { ErrorReporter } from './utils/error-reporter';
 
 // 1. Create validator with contract-specific rules
 const validator = new ComplianceValidator(
@@ -81,7 +81,7 @@ console.log('✅ Validation passed!');
 
 ```bash
 cd skills/architecture-compliance
-bun run utils/validate-example.ts
+bun run examples/validate-example.ts
 ```
 
 ### Run Tests
@@ -108,11 +108,11 @@ skills/architecture-compliance/
 ├── utils/
 │   ├── validators.ts               (883 lines) - Post-validation engine (Phase 4.6)
 │   ├── template-prevalidator.ts    (300 lines) - Pre-validation engine (Phase 4.1)
-│   ├── error_reporter.ts           (409 lines) - Error formatting & reporting
+│   ├── error-reporter.ts           (409 lines) - Error formatting & reporting
 │   ├── generation-helper.ts        (250 lines) - Integration helper module
 │   ├── validate-cli.ts             (200 lines) - Standalone CLI tool
 │   ├── resolve-includes.ts         (240 lines) - Template expansion + pre-validation
-│   └── validate-example.ts         (200 lines) - Example usage
+│   └── validate-example.ts         (200 lines) - Example usage (see examples/)
 ├── validation/
 │   ├── TEMPLATE_VALIDATION_SCHEMA.json     - JSON schema for rules
 │   ├── VALIDATION_RULE_EXAMPLES.md         - Examples & patterns
