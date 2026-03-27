@@ -33,7 +33,7 @@ This repository follows the Claude Code plugin structure:
 - `.claude-plugin/` - Plugin manifest (`plugin.json`) and marketplace registry (`marketplace.json`) — version is tracked here (authoritative)
 - `package.json` - Root Bun workspace config; `bun run build` / `bun run typecheck` operate here
 - `agents/` - 10 Markdown agent definitions, one per compliance contract type; invoked by the `architecture-compliance` skill via the Agent tool
-- `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-doc-export)
+- `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-docs-export)
 - `tools/docgen/` - Standalone `generate-doc.js` (Word/.docx generation via `docx` v8); its own `package.json` under the Bun workspace
 - `scripts/build-release.sh` - Packages a release ZIP with SHA256 checksum
 - `docs/` - User-facing documentation
@@ -324,11 +324,31 @@ The skill includes:
 
 ---
 
+### Using the Architecture Onboarding Skill
+
+The `architecture-onboarding` skill is the **entry point for new team members**. It reads the project's existing architecture docs and generates a canvas-based interactive concept map via the `playground` plugin. Nodes represent lifecycle phases, architecture sections (S1-S12), components, compliance contracts, principles, and available skills — connected by dependency, workflow, and validation edges. Users drag nodes to explore, cycle knowledge levels (Know/Fuzzy/Unknown) per concept, and copy a targeted learning prompt shaped by their gaps.
+
+To manually activate the skill, use: `/skill architecture-onboarding`
+
+The skill includes:
+- **Concept map playground** — draggable nodes, force-directed auto-layout, edge types (depends-on, produces, validates, uses-skill, implements)
+- **6 node groups** — Lifecycle Phases, Architecture Sections, Components, Compliance Contracts, Principles, Available Skills
+- **5 preset views** — Full Map, Lifecycle Flow, Section Dependencies, Component Map, Compliance Coverage
+- **Ghost nodes** — missing sections/contracts shown semi-transparent with actionable guidance on which skill to invoke
+- **Knowledge cycling** — Know / Fuzzy / Unknown per node; generates targeted learning prompt
+- **Fallback** — plain-text report with next-skill recommendations if playground plugin is not installed
+
+**Output**: `architecture-onboarding-<YYYY-MM-DD>.html` opened in browser.
+
+**When to use**: When a new team member joins the project, when you want an overview of the architecture suite, when exploring what documentation exists and what's missing, or when mapping what you know and don't know about the architecture.
+
+---
+
 ### Using the Architecture Doc Export Skill
 
-The `architecture-doc-export` skill exports architecture documents and component handoffs to professional Word (.docx) files on demand. Exports are **never automatic** — invoke explicitly when ready to produce deliverables.
+The `architecture-docs-export` skill exports architecture documents and component handoffs to professional Word (.docx) files on demand. Exports are **never automatic** — invoke explicitly when ready to produce deliverables.
 
-To manually activate the skill, use: `/skill architecture-doc-export`
+To manually activate the skill, use: `/skill architecture-docs-export`
 
 The skill has two export modes:
 

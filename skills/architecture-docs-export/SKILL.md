@@ -1,5 +1,5 @@
 ---
-name: architecture-doc-export
+name: architecture-docs-export
 description: >
   On-demand export of architecture documents to professional Word (.docx) files.
   Exports are never automatic — invoke explicitly when ready to produce deliverables.

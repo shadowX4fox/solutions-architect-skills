@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.39-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.11.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -44,7 +44,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - `architecture-component-guardian`: Manages `docs/components/README.md` index
   - `architecture-peer-review`: Interactive peer review with playground tool
   - `architecture-dev-handoff`: Component development handoffs with deliverable assets
-  - `architecture-doc-export`: On-demand Word (.docx) export for architecture docs and handoffs
+  - `architecture-docs-export`: On-demand Word (.docx) export for architecture docs and handoffs
 
   Plus `architecture-blueprint`: generates Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
 
@@ -148,7 +148,7 @@ Generates per-component handoff documents with deliverable assets into `docs/han
 **Phase 4.5 — Word Export (optional)**
 
 ```bash
-/skill architecture-doc-export
+/skill architecture-docs-export
 ```
 
 Exports architecture documents to professional Word (.docx) files: SA executive summary (synthesized from overview + component index + compliance manifest), individual ADRs, or component handoffs.
@@ -310,7 +310,7 @@ Use `/skill architecture-dev-handoff` when handing off a component to the develo
 
 #### Doc Export
 
-Use `/skill architecture-doc-export` when professional Word deliverables are needed.
+Use `/skill architecture-docs-export` when professional Word deliverables are needed.
 
 | Mode | What it exports | Output |
 |------|----------------|--------|
@@ -471,7 +471,7 @@ For the best experience working with this plugin, install these three VS Code ex
 
 - **Claude Code** is required to run the plugin's 8 skills from VS Code
 - **Mermaid Preview** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated
-- **Office Viewer** lets you open and review `.docx` files produced by the `architecture-doc-export` skill directly in the editor
+- **Office Viewer** lets you open and review `.docx` files produced by the `architecture-docs-export` skill directly in the editor
 
 ## Use Cases
 
@@ -537,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.39 (Current Release) ✅
+### v2.11.0 (Current Release) ✅
+**feat: new architecture-onboarding skill with interactive concept map playground; rename architecture-doc-export → architecture-docs-export**
+
+New `architecture-onboarding` skill — generates a canvas-based interactive concept map via the `playground` plugin for onboarding new team members. Draggable nodes represent lifecycle phases (5), architecture sections S1-S12, components, compliance contracts (10 slots), required principles (9), and available skills (9) — connected by dependency, workflow, and validation edges. Users cycle knowledge levels per node (Know/Fuzzy/Unknown) and copy a targeted learning prompt. Includes 6 preset views (Full Map, Lifecycle Flow, Section Dependencies, Component Map, Compliance Coverage, Principles View), ghost nodes for missing artifacts, and force-directed auto-layout. Also renamed `architecture-doc-export` to `architecture-docs-export` for consistency across all references.
+
+### v2.10.39 (Previous Release) ✅
 **fix: remove dead instruction blocks from generated compliance contracts — wrap compliance-score-calculation fragment in internal tags; remove duplicate Dynamic Field Instructions from Development template**
 
 Two agent-guidance blocks were appearing verbatim in generated contracts: (1) `**CRITICAL - Compliance Score Calculation**` from `shared/fragments/compliance-score-calculation.md` — included in all 9 non-SRE templates but not wrapped in `<!-- BEGIN_INTERNAL_INSTRUCTIONS -->` tags, so `--strip-internal` never removed it. Fixed by wrapping the fragment content. (2) `**Dynamic Field Instructions**: [VALIDATION_SUMMARY]...` inline block in `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md` — a duplicate of the already-properly-wrapped `dynamic-field-instructions.md` include. Removed the inline duplicate and moved `[VALIDATION_SUMMARY]` replacement rule into the development agent instead.
@@ -570,7 +575,7 @@ Aligns the two remaining outlier templates (Business Continuity: 43 rows, SRE: 5
 ### v2.10.33 (Previous Release) ✅
 **feat: standardize Questions & Gaps Register across all 10 compliance contracts; add Word export for compliance contracts; fix TypeScript errors; expand test coverage**
 
-Replaces three inconsistent post-appendix gap sections (5-col "Missing Data", 3-col "Not Applicable", 4-col "Unknown Status") with a single unified `## Questions & Gaps Register` (8 columns: Code | Requirement | Type | Status | Owner | ARCHITECTURE.md Section | Action Required | Priority) populated automatically by the post-generation pipeline. New `questions-register-populator.ts` derives priority (Critical/High/Medium/Low) and action text from the domain validation JSON — agents are explicitly forbidden from populating it. Added `compliance` doc type to `generate-doc.js` (purple `#7B2D8E`) with yellow-highlighted editable cells (Owner, Action Required, Priority) and status-conditional coloring in the Compliance Summary table. Added full Workflow C to `architecture-doc-export/SKILL.md` for exporting compliance contracts to Word. Fixed inline A.2 schema violations in Development and Integration templates (now use shared `@include-with-config`). Fixed 2 pre-existing TypeScript errors. Added 78 new tests across 4 new test files (questions-register-populator, manifest-generator, resolve-includes, contract-types). Deleted 3 deprecated shared section templates.
+Replaces three inconsistent post-appendix gap sections (5-col "Missing Data", 3-col "Not Applicable", 4-col "Unknown Status") with a single unified `## Questions & Gaps Register` (8 columns: Code | Requirement | Type | Status | Owner | ARCHITECTURE.md Section | Action Required | Priority) populated automatically by the post-generation pipeline. New `questions-register-populator.ts` derives priority (Critical/High/Medium/Low) and action text from the domain validation JSON — agents are explicitly forbidden from populating it. Added `compliance` doc type to `generate-doc.js` (purple `#7B2D8E`) with yellow-highlighted editable cells (Owner, Action Required, Priority) and status-conditional coloring in the Compliance Summary table. Added full Workflow C to `architecture-docs-export/SKILL.md` for exporting compliance contracts to Word. Fixed inline A.2 schema violations in Development and Integration templates (now use shared `@include-with-config`). Fixed 2 pre-existing TypeScript errors. Added 78 new tests across 4 new test files (questions-register-populator, manifest-generator, resolve-includes, contract-types). Deleted 3 deprecated shared section templates.
 
 ### v2.10.28 ✅
 **feat: enforce internal section numbers (S1-S12) across all skills and agents; add supplementary context file intake to architecture creation**

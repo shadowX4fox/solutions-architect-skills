@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.15]
 
 ### Added
-- `skills/architecture-doc-export/SKILL.md`: `docs/02-architecture-principles.md` added as required source; `## Architecture Principles` section added to Step A.2 composed document structure
+- `skills/architecture-docs-export/SKILL.md`: `docs/02-architecture-principles.md` added as required source; `## Architecture Principles` section added to Step A.2 composed document structure
 - `.claude/settings.json` + `.claude/settings.json.example`: Added `Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)` permission
 
 ## [2.10.14]
@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.13]
 
 ### Changed
-- `skills/architecture-doc-export/SKILL.md`: Added `check-dir.ts` validation step before Steps A.3 and B.2; Added Documentation Fidelity policy — verbatim extraction, `[NOT DOCUMENTED]` markers for empty sections; Fixed ADR status fallback to `NOT DOCUMENTED`
+- `skills/architecture-docs-export/SKILL.md`: Added `check-dir.ts` validation step before Steps A.3 and B.2; Added Documentation Fidelity policy — verbatim extraction, `[NOT DOCUMENTED]` markers for empty sections; Fixed ADR status fallback to `NOT DOCUMENTED`
 
 ## [2.10.12]
 
@@ -88,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.10]
 
 ### Fixed
-- `skills/architecture-doc-export/SKILL.md`: Added Step 0 — plugin directory resolution before all workflows; all bash blocks use `$plugin_dir/tools/docgen/generate-doc.js` (absolute path)
+- `skills/architecture-docs-export/SKILL.md`: Added Step 0 — plugin directory resolution before all workflows; all bash blocks use `$plugin_dir/tools/docgen/generate-doc.js` (absolute path)
 
 ## [2.10.9]
 
@@ -113,12 +113,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.5]
 
 ### Fixed
-- `skills/architecture-doc-export/SKILL.md`: Explicit Bun runtime enforcement; executive summary temp file changed to `sa-executive-summary.md` at project root
+- `skills/architecture-docs-export/SKILL.md`: Explicit Bun runtime enforcement; executive summary temp file changed to `sa-executive-summary.md` at project root
 
 ## [2.10.4]
 
 ### Changed
-- `skills/architecture-doc-export/SKILL.md`: Workflow A redesigned — synthesizes executive summary from `docs/01-system-overview.md`, `docs/components/README.md`, and `compliance-docs/COMPLIANCE_MANIFEST.md`; ADRs exported individually
+- `skills/architecture-docs-export/SKILL.md`: Workflow A redesigned — synthesizes executive summary from `docs/01-system-overview.md`, `docs/components/README.md`, and `compliance-docs/COMPLIANCE_MANIFEST.md`; ADRs exported individually
 
 ## [2.10.3]
 
@@ -129,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `skills/architecture-dev-handoff/SKILL.md`: Added explicit `triggers:` frontmatter; Phase 2 component selection always prompts with component list
-- `skills/architecture-doc-export/SKILL.md`: Added `export dev handoff` and `export dev handoffs` triggers
+- `skills/architecture-docs-export/SKILL.md`: Added `export dev handoff` and `export dev handoffs` triggers
 
 ## [2.10.1]
 
@@ -139,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.0]
 
 ### Added
-- `skills/architecture-doc-export/` (new skill): On-demand Word (.docx) export for Solution Architecture documents and Component Development Handoffs
+- `skills/architecture-docs-export/` (new skill): On-demand Word (.docx) export for Solution Architecture documents and Component Development Handoffs
 - `tools/docgen/generate-doc.js`: Professional Word generator for 3 doc types: `solution-architecture`, `adr`, `handoff`; Bun runtime; CHANGELOG directive support
 - `tools/docgen/package.json`: Isolated `docx ^8.5.0` workspace dependency
 - `skills/architecture-dev-handoff/` (new skill): Per-component handoff documents — 16-section template, component-type-specific asset generation (OpenAPI, DDL, K8s Deployment, AsyncAPI, Avro/Protobuf schemas, CronJob), gap detection, compliance enrichment
