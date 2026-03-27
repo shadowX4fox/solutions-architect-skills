@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.38-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.39-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -537,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.38 (Current Release) ✅
+### v2.10.39 (Current Release) ✅
+**fix: remove dead instruction blocks from generated compliance contracts — wrap compliance-score-calculation fragment in internal tags; remove duplicate Dynamic Field Instructions from Development template**
+
+Two agent-guidance blocks were appearing verbatim in generated contracts: (1) `**CRITICAL - Compliance Score Calculation**` from `shared/fragments/compliance-score-calculation.md` — included in all 9 non-SRE templates but not wrapped in `<!-- BEGIN_INTERNAL_INSTRUCTIONS -->` tags, so `--strip-internal` never removed it. Fixed by wrapping the fragment content. (2) `**Dynamic Field Instructions**: [VALIDATION_SUMMARY]...` inline block in `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md` — a duplicate of the already-properly-wrapped `dynamic-field-instructions.md` include. Removed the inline duplicate and moved `[VALIDATION_SUMMARY]` replacement rule into the development agent instead.
+
+### v2.10.38 (Previous Release) ✅
 **fix: add Glob permission for plugin_dir resolution to settings.json.example and CLAUDE.md**
 
 Added `"Glob(**/skills/architecture-compliance/SKILL.md)"` to the permissions `allow` list in both `.claude/settings.json.example` and `CLAUDE.md`. This prevents approval prompts when agents run the Glob to resolve `plugin_dir` in marketplace installations.

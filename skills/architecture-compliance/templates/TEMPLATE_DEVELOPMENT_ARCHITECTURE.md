@@ -24,9 +24,6 @@
 
 **Stack Validation**: [VALIDATION_SUMMARY] (**MANDATORY** - Contract cannot be approved without completed validation)
 
-**Dynamic Field Instructions**:
-- `[VALIDATION_SUMMARY]`: If `validation_results.overall_status == "PASS"` → "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)", else if "FAIL" → "❌ FAIL (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN) - See LADES1.6 for details", else → "PENDING - Validation not performed"
-
 <!-- @include shared/fragments/compliance-score-calculation.md -->
 
 ---

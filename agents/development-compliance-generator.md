@@ -80,6 +80,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
 - Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace role placeholders (`[Role or N/A]`, `[X Architect or N/A]`, etc.) with the role name specified in the template; use "N/A" ONLY if Status = "Not Applicable"
+- Replace `[VALIDATION_SUMMARY]` with: "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)" if overall_status = PASS, "❌ FAIL (...) - See LADES1.6 for details" if FAIL, or "PENDING - Validation not performed" otherwise
 
 **How to work**:
 1. Read the cleaned template as immutable content
