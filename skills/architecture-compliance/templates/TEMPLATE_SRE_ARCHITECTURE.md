@@ -41,63 +41,63 @@ This template uses a two-tier scoring system for SRE requirements:
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Operational and audit logs must be recorded in a structured format, us... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE02 | Operational logs must record relevant information, classified into lev... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE03 | Logs must be accessible without depending on third parties, either thr... | Practice - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE04 | Automatic rollback mechanisms must be in place in case of failures dur... | Practice - Application Deployment | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE05 | All configurations must be stored in official and secure repositories,... | Practice - Configuration Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE06 | Application documentation and operational procedures (SOP) will be mai... | Practice - Operational Documentation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE07 | The application must implement mechanisms that allow identifying when ... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE08 | The application must implement health check mechanisms that allow iden... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE09 | The application must have high availability mechanisms, through the im... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE10 | Load tests must be executed and documented on all application componen... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE11 | The application must have automatic adjustment mechanisms in the numbe... | Practice - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE12 | A documented recovery plan (DRP) must be in place, establishing the ne... | Practice - Recovery and Resilience Testing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE13 | Has C2 application and deployment diagrams in IcePanel. | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE14 | The application is registered in the Bank's application portfolio and ... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE15 | The escalation matrix is defined and resolving groups are registered i... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE16 | Has generated a request for implementation or modification of applicat... | Practice - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE17 | Has defined the mechanism and criteria for measuring application avail... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE18 | Has defined the mechanism and criteria for measuring application perfo... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE19 | Monitored components have dynamic or static thresholds correctly confi... | Observability - Key Metrics | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE20 | Has validated that microservices are instrumented with Dynatrace (auto... | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE21 | Internal APIs of the application are monitored. | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE22 | Has validated that microservice requests correctly handle exceptions a... | Observability - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE23 | The application URL has synthetic availability validation. | Observability - Frontend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE24 | The application frontend allows injection of Dynatrace JavaScript for ... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE25 | Confirms that in security components like WAF, firewall, frontdoor, et... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE26 | The application has UX monitoring. Note: Applies to applications with ... | Observability - User Experience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE27 | Has performed Dynatrace licensing cost estimation using the official c... | Observability - Cost Estimation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
-| LASRE28 | Prerequisites necessary to ensure coverage of all components have been... | Observability - Cost Estimation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
-| LASRE29 | Onpremise or cloud servers of the application have Dynatrace agent ins... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE30 | Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent de... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE31 | Onpremise and/or cloud dependencies like DB, load balancers, Redis, fr... | Observability - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE32 | Has monitoring of batch processes not managed by Control-M. | Observability - Batch Processing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE33 | Consistency between applications and their source code will be ensured... | Observability - Application Deployment | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE34 | Must have automation of the Disaster Recovery process. | Observability - Disaster Recovery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE35 | Must have automation of the process to validate the state of what is r... | Observability - Disaster Recovery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE36 | Must have an automated process for managing application services (star... | Observability - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE37 | Generated logs must be centralized in an analysis or monitoring tool, ... | Observability - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE38 | Operational logs must allow modification of verbosity level, thus faci... | Observability - Log Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE39 | Configurations must be subject to version control, ensuring that any c... | Observability - Configuration Management | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE40 | Deployments of new versions will be performed gradually, using strateg... | Observability - Integration, Deployment and Delivery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE41 | Appropriate traffic management strategies will be applied to the appli... | Observability - Integration, Deployment and Delivery | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE42 | Will have a defined 7x24 maintenance procedure that guarantees continu... | Observability - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE43 | Must have alternative mechanisms that allow managing backend failures,... | Automation - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE44 | Automatic retries and proper management of timeouts for both client an... | Automation - Operational Resilience | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE45 | The application must execute chaos tests, with the objective of evalua... | Automation - Recovery and Resilience Testing | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE46 | Components involved in the application's critical journeys are identif... | Automation - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE47 | Components involved in the application's critical journeys are identif... | Automation - Information and Architecture | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE48 | Microservices and workloads contain labels that allow differentiating ... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE49 | Has validated with the external system provider that they have APIs th... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE50 | Critical services have advanced monitoring configurations and threshol... | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE51 | Application logs are correctly ingested into observability tools. | Automation - Backend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE52 | The application allows performing synthetic validations through authen... | Automation - Frontend Application | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE53 | Cloud components (MS Azure, GCP, AWS) of the application are tagged at... | Automation - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE54 | Has health or state detection of critical processes or OS services (pr... | Automation - Infrastructure | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE55 | Must have generation of reports on application components. | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE56 | Will have an automated process to sanitize or copy data to previous en... | Automation - Application Operational Tasks | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE57 | Will have automation to remediate application failures automatically. | Automation - Auto-remediation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE01 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE02 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE03 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE04 | Application Deployment | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE05 | Configuration Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE06 | Operational Documentation | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE07 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE08 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE09 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE10 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE11 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE12 | Recovery and Resilience Testing | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE13 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE14 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE15 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE16 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE17 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE18 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE19 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
+| LASRE20 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE21 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE22 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE23 | Frontend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE24 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE25 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE26 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE27 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
+| LASRE28 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
+| LASRE29 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE30 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE31 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE32 | Batch Processing | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE33 | Application Deployment | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE34 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE35 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE36 | Application Operational Tasks | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE37 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE38 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE39 | Configuration Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
+| LASRE40 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE41 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE42 | Operational Resilience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE43 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE44 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
+| LASRE45 | Recovery and Resilience Testing | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
+| LASRE46 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE47 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
+| LASRE48 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE49 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE50 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE51 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE52 | Frontend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
+| LASRE53 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE54 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
+| LASRE55 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE56 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE57 | Auto-remediation | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
 
 <!-- @include shared/fragments/compliance-summary-footer.md -->
 
