@@ -48,7 +48,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 ## Input Parameters
 
 - `architecture_file`: Path to ARCHITECTURE.md (default: ./ARCHITECTURE.md)
-- `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (provided by the skill orchestrator). If not provided, use Glob to find `**/solutions-architect-skills/skills/architecture-compliance/SKILL.md` and strip the `/skills/architecture-compliance/SKILL.md` suffix.
+- `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (provided by the skill orchestrator). If not provided, use Glob to find `**/skills/architecture-compliance/SKILL.md` and strip the `/skills/architecture-compliance/SKILL.md` suffix.
 
 ## Workflow
 
@@ -129,7 +129,7 @@ Violating this rule causes permission prompts that block autonomous execution.
 
 Confirm `plugin_dir` from input parameters. If not provided, use Glob to locate the skill:
 ```
-Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL.md
+Glob pattern: **/skills/architecture-compliance/SKILL.md
 Strip the "/skills/architecture-compliance/SKILL.md" suffix to get plugin_dir
 ```
 

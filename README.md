@@ -1,10 +1,12 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.36-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.37-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
 Professional architecture documentation workflow for Claude Code: Transform business requirements into technical architecture, compliance documents, and development handoffs.
+
+
 
 ## Overview
 
@@ -535,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.36 (Current Release) ✅
+### v2.10.37 (Current Release) ✅
+**fix: plugin_dir Glob pattern now works for marketplace installations — remove hardcoded repo name from path**
+
+The Glob pattern used to resolve `plugin_dir` was `**/solutions-architect-skills/skills/architecture-compliance/SKILL.md`, which hardcodes the repo name and only matches the dev directory structure. When running as an installed plugin, the marketplace directory is named `shadowx4fox-solution-architect-marketplace/` (not `solutions-architect-skills/`), so the Glob failed and agents fell back to a wrong path that appended `solutions-architect-skills/` as a subdirectory — producing `Module not found` errors on every compliance contract run. Fixed in `skills/architecture-compliance/SKILL.md` (orchestrator) and all 10 agent files by changing the pattern to `**/skills/architecture-compliance/SKILL.md`, which matches both dev and marketplace paths correctly.
+
+### v2.10.36 (Previous Release) ✅
 **fix: Responsible Role always populated — BC/SRE templates now use category-specific roles; all agents forbidden from defaulting to N/A**
 
 Business Continuity and SRE compliance contracts were generating N/A in the Responsible Role column because both templates used a generic `[Role or N/A]` placeholder with no role hint, and all 10 agent instructions permitted defaulting to N/A. Fix: (1) BC template now maps roles by category — BC-GEN → Solution Architect, BC-DR/BC-RTO → Business Continuity Manager, BC-BACKUP → Infrastructure Architect, BC-AUTO → Platform Engineer, BC-CLOUD → Cloud Architect — across all 86 occurrences (summary table + detailed sections). (2) SRE template table rows now use Practice/Observability → SRE Lead, Automation → Platform Engineer; detailed section entries cleaned up from `SRE Engineer or N/A` to plain `SRE Engineer`. (3) All 10 agent instructions updated: role placeholders must resolve to the template-specified role name; N/A is only permitted when Status = "Not Applicable".

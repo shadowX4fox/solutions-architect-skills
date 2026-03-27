@@ -587,7 +587,7 @@ Output: Validated contract type
 
 **Step A — Try Glob (dev mode / running from within the plugin directory):**
 ```
-Glob pattern: **/solutions-architect-skills/skills/architecture-compliance/SKILL.md
+Glob pattern: **/skills/architecture-compliance/SKILL.md
 ```
 If a result is returned: strip the `"/skills/architecture-compliance/SKILL.md"` suffix → `plugin_dir`. Done — skip Step B.
 
