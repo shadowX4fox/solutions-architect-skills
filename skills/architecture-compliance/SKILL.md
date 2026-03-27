@@ -1,6 +1,10 @@
 ---
 name: architecture-compliance
 description: Generate Compliance Contracts (Contratos de Adherencia) from ARCHITECTURE.md files
+triggers:
+  - compliance contracts
+  - generate compliance
+  - contratos de adherencia
 ---
 
 # Architecture Compliance Skill

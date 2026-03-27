@@ -1,6 +1,10 @@
 ---
 name: architecture-peer-review
 description: Use this skill to perform a Solution Architect peer review of ARCHITECTURE.md documents. Generates an interactive HTML playground for reviewing and triaging findings with approve/reject/comment workflow. Invoke when the user asks to review, critique, peer-review, or assess architecture documentation quality, asks for architecture feedback or a second opinion, or wants scalability/security/performance analysis of their architecture.
+triggers:
+  - peer review
+  - review architecture
+  - architecture quality
 ---
 
 # Architecture Peer Review Skill

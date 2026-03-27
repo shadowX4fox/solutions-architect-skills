@@ -1,6 +1,10 @@
 ---
 name: architecture-component-guardian
 description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when: adding a component, removing a component, updating a component name or type, syncing the index after a migration, or any time docs/components/README.md needs to change.
+triggers:
+  - component index
+  - update components
+  - docs/components
 ---
 
 # Architecture Component Guardian Skill

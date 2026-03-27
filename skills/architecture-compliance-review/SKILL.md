@@ -1,6 +1,10 @@
 ---
 name: architecture-compliance-review
 description: Use this skill to review compliance contract portfolio health. Validates all 10 contracts exist and are ≤6 months old, triggers regeneration for missing/expired contracts, and generates an interactive playground for exploring concept gaps across all contracts to understand what needs to be addressed to reach the auto-approve threshold (≥8.0/10).
+triggers:
+  - review compliance
+  - compliance health
+  - compliance gaps
 ---
 
 # Architecture Compliance Review Skill

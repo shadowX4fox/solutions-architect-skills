@@ -1,6 +1,10 @@
 ---
 name: architecture-readiness
 description: Use this skill for requirements elicitation, discovery interviews, and creating or evaluating Product Owner Specifications documenting business requirements before architecture design
+triggers:
+  - requirements elicitation
+  - PO spec
+  - product owner specification
 ---
 
 # Architecture Readiness Skill
