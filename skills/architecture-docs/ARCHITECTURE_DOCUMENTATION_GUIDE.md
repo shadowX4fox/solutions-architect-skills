@@ -63,19 +63,26 @@ To change the architecture type of an existing ARCHITECTURE.md:
 A comprehensive architecture document follows this hierarchical structure. Each section is stored in its corresponding `docs/NN-name.md` file (see **RESTRUCTURING_GUIDE.md** for the full directory layout):
 
 ```
-1. Executive Summary          → docs/01-system-overview.md  (combined with Section 2)
-2. System Overview            → docs/01-system-overview.md
-3. Architecture Principles    → docs/02-architecture-principles.md
-4. Architecture Layers        → docs/03-architecture-layers.md
-5. Component Details          → docs/components/NN-<component>.md  (one file per component)
-6. Data Flow Patterns         → docs/04-data-flow-patterns.md
-7. Integration Points         → docs/05-integration-points.md
-8. Technology Stack           → docs/06-technology-stack.md
-9. Security Architecture      → docs/07-security-architecture.md
-10. Scalability & Performance → docs/08-scalability-and-performance.md
-11. Operational Considerations→ docs/09-operational-considerations.md
-12. Architecture Decision Records (ADRs) → adr/ directory (separate files per ADR)
+S1+S2. Executive Summary + System Overview → docs/01-system-overview.md  (S1 and S2 combined)
+S3.    Architecture Principles             → docs/02-architecture-principles.md
+S4.    Architecture Layers                 → docs/03-architecture-layers.md
+S5.    Component Details                   → docs/components/NN-<component>.md  (one file per component)
+S6.    Data Flow Patterns                  → docs/04-data-flow-patterns.md
+S7.    Integration Points                  → docs/05-integration-points.md
+S8.    Technology Stack                    → docs/06-technology-stack.md
+S9.    Security Architecture               → docs/07-security-architecture.md
+S10.   Scalability & Performance           → docs/08-scalability-and-performance.md
+S11.   Operational Considerations          → docs/09-operational-considerations.md
+S12.   Architecture Decision Records (ADRs)→ adr/ directory (separate files per ADR)
+       References                          → docs/10-references.md
 ```
+
+> **WARNING — Section numbers ≠ file prefix numbers.**
+> Internal section numbers (S1-S12) identify content concepts. File prefix numbers (01-10) are filesystem ordering only. They do NOT align.
+> - S9 (Security Architecture) = `docs/07-security-architecture.md` — **NOT** `docs/09-*`
+> - `docs/09-operational-considerations.md` = S11 (Operational Considerations)
+> - When a user says "update Section 9", resolve to S9 → `docs/07-security-architecture.md`
+> Always use **S-prefix** to identify sections and **file paths** to identify files. Never assume file prefix NN = section number N.
 
 **IMPORTANT**: Section names must match exactly as shown above. See the architecture-docs skill guide for strict section name enforcement rules.
 
@@ -110,7 +117,7 @@ This enables:
 
 | # | Section | File | Description |
 |---|---------|------|-------------|
-| 1 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | ... |
+| S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | ... |
 ...
 
 ## Architecture Decision Records

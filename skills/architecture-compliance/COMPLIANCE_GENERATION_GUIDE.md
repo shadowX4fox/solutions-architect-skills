@@ -1134,7 +1134,7 @@ Generated (WRONG - preserves all branches):
                 ↑ Should show ONLY "RTO documented" since Status = Compliant
 
 Generated (ALSO WRONG - custom prose):
-**RTO**: 4 hours documented in Section 11.3
+**RTO**: 4 hours documented in S11 (docs/09-operational-considerations.md)
 - Status: Compliant
 - Explanation: The Recovery Time Objective is well-documented at 4 hours, which aligns with Tier 1 application requirements and meets industry best practices for mission-critical systems.
 ```
@@ -1888,16 +1888,16 @@ Top Missing Data Points:
 2. DR drill schedules (appears in 3 contracts)
 3. Backup restoration test results (appears in 2 contracts)
 
-Recommendations for ARCHITECTURE.md Improvements:
-1. Add Section 11.2: Incident Management
+Recommendations for Architecture Documentation Improvements:
+1. Add Incident Management subsection to S11 (`docs/09-operational-considerations.md`)
    - Include on-call rotation, escalation paths, team contacts
    - Would eliminate 8 placeholders across 5 contracts
 
-2. Expand Section 11.3: Backup and Recovery
+2. Expand Backup and Recovery subsection in S11 (`docs/09-operational-considerations.md`)
    - Include DR drill schedule and results
    - Would eliminate 5 placeholders across 3 contracts
 
-3. Add Section 11.4: Operational Runbooks
+3. Add Operational Runbooks subsection to S11 (`docs/09-operational-considerations.md`)
    - Include runbook repository, key procedures
    - Would eliminate 4 placeholders across 2 contracts
 
@@ -3042,9 +3042,9 @@ The remediation guidance leverages the **architecture-docs skill** capabilities:
 Gap: Missing cost monitoring configuration
 Skill Command:
   /skill architecture-docs
-  "Add cost monitoring to Section 11: CloudWatch billing alarms,
+  "Add cost monitoring to S11 (docs/09-operational-considerations.md): CloudWatch billing alarms,
    80% budget threshold, monthly cost reviews"
-Expected Outcome: Section 11.X with CloudWatch alarms, thresholds, review schedule
+Expected Outcome: docs/09-operational-considerations.md updated with CloudWatch alarms, thresholds, review schedule
 Impact: LAC4 → Compliant (+0.5 points)
 ```
 

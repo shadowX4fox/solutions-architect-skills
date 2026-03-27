@@ -27,6 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 **Contract Type**: `business_continuity`
 **Template**: `TEMPLATE_BUSINESS_CONTINUITY.md`
 **Section Mapping**: docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/06-technology-stack.md, docs/08-scalability-and-performance.md, docs/09-operational-considerations.md
+> File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
 **Key Data Points**:
 - RTO (Recovery Time Objective)

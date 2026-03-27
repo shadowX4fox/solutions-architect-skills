@@ -27,6 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 **Contract Type**: `development`
 **Template**: `TEMPLATE_DEVELOPMENT_ARCHITECTURE.md`
 **Section Mapping**: docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md (primary), docs/09-operational-considerations.md (secondary)
+> File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
 **Key Data Points**:
 - Technology stack (languages, frameworks, versions)

@@ -389,15 +389,16 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 - ❌ No complex data transformations
 
 **If omitted:**
-- Renumber subsequent sections:
-  - Section 7 (Integration Points) → Section 6
-  - Section 8 (Technology Stack) → Section 7
-  - Section 9 (Security Architecture) → Section 8
-  - Section 10 (Scalability & Performance) → Section 9
-  - Section 11 (Operational Considerations) → Section 10
-  - Section 12 (Architecture Decision Records) → Section 11
+- Renumber subsequent **internal section numbers** only:
+  - S7 (Integration Points) → S6
+  - S8 (Technology Stack) → S7
+  - S9 (Security Architecture) → S8
+  - S10 (Scalability & Performance) → S9
+  - S11 (Operational Considerations) → S10
+  - S12 (Architecture Decision Records) → S11
 - **Update Document Index** to reflect 11-section structure
 - **Note**: All section cross-references must be updated
+- **IMPORTANT**: `docs/NN-name.md` **file names do NOT change** when sections are renumbered. `docs/05-integration-points.md` stays `05-*` regardless of whether it is internally numbered S6 or S7. This is why internal section numbers and file prefix numbers are independent — never assume they align.
 
 ### Section Renumbering Workflow
 

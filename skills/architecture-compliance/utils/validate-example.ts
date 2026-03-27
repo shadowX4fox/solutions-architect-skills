@@ -29,8 +29,8 @@ const EXAMPLE_DOCUMENT_WITH_ERRORS = `# Compliance Contract: SRE Architecture
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Structured logging | Practice - Log Management | Pass | Section 11.1 | SRE Team |
-| LASRE02 | Centralized logging | Practice - Log Management | compliant | Section 11.1 | SRE Team |
+| LASRE01 | Structured logging | Practice - Log Management | Pass | docs/09-operational-considerations.md | SRE Team |
+| LASRE02 | Centralized logging | Practice - Log Management | compliant | docs/09-operational-considerations.md | SRE Team |
 | LASRE03 | Log retention | Practice - Log Management | Compliant | Not documented | SRE Team |
 
 **Overall Compliance**:
@@ -71,8 +71,8 @@ const EXAMPLE_DOCUMENT_VALID = `# Compliance Contract: SRE Architecture
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Structured logging | Practice - Log Management | Compliant | Section 11.1 | SRE Team |
-| LASRE02 | Centralized logging | Practice - Log Management | Compliant | Section 11.1 | SRE Team |
+| LASRE01 | Structured logging | Practice - Log Management | Compliant | docs/09-operational-considerations.md | SRE Team |
+| LASRE02 | Centralized logging | Practice - Log Management | Compliant | docs/09-operational-considerations.md | SRE Team |
 | LASRE03 | Log retention | Practice - Log Management | Non-Compliant | Not documented | SRE Team |
 
 **Overall Compliance**:

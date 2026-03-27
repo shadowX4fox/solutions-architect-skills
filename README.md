@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.27-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.28-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -88,7 +88,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.27` in the list.
+You should see `solutions-architect-skills v2.10.28` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -535,7 +535,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.27 (Current Release) ✅
+### v2.10.28 (Current Release) ✅
+**feat: enforce internal section numbers (S1-S12) across all skills and agents; add supplementary context file intake to architecture creation**
+
+Adds explicit S1-S12 section number disambiguation throughout all architecture skills and compliance agents — file prefix numbers (01-10) now never conflate with internal section numbers (S9 = `docs/07-security-architecture.md`, not `docs/09-*`). Added canonical S-prefix mapping table and WARNING blocks to ARCHITECTURE_DOCUMENTATION_GUIDE.md, RESTRUCTURING_GUIDE.md, SKILL.md, QUERY_SECTION_MAPPING.md, SECTION_MAPPING_GUIDE.md, and VALIDATIONS.md. Updated all 10 compliance generator agents with a disambiguation note at their Section Mapping. Fixed all legacy `Section N.M` source references in validation examples, test fixtures, and compliance guides to use file paths. Also added Step 0.5 to the architecture creation workflow: after the PO Spec gate, the user is prompted for supplementary context files (ADRs, HLD PDFs, tech stack specs, OpenAPI/AsyncAPI, data models, NFRs, IaC templates) before architecture type selection — HLD documents are enforced as PDF-only.
+
+### v2.10.27 (Previous Release) ✅
 **feat: add Async Intake mode to architecture-readiness skill**
 
 New 4th mode for file-based requirements extraction from tickets, emails, or documents. Reads a context file, maps content to the 8 PO Spec sections using keyword indicators, scores against the weighted rubric, and produces `PO_SPEC_GAP_REPORT.md` with ready-to-send questions prioritized by section weight. If score ≥7.5, also drafts `PRODUCT_OWNER_SPEC.md` automatically. No interactive interview — fully async. Added `ASYNC_INTAKE_GUIDE.md`, updated `architecture-docs` PO Spec gate with Option 4, and updated CLAUDE.md and README.

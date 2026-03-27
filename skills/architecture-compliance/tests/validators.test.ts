@@ -33,8 +33,8 @@ const VALID_TABLE = `## Compliance Summary
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Structured logging | Practice - Log Management | Compliant | Section 11.1 | SRE Team |
-| LASRE02 | Centralized logging | Practice - Log Management | Compliant | Section 11.1 | SRE Team |
+| LASRE01 | Structured logging | Practice - Log Management | Compliant | docs/09-operational-considerations.md | SRE Team |
+| LASRE02 | Centralized logging | Practice - Log Management | Compliant | docs/09-operational-considerations.md | SRE Team |
 | LASRE03 | Log retention policy | Practice - Log Management | Non-Compliant | Not documented | SRE Team |
 `;
 
@@ -42,14 +42,14 @@ const INVALID_5COLUMN_TABLE = `## Compliance Summary
 
 | Code | Requirement | Category | Status | Source Section |
 |------|-------------|----------|--------|----------------|
-| LASRE01 | Structured logging | Practice | Compliant | Section 11.1 |
+| LASRE01 | Structured logging | Practice | Compliant | docs/09-operational-considerations.md |
 `;
 
 const INVALID_STATUS_TABLE = `## Compliance Summary
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Structured logging | Practice | Pass | Section 11.1 | SRE Team |
+| LASRE01 | Structured logging | Practice | Pass | docs/09-operational-considerations.md | SRE Team |
 `;
 
 const VALID_OVERALL_COMPLIANCE = `**Overall Compliance**:

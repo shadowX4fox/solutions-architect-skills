@@ -10,18 +10,21 @@ This guide provides detailed mapping between ARCHITECTURE.md sections and compli
 
 ### Standard 12-Section Structure
 
-1. **Section 1: System Overview** - High-level description, purpose, scope
-2. **Section 2: Business Context** - Business drivers, stakeholders, constraints
-3. **Section 3: Architecture Patterns** - Design patterns, architectural style
-4. **Section 4: Deployment Architecture** - Environments, infrastructure, cloud
-5. **Section 5: System Components** - Components, services, interfaces
-6. **Section 6: Data Flow** - Data movement, transformations, pipelines
-7. **Section 7: Integration Points** - External systems, APIs, protocols
-8. **Section 8: Technology Stack** - Technologies, versions, frameworks
-9. **Section 9: Security Considerations** - Security controls, compliance
-10. **Section 10: Performance Requirements** - SLAs, latency, throughput
-11. **Section 11: Operational Considerations** - Monitoring, backup, incidents
-12. **Section 12: Architecture Decision Records** - ADRs, trade-offs
+> **WARNING — Internal section numbers ≠ file prefix numbers.**
+> S9 (Security) = `docs/07-security-architecture.md` — NOT `docs/09-*`.
+> `docs/09-operational-considerations.md` = S11. Use the mapping table below; never assume prefix NN = section N.
+
+1. **S1+S2: Executive Summary + System Overview** (`docs/01-system-overview.md`) - High-level description, purpose, scope, business context
+2. **S3: Architecture Principles** (`docs/02-architecture-principles.md`) - Design patterns, architectural style
+3. **S4: Architecture Layers** (`docs/03-architecture-layers.md`) - Environments, infrastructure, cloud
+4. **S5: Component Details** (`docs/components/`) - Components, services, interfaces
+5. **S6: Data Flow Patterns** (`docs/04-data-flow-patterns.md`) - Data movement, transformations, pipelines
+6. **S7: Integration Points** (`docs/05-integration-points.md`) - External systems, APIs, protocols
+7. **S8: Technology Stack** (`docs/06-technology-stack.md`) - Technologies, versions, frameworks
+8. **S9: Security Architecture** (`docs/07-security-architecture.md`) - Security controls, compliance
+9. **S10: Scalability & Performance** (`docs/08-scalability-and-performance.md`) - SLAs, latency, throughput
+10. **S11: Operational Considerations** (`docs/09-operational-considerations.md`) - Monitoring, backup, incidents
+11. **S12: Architecture Decision Records** (`adr/`) - ADRs, trade-offs
 
 ---
 
@@ -62,18 +65,20 @@ Each logical section now maps to a specific file in the `docs/` directory:
 
 | Section | Content | File |
 |---------|---------|------|
-| 1, 2 (Executive Summary / System Overview) | Business context, system purpose, scope | `docs/01-system-overview.md` |
-| 3 (Architecture Principles) | Design principles, patterns, constraints | `docs/02-architecture-principles.md` |
-| 4 (Architecture Layers) | Deployment architecture, environment design | `docs/03-architecture-layers.md` |
-| 5 (Component Details) | Components, services, interfaces | `docs/components/README.md` |
-| 6 (Data Flow Patterns) | Data movement, pipelines, transformations | `docs/04-data-flow-patterns.md` |
-| 7 (Integration Points) | External systems, APIs, protocols | `docs/05-integration-points.md` |
-| 8 (Technology Stack) | Technologies, versions, frameworks | `docs/06-technology-stack.md` |
-| 9 (Security Architecture) | Security controls, compliance | `docs/07-security-architecture.md` |
-| 10 (Scalability & Performance) | SLAs, latency, throughput, SLOs | `docs/08-scalability-and-performance.md` |
-| 11 (Operational Considerations) | Monitoring, backup, incidents, DR | `docs/09-operational-considerations.md` |
-| 12 (ADRs) | Architecture Decision Records | `adr/README.md` |
+| S1+S2 (Executive Summary + System Overview) | Business context, system purpose, scope | `docs/01-system-overview.md` |
+| S3 (Architecture Principles) | Design principles, patterns, constraints | `docs/02-architecture-principles.md` |
+| S4 (Architecture Layers) | Deployment architecture, environment design | `docs/03-architecture-layers.md` |
+| S5 (Component Details) | Components, services, interfaces | `docs/components/README.md` |
+| S6 (Data Flow Patterns) | Data movement, pipelines, transformations | `docs/04-data-flow-patterns.md` |
+| S7 (Integration Points) | External systems, APIs, protocols | `docs/05-integration-points.md` |
+| S8 (Technology Stack) | Technologies, versions, frameworks | `docs/06-technology-stack.md` |
+| S9 (Security Architecture) | Security controls, compliance | `docs/07-security-architecture.md` |
+| S10 (Scalability & Performance) | SLAs, latency, throughput, SLOs | `docs/08-scalability-and-performance.md` |
+| S11 (Operational Considerations) | Monitoring, backup, incidents, DR | `docs/09-operational-considerations.md` |
+| S12 (ADRs) | Architecture Decision Records | `adr/README.md` |
 | References | External references | `docs/10-references.md` |
+
+> **NEVER use section numbers as file lookups.** S9 ≠ `docs/09-*`. Always use the file paths in the table above.
 
 #### Two-Step File Loading Workflow
 
@@ -722,84 +727,84 @@ Maps to Contract:
 #### LASRE Requirement Categories
 
 **Log Management** (LASRE01-03, 37-38):
-- Source: Section 11.1 (Monitoring and Logging)
+- Source: `docs/09-operational-considerations.md` (Monitoring and Logging subsection)
 - Blocker: Structured format, log levels, accessibility
 - Desired: Centralization, verbosity control
 
 **Application Deployment** (LASRE04, 33):
-- Source: Section 11.3 (Deployment)
+- Source: `docs/09-operational-considerations.md` (Deployment subsection)
 - Blocker: Rollback mechanisms, deployment consistency
 
 **Configuration Management** (LASRE05, 15, 39):
-- Source: Section 11.4 (Configuration)
+- Source: `docs/09-operational-considerations.md` (Configuration subsection)
 - Blocker: Secure repositories
 - Desired: Version control
 
 **Operational Documentation** (LASRE06):
-- Source: Section 11.4 (Documentation)
+- Source: `docs/09-operational-considerations.md` (Documentation subsection)
 - Blocker: SOP in official repositories
 
 **Operational Resilience** (LASRE07-11, 42-44):
-- Source: Sections 10.1, 10.2
+- Source: `docs/08-scalability-and-performance.md`
 - Blocker: Readiness, health checks, HA, load testing, auto-scaling
 - Desired: 7x24 maintenance, circuit breakers, retries
 
 **Recovery and Resilience Testing** (LASRE12, 45):
-- Source: Section 11.2 (DR)
+- Source: `docs/09-operational-considerations.md` (DR subsection)
 - Blocker: Documented DRP
 - Desired: Chaos testing
 
 **Information and Architecture** (LASRE13-16, 46-47):
-- Source: Sections 2.1, 4.1
+- Source: `docs/01-system-overview.md`, `docs/03-architecture-layers.md`
 - Blocker: C2 diagrams, portfolio registration, escalation matrix, observability requests
 - Desired: Critical journey identification
 
 **Key Metrics** (LASRE17-19):
-- Source: Section 10.2
+- Source: `docs/08-scalability-and-performance.md`
 - Blocker: Availability measurement, performance measurement, threshold configuration
 
 **Backend Application** (LASRE20-22, 48-51):
-- Source: Section 11.1
+- Source: `docs/09-operational-considerations.md` (Monitoring subsection)
 - Blocker: Dynatrace instrumentation, API monitoring, exception handling
 - Desired: Labels, external API validation, advanced monitoring, log ingestion
 
 **Frontend Application** (LASRE23, 52):
-- Source: Section 11.1
+- Source: `docs/09-operational-considerations.md` (Monitoring subsection)
 - Blocker: Synthetic validation
 - Desired: MFA-free testing
 
 **User Experience** (LASRE24-26):
-- Source: Section 11.1
+- Source: `docs/09-operational-considerations.md` (Monitoring subsection)
 - Blocker: RUM injection, security compatibility, UX monitoring
 
 **Cost Estimation** (LASRE27-28):
-- Source: Section 2.5
+- Source: `docs/01-system-overview.md`
 - Blocker: Dynatrace cost estimation, budget prerequisites
 
 **Infrastructure** (LASRE29-31, 53-54):
-- Source: Section 5.2
+- Source: `docs/components/README.md`
 - Blocker: OneAgent installation, container monitoring, dependency monitoring
 - Desired: Cloud tagging, process health detection
 
 **Batch Processing** (LASRE32):
-- Source: Section 11.1
+- Source: `docs/09-operational-considerations.md` (Monitoring subsection)
 - Blocker: Non-Control-M batch monitoring
 
 **Disaster Recovery** (LASRE34-35):
-- Source: Section 11.2
+- Source: `docs/09-operational-considerations.md` (DR subsection)
 - Blocker: DR automation, DR validation automation
 
 **Application Operational Tasks** (LASRE36, 55-56):
-- Source: Section 11.3
+- Source: `docs/09-operational-considerations.md` (Deployment subsection)
 - Blocker: Service management automation
 - Desired: Reporting, data sanitization
 
 **Integration, Deployment and Delivery** (LASRE40-41):
-- Source: Section 11.3
+- Source: `docs/09-operational-considerations.md` (Deployment subsection)
 - Desired: Canary releases, traffic management
 
 **Auto-remediation** (LASRE57):
-- Source: Section 11.3
+- Source: `docs/09-operational-considerations.md` (Deployment subsection)
 - Desired: Automated failure remediation
 
 #### Extraction Logic (v2.0)

@@ -22,7 +22,7 @@ This document provides examples of valid and invalid patterns for each validatio
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Structured logging | Practice - Log Management | Compliant | Section 11.1 | SRE Team |
+| LASRE01 | Structured logging | Practice - Log Management | Compliant | docs/09-operational-considerations.md | SRE Team |
 | LASRE02 | Centralized logging | Practice - Log Management | Non-Compliant | Not documented | SRE Team |
 | LASRE03 | Log retention policy | Practice - Log Management | Not Applicable | N/A | N/A |
 ```
@@ -40,7 +40,7 @@ This document provides examples of valid and invalid patterns for each validatio
 
 | Code | Requirement | Category | Status | Source Section |
 |------|-------------|----------|--------|----------------|
-| LASRE01 | Structured logging | Practice | Compliant | Section 11.1 |
+| LASRE01 | Structured logging | Practice | Compliant | docs/09-operational-considerations.md |
 ```
 
 **Why it fails:**
@@ -63,7 +63,7 @@ Fix: Ensure table has exactly 6 columns in this order
 
 | Code | Category | Requirement | Status | Source Section | Responsible Role |
 |------|----------|-------------|--------|----------------|------------------|
-| LASRE01 | Practice | Structured logging | Compliant | Section 11.1 | SRE Team |
+| LASRE01 | Practice | Structured logging | Compliant | docs/09-operational-considerations.md | SRE Team |
 ```
 
 **Why it fails:**
@@ -76,7 +76,7 @@ Fix: Ensure table has exactly 6 columns in this order
 ```markdown
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| sre-01 | Structured logging | Practice | Compliant | Section 11.1 | SRE Team |
+| sre-01 | Structured logging | Practice | Compliant | docs/09-operational-considerations.md | SRE Team |
 ```
 
 **Why it fails:**
@@ -427,15 +427,15 @@ Fix: Add required section: document_control
 
 **RTO (Recovery Time Objective)**: 4 hours
 - Status: Compliant
-- Source: ARCHITECTURE.md Section 11.3, lines 489-491
+- Source: docs/09-operational-considerations.md
 
 **RPO (Recovery Point Objective)**: 15 minutes
 - Status: Compliant
-- Source: ARCHITECTURE.md Section 11.3, lines 492-494
+- Source: docs/09-operational-considerations.md
 
 **Business Criticality**: Tier 1 (Mission Critical)
 - Status: Compliant
-- Source: ARCHITECTURE.md Section 10.1, lines 425-427
+- Source: docs/08-scalability-and-performance.md
 ```
 
 **Why it passes:**
@@ -539,8 +539,8 @@ Fix: Add required section: document_control
 ```markdown
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Logging | Practice | Compliant | Section 11.1 | SRE Team |
-| LASRE01 | Logging | Practice | Compliant | Section 11.1 | SRE Team |
+| LASRE01 | Logging | Practice | Compliant | docs/09-operational-considerations.md | SRE Team |
+| LASRE01 | Logging | Practice | Compliant | docs/09-operational-considerations.md | SRE Team |
 ```
 
 **Issue**: Duplicate Code (LASRE01 appears twice)

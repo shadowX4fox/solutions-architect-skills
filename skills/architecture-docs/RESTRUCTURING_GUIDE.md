@@ -62,16 +62,20 @@ After creating all `docs/` files, `ARCHITECTURE.md` at the project root should u
 
 | # | Section | File | Description |
 |---|---------|------|-------------|
-| 1 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | Problem, solution, use cases, key metrics |
-| 2 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles with trade-offs |
-| 3 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Architecture model, layer diagram |
-| 4 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |
-| 5 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Async execution flows |
-| 6 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | External integrations |
-| 7 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | Libraries, versions, tools |
-| 8 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | Threat model, controls, compliance |
-| 9 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | HPA, latency targets, capacity |
-| 10 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | Deployment, DR, monitoring, costs |
+| S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | Problem, solution, use cases, key metrics |
+| S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles with trade-offs |
+| S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Architecture model, layer diagram |
+| S5 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |
+| S6 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Async execution flows |
+| S7 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | External integrations |
+| S8 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | Libraries, versions, tools |
+| S9 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | Threat model, controls, compliance |
+| S10 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | HPA, latency targets, capacity |
+| S11 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | Deployment, DR, monitoring, costs |
+
+> **Note**: The `#` column uses internal section numbers (S-prefix), not file prefix numbers.
+> File prefix `07` = S9 (Security Architecture). File prefix `09` = S11 (Operational Considerations).
+> See ARCHITECTURE_DOCUMENTATION_GUIDE.md for the full S1-S12 → file path canonical mapping.
 
 ## Architecture Decision Records
 

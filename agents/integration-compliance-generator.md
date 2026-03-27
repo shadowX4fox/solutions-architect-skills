@@ -27,6 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 **Contract Type**: `integration`
 **Template**: `TEMPLATE_INTEGRATION_ARCHITECTURE.md`
 **Section Mapping**: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md, docs/07-security-architecture.md (primary)
+> File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
 **Key Data Points**:
 - Integration catalog and documentation

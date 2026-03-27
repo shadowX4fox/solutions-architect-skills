@@ -192,10 +192,10 @@ Final Score = (8.0 × 0.4) + (7.5 × 0.5) + (8.0 × 0.1)
 **Outcome**: Contract validation passed, but requires manual review by SRE Leadership. Small gaps are acceptable pending human review and approval.
 
 **Recommendations**:
-1. Add missing error budget calculation to ARCHITECTURE.md Section 10.2
-2. Define on-call rotation in Section 11.2
-3. Specify monitoring dashboard URL in Section 11.1
-4. Document incident escalation matrix in Section 11.2
+1. Add missing error budget calculation to S10 (`docs/08-scalability-and-performance.md`)
+2. Define on-call rotation in S11 (`docs/09-operational-considerations.md`)
+3. Specify monitoring dashboard URL in S11 (`docs/09-operational-considerations.md`)
+4. Document incident escalation matrix in S11 (`docs/09-operational-considerations.md`)
 
 ---
 

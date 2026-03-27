@@ -27,6 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 **Contract Type**: `platform`
 **Template**: `TEMPLATE_PLATFORM_IT_INFRASTRUCTURE.md`
 **Section Mapping**: docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md (primary), docs/08-scalability-and-performance.md (secondary)
+> File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
 **Key Data Points**:
 - Environment isolation (network, IAM)

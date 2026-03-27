@@ -87,7 +87,7 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 
 **INCORRECT Replacement (DO NOT DO THIS):**
 ```markdown
-**RTO**: 4 hours documented in Section 11.3
+**RTO**: 4 hours documented in S11 (docs/09-operational-considerations.md)
 - Status: Compliant
 - Explanation: The system documents a 4-hour RTO requirement which meets organizational standards...
 ```

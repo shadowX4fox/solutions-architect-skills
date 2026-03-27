@@ -6,16 +6,24 @@ This guide maps common architectural questions to ARCHITECTURE.md sections for t
 
 When users ask questions about the architecture, this guide helps identify which ARCHITECTURE.md section(s) contain the answer, enabling context-efficient loading and accurate citations.
 
+> **IMPORTANT — Section numbers ≠ file prefix numbers.**
+> Internal section numbers (Section 1-12) identify content concepts. File prefix numbers (01-10) in `docs/NN-name.md` are filesystem ordering only. They do NOT align.
+> - Section 9 (S9, Security Architecture) = `docs/07-security-architecture.md` — **NOT** `docs/09-*`
+> - `docs/09-operational-considerations.md` = Section 11 (S11)
+> Always resolve section numbers to file paths using the canonical mapping in ARCHITECTURE_DOCUMENTATION_GUIDE.md.
+
 ## How to Use This Guide
 
 1. **Classify the user's question** by identifying the main topic (authentication, scaling, components, etc.)
 2. **Consult the relevant section mapping** below to find which ARCHITECTURE.md section contains the answer
-3. **Load the identified section(s)** using the index-based approach from Workflow 7
-4. **Extract the answer** and provide citations with line numbers
+3. **Load the identified section(s)** — read the corresponding `docs/NN-name.md` file directly (see **Source File** in each section below)
+4. **Extract the answer** and provide citations by file path
 
 ---
 
-## Section 1: Executive Summary
+## Section 1 (S1+S2): Executive Summary + System Overview
+
+**Source File:** `docs/01-system-overview.md`
 
 **Answers queries about**:
 - Overall system purpose and value
@@ -41,7 +49,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 2: System Overview
+## Section 2 (S1+S2): System Overview
+
+**Source File:** `docs/01-system-overview.md` _(combined with Section 1 in the same file)_
 
 **Answers queries about**:
 - Problem being solved (Section 2.1)
@@ -68,7 +78,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 3: Architecture Principles
+## Section 3 (S3): Architecture Principles
+
+**Source File:** `docs/02-architecture-principles.md`
 
 **Answers queries about**:
 - Guiding architectural principles
@@ -103,7 +115,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 4: Architecture Layers
+## Section 4 (S4): Architecture Layers
+
+**Source File:** `docs/03-architecture-layers.md`
 
 **Answers queries about**:
 - Architectural layers and their responsibilities
@@ -139,7 +153,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 5: Component Details
+## Section 5 (S5): Component Details
+
+**Source File:** `docs/components/README.md` (index) + `docs/components/NN-<component-name>.md` (one file per component)
 
 **Answers queries about**:
 - Individual components and services
@@ -169,7 +185,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 6: Data Flow Patterns
+## Section 6 (S6): Data Flow Patterns
+
+**Source File:** `docs/04-data-flow-patterns.md`
 
 **Answers queries about**:
 - How data moves through the system
@@ -199,7 +217,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 7: Integration Points
+## Section 7 (S7): Integration Points
+
+**Source File:** `docs/05-integration-points.md`
 
 **Answers queries about**:
 - External system integrations
@@ -228,7 +248,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 8: Technology Stack
+## Section 8 (S8): Technology Stack
+
+**Source File:** `docs/06-technology-stack.md`
 
 **Answers queries about**:
 - Programming languages and frameworks
@@ -265,7 +287,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 9: Security Architecture
+## Section 9 (S9): Security Architecture
+
+**Source File:** `docs/07-security-architecture.md` _(file prefix 07, NOT 09 — see disambiguation warning above)_
 
 **Answers queries about**:
 - Authentication and authorization
@@ -297,7 +321,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 10: Scalability & Performance
+## Section 10 (S10): Scalability & Performance
+
+**Source File:** `docs/08-scalability-and-performance.md`
 
 **Answers queries about**:
 - Performance targets (latency, throughput)
@@ -332,7 +358,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 11: Operational Considerations
+## Section 11 (S11): Operational Considerations
+
+**Source File:** `docs/09-operational-considerations.md` _(file prefix 09 = S11, NOT Section 9)_
 
 **Answers queries about**:
 - Monitoring and observability
@@ -365,7 +393,9 @@ When users ask questions about the architecture, this guide helps identify which
 
 ---
 
-## Section 12: Architecture Decision Records (ADRs)
+## Section 12 (S12): Architecture Decision Records (ADRs)
+
+**Source File:** `adr/README.md` (index) + `adr/ADR-NNN-<title>.md` (one file per ADR)
 
 **Answers queries about**:
 - Why specific technologies were chosen
@@ -536,16 +566,16 @@ Use this decision tree to quickly classify user queries:
 ```
 User Question
 │
-├─ Mentions "problem", "why build this" → Section 2 (System Overview)
-├─ Mentions "principle", "approach", "philosophy" → Section 3 (Architecture Principles)
-├─ Mentions "layer", "tier", "deployment", "cloud" → Section 4 (Architecture Layers)
-├─ Mentions "component", "service", "module" → Section 5 (Component Details)
-├─ Mentions "flow", "pipeline", "event", "transform" → Section 6 (Data Flow Patterns)
-├─ Mentions "integration", "API", "external", "third-party" → Section 7 (Integration Points)
-├─ Mentions "technology", "database", "language", "framework" → Section 8 (Technology Stack)
-├─ Mentions "security", "authentication", "encryption", "compliance" → Section 9 (Security)
-├─ Mentions "scale", "performance", "SLA", "capacity" → Section 10 (Scalability & Performance)
-├─ Mentions "monitoring", "backup", "incident", "deployment" → Section 11 (Operational Considerations)
+├─ Mentions "problem", "why build this" → S2 (docs/01-system-overview.md)
+├─ Mentions "principle", "approach", "philosophy" → S3 (docs/02-architecture-principles.md)
+├─ Mentions "layer", "tier", "deployment", "cloud" → S4 (docs/03-architecture-layers.md)
+├─ Mentions "component", "service", "module" → S5 (docs/components/)
+├─ Mentions "flow", "pipeline", "event", "transform" → S6 (docs/04-data-flow-patterns.md)
+├─ Mentions "integration", "API", "external", "third-party" → S7 (docs/05-integration-points.md)
+├─ Mentions "technology", "database", "language", "framework" → S8 (docs/06-technology-stack.md)
+├─ Mentions "security", "authentication", "encryption", "compliance" → S9 (docs/07-security-architecture.md)
+├─ Mentions "scale", "performance", "SLA", "capacity" → S10 (docs/08-scalability-and-performance.md)
+├─ Mentions "monitoring", "backup", "incident", "deployment" → S11 (docs/09-operational-considerations.md)
 ├─ Mentions "why choose", "trade-off", "decision", "alternative" → Section 12 (ADRs)
 └─ Generic "what is", "overview", "summary" → Section 1 (Executive Summary)
 ```

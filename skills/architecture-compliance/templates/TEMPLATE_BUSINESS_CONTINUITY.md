@@ -5,6 +5,8 @@
 **Source**: ARCHITECTURE.md (Sections 1, 3, 4, 5, 7, 8, 10, 11)
 **Version**: 2.0
 
+> **Note for agents/reviewers**: `Note` fields in this template reference ARCHITECTURE.md sections using internal section numbers (S1-S12), NOT file prefix numbers. Use the canonical mapping: S9 = `docs/07-security-architecture.md`, S10 = `docs/08-scalability-and-performance.md`, S11 = `docs/09-operational-considerations.md`. See SECTION_MAPPING_GUIDE.md for the full S1-S12 → file path mapping.
+
 ---
 
 <!-- @include-with-config shared/sections/document-control.md config=business-continuity -->

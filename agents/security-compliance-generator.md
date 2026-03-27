@@ -27,6 +27,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 **Contract Type**: `security`
 **Template**: `TEMPLATE_SECURITY_ARCHITECTURE.md`
 **Section Mapping**: docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/07-security-architecture.md, docs/09-operational-considerations.md (primary)
+> File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
 **Key Data Points**:
 - API authentication and authorization

@@ -7,6 +7,30 @@ description: Use this skill when creating, updating, or maintaining ARCHITECTURE
 
 This skill provides comprehensive guidelines for creating and maintaining ARCHITECTURE.md files using the standardized template from ARCHITECTURE_DOCUMENTATION_GUIDE.md. It enforces consistency across all documentation sections through the **Foundational Context Anchor Protocol** — a dependency-aware editing workflow that loads required upstream context before any downstream section edit, requires source attribution for derived claims, and detects downstream impact when any section changes.
 
+### CRITICAL: Section Number vs File Prefix Disambiguation
+
+Internal section numbers (S1-S12) and file prefix numbers (01-10) are **independent** and do NOT align.
+
+| Internal Section | Name | File |
+|---|---|---|
+| S1+S2 | Executive Summary + System Overview | `docs/01-system-overview.md` |
+| S3 | Architecture Principles | `docs/02-architecture-principles.md` |
+| S4 | Architecture Layers | `docs/03-architecture-layers.md` |
+| S5 | Component Details | `docs/components/` |
+| S6 | Data Flow Patterns | `docs/04-data-flow-patterns.md` |
+| S7 | Integration Points | `docs/05-integration-points.md` |
+| S8 | Technology Stack | `docs/06-technology-stack.md` |
+| S9 | Security Architecture | `docs/07-security-architecture.md` |
+| S10 | Scalability & Performance | `docs/08-scalability-and-performance.md` |
+| S11 | Operational Considerations | `docs/09-operational-considerations.md` |
+| S12 | ADRs | `adr/` directory |
+
+**Rules:**
+- When a user says "update Section 9" → resolve to **S9** = `docs/07-security-architecture.md`, NOT `docs/09-*`
+- `docs/09-operational-considerations.md` = **S11**, not Section 9
+- Always use S-prefix (S1-S12) to identify sections, file paths to identify files
+- NEVER assume file prefix `NN` equals section number `N`
+
 ## When This Skill is Invoked
 
 Automatically activate when:
@@ -428,6 +452,81 @@ List all matches and ask the user to select which one applies before proceeding:
 
 Please enter the number of the specification to use.
 ```
+
+---
+
+#### Step 0.5: Supplementary Context Files (Optional)
+
+After the PO Spec gate resolves (found, inline context provided, or skipped), prompt the user once for any additional context files that could enrich the architecture documentation.
+
+Display the following message:
+
+```
+📎 **Supplementary Context (Optional)**
+
+Before we start, do you have any existing documents that could inform the architecture?
+Examples:
+
+  📄  ADR files or decision logs
+  📐  High-Level Design (HLD) — must be provided as PDF (.pdf)
+  🔧  Technology stack specs or tech radar
+  🔌  API specifications (OpenAPI, AsyncAPI)
+  🗄️  Data models or ER diagrams
+  📊  Non-functional requirements or SLA documents
+  🏗️  Infrastructure diagrams or IaC templates
+  📝  Any other relevant design documents
+
+You can provide:
+  • File paths (e.g., `design/hld.pdf`, `specs/openapi.yaml`, `adr/ADR-001.md`)
+  • Multiple files separated by commas
+  • A directory to scan (e.g., `design-docs/`)
+
+Type **skip** or press Enter to proceed without extra context.
+```
+
+**Processing supplementary files:**
+
+1. **If user provides file paths or a directory:**
+   - Read each file provided:
+     - Markdown, YAML, JSON, text files → read directly
+     - **PDF files** → read using the Read tool (supports PDF with `pages` parameter; for large PDFs >10 pages, read in chunks of 20 pages)
+     - For directories: glob `*.md`, `*.yaml`, `*.yml`, `*.json`, `*.pdf`, `*.txt`
+   - Classify each file by type:
+     | File Pattern | Classification | Used In |
+     |---|---|---|
+     | `ADR-*`, `adr/*`, decision log content | ADR / Decision Record | S3 (Principles), S12 (ADRs) |
+     | HLD, high-level design, system design (**PDF only** — reject non-PDF HLD files) | High-Level Design | S4 (Layers), S5 (Components), S6 (Data Flow) |
+     | Tech stack, tech radar, versions | Technology Stack | S8 (Technology Stack) |
+     | OpenAPI, Swagger, AsyncAPI specs | API Specification | S5 (Components), S7 (Integration Points) |
+     | ER diagram, data model, schema | Data Model | S5 (Components), S6 (Data Flow) |
+     | NFR, SLA, performance targets | Non-Functional Requirements | S10 (Scalability & Performance) |
+     | Kubernetes, Terraform, IaC, infra | Infrastructure | S4 (Layers), S11 (Operational) |
+     | Security policy, threat model | Security | S9 (Security Architecture) |
+   - **HLD format enforcement**: If a file is classified as High-Level Design but is NOT a `.pdf` file, reject it and display:
+     ```
+     ⚠️ [filename] appears to be an HLD document but is not a PDF.
+     High-Level Design documents must be provided as PDF files.
+     Please provide the PDF version of this document.
+     ```
+   - Display summary:
+     ```
+     ✅ Loaded N supplementary file(s):
+       • [filename] → classified as [type] → will inform [sections]
+       ...
+     ```
+   - Store extracted data points for use during Step 5 (file creation):
+     - Pre-populate relevant sections with data from supplementary files
+     - Add source attribution: `<!-- SUPPLEMENTARY_SOURCE: [filename] -->`
+     - Cross-reference with PO Spec data (supplementary files complement, PO Spec is authoritative for business context)
+
+2. **If user types "skip" or presses Enter:**
+   - Display: `⏭️ Proceeding without supplementary context.`
+   - Continue to Step 1
+
+3. **Conflict resolution:**
+   - If supplementary files contradict PO Spec → PO Spec wins (business context is authoritative)
+   - If supplementary files contradict each other → flag the conflict and ask the user to clarify
+   - If supplementary files add detail not in PO Spec → incorporate as enrichment
 
 ---
 
