@@ -29,38 +29,13 @@
 import { ComplianceValidator } from './validators';
 import { ErrorReporter } from './error-reporter';
 import type { ValidationResult } from './validators';
-
-/**
- * Contract type to validation rule file mapping
- */
-const VALIDATION_RULE_FILES: Record<string, string> = {
-  business_continuity: 'validation/template_validation_business_continuity.json',
-  sre_architecture: 'validation/template_validation_sre_architecture.json',
-  cloud_architecture: 'validation/template_validation_cloud_architecture.json',
-  data_ai_architecture: 'validation/template_validation_data_ai_architecture.json',
-  development_architecture: 'validation/template_validation_development_architecture.json',
-  process_transformation: 'validation/template_validation_process_transformation.json',
-  security_architecture: 'validation/template_validation_security_architecture.json',
-  platform_it_infrastructure: 'validation/template_validation_platform_it_infrastructure.json',
-  enterprise_architecture: 'validation/template_validation_enterprise_architecture.json',
-  integration_architecture: 'validation/template_validation_integration_architecture.json',
-};
-
-/**
- * Contract type display names
- */
-const CONTRACT_DISPLAY_NAMES: Record<string, string> = {
-  business_continuity: 'Business Continuity',
-  sre_architecture: 'SRE Architecture',
-  cloud_architecture: 'Cloud Architecture',
-  data_ai_architecture: 'Data & AI Architecture',
-  development_architecture: 'Development Architecture',
-  process_transformation: 'Process Transformation',
-  security_architecture: 'Security Architecture',
-  platform_it_infrastructure: 'Platform IT Infrastructure',
-  enterprise_architecture: 'Enterprise Architecture',
-  integration_architecture: 'Integration Architecture',
-};
+import {
+  getContractDisplayName,
+  getSupportedContractTypes,
+  getTemplateValidationFile,
+} from './contract-types';
+export { getContractDisplayName, getSupportedContractTypes } from './contract-types';
+export { getLocalDateString } from './date-utils';
 
 /**
  * Validation result with formatted reports
@@ -106,15 +81,9 @@ export async function validateGeneratedContract(
     throwOnError?: boolean;
   } = {}
 ): Promise<GenerationValidationResult> {
-  // Validate contract type
-  const rulesFile = VALIDATION_RULE_FILES[contractType];
-  if (!rulesFile) {
-    throw new Error(
-      `Unknown contract type: ${contractType}. Valid types: ${Object.keys(VALIDATION_RULE_FILES).join(', ')}`
-    );
-  }
-
-  const displayName = CONTRACT_DISPLAY_NAMES[contractType] || contractType;
+  // Validate contract type and get rule file (throws on unknown type)
+  const rulesFile = getTemplateValidationFile(contractType);
+  const displayName = getContractDisplayName(contractType);
 
   // Load validator with contract-specific rules
   const validator = new ComplianceValidator(rulesFile);
@@ -209,43 +178,11 @@ export async function validateMultipleContracts(
  * @returns Path to validation rules file
  */
 export function getValidationRulesPath(contractType: string): string {
-  const rulesFile = VALIDATION_RULE_FILES[contractType];
-  if (!rulesFile) {
-    throw new Error(`Unknown contract type: ${contractType}`);
-  }
-  return rulesFile;
+  return getTemplateValidationFile(contractType);
 }
 
-/**
- * Get list of all supported contract types
- *
- * @returns Array of contract type identifiers
- */
-export function getSupportedContractTypes(): string[] {
-  return Object.keys(VALIDATION_RULE_FILES);
-}
-
-/**
- * Get display name for a contract type
- *
- * @param contractType - Contract type identifier
- * @returns Human-readable display name
- */
-export function getContractDisplayName(contractType: string): string {
-  return CONTRACT_DISPLAY_NAMES[contractType] || contractType;
-}
-
-/**
- * Get current date as YYYY-MM-DD string in local timezone.
- *
- * Uses local time (mirrors bash `date +%Y-%m-%d`).
- * Avoids the UTC shift from `new Date().toISOString().split('T')[0]`
- * which can return tomorrow's date for UTC- timezones after midnight UTC.
- */
-export function getLocalDateString(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+// getContractDisplayName, getSupportedContractTypes, getLocalDateString
+// are re-exported at the top of this file from contract-types and date-utils.
 
 /**
  * Print validation result to console with formatted output

@@ -27,38 +27,11 @@ import {
   type ContractMetadata,
   type ManifestData
 } from './manifest-generator';
-import { getContractDisplayName, getLocalDateString } from './generation-helper';
+import { getContractDisplayName, FILENAME_PREFIX_TO_CONTRACT_TYPE, SCORING_VALIDATION_FILES } from './contract-types';
+import { getLocalDateString } from './date-utils';
 
 // Configuration
 const MANIFEST_FILENAME = 'COMPLIANCE_MANIFEST.md';
-
-// Contract filename prefix → contract type key
-const FILENAME_PREFIX_TO_CONTRACT_TYPE: Record<string, string> = {
-  INTEGRATION_ARCHITECTURE: 'integration_architecture',
-  SECURITY_ARCHITECTURE: 'security_architecture',
-  CLOUD_ARCHITECTURE: 'cloud_architecture',
-  DEVELOPMENT_ARCHITECTURE: 'development_architecture',
-  SRE_ARCHITECTURE: 'sre_architecture',
-  BUSINESS_CONTINUITY: 'business_continuity',
-  DATA_AI_ARCHITECTURE: 'data_ai_architecture',
-  ENTERPRISE_ARCHITECTURE: 'enterprise_architecture',
-  PLATFORM_IT_INFRASTRUCTURE: 'platform_it_infrastructure',
-  PROCESS_TRANSFORMATION: 'process_transformation',
-};
-
-// Contract type key → validation config path (relative to SKILL_DIR, resolved by score-calculator)
-const CONTRACT_TYPE_TO_VALIDATION: Record<string, string> = {
-  integration_architecture: 'validation/integration_architecture_validation.json',
-  security_architecture: 'validation/security_architecture_validation.json',
-  cloud_architecture: 'validation/cloud_architecture_validation.json',
-  development_architecture: 'validation/development_architecture_validation.json',
-  sre_architecture: 'validation/sre_architecture_validation.json',
-  business_continuity: 'validation/business_continuity_validation.json',
-  data_ai_architecture: 'validation/data_ai_architecture_validation.json',
-  enterprise_architecture: 'validation/enterprise_architecture_validation.json',
-  platform_it_infrastructure: 'validation/platform_it_infrastructure_validation.json',
-  process_transformation: 'validation/process_transformation_validation.json',
-};
 
 interface ContractResult {
   file: string;
@@ -108,7 +81,7 @@ async function processContract(contractPath: string, contractType: string, fallb
     const dateMatch = content.match(/\*\*Generation Date\*\*:\s*(\d{4}-\d{2}-\d{2})/);
     const generationDate = dateMatch?.[1] ?? fallbackDate;
 
-    const validationConfig = CONTRACT_TYPE_TO_VALIDATION[contractType];
+    const validationConfig = SCORING_VALIDATION_FILES[contractType];
     if (!validationConfig) {
       throw new Error(`No validation config mapped for contract type: ${contractType}`);
     }

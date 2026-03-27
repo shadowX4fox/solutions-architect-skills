@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
-import { getLocalDateString } from './generation-helper';
+import { getLocalDateString } from './date-utils';
 
 // Resolve skill directory from script location (works both locally and as plugin)
 const SKILL_DIR = resolve(import.meta.dir, '..');

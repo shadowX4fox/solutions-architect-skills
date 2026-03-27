@@ -17,7 +17,7 @@
 
 import { resolve, join } from 'path';
 import { existsSync } from 'fs';
-import { getLocalDateString } from './generation-helper';
+import { getLocalDateString } from './date-utils';
 
 // Configuration
 const SKILL_DIR = resolve(import.meta.dir, '..');
