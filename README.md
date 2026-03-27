@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.11.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.11.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -537,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.11.0 (Current Release) ✅
+### v2.11.1 (Current Release) ✅
+**fix: complete concept map rendering — full JS implementation in PLAYGROUND_TEMPLATE.md**
+
+Rewrote `PLAYGROUND_TEMPLATE.md` for the `architecture-onboarding` skill to include complete, verbatim JavaScript implementations for all canvas rendering functions. Previously, key functions (`initializePositions`, `autoLayout`, `drawEdge`, drag handlers, tooltip) had elided `// ...` bodies that the playground plugin could not fill in — causing most nodes to render at undefined positions (invisible). All functions are now fully specified: grid-based initial node placement per group band, force-directed auto-layout with pairwise repulsion + edge attraction, full Canvas 2D arrowhead drawing, bounding-box drag, and absolute-positioned tooltips.
+
+### v2.11.0 (Previous Release) ✅
 **feat: new architecture-onboarding skill with interactive concept map playground; rename architecture-doc-export → architecture-docs-export**
 
 New `architecture-onboarding` skill — generates a canvas-based interactive concept map via the `playground` plugin for onboarding new team members. Draggable nodes represent lifecycle phases (5), architecture sections S1-S12, components, compliance contracts (10 slots), required principles (9), and available skills (9) — connected by dependency, workflow, and validation edges. Users cycle knowledge levels per node (Know/Fuzzy/Unknown) and copy a targeted learning prompt. Includes 6 preset views (Full Map, Lifecycle Flow, Section Dependencies, Component Map, Compliance Coverage, Principles View), ghost nodes for missing artifacts, and force-directed auto-layout. Also renamed `architecture-doc-export` to `architecture-docs-export` for consistency across all references.
