@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.37-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.38-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -537,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.37 (Current Release) ✅
+### v2.10.38 (Current Release) ✅
+**fix: add Glob permission for plugin_dir resolution to settings.json.example and CLAUDE.md**
+
+Added `"Glob(**/skills/architecture-compliance/SKILL.md)"` to the permissions `allow` list in both `.claude/settings.json.example` and `CLAUDE.md`. This prevents approval prompts when agents run the Glob to resolve `plugin_dir` in marketplace installations.
+
+### v2.10.37 (Previous Release) ✅
 **fix: plugin_dir Glob pattern now works for marketplace installations — remove hardcoded repo name from path**
 
 The Glob pattern used to resolve `plugin_dir` was `**/solutions-architect-skills/skills/architecture-compliance/SKILL.md`, which hardcodes the repo name and only matches the dev directory structure. When running as an installed plugin, the marketplace directory is named `shadowx4fox-solution-architect-marketplace/` (not `solutions-architect-skills/`), so the Glob failed and agents fell back to a wrong path that appended `solutions-architect-skills/` as a subdirectory — producing `Module not found` errors on every compliance contract run. Fixed in `skills/architecture-compliance/SKILL.md` (orchestrator) and all 10 agent files by changing the pattern to `**/skills/architecture-compliance/SKILL.md`, which matches both dev and marketplace paths correctly.
