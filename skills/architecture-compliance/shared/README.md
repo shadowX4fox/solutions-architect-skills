@@ -24,9 +24,7 @@ shared/
 │   ├── generation-metadata.md                  # Generation Metadata section
 │   ├── change-history-template.md              # Appendix A.4 Change History
 │   ├── data-extracted-template.md              # Data Extracted Successfully section
-│   ├── missing-data-table-template.md          # Missing Data Requiring Attention table
-│   ├── not-applicable-template.md              # Not Applicable Items section
-│   └── unknown-status-table-template.md        # Unknown Status Items table
+│   └── questions-gaps-register-template.md      # Questions & Gaps Register (unified, pipeline-populated)
 │
 ├── fragments/                                  # Smaller reusable fragments
 │   ├── status-codes.md                         # 4 status definitions
@@ -374,15 +372,7 @@ Use the standard include directives pattern found in existing templates:
 
 ---
 
-<!-- @include-with-config shared/sections/missing-data-table-template.md config=<domain-name> -->
-
----
-
-<!-- @include-with-config shared/sections/not-applicable-template.md config=<domain-name> -->
-
----
-
-<!-- @include-with-config shared/sections/unknown-status-table-template.md config=<domain-name> -->
+<!-- @include-with-config shared/sections/questions-gaps-register-template.md config=<domain-name> -->
 
 ---
 
@@ -440,7 +430,7 @@ When adding new compliance domains:
 
 | Metric | Value |
 |--------|-------|
-| Shared sections | 10 (document-control, dynamic-field-instructions, validation-methodology, completion-guide-intro, generation-metadata, change-history-template, data-extracted-template, missing-data-table-template, not-applicable-template, unknown-status-table-template) |
+| Shared sections | 8 (document-control, dynamic-field-instructions, validation-methodology, completion-guide-intro, generation-metadata, change-history-template, data-extracted-template, questions-gaps-register-template) |
 | Shared fragments | 3 (status-codes, compliance-score-calculation, compliance-summary-footer) |
 | Domain configs | 10 (all domains) |
 | Templates refactored | 10 (all templates) |

@@ -783,7 +783,8 @@ export class ComplianceValidator {
       'compliance_summary': /##\s+Compliance Summary/,
       'overall_compliance': /\*\*Overall Compliance\*\*:/,
       'appendix_a1_a4': /###\s+A\.1\s+/,
-      'dynamic_sections': /##\s+Data Extracted from ARCHITECTURE\.md/,
+      'dynamic_sections': /##\s+Data Extracted(?: from ARCHITECTURE\.md| Successfully)/,
+      'questions_gaps_register': /##\s+Questions\s+&\s+Gaps\s+Register/,
     };
 
     for (const section of rules.required_sections) {

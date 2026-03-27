@@ -138,7 +138,7 @@ All 10 compliance templates expand successfully:
 **Total lines saved by using includes**: ~1,287 lines across all 10 templates
 
 **Shared Content Breakdown:**
-- 10 shared sections (document-control, dynamic-field-instructions, validation-methodology, completion-guide-intro, generation-metadata, change-history-template, data-extracted-template, missing-data-table-template, not-applicable-template, unknown-status-table-template)
+- 8 shared sections (document-control, dynamic-field-instructions, validation-methodology, completion-guide-intro, generation-metadata, change-history-template, data-extracted-template, questions-gaps-register-template)
 - 3 shared fragments (status-codes, compliance-score-calculation, compliance-summary-footer)
 - 10 domain configs (all compliance domains)
 - 3 refactoring phases completed (Quick Wins + Table Templates + Compliance Summary)

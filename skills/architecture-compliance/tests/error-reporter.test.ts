@@ -20,6 +20,7 @@ import type { ValidationResult, ValidationError } from '../utils/validators';
 
 function makeError(overrides: Partial<ValidationError> = {}): ValidationError {
   return {
+    errorId: 'ERR-TEST-001',
     validationArea: 'Compliance Summary Table',
     severity: 'BLOCKING',
     location: 'Section 2',

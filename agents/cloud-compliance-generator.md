@@ -68,6 +68,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - You are FORBIDDEN from adding section numbering (A.1, A.2, etc.)
 - You are FORBIDDEN from adding or removing table columns/rows
 - You are FORBIDDEN from converting tables to other formats
+- You are FORBIDDEN from populating the `## Questions & Gaps Register` table — it is populated automatically by the post-generation pipeline after you write the contract
 
 **What you CAN do**:
 - Replace `[PROJECT_NAME]` with the actual project name

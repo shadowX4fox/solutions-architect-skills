@@ -424,47 +424,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 ---
 
-### A.2 Validation Methodology
-
-This document is validated using an automated scoring system defined in `/skills/architecture-compliance/validation/integration_architecture_validation.json`.
-
-**Validation Process**:
-
-1. **Completeness Check (30% weight)**:
-   - Counts filled data points across all LAI requirements
-   - Formula: (Filled fields / Total required fields) × 10
-   - Example: 19 out of 21 fields = 9.0/10 completeness
-
-2. **Compliance Check (60% weight)**:
-   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN/EXCEPTION
-   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
-   - **CRITICAL**: N/A items MUST be included in numerator
-   - Example: 15 PASS + 4 N/A + 0 EXCEPTION out of 21 items = (15+4)/21 × 10 = 9.0/10
-
-3. **Quality Check (10% weight)**:
-   - Assesses source traceability (ARCHITECTURE.md section references)
-   - Verifies explanation quality and actionable notes
-   - Formula: (Items with valid sources / Total items) × 10
-
-4. **Final Score Calculation**:
-   ```
-   Final Score = (Completeness × 0.3) + (Compliance × 0.6) + (Quality × 0.1)
-   ```
-
-**Validation Item Statuses**:
-- ✅ **PASS** (10 points): Complies with LAI requirement
-- ❌ **FAIL** (0 points): Non-compliant or uses deprecated/insecure technologies
-- ⚪ **N/A** (10 points): Not applicable to this architecture (counts as compliant)
-- ❓ **UNKNOWN** (0 points): Missing data in ARCHITECTURE.md
-- 🔓 **EXCEPTION** (10 points): Documented and approved exception
-
-**Outcome Determination**:
-| Score Range | Document Status | Review Actor | Action |
-|-------------|----------------|--------------|--------|
-| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation |
-| 7.0-7.9 | In Review | Integration Architecture Review Board | Manual review required |
-| 5.0-6.9 | Draft | Architecture Team | Address integration gaps before review |
-| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed - critical integration failures |
+<!-- @include-with-config shared/sections/validation-methodology.md config=integration-architecture -->
 
 ---
 
@@ -554,15 +514,7 @@ This document is validated using an automated scoring system defined in `/skills
 
 ---
 
-<!-- @include-with-config shared/sections/missing-data-table-template.md config=integration-architecture -->
-
----
-
-<!-- @include-with-config shared/sections/not-applicable-template.md config=integration-architecture -->
-
----
-
-<!-- @include-with-config shared/sections/unknown-status-table-template.md config=integration-architecture -->
+<!-- @include-with-config shared/sections/questions-gaps-register-template.md config=integration-architecture -->
 
 ---
 

@@ -52,6 +52,12 @@ const DOC_TYPES = {
     color:   '0D7377',                // Teal — development phase, distinct from architecture
     tagline: 'Solution Architecture · Implementation Guide for Development Teams',
   },
+  compliance: {
+    label:   'Compliance Contract',
+    code:    'CC',
+    color:   '7B2D8E',                // Purple — distinct from blue/amber/teal
+    tagline: 'Solution Architecture · Compliance Adherence Contract',
+  },
 };
 
 // ─── Page layout constants ────────────────────────────────────────────────────
@@ -68,6 +74,7 @@ function parseMarkdown(text) {
   const lines = text.split('\n');
   const blocks = [];
   let i = 0;
+  let nextTableType = 'table'; // used to tag special tables
 
   while (i < lines.length) {
     const line = lines[i];
@@ -75,7 +82,16 @@ function parseMarkdown(text) {
     // Headings
     const h = line.match(/^(#{1,6})\s+(.+)$/);
     if (h) {
-      blocks.push({ type: 'heading', level: h[1].length, text: h[2].trim() });
+      const headingText = h[2].trim();
+      blocks.push({ type: 'heading', level: h[1].length, text: headingText });
+      // Tag the next table based on heading context
+      if (headingText === 'Questions & Gaps Register') {
+        nextTableType = 'questions-register';
+      } else if (headingText === 'Compliance Summary') {
+        nextTableType = 'compliance-summary';
+      } else {
+        nextTableType = 'table';
+      }
       i++; continue;
     }
 
@@ -92,7 +108,8 @@ function parseMarkdown(text) {
         tableLines.push(lines[i]);
         i++;
       }
-      blocks.push({ type: 'table', lines: tableLines });
+      blocks.push({ type: nextTableType, lines: tableLines });
+      nextTableType = 'table'; // reset after consuming
       continue;
     }
 
@@ -336,6 +353,29 @@ function blocksToDocx(blocks) {
         break;
       }
 
+      case 'questions-register': {
+        const tbl = parseQuestionsRegisterTable(block.lines);
+        if (tbl) {
+          elements.push(tbl);
+          // Note below the table explaining editable fields
+          elements.push(new Paragraph({
+            children: [new TextRun({
+              text: '★ Fields highlighted in yellow (Owner, Action Required, Priority) are designed for stakeholder input.',
+              font: 'Arial', size: 18, italics: true, color: COLORS.subtext,
+            })],
+            spacing: { before: 60, after: 120 },
+            indent: { left: 360 },
+          }));
+        }
+        break;
+      }
+
+      case 'compliance-summary': {
+        const tbl = parseComplianceSummaryTableDoc(block.lines);
+        if (tbl) elements.push(tbl);
+        break;
+      }
+
       case 'hr': {
         elements.push(new Paragraph({
           text: '',
@@ -390,6 +430,160 @@ function parseTable(lines) {
       new TableRow({ children: headers.map(h => makeCell(h, true)), tableHeader: true }),
       ...rows.map(row => new TableRow({
         children: row.map(c => makeCell(c, false)),
+      })),
+    ],
+  });
+}
+
+// ─── Questions & Gaps Register table (editable fields highlighted) ───────────
+function parseQuestionsRegisterTable(lines) {
+  const dataLines = lines.filter(l => !l.match(/^\|[\s\-:|]+\|$/));
+  if (!dataLines.length) return null;
+
+  const parseRow = (line) =>
+    line.split('|').slice(1, -1).map(c => c.trim());
+
+  const headers = parseRow(dataLines[0]);
+  if (!headers.length) return null;
+  const rows = dataLines.slice(1).map(parseRow);
+
+  // Column widths for 8-column register (twips, must sum to PAGE.content = 9720)
+  // Code=900, Requirement=1600, Type=900, Status=900, Owner=1080, Section=1340, Action=2000, Priority=1000
+  const colWidths = [900, 1600, 900, 900, 1080, 1340, 2000, 1000];
+  const totalW = colWidths.reduce((a, b) => a + b, 0);
+  // Scale to fit content width
+  const scale = PAGE.content / totalW;
+  const scaledWidths = colWidths.map(w => Math.round(w * scale));
+
+  const border = { style: BorderStyle.SINGLE, size: 4, color: COLORS.border };
+  const borders = { top: border, bottom: border, left: border, right: border };
+
+  // Editable column indices (0-based): Owner=4, Action Required=6, Priority=7
+  const EDITABLE_COLS = new Set([4, 6, 7]);
+  const EDITABLE_FILL = 'FFF9E6'; // light yellow
+
+  // Priority coloring
+  const PRIORITY_COLORS = {
+    'Critical': 'FFE0E0',
+    'High':     'FFE8CC',
+    'Medium':   'FFF0CC',
+    'Low':      'E8F4E8',
+  };
+
+  // Status coloring (for Status column = index 3)
+  const STATUS_COLORS = {
+    'Non-Compliant': 'FFE0E0',
+    'Unknown':       'FFF9E6',
+    'Not Applicable':'F0F0F0',
+  };
+
+  const makeCell = (text, colIdx, isHeader) => {
+    let fill = isHeader ? COLORS.headerBg : COLORS.white;
+
+    if (!isHeader) {
+      if (colIdx === 3) {
+        // Status column
+        fill = STATUS_COLORS[text] || COLORS.white;
+      } else if (colIdx === 7) {
+        // Priority column
+        fill = PRIORITY_COLORS[text] || COLORS.white;
+      } else if (EDITABLE_COLS.has(colIdx)) {
+        fill = EDITABLE_FILL;
+      }
+    }
+
+    const dashedBorder = { style: BorderStyle.DASHED, size: 4, color: '999900' };
+    const useEditable = EDITABLE_COLS.has(colIdx) && !isHeader;
+
+    const cellBorders = {
+      top: border,
+      bottom: border,
+      left: useEditable ? dashedBorder : border,
+      right: useEditable ? dashedBorder : border,
+    };
+
+    return new TableCell({
+      borders: cellBorders,
+      width: { size: scaledWidths[colIdx] || scaledWidths[scaledWidths.length - 1], type: WidthType.DXA },
+      shading: { fill, type: ShadingType.CLEAR },
+      margins: { top: 60, bottom: 60, left: 100, right: 100 },
+      verticalAlign: VerticalAlign.CENTER,
+      children: [new Paragraph({
+        children: [new TextRun({
+          text, font: 'Arial', size: isHeader ? 18 : 17,
+          bold: isHeader,
+          color: isHeader ? COLORS.primary : COLORS.text,
+        })],
+      })],
+    });
+  };
+
+  return new Table({
+    width: { size: PAGE.content, type: WidthType.DXA },
+    columnWidths: scaledWidths,
+    rows: [
+      new TableRow({ children: headers.map((h, ci) => makeCell(h, ci, true)), tableHeader: true }),
+      ...rows.map(row => new TableRow({
+        children: row.map((c, ci) => makeCell(c, ci, false)),
+      })),
+    ],
+  });
+}
+
+// ─── Compliance Summary table (status-conditional cell coloring) ──────────────
+function parseComplianceSummaryTableDoc(lines) {
+  const dataLines = lines.filter(l => !l.match(/^\|[\s\-:|]+\|$/));
+  if (!dataLines.length) return null;
+
+  const parseRow = (line) =>
+    line.split('|').slice(1, -1).map(c => c.trim());
+
+  const headers = parseRow(dataLines[0]);
+  if (!headers.length) return null;
+  const rows = dataLines.slice(1).map(parseRow);
+  const colW = Math.floor(PAGE.content / headers.length);
+
+  const border = { style: BorderStyle.SINGLE, size: 4, color: COLORS.border };
+  const borders = { top: border, bottom: border, left: border, right: border };
+
+  // Status column index in Compliance Summary (0-based) — Status is at index 3
+  const STATUS_COL = 3;
+  const STATUS_FILL = {
+    'Compliant':     'E6F4EA',
+    'Non-Compliant': 'FFE0E0',
+    'Not Applicable':'F0F0F0',
+    'Unknown':       'FFF9E6',
+  };
+
+  const makeCell = (text, colIdx, isHeader) => {
+    let fill = isHeader ? COLORS.headerBg : COLORS.white;
+    if (!isHeader && colIdx === STATUS_COL) {
+      fill = STATUS_FILL[text] || COLORS.white;
+    }
+
+    return new TableCell({
+      borders,
+      width: { size: colW, type: WidthType.DXA },
+      shading: { fill, type: ShadingType.CLEAR },
+      margins: { top: 60, bottom: 60, left: 120, right: 120 },
+      verticalAlign: VerticalAlign.CENTER,
+      children: [new Paragraph({
+        children: [new TextRun({
+          text, font: 'Arial', size: isHeader ? 20 : 19,
+          bold: isHeader,
+          color: isHeader ? COLORS.primary : COLORS.text,
+        })],
+      })],
+    });
+  };
+
+  return new Table({
+    width: { size: PAGE.content, type: WidthType.DXA },
+    columnWidths: headers.map(() => colW),
+    rows: [
+      new TableRow({ children: headers.map((h, ci) => makeCell(h, ci, true)), tableHeader: true }),
+      ...rows.map(row => new TableRow({
+        children: row.map((c, ci) => makeCell(c, ci, false)),
       })),
     ],
   });
@@ -640,17 +834,19 @@ async function main() {
   const input    = get('--input');
   const output   = get('--output') || 'output.docx';
   const titleArg = get('--title');
-  const author   = get('--author') || 'Solution Architecture';
-  const version  = get('--version') || '1.0';
-  const status   = get('--status') || 'Draft';
+  const author            = get('--author') || 'Solution Architecture';
+  const version           = get('--version') || '1.0';
+  const status            = get('--status') || 'Draft';
+  const score             = get('--score');
+  const approvalAuthority = get('--approval-authority');
 
   if (!input) {
-    console.error('Usage: bun run generate-doc.js --type <solution-architecture|adr|handoff> --input <file.md> --output <file.docx>');
+    console.error('Usage: bun run generate-doc.js --type <solution-architecture|adr|handoff|compliance> --input <file.md> --output <file.docx>');
     process.exit(1);
   }
 
   if (!DOC_TYPES[docType]) {
-    console.error(`Unknown type "${docType}". Use: solution-architecture, adr, handoff`);
+    console.error(`Unknown type "${docType}". Use: solution-architecture, adr, handoff, compliance`);
     process.exit(1);
   }
 
@@ -668,6 +864,8 @@ async function main() {
     'Status':        status,
     'Author':        author,
     'Date':          new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    ...(score             ? { 'Compliance Score':     score }             : {}),
+    ...(approvalAuthority ? { 'Approval Authority':   approvalAuthority } : {}),
   };
 
   console.log(`Generating ${DOC_TYPES[docType].label}: "${title}"...`);

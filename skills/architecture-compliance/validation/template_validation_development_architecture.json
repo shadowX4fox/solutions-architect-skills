@@ -98,7 +98,8 @@
         "compliance_summary",
         "overall_compliance",
         "appendix_a1_a4",
-        "dynamic_sections"
+        "dynamic_sections",
+        "questions_gaps_register"
       ]
     }
   },

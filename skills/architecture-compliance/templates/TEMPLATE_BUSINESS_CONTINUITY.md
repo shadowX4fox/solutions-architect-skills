@@ -1684,15 +1684,7 @@
 
 ---
 
-<!-- @include-with-config shared/sections/missing-data-table-template.md config=business-continuity -->
-
----
-
-<!-- @include-with-config shared/sections/not-applicable-template.md config=business-continuity -->
-
----
-
-<!-- @include-with-config shared/sections/unknown-status-table-template.md config=business-continuity -->
+<!-- @include-with-config shared/sections/questions-gaps-register-template.md config=business-continuity -->
 
 ---
 

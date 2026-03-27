@@ -22,6 +22,7 @@ import { resolve, join, basename } from 'path';
 import { readdirSync, existsSync, unlinkSync } from 'fs';
 import { calculateComplianceScore } from './score-calculator';
 import { updateContractWithValidation } from './field-updater';
+import { populateQuestionsRegister } from './questions-register-populator';
 import {
   generateManifestContent,
   type ContractMetadata,
@@ -90,7 +91,8 @@ async function processContract(contractPath: string, contractType: string, fallb
     const score = calculateComplianceScore(content, validationConfig);
 
     const updatedContent = updateContractWithValidation(content, score);
-    await Bun.write(contractPath, updatedContent);
+    const finalContent = populateQuestionsRegister(updatedContent, validationConfig);
+    await Bun.write(contractPath, finalContent);
 
     const completeness = Math.round(score.completeness_score * 10); // 0-10 → 0-100%
 

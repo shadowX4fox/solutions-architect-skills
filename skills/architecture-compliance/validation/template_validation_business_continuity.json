@@ -78,7 +78,8 @@
         "appendix_a2",
         "appendix_a3",
         "appendix_a4",
-        "dynamic_sections"
+        "dynamic_sections",
+        "questions_gaps_register"
       ],
       "minimum_requirements": 43
     }

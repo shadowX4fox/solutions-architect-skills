@@ -16,6 +16,9 @@ triggers:
   - export component handoff
   - export dev handoff
   - export dev handoffs
+  - export compliance
+  - export compliance contract
+  - export compliance to word
   - convert to word
   - download as word
 ---
@@ -44,6 +47,7 @@ Exports architecture documents to professional Word files on demand.
 |-------------|--------------|--------|
 | Solution Architecture | `docs/01-system-overview.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
 | Component Handoff | Selected handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
+| Compliance Contract | Selected contract(s) from `compliance-docs/` | `exports/CC-<domain>-<project>.docx` per contract; Questions & Gaps Register cells are highlighted for stakeholder editing |
 
 ---
 
@@ -208,6 +212,81 @@ Delete the temporary markdown file (`sa-executive-summary.md`), then report:
 
 ---
 
+## Workflow C — Export Compliance Contracts
+
+**Trigger phrases**: "export compliance", "export compliance contract", "export compliance to Word"
+
+### Step C.1 — List Available Contracts
+
+Check `compliance-docs/` for contract files (pattern: `*.md`, excluding `COMPLIANCE_MANIFEST.md`). If none found:
+
+```
+❌ No compliance contracts found in compliance-docs/.
+   Generate them first with /skill architecture-compliance.
+```
+
+If contracts exist, display a numbered list with their scores extracted from the Document Control table (`| Status |` row):
+
+```
+Available compliance contracts:
+
+  1. SRE_ARCHITECTURE_Project_2026-03-25.md      SRE Architecture          7.69/10  In Review
+  2. CLOUD_ARCHITECTURE_Project_2026-03-25.md    Cloud Architecture        8.50/10  Approved
+  ...
+
+Which contract(s) to export?
+  Enter numbers (e.g. 1, 3), ranges (e.g. 1-3), or "all"
+```
+
+### Step C.2 — Extract Score and Metadata
+
+For each selected contract:
+
+1. Read the contract file
+2. Extract `**Generation Date**` from the header
+3. Extract `| Status |` from the Document Control table to get document_status
+4. Extract `[VALIDATION_SCORE]` or the actual score from the Document Control table
+
+### Step C.3 — Export Selected Contracts
+
+Validate the output directory exists:
+```bash
+bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
+```
+If output is empty (directory does not exist), create it:
+```bash
+mkdir exports
+```
+
+For each selected contract, derive a domain slug from the filename prefix (e.g. `SRE_ARCHITECTURE` → `sre-architecture`):
+
+```bash
+# MUST use bun — never node
+bun run $plugin_dir/tools/docgen/generate-doc.js \
+  --type              compliance \
+  --input             compliance-docs/<CONTRACT_FILENAME>.md \
+  --output            exports/CC-<domain-slug>-<project-slug>.docx \
+  --score             "<score>/10" \
+  --approval-authority "<approval_authority from contract>" \
+  --status            "<document_status from contract>" \
+  --author            "Compliance Team" \
+  --version           "2.0"
+```
+
+### Step C.4 — Report
+
+```
+✅ Compliance Export Complete
+
+   exports/CC-sre-architecture-project.docx       (SRE Architecture — 7.69/10 In Review)
+   exports/CC-cloud-architecture-project.docx     (Cloud Architecture — 8.50/10 Approved)
+
+📝 The Questions & Gaps Register in each document has yellow-highlighted cells (Owner, Action Required, Priority)
+   ready for stakeholder review and editing in Microsoft Word.
+```
+
+---
+
 ## Workflow B — Export Component Handoff
 
 **Trigger phrases**: "export handoff", "export dev handoff", "export <component-name> to Word"
@@ -275,8 +354,11 @@ bun run $plugin_dir/tools/docgen/generate-doc.js \
 | Executive Summary | `SA` | Corporate blue `#1F4E79` | Architecture overview deliverable |
 | ADR-*.md | `ADR` | Amber/Gold `#8B6914` | Architecture decisions |
 | Component handoffs | `HANDOFF` | Teal `#0D7377` | Dev team deliverables |
+| Compliance contracts | `CC` | Purple `#7B2D8E` | Compliance adherence contracts with editable Questions & Gaps Register |
 
-Each document type has a distinct color: corporate blue for the SA executive summary, amber/gold for ADRs, and teal for development handoffs.
+Each document type has a distinct color. Compliance contracts use purple to distinguish them from all other types. The Questions & Gaps Register table in compliance exports has:
+- Yellow-highlighted cells for **Owner**, **Action Required**, and **Priority** (editable by stakeholders in Word)
+- Status-conditional coloring in the Compliance Summary table: green=Compliant, red=Non-Compliant, gray=Not Applicable, yellow=Unknown
 
 ---
 
@@ -290,7 +372,9 @@ exports/
 ├── ADR-001-api-gateway-choice.docx      ← Individual ADR
 ├── ADR-002-database-selection.docx      ← Individual ADR
 ├── HANDOFF-payment-api.docx
-└── HANDOFF-user-service.docx
+├── HANDOFF-user-service.docx
+├── CC-sre-architecture-project.docx     ← Compliance Contract (Questions & Gaps editable)
+└── CC-cloud-architecture-project.docx  ← Compliance Contract
 ```
 
 ---
@@ -311,5 +395,6 @@ Only needed once.
 
 - `docs/01-system-overview.md` and `docs/components/README.md` created by `/skill architecture-docs`
 - ADR files created by `/skill architecture-docs` (ADR workflow)
-- Compliance manifest created by `/skill architecture-compliance`
+- Compliance manifest created by `/skill architecture-compliance` (also needed for Workflow A compliance section)
 - Component handoffs created by `/skill architecture-dev-handoff`
+- Compliance contracts (Workflow C): created by `/skill architecture-compliance`; the `## Questions & Gaps Register` section must be present (generated by post-generation pipeline)

@@ -57,7 +57,7 @@ async function loadConfig(configName: string): Promise<DomainConfig> {
   }
 
   // Bun's optimized JSON loading
-  return await Bun.file(configPath).json<DomainConfig>();
+  return await Bun.file(configPath).json() as DomainConfig;
 }
 
 /**

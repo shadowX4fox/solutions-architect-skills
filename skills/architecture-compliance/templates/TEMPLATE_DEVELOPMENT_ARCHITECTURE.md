@@ -410,41 +410,7 @@
 
 ---
 
-### A.2 Validation Methodology
-
-**Validation Process**:
-
-1. **Completeness Check (40% weight)**:
-   - Counts filled data points across all LADES requirements
-   - Formula: (Filled fields / Total required fields) × 10
-   - Example: 12 out of 14 fields = 8.6/10 completeness
-
-2. **Compliance Check (50% weight)**:
-   - Evaluates each validation item as PASS/FAIL/N/A/UNKNOWN
-   - Formula: (PASS + N/A + EXCEPTION items) / Total items × 10
-   - **CRITICAL**: N/A items MUST be included in numerator
-   - Example: 10 PASS + 2 N/A + 0 EXCEPTION out of 14 items = (10+2)/14 × 10 = 8.6/10
-   - **SPECIAL**: LADES1.6 (Stack Validation) cannot be "Unknown" - must be Compliant (PASS) or Non-Compliant (PENDING/FAIL)
-
-3. **Quality Check (10% weight)**:
-   - Assesses source traceability (ARCHITECTURE.md section references)
-   - Verifies Stack Validation Checklist completion
-   - Formula: (Items with valid sources / Total items) × 10
-
-4. **Final Score Calculation**:
-   ```
-   Final Score = (Completeness × 0.4) + (Compliance × 0.5) + (Quality × 0.1)
-   ```
-
-**Outcome Determination**:
-| Score Range | Document Status | Review Actor | Action |
-|-------------|----------------|--------------|--------|
-| 8.0-10.0 | Approved | System (Auto-Approved) | Ready for implementation (requires LADES1.6 PASS) |
-| 7.0-7.9 | In Review | Development Architecture Review Board | Manual review required |
-| 5.0-6.9 | Draft | Architecture Team | Address gaps before review |
-| 0.0-4.9 | Rejected | N/A (Blocked) | Cannot proceed - critical development standards missing |
-
-**IMPORTANT**: Contract cannot achieve "Approved" status without Stack Validation Checklist (LADES1.6) showing PASS status.
+<!-- @include-with-config shared/sections/validation-methodology.md config=development-architecture -->
 
 ---
 
@@ -544,15 +510,7 @@
 
 ---
 
-<!-- @include-with-config shared/sections/missing-data-table-template.md config=development-architecture -->
-
----
-
-<!-- @include-with-config shared/sections/not-applicable-template.md config=development-architecture -->
-
----
-
-<!-- @include-with-config shared/sections/unknown-status-table-template.md config=development-architecture -->
+<!-- @include-with-config shared/sections/questions-gaps-register-template.md config=development-architecture -->
 
 ---
 

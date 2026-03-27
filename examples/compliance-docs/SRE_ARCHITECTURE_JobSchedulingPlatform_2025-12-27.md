@@ -198,64 +198,48 @@ This template uses a two-tier scoring system for SRE requirements:
 
 ---
 
-## Missing Data Report
+## Questions & Gaps Register
 
-The following data points were not found in ARCHITECTURE.md and should be added:
+The following items require attention to improve compliance. Each row maps to a requirement from the Compliance Summary that is not yet "Compliant". Use this register to assign ownership, plan remediation, and track progress.
 
-| Code | Requirement | Missing Information | Recommended Section | Priority |
-|------|-------------|---------------------|---------------------|----------|
-| LASRE06 | Operational procedures documentation | SOP documentation status | 11.4 Maintenance | High |
-| LASRE10 | Load testing documentation | Load test results and documentation | 10.1 or 10.3 | High |
-| LASRE23 | Synthetic availability validation | Synthetic monitoring configuration | 11.1 Monitoring | Medium |
-| LASRE35 | DR validation automation | DR state validation procedures | 11.2 Disaster Recovery | High |
-| LASRE38 | Log verbosity control | Log level configuration capabilities | 11.1 Monitoring | Medium |
-| LASRE45 | Chaos testing | Chaos engineering practices | 11.2 or 10.1 | Medium |
-| LASRE52 | Synthetic authentication validation | Synthetic user journey testing | 11.1 Monitoring | Medium |
-| LASRE53 | Cloud resource tagging | Azure tagging strategy | 5.2 or 11.1 | Medium |
-| LASRE55 | Component reporting | Automated reporting capabilities | 11.1 or 11.3 | Low |
-| LASRE56 | Data sanitization automation | Data refresh procedures | 11.3 or 11.4 | Low |
-| LASRE57 | Auto-remediation | Self-healing capabilities | 11.3 or 10.1 | Medium |
+| Code | Requirement | Type | Status | Owner | ARCHITECTURE.md Section | Action Required | Priority |
+|------|-------------|------|--------|-------|-------------------------|-----------------|----------|
+| LASRE06 | Operational procedures (SOP) | Unknown | Unknown | N/A | Section 11.4 | SOP documentation status cannot be determined from documentation — document operational runbooks in Section 11.4 | High |
+| LASRE10 | Load testing documentation | Unknown | Unknown | N/A | Section 10.1 | Load testing status cannot be determined from documentation — add load testing results to 10.3 Performance Optimization | High |
+| LASRE23 | Synthetic availability validation | Unknown | Unknown | N/A | Section 11.1 | Synthetic monitoring status cannot be determined from documentation — clarify synthetic monitoring approach in 11.1 | High |
+| LASRE35 | DR validation automation | Unknown | Unknown | N/A | Section 11.2 | DR validation testing not detailed — add DR testing procedures to 11.2 | High |
+| LASRE38 | Log verbosity control | Unknown | Unknown | N/A | Section 11.1 | Log level configuration cannot be determined — document log level management in 11.1 | High |
+| LASRE45 | Chaos testing | Unknown | Unknown | N/A | Section 11.2 | Chaos engineering practices not documented — add chaos testing strategy to 11.2 | High |
+| LASRE52 | Synthetic authentication validation | Unknown | Unknown | N/A | Section 11.1 | Synthetic user journeys not documented — document synthetic testing in 11.1 | Medium |
+| LASRE53 | Cloud resource tagging | Unknown | Unknown | N/A | Section 5.2 | Azure tagging strategy not explicitly documented — add tagging standards to Section 8.4 or 11.1 | Medium |
+| LASRE55 | Component reporting | Unknown | Unknown | N/A | Section 11.1 | Automated reporting capabilities not documented — document reporting capabilities in 11.1 or 11.3 | Medium |
+| LASRE56 | Data sanitization automation | Unknown | Unknown | N/A | Section 11.3 | Data refresh procedures not documented — add data management procedures to 11.3 | Medium |
+| LASRE57 | Auto-remediation capabilities | Unknown | Unknown | N/A | Section 11.3 | Self-healing beyond pod restarts not documented — document auto-remediation strategies in 11.3 or 10.1 | Medium |
+| LASRE13 | IcePanel diagrams | Not Applicable | Not Applicable | N/A | Section 4.4 | Verify justification: Project uses different diagramming approach (documented in Section 4.4) | Low |
+| LASRE14 | Bank application portfolio registration | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Internal platform, not bank-specific | Low |
+| LASRE15 | Escalation matrix in bank systems | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Not applicable to this organization | Low |
+| LASRE16 | Bank implementation request | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Not applicable to this organization | Low |
+| LASRE20 | Dynatrace instrumentation | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure Monitor and Application Insights instead | Low |
+| LASRE24 | Dynatrace JavaScript injection | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure Application Insights for frontend monitoring | Low |
+| LASRE25 | Dynatrace headers in security components | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure-native monitoring | Low |
+| LASRE26 | UX monitoring (GUI apps) | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Internal platform with limited UI requirements | Low |
+| LASRE27 | Dynatrace licensing cost estimation | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure Monitor instead | Low |
+| LASRE28 | Dynatrace coverage prerequisites | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure Monitor instead | Low |
+| LASRE29 | Dynatrace agent on servers | Not Applicable | Not Applicable | N/A | N/A | Verify justification: Uses Azure Monitor instead | Low |
+| LASRE49 | External system provider APIs | Not Applicable | Not Applicable | N/A | N/A | Verify justification: No external systems requiring special monitoring APIs | Low |
 
----
+**Type definitions**:
+- `Non-Compliant` — Requirement explicitly not met
+- `Unknown` — Partial or absent information; insufficient to determine compliance
+- `Not Applicable` — Requirement does not apply to this solution (justification required)
 
-## Not Applicable Requirements
+**Priority derivation**:
+- `Critical` — Non-Compliant blocker requirement (blocks approval)
+- `High` — Unknown blocker requirement (blocks approval)
+- `Medium` — Non-Compliant or Unknown desired requirement
+- `Low` — Not Applicable item (justification review recommended)
 
-The following requirements are marked as "Not Applicable" for this project:
-
-| Code | Requirement | Reason |
-|------|-------------|--------|
-| LASRE13 | IcePanel diagrams | Project uses different diagramming approach (documented in Section 4.4) |
-| LASRE14 | Bank application portfolio registration | Internal platform, not bank-specific |
-| LASRE15 | Escalation matrix in bank systems | Not applicable to this organization |
-| LASRE16 | Bank implementation request | Not applicable to this organization |
-| LASRE20 | Dynatrace instrumentation | Uses Azure Monitor and Application Insights instead |
-| LASRE24 | Dynatrace JavaScript injection | Uses Azure Application Insights for frontend monitoring |
-| LASRE25 | Dynatrace headers in security components | Uses Azure-native monitoring |
-| LASRE26 | UX monitoring (GUI apps) | Internal platform with limited UI requirements |
-| LASRE27 | Dynatrace licensing cost estimation | Uses Azure Monitor instead |
-| LASRE28 | Dynatrace coverage prerequisites | Uses Azure Monitor instead |
-| LASRE29 | Dynatrace agent on servers | Uses Azure Monitor instead |
-| LASRE49 | External system provider APIs | No external systems requiring special monitoring APIs |
-
----
-
-## Unknown Status Requirements
-
-The following requirements have "Unknown" status due to insufficient information in ARCHITECTURE.md:
-
-| Code | Requirement | Reason | Recommended Action |
-|------|-------------|--------|---------------------|
-| LASRE06 | Operational procedures (SOP) | SOP documentation not mentioned | Document operational runbooks in Section 11.4 |
-| LASRE10 | Load testing documentation | Load test results not documented | Add load testing section to 10.3 Performance Optimization |
-| LASRE23 | Synthetic availability validation | Synthetic monitoring not explicitly mentioned | Clarify synthetic monitoring approach in 11.1 |
-| LASRE35 | DR validation automation | DR validation testing not detailed | Add DR testing procedures to 11.2 |
-| LASRE38 | Log verbosity control | Log level configuration not mentioned | Document log level management in 11.1 |
-| LASRE45 | Chaos testing | Chaos engineering not mentioned | Add chaos testing strategy to 11.2 or create new subsection |
-| LASRE52 | Synthetic authentication validation | Synthetic user journeys not documented | Document synthetic testing in 11.1 |
-| LASRE53 | Cloud resource tagging | Azure tagging strategy not explicitly documented | Add tagging standards to Section 8.4 or 11.1 |
-| LASRE55 | Component reporting | Automated reporting not mentioned | Document reporting capabilities in 11.1 or 11.3 |
-| LASRE56 | Data sanitization automation | Data refresh procedures not documented | Add data management procedures to 11.3 |
-| LASRE57 | Auto-remediation capabilities | Self-healing beyond pod restarts not documented | Document auto-remediation strategies in 11.3 or 10.1 |
+> **Note for editable exports**: The "Owner", "Action Required", and "Priority" columns are designed for stakeholder input. When this document is exported to Word format, these fields are highlighted for editing.
 
 ---
 
