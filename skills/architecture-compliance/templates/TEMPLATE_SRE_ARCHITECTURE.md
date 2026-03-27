@@ -41,63 +41,63 @@ This template uses a two-tier scoring system for SRE requirements:
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LASRE01 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE02 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE03 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE04 | Application Deployment | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE05 | Configuration Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE06 | Operational Documentation | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE07 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE08 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE09 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE10 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE11 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE12 | Recovery and Resilience Testing | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE13 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE14 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE15 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE16 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE17 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE18 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE19 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | [Role or N/A] |
-| LASRE20 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE21 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE22 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE23 | Frontend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE24 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE25 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE26 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE27 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
-| LASRE28 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | [Role or N/A] |
-| LASRE29 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE30 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE31 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE32 | Batch Processing | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE33 | Application Deployment | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE34 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE35 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE36 | Application Operational Tasks | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE37 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE38 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE39 | Configuration Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | [Role or N/A] |
-| LASRE40 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE41 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE42 | Operational Resilience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE43 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE44 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | [Role or N/A] |
-| LASRE45 | Recovery and Resilience Testing | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | [Role or N/A] |
-| LASRE46 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE47 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | [Role or N/A] |
-| LASRE48 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE49 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE50 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE51 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE52 | Frontend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | [Role or N/A] |
-| LASRE53 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE54 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | [Role or N/A] |
-| LASRE55 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE56 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
-| LASRE57 | Auto-remediation | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | [Role or N/A] |
+| LASRE01 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE02 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE03 | Log Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE04 | Application Deployment | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | SRE Lead |
+| LASRE05 | Configuration Management | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | SRE Lead |
+| LASRE06 | Operational Documentation | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | SRE Lead |
+| LASRE07 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE08 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE09 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE10 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE11 | Operational Resilience | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE12 | Recovery and Resilience Testing | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | SRE Lead |
+| LASRE13 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | SRE Lead |
+| LASRE14 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | SRE Lead |
+| LASRE15 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | SRE Lead |
+| LASRE16 | Information and Architecture | Practice | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | SRE Lead |
+| LASRE17 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | SRE Lead |
+| LASRE18 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | SRE Lead |
+| LASRE19 | Key Metrics | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.2 | SRE Lead |
+| LASRE20 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE21 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE22 | Backend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE23 | Frontend Application | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE24 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE25 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE26 | User Experience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE27 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | SRE Lead |
+| LASRE28 | Cost Estimation | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 2.5 | SRE Lead |
+| LASRE29 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | SRE Lead |
+| LASRE30 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | SRE Lead |
+| LASRE31 | Infrastructure | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | SRE Lead |
+| LASRE32 | Batch Processing | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE33 | Application Deployment | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | SRE Lead |
+| LASRE34 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | SRE Lead |
+| LASRE35 | Disaster Recovery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | SRE Lead |
+| LASRE36 | Application Operational Tasks | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | SRE Lead |
+| LASRE37 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE38 | Log Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | SRE Lead |
+| LASRE39 | Configuration Management | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.4 | SRE Lead |
+| LASRE40 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | SRE Lead |
+| LASRE41 | Integration, Deployment and Delivery | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | SRE Lead |
+| LASRE42 | Operational Resilience | Observability | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | SRE Lead |
+| LASRE43 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | Platform Engineer |
+| LASRE44 | Operational Resilience | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 10.1 | Platform Engineer |
+| LASRE45 | Recovery and Resilience Testing | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.2 | Platform Engineer |
+| LASRE46 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | Platform Engineer |
+| LASRE47 | Information and Architecture | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 4.1/2.1 | Platform Engineer |
+| LASRE48 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | Platform Engineer |
+| LASRE49 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | Platform Engineer |
+| LASRE50 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | Platform Engineer |
+| LASRE51 | Backend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | Platform Engineer |
+| LASRE52 | Frontend Application | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.1 | Platform Engineer |
+| LASRE53 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | Platform Engineer |
+| LASRE54 | Infrastructure | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 5.2 | Platform Engineer |
+| LASRE55 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | Platform Engineer |
+| LASRE56 | Application Operational Tasks | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | Platform Engineer |
+| LASRE57 | Auto-remediation | Automation | [Compliant/Non-Compliant/Not Applicable/Unknown] | 11.3 | Platform Engineer |
 
 <!-- @include shared/fragments/compliance-summary-footer.md -->
 
@@ -116,7 +116,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Operational and audit logs must be recorded in a structured format, using defined and consistent fields, or following a standard to ensure uniformity and facilitate analysis.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 1.1 Implementation
@@ -144,7 +144,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Operational logs must record relevant information, classified into levels such as debug, info, or error according to the system's needs and characteristics.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 2.1 Implementation
@@ -172,7 +172,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Logs must be accessible without depending on third parties, either through internal mechanisms or automated processes that allow efficient and secure consultation of these records.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 3.1 Implementation
@@ -200,7 +200,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Automatic rollback mechanisms must be in place in case of failures during deployment, ensuring that the system can revert to a previous stable version.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 4.1 Implementation
@@ -228,7 +228,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: All configurations must be stored in official and secure repositories, such as authorized repositories or specialized services like Azure Repos, to ensure protection and controlled access to information.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 5.1 Implementation
@@ -256,7 +256,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Application documentation and operational procedures (SOP) will be maintained in official repositories, accessible to the entire team.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Team Lead or N/A
+**Responsible Role**: SRE Team Lead
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 6.1 Implementation
@@ -284,7 +284,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application must implement mechanisms that allow identifying when it is ready to receive load, ensuring that services are available and operational before starting processes or receiving requests.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 7.1 Implementation
@@ -312,7 +312,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application must implement health check mechanisms that allow identifying if it is functioning correctly, ensuring timely detection of possible service failures.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 8.1 Implementation
@@ -340,7 +340,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application must have high availability mechanisms, through the implementation of more than one replica, to ensure service continuity and minimize possible interruptions.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 9.1 Implementation
@@ -368,7 +368,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Load tests must be executed and documented on all application components before production release, ensuring that performance is adequate and results are available for consultation and analysis.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 10.1 Implementation
@@ -396,7 +396,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application must have automatic adjustment mechanisms in the number of instances, allowing scaling according to service load to ensure optimal performance and continuous availability.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 11.1 Implementation
@@ -424,7 +424,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: A documented recovery plan (DRP) must be in place, establishing the necessary procedures and resources to restore service in case of incidents or disasters, guaranteeing operational continuity.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Business Continuity Manager or N/A
+**Responsible Role**: Business Continuity Manager
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 12.1 Implementation
@@ -452,7 +452,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has C2 application and deployment diagrams in IcePanel.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 13.1 Implementation
@@ -480,7 +480,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application is registered in the Bank's application portfolio and business criticality has been categorized.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 14.1 Implementation
@@ -508,7 +508,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The escalation matrix is defined and resolving groups are registered in the application portfolio.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 15.1 Implementation
@@ -536,7 +536,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has generated a request for implementation or modification of application observability.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 16.1 Implementation
@@ -564,7 +564,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has defined the mechanism and criteria for measuring application availability.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 17.1 Implementation
@@ -592,7 +592,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has defined the mechanism and criteria for measuring application performance.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 18.1 Implementation
@@ -620,7 +620,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Monitored components have dynamic or static thresholds correctly configured.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 19.1 Implementation
@@ -648,7 +648,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has validated that microservices are instrumented with Dynatrace (automatic or manual instrumentation).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 20.1 Implementation
@@ -676,7 +676,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Internal APIs of the application are monitored.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 21.1 Implementation
@@ -704,7 +704,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has validated that microservice requests correctly handle exceptions at code level in test environment, to avoid increase in monitoring failure rate in production.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 22.1 Implementation
@@ -732,7 +732,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application URL has synthetic availability validation.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Frontend SRE or N/A
+**Responsible Role**: Frontend SRE
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 23.1 Implementation
@@ -760,7 +760,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application frontend allows injection of Dynatrace JavaScript for RUM (Real User Experience) capture. Note: Applies to applications with business transactionality.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 24.1 Implementation
@@ -788,7 +788,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Confirms that in security components like WAF, firewall, frontdoor, etc., there are no blocks to Dynatrace injection and beacons. Note: Applies to applications with business transactionality.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 25.1 Implementation
@@ -816,7 +816,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application has UX monitoring. Note: Applies to applications with business transactionality.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 26.1 Implementation
@@ -844,7 +844,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has performed Dynatrace licensing cost estimation using the official calculator and has Observability team approval for coverage and/or budget allocation.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Team Lead or N/A
+**Responsible Role**: SRE Team Lead
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 27.1 Implementation
@@ -872,7 +872,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Prerequisites necessary to ensure coverage of all components have been considered in the budget, such as manual code instrumentation, additional development by the provider, cloud service activation, infrastructure, among others.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Team Lead or N/A
+**Responsible Role**: SRE Team Lead
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 28.1 Implementation
@@ -900,7 +900,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Onpremise or cloud servers of the application have Dynatrace agent installed (OneAgent).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Platform Engineer or N/A
+**Responsible Role**: Platform Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 29.1 Implementation
@@ -928,7 +928,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Containers (OpenShift/AKS/EKS/GKE) have Dynatrace Operator/OneAgent deployed.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Platform Engineer or N/A
+**Responsible Role**: Platform Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 30.1 Implementation
@@ -956,7 +956,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Onpremise and/or cloud dependencies like DB, load balancers, Redis, frontdoor, etc. of the application are monitored.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Platform Engineer or N/A
+**Responsible Role**: Platform Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 31.1 Implementation
@@ -984,7 +984,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has monitoring of batch processes not managed by Control-M.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 32.1 Implementation
@@ -1012,7 +1012,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Consistency between applications and their source code will be ensured through automated deployment and configuration processes.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 33.1 Implementation
@@ -1040,7 +1040,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Must have automation of the Disaster Recovery process.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Business Continuity Manager or N/A
+**Responsible Role**: Business Continuity Manager
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 34.1 Implementation
@@ -1068,7 +1068,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Must have automation of the process to validate the state of what is required to start the application at the Alternate Site.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Business Continuity Manager or N/A
+**Responsible Role**: Business Continuity Manager
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 35.1 Implementation
@@ -1096,7 +1096,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Must have an automated process for managing application services (start, stop, restart).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: **BLOCKER** (Blocking - Must Pass)
 
 ### 36.1 Implementation
@@ -1124,7 +1124,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Generated logs must be centralized in an analysis or monitoring tool, such as Dynatrace or Splunk, to facilitate their management, consultation, and analysis.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1142,7 +1142,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Operational logs must allow modification of verbosity level, thus facilitating adjustment of the amount and type of information recorded according to monitoring or diagnostic needs.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1160,7 +1160,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Configurations must be subject to version control, ensuring that any change is recorded and can be audited or reverted if necessary.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1178,7 +1178,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Deployments of new versions will be performed gradually, using strategies such as Canary Release, to minimize risks and ensure a controlled transition before applying changes to all users.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1196,7 +1196,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Appropriate traffic management strategies will be applied to the application's target audience, such as the Friends & Family approach, to control access and use according to defined needs.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1214,7 +1214,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Will have a defined 7x24 maintenance procedure that guarantees continuous application availability, allowing preventive and corrective tasks to be performed without affecting service for users.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1232,7 +1232,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Must have alternative mechanisms that allow managing backend failures, such as Fallback or Circuit Breaker strategies, ensuring service continuity and resilience in case of possible interruptions.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1250,7 +1250,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Automatic retries and proper management of timeouts for both client and backend must be implemented, ensuring resilience and proper handling of wait or failure situations in communications.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1268,7 +1268,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application must execute chaos tests, with the objective of evaluating its resilience and recovery capacity in adverse scenarios or unexpected failures.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Business Continuity Manager or N/A
+**Responsible Role**: Business Continuity Manager
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1286,7 +1286,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1304,7 +1304,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Components involved in the application's critical journeys are identified in the C2 diagram.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Enterprise Architect or N/A
+**Responsible Role**: Enterprise Architect
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1322,7 +1322,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Microservices and workloads contain labels that allow differentiating the application and its vital functions (for example: application name, application id, resolving group, vital function, tribe, cell, etc.).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1340,7 +1340,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has validated with the external system provider that they have APIs that allow monitoring the state of their system/APIs synthetically.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1358,7 +1358,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Critical services have advanced monitoring configurations and threshold customization (traffic load, anomaly detection, latency, key request, etc.).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1376,7 +1376,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Application logs are correctly ingested into observability tools.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: SRE Engineer or N/A
+**Responsible Role**: SRE Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1394,7 +1394,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: The application allows performing synthetic validations through authentication of generic Observability user without MFA (only user and password).
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Frontend SRE or N/A
+**Responsible Role**: Frontend SRE
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1412,7 +1412,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Cloud components (MS Azure, GCP, AWS) of the application are tagged at the source for easy identification.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Platform Engineer or N/A
+**Responsible Role**: Platform Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1430,7 +1430,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Has health or state detection of critical processes or OS services (process group) on hosts.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Platform Engineer or N/A
+**Responsible Role**: Platform Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1448,7 +1448,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Must have generation of reports on application components.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1466,7 +1466,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Will have an automated process to sanitize or copy data to previous environments.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: DevOps Engineer or N/A
+**Responsible Role**: DevOps Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]
@@ -1484,7 +1484,7 @@ This template uses a two-tier scoring system for SRE requirements:
 **Requirement**: Will have automation to remediate application failures automatically.
 
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: Automation Engineer or N/A
+**Responsible Role**: Automation Engineer
 **Criticality**: DESIRED (Optional Enhancement)
 
 **Implementation Status**: [Value or "Not specified"]

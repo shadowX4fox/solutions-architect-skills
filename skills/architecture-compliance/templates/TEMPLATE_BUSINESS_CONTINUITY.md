@@ -21,49 +21,49 @@
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
 |------|-------------|----------|--------|----------------|------------------|
-| LACN001 | Application or Initiative Name | BC-GEN | [Status] | Section 1 (Business Context) or Section 2 (System Overview) | [Role or N/A] |
-| LACN002 | Architecture Type and Deployment Model | BC-GEN | [Status] | Section 3 (Architecture Overview) or Section 4 (Deployment Architecture) | [Role or N/A] |
-| LACN003 | Number of Architecture Layers | BC-GEN | [Status] | Section 4 (Architecture Layers) or Section 3 (Architecture Overview) | [Role or N/A] |
-| LACN004 | Infrastructure Type | BC-GEN | [Status] | Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure) | [Role or N/A] |
-| LACN005 | Critical System Dependencies | BC-GEN | [Status] | Section 1 (Business Context → Dependencies) or Section 5 (System Integrations) | [Role or N/A] |
-| LACN006 | High Availability Requirement | BC-DR | [Status] | Section 10 (Non-Functional Requirements → Availability) | [Role or N/A] |
-| LACN007 | High Availability Component Scope | BC-DR | [Status] | Section 11 (Operational → High Availability) | [Role or N/A] |
-| LACN008 | Local Contingency Requirement | BC-DR | [Status] | Section 11 (Operational → High Availability) | [Role or N/A] |
-| LACN009 | Disaster Recovery Requirement | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery) | [Role or N/A] |
-| LACN010 | Disaster Recovery Architecture Pattern | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery) | [Role or N/A] |
-| LACN011 | Data Replication Method for DR | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery → Data Replication) | [Role or N/A] |
-| LACN012 | Recovery Time Objective (RTO) Definition | BC-RTO | [Status] | Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR) | [Role or N/A] |
-| LACN013 | Contingency and DR Testing Requirement | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery → Testing) | [Role or N/A] |
-| LACN014 | Resilience to Transient Component Failures | BC-DR | [Status] | Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns) | [Role or N/A] |
-| LACN015 | Batch Processing Requirement | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational) | [Role or N/A] |
-| LACN016 | Batch Execution Type | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing) | [Role or N/A] |
-| LACN017 | Batch Job Reprocessing on Failure | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing → Error Handling) | [Role or N/A] |
-| LACN018 | Periodic Data Backup Requirement | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore) | [Role or N/A] |
-| LACN019 | Backup Frequency | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Schedule) | [Role or N/A] |
-| LACN020 | Backup Retention Period | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Retention) | [Role or N/A] |
-| LACN021 | Backup Versioning Strategy | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Versioning) | [Role or N/A] |
-| LACN022 | Data Recreation Difficulty Assessment | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore) or Section 1 (Business Context) | [Role or N/A] |
-| LACN023 | Business Impact of Data Loss | BC-BACKUP | [Status] | Section 1 (Business Context → Business Impact Analysis) | [Role or N/A] |
-| LACN024 | RPO Validation with Business Stakeholders | BC-RTO | [Status] | Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR) | [Role or N/A] |
-| LACN025 | Geographic Backup Distribution | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Geographic Distribution) | [Role or N/A] |
-| LACN026 | Infrastructure Configuration Backup | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Infrastructure) | [Role or N/A] |
-| LACN027 | Infrastructure Change Log Backup | BC-BACKUP | [Status] | Section 11 (Operational → Logging & Monitoring or Backup & Restore) | [Role or N/A] |
-| LACN028 | Full Application Restore Capability | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Testing) | [Role or N/A] |
-| LACN029 | Sensitive Data Classification | BC-BACKUP | [Status] | Section 8 (Security Architecture → Data Classification) or Section 11 (Operational) | [Role or N/A] |
-| LACN030 | Backup Responsibility Assignment | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Responsibilities) | [Role or N/A] |
-| LACN031 | Backup Download to Local/On-Premises Repository | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Hybrid Strategy) | [Role or N/A] |
-| LACN032 | DR Activation Automation Capability | BC-AUTO | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | [Role or N/A] |
-| LACN033 | Automatable DR Components | BC-AUTO | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | [Role or N/A] |
-| LACN034 | Circuit Breaker Pattern Requirement | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | [Role or N/A] |
-| LACN035 | Retry with Exponential Backoff Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | [Role or N/A] |
-| LACN036 | Timeout Configuration for External Services | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations) | [Role or N/A] |
-| LACN037 | Timeboxing for Automated Contingency/DRP Activation | BC-CLOUD | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | [Role or N/A] |
-| LACN038 | Fallback Response Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | [Role or N/A] |
-| LACN039 | Bulkhead Isolation Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | [Role or N/A] |
-| LACN040 | Auto-Scaling with Health-Based Instance Replacement | BC-CLOUD | [Status] | Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture) | [Role or N/A] |
-| LACN041 | Load Balancing for Automatic Traffic Distribution | BC-CLOUD | [Status] | Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational) | [Role or N/A] |
-| LACN042 | Queue-Based Load Leveling Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Asynchronous Processing) | [Role or N/A] |
-| LACN043 | Single Points of Failure (SPOF) Identification | BC-CLOUD | [Status] | Section 3 (Architecture Overview) or Section 11 (Operational → High Availability) | [Role or N/A] |
+| LACN001 | Application or Initiative Name | BC-GEN | [Status] | Section 1 (Business Context) or Section 2 (System Overview) | Solution Architect |
+| LACN002 | Architecture Type and Deployment Model | BC-GEN | [Status] | Section 3 (Architecture Overview) or Section 4 (Deployment Architecture) | Solution Architect |
+| LACN003 | Number of Architecture Layers | BC-GEN | [Status] | Section 4 (Architecture Layers) or Section 3 (Architecture Overview) | Solution Architect |
+| LACN004 | Infrastructure Type | BC-GEN | [Status] | Section 4 (Deployment Architecture) or Section 11 (Operational → Infrastructure) | Solution Architect |
+| LACN005 | Critical System Dependencies | BC-GEN | [Status] | Section 1 (Business Context → Dependencies) or Section 5 (System Integrations) | Solution Architect |
+| LACN006 | High Availability Requirement | BC-DR | [Status] | Section 10 (Non-Functional Requirements → Availability) | Business Continuity Manager |
+| LACN007 | High Availability Component Scope | BC-DR | [Status] | Section 11 (Operational → High Availability) | Business Continuity Manager |
+| LACN008 | Local Contingency Requirement | BC-DR | [Status] | Section 11 (Operational → High Availability) | Business Continuity Manager |
+| LACN009 | Disaster Recovery Requirement | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery) | Business Continuity Manager |
+| LACN010 | Disaster Recovery Architecture Pattern | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery) | Business Continuity Manager |
+| LACN011 | Data Replication Method for DR | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery → Data Replication) | Business Continuity Manager |
+| LACN012 | Recovery Time Objective (RTO) Definition | BC-RTO | [Status] | Section 10 (Non-Functional Requirements) or Section 11 (Operational → DR) | Business Continuity Manager |
+| LACN013 | Contingency and DR Testing Requirement | BC-DR | [Status] | Section 11 (Operational → Disaster Recovery → Testing) | Business Continuity Manager |
+| LACN014 | Resilience to Transient Component Failures | BC-DR | [Status] | Section 11 (Operational → Resilience) or Section 7 (Application Architecture → Resilience Patterns) | Business Continuity Manager |
+| LACN015 | Batch Processing Requirement | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing) or Section 11 (Operational) | Business Continuity Manager |
+| LACN016 | Batch Execution Type | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing) | Business Continuity Manager |
+| LACN017 | Batch Job Reprocessing on Failure | BC-DR | [Status] | Section 7 (Application Architecture → Batch Processing → Error Handling) | Business Continuity Manager |
+| LACN018 | Periodic Data Backup Requirement | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore) | Infrastructure Architect |
+| LACN019 | Backup Frequency | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Schedule) | Infrastructure Architect |
+| LACN020 | Backup Retention Period | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Retention) | Infrastructure Architect |
+| LACN021 | Backup Versioning Strategy | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Versioning) | Infrastructure Architect |
+| LACN022 | Data Recreation Difficulty Assessment | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore) or Section 1 (Business Context) | Infrastructure Architect |
+| LACN023 | Business Impact of Data Loss | BC-BACKUP | [Status] | Section 1 (Business Context → Business Impact Analysis) | Infrastructure Architect |
+| LACN024 | RPO Validation with Business Stakeholders | BC-RTO | [Status] | Section 10 (Non-Functional Requirements) or Section 11 (Operational → Backup & DR) | Business Continuity Manager |
+| LACN025 | Geographic Backup Distribution | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Geographic Distribution) | Infrastructure Architect |
+| LACN026 | Infrastructure Configuration Backup | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Infrastructure) | Infrastructure Architect |
+| LACN027 | Infrastructure Change Log Backup | BC-BACKUP | [Status] | Section 11 (Operational → Logging & Monitoring or Backup & Restore) | Infrastructure Architect |
+| LACN028 | Full Application Restore Capability | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Testing) | Infrastructure Architect |
+| LACN029 | Sensitive Data Classification | BC-BACKUP | [Status] | Section 8 (Security Architecture → Data Classification) or Section 11 (Operational) | Infrastructure Architect |
+| LACN030 | Backup Responsibility Assignment | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Responsibilities) | Infrastructure Architect |
+| LACN031 | Backup Download to Local/On-Premises Repository | BC-BACKUP | [Status] | Section 11 (Operational → Backup & Restore → Hybrid Strategy) | Infrastructure Architect |
+| LACN032 | DR Activation Automation Capability | BC-AUTO | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | Platform Engineer |
+| LACN033 | Automatable DR Components | BC-AUTO | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | Platform Engineer |
+| LACN034 | Circuit Breaker Pattern Requirement | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | Cloud Architect |
+| LACN035 | Retry with Exponential Backoff Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | Cloud Architect |
+| LACN036 | Timeout Configuration for External Services | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) or Section 5 (Integrations) | Cloud Architect |
+| LACN037 | Timeboxing for Automated Contingency/DRP Activation | BC-CLOUD | [Status] | Section 11 (Operational → Disaster Recovery → Automation) | Cloud Architect |
+| LACN038 | Fallback Response Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | Cloud Architect |
+| LACN039 | Bulkhead Isolation Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Resilience Patterns) | Cloud Architect |
+| LACN040 | Auto-Scaling with Health-Based Instance Replacement | BC-CLOUD | [Status] | Section 11 (Operational → Auto-Scaling) or Section 4 (Deployment Architecture) | Cloud Architect |
+| LACN041 | Load Balancing for Automatic Traffic Distribution | BC-CLOUD | [Status] | Section 4 (Deployment Architecture → Load Balancing) or Section 11 (Operational) | Cloud Architect |
+| LACN042 | Queue-Based Load Leveling Pattern | BC-CLOUD | [Status] | Section 7 (Application Architecture → Asynchronous Processing) | Cloud Architect |
+| LACN043 | Single Points of Failure (SPOF) Identification | BC-CLOUD | [Status] | Section 3 (Architecture Overview) or Section 11 (Operational → High Availability) | Cloud Architect |
 
 ---
 
@@ -73,7 +73,7 @@
 
 **Requirement**: Provide the complete and official name of the application or business initiative, matching the name used in enterprise architecture documentation and project charters. Include any acronyms or alternative names commonly used within the organization.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Solution Architect
 **Category**: BC-GEN
 
 ### 1.1 Application Identification
@@ -104,7 +104,7 @@
 
 **Requirement**: Document the high-level architecture pattern (e.g., monolithic, microservices, serverless) and deployment model (e.g., on-premises, cloud, hybrid), as these are critical for disaster recovery planning since different architectures require different recovery strategies.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Solution Architect
 **Category**: BC-GEN
 
 ### 2.1 Architecture and Deployment Documentation
@@ -135,7 +135,7 @@
 
 **Requirement**: Specify how many distinct layers or tiers comprise the architecture and name each layer exactly as defined in ARCHITECTURE.md, as layer count determines dependencies and recovery sequence during disaster recovery scenarios.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Solution Architect
 **Category**: BC-GEN
 
 ### 3.1 Layer Inventory
@@ -178,7 +178,7 @@
 
 **Requirement**: Specify the infrastructure foundation supporting the application (physical servers, virtual machines, containers, serverless, or hybrid), as infrastructure type significantly impacts backup strategies, failover mechanisms, and recovery time objectives.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Solution Architect
 **Category**: BC-GEN
 
 ### 4.1 Infrastructure Classification
@@ -209,7 +209,7 @@
 
 **Requirement**: Document all upstream and downstream dependencies critical for system operation, including internal services, external APIs, SaaS platforms, authentication providers, databases, and message queues, noting each dependency's name, provider, criticality level, and impact if unavailable.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Solution Architect
 **Category**: BC-GEN
 
 ### 5.1 Dependency Documentation
@@ -246,7 +246,7 @@
 
 **Requirement**: Assess whether the system must be designed for high availability, specifying the target availability percentage (e.g., 99.95%) and providing business justification based on revenue impact of downtime, user expectations, and SLA commitments.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 6.1 HA Requirement Assessment
@@ -283,7 +283,7 @@
 
 **Requirement**: Specify which components require HA design (redundancy and failover), documenting for each: deployment pattern (active-active or active-passive), redundancy level (N+1, N+2), geographic distribution (single AZ, multi-AZ, multi-region), and failover mechanism (automatic or manual).
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 7.1 HA Component Definitions
@@ -320,7 +320,7 @@
 
 **Requirement**: Determine whether the solution requires local contingency measures (failover within the same data center or availability zone) to handle component-level failures such as server crashes, network issues, or software bugs, distinct from disaster recovery which handles site-wide failures.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 8.1 Local Contingency Design
@@ -357,7 +357,7 @@
 
 **Requirement**: Determine if the solution requires disaster recovery capabilities to recover from catastrophic site-wide or regional failures, documenting the business justification, disaster scenarios addressed, and associated RTO and RPO targets.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 9.1 DR Requirement Assessment
@@ -394,7 +394,7 @@
 
 **Requirement**: Document the DR architecture pattern based on RTO and cost considerations, selecting from cold standby, warm standby, hot standby, or active-active, and provide justification including primary and DR site locations and failover trigger criteria.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 10.1 DR Architecture
@@ -431,7 +431,7 @@
 
 **Requirement**: Document how data is replicated from the primary to the DR site, specifying the replication method (synchronous, asynchronous, snapshot-based, or backup-restore), replication frequency/lag, RPO achieved, and network bandwidth and performance impact.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 11.1 Replication Configuration
@@ -468,7 +468,7 @@
 
 **Requirement**: Define the RTO representing the maximum tolerable downtime before business impact becomes unacceptable, differentiated by failure type, with business-driven justification and documented stakeholder approval.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-RTO
 
 ### 12.1 RTO Documentation
@@ -505,7 +505,7 @@
 
 **Requirement**: Determine if contingency and disaster recovery procedures must be regularly tested and validated, specifying testing frequency, test types, success criteria, roles/responsibilities, and a post-test review and improvement process.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 13.1 DR Testing Plan
@@ -548,7 +548,7 @@
 
 **Requirement**: Verify that the application implements resilience patterns (circuit breakers, retries with exponential backoff, timeouts, fallbacks, bulkheads) to handle transient failures of internal or external components, with documented failure handling strategies per critical dependency.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 14.1 Resilience Pattern Coverage
@@ -591,7 +591,7 @@
 
 **Requirement**: Determine if the platform executes batch processing jobs or scheduled workloads, documenting a batch job inventory with execution schedules, dependencies, data volumes, and criticality rating to enable prioritized recovery during DR scenarios.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 15.1 Batch Processing Assessment
@@ -628,7 +628,7 @@
 
 **Requirement**: Classify batch job execution patterns (scheduled, event-triggered, manual, or on-demand) as execution type impacts DR recovery sequencing — scheduled jobs may need catch-up after outage while event-triggered jobs may need message queue replay.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 16.1 Batch Execution Classification
@@ -665,7 +665,7 @@
 
 **Requirement**: Determine if failed batch jobs must support safe reprocessing or retry, requiring idempotency design, checkpoint/resume state tracking, transactional consistency, and input/output validation to avoid data inconsistencies.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-DR
 
 ### 17.1 Batch Reprocessing Design
@@ -708,7 +708,7 @@
 
 **Requirement**: Determine if periodic backups of application data are required for recovery purposes, documenting backup scope (databases, file storage, configurations), recovery scenarios addressed, and any compliance or regulatory backup mandates.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 18.1 Backup Requirement Assessment
@@ -745,7 +745,7 @@
 
 **Requirement**: Specify the frequency of data backups (continuous, hourly, daily, weekly, or custom) based on RPO requirements, including the full vs. incremental backup strategy and how the schedule accounts for maintenance windows and system load.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 19.1 Backup Schedule
@@ -782,7 +782,7 @@
 
 **Requirement**: Define how long backup copies must be retained before deletion, balancing recovery needs with storage costs and compliance requirements, and specifying a tiered retention strategy for different backup types.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 20.1 Retention Policy
@@ -825,7 +825,7 @@
 
 **Requirement**: Determine if backups should overwrite previous versions or maintain historical versions for point-in-time recovery, assessing the number of versions to retain and storage cost impact for ransomware protection and auditing scenarios.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 21.1 Versioning Configuration
@@ -862,7 +862,7 @@
 
 **Requirement**: Assess the difficulty and effort required to recreate lost data if backups are unavailable, categorizing each data store and ensuring backup frequency and redundancy align with recreation difficulty.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 22.1 Data Recreation Assessment
@@ -899,7 +899,7 @@
 
 **Requirement**: Quantify the business impact if data is lost (revenue loss, operational disruption, regulatory penalties, reputation damage) to drive backup investment decisions and ensure backup strategy aligns with impact severity.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 23.1 Business Impact Analysis
@@ -936,7 +936,7 @@
 
 **Requirement**: Confirm that the Recovery Point Objective (RPO) — the maximum acceptable data loss — has been validated and approved by business stakeholders, with documentation of approval and technical implementation aligned to the approved RPO.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Business Continuity Manager
 **Category**: BC-RTO
 
 ### 24.1 RPO Validation
@@ -979,7 +979,7 @@
 
 **Requirement**: Determine if backups must be stored in a geographically separate location to protect against site-wide disasters (earthquakes, floods, regional power failures), implementing the 3-2-1 rule and ensuring geographic risk separation.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 25.1 Geographic Distribution Configuration
@@ -1022,7 +1022,7 @@
 
 **Requirement**: Determine if infrastructure configurations, operating system settings, and system files (BDI - Base de Infraestructura) require backup, specifying the backup mechanism (IaC, snapshots, image-based) and documenting restore and rebuild procedures.
 **Status**: [Status]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 26.1 Infrastructure Backup Scope
@@ -1065,7 +1065,7 @@
 
 **Requirement**: Determine if audit logs of infrastructure changes must be backed up for compliance, troubleshooting, and forensic analysis.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 27.1 Implementation
@@ -1092,7 +1092,7 @@
 
 **Requirement**: Verify that the complete application can be restored from backups if all components fail simultaneously (worst-case scenario).
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 28.1 Implementation
@@ -1119,7 +1119,7 @@
 
 **Requirement**: Identify if the platform handles sensitive data such as customer PII, financial data, or other regulated information requiring enhanced backup protection.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 29.1 Implementation
@@ -1146,7 +1146,7 @@
 
 **Requirement**: Define who is responsible for executing, monitoring, and validating backups: infrastructure team, DBA team, application team, or managed service provider.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 30.1 Implementation
@@ -1173,7 +1173,7 @@
 
 **Requirement**: Determine if backups stored in cloud or managed services can be downloaded to local or on-premises storage for additional protection.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Infrastructure Architect
 **Category**: BC-BACKUP
 
 ### 31.1 Implementation
@@ -1200,7 +1200,7 @@
 
 **Requirement**: Assess if disaster recovery activation can be automated rather than requiring manual procedures.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Platform Engineer
 **Category**: BC-AUTO
 
 ### 32.1 Implementation
@@ -1227,7 +1227,7 @@
 
 **Requirement**: Identify which specific components and procedures can be automated during disaster recovery activation.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Platform Engineer
 **Category**: BC-AUTO
 
 ### 33.1 Implementation
@@ -1254,7 +1254,7 @@
 
 **Requirement**: Determine if the application requires circuit breaker pattern to prevent cascading failures when downstream services are unavailable or slow.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 34.1 Implementation
@@ -1281,7 +1281,7 @@
 
 **Requirement**: Implement retry logic with exponential backoff to handle transient failures in distributed systems and third-party integrations.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 35.1 Implementation
@@ -1308,7 +1308,7 @@
 
 **Requirement**: Implement appropriate timeout values for calls to third-party and external services to prevent blocking and cascading slowness.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 36.1 Implementation
@@ -1335,7 +1335,7 @@
 
 **Requirement**: Define time-bound triggers for automated contingency or disaster recovery activation to limit blast radius and ensure timely response.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 37.1 Implementation
@@ -1362,7 +1362,7 @@
 
 **Requirement**: Implement fallback responses or degraded functionality when primary services or features are unavailable.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 38.1 Implementation
@@ -1389,7 +1389,7 @@
 
 **Requirement**: Implement bulkhead pattern to isolate failing components and prevent cascading failures across services.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 39.1 Implementation
@@ -1416,7 +1416,7 @@
 
 **Requirement**: Implement auto-scaling with health checks to automatically replace failed instances across multiple availability zones.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 40.1 Implementation
@@ -1443,7 +1443,7 @@
 
 **Requirement**: Implement load balancing to automatically distribute traffic across multiple instances and availability zones.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 41.1 Implementation
@@ -1470,7 +1470,7 @@
 
 **Requirement**: Implement queue-based load leveling to absorb traffic spikes and process workloads asynchronously without impacting service availability.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 42.1 Implementation
@@ -1497,7 +1497,7 @@
 
 **Requirement**: Identify all potential single points of failure in the architecture that could cause complete service outage if they fail.
 **Status**: [Compliant/Non-Compliant/Not Applicable/Unknown]
-**Responsible Role**: [Role or N/A]
+**Responsible Role**: Cloud Architect
 **Category**: BC-CLOUD
 
 ### 43.1 Implementation

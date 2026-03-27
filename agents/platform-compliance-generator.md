@@ -79,7 +79,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
 - Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
-- Replace `[Role or N/A]` with extracted role or "N/A"
+- Replace role placeholders (`[Role or N/A]`, `[X Architect or N/A]`, etc.) with the role name specified in the template; use "N/A" ONLY if Status = "Not Applicable"
 
 **How to work**:
 1. Read the cleaned template as immutable content
