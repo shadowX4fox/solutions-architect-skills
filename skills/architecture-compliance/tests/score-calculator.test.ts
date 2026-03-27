@@ -19,7 +19,7 @@ import {
   type ComplianceTableData,
   type ValidationConfig,
 } from '../utils/score-calculator';
-import { getLocalDateString } from '../utils/date-utils';
+import { getLocalDateString, getNextReviewDate } from '../utils/date-utils';
 
 // ============================================================================
 // Test Fixtures
@@ -318,5 +318,30 @@ describe('getLocalDateString', () => {
     const date = getLocalDateString();
     const year = parseInt(date.split('-')[0]);
     expect(year).toBe(new Date().getFullYear());
+  });
+});
+
+// ============================================================================
+// getNextReviewDate
+// ============================================================================
+
+describe('getNextReviewDate', () => {
+  test('adds 6 months to a mid-month date', () => {
+    expect(getNextReviewDate('2026-01-15')).toBe('2026-07-15');
+  });
+
+  test('adds 6 months crossing a year boundary', () => {
+    expect(getNextReviewDate('2026-09-01')).toBe('2027-03-01');
+  });
+
+  test('clamps to last day when target month is shorter', () => {
+    // Jan 31 + 6 months = Jul 31 (valid, no clamping needed)
+    expect(getNextReviewDate('2026-01-31')).toBe('2026-07-31');
+    // Aug 31 + 6 months = Feb 31 → clamped to Feb 28
+    expect(getNextReviewDate('2026-08-31')).toBe('2027-02-28');
+  });
+
+  test('returns YYYY-MM-DD format', () => {
+    expect(getNextReviewDate('2026-03-27')).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

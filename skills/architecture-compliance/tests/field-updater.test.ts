@@ -56,6 +56,19 @@ const DOC_CONTROL_TEMPLATE = `# Contract
 | Review Actor | [REVIEW_ACTOR] |
 `;
 
+const DOC_CONTROL_WITH_DATES_TEMPLATE = `# Contract
+
+| Field | Value |
+|-------|-------|
+| Last Review Date | 2026-01-15 |
+| Next Review Date | [NEXT_REVIEW_DATE] |
+| Validation Score | [VALIDATION_SCORE]/10 |
+| Validation Status | [VALIDATION_STATUS] |
+| Validation Date | [VALIDATION_DATE] |
+| Status | [DOCUMENT_STATUS] |
+| Review Actor | [REVIEW_ACTOR] |
+`;
+
 const COMPLIANCE_FOOTER_TEMPLATE = `## Compliance Summary
 
 | Code | Requirement | Category | Status | Source Section | Responsible Role |
@@ -120,6 +133,21 @@ describe('updateDocumentControlFields', () => {
     const noop = '# Plain content\nNo placeholders here.';
     const updated = updateDocumentControlFields(noop, score);
     expect(updated).toBe(noop);
+  });
+
+  test('replaces [NEXT_REVIEW_DATE] with 6 months after Last Review Date', () => {
+    const score = makeScore();
+    const updated = updateDocumentControlFields(DOC_CONTROL_WITH_DATES_TEMPLATE, score);
+    expect(updated).toContain('2026-07-15');
+    expect(updated).not.toContain('[NEXT_REVIEW_DATE]');
+  });
+
+  test('skips [NEXT_REVIEW_DATE] replacement when no Last Review Date row is present', () => {
+    const score = makeScore();
+    const noDateTemplate = `| Next Review Date | [NEXT_REVIEW_DATE] |\n| Status | [DOCUMENT_STATUS] |`;
+    const updated = updateDocumentControlFields(noDateTemplate, score);
+    // No Last Review Date row to parse → placeholder stays as-is (no crash)
+    expect(updated).toContain('[NEXT_REVIEW_DATE]');
   });
 });
 

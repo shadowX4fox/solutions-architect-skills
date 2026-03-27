@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { ValidationScore } from './score-calculator';
+import { getNextReviewDate } from './date-utils';
 
 /**
  * Compliance Contract Field Updater
@@ -118,6 +119,19 @@ function updateDocumentControlFields(
     /\[VALIDATION_EVALUATOR\]/g,
     'Claude Code (Automated Validation Engine)'
   );
+
+  // Replace [NEXT_REVIEW_DATE] with generation date + 6 months
+  // Extract generation date from the "Last Review Date" row (already filled by the AI agent)
+  const lastReviewMatch = updated.match(/\| Last Review Date\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
+  if (lastReviewMatch) {
+    const nextReview = getNextReviewDate(lastReviewMatch[1]);
+    updated = updated.replace(/\[NEXT_REVIEW_DATE\]/g, nextReview);
+    // Fallback: replace any already-substituted non-date value in the Next Review Date row
+    updated = updated.replace(
+      /^(\| Next Review Date\s*\| )\[NEXT_REVIEW_DATE\]( \|)\s*$/gm,
+      `$1${nextReview}$2`
+    );
+  }
 
   return updated;
 }

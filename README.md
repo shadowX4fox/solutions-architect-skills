@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.10.34-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.10.35-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -535,7 +535,12 @@ Where:
 
 ## Roadmap
 
-### v2.10.34 (Current Release) ✅
+### v2.10.35 (Current Release) ✅
+**fix: auto-populate [NEXT_REVIEW_DATE] as generation date +6 months; fix Section 1.6 stack validation placeholders left unreplaced in Development contract**
+
+Two fixes in one release: (1) `[NEXT_REVIEW_DATE]` in the Document Control table was never replaced — added `getNextReviewDate()` to `date-utils.ts` and wired it into `field-updater.ts` so it computes generation date + 6 months with correct month-end clamping. (2) Development contract Section 1.6 "Stack Validation Checklist" had ~30 unreplaced placeholders (`[JAVA_ITEM_1]`–`[JAVA_ITEM_6]`, `[DOTNET_*]`, `[FRONTEND_*]`, `[OTHER_STACKS_*]`, `[EXCEPTIONS_*]`, `[TOTAL_ITEMS]`, etc.) — removed the dead "Dynamic Field Mapping Instructions" block from the template and added Step 4.6 to the development agent with full 26-item evaluation criteria (Java, .NET, Frontend, Other Stacks, Exceptions). Added 6 new tests for `getNextReviewDate` and `[NEXT_REVIEW_DATE]` field-updater replacement.
+
+### v2.10.34 (Previous Release) ✅
 **fix: shorten Compliance Summary table Requirement columns in Business Continuity and SRE templates to use section titles instead of full descriptions; simplify SRE Category column to prefix-only (Practice/Observability/Automation)**
 
 Aligns the two remaining outlier templates (Business Continuity: 43 rows, SRE: 57 rows) with the short-title pattern already used by the other 8 compliance templates. BC Requirement column now uses H2 section titles (e.g., "Application or Initiative Name" instead of the full question). SRE Requirement column uses H2 section titles and Category column simplified from "Practice - Log Management" to just "Practice".
