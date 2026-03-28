@@ -10,7 +10,7 @@ If no argument is provided, default to `patch`.
 
 ## Steps
 
-1. **Read current version** from both `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`
+1. **Read current version** from `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, and `package.json`
 2. **Calculate new version** using semver bump:
    - `patch` (default): 2.2.1 → 2.2.2
    - `minor`: 2.2.1 → 2.3.0
@@ -21,11 +21,12 @@ If no argument is provided, default to `patch`.
    - Installation verification line: `v OLD_VERSION` → `v NEW_VERSION`
    - Add a new roadmap entry `### vNEW_VERSION (Current Release) ✅` summarizing the changes in this release (infer from git log / staged changes)
    - Mark the previous current release entry as `(Previous Release)`
-4. **Update version** in both plugin files:
+4. **Update version** in all three version files:
    - `.claude-plugin/plugin.json` → `"version": "NEW_VERSION"`
    - `.claude-plugin/marketplace.json` → `"version": "NEW_VERSION"`
+   - `package.json` → `"version": "NEW_VERSION"`
 5. **Show git status** to review all pending changes (staged and unstaged)
-6. **Stage all modified files** (README.md, plugin.json, marketplace.json, and any other changed files)
+6. **Stage all modified files** (README.md, plugin.json, marketplace.json, package.json, and any other changed files)
 7. **Ask the user for a commit message** before committing. Suggest a default message based on the changes detected.
 8. **Commit** with the user-approved message. Append the version tag (e.g., `v2.2.2`) to the end of the first line.
 9. **Create git tag** `vNEW_VERSION` (e.g., `v2.3.2`) on the release commit.
