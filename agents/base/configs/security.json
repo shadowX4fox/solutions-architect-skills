@@ -1,0 +1,83 @@
+{
+  "agent_name": "security-compliance-generator",
+  "agent_description": "Argus — Security Architecture Compliance Contract Generator - Generates Security Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Security Architecture",
+    "short_name": "Security",
+    "contract_type": "security",
+    "template_filename": "TEMPLATE_SECURITY_ARCHITECTURE.md",
+    "tmp_prefix": "security",
+    "output_prefix": "SECURITY_ARCHITECTURE",
+    "compliance_prefix": "LAS",
+    "requirement_range": "LAS1-LAS8",
+    "requirement_count": 8,
+    "approval_authority": "Security Architecture Review Board",
+    "section_structure_description": "API Exposure, Intra-Microservices Communication, Inter-Cluster Kubernetes Communication, Domain API Communication, Third-Party API Consumption, Data Lake Communication, Internal Application Authentication, HTTP Encryption Scheme",
+    "wrong_code_examples": "`SEC001`, `SECA001`"
+  },
+  "persona": {
+    "codename": "Argus",
+    "title": "The Sentinel",
+    "voice": "Vigilant, zero-trust mindset, speaks in threats and controls",
+    "tone": "Assertive, uncompromising on fundamentals, risk-first",
+    "perspective": "Assume breach. Verify everything. Trust nothing.",
+    "emphasis": "Authentication, encryption standards, vulnerability SLAs, secrets management",
+    "missing_data_framing": "Escalate firmly — \"Undocumented security control is an assumed vulnerability\""
+  },
+  "section_mapping": {
+    "description": "docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/07-security-architecture.md, docs/09-operational-considerations.md (primary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "API authentication and authorization",
+    "Encryption (TLS 1.3 for transit, AES-256 for rest)",
+    "Authentication methods (OAuth, SAML, JWT, MFA)",
+    "Microservice communication security (mutual TLS)",
+    "Secrets management",
+    "Vulnerability remediation SLAs",
+    "Security event logging"
+  ],
+  "focus_areas": [
+    "API security and exposure",
+    "Authentication and authorization",
+    "Encryption (transit and rest)",
+    "Microservice security",
+    "Vulnerability management",
+    "Security monitoring"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Security Architecture",
+    "required_files": [
+      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "API security, service boundaries" },
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Network security, firewalls" },
+      { "path": "docs/05-integration-points.md", "label": "Integration Points", "description": "API authentication, authorization" },
+      { "path": "docs/07-security-architecture.md", "label": "Security Architecture", "description": "Comprehensive security controls" },
+      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Security monitoring, incident response" }
+    ],
+    "data_points": [
+      { "name": "API Authentication", "file": "docs/07-security-architecture.md", "pattern": "(API authentication|API authorization|OAuth|JWT|API key|bearer token)", "case_insensitive": true },
+      { "name": "Encryption Transit", "file": "docs/07-security-architecture.md", "pattern": "(TLS|SSL|HTTPS|encryption in transit|transport security)", "case_insensitive": true },
+      { "name": "Encryption Rest", "file": "docs/07-security-architecture.md", "pattern": "(encryption at rest|AES|data encryption|encrypted storage)", "case_insensitive": true },
+      { "name": "Authentication Method", "file": "docs/07-security-architecture.md", "pattern": "(authentication|SAML|OAuth 2.0|OpenID Connect|SSO|multi-factor|MFA)", "case_insensitive": true },
+      { "name": "Microservice Security", "file": "docs/07-security-architecture.md", "pattern": "(mutual TLS|mTLS|service mesh|service-to-service|inter-service security)", "case_insensitive": true },
+      { "name": "Secrets Management", "file": "docs/07-security-architecture.md", "pattern": "(secrets management|vault|key management|KMS|secrets rotation)", "case_insensitive": true },
+      { "name": "Vulnerability Management", "file": "docs/09-operational-considerations.md", "pattern": "(vulnerability|CVE|security patch|penetration test|security scan)", "case_insensitive": true },
+      { "name": "Security Monitoring", "file": "docs/09-operational-considerations.md", "pattern": "(security monitoring|SIEM|security event|audit log|security alert)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "API Security: All APIs require authentication and authorization",
+    "Encryption Standards: TLS 1.3 for transit, AES-256 for rest",
+    "Secrets Management: Never store in code or configuration files",
+    "Microservice mTLS: Mutual TLS required for service communication",
+    "Vulnerability SLA: Critical < 24hr, High < 7 days",
+    "Security Logging: All authentication events logged and monitored"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Security Architecture",
+  "requirement_codes_list": "LAS1, LAS2, LAS3, LAS4, LAS5, LAS6, LAS7, LAS8",
+  "success_sections": "docs/03, docs/components/README.md, docs/05, docs/07, docs/09",
+  "validation_agent": "solutions-architect-skills:security-validator"
+}

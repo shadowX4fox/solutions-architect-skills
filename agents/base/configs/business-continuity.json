@@ -1,0 +1,85 @@
+{
+  "agent_name": "business-continuity-compliance-generator",
+  "agent_description": "Aegis — Business Continuity Compliance Contract Generator - Generates Business Continuity compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Business Continuity",
+    "short_name": "Business Continuity",
+    "contract_type": "business_continuity",
+    "template_filename": "TEMPLATE_BUSINESS_CONTINUITY.md",
+    "tmp_prefix": "bc",
+    "output_prefix": "BUSINESS_CONTINUITY",
+    "compliance_prefix": "LACN",
+    "requirement_range": "LACN001-LACN043",
+    "requirement_count": 43,
+    "approval_authority": "Business Continuity Review Board",
+    "section_structure_description": "Application Name, Architecture Type, Architecture Layers, Infrastructure Type, Critical Dependencies, HA Requirement, HA Scope, Local Contingency, DR Requirement, DR Pattern, Data Replication, RTO Definition, DR Testing, Resilience to Failures, Batch Processing, Batch Execution, Batch Reprocessing, Data Backup, Backup Frequency, Backup Retention, Backup Versioning, Data Recreation Difficulty, Business Impact of Data Loss, RPO Validation, Geographic Backup Distribution, Infrastructure Config Backup, Change Log Backup, Full Restore Capability, Sensitive Data Classification, Backup Responsibility, Backup Download, DR Activation Automation, Automatable DR Components, Circuit Breaker, Retry with Backoff, Timeout Configuration, Timeboxing for DR, Fallback Response, Bulkhead Isolation, Auto-Scaling, Load Balancing, Queue-Based Load Leveling, SPOF Identification",
+    "wrong_code_examples": "`BC001`, `BCP001`"
+  },
+  "persona": {
+    "codename": "Aegis",
+    "title": "The Guardian",
+    "voice": "Calm but firm, like a crisis commander during peacetime",
+    "tone": "Protective, methodical, always planning for the worst",
+    "perspective": "Every system will fail — the question is whether you're ready",
+    "emphasis": "RTO/RPO gaps, single points of failure, recovery readiness",
+    "missing_data_framing": "Warn with urgency — \"This gap represents unprotected business capability\""
+  },
+  "section_mapping": {
+    "description": "docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md, docs/components/README.md, docs/05-integration-points.md, docs/06-technology-stack.md, docs/08-scalability-and-performance.md, docs/09-operational-considerations.md",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "RTO (Recovery Time Objective)",
+    "RPO (Recovery Point Objective)",
+    "Disaster recovery procedures",
+    "Backup strategy and retention",
+    "SPOF (Single Point of Failure) analysis",
+    "Geographic redundancy",
+    "High availability design"
+  ],
+  "focus_areas": [
+    "Business continuity planning",
+    "Disaster recovery automation",
+    "Backup and restoration procedures",
+    "Critical process impact",
+    "Resilience patterns"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Business Continuity",
+    "required_files": [
+      { "path": "docs/01-system-overview.md", "label": "System Overview", "description": "Critical business processes, business impact" },
+      { "path": "docs/02-architecture-principles.md", "label": "Architecture Principles", "description": "Architecture pattern, SPOF identification" },
+      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "Component dependencies, criticality" },
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Data backup, retention policies" },
+      { "path": "docs/05-integration-points.md", "label": "Integration Points", "description": "Integration dependencies, failover" },
+      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "Geographic redundancy, HA configuration" },
+      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "SLA targets, availability requirements" },
+      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "DR procedures, backup automation, monitoring" }
+    ],
+    "data_points": [
+      { "name": "RTO Detection", "file": "docs/09-operational-considerations.md", "pattern": "RTO[:\\s]+([0-9]+)\\s*(hour|minute|day|hr|min)", "case_insensitive": true },
+      { "name": "RPO Detection", "file": "docs/09-operational-considerations.md", "pattern": "RPO[:\\s]+([0-9]+)\\s*(hour|minute|day|hr|min)", "case_insensitive": true },
+      { "name": "Disaster Recovery", "file": "docs/09-operational-considerations.md", "pattern": "(disaster recovery|DR procedure|DR plan|failover|recovery plan)", "case_insensitive": true },
+      { "name": "Backup Strategy", "file": "docs/09-operational-considerations.md", "pattern": "(backup|snapshot|replication|incremental backup|full backup)", "case_insensitive": true },
+      { "name": "Retention Policy", "file": "docs/09-operational-considerations.md", "pattern": "(retention|backup retention|retention period|backup schedule)", "case_insensitive": true },
+      { "name": "Geographic Redundancy", "file": "docs/06-technology-stack.md", "pattern": "(geographic|geo[- ]redundan|multi[- ]region|cross[- ]region|multi[- ]datacenter)", "case_insensitive": true },
+      { "name": "High Availability", "file": "docs/06-technology-stack.md", "pattern": "(high availability|HA|active[- ]active|active[- ]passive|load balanc)", "case_insensitive": true },
+      { "name": "SPOF Analysis", "file": "docs/02-architecture-principles.md", "pattern": "(single point of failure|SPOF|single point|redundancy)", "case_insensitive": true },
+      { "name": "Critical Processes", "file": "docs/01-system-overview.md", "pattern": "(critical process|business critical|mission critical|tier 1)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "Tier Classification: Determine application tier (Tier 1/2/3) based on RTO/RPO",
+    "DR Automation: Verify automated DR procedures vs. manual processes",
+    "Backup Testing: Check quarterly backup restoration testing requirements",
+    "Geographic Redundancy: Mandatory for Tier 1 applications",
+    "SPOF Analysis: Identify and document mitigation strategies"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Business Continuity",
+  "requirement_codes_list": "LACN001, LACN002, LACN003, LACN004, LACN005, LACN006, LACN007, LACN008, LACN009, LACN010, LACN011, LACN012, LACN013, LACN014, LACN015, LACN016, LACN017, LACN018, LACN019, LACN020, LACN021, LACN022, LACN023, LACN024, LACN025, LACN026, LACN027, LACN028, LACN029, LACN030, LACN031, LACN032, LACN033, LACN034, LACN035, LACN036, LACN037, LACN038, LACN039, LACN040, LACN041, LACN042, LACN043",
+  "success_sections": "docs/01, docs/02, docs/03, docs/components/README.md, docs/05, docs/06, docs/08, docs/09",
+  "validation_agent": "solutions-architect-skills:business-continuity-validator"
+}

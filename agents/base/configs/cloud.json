@@ -1,0 +1,80 @@
+{
+  "agent_name": "cloud-compliance-generator",
+  "agent_description": "Atlas — Cloud Architecture Compliance Contract Generator - Generates Cloud Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Cloud Architecture",
+    "short_name": "Cloud",
+    "contract_type": "cloud_architecture",
+    "template_filename": "TEMPLATE_CLOUD_ARCHITECTURE.md",
+    "tmp_prefix": "cloud",
+    "output_prefix": "CLOUD_ARCHITECTURE",
+    "compliance_prefix": "LAC",
+    "requirement_range": "LAC1-LAC6",
+    "requirement_count": 6,
+    "approval_authority": "Cloud Architecture Review Board",
+    "section_structure_description": "Cloud Deployment Model, Network Connectivity, Security and Regulatory Compliance, Resource Monitoring, Backup and Recovery, Cloud Best Practices",
+    "wrong_code_examples": "`CLDA001`, `CLOUD001`"
+  },
+  "persona": {
+    "codename": "Atlas",
+    "title": "The Scaler",
+    "voice": "Forward-thinking, cost-conscious, cloud-native evangelist",
+    "tone": "Optimistic but disciplined, always balancing scale vs. spend",
+    "perspective": "Design for elasticity, pay for what you use",
+    "emphasis": "Multi-region readiness, IaC coverage, cost optimization, cloud-native patterns",
+    "missing_data_framing": "Frame as opportunity cost — \"Undefined cloud strategy risks vendor lock-in and overspend\""
+  },
+  "section_mapping": {
+    "description": "docs/03-architecture-layers.md, docs/06-technology-stack.md, docs/09-operational-considerations.md (primary), docs/07-security-architecture.md, docs/08-scalability-and-performance.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "Cloud provider (AWS, Azure, GCP)",
+    "Deployment model (IaaS, PaaS, SaaS)",
+    "Multi-region deployment",
+    "IaC coverage (Terraform, CloudFormation, Pulumi)",
+    "Cloud costs and optimization",
+    "Cloud-native services usage"
+  ],
+  "focus_areas": [
+    "Cloud deployment patterns",
+    "Multi-region resilience",
+    "Cost optimization strategies",
+    "IaC (Infrastructure as Code) adoption",
+    "Cloud security best practices"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Cloud Architecture",
+    "required_files": [
+      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "Cloud deployment model, architecture pattern" },
+      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "IaC tools, cloud resources, multi-region setup" },
+      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Cloud monitoring, backup strategies" },
+      { "path": "docs/07-security-architecture.md", "label": "Security Architecture", "description": "Cloud security controls (secondary)" },
+      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "Cloud scalability (secondary)" }
+    ],
+    "data_points": [
+      { "name": "Cloud Provider Detection", "file": "docs/03-architecture-layers.md", "pattern": "(AWS|Azure|GCP|Google Cloud|Amazon Web Services|Microsoft Azure)", "case_insensitive": true },
+      { "name": "Deployment Model", "file": "docs/03-architecture-layers.md", "pattern": "(IaaS|PaaS|SaaS|Infrastructure as a Service|Platform as a Service|Software as a Service)", "case_insensitive": true },
+      { "name": "Multi-Region Configuration", "file": "docs/06-technology-stack.md", "pattern": "(multi[- ]region|multi[- ]az|availability zone|cross[- ]region)", "case_insensitive": true },
+      { "name": "IaC Tools", "file": "docs/06-technology-stack.md", "pattern": "(Terraform|CloudFormation|Pulumi|Infrastructure as Code|IaC|ARM template|Bicep)", "case_insensitive": true },
+      { "name": "Cloud-Native Services", "file": "docs/03-architecture-layers.md", "pattern": "(Lambda|S3|ECS|EKS|CloudFront|API Gateway|Cloud Functions|Cloud Run|App Service|AKS|Cosmos)", "case_insensitive": true },
+      { "name": "Cost Optimization", "file": "docs/09-operational-considerations.md", "pattern": "(reserved instance|spot instance|auto[- ]scaling|right[- ]sizing|cost optimization|FinOps)", "case_insensitive": true },
+      { "name": "Cloud Monitoring Tools", "file": "docs/09-operational-considerations.md", "pattern": "(CloudWatch|Azure Monitor|Stackdriver|Cloud Logging|X-Ray|Application Insights)", "case_insensitive": true },
+      { "name": "Cloud Security", "file": "docs/07-security-architecture.md", "pattern": "(IAM|encryption at rest|encryption in transit|VPC|security group|network ACL|WAF)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "Multi-cloud detection: If multiple cloud providers found (AWS + Azure), note hybrid cloud approach",
+    "IaC coverage: Calculate percentage based on manual vs. IaC-managed resources",
+    "Cost optimization: Identify cost-saving opportunities (reserved instances, auto-scaling)",
+    "Cloud-native adoption: Measure usage of managed services vs. custom deployments",
+    "Regional redundancy: Verify multi-region setup for high availability"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Cloud Architecture",
+  "requirement_codes_list": "LAC1, LAC2, LAC3, LAC4, LAC5, LAC6",
+  "success_sections": "docs/03, docs/06, docs/09, docs/07, docs/08",
+  "validation_agent": "solutions-architect-skills:cloud-validator"
+}

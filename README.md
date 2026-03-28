@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.13.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.12.12` in the list.
+You should see `solutions-architect-skills v2.13.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -591,7 +591,16 @@ Where:
 
 ## Roadmap
 
-### v2.12.12 (Current Release) ✅
+### v2.13.0 (Current Release) ✅
+**refactor: compliance agent build system — base template + domain configs + 10 validation agents**
+
+- Refactored 10 compliance agents (~85% shared boilerplate) into a build-time generation system: `agents/base/AGENT_BASE.md` + 9 shared sections + 10 domain config JSONs → 10 generated agent .md files via `bun run build:agents`
+- Added 10 new validation agents (`agents/validators/`) — one per compliance domain — that perform external standard checks (stack validation, security controls, SRE readiness, etc.)
+- Each compliance agent now invokes its domain validator in Step 3.4 before populating the template
+- Build script (`scripts/build-agents.ts`) handles `{{variable}}` substitution, `@foreach`/`@if` directives, section injection, and domain-specific overrides
+- Integrated into `bun run build` pipeline; generated files marked `linguist-generated` via `.gitattributes`
+
+### v2.12.12 (Previous Release) ✅
 **feat: dependency-based ordering for batch dev handoff generation**
 
 - Added Step 2.2 to `architecture-dev-handoff`: when generating multiple handoffs, components are sorted ascending by inter-component dependency count (least → most)

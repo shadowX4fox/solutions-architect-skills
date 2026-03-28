@@ -1,0 +1,105 @@
+{
+  "agent_name": "development-compliance-generator",
+  "agent_description": "Hephaestus — Development Architecture Compliance Contract Generator - Generates Development Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Development Architecture",
+    "short_name": "Development",
+    "contract_type": "development",
+    "template_filename": "TEMPLATE_DEVELOPMENT_ARCHITECTURE.md",
+    "tmp_prefix": "dev",
+    "output_prefix": "DEVELOPMENT_ARCHITECTURE",
+    "compliance_prefix": "LADES",
+    "requirement_range": "LADES1-LADES2",
+    "requirement_count": 2,
+    "approval_authority": "Development Architecture Review Board",
+    "section_structure_description": "Best Practices Adoption - Technology Stack Alignment, Architecture Debt Impact - Exception Handling and Action Plans",
+    "wrong_code_examples": "`DEV001`, `DEVA001`"
+  },
+  "persona": {
+    "codename": "Hephaestus",
+    "title": "The Craftsman",
+    "voice": "Practical, quality-focused, developer-empathetic",
+    "tone": "Constructive, standards-driven but not dogmatic",
+    "perspective": "Good architecture enables fast, safe delivery",
+    "emphasis": "Code quality, test coverage, tech debt tracking, CI/CD maturity",
+    "missing_data_framing": "Frame as velocity risk — \"Undefined standards lead to inconsistent delivery\""
+  },
+  "section_mapping": {
+    "description": "docs/02-architecture-principles.md, docs/components/README.md, docs/06-technology-stack.md, adr/README.md (primary), docs/09-operational-considerations.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "Technology stack (languages, frameworks, versions)",
+    "Code coverage (minimum 80% for critical paths)",
+    "Technical debt tracking",
+    "Dependency vulnerabilities",
+    "Exception action plans (deviations from standards)",
+    "Development velocity",
+    "Build and deployment automation"
+  ],
+  "focus_areas": [
+    "Software development standards",
+    "Technical debt management",
+    "Code quality",
+    "Technology lifecycle",
+    "Development practices"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Development Architecture",
+    "required_files": [
+      { "path": "docs/02-architecture-principles.md", "label": "Architecture Principles", "description": "Architecture patterns, design principles" },
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Development infrastructure, CI/CD" },
+      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "Languages, frameworks, versions" },
+      { "path": "adr/README.md", "label": "ADRs", "description": "Architectural decisions, technology choices" },
+      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Build/deployment automation (secondary)" }
+    ],
+    "data_points": [
+      { "name": "Technology Stack", "file": "docs/06-technology-stack.md", "pattern": "(language|framework|library|Java|Python|Node|React|Spring|.NET)", "case_insensitive": true },
+      { "name": "Code Coverage", "file": "docs/09-operational-considerations.md", "pattern": "(code coverage|test coverage|unit test|integration test)", "case_insensitive": true },
+      { "name": "Technical Debt", "file": "adr/README.md", "pattern": "(technical debt|tech debt|refactoring|code quality|code smell)", "case_insensitive": true },
+      { "name": "Dependency Management", "file": "docs/06-technology-stack.md", "pattern": "(dependency|vulnerability|CVE|security patch|version upgrade)", "case_insensitive": true },
+      { "name": "CI/CD Pipeline", "file": "docs/09-operational-considerations.md", "pattern": "(CI/CD|continuous integration|continuous deployment|Jenkins|GitHub Actions|GitLab CI)", "case_insensitive": true },
+      { "name": "Code Review", "file": "docs/09-operational-considerations.md", "pattern": "(code review|peer review|pull request|PR review)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [
+    {
+      "id": "step46",
+      "insert_after": "phase4-post",
+      "file": "development-step46.md"
+    },
+    {
+      "id": "validation_summary_placeholder",
+      "append_to": "phase0-can-do-list",
+      "file": "development-validation-summary.md"
+    },
+    {
+      "id": "phase45_extra_checks",
+      "append_to": "phase45-extra-checks",
+      "content_lines": [
+        "- [ ] Section 1.6 has NO remaining placeholders (`[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, etc.)"
+      ]
+    },
+    {
+      "id": "phase5_extra_checks",
+      "append_to": "phase5-extra-checks",
+      "content_lines": [
+        "- [ ] **Section 1.6 complete**: No `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, or other Section 1.6 placeholders remain"
+      ]
+    }
+  ],
+  "agent_notes": [
+    "Technology Stack: Must use supported versions (not deprecated)",
+    "Code Coverage: Minimum 80% for critical paths",
+    "Peer Review: All code changes require review",
+    "Technical Debt: Tracked and addressed quarterly",
+    "Vulnerability SLA: Critical < 24hr, High < 7 days",
+    "Exception Plans: Required for non-standard technology choices"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Development Architecture",
+  "requirement_codes_list": "LADES1, LADES2",
+  "success_sections": "docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09",
+  "validation_agent": "solutions-architect-skills:development-validator"
+}

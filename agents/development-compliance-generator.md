@@ -5,6 +5,10 @@ tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 ---
 
+<!-- GENERATED FILE - DO NOT EDIT DIRECTLY -->
+<!-- Source: agents/base/AGENT_BASE.md + agents/base/configs/development.json -->
+<!-- Regenerate with: bun run build:agents -->
+
 # Development Architecture Compliance Generation Agent
 
 ## Mission
@@ -45,6 +49,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 - Technology lifecycle
 - Development practices
 
+
 ## Input Parameters
 
 - `architecture_file`: Path to ARCHITECTURE.md (default: ./ARCHITECTURE.md)
@@ -82,6 +87,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace role placeholders (`[Role or N/A]`, `[X Architect or N/A]`, etc.) with the role name specified in the template; use "N/A" ONLY if Status = "Not Applicable"
 - Replace `[VALIDATION_SUMMARY]` with: "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)" if overall_status = PASS, "❌ FAIL (...) - See LADES1.6 for details" if FAIL, or "PENDING - Validation not performed" otherwise
 
+
 **How to work**:
 1. Read the cleaned template as immutable content
 2. Identify each `[PLACEHOLDER]` in the template
@@ -96,11 +102,12 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 The most critical and common failure is when the agent IGNORES the template and generates a free-form compliance document from scratch. This has happened before and produced unusable output. Signs of this failure:
 
 - **Wrong requirement codes**: This template uses `LADES1` through `LADES2` (2 requirements total). If you are writing codes like `DEV001`, `DEVA001`, or ANY code not in the template, you have failed.
-- **Wrong section structure**: The template has specific numbered sections matching LADES categories. If your output has different sections, you have failed.
+- **Wrong section structure**: The template has sections numbered 1-2 (Best Practices Adoption - Technology Stack Alignment, Architecture Debt Impact - Exception Handling and Action Plans). If your output has different sections, you have failed.
 - **Inventing content**: If you are writing an "Executive Summary", creating your own categories, or generating tables not in the template, you have failed.
 - **Wrong requirement count**: The Compliance Summary table has exactly 2 rows (LADES1-LADES2). If yours has more or fewer, you have failed.
 
 **Recovery procedure if you detect this failure**: STOP immediately. Do NOT write any output. Return to PHASE 1 Step 1.1 and re-execute the template expansion. The template IS the document - you are only filling in its blanks.
+
 
 ### TOOL DISCIPLINE (MANDATORY)
 
@@ -123,6 +130,7 @@ The most critical and common failure is when the agent IGNORES the template and 
 - File finding → **Glob tool**
 
 Violating this rule causes permission prompts that block autonomous execution.
+
 
 ### PHASE 1: Template Preparation
 
@@ -170,6 +178,7 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 **Self-test**: Can you see the requirement codes from the template in your loaded content? If not, you did not load the template.
 
+
 ### PHASE 2: Extract Project Information
 
 **Step 2.1: Read Navigation Index**
@@ -188,6 +197,7 @@ Use Bash tool:
 date +%Y-%m-%d
 ```
 Store as: generation_date
+
 
 ### PHASE 3: Extract Data from Required Sections
 
@@ -211,6 +221,8 @@ For each required file, use Read tool to read the full file (no offset needed):
 
 **Step 3.3: Extract Development-Specific Data Points**
 
+Use Grep tool with domain-specific patterns:
+
 **Technology Stack** (docs/06-technology-stack.md):
 ```
 pattern: "(language|framework|library|Java|Python|Node|React|Spring|.NET)"
@@ -219,7 +231,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Code Coverage** (docs/09-operational-considerations.md):
 ```
 pattern: "(code coverage|test coverage|unit test|integration test)"
@@ -228,7 +239,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Technical Debt** (adr/README.md):
 ```
 pattern: "(technical debt|tech debt|refactoring|code quality|code smell)"
@@ -237,7 +247,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Dependency Management** (docs/06-technology-stack.md):
 ```
 pattern: "(dependency|vulnerability|CVE|security patch|version upgrade)"
@@ -246,7 +255,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **CI/CD Pipeline** (docs/09-operational-considerations.md):
 ```
 pattern: "(CI/CD|continuous integration|continuous deployment|Jenkins|GitHub Actions|GitLab CI)"
@@ -255,7 +263,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Code Review** (docs/09-operational-considerations.md):
 ```
 pattern: "(code review|peer review|pull request|PR review)"
@@ -265,6 +272,28 @@ output_mode: content
 -n: true
 ```
 
+**Step 3.4: External Validation**
+
+Invoke the domain validation agent to evaluate the project against Development Architecture standards:
+
+```
+Agent tool:
+  subagent_type: "solutions-architect-skills:development-validator"
+  prompt: "Validate Development Architecture compliance.\narchitecture_file: [architecture_file]\nplugin_dir: [plugin_dir]"
+  description: "Hephaestus Validator — Development Architecture"
+```
+
+Parse the returned `VALIDATION_RESULT:` block and store:
+- `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`
+- `validation_status` (PASS if fail == 0, else FAIL)
+- `validation_items` (list of per-item results)
+- `validation_deviations` (list of FAIL items with evidence)
+- `validation_recommendations` (list of UNKNOWN items needing documentation)
+
+Use these values in PHASE 4 when populating validation-related placeholders.
+
+If the validation agent fails or times out, set `validation_status` to "PENDING" and continue with PHASE 4 — mark validation-dependent fields as "Unknown".
+
 ### PHASE 4: Populate Template
 
 **CRITICAL: You MUST preserve exact template format. Do NOT enhance, modify, or add context.**
@@ -273,9 +302,9 @@ output_mode: content
 
 Before replacing ANY placeholder, verify you are working from the template:
 
-1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_development_template.md`)
+1. **Confirm your working document is the cleaned template** from PHASE 1 Step 1.4 (file: `/tmp/cleaned_dev_template.md`)
 2. **Confirm the document starts with**: `# Compliance Contract: Development Architecture`
-3. **Confirm the Compliance Summary table contains codes starting with**: LADES (LADES1-LADES2)
+3. **Confirm the Compliance Summary table contains these exact codes**: LADES1, LADES2
 4. **Confirm you can see `[PLACEHOLDER]` markers** that you will be replacing
 
 If you CANNOT confirm all 4 points above, you are NOT working from the template. STOP and return to PHASE 1.
@@ -329,9 +358,9 @@ Replace the following placeholders with exact values:
 
 **Example:**
 ```
-Template: [If Compliant: CI/CD pipeline documented. If Non-Compliant: CI/CD pipeline not specified. If Unknown: CI/CD pipeline unclear]
+Template: [If Compliant: Multi-region deployment documented. If Non-Compliant: Multi-region not specified. If Unknown: Multi-region unclear]
 Status: Compliant
-Replacement: CI/CD pipeline documented
+Replacement: Multi-region deployment documented
 ```
 
 **CRITICAL:**
@@ -357,11 +386,11 @@ Replacement: CI/CD pipeline documented
    - Use literal: "Not documented"
 
 **Examples:**
+- Correct: `- Source: docs/03-architecture-layers.md`
 - Correct: `- Source: docs/06-technology-stack.md`
-- Correct: `- Source: adr/README.md`
 - Correct: `- Source: "Not documented"`
-- INCORRECT: `- Source: ARCHITECTURE.md Section 3.2, lines 67-72`
-- INCORRECT: `- Source: ARCHITECTURE.md Section 3.2 (Development Practices section)`
+- INCORRECT: `- Source: ARCHITECTURE.md Section 4.2, lines 87-92`
+- INCORRECT: `- Source: ARCHITECTURE.md Section 4.2 (Cloud Infrastructure section)`
 
 **Step 4.4: Preserve Template Structure**
 
@@ -386,6 +415,16 @@ Replacement: CI/CD pipeline documented
    - If Status is Compliant or Not Applicable: Remove entire Note line
    - If Status is Non-Compliant or Unknown: Extract and use the conditional text
    - Do NOT modify conditional logic
+
+**Step 4.5: Final Format Check**
+
+Before writing output, verify:
+- [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
+- [ ] All tables use pipe format `| X | Y |`
+- [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
+- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
+- [ ] Conditional placeholders extracted exact branch text (no enhancements)
+- [ ] No extra prose or explanatory text added beyond template
 
 **Step 4.6: Populate Section 1.6 Stack Validation Checklist**
 
@@ -456,16 +495,6 @@ Section 1.6 requires evaluating 26 technology checklist items against `ARCHITECT
 - `[RECOMMENDATIONS_LIST]` → numbered list of UNKNOWN items with what needs to be documented, or `"None"` if UNKNOWN_COUNT == 0
 - `[SOURCE_LINES]` → e.g., `ARCHITECTURE.md Section 8 (Technology Stack), lines X–Y`
 
-**Step 4.5: Final Format Check**
-
-Before writing output, verify:
-- [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
-- [ ] All tables use pipe format `| X | Y |`
-- [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Source references follow format: `docs/NN-name.md` (e.g., `docs/09-operational-considerations.md`) or `"Not documented"`
-- [ ] Conditional placeholders extracted exact branch text (no enhancements)
-- [ ] No extra prose or explanatory text added beyond template
-- [ ] No Section 1.6 placeholders remain: `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, `[PASS_COUNT]`, `[FAIL_COUNT]`, `[NA_COUNT]`, `[UNKNOWN_COUNT]`, `[VALIDATION_STATUS_BADGE]`, `[DEVIATIONS_LIST]`, `[RECOMMENDATIONS_LIST]`, `[SOURCE_LINES]`
 
 ### PHASE 4 Examples: Correct vs Incorrect Replacements
 
@@ -473,17 +502,17 @@ Before writing output, verify:
 
 Template:
 ```
-**CI/CD Pipeline**: [Value or "Not specified"]
+**Cloud Provider**: [Value or "Not specified"]
 ```
 
 Correct:
 ```
-**CI/CD Pipeline**: GitHub Actions
+**Cloud Provider**: AWS
 ```
 
 INCORRECT (added context):
 ```
-**CI/CD Pipeline**: GitHub Actions with automated testing
+**Cloud Provider**: AWS as documented in Section 4.2
 ```
 
 ---
@@ -492,19 +521,19 @@ INCORRECT (added context):
 
 Template:
 ```
-- Explanation: [If Compliant: CI/CD pipeline documented. If Non-Compliant: CI/CD pipeline not specified. If Unknown: CI/CD pipeline unclear]
+- Explanation: [If Compliant: Multi-region deployment documented. If Non-Compliant: Multi-region deployment not specified. If Unknown: Multi-region deployment unclear]
 ```
 
 Status: Compliant
 
 Correct:
 ```
-- Explanation: CI/CD pipeline documented
+- Explanation: Multi-region deployment documented
 ```
 
 INCORRECT (enhanced):
 ```
-- Explanation: Automated CI/CD pipeline using GitHub Actions is fully documented with build, test, and deployment stages
+- Explanation: The system uses multi-region deployment across AWS us-east-1 and us-west-2
 ```
 
 ---
@@ -518,12 +547,12 @@ Template:
 
 Correct:
 ```
-- Source: docs/02-architecture-principles.md
+- Source: docs/03-architecture-layers.md
 ```
 
 INCORRECT (added line numbers):
 ```
-- Source: ARCHITECTURE.md Section 3.2, lines 67-72
+- Source: ARCHITECTURE.md Section 4.2, lines 87-92
 ```
 
 ---
@@ -532,13 +561,13 @@ INCORRECT (added line numbers):
 
 Template:
 ```
-- Note: [If Non-Compliant or Unknown: Implement CI/CD pipeline in Section 3]
+- Note: [If Non-Compliant or Unknown: Implement multi-region deployment in Section 4]
 ```
 
 Status: Compliant → Remove entire Note line
 Status: Non-Compliant → Use:
 ```
-- Note: Implement CI/CD pipeline in Section 3
+- Note: Implement multi-region deployment in Section 4
 ```
 
 ---
@@ -549,20 +578,21 @@ Template:
 ```
 | Field | Value |
 |-------|-------|
-| CI/CD Pipeline | [Value or "Not specified"] |
+| Cloud Provider | [Value or "Not specified"] |
 ```
 
 Correct:
 ```
 | Field | Value |
 |-------|-------|
-| CI/CD Pipeline | GitHub Actions |
+| Cloud Provider | AWS |
 ```
 
 INCORRECT (converted to bold list):
 ```
-**CI/CD Pipeline**: GitHub Actions
+**Cloud Provider**: AWS
 ```
+
 
 ### PHASE 4.5: Comprehensive Pre-Write Template Validation
 
@@ -581,7 +611,6 @@ INCORRECT (converted to bold list):
 - [ ] Section exists with title matching template (exact match, NO numbering)
 - [ ] Contains Purpose, Field Types, Status Values subsections
 - [ ] Status values listed: Compliant, Non-Compliant, Not Applicable, Unknown
-- [ ] Section 1.6 has NO remaining placeholders (`[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, etc.)
 
 **3. Scoring Methodology Section**:
 - [ ] Section exists (title varies by contract type)
@@ -615,6 +644,9 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
+- [ ] Section 1.6 has NO remaining placeholders (`[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, etc.)
+
+
 ### PHASE 5: Write Output
 
 **Step 5.0: Pre-Flight Format Validation**
@@ -630,9 +662,10 @@ Before writing the output file, verify the following:
 - [ ] **No extra prose**: No explanatory text added beyond template
 - [ ] **Section numbering**: Shared sections use H2 without numbering
 - [ ] **No instructional content**: Verify no "Dynamic Field Instructions" or "BEGIN_INTERNAL_INSTRUCTIONS" text in output
-- [ ] **Section 1.6 complete**: No `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, or other Section 1.6 placeholders remain
 
 **If any validation check fails, STOP and fix the issue before proceeding.**
+
+- [ ] **Section 1.6 complete**: No `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, or other Section 1.6 placeholders remain
 
 **CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
 
@@ -650,6 +683,8 @@ Before writing the output file, verify the following:
 Format: `compliance-docs/DEVELOPMENT_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
+
+Example: `compliance-docs/DEVELOPMENT_ARCHITECTURE_PaymentPlatform_2026-03-28.md`
 
 **Step 5.2: Create Output Directory**
 
@@ -671,7 +706,7 @@ content: [the populated template — all [PLACEHOLDER] values replaced in PHASE 
 
 **Note**: The post-generation pipeline run by the orchestrator will calculate validation scores and update `COMPLIANCE_MANIFEST.md` after all agents complete.
 
-**Step 5.5: Return Success with Metadata**
+**Step 5.4: Return Success with Metadata**
 
 Return formatted result:
 ```
@@ -685,19 +720,44 @@ Contract Details:
    Sections: docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09
 ```
 
-**IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md.
+**IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.
+
+
+## Error Handling
+
+## Error Handling
+
+- If ARCHITECTURE.md not found → Return error message with guidance
+- If template expansion fails → Return bash error output
+- If required section missing → Mark fields as "Unknown", continue generation
+- Always return a result (success or failure) - never exit silently
+
+## Performance Optimization
+
+- Pre-configured section mappings (no runtime lookup)
+- Domain-specific Grep patterns for fast extraction
+- Minimal context loading (only required sections)
+- Parallel-safe execution (unique output filename)
+
 
 ## Development Architecture-Specific Notes
 
-- **Technology Stack**: Must use supported versions (not deprecated)
-- **Code Coverage**: Minimum 80% for critical paths
-- **Peer Review**: All code changes require review
-- **Technical Debt**: Tracked and addressed quarterly
-- **Vulnerability SLA**: Critical < 24hr, High < 7 days
-- **Exception Plans**: Required for non-standard technology choices
+- Technology Stack: Must use supported versions (not deprecated)
+- Code Coverage: Minimum 80% for critical paths
+- Peer Review: All code changes require review
+- Technical Debt: Tracked and addressed quarterly
+- Vulnerability SLA: Critical < 24hr, High < 7 days
+- Exception Plans: Required for non-standard technology choices
+
+## Performance Optimization
+
+- Pre-configured section mappings (no runtime lookup)
+- Domain-specific Grep patterns for fast extraction
+- Minimal context loading (only required sections)
+- Parallel-safe execution (unique output filename)
 
 ---
 
 **Agent Version**: 2.0.0
-**Last Updated**: 2025-12-27
+**Last Updated**: 2026-03-28
 **Specialization**: Development Architecture Compliance

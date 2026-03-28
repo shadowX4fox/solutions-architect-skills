@@ -1,0 +1,82 @@
+{
+  "agent_name": "data-ai-compliance-generator",
+  "agent_description": "Mnemosyne — Data & AI Architecture Compliance Contract Generator - Generates Data & AI Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Data & AI Architecture",
+    "short_name": "Data & AI",
+    "contract_type": "data_ai",
+    "template_filename": "TEMPLATE_DATA_AI_ARCHITECTURE.md",
+    "tmp_prefix": "data_ai",
+    "output_prefix": "DATA_AI_ARCHITECTURE",
+    "compliance_prefix": "LAD/LAIA",
+    "requirement_range": "LAD1-LAD8, LAIA1-LAIA3",
+    "requirement_count": 11,
+    "approval_authority": "Data & AI Architecture Review Board",
+    "section_structure_description": "Data Quality, Data Fabric Reuse, Data Recovery, Data Decoupling, Data Scalability, Data Integration, Regulatory Compliance, Data Architecture Standards, AI Model Governance, AI Security and Reputation, AI Hallucination Control",
+    "wrong_code_examples": "`DAI001`, `DATA001`"
+  },
+  "persona": {
+    "codename": "Mnemosyne",
+    "title": "The Steward",
+    "voice": "Precise, governance-minded, treats data as a strategic asset",
+    "tone": "Analytical, privacy-aware, lineage-obsessed",
+    "perspective": "Data without governance is liability, not asset",
+    "emphasis": "Data quality, PII protection, ML model governance, regulatory compliance",
+    "missing_data_framing": "Flag regulatory risk — \"Undocumented data flow is a compliance blind spot\""
+  },
+  "section_mapping": {
+    "description": "docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md (primary), docs/06-technology-stack.md, docs/08-scalability-and-performance.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "Data quality metrics",
+    "Data lineage and traceability",
+    "PII encryption and masking",
+    "ML model governance (training, deployment, monitoring)",
+    "Data retention policies",
+    "Data scalability (3x growth capability)",
+    "Regulatory compliance (GDPR, data residency)"
+  ],
+  "focus_areas": [
+    "Data management and governance",
+    "Analytics and AI/ML model lifecycle",
+    "Data quality and validation",
+    "Regulatory compliance",
+    "Data pipeline architecture"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Data & AI Architecture",
+    "required_files": [
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Data models, storage, quality" },
+      { "path": "docs/04-data-flow-patterns.md", "label": "Data Flow Patterns", "description": "Data integration patterns" },
+      { "path": "docs/05-integration-points.md", "label": "Integration Points", "description": "Data encryption, PII protection" },
+      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "Data infrastructure (secondary)" },
+      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "Data pipeline performance (secondary)" }
+    ],
+    "data_points": [
+      { "name": "Data Quality", "file": "docs/components/README.md", "pattern": "(data quality|data validation|data cleansing|data accuracy|data completeness)", "case_insensitive": true },
+      { "name": "Data Lineage", "file": "docs/04-data-flow-patterns.md", "pattern": "(data lineage|data provenance|data flow|data traceability)", "case_insensitive": true },
+      { "name": "PII Protection", "file": "docs/05-integration-points.md", "pattern": "(PII|personally identifiable|data masking|data anonymization|pseudonymization)", "case_insensitive": true },
+      { "name": "ML Model Governance", "file": "docs/components/README.md", "pattern": "(ML model|machine learning|model training|model deployment|model monitoring|re-training)", "case_insensitive": true },
+      { "name": "Data Retention", "file": "docs/components/README.md", "pattern": "(retention policy|data retention|retention period|data lifecycle)", "case_insensitive": true },
+      { "name": "Data Scalability", "file": "docs/08-scalability-and-performance.md", "pattern": "(data volume|scalability|3x growth|data growth|scaling)", "case_insensitive": true },
+      { "name": "Regulatory Compliance", "file": "docs/05-integration-points.md", "pattern": "(GDPR|data residency|data sovereignty|privacy regulation|CCPA)", "case_insensitive": true },
+      { "name": "Data Pipeline", "file": "docs/04-data-flow-patterns.md", "pattern": "(data pipeline|ETL|ELT|data ingestion|data processing)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "Data Quality Coverage: Define and monitor data quality metrics",
+    "Data Lineage: Track from source to consumption",
+    "PII Protection: Encryption and masking required",
+    "ML Model Lifecycle: Training, deployment, monitoring, re-training schedules",
+    "Scalability: Handle 3x growth without redesign",
+    "Regulatory Compliance: GDPR, data residency requirements"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Data & AI Architecture",
+  "requirement_codes_list": "LAD1, LAD2, LAD3, LAD4, LAD5, LAD6, LAD7, LAD8, LAIA1, LAIA2, LAIA3",
+  "success_sections": "docs/components/README.md, docs/04, docs/05, docs/06, docs/08",
+  "validation_agent": "solutions-architect-skills:data-ai-validator"
+}

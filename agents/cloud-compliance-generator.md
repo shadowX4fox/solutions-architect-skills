@@ -5,6 +5,10 @@ tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 ---
 
+<!-- GENERATED FILE - DO NOT EDIT DIRECTLY -->
+<!-- Source: agents/base/AGENT_BASE.md + agents/base/configs/cloud.json -->
+<!-- Regenerate with: bun run build:agents -->
+
 # Cloud Architecture Compliance Generation Agent
 
 ## Mission
@@ -43,6 +47,7 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 - Cost optimization strategies
 - IaC (Infrastructure as Code) adoption
 - Cloud security best practices
+
 
 ## Input Parameters
 
@@ -100,6 +105,7 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 **Recovery procedure if you detect this failure**: STOP immediately. Do NOT write any output. Return to PHASE 1 Step 1.1 and re-execute the template expansion. The template IS the document - you are only filling in its blanks.
 
+
 ### TOOL DISCIPLINE (MANDATORY)
 
 **ALLOWED Bash commands** (these 3 ONLY):
@@ -121,6 +127,7 @@ The most critical and common failure is when the agent IGNORES the template and 
 - File finding → **Glob tool**
 
 Violating this rule causes permission prompts that block autonomous execution.
+
 
 ### PHASE 1: Template Preparation
 
@@ -168,6 +175,7 @@ TEMPLATE LOAD FAILURE: Could not load and verify the compliance template. Contra
 
 **Self-test**: Can you see the requirement codes from the template in your loaded content? If not, you did not load the template.
 
+
 ### PHASE 2: Extract Project Information
 
 **Step 2.1: Read Navigation Index**
@@ -186,6 +194,7 @@ Use Bash tool:
 date +%Y-%m-%d
 ```
 Store as: generation_date
+
 
 ### PHASE 3: Extract Data from Required Sections
 
@@ -219,7 +228,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Deployment Model** (docs/03-architecture-layers.md):
 ```
 pattern: "(IaaS|PaaS|SaaS|Infrastructure as a Service|Platform as a Service|Software as a Service)"
@@ -228,7 +236,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Multi-Region Configuration** (docs/06-technology-stack.md):
 ```
 pattern: "(multi[- ]region|multi[- ]az|availability zone|cross[- ]region)"
@@ -237,7 +244,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **IaC Tools** (docs/06-technology-stack.md):
 ```
 pattern: "(Terraform|CloudFormation|Pulumi|Infrastructure as Code|IaC|ARM template|Bicep)"
@@ -246,7 +252,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Cloud-Native Services** (docs/03-architecture-layers.md):
 ```
 pattern: "(Lambda|S3|ECS|EKS|CloudFront|API Gateway|Cloud Functions|Cloud Run|App Service|AKS|Cosmos)"
@@ -255,7 +260,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Cost Optimization** (docs/09-operational-considerations.md):
 ```
 pattern: "(reserved instance|spot instance|auto[- ]scaling|right[- ]sizing|cost optimization|FinOps)"
@@ -264,7 +268,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Cloud Monitoring Tools** (docs/09-operational-considerations.md):
 ```
 pattern: "(CloudWatch|Azure Monitor|Stackdriver|Cloud Logging|X-Ray|Application Insights)"
@@ -273,7 +276,6 @@ output_mode: content
 -i: true
 -n: true
 ```
-
 **Cloud Security** (docs/07-security-architecture.md):
 ```
 pattern: "(IAM|encryption at rest|encryption in transit|VPC|security group|network ACL|WAF)"
@@ -282,6 +284,28 @@ output_mode: content
 -i: true
 -n: true
 ```
+
+**Step 3.4: External Validation**
+
+Invoke the domain validation agent to evaluate the project against Cloud Architecture standards:
+
+```
+Agent tool:
+  subagent_type: "solutions-architect-skills:cloud-validator"
+  prompt: "Validate Cloud Architecture compliance.\narchitecture_file: [architecture_file]\nplugin_dir: [plugin_dir]"
+  description: "Atlas Validator — Cloud Architecture"
+```
+
+Parse the returned `VALIDATION_RESULT:` block and store:
+- `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`
+- `validation_status` (PASS if fail == 0, else FAIL)
+- `validation_items` (list of per-item results)
+- `validation_deviations` (list of FAIL items with evidence)
+- `validation_recommendations` (list of UNKNOWN items needing documentation)
+
+Use these values in PHASE 4 when populating validation-related placeholders.
+
+If the validation agent fails or times out, set `validation_status` to "PENDING" and continue with PHASE 4 — mark validation-dependent fields as "Unknown".
 
 ### PHASE 4: Populate Template
 
@@ -415,6 +439,7 @@ Before writing output, verify:
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
+
 ### PHASE 4 Examples: Correct vs Incorrect Replacements
 
 **Example 1: Simple Placeholder**
@@ -512,6 +537,7 @@ INCORRECT (converted to bold list):
 **Cloud Provider**: AWS
 ```
 
+
 ### PHASE 4.5: Comprehensive Pre-Write Template Validation
 
 **MANDATORY CHECK**: Before writing the output file, verify COMPLETE template compliance.
@@ -562,6 +588,7 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
+
 ### PHASE 5: Write Output
 
 **Step 5.0: Pre-Flight Format Validation**
@@ -580,6 +607,7 @@ Before writing the output file, verify the following:
 
 **If any validation check fails, STOP and fix the issue before proceeding.**
 
+
 **CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
 
 **Prohibited Actions**:
@@ -597,7 +625,7 @@ Format: `compliance-docs/CLOUD_ARCHITECTURE_[PROJECT]_[DATE].md`
 
 **IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
 
-Example: `compliance-docs/CLOUD_ARCHITECTURE_PaymentPlatform_2025-12-27.md`
+Example: `compliance-docs/CLOUD_ARCHITECTURE_PaymentPlatform_2026-03-28.md`
 
 **Step 5.2: Create Output Directory**
 
@@ -635,6 +663,9 @@ Contract Details:
 
 **IMPORTANT**: This agent does NOT generate COMPLIANCE_MANIFEST.md. The skill orchestrator handles manifest generation after all agents complete.
 
+
+## Error Handling
+
 ## Error Handling
 
 - If ARCHITECTURE.md not found → Return error message with guidance
@@ -642,13 +673,21 @@ Contract Details:
 - If required section missing → Mark fields as "Unknown", continue generation
 - Always return a result (success or failure) - never exit silently
 
+## Performance Optimization
+
+- Pre-configured section mappings (no runtime lookup)
+- Domain-specific Grep patterns for fast extraction
+- Minimal context loading (only required sections)
+- Parallel-safe execution (unique output filename)
+
+
 ## Cloud Architecture-Specific Notes
 
-- **Multi-cloud detection**: If multiple cloud providers found (AWS + Azure), note hybrid cloud approach
-- **IaC coverage**: Calculate percentage based on manual vs. IaC-managed resources
-- **Cost optimization**: Identify cost-saving opportunities (reserved instances, auto-scaling)
-- **Cloud-native adoption**: Measure usage of managed services vs. custom deployments
-- **Regional redundancy**: Verify multi-region setup for high availability
+- Multi-cloud detection: If multiple cloud providers found (AWS + Azure), note hybrid cloud approach
+- IaC coverage: Calculate percentage based on manual vs. IaC-managed resources
+- Cost optimization: Identify cost-saving opportunities (reserved instances, auto-scaling)
+- Cloud-native adoption: Measure usage of managed services vs. custom deployments
+- Regional redundancy: Verify multi-region setup for high availability
 
 ## Performance Optimization
 
@@ -660,5 +699,5 @@ Contract Details:
 ---
 
 **Agent Version**: 2.0.0
-**Last Updated**: 2025-12-27
+**Last Updated**: 2026-03-28
 **Specialization**: Cloud Architecture Compliance

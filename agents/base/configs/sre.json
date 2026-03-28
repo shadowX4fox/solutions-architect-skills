@@ -1,0 +1,93 @@
+{
+  "agent_name": "sre-compliance-generator",
+  "agent_description": "Prometheus — SRE Architecture Compliance Contract Generator - Generates SRE Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "SRE Architecture",
+    "short_name": "SRE",
+    "contract_type": "sre_architecture",
+    "template_filename": "TEMPLATE_SRE_ARCHITECTURE.md",
+    "tmp_prefix": "sre",
+    "output_prefix": "SRE_ARCHITECTURE",
+    "compliance_prefix": "LASRE",
+    "requirement_range": "LASRE01-LASRE57",
+    "requirement_count": 57,
+    "approval_authority": "SRE Leadership/Operations",
+    "section_structure_description": "Log Management, Application Deployment, Configuration Management, Operational Documentation, Operational Resilience, Recovery and Resilience Testing, Information and Architecture, Key Metrics, Backend Application, Frontend Application, User Experience, Cost Estimation, Infrastructure, Batch Processing, Disaster Recovery, Application Operational Tasks, Integration Deployment and Delivery, Auto-remediation",
+    "wrong_code_examples": "`SRE001`, `SREA001`, `LASRE001`"
+  },
+  "persona": {
+    "codename": "Prometheus",
+    "title": "The Operator",
+    "voice": "Pragmatic, data-driven, speaks in metrics and thresholds",
+    "tone": "Direct, no-nonsense, obsessed with measurability",
+    "perspective": "If you can't measure it, you can't manage it",
+    "emphasis": "SLOs, error budgets, MTTR, observability coverage",
+    "missing_data_framing": "State it clinically — \"No SLI defined = no reliability baseline\""
+  },
+  "section_mapping": {
+    "description": "docs/08-scalability-and-performance.md (primary), docs/09-operational-considerations.md (primary), docs/components/README.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "SLO (Service Level Objectives)",
+    "SLI (Service Level Indicators)",
+    "Error Budget",
+    "MTTR (Mean Time To Recovery)",
+    "MTBF (Mean Time Between Failures)",
+    "Runbook coverage",
+    "Monitoring tools (Prometheus, Grafana, Datadog)",
+    "Incident response procedures"
+  ],
+  "focus_areas": [
+    "Solution resilience",
+    "Observability (metrics, logs, traces)",
+    "Automation",
+    "Incident management",
+    "Performance monitoring"
+  ],
+  "scoring_model": "two-tier",
+  "tier_info": {
+    "blocker_count": 36,
+    "desired_count": 21,
+    "blocker_weight_pct": "70%",
+    "desired_weight_pct": "30%"
+  },
+  "phase3": {
+    "step31_title": "Required Sections for SRE Architecture",
+    "required_files": [
+      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "SLO, SLI, latency targets (30%)" },
+      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Monitoring, DR, deployment (50%)" },
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Infrastructure resilience (10%)" }
+    ],
+    "data_points": [
+      { "name": "SLO Detection", "file": "docs/08-scalability-and-performance.md", "pattern": "SLO[:\\s]+([0-9]+\\.?[0-9]*)%", "case_insensitive": false },
+      { "name": "SLI Detection", "file": "docs/08-scalability-and-performance.md", "pattern": "(SLI|service level indicator|availability|latency|throughput|error rate)", "case_insensitive": true },
+      { "name": "Error Budget", "file": "docs/09-operational-considerations.md", "pattern": "error budget[:\\s]+([0-9]+\\.?[0-9]*)%", "case_insensitive": true },
+      { "name": "MTTR", "file": "docs/09-operational-considerations.md", "pattern": "MTTR[:\\s]+([0-9]+)\\s*(minute|hour|min|hr)", "case_insensitive": true },
+      { "name": "MTBF", "file": "docs/09-operational-considerations.md", "pattern": "MTBF[:\\s]+([0-9]+)\\s*(day|hour|week)", "case_insensitive": true },
+      { "name": "Monitoring Tools", "file": "docs/09-operational-considerations.md", "pattern": "(Prometheus|Grafana|Datadog|New Relic|CloudWatch|Azure Monitor|Stackdriver|Dynatrace)", "case_insensitive": true },
+      { "name": "Observability Triad", "file": "docs/09-operational-considerations.md", "pattern": "(metrics|logs|traces|distributed tracing|log aggregation|metric collection)", "case_insensitive": true },
+      { "name": "Incident Response", "file": "docs/09-operational-considerations.md", "pattern": "(incident response|on[- ]call|P1|P2|P3|incident severity|postmortem|post[- ]incident)", "case_insensitive": true },
+      { "name": "Runbooks", "file": "docs/09-operational-considerations.md", "pattern": "(runbook|operational procedure|troubleshooting guide|playbook)", "case_insensitive": true },
+      { "name": "Deployment Automation", "file": "docs/09-operational-considerations.md", "pattern": "(CI/CD|deployment automation|blue[- ]green|canary|rolling deployment)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [
+    {
+      "name": "sre-two-tier-scoring",
+      "description": "Two-tier scoring model: 36 Blocker requirements (mandatory, 70% weight) + 21 Desired requirements (optional, 30% weight). Blocker requirements must all pass for approval (>=8.0 final score).",
+      "file": "sre-two-tier-scoring.md"
+    }
+  ],
+  "agent_notes": [
+    "Two-Tier Scoring: Blocker requirements must all pass for approval (>=8.0 final score)",
+    "SLO Minimum: All services must define SLOs (minimum 99.9%)",
+    "Observability Triad: Must include metrics, logs, AND traces",
+    "Incident Response: P1 < 15min, P2 < 1hr, P3 < 4hr",
+    "Runbook Coverage: All operational procedures must have runbooks"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: SRE Architecture",
+  "requirement_codes_list": "LASRE01, LASRE02, LASRE03, LASRE04, LASRE05, LASRE06, LASRE07, LASRE08, LASRE09, LASRE10, LASRE11, LASRE12, LASRE13, LASRE14, LASRE15, LASRE16, LASRE17, LASRE18, LASRE19, LASRE20, LASRE21, LASRE22, LASRE23, LASRE24, LASRE25, LASRE26, LASRE27, LASRE28, LASRE29, LASRE30, LASRE31, LASRE32, LASRE33, LASRE34, LASRE35, LASRE36, LASRE37, LASRE38, LASRE39, LASRE40, LASRE41, LASRE42, LASRE43, LASRE44, LASRE45, LASRE46, LASRE47, LASRE48, LASRE49, LASRE50, LASRE51, LASRE52, LASRE53, LASRE54, LASRE55, LASRE56, LASRE57",
+  "success_sections": "docs/08-scalability-and-performance.md, docs/09-operational-considerations.md, docs/components/README.md",
+  "validation_agent": "solutions-architect-skills:sre-validator"
+}

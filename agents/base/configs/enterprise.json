@@ -1,0 +1,81 @@
+{
+  "agent_name": "enterprise-compliance-generator",
+  "agent_description": "Athena — Enterprise Architecture Compliance Contract Generator - Generates Enterprise Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Enterprise Architecture",
+    "short_name": "Enterprise",
+    "contract_type": "enterprise",
+    "template_filename": "TEMPLATE_ENTERPRISE_ARCHITECTURE.md",
+    "tmp_prefix": "enterprise",
+    "output_prefix": "ENTERPRISE_ARCHITECTURE",
+    "compliance_prefix": "LAE",
+    "requirement_range": "LAE1-LAE7",
+    "requirement_count": 7,
+    "approval_authority": "Enterprise Architecture Review Board",
+    "section_structure_description": "Modularity and Capability Reusability, Third-Party Application Customization, Cloud First, Business Strategy Alignment, Zero Obsolescence, Managed Data Vision, API First / Event Driven",
+    "wrong_code_examples": "`ENT001`, `EA001`"
+  },
+  "persona": {
+    "codename": "Athena",
+    "title": "The Strategist",
+    "voice": "Big-picture, governance-oriented, business-aligned",
+    "tone": "Formal, principled, connects technology to business capability",
+    "perspective": "Architecture serves the business, not the other way around",
+    "emphasis": "Business alignment, modularity, technology lifecycle, API-first design",
+    "missing_data_framing": "Frame strategically — \"Unaligned component is technical debt at enterprise scale\""
+  },
+  "section_mapping": {
+    "description": "docs/01-system-overview.md, docs/02-architecture-principles.md, docs/03-architecture-layers.md (primary), adr/README.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "Business capability alignment",
+    "Modularity and bounded contexts",
+    "Third-party app customization (maximum 20%)",
+    "Cloud-first adoption",
+    "Technology lifecycle (no EOL within 3 years)",
+    "API-first design",
+    "Event-driven architecture"
+  ],
+  "focus_areas": [
+    "Strategic alignment",
+    "Enterprise modularity",
+    "Cloud-first approach",
+    "Technology lifecycle management",
+    "API and event-driven patterns"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Enterprise Architecture",
+    "required_files": [
+      { "path": "docs/01-system-overview.md", "label": "System Overview", "description": "Business capabilities, strategic alignment" },
+      { "path": "docs/02-architecture-principles.md", "label": "Architecture Principles", "description": "Modularity, bounded contexts" },
+      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "Component design, service boundaries" },
+      { "path": "adr/README.md", "label": "ADRs", "description": "Technology decisions, architecture rationale (secondary)" }
+    ],
+    "data_points": [
+      { "name": "Business Capability Alignment", "file": "docs/01-system-overview.md", "pattern": "(business capability|capability map|business alignment|business domain)", "case_insensitive": true },
+      { "name": "Modularity", "file": "docs/02-architecture-principles.md", "pattern": "(modularity|bounded context|domain-driven|microservice|service boundary)", "case_insensitive": true },
+      { "name": "Third-Party Customization", "file": "docs/01-system-overview.md", "pattern": "(third-party|COTS|vendor|customization|SaaS customization)", "case_insensitive": true },
+      { "name": "Cloud-First", "file": "docs/03-architecture-layers.md", "pattern": "(cloud-first|cloud-native|cloud adoption|cloud strategy)", "case_insensitive": true },
+      { "name": "Technology Lifecycle", "file": "adr/README.md", "pattern": "(technology lifecycle|EOL|end of life|technology age|obsolescence)", "case_insensitive": true },
+      { "name": "API-First", "file": "docs/02-architecture-principles.md", "pattern": "(API-first|API design|API strategy|RESTful|GraphQL)", "case_insensitive": true },
+      { "name": "Event-Driven", "file": "docs/02-architecture-principles.md", "pattern": "(event-driven|event sourcing|message queue|Kafka|event stream|asynchronous)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "Business Alignment: Solutions align with enterprise business capabilities",
+    "Modularity: Services bounded by business domains",
+    "Cloud-First: Prefer cloud-native over on-premise",
+    "Third-Party Customization: Maximum 20% of functionality",
+    "Zero Obsolescence: No technologies EOL within 3 years",
+    "API-First: All service interfaces API-first design",
+    "Event-Driven: Asynchronous processes use event-driven patterns"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Enterprise Architecture",
+  "requirement_codes_list": "LAE1, LAE2, LAE3, LAE4, LAE5, LAE6, LAE7",
+  "success_sections": "docs/01, docs/02, docs/03, adr/README.md",
+  "validation_agent": "solutions-architect-skills:enterprise-validator"
+}

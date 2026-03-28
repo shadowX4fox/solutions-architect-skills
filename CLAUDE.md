@@ -10,8 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Type-check all TypeScript files
 bun run typecheck
 
-# Compile TypeScript to dist/
+# Build agents + compile TypeScript
 bun run build
+
+# Rebuild compliance agents only (base template + configs → 10 agent .md files)
+bun run build:agents
 
 # Run unit tests (Bun test framework)
 bun test
@@ -32,9 +35,10 @@ This repository follows the Claude Code plugin structure:
 
 - `.claude-plugin/` - Plugin manifest (`plugin.json`) and marketplace registry (`marketplace.json`) — version is tracked here (authoritative)
 - `package.json` - Root Bun workspace config; `bun run build` / `bun run typecheck` operate here
-- `agents/` - 10 Markdown agent definitions, one per compliance contract type; invoked by the `architecture-compliance` skill via the Agent tool
+- `agents/` - 10 generated compliance agents + 10 validation agents; `agents/base/` holds the template, sections, overrides, and configs; `agents/validators/` holds hand-maintained validation agents
 - `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-docs-export)
 - `tools/docgen/` - Standalone `generate-doc.js` (Word/.docx generation via `docx` v8); its own `package.json` under the Bun workspace
+- `scripts/build-agents.ts` - Assembles 10 compliance agent .md files from base template + domain configs
 - `scripts/build-release.sh` - Packages a release ZIP with SHA256 checksum
 - `docs/` - User-facing documentation
 - `CLAUDE.md` - This file (development guidelines)
@@ -53,7 +57,16 @@ For more on plugin structure, see [Plugin Directory Structure](https://docs.anth
 - `resolve-plugin-dir.ts` — resolves the plugin cache path at runtime (needed because the skill is invoked from arbitrary project directories)
 - CLI wrappers (`*-cli.ts`) — thin Bun entrypoints for each utility
 
-**Agents vs. Skills**: The `agents/` directory holds 10 agent definitions consumed by Claude Code's Agent tool. They are **not** skills; they are spawned as sub-agents from the `architecture-compliance` skill to run compliance generation in parallel. NEVER invoke them directly from user-facing prompts.
+**Agents vs. Skills**: The `agents/` directory holds 10 compliance generator agents and 10 validation agents consumed by Claude Code's Agent tool. They are **not** skills; compliance generators are spawned as sub-agents from the `architecture-compliance` skill, and validation agents are spawned by their respective compliance generators. NEVER invoke them directly from user-facing prompts.
+
+**Agent build system**: The 10 compliance generator agents (`agents/*-compliance-generator.md`) are **generated files** — assembled from `agents/base/AGENT_BASE.md` + domain configs in `agents/base/configs/*.json` by `scripts/build-agents.ts`. Do NOT edit generated agent files directly; edit the base template or configs instead, then run `bun run build:agents`. Validation agents (`agents/validators/*.md`) are hand-maintained.
+
+**Agent directory structure**:
+- `agents/base/AGENT_BASE.md` — shared template with `{{variable}}` placeholders
+- `agents/base/sections/` — extracted shared sections (Phase 0-5, tool discipline, error handling)
+- `agents/base/overrides/` — domain-specific unique sections (Development Step 4.6, SRE two-tier scoring)
+- `agents/base/configs/` — 10 JSON files with domain-specific values (persona, grep patterns, requirements, etc.)
+- `agents/validators/` — 10 validation agents that perform external standard checks per domain
 
 **Versioning**: The canonical version lives in `.claude-plugin/plugin.json`. Commits follow `feat: <description> v<semver>` and the `/release` skill bumps the version, commits, and pushes.
 

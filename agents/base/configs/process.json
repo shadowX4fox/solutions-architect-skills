@@ -1,0 +1,78 @@
+{
+  "agent_name": "process-compliance-generator",
+  "agent_description": "Hermes — Process Transformation Compliance Contract Generator - Generates Process Transformation compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "domain": {
+    "name": "Process Transformation",
+    "short_name": "Process",
+    "contract_type": "process",
+    "template_filename": "TEMPLATE_PROCESS_TRANSFORMATION.md",
+    "tmp_prefix": "process",
+    "output_prefix": "PROCESS_TRANSFORMATION",
+    "compliance_prefix": "LAA",
+    "requirement_range": "LAA1-LAA4",
+    "requirement_count": 4,
+    "approval_authority": "Process Transformation Review Board",
+    "section_structure_description": "Feasibility and Impact Analysis, Automation Factors, Efficient License Usage, Document Management Alignment",
+    "wrong_code_examples": "`PROC001`, `PTA001`"
+  },
+  "persona": {
+    "codename": "Hermes",
+    "title": "The Optimizer",
+    "voice": "Efficiency-obsessed, ROI-driven, automation advocate",
+    "tone": "Energetic, results-oriented, always quantifying impact",
+    "perspective": "If a human does it twice, automate it",
+    "emphasis": "Hours saved, automation ROI, reusable capabilities, cost reduction",
+    "missing_data_framing": "Challenge with numbers — \"No baseline measurement = no way to prove improvement\""
+  },
+  "section_mapping": {
+    "description": "docs/01-system-overview.md, docs/04-data-flow-patterns.md (primary), docs/components/README.md, docs/05-integration-points.md (secondary)",
+    "note": "File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers."
+  },
+  "key_data_points": [
+    "Automation ROI (positive within 12 months)",
+    "Hours saved by automation",
+    "Reusable capabilities and shared services",
+    "License optimization",
+    "Process efficiency gains",
+    "Impact analysis (cost reduction, time savings)"
+  ],
+  "focus_areas": [
+    "Automation solutions",
+    "Process improvement",
+    "Capability reuse",
+    "License consumption efficiency",
+    "Document management"
+  ],
+  "scoring_model": "default",
+  "tier_info": null,
+  "phase3": {
+    "step31_title": "Required Sections for Process Transformation",
+    "required_files": [
+      { "path": "docs/01-system-overview.md", "label": "System Overview", "description": "Business processes, efficiency targets" },
+      { "path": "docs/04-data-flow-patterns.md", "label": "Data Flow Patterns", "description": "Automation tools, integration patterns" },
+      { "path": "docs/components/README.md", "label": "Component Details", "description": "Automation infrastructure (secondary)" },
+      { "path": "docs/05-integration-points.md", "label": "Integration Points", "description": "Automation security (secondary)" }
+    ],
+    "data_points": [
+      { "name": "Automation ROI", "file": "docs/01-system-overview.md", "pattern": "(automation ROI|return on investment|cost savings|efficiency gain)", "case_insensitive": true },
+      { "name": "Hours Saved", "file": "docs/01-system-overview.md", "pattern": "(hours saved|time savings|manual hours|productivity gain)", "case_insensitive": true },
+      { "name": "Automation Tools", "file": "docs/04-data-flow-patterns.md", "pattern": "(RPA|robotic process|UiPath|Automation Anywhere|Power Automate|workflow automation)", "case_insensitive": true },
+      { "name": "Reusable Capabilities", "file": "docs/components/README.md", "pattern": "(reusable|shared service|capability reuse|component library)", "case_insensitive": true },
+      { "name": "License Optimization", "file": "docs/components/README.md", "pattern": "(license|concurrent user|named user|license optimization)", "case_insensitive": true },
+      { "name": "Process Improvement", "file": "docs/01-system-overview.md", "pattern": "(process improvement|process optimization|lean|Six Sigma)", "case_insensitive": true }
+    ]
+  },
+  "overrides": [],
+  "agent_notes": [
+    "Automation Threshold: Manual processes >10 hours/month evaluated for automation",
+    "ROI Requirement: Positive ROI within 12 months",
+    "Shared Services: Reusable capabilities designed as shared services",
+    "License Efficiency: Optimize concurrent vs. named users",
+    "Impact Analysis: Required before process changes",
+    "Error Handling: Process automation must include monitoring"
+  ],
+  "phase4_anchor_title": "# Compliance Contract: Process Transformation",
+  "requirement_codes_list": "LAA1, LAA2, LAA3, LAA4",
+  "success_sections": "docs/01, docs/04, docs/components/README.md, docs/05",
+  "validation_agent": "solutions-architect-skills:process-validator"
+}
