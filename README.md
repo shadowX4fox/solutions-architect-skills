@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.11.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -45,6 +45,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - `architecture-peer-review`: Interactive peer review with playground tool
   - `architecture-dev-handoff`: Component development handoffs with deliverable assets
   - `architecture-docs-export`: On-demand Word (.docx) export for architecture docs and handoffs
+  - `architecture-definition-record`: Create, update, and manage Architecture Decision Records (ADRs)
 
   Plus `architecture-blueprint`: generates Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
 
@@ -469,7 +470,7 @@ For the best experience working with this plugin, install these three VS Code ex
 
 ### Why these extensions?
 
-- **Claude Code** is required to run the plugin's 8 skills from VS Code
+- **Claude Code** is required to run the plugin's 9 skills from VS Code
 - **Mermaid Preview** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated
 - **Office Viewer** lets you open and review `.docx` files produced by the `architecture-docs-export` skill directly in the editor
 
@@ -537,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.11.2 (Current Release) ✅
+### v2.12.0 (Current Release) ✅
+**feat: new `architecture-definition-record` skill — single owner of all ADR write operations**
+
+Extracted ADR handling from `architecture-docs` into a dedicated `architecture-definition-record` skill (9th skill). The new skill owns five workflows: generate ADR files from ARCHITECTURE.md Section 12 table, create individual ADRs interactively (guided interview), update ADR status (Proposed → Accepted / Deprecated / Rejected), supersede an ADR (creates new + marks old as superseded), and list/audit the ADR inventory. All other skills now delegate write operations here while retaining direct read access to `adr/*.md`. Moved `ADR_GUIDE.md` and `ADR-000-template.md` into the new skill directory. Removed ~500-line Step 6 implementation from `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`, replaced with a single delegation instruction. Updated CLAUDE.md, README.md, and 4 other skills with delegation notes.
+
+### v2.11.2 (Previous Release) ✅
 **feat: use case traceability in onboarding concept map; focus on UC → Sections → Components spine**
 
 Redesigned the `architecture-onboarding` concept map around a business-to-technical traceability spine. Adds a **Use Cases** node group (pink) extracted from PO Spec Section 4 or `docs/01-system-overview.md` Section 2.3 — placed at the top band, tracing down through Architecture Sections (middle) to Components (bottom). New edge types: `traces-to` (UC → section, dashed pink) and `served-by` (UC → component, from handoff docs' Business Context field). Removed lifecycle, compliance, principles, and skill groups entirely — they don't add value to onboarding exploration. Concept map now contains exactly 3 node groups and 3 presets (Use Case Traceability, Section Dependencies, Component Map). Default preset is "Use Case Traceability".

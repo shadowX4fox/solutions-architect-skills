@@ -324,6 +324,25 @@ The skill includes:
 
 ---
 
+### Using the Architecture Definition Record Skill
+
+The `architecture-definition-record` skill is the **single owner of all ADR write operations**. It creates, updates, and manages Architecture Decision Records (ADRs) — immutable documents capturing the context, rationale, and consequences of significant architectural choices.
+
+To manually activate the skill, use: `/skill architecture-definition-record`
+
+The skill has five workflows:
+1. **Generate from Section 12** — extract ADR table from ARCHITECTURE.md, create `adr/ADR-XXX-title.md` files
+2. **Create individual ADR** — guided interview (problem, decision, alternatives, rationale) → writes complete ADR file
+3. **Update ADR status** — change Proposed → Accepted / Deprecated / Rejected
+4. **Supersede ADR** — create new ADR, mark old one as `Superseded by ADR-NNN`
+5. **List/audit ADRs** — scan `adr/` directory, show status summary, flag gaps
+
+**When to use**: When documenting architectural decisions, updating ADR status, or generating ADR files from a newly created ARCHITECTURE.md. All other skills read `adr/*.md` directly for context but must delegate any write operations here.
+
+**ADR file convention**: `adr/ADR-NNN-brief-title.md` — zero-padded, lowercase, hyphen-separated. Template and guide are in `skills/architecture-definition-record/`.
+
+---
+
 ### Using the Architecture Onboarding Skill
 
 The `architecture-onboarding` skill is the **entry point for new team members**. It reads the project's existing architecture docs and generates a canvas-based interactive concept map via the `playground` plugin. The map is **centered on architecture sections** and traces back to **use cases from the PO Spec / system overview**, showing how business requirements flow through sections into components. Users drag nodes to explore, cycle knowledge levels (Know/Fuzzy/Unknown) per concept, and copy a targeted learning prompt shaped by their gaps.

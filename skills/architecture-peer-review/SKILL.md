@@ -225,6 +225,7 @@ If the user pastes the generated fix prompt back into Claude, apply the approved
 | Skill | Relationship |
 |-------|-------------|
 | `architecture-docs` | Prerequisite: ARCHITECTURE.md must exist. Architecture docs skill's REVIEW_AUDIT_WORKFLOW validates form before this skill validates quality. Use architecture-docs editing workflow to apply fixes. |
+| `architecture-definition-record` | For ADR fixes found during Hard review (ADR quality checks), delegate any ADR creation, update, or supersede to this skill. Read-only access to `adr/*.md` is permitted directly. |
 | `playground` | External plugin dependency: generates the interactive HTML review file. |
 | `architecture-compliance` | Peer review findings (especially SECURITY and SCALE categories) can inform compliance gap analysis. Hard-depth findings map directly to compliance contract requirements. |
 | `architecture-readiness` | If peer review reveals missing business context (vague requirements, unexplained constraints), suggest running `architecture-readiness` to produce a PO Spec. |

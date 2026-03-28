@@ -236,14 +236,16 @@ Update `ARCHITECTURE.md` only when:
 
 ## Architecture Type Selection Workflow
 
-Full workflow for guiding users through architecture type selection (Banking/BIAN, Microservices, Monolith, etc.), the PO Spec prerequisite check, template loading, diagram generation trigger, and ADR prompt is in `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`.
+Full workflow for guiding users through architecture type selection (Banking/BIAN, Microservices, Monolith, etc.), the PO Spec prerequisite check, template loading, and diagram generation is in `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`.
 
 Read it when:
 - User is creating a NEW architecture document
 - User asks to change architecture type
 - No existing ARCHITECTURE.md is detected
 
-The workflow runs Steps 0–7 (PO Spec gate → type selection → template load → metadata → multi-file creation → ADR prompt → diagrams).
+The workflow runs Steps 0–7 (PO Spec gate → type selection → template load → metadata → multi-file creation → ADR delegation → diagrams).
+
+**ADR operations**: Any ADR creation, update, or supersede must delegate to `/skill architecture-definition-record`. This skill reads `adr/*.md` for context only.
 
 ### When to Trigger
 

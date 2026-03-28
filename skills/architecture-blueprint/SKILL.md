@@ -209,7 +209,7 @@ For each ADR found in `adr/ADR-*.md`, extract one entry per ADR. If multiple ADR
 | `<Description of criterion or principle 1>` ... `<Description of criterion or principle N>` | `<Descripción del criterio o principio 1>` ... `<Descripción del criterio o principio N>` | Decision criteria / principles | ADR file → "Decision Criteria" section or `docs/02-architecture-principles.md` |
 | `<Description of assumption 1>` ... `<Description of assumption N>` | `<Descripción de la suposición 1>` ... `<Descripción de la suposición N>` | Assumptions | ADR file → "Assumptions" section |
 
-If NO ADR files found: fill each placeholder with `NOT FOUND — suggest: create ADRs using /skill architecture-docs`.
+If NO ADR files found: fill each placeholder with `NOT FOUND — suggest: create ADRs using /skill architecture-definition-record`.
 
 #### Capacity Sizing
 
