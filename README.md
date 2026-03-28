@@ -302,7 +302,7 @@ Generate compliance contracts from ARCHITECTURE.md with full traceability. Each 
 - 10 compliance contracts with **external validation agents** (one validator per domain)
 - **Automatic Validation (0-10 scoring)**: All contracts validated with granular scoring
 - **4-Tier Approval Workflow**: Auto-approve (8.0-10), Manual review (7.0-7.9), Needs work (5.0-6.9), Rejected (0-4.9)
-- **EOL checking via context7**: Validator agents detect end-of-life technology versions
+- **EOL checking via web search**: Validator agents detect end-of-life technology versions
 - Source traceability (section + line number references)
 - Compliance manifest (index of all generated documents)
 
@@ -375,9 +375,9 @@ Phase 3: Read docs/06, docs/09, adr/     ├─ .NET Backend (DEV-07 to DEV-12)
                                           ├─ Frontend (DEV-13 to DEV-18)
 Step 3.4: ──── invoke ──────────────────► ├─ Other Stacks (DEV-19 to DEV-23)
                                           └─ Exceptions (DEV-24 to DEV-26)
-                                          Phase 2: EOL Validation (context7)
-                                          ├─ resolve-library-id per technology
-                                          ├─ query-docs for lifecycle status
+                                          Phase 2: EOL Validation (web search)
+                                          ├─ WebSearch per technology version
+                                          ├─ endoflife.date / vendor docs
                                           └─ DEV-EOL-01, DEV-EOL-02, ...
            ◄── VALIDATION_RESULT ─────────
 
@@ -665,12 +665,13 @@ Where:
 ## Roadmap
 
 ### v2.14.1 (Current Release) ✅
-**feat: development validator as sole validation point + EOL checks via context7**
+**feat: development validator as sole validation point + EOL checks + compact VALIDATION_RESULT**
 
 - Development validator is now the single source of truth for stack validation — Step 4.6 override no longer duplicates criteria, only maps VALIDATION_RESULT to template placeholders
-- Added Phase 2: EOL Validation to development validator — uses context7 MCP (`resolve-library-id` + `query-docs`) to check technology version lifecycle status
+- Added Phase 2: EOL Validation to development validator — uses WebSearch to check technology version lifecycle status against endoflife.date and vendor documentation
 - EOL items (DEV-EOL-*) are supplementary: PASS (supported), FAIL (EOL), UNKNOWN (no info); included in deviations/recommendations
-- Graceful degradation when context7 is unavailable — Phase 2 silently skipped
+- Compact VALIDATION_RESULT format across all 10 validators — single-line summary + pipe-delimited items table replaces verbose per-item YAML blocks
+- Graceful degradation when WebSearch is unavailable — Phase 2 silently skipped
 
 ### v2.14.0 (Previous Release) ✅
 **refactor: compliance contract naming — CC-prefixed kebab-case with numbered types**

@@ -195,38 +195,32 @@ Evaluate the project's architecture documentation against development technology
 3. For each validation item (DEV-01 through DEV-26), evaluate against the criteria above
 4. Collect all results into the VALIDATION_RESULT format
 
-### Phase 2: EOL Validation (context7)
+### Phase 2: EOL Validation (Web Search)
 
 **After** completing the 26 standard items, perform end-of-life checks for every technology detected in Phase 1 that has a specific version number.
 
-**Skip this phase entirely** if context7 MCP tools are not available — degrade gracefully with no errors or warnings.
+**Skip this phase entirely** if the WebSearch tool is not available — degrade gracefully with no errors or warnings.
 
 **For each detected technology with a version** (e.g., "Java 17", "Spring Boot 3.2", "PostgreSQL 15", "React 18"):
 
-1. Use `mcp__context7__resolve-library-id` to find the library ID:
+1. Use WebSearch to look up the EOL status:
    ```
-   libraryName: "{technology name}" (e.g., "java", "spring-boot", "postgresql", "react")
+   query: "{technology} {version} end of life support date"
    ```
-   Pick the best match by source reputation and relevance.
+   Prioritize results from official sources (endoflife.date, vendor documentation, release blogs).
 
-2. Use `mcp__context7__query-docs` to check lifecycle status:
-   ```
-   libraryId: "{resolved ID}"
-   topic: "end of life support lifecycle versions {version}"
-   ```
-
-3. From the docs response, determine EOL status:
+2. From the search results, determine EOL status:
    - **PASS**: Version is actively supported (has future EOL date or is current LTS)
    - **FAIL**: Version is EOL, end-of-support, or deprecated
-   - **UNKNOWN**: context7 returned no clear lifecycle information for this version
+   - **UNKNOWN**: No clear lifecycle information found
 
-4. Add an EOL item to the VALIDATION_RESULT:
+3. Add an EOL item to the VALIDATION_RESULT:
    ```
    - id: DEV-EOL-{N}
      category: EOL Validation
      question: "Is {technology} {version} still supported?"
      status: {PASS|FAIL|UNKNOWN}
-     evidence: "{EOL date or support status from context7} — context7/{libraryId}"
+     evidence: "{EOL date or support status} — {source URL or 'endoflife.date'}"
    ```
 
 **EOL items are supplementary** — they appear after DEV-26 in the items list. They do NOT count toward `total_items` (which stays at 26 for standard items). However, EOL FAIL items ARE included in `deviations` and EOL UNKNOWN items in `recommendations`.
@@ -274,160 +268,50 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: development
-  total_items: 26
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
-  eol_items_checked: {count or 0 if context7 unavailable}
-  eol_pass: {count}
-  eol_fail: {count}
-  eol_unknown: {count}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: DEV-01
-      category: Java Backend
-      question: "Is Java version LTS (11/17/21)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-02
-      category: Java Backend
-      question: "Is Spring Boot version 2.7+ or 3.x?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-03
-      category: Java Backend
-      question: "Are official tools documented (Maven/Gradle, JUnit, SonarQube)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-04
-      category: Java Backend
-      question: "Is container deployment documented (Docker + K8s)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-05
-      category: Java Backend
-      question: "Are all libraries from approved catalog?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-06
-      category: Java Backend
-      question: "Are naming conventions documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-07
-      category: .NET Backend
-      question: "Is C#/.NET version current?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-08
-      category: .NET Backend
-      question: "Is ASP.NET Core the main framework?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-09
-      category: .NET Backend
-      question: "Are official tools documented (NuGet, xUnit/NUnit, SonarQube)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-10
-      category: .NET Backend
-      question: "Is container deployment documented (Docker + K8s)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-11
-      category: .NET Backend
-      question: "Are all libraries from approved catalog?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-12
-      category: .NET Backend
-      question: "Are naming conventions documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-13
-      category: Frontend
-      question: "Is frontend framework approved (Angular 12+, React 17+, Vue.js 3+)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-14
-      category: Frontend
-      question: "Is TypeScript or JavaScript ES6+ used?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-15
-      category: Frontend
-      question: "Are official tools documented (NPM/Yarn, Webpack/Vite, Jest/Cypress)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-16
-      category: Frontend
-      question: "Is SPA or Micro-Frontends architecture documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-17
-      category: Frontend
-      question: "Are all frontend libraries from approved catalog?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-18
-      category: Frontend
-      question: "Are frontend naming conventions documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-19
-      category: Other Stacks
-      question: "Are automation tools approved (Python 3.x / Shell / RPA)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-20
-      category: Other Stacks
-      question: "Is IaC tool approved (Terraform, Ansible, Azure DevOps)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-21
-      category: Other Stacks
-      question: "Is database platform approved with version?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-22
-      category: Other Stacks
-      question: "Are API standards documented (OpenAPI 3.0, REST, gRPC)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-23
-      category: Other Stacks
-      question: "Is CI/CD platform approved?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-24
-      category: Exceptions
-      question: "Are any deviations from official stack documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-25
-      category: Exceptions
-      question: "Do all exceptions have ADR with justification and risk?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DEV-26
-      category: Exceptions
-      question: "Are exception action plans approved and registered?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    # EOL items (only if context7 available, omit section if not)
-    - id: DEV-EOL-01
-      category: EOL Validation
-      question: "Is {technology} {version} still supported?"
-      status: {PASS|FAIL|UNKNOWN}
-      evidence: "{EOL date or support status} — context7/{libraryId}"
-    # ... one item per detected technology with a version number
+    | ID | Category | Status | Evidence |
+    | DEV-01 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-02 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-03 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-04 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-05 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-06 | Java Backend | {STATUS} | {evidence} — {source} |
+    | DEV-07 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-08 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-09 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-10 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-11 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-12 | .NET Backend | {STATUS} | {evidence} — {source} |
+    | DEV-13 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-14 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-15 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-16 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-17 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-18 | Frontend | {STATUS} | {evidence} — {source} |
+    | DEV-19 | Other Stacks | {STATUS} | {evidence} — {source} |
+    | DEV-20 | Other Stacks | {STATUS} | {evidence} — {source} |
+    | DEV-21 | Other Stacks | {STATUS} | {evidence} — {source} |
+    | DEV-22 | Other Stacks | {STATUS} | {evidence} — {source} |
+    | DEV-23 | Other Stacks | {STATUS} | {evidence} — {source} |
+    | DEV-24 | Exceptions | {STATUS} | {evidence} — {source} |
+    | DEV-25 | Exceptions | {STATUS} | {evidence} — {source} |
+    | DEV-26 | Exceptions | {STATUS} | {evidence} — {source} |
+    | DEV-EOL-{N} | EOL | {STATUS} | {tech} {version} {status} — {source} |
+  eol_checked: {N}  eol_fail: {N}
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

@@ -144,84 +144,35 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: integration
-  total_items: 13
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: INT-01
-      category: API Standards
-      question: "Are OpenAPI or AsyncAPI specifications documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-02
-      category: API Standards
-      question: "Is API versioning strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-03
-      category: API Standards
-      question: "Are correlation IDs implemented for request tracing?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-04
-      category: API Standards
-      question: "Is rate limiting or throttling documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-05
-      category: Message Patterns
-      question: "Are async messaging patterns documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-06
-      category: Message Patterns
-      question: "Is message format and schema documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-07
-      category: Message Patterns
-      question: "Are DLQ and error handling documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-08
-      category: Security & Resilience
-      question: "Is mTLS or service-to-service auth documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-09
-      category: Security & Resilience
-      question: "Are circuit breakers documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-10
-      category: Security & Resilience
-      question: "Are retry policies documented with backoff strategy?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-11
-      category: Observability
-      question: "Is distributed tracing documented across integration points?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-12
-      category: Observability
-      question: "Is API monitoring and alerting documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: INT-13
-      category: Observability
-      question: "Is integration contract testing documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | INT-01 | API Standards | {STATUS} | {evidence} — {source} |
+    | INT-02 | API Standards | {STATUS} | {evidence} — {source} |
+    | INT-03 | API Standards | {STATUS} | {evidence} — {source} |
+    | INT-04 | API Standards | {STATUS} | {evidence} — {source} |
+    | INT-05 | Message Patterns | {STATUS} | {evidence} — {source} |
+    | INT-06 | Message Patterns | {STATUS} | {evidence} — {source} |
+    | INT-07 | Message Patterns | {STATUS} | {evidence} — {source} |
+    | INT-08 | Security & Resilience | {STATUS} | {evidence} — {source} |
+    | INT-09 | Security & Resilience | {STATUS} | {evidence} — {source} |
+    | INT-10 | Security & Resilience | {STATUS} | {evidence} — {source} |
+    | INT-11 | Observability | {STATUS} | {evidence} — {source} |
+    | INT-12 | Observability | {STATUS} | {evidence} — {source} |
+    | INT-13 | Observability | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

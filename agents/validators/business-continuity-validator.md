@@ -165,99 +165,38 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: business-continuity
-  total_items: 16
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: BC-01
-      category: DR Strategy
-      question: "Are RTO and RPO targets defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-02
-      category: DR Strategy
-      question: "Is the DR site or secondary region documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-03
-      category: DR Strategy
-      question: "Is the failover procedure documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-04
-      category: DR Strategy
-      question: "Is DR testing cadence documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-05
-      category: Backup & Recovery
-      question: "Is backup schedule documented for all data stores?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-06
-      category: Backup & Recovery
-      question: "Is backup retention policy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-07
-      category: Backup & Recovery
-      question: "Are restore procedures documented and tested?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-08
-      category: Backup & Recovery
-      question: "Is backup encryption and offsite storage documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-09
-      category: HA Configuration
-      question: "Is the HA pattern documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-10
-      category: HA Configuration
-      question: "Is SPOF analysis documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-11
-      category: HA Configuration
-      question: "Is database HA documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-12
-      category: HA Configuration
-      question: "Is session management for HA documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-13
-      category: Business Impact
-      question: "Is a Business Impact Analysis completed?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-14
-      category: Business Impact
-      question: "Are critical business processes inventoried?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-15
-      category: Business Impact
-      question: "Are communication plans for outages documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: BC-16
-      category: Business Impact
-      question: "Are recovery team roles and responsibilities defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | BC-01 | DR Strategy | {STATUS} | {evidence} — {source} |
+    | BC-02 | DR Strategy | {STATUS} | {evidence} — {source} |
+    | BC-03 | DR Strategy | {STATUS} | {evidence} — {source} |
+    | BC-04 | DR Strategy | {STATUS} | {evidence} — {source} |
+    | BC-05 | Backup & Recovery | {STATUS} | {evidence} — {source} |
+    | BC-06 | Backup & Recovery | {STATUS} | {evidence} — {source} |
+    | BC-07 | Backup & Recovery | {STATUS} | {evidence} — {source} |
+    | BC-08 | Backup & Recovery | {STATUS} | {evidence} — {source} |
+    | BC-09 | HA Configuration | {STATUS} | {evidence} — {source} |
+    | BC-10 | HA Configuration | {STATUS} | {evidence} — {source} |
+    | BC-11 | HA Configuration | {STATUS} | {evidence} — {source} |
+    | BC-12 | HA Configuration | {STATUS} | {evidence} — {source} |
+    | BC-13 | Business Impact | {STATUS} | {evidence} — {source} |
+    | BC-14 | Business Impact | {STATUS} | {evidence} — {source} |
+    | BC-15 | Business Impact | {STATUS} | {evidence} — {source} |
+    | BC-16 | Business Impact | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

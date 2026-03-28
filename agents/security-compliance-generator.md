@@ -298,12 +298,23 @@ Agent tool:
   description: "Argus Validator — Security Architecture"
 ```
 
-Parse the returned `VALIDATION_RESULT:` block and store:
-- `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`
-- `validation_status` (PASS if fail == 0, else FAIL)
-- `validation_items` (list of per-item results)
-- `validation_deviations` (list of FAIL items with evidence)
-- `validation_recommendations` (list of UNKNOWN items needing documentation)
+Parse the returned `VALIDATION_RESULT:` block. The format is:
+```
+VALIDATION_RESULT:
+  domain: ...
+  total_items: N
+  pass: N  fail: N  na: N  unknown: N
+  status: PASS|FAIL
+  items:
+    | ID | Category | Status | Evidence |
+    | ... |
+  deviations:
+    - ID: description — source
+  recommendations:
+    - ID: description — source
+```
+
+Store: `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`, `validation_status`, `validation_items` (table rows), `validation_deviations`, `validation_recommendations`.
 
 Use these values in PHASE 4 when populating validation-related placeholders.
 

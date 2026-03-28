@@ -144,84 +144,35 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: data-ai
-  total_items: 13
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: DAI-01
-      category: Data Governance
-      question: "Is data classification documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-02
-      category: Data Governance
-      question: "Is data lineage documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-03
-      category: Data Governance
-      question: "Is data retention policy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-04
-      category: Data Governance
-      question: "Is data ownership and stewardship assigned?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-05
-      category: Data Quality
-      question: "Are data quality metrics defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-06
-      category: Data Quality
-      question: "Is data validation at ingestion documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-07
-      category: Data Quality
-      question: "Is master data management addressed?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-08
-      category: AI/ML Governance
-      question: "Is ML model versioning documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-09
-      category: AI/ML Governance
-      question: "Is ML model monitoring documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-10
-      category: AI/ML Governance
-      question: "Is bias detection and fairness evaluation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-11
-      category: Privacy & Compliance
-      question: "Is PII identification and handling documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-12
-      category: Privacy & Compliance
-      question: "Is consent management documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: DAI-13
-      category: Privacy & Compliance
-      question: "Is regulatory compliance documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | DAI-01 | Data Governance | {STATUS} | {evidence} — {source} |
+    | DAI-02 | Data Governance | {STATUS} | {evidence} — {source} |
+    | DAI-03 | Data Governance | {STATUS} | {evidence} — {source} |
+    | DAI-04 | Data Governance | {STATUS} | {evidence} — {source} |
+    | DAI-05 | Data Quality | {STATUS} | {evidence} — {source} |
+    | DAI-06 | Data Quality | {STATUS} | {evidence} — {source} |
+    | DAI-07 | Data Quality | {STATUS} | {evidence} — {source} |
+    | DAI-08 | AI/ML Governance | {STATUS} | {evidence} — {source} |
+    | DAI-09 | AI/ML Governance | {STATUS} | {evidence} — {source} |
+    | DAI-10 | AI/ML Governance | {STATUS} | {evidence} — {source} |
+    | DAI-11 | Privacy & Compliance | {STATUS} | {evidence} — {source} |
+    | DAI-12 | Privacy & Compliance | {STATUS} | {evidence} — {source} |
+    | DAI-13 | Privacy & Compliance | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

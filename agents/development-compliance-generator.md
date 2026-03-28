@@ -283,12 +283,23 @@ Agent tool:
   description: "Hephaestus Validator — Development Architecture"
 ```
 
-Parse the returned `VALIDATION_RESULT:` block and store:
-- `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`
-- `validation_status` (PASS if fail == 0, else FAIL)
-- `validation_items` (list of per-item results)
-- `validation_deviations` (list of FAIL items with evidence)
-- `validation_recommendations` (list of UNKNOWN items needing documentation)
+Parse the returned `VALIDATION_RESULT:` block. The format is:
+```
+VALIDATION_RESULT:
+  domain: ...
+  total_items: N
+  pass: N  fail: N  na: N  unknown: N
+  status: PASS|FAIL
+  items:
+    | ID | Category | Status | Evidence |
+    | ... |
+  deviations:
+    - ID: description — source
+  recommendations:
+    - ID: description — source
+```
+
+Store: `validation_total`, `validation_pass`, `validation_fail`, `validation_na`, `validation_unknown`, `validation_status`, `validation_items` (table rows), `validation_deviations`, `validation_recommendations`.
 
 Use these values in PHASE 4 when populating validation-related placeholders.
 
@@ -442,16 +453,12 @@ The development validator agent (Step 3.4) is the **sole source of truth** for s
 | DEV-19 through DEV-23 | `[OTHER_STACKS_ITEM_1]` through `[OTHER_STACKS_ITEM_5]` | Other Stacks |
 | DEV-24 through DEV-26 | `[EXCEPTIONS_ITEM_1]` through `[EXCEPTIONS_ITEM_3]` | Exceptions |
 
-**For each validator item**, format the placeholder value as:
+**For each row in the `items` table**, format the placeholder value as:
 ```
-- {STATUS_ICON} {item.question} ({item.evidence})
+- {STATUS_ICON} {Evidence}
 ```
 
-Where STATUS_ICON maps from `item.status`:
-- `PASS` → ✅
-- `FAIL` → ❌
-- `UNKNOWN` → ❓
-- `N/A` → ⚪
+Status icon mapping: `PASS` → ✅ | `FAIL` → ❌ | `UNKNOWN` → ❓ | `N/A` → ⚪
 
 **Replace summary placeholders from VALIDATION_RESULT counts**:
 

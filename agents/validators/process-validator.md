@@ -111,59 +111,30 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: process
-  total_items: 8
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: PRC-01
-      category: Automation Coverage
-      question: "Are automation tools and platforms identified?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-02
-      category: Automation Coverage
-      question: "Is automation ROI or business case documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-03
-      category: Automation Coverage
-      question: "Are hours saved or efficiency gains tracked?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-04
-      category: Process Maturity
-      question: "Are reusable automation capabilities identified?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-05
-      category: Process Maturity
-      question: "Are process improvement metrics defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-06
-      category: Process Maturity
-      question: "Is ITIL or service management alignment documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-07
-      category: Change Management
-      question: "Is a CAB or approval workflow documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PRC-08
-      category: Change Management
-      question: "Is deployment approval workflow documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | PRC-01 | Automation Coverage | {STATUS} | {evidence} — {source} |
+    | PRC-02 | Automation Coverage | {STATUS} | {evidence} — {source} |
+    | PRC-03 | Automation Coverage | {STATUS} | {evidence} — {source} |
+    | PRC-04 | Process Maturity | {STATUS} | {evidence} — {source} |
+    | PRC-05 | Process Maturity | {STATUS} | {evidence} — {source} |
+    | PRC-06 | Process Maturity | {STATUS} | {evidence} — {source} |
+    | PRC-07 | Change Management | {STATUS} | {evidence} — {source} |
+    | PRC-08 | Change Management | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

@@ -225,144 +225,47 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: sre
-  total_items: 25
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: SRE-01
-      category: SLO/SLI Definitions
-      question: "Are SLOs defined for each critical service?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-02
-      category: SLO/SLI Definitions
-      question: "Are SLIs measurable and mapped to SLOs?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-03
-      category: SLO/SLI Definitions
-      question: "Are error budgets defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-04
-      category: SLO/SLI Definitions
-      question: "Are SLO review cadences documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-05
-      category: SLO/SLI Definitions
-      question: "Are SLO dashboards or reporting tools specified?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-06
-      category: Observability
-      question: "Is a centralized monitoring tool documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-07
-      category: Observability
-      question: "Is centralized logging configured?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-08
-      category: Observability
-      question: "Is distributed tracing enabled?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-09
-      category: Observability
-      question: "Are alerting rules and thresholds documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-10
-      category: Observability
-      question: "Are health check endpoints defined for each service?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-11
-      category: Incident Management
-      question: "Are incident severity levels defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-12
-      category: Incident Management
-      question: "Is an on-call rotation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-13
-      category: Incident Management
-      question: "Are runbooks documented for critical scenarios?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-14
-      category: Incident Management
-      question: "Is a post-incident review process documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-15
-      category: Incident Management
-      question: "Is incident communication plan documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-16
-      category: Capacity & Performance
-      question: "Are capacity planning targets documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-17
-      category: Capacity & Performance
-      question: "Are performance benchmarks or baselines documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-18
-      category: Capacity & Performance
-      question: "Is load testing strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-19
-      category: Capacity & Performance
-      question: "Are auto-scaling policies documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-20
-      category: Capacity & Performance
-      question: "Are resource limits and requests defined for containers?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-21
-      category: Automation
-      question: "Is deployment automation documented (CI/CD)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-22
-      category: Automation
-      question: "Is rollback automation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-23
-      category: Automation
-      question: "Is infrastructure provisioning automated?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-24
-      category: Automation
-      question: "Is database migration automation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SRE-25
-      category: Automation
-      question: "Are chaos engineering or resilience tests documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | SRE-01 | SLO/SLI Definitions | {STATUS} | {evidence} — {source} |
+    | SRE-02 | SLO/SLI Definitions | {STATUS} | {evidence} — {source} |
+    | SRE-03 | SLO/SLI Definitions | {STATUS} | {evidence} — {source} |
+    | SRE-04 | SLO/SLI Definitions | {STATUS} | {evidence} — {source} |
+    | SRE-05 | SLO/SLI Definitions | {STATUS} | {evidence} — {source} |
+    | SRE-06 | Observability | {STATUS} | {evidence} — {source} |
+    | SRE-07 | Observability | {STATUS} | {evidence} — {source} |
+    | SRE-08 | Observability | {STATUS} | {evidence} — {source} |
+    | SRE-09 | Observability | {STATUS} | {evidence} — {source} |
+    | SRE-10 | Observability | {STATUS} | {evidence} — {source} |
+    | SRE-11 | Incident Management | {STATUS} | {evidence} — {source} |
+    | SRE-12 | Incident Management | {STATUS} | {evidence} — {source} |
+    | SRE-13 | Incident Management | {STATUS} | {evidence} — {source} |
+    | SRE-14 | Incident Management | {STATUS} | {evidence} — {source} |
+    | SRE-15 | Incident Management | {STATUS} | {evidence} — {source} |
+    | SRE-16 | Capacity & Performance | {STATUS} | {evidence} — {source} |
+    | SRE-17 | Capacity & Performance | {STATUS} | {evidence} — {source} |
+    | SRE-18 | Capacity & Performance | {STATUS} | {evidence} — {source} |
+    | SRE-19 | Capacity & Performance | {STATUS} | {evidence} — {source} |
+    | SRE-20 | Capacity & Performance | {STATUS} | {evidence} — {source} |
+    | SRE-21 | Automation | {STATUS} | {evidence} — {source} |
+    | SRE-22 | Automation | {STATUS} | {evidence} — {source} |
+    | SRE-23 | Automation | {STATUS} | {evidence} — {source} |
+    | SRE-24 | Automation | {STATUS} | {evidence} — {source} |
+    | SRE-25 | Automation | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

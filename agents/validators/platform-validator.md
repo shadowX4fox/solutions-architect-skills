@@ -137,79 +137,34 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: platform
-  total_items: 12
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: PLT-01
-      category: Infrastructure Standards
-      question: "Are OS versions documented and approved?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-02
-      category: Infrastructure Standards
-      question: "Is the container platform documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-03
-      category: Infrastructure Standards
-      question: "Are compute resource specifications documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-04
-      category: Environment Management
-      question: "Is environment isolation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-05
-      category: Environment Management
-      question: "Is environment parity documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-06
-      category: Environment Management
-      question: "Is environment provisioning automated?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-07
-      category: Database Standards
-      question: "Is the database platform approved with version?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-08
-      category: Database Standards
-      question: "Is database backup strategy documented per environment?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-09
-      category: Database Standards
-      question: "Is database high availability documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-10
-      category: Naming & Conventions
-      question: "Is a naming convention documented for infrastructure resources?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-11
-      category: Naming & Conventions
-      question: "Is resource tagging strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: PLT-12
-      category: Naming & Conventions
-      question: "Is IaC used consistently for all environments?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | PLT-01 | Infrastructure Standards | {STATUS} | {evidence} — {source} |
+    | PLT-02 | Infrastructure Standards | {STATUS} | {evidence} — {source} |
+    | PLT-03 | Infrastructure Standards | {STATUS} | {evidence} — {source} |
+    | PLT-04 | Environment Management | {STATUS} | {evidence} — {source} |
+    | PLT-05 | Environment Management | {STATUS} | {evidence} — {source} |
+    | PLT-06 | Environment Management | {STATUS} | {evidence} — {source} |
+    | PLT-07 | Database Standards | {STATUS} | {evidence} — {source} |
+    | PLT-08 | Database Standards | {STATUS} | {evidence} — {source} |
+    | PLT-09 | Database Standards | {STATUS} | {evidence} — {source} |
+    | PLT-10 | Naming & Conventions | {STATUS} | {evidence} — {source} |
+    | PLT-11 | Naming & Conventions | {STATUS} | {evidence} — {source} |
+    | PLT-12 | Naming & Conventions | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

@@ -14,16 +14,12 @@ The development validator agent (Step 3.4) is the **sole source of truth** for s
 | DEV-19 through DEV-23 | `[OTHER_STACKS_ITEM_1]` through `[OTHER_STACKS_ITEM_5]` | Other Stacks |
 | DEV-24 through DEV-26 | `[EXCEPTIONS_ITEM_1]` through `[EXCEPTIONS_ITEM_3]` | Exceptions |
 
-**For each validator item**, format the placeholder value as:
+**For each row in the `items` table**, format the placeholder value as:
 ```
-- {STATUS_ICON} {item.question} ({item.evidence})
+- {STATUS_ICON} {Evidence}
 ```
 
-Where STATUS_ICON maps from `item.status`:
-- `PASS` → ✅
-- `FAIL` → ❌
-- `UNKNOWN` → ❓
-- `N/A` → ⚪
+Status icon mapping: `PASS` → ✅ | `FAIL` → ❌ | `UNKNOWN` → ❓ | `N/A` → ⚪
 
 **Replace summary placeholders from VALIDATION_RESULT counts**:
 

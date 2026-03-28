@@ -159,94 +159,37 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: cloud
-  total_items: 15
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: CLD-01
-      category: Cloud Provider & Model
-      question: "Is the cloud provider from the approved list?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-02
-      category: Cloud Provider & Model
-      question: "Is the deployment model documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-03
-      category: Cloud Provider & Model
-      question: "Are cloud service tiers and SKUs specified?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-04
-      category: Multi-Region & HA
-      question: "Is the primary deployment region documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-05
-      category: Multi-Region & HA
-      question: "Is multi-region or multi-AZ strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-06
-      category: Multi-Region & HA
-      question: "Is DNS and traffic routing strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-07
-      category: IaC Coverage
-      question: "Is all infrastructure defined as code?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-08
-      category: IaC Coverage
-      question: "Are IaC modules versioned and in source control?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-09
-      category: IaC Coverage
-      question: "Is IaC drift detection documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-10
-      category: Cost Optimization
-      question: "Is cost tagging strategy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-11
-      category: Cost Optimization
-      question: "Are cost estimates or budgets documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-12
-      category: Cost Optimization
-      question: "Are cost optimization measures documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-13
-      category: Cloud Security
-      question: "Are cloud security groups and network ACLs documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-14
-      category: Cloud Security
-      question: "Is WAF or DDoS protection configured?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: CLD-15
-      category: Cloud Security
-      question: "Is cloud IAM documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | CLD-01 | Cloud Provider & Model | {STATUS} | {evidence} — {source} |
+    | CLD-02 | Cloud Provider & Model | {STATUS} | {evidence} — {source} |
+    | CLD-03 | Cloud Provider & Model | {STATUS} | {evidence} — {source} |
+    | CLD-04 | Multi-Region & HA | {STATUS} | {evidence} — {source} |
+    | CLD-05 | Multi-Region & HA | {STATUS} | {evidence} — {source} |
+    | CLD-06 | Multi-Region & HA | {STATUS} | {evidence} — {source} |
+    | CLD-07 | IaC Coverage | {STATUS} | {evidence} — {source} |
+    | CLD-08 | IaC Coverage | {STATUS} | {evidence} — {source} |
+    | CLD-09 | IaC Coverage | {STATUS} | {evidence} — {source} |
+    | CLD-10 | Cost Optimization | {STATUS} | {evidence} — {source} |
+    | CLD-11 | Cost Optimization | {STATUS} | {evidence} — {source} |
+    | CLD-12 | Cost Optimization | {STATUS} | {evidence} — {source} |
+    | CLD-13 | Cloud Security | {STATUS} | {evidence} — {source} |
+    | CLD-14 | Cloud Security | {STATUS} | {evidence} — {source} |
+    | CLD-15 | Cloud Security | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

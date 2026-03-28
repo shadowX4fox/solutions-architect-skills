@@ -167,99 +167,38 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: security
-  total_items: 16
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: SEC-01
-      category: Authentication & Authorization
-      question: "Is the authentication method documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-02
-      category: Authentication & Authorization
-      question: "Is RBAC or ABAC access control defined?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-03
-      category: Authentication & Authorization
-      question: "Is OAuth/JWT or token configuration documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-04
-      category: Authentication & Authorization
-      question: "Is MFA documented for sensitive operations?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-05
-      category: Encryption
-      question: "Is TLS 1.2+ enforced for data in transit?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-06
-      category: Encryption
-      question: "Is encryption at rest documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-07
-      category: Encryption
-      question: "Is key rotation policy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-08
-      category: Network Security
-      question: "Is network segmentation documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-09
-      category: Network Security
-      question: "Is WAF configured for public endpoints?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-10
-      category: Network Security
-      question: "Are egress controls documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-11
-      category: Vulnerability Management
-      question: "Is application security scanning documented (SAST/DAST)?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-12
-      category: Vulnerability Management
-      question: "Is dependency/container scanning documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-13
-      category: Vulnerability Management
-      question: "Is penetration testing cadence documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-14
-      category: Secrets Management
-      question: "Is a secrets vault documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-15
-      category: Secrets Management
-      question: "Are no hardcoded credentials in architecture docs?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: SEC-16
-      category: Secrets Management
-      question: "Is secrets rotation policy documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | SEC-01 | Authentication & Authorization | {STATUS} | {evidence} — {source} |
+    | SEC-02 | Authentication & Authorization | {STATUS} | {evidence} — {source} |
+    | SEC-03 | Authentication & Authorization | {STATUS} | {evidence} — {source} |
+    | SEC-04 | Authentication & Authorization | {STATUS} | {evidence} — {source} |
+    | SEC-05 | Encryption | {STATUS} | {evidence} — {source} |
+    | SEC-06 | Encryption | {STATUS} | {evidence} — {source} |
+    | SEC-07 | Encryption | {STATUS} | {evidence} — {source} |
+    | SEC-08 | Network Security | {STATUS} | {evidence} — {source} |
+    | SEC-09 | Network Security | {STATUS} | {evidence} — {source} |
+    | SEC-10 | Network Security | {STATUS} | {evidence} — {source} |
+    | SEC-11 | Vulnerability Management | {STATUS} | {evidence} — {source} |
+    | SEC-12 | Vulnerability Management | {STATUS} | {evidence} — {source} |
+    | SEC-13 | Vulnerability Management | {STATUS} | {evidence} — {source} |
+    | SEC-14 | Secrets Management | {STATUS} | {evidence} — {source} |
+    | SEC-15 | Secrets Management | {STATUS} | {evidence} — {source} |
+    | SEC-16 | Secrets Management | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.

@@ -139,79 +139,34 @@ Return EXACTLY this format (the compliance agent parses it):
 ```
 VALIDATION_RESULT:
   domain: enterprise
-  total_items: 12
-  pass: {count}
-  fail: {count}
-  na: {count}
-  unknown: {count}
-  status: {PASS if fail == 0, else FAIL}
+  total_items: {N}
+  pass: {N}  fail: {N}  na: {N}  unknown: {N}
+  status: {PASS|FAIL}
   items:
-    - id: ENT-01
-      category: Business Alignment
-      question: "Is business capability mapping documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-02
-      category: Business Alignment
-      question: "Is strategic alignment documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-03
-      category: Business Alignment
-      question: "Is stakeholder analysis documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-04
-      category: Architecture Principles
-      question: "Are architecture principles explicitly documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-05
-      category: Architecture Principles
-      question: "Is API-first or integration-first principle documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-06
-      category: Architecture Principles
-      question: "Is cloud-first or cloud-native principle documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-07
-      category: Technology Lifecycle
-      question: "Is a technology roadmap documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-08
-      category: Technology Lifecycle
-      question: "Is EOL tracking documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-09
-      category: Technology Lifecycle
-      question: "Is technical debt inventory maintained?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-10
-      category: Governance
-      question: "Is ARB involvement documented?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-11
-      category: Governance
-      question: "Is a standards catalog referenced?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
-    - id: ENT-12
-      category: Governance
-      question: "Are ADRs maintained?"
-      status: {PASS|FAIL|N/A|UNKNOWN}
-      evidence: "{evidence text with source file reference}"
+    | ID | Category | Status | Evidence |
+    | ENT-01 | Business Alignment | {STATUS} | {evidence} — {source} |
+    | ENT-02 | Business Alignment | {STATUS} | {evidence} — {source} |
+    | ENT-03 | Business Alignment | {STATUS} | {evidence} — {source} |
+    | ENT-04 | Architecture Principles | {STATUS} | {evidence} — {source} |
+    | ENT-05 | Architecture Principles | {STATUS} | {evidence} — {source} |
+    | ENT-06 | Architecture Principles | {STATUS} | {evidence} — {source} |
+    | ENT-07 | Technology Lifecycle | {STATUS} | {evidence} — {source} |
+    | ENT-08 | Technology Lifecycle | {STATUS} | {evidence} — {source} |
+    | ENT-09 | Technology Lifecycle | {STATUS} | {evidence} — {source} |
+    | ENT-10 | Governance | {STATUS} | {evidence} — {source} |
+    | ENT-11 | Governance | {STATUS} | {evidence} — {source} |
+    | ENT-12 | Governance | {STATUS} | {evidence} — {source} |
   deviations:
-    - "{description of each FAIL item with source}"
-    ...
+    - {ID}: {description} — {source}
   recommendations:
-    - "{description of each UNKNOWN item — what needs to be documented}"
-    ...
+    - {ID}: {description} — {source}
 ```
+
+**Rules:**
+- `status`: PASS if fail == 0, else FAIL
+- `items` table: one row per validation item, ordered by ID
+- `deviations`: only FAIL items (omit section if none)
+- `recommendations`: only UNKNOWN items (omit section if none)
+- Evidence must reference the source file (e.g., `docs/06-technology-stack.md`)
 
 **CRITICAL**: Return the VALIDATION_RESULT block as the LAST thing in your response. The compliance agent extracts it by finding the `VALIDATION_RESULT:` marker.
