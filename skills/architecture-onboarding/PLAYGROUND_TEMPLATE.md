@@ -629,6 +629,8 @@ canvas.addEventListener('mousedown', e => {
     // Clicked empty canvas — clear focus
     focusedNode = null;
     draw();
+    buildNodeList();
+    updatePrompt();
   }
 });
 
@@ -660,6 +662,8 @@ canvas.addEventListener('mouseup', () => {
     // Click without drag — toggle focus mode
     focusedNode = (focusedNode === dragNode) ? null : dragNode;
     draw();
+    buildNodeList();
+    updatePrompt();
   }
   dragNode = null;
   canvas.style.cursor = 'grab';
@@ -761,13 +765,34 @@ function buildNodeList() {
   const list = document.getElementById('node-list');
   if (!list) return;
   list.innerHTML = '';
-  getVisibleNodes().forEach(node => {
+
+  // If a node is focused, show only it and its direct connections
+  let nodesToShow;
+  if (focusedNode) {
+    const connectedIds = new Set([focusedNode.id]);
+    getVisibleEdges().forEach(e => {
+      if (e.from === focusedNode.id) connectedIds.add(e.to);
+      if (e.to === focusedNode.id) connectedIds.add(e.from);
+    });
+    nodesToShow = getVisibleNodes().filter(n => connectedIds.has(n.id));
+
+    // Focus header
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:11px;color:var(--accent);padding:2px 0 6px;font-weight:600;display:flex;justify-content:space-between;align-items:center';
+    header.innerHTML = `<span>Exploring: ${truncate(focusedNode.label, 22)} (${nodesToShow.length} nodes)</span><button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:1px 8px;cursor:pointer;font-size:10px" onclick="focusedNode=null;draw();buildNodeList();updatePrompt()">Show All</button>`;
+    list.appendChild(header);
+  } else {
+    nodesToShow = getVisibleNodes();
+  }
+
+  nodesToShow.forEach(node => {
     const color = getGroupColor(node.group);
+    const isFocused = focusedNode && node.id === focusedNode.id;
     const row = document.createElement('div');
     row.className = 'node-row';
     row.innerHTML = `
       <span class="group-dot" style="background:${color}"></span>
-      <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${node.label}">${truncate(node.label, 26)}</span>
+      <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${isFocused ? 'font-weight:700;color:var(--accent)' : ''}" title="${node.label}">${truncate(node.label, 26)}</span>
       <button id="kb-${node.id}" class="knowledge-btn ${node.knowledge}" onclick="cycleKnowledge('${node.id}')">${capitalize(node.knowledge)}</button>
     `;
     list.appendChild(row);
@@ -779,15 +804,30 @@ function buildNodeList() {
 
 ```javascript
 function updatePrompt() {
-  const visibleNodes = getVisibleNodes();
-  const knows   = visibleNodes.filter(n => n.knowledge === 'know');
-  const fuzzies = visibleNodes.filter(n => n.knowledge === 'fuzzy');
-  const unknowns = visibleNodes.filter(n => n.knowledge === 'unknown');
+  // Scope to focused node's connections if in focus mode
+  let scopeNodes, scopeEdges, focusLine = '';
+  if (focusedNode) {
+    const connectedIds = new Set([focusedNode.id]);
+    getVisibleEdges().forEach(e => {
+      if (e.from === focusedNode.id) connectedIds.add(e.to);
+      if (e.to === focusedNode.id) connectedIds.add(e.from);
+    });
+    scopeNodes = getVisibleNodes().filter(n => connectedIds.has(n.id));
+    scopeEdges = getVisibleEdges().filter(e => connectedIds.has(e.from) && connectedIds.has(e.to));
+    focusLine = `I'm currently exploring: **${focusedNode.label}** and its ${scopeNodes.length - 1} direct connections.\n\n`;
+  } else {
+    scopeNodes = getVisibleNodes();
+    scopeEdges = getVisibleEdges().slice(0, 8);
+  }
+
+  const knows   = scopeNodes.filter(n => n.knowledge === 'know');
+  const fuzzies = scopeNodes.filter(n => n.knowledge === 'fuzzy');
+  const unknowns = scopeNodes.filter(n => n.knowledge === 'unknown');
   const allFuzzy = knows.length === 0 && unknowns.length === 0;
 
   const projectLine = `I'm onboarding to the ${onboardingData.project} architecture (${onboardingData.architectureType} pattern, ${onboardingData.structureType} docs).`;
 
-  let prompt = projectLine + '\n\n';
+  let prompt = projectLine + '\n\n' + focusLine;
 
   if (allFuzzy) {
     prompt += 'I\'m starting from scratch on all of these:\n';
@@ -810,10 +850,9 @@ function updatePrompt() {
     }
   }
 
-  const visibleEdges = getVisibleEdges().slice(0, 8);
-  if (visibleEdges.length > 0) {
+  if (scopeEdges.length > 0) {
     prompt += 'Key relationships I want to understand:\n';
-    visibleEdges.forEach(e => {
+    scopeEdges.forEach(e => {
       const src = getNodeById(e.from), tgt = getNodeById(e.to);
       if (src && tgt) prompt += `• ${src.label} → ${tgt.label} (${e.label || e.type})\n`;
     });

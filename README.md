@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.4 (Current Release) ✅
+### v2.12.5 (Current Release) ✅
+**feat: focus mode filters sidebar to connected nodes for scoped knowledge cycling and learning prompts**
+
+When a node is clicked (focus mode), the sidebar node list now filters to show only the focused node and its direct connections — with a header showing "Exploring: [node name] (N nodes)" and a "Show All" button to exit. The focused node appears bold in accent color. Knowledge cycling (Know/Fuzzy/Unknown) works within this filtered scope, so users can mark what they know about just the connected concepts. The learning prompt also scopes to the focused subset: only edges and nodes touching the focused node are included, and the prompt opens with "I'm currently exploring: **[node name]** and its N direct connections." Clicking empty canvas or "Show All" restores the full node list and global prompt.
+
+### v2.12.4 (Previous Release) ✅
 **feat: concept map node focus mode — click to highlight connections, dim unrelated nodes**
 
 Clicking a node in the onboarding concept map now enters focus mode: the clicked node and all directly connected nodes stay at full opacity while every unrelated node dims to 12% and unrelated edges dim to 6%. Clicking the same node again or clicking empty canvas clears focus and restores full rendering. Implementation: added `focusedNode` state variable; updated `draw()` to build a `connectedIds` set (node + both-direction edge neighbors) and pass it to `drawNode()`/`drawEdge()`; updated `drawNode()` to apply `alpha=0.12` for dimmed nodes; updated `drawEdge()` to apply `globalAlpha=0.06` for dimmed edges and `0.04` for their labels; updated `mouseup` to toggle focus on click-without-drag; updated `mousedown` to clear focus when clicking empty canvas. Drag behavior is unchanged — focus only triggers on click (mousedown + mouseup with no movement).
