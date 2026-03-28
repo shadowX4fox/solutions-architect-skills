@@ -28,7 +28,7 @@ This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Ma
 
 - **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
 - **Plugin**: This repository, installable from the marketplace
-- **Skills**: Eight specialized skills within the plugin
+- **Skills**: Nine specialized skills within the plugin
 
 For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
 
@@ -36,7 +36,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **8 Integrated Skills**
+- **9 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance
   - `architecture-compliance`: Generate 10 compliance contracts
@@ -91,7 +91,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.10.28` in the list.
+You should see `solutions-architect-skills v2.12.7` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -200,6 +200,7 @@ Create and maintain technical architecture documentation following enterprise st
 - 9 mandatory Architecture Principles + 1 optional
 - ADR (Architecture Decision Record) templates with automatic file generation
 - **Foundational Context Anchor Protocol** — dependency-aware editing workflow that loads required upstream context before any downstream section edit
+- **Downstream Documentation Propagation** — after any substantive section edit, detects affected downstream files via reverse dependency table, presents a user-approval checklist, and cascades updates in tier order following the Context Anchor Protocol
 - All files kept under ~400 lines each for context efficiency
 
 **Output structure:**
