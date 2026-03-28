@@ -326,14 +326,15 @@ The skill includes:
 
 ### Using the Architecture Onboarding Skill
 
-The `architecture-onboarding` skill is the **entry point for new team members**. It reads the project's existing architecture docs and generates a canvas-based interactive concept map via the `playground` plugin. Nodes represent lifecycle phases, architecture sections (S1-S12), components, compliance contracts, principles, and available skills — connected by dependency, workflow, and validation edges. Users drag nodes to explore, cycle knowledge levels (Know/Fuzzy/Unknown) per concept, and copy a targeted learning prompt shaped by their gaps.
+The `architecture-onboarding` skill is the **entry point for new team members**. It reads the project's existing architecture docs and generates a canvas-based interactive concept map via the `playground` plugin. The map is **centered on architecture sections** and traces back to **use cases from the PO Spec / system overview**, showing how business requirements flow through sections into components. Users drag nodes to explore, cycle knowledge levels (Know/Fuzzy/Unknown) per concept, and copy a targeted learning prompt shaped by their gaps.
 
 To manually activate the skill, use: `/skill architecture-onboarding`
 
 The skill includes:
-- **Concept map playground** — draggable nodes, force-directed auto-layout, edge types (depends-on, produces, validates, uses-skill, implements)
-- **6 node groups** — Lifecycle Phases, Architecture Sections, Components, Compliance Contracts, Principles, Available Skills
-- **5 preset views** — Full Map, Lifecycle Flow, Section Dependencies, Component Map, Compliance Coverage
+- **Use case traceability** — extracts use cases from PO Spec Section 4 or `docs/01-system-overview.md` Section 2.3, traces them through architecture sections to components via handoff docs
+- **Concept map playground** — draggable nodes, force-directed auto-layout, edge types (depends-on, produces, validates, uses-skill, implements, traces-to, served-by)
+- **7 node groups** — Use Cases, Lifecycle Phases, Architecture Sections, Components, Compliance Contracts, Principles, Available Skills
+- **7 preset views** — Use Case Traceability (default), Full Map, Section Dependencies, Component Map, Compliance Coverage, Lifecycle Flow, Principles View
 - **Ghost nodes** — missing sections/contracts shown semi-transparent with actionable guidance on which skill to invoke
 - **Knowledge cycling** — Know / Fuzzy / Unknown per node; generates targeted learning prompt
 - **Fallback** — plain-text report with next-skill recommendations if playground plugin is not installed

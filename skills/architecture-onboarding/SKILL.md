@@ -26,6 +26,7 @@ triggers:
 This skill is the **entry point for new team members** joining a project that uses the solutions-architect-skills documentation suite. It reads the project's existing architecture docs and generates an interactive concept map — a canvas-based, draggable node-and-edge visualization — that helps users explore:
 
 - The **5-phase lifecycle pipeline** (Readiness → Docs → Compliance → Review → Handoff)
+- **Use cases** from the PO Spec / system overview, traced through sections and components
 - The **12-section architecture structure** (S1-S12) with their file paths and dependency tiers
 - **Architecture types** (META, 3-Tier, Microservices, N-Layer, BIAN) with the detected type highlighted
 - **Components** from the component index with their types and connections
@@ -141,6 +142,16 @@ All items in this step are **optional** — the skill works with just `ARCHITECT
 **PO Spec** (`PRODUCT_OWNER_SPEC.md`):
 - Check if file exists. Used to determine Phase 1 lifecycle status.
 
+**Use Cases** (extracted from two sources in priority order):
+1. **Primary source** — `docs/01-system-overview.md` Section 2.3 "Primary Use Cases": Parse use case headings (`### Use Case N: <Name>`) and extract: name, description (first line after heading), actors, and success metrics.
+2. **Fallback source** — `PRODUCT_OWNER_SPEC.md` Section 4 "Use Cases": Parse `### Use Case N: <Name>` headings with description, actors, primary flow steps, and success metrics.
+3. If neither source has use cases, skip — no use case nodes are created.
+- Limit to 10 use cases maximum.
+
+**Use Case → Component mapping** (from handoff docs):
+- If `docs/handoffs/` exists: scan each handoff file for the "Business Context" field (typically line ~30). Extract use case references (e.g., "UC 1", "UC 2", "Use Case 1") and map them to component IDs.
+- If handoffs don't exist: infer mapping from component descriptions and use case names (best-effort keyword matching).
+
 ---
 
 ### Step 5 — Build Nodes and Edges
@@ -148,6 +159,7 @@ All items in this step are **optional** — the skill works with just `ARCHITECT
 Assemble `onboardingData` JSON following the schema in `PLAYGROUND_TEMPLATE.md`.
 
 **Node construction rules:**
+- Create one node per **use case** extracted in Step 4 (id: `uc-N`, group: `usecases`). Include description, actors, and success metrics in the detail field.
 - Create one node per lifecycle phase (always 5, status derived from artifact existence)
 - Create one node per S-number (present nodes fully opaque, missing nodes as ghost nodes with `status: "missing"`)
 - Create one node per component (up to 15)
@@ -181,6 +193,15 @@ Phase → skill edges (uses-skill):
 - Phase 3 → architecture-compliance skill
 - Phase 4 → architecture-peer-review + architecture-compliance-review skills
 - Phase 5 → architecture-dev-handoff + architecture-docs-export skills
+
+Use case → section edges (traces-to):
+- Every use case traces to S1+S2 (system overview is where use cases are technically defined)
+- Use case → S6 (data flow) if the use case involves async flows or event processing
+- Use case → S7 (integration) if the use case involves external systems
+
+Use case → component edges (served-by) — extracted from handoff docs:
+- Each component's "Business Context" field lists which use cases it serves
+- Create `{ from: "uc-N", to: "comp-<slug>", type: "served-by" }` for each mapping
 
 Component → S5 edges (implements) — extracted from component index
 
@@ -276,6 +297,6 @@ Phase 5 (Handoff): [COMPLETE | PARTIAL | PENDING] — /skill architecture-dev-ha
 - [ ] `onboardingData` JSON assembled with nodes, edges, groups, and presets
 - [ ] Concept map HTML generated via playground plugin
 - [ ] File opened in browser
-- [ ] All node groups represented (lifecycle, sections, components, compliance, principles, skills)
+- [ ] All node groups represented (usecases, lifecycle, sections, components, compliance, principles, skills)
 - [ ] Ghost nodes shown for missing sections/contracts with actionable guidance
 - [ ] If playground unavailable: plain-text report output with next-skill recommendations

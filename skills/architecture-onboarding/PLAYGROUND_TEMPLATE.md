@@ -21,9 +21,10 @@ Use this template when the playground generates the interactive architecture onb
 | [ Reset ]                      | [PROJECT] architecture.  |
 |                                | I already know: ...       |
 | Group toggles:                 | I'm fuzzy on: ...         |
-| ■ Lifecycle   ■ Sections       | I don't know: ...         |
-| ■ Components  ■ Compliance     |                           |
-| ■ Principles  ■ Skills         | [ Copy Learning Prompt ]  |
+| ■ Use Cases   ■ Lifecycle      | I don't know: ...         |
+| ■ Sections    ■ Components     |                           |
+| ■ Compliance  ■ Principles     |                           |
+| ■ Skills                       | [ Copy Learning Prompt ]  |
 |                                |                           |
 | Node list (scrollable):        |                           |
 | ● [Phase 1: Readiness]  Fuzzy |                           |
@@ -50,6 +51,18 @@ const onboardingData = {
   // status: "complete" | "present" | "in-progress" | "not-started" | "missing"
   // knowledge: "know" | "fuzzy" | "unknown"   (user-adjustable, starts as "fuzzy")
   nodes: [
+    // ── Use Case nodes (variable, injected by the skill from PO Spec / S2) ──
+    // EXAMPLE — replace with actual extracted use cases:
+    // {
+    //   id: "uc-1",
+    //   label: "UC1: Scheduled Transfers",
+    //   group: "usecases",
+    //   description: "Users schedule one-time or future-dated fund transfers",
+    //   status: "present",
+    //   knowledge: "fuzzy",
+    //   detail: "Actors: Retail Banking Customer\nSuccess: 99.99% on-time execution\nSource: docs/01-system-overview.md § 2.3"
+    // },
+
     // ── Lifecycle Phase nodes (always 5) ──
     {
       id: "phase-1",
@@ -367,12 +380,20 @@ const onboardingData = {
     { from: "compliance-enterprise",  to: "s1-s2",type: "validates", label: "audits" },
     { from: "compliance-integration", to: "s7",   type: "validates", label: "audits" },
 
+    // Use case → section edges (traces-to) — injected by skill:
+    // { from: "uc-1", to: "s1-s2", type: "traces-to", label: "defined in" }
+    // { from: "uc-1", to: "s6",    type: "traces-to", label: "flow in" }
+
+    // Use case → component edges (served-by) — injected by skill from handoff docs:
+    // { from: "uc-1", to: "comp-<slug>", type: "served-by", label: "served by" }
+
     // Component edges injected here by skill (one per component):
     // { from: "comp-<slug>", to: "s5", type: "implements", label: "part of" }
   ],
 
   // ── Group definitions ─────────────────────────────────────
   groups: [
+    { id: "usecases",   label: "Use Cases",               color: "#f778ba", visible: true },
     { id: "lifecycle",   label: "Lifecycle Phases",       color: "#8957e5", visible: true },
     { id: "sections",    label: "Architecture Sections",   color: "#58a6ff", visible: true },
     { id: "components",  label: "Components",              color: "#3fb950", visible: true },
@@ -383,11 +404,12 @@ const onboardingData = {
 
   // ── Preset views ──────────────────────────────────────────
   presets: [
-    { name: "Full Map",             visibleGroups: ["lifecycle","sections","components","compliance","principles","skills"] },
-    { name: "Lifecycle Flow",       visibleGroups: ["lifecycle","skills"] },
+    { name: "Use Case Traceability", visibleGroups: ["usecases","sections","components"] },
+    { name: "Full Map",             visibleGroups: ["usecases","lifecycle","sections","components","compliance","principles","skills"] },
     { name: "Section Dependencies", visibleGroups: ["sections"] },
     { name: "Component Map",        visibleGroups: ["sections","components"] },
     { name: "Compliance Coverage",  visibleGroups: ["sections","compliance"] },
+    { name: "Lifecycle Flow",       visibleGroups: ["lifecycle","skills"] },
     { name: "Principles View",      visibleGroups: ["sections","principles"] }
   ]
 };
@@ -458,14 +480,16 @@ function initializePositions() {
   const W = canvas.width || 1200;
   const H = canvas.height || 600;
 
-  // Group band configuration: { y center, x start, x end, reserved for right side }
+  // Group band configuration: { y center, x start, x end }
+  // Use cases at the top center, sections below, components further down
   const bands = {
-    lifecycle:   { y: 80,  xStart: 20,       xEnd: W * 0.48 },
-    sections:    { y: 240, xStart: 20,       xEnd: W * 0.55 },
-    components:  { y: 390, xStart: 20,       xEnd: W * 0.55 },
-    compliance:  { y: 240, xStart: W * 0.60, xEnd: W - 20   },
-    principles:  { y: 500, xStart: 20,       xEnd: W * 0.55 },
-    skills:      { y: 80,  xStart: W * 0.52, xEnd: W - 20   }
+    usecases:    { y: 60,  xStart: W * 0.15, xEnd: W * 0.65 },
+    lifecycle:   { y: 60,  xStart: W * 0.68, xEnd: W - 20   },
+    sections:    { y: 220, xStart: 20,       xEnd: W * 0.55 },
+    components:  { y: 400, xStart: 20,       xEnd: W * 0.55 },
+    compliance:  { y: 220, xStart: W * 0.60, xEnd: W - 20   },
+    principles:  { y: 520, xStart: 20,       xEnd: W * 0.55 },
+    skills:      { y: 520, xStart: W * 0.60, xEnd: W - 20   }
   };
 
   // Group nodes by group id
@@ -588,7 +612,9 @@ function drawEdge(edge) {
     'produces':   { color: '#3fb950', dash: [6, 3],   width: 1.5 },
     'validates':  { color: '#d29922', dash: [3, 3],   width: 1.5 },
     'uses-skill': { color: '#8b949e', dash: [],       width: 1.0 },
-    'implements': { color: '#3fb950', dash: [],       width: 1.5 }
+    'implements': { color: '#3fb950', dash: [],       width: 1.5 },
+    'traces-to':  { color: '#f778ba', dash: [8, 4],   width: 2.0 },
+    'served-by':  { color: '#f778ba', dash: [],       width: 1.5 }
   };
   const style = styles[edge.type] || styles['depends-on'];
 
@@ -1128,12 +1154,15 @@ The skill workflow (Step 5 in SKILL.md) produces a fully populated `onboardingDa
 
 Modifications the skill makes before passing to the playground:
 
-1. **Replace status values** on lifecycle, section, and compliance nodes based on extracted data
-2. **Inject component nodes** — one node per entry in `docs/components/README.md` (up to 15), using id `comp-<slug>`
-3. **Inject component edges** — `{ from: "comp-<slug>", to: "s5", type: "implements", label: "part of" }`
-4. **Update compliance nodes** with actual score and date from `COMPLIANCE_MANIFEST.md`
-5. **Update principle nodes** with `status: "missing"` for any of the 9 not present in S3
-6. **Update phase statuses** based on artifact presence (PO Spec, compliance manifest, handoffs)
-7. **Update header chips** — stat chips show: phases complete count, ADR count, component count, avg compliance score
+1. **Inject use case nodes** — one node per use case from `docs/01-system-overview.md` Section 2.3 or PO Spec Section 4 (up to 10), using id `uc-N`
+2. **Inject use case → section edges** — `{ from: "uc-N", to: "s1-s2", type: "traces-to", label: "defined in" }` (all use cases trace to S1+S2; additional edges to S6/S7 if flows/integrations apply)
+3. **Inject use case → component edges** — `{ from: "uc-N", to: "comp-<slug>", type: "served-by", label: "served by" }` (from handoff docs' Business Context field)
+4. **Replace status values** on lifecycle, section, and compliance nodes based on extracted data
+5. **Inject component nodes** — one node per entry in `docs/components/README.md` (up to 15), using id `comp-<slug>`
+6. **Inject component edges** — `{ from: "comp-<slug>", to: "s5", type: "implements", label: "part of" }`
+7. **Update compliance nodes** with actual score and date from `COMPLIANCE_MANIFEST.md`
+8. **Update principle nodes** with `status: "missing"` for any of the 9 not present in S3
+9. **Update phase statuses** based on artifact presence (PO Spec, compliance manifest, handoffs)
+10. **Update header chips** — stat chips show: phases complete count, ADR count, component count, use case count, avg compliance score
 
 The playground does NOT modify `onboardingData` — it embeds it as-is and renders from it.
