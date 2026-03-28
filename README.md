@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.12.11` in the list.
+You should see `solutions-architect-skills v2.12.12` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -591,7 +591,13 @@ Where:
 
 ## Roadmap
 
-### v2.12.11 (Current Release) ✅
+### v2.12.12 (Current Release) ✅
+**feat: dependency-based ordering for batch dev handoff generation**
+
+- Added Step 2.2 to `architecture-dev-handoff`: when generating multiple handoffs, components are sorted ascending by inter-component dependency count (least → most)
+- Ensures foundational components are generated first so heavily-dependent components can cross-reference upstream handoffs for consistency
+
+### v2.12.11 (Previous Release) ✅
 **docs: add context7 MCP integration guide to README**
 
 - Added context7 to "What's Included" feature list as optional MCP integration

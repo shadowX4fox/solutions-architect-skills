@@ -145,9 +145,25 @@ Selection modes:
 4. Comma-separated     → process that subset (e.g. "1, 3" or "payment-api, auth-service")
 ```
 
+**Step 2.2: Dependency-Based Ordering (batch only)**
+
+When multiple components are selected (including "all"), sort them by dependency count **ascending** — components with the fewest dependencies are generated first, components with the most dependencies last.
+
+```
+1. For each selected component, read its docs/components/NN-<component>.md file
+2. Count the number of inter-component dependencies (look for **Dependencies:**,
+   **Depends On:**, or integration references to other selected components)
+3. Sort ascending by dependency count (least → most)
+4. Ties are broken by index position (lower number first)
+```
+
+**Why**: Components with fewer dependencies provide foundational context. Generating them first ensures that when a heavily-dependent component is processed, its upstream handoffs already exist and can be cross-referenced for consistency.
+
+Skip this step for single-component generation.
+
 ### Phase 3: Per-Component Generation
 
-For each selected component, execute Steps 3.1–3.5 sequentially:
+For each selected component (in dependency order when batch), execute Steps 3.1–3.5 sequentially:
 
 **Step 3.1: Read Source Files**
 
