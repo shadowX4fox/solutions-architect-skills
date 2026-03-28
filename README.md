@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.14.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.14.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.14.1` in the list.
+You should see `solutions-architect-skills v2.14.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,15 @@ Where:
 
 ## Roadmap
 
-### v2.14.1 (Current Release) ✅
+### v2.14.2 (Current Release) ✅
+**fix: EOL checks integrated into Phase 1 version items — approved does not mean supported**
+
+- Version-bearing validation items (1, 2, 7, 8, 13, 19, 20, 21, 22, 23) now verify EOL status via WebSearch as part of PASS/FAIL criteria — a technology on the approved list but past end-of-support is marked FAIL
+- Evidence includes both facts: `"Spring Boot 3.2 is in approved list but EOL since 2024-12-31 — endoflife.date"`
+- Phase 2 simplified to supplementary catch-all for technologies not covered by the 26 standard items
+- Compact VALIDATION_RESULT format maintained across all 10 validators
+
+### v2.14.1 (Previous Release) ✅
 **feat: development validator as sole validation point + EOL checks + compact VALIDATION_RESULT**
 
 - Development validator is now the single source of truth for stack validation — Step 4.6 override no longer duplicates criteria, only maps VALIDATION_RESULT to template placeholders

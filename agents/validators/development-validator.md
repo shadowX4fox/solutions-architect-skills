@@ -18,19 +18,43 @@ Evaluate the project's architecture documentation against development technology
 - `architecture_file`: Path to ARCHITECTURE.md
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory
 
+## EOL Cross-Check Rule (applies to ALL version-bearing items)
+
+**IMPORTANT**: For every validation item that checks a technology version (items 1, 2, 7, 8, 13, 19, 20, 21, 22, 23), being on the "approved list" is NOT sufficient for PASS. You MUST also verify the specific version is **not end-of-life**.
+
+**Procedure for version items**:
+1. Evaluate against the approved list criteria below (standard check)
+2. If the version matches the approved list, use **WebSearch** to verify EOL status:
+   ```
+   query: "{technology} {version} end of life support date"
+   ```
+   Prioritize results from: endoflife.date, official vendor release pages, and maintenance blogs.
+3. Final status:
+   - **PASS**: Version is on approved list AND still actively supported
+   - **FAIL**: Version is NOT on approved list, OR version IS on approved list but is **EOL/end-of-support**
+   - **N/A**: Technology not used
+   - **UNKNOWN**: Version unspecified, OR EOL status could not be determined (WebSearch unavailable or inconclusive)
+
+If WebSearch is unavailable, skip the EOL check and evaluate against the approved list only — do NOT block the validation.
+
+When a version is approved but EOL, include both facts in the evidence:
+```
+"{technology} {version} is in approved list but EOL since {date} — endoflife.date"
+```
+
 ## Validation Items
 
 ### Java Backend (6 items)
 
 1. **Is Java version LTS (11/17/21)?**
-   - PASS: Java 11, 17, or 21 LTS documented in technology stack
-   - FAIL: Java 8 or older detected
+   - PASS: Java 11, 17, or 21 LTS documented **and** not EOL (verify via WebSearch)
+   - FAIL: Java 8 or older detected, OR LTS version that has reached end-of-support
    - N/A: Java not used in the technology stack
    - UNKNOWN: Java is present but version is unspecified
 
 2. **Is Spring Boot version 2.7+ or 3.x?**
-   - PASS: Spring Boot 2.7+ or 3.x documented
-   - FAIL: Spring Boot version < 2.7
+   - PASS: Spring Boot 2.7+ or 3.x documented **and** not EOL (verify via WebSearch)
+   - FAIL: Spring Boot version < 2.7, OR version is EOL/end-of-support
    - N/A: Spring Boot not used
    - UNKNOWN: Spring Boot mentioned but version unspecified
 
@@ -61,8 +85,8 @@ Evaluate the project's architecture documentation against development technology
 ### .NET Backend (6 items)
 
 7. **Is C#/.NET version current (.NET 6/7/8 or .NET Core 3.1)?**
-   - PASS: .NET 6, 7, 8, or .NET Core 3.1 documented
-   - FAIL: .NET Core 2.x or .NET Framework 4.x detected
+   - PASS: .NET 6, 7, 8, or .NET Core 3.1 documented **and** not EOL (verify via WebSearch)
+   - FAIL: .NET Core 2.x or .NET Framework 4.x detected, OR approved version that is EOL
    - N/A: .NET not used
    - UNKNOWN: .NET present but version unspecified
 
@@ -99,8 +123,8 @@ Evaluate the project's architecture documentation against development technology
 ### Frontend (6 items)
 
 13. **Is frontend framework approved (Angular 12+, React 17+, Vue.js 3+)?**
-    - PASS: Framework and version in approved list
-    - FAIL: Deprecated framework version detected
+    - PASS: Framework and version in approved list **and** not EOL (verify via WebSearch)
+    - FAIL: Deprecated framework version detected, OR approved version that is EOL
     - N/A: No frontend in the architecture
     - UNKNOWN: Framework present but version unspecified
 
@@ -137,8 +161,8 @@ Evaluate the project's architecture documentation against development technology
 ### Other Stacks and Components (5 items)
 
 19. **Are automation tools approved (Python 3.x / Shell / RPA)?**
-    - PASS: Automation tool in approved list with version
-    - FAIL: Python 2.x or unapproved RPA tool detected
+    - PASS: Automation tool in approved list with version **and** not EOL (verify via WebSearch)
+    - FAIL: Python 2.x or unapproved RPA tool detected, OR approved version that is EOL
     - N/A: No automation components in the architecture
     - UNKNOWN: Automation mentioned but tool/version unspecified
 
@@ -149,8 +173,8 @@ Evaluate the project's architecture documentation against development technology
     - UNKNOWN: IaC mentioned but specific tool unspecified
 
 21. **Is database platform approved with version (PostgreSQL, SQL Server, Oracle, MongoDB)?**
-    - PASS: Database in approved catalog with version documented
-    - FAIL: Unapproved database or end-of-life version detected
+    - PASS: Database in approved catalog with version documented **and** not EOL (verify via WebSearch)
+    - FAIL: Unapproved database, OR approved database with EOL version
     - N/A: Stateless application with no database
     - UNKNOWN: Database present but platform or version unspecified
 
@@ -195,35 +219,20 @@ Evaluate the project's architecture documentation against development technology
 3. For each validation item (DEV-01 through DEV-26), evaluate against the criteria above
 4. Collect all results into the VALIDATION_RESULT format
 
-### Phase 2: EOL Validation (Web Search)
+### Phase 2: Supplementary EOL Scan
 
-**After** completing the 26 standard items, perform end-of-life checks for every technology detected in Phase 1 that has a specific version number.
+**Note**: EOL checks are already integrated into Phase 1 version-bearing items (1, 2, 7, 8, 13, 19, 20, 21, 22, 23). Phase 2 catches any **additional** technologies detected in the docs that are not covered by the 26 standard items (e.g., middleware, message brokers, caching layers).
 
-**Skip this phase entirely** if the WebSearch tool is not available — degrade gracefully with no errors or warnings.
+**Skip this phase** if WebSearch is not available or no additional technologies with versions were found beyond those already checked in Phase 1.
 
-**For each detected technology with a version** (e.g., "Java 17", "Spring Boot 3.2", "PostgreSQL 15", "React 18"):
-
-1. Use WebSearch to look up the EOL status:
+For each additional technology with a version:
+1. WebSearch: `"{technology} {version} end of life support date"`
+2. Add a supplementary EOL row to the items table:
    ```
-   query: "{technology} {version} end of life support date"
-   ```
-   Prioritize results from official sources (endoflife.date, vendor documentation, release blogs).
-
-2. From the search results, determine EOL status:
-   - **PASS**: Version is actively supported (has future EOL date or is current LTS)
-   - **FAIL**: Version is EOL, end-of-support, or deprecated
-   - **UNKNOWN**: No clear lifecycle information found
-
-3. Add an EOL item to the VALIDATION_RESULT:
-   ```
-   - id: DEV-EOL-{N}
-     category: EOL Validation
-     question: "Is {technology} {version} still supported?"
-     status: {PASS|FAIL|UNKNOWN}
-     evidence: "{EOL date or support status} — {source URL or 'endoflife.date'}"
+   | DEV-EOL-{N} | EOL | {PASS|FAIL|UNKNOWN} | {evidence} — {source} |
    ```
 
-**EOL items are supplementary** — they appear after DEV-26 in the items list. They do NOT count toward `total_items` (which stays at 26 for standard items). However, EOL FAIL items ARE included in `deviations` and EOL UNKNOWN items in `recommendations`.
+Supplementary EOL items do NOT count toward `total_items` (stays at 26). FAIL items are added to `deviations`.
 
 **Add EOL summary fields** to the VALIDATION_RESULT:
 ```
