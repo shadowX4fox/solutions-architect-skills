@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -59,6 +59,11 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - Metric consistency checking
   - Design Drivers calculation
 
+- **Optional MCP Integration — [context7](https://context7.com)**
+  - Fetches current library/framework documentation during asset generation and component documentation
+  - Used by `architecture-dev-handoff` (spec validation for OpenAPI, AsyncAPI, K8s, etc.) and `architecture-docs` (technology context briefs)
+  - Fully optional — all skills degrade gracefully without it
+
 - **Complete Documentation**
   - Installation guide, Quick Start tutorial, Workflow guide, Troubleshooting
 
@@ -91,9 +96,51 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.12.8` in the list.
+You should see `solutions-architect-skills v2.12.11` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
+
+### Optional: Enable context7
+
+[context7](https://context7.com) provides up-to-date library documentation to improve generated assets (OpenAPI specs, K8s manifests, DDL, etc.). Two skills use it when available:
+
+| Skill | Usage |
+|-------|-------|
+| `architecture-dev-handoff` | Fetches current spec docs (OpenAPI, AsyncAPI, Kubernetes, Protobuf, Avro, DDL, Redis) to validate generated asset syntax |
+| `architecture-docs` | Fetches framework docs for technologies in new component files; presents a Technology Context Brief |
+
+**MCP server setup (recommended):**
+
+Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+**Alternative — automatic setup via CLI:**
+
+```bash
+npx ctx7 setup --claude
+```
+
+This authenticates via OAuth, generates an API key, and configures context7 automatically.
+
+For headless/remote environments, pass your API key directly:
+
+```bash
+npx ctx7 setup --claude --api-key YOUR_API_KEY
+```
+
+Generate your API key at the [context7 dashboard](https://context7.com).
+
+> context7 is fully optional. All skills complete successfully without it — no errors or warnings.
 
 ### First Workflow
 
@@ -544,7 +591,15 @@ Where:
 
 ## Roadmap
 
-### v2.12.10 (Current Release) ✅
+### v2.12.11 (Current Release) ✅
+**docs: add context7 MCP integration guide to README**
+
+- Added context7 to "What's Included" feature list as optional MCP integration
+- New "Optional: Enable context7" section in Quick Start with MCP server JSON config (recommended), CLI setup, and headless alternative
+- Documented which skills use context7 (`architecture-dev-handoff`, `architecture-docs`) with usage table
+- Fixed stale installation verification version
+
+### v2.12.10 (Previous Release) ✅
 **docs: merge propagation gates — unified ADR and downstream propagation node in workflow diagram**
 
 - Merged `{Propagation}` (ADR status change) and `{Downstream Propagation}` (section edit) diamond nodes into a single `{Propagation}` gate in the Workflow Integration diagram
