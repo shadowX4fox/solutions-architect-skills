@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,18 @@ Where:
 
 ## Roadmap
 
-### v2.12.6 (Current Release) ✅
+### v2.12.7 (Current Release) ✅
+**feat: architecture-docs downstream propagation — cascade updates to dependent sections, components, and handoffs after any substantive section edit**
+
+- Added Step 5.5 to the architecture-docs editing workflow: Downstream Documentation Propagation
+- Embedded reverse dependency table mapping each section to its structurally-dependent downstream files
+- 4-phase propagation: fact-delta extraction → user-approval checklist → tier-ordered Context Anchor updates → completion report
+- Cross-cutting scan always covers `docs/components/` and `docs/handoffs/` regardless of section tier
+- Cosmetic edit heuristic skips propagation silently for formatting/typo changes
+- Anti-recursion rule: propagation edits do not re-trigger propagation
+- Component file edits cascade through S5's full dependency row + always include matching handoff doc
+
+### v2.12.6 (Previous Release) ✅
 **feat: ADR change propagation — downstream documentation impact tracking and execution**
 
 When an ADR is updated (status change) or superseded (Workflow 3/4), the `architecture-definition-record` skill now runs a 4-phase Documentation Impact Propagation step. Phase 1 (Impact Discovery): greps all `docs/`, `docs/components/`, and `docs/handoffs/` for explicit ADR citations, applies a keyword-to-file topic mapping table to find conceptually-affected files without explicit citations, and extracts concrete fact changes from the ADR content. Phase 2 (Checklist): presents a "Documentation Updates Required" checklist grouped by file type (Architecture Docs / Component Files / Handoff Docs) — each entry states what needs updating and why; user approves all or deselects items for manual handling. Phase 3 (Execute): applies each approved update following the architecture-docs Context Anchor Protocol (load foundation + section-specific parents + changed ADR, update citations and derived facts, run 5-check Post-Write Audit); handoff updates follow the dev-handoff Documentation Fidelity Policy. If user skips, adds `<!-- PROPAGATION PENDING -->` marker to the ADR file. Phase 4 (Report): completion report with `[x]` completed / `[ ]` deselected / `⚠️` failed items. For supersede: also migrates `per [ADR-old]` citations to `per [ADR-new]` across all docs and updates ARCHITECTURE.md Section 12 table. Integration table and Success Criteria updated.

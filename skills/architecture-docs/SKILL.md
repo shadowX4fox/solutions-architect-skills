@@ -206,6 +206,130 @@ See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conve
      - `<!-- TODO: Add source reference -->` markers → count and report
    - **Silent pass** if no issues found; display alignment report **only when misalignment or missing citations are detected**
 
+5.5. **Downstream Documentation Propagation**
+
+Runs immediately after the Post-Write Alignment Audit passes. Detects downstream files whose content may be stale due to the edit and offers to update them.
+
+#### Trigger Gate
+
+**Run when**: The edit changed substantive content — metrics, technology names, component names, architectural patterns, constraints, requirements, or interface definitions.
+
+**Skip silently when**: The edit was cosmetic — typo fixes, formatting, grammar, markdown structure, comment updates, `<!-- TODO -->` markers, source attribution links, or Document Index line numbers. Heuristic: if the diff contains only whitespace/punctuation/link/formatting changes with no word-level changes to technical terms, skip entirely.
+
+**Anti-recursion rule**: Propagation updates (Phase 3 edits) do NOT re-trigger Step 5.5.
+
+#### Reverse Dependency Table
+
+| Edited Section | File | Downstream Section Files |
+|---|---|---|
+| S1+S2 (System Overview) | `docs/01-system-overview.md` | ALL sections (S4–S11) + `docs/components/*` |
+| S3 (Principles) | `docs/02-architecture-principles.md` | ALL sections (S4–S11) + `docs/components/*` |
+| S4 (Layers) | `docs/03-architecture-layers.md` | S5 (`docs/components/*`), S8 (`docs/06-technology-stack.md`) |
+| S5 (Components) | `docs/components/*.md` | S6 (`docs/04-data-flow-patterns.md`), S7 (`docs/05-integration-points.md`), S8 (`docs/06-technology-stack.md`), S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`) |
+| S6 (Data Flow) | `docs/04-data-flow-patterns.md` | *(leaf — no downstream sections)* |
+| S7 (Integration) | `docs/05-integration-points.md` | S9 (`docs/07-security-architecture.md`) |
+| S8 (Tech Stack) | `docs/06-technology-stack.md` | S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`) |
+| S9 (Security) | `docs/07-security-architecture.md` | *(leaf)* |
+| S10 (Scalability) | `docs/08-scalability-and-performance.md` | S11 (`docs/09-operational-considerations.md`) |
+| S11 (Operations) | `docs/09-operational-considerations.md` | *(leaf)* |
+
+**Cross-cutting** (always scanned regardless of table): `docs/components/`, `docs/handoffs/`
+
+#### Phase 1: Impact Discovery
+
+**1a. Fact-delta extraction** — Compare the file content before and after the edit. Produce a concrete bullet list of what changed (e.g., "Database: PostgreSQL → CockroachDB", "Added: Redis caching layer", "Removed: legacy SOAP endpoint"). If zero substantive deltas → skip propagation entirely.
+
+**1b. Structural dependency scan** — Look up the edited section in the reverse dependency table above. Collect all downstream section files.
+
+**1c. Cross-reference scan** — Grep across `docs/`, `docs/components/`, `docs/handoffs/` for explicit references to the edited filename (links, section anchors, `(see [...](...))`).
+
+```bash
+grep -rl "{edited_filename}" docs/ docs/components/ docs/handoffs/ 2>/dev/null
+```
+
+**1d. Handoff scan** — For each fact-delta keyword (component names, technology names, pattern names), grep `docs/handoffs/` for matching terms.
+
+**1e. Merge and deduplicate** — Combine results from 1b+1c+1d. Remove duplicates and remove the edited file itself.
+
+#### Phase 2: Generate Checklist
+
+Present a structured checklist grouped by file type:
+
+```
+═══════════════════════════════════════════════════════════
+DOWNSTREAM UPDATES REQUIRED — {edited_file} ({section_name})
+═══════════════════════════════════════════════════════════
+
+Changes detected:
+- {bullet list from Phase 1a}
+
+─── Downstream Sections ──────────────────────────────────
+[ ] 1. docs/07-security-architecture.md — references {changed_tech}; security controls may need updating
+[ ] 2. docs/09-operational-considerations.md — mentions {old_value}; align with new value
+
+─── Component Files ──────────────────────────────────────
+[ ] 3. docs/components/03-payment-service.md — uses {changed_component}; integration details may be stale
+
+─── Handoff Docs ─────────────────────────────────────────
+[ ] 4. docs/handoffs/03-payment-service-handoff.md — Section 4 references {old_tech}
+
+─── No Updates Required ──────────────────────────────────
+ℹ️  docs/04-data-flow-patterns.md — no references to changed content
+═══════════════════════════════════════════════════════════
+Approve all? ('all', comma-separated numbers to deselect, or 'skip')
+```
+
+Wait for user response before proceeding.
+
+#### Phase 3: Execute Updates
+
+Process approved files **in tier order** (lower tiers first → higher tiers last) so each updated file is available as context for files that depend on it.
+
+For each approved `docs/*.md` or `docs/components/*.md` file:
+1. Load Context Anchor (universal foundation + section-specific parents per the dependency table)
+2. Read the target file in full
+3. Identify passages affected by the fact-deltas
+4. Apply updates, maintaining Source Attribution links (`per [Section X](../...)`)
+5. Run the 5-check Post-Write Alignment Audit on the updated file
+6. Mark as `[x]`
+
+For approved `docs/handoffs/*.md` files: Read, locate affected passages, update following the dev-handoff Documentation Fidelity Policy. Mark as `[x]`.
+
+If user selected `skip`: Add `<!-- PROPAGATION PENDING: upstream {edited_file} changed ({date}) — downstream not yet updated -->` comment at the top of the edited file.
+
+#### Component File Edit Handling
+
+When the edited file is `docs/components/*.md` (not a section file):
+- Cascade through S5's row in the table (S6, S7, S8, S9, S10, S11)
+- Additionally grep for the **component name** (not just filename) across all `docs/` files
+- Always include the matching `docs/handoffs/{component}-handoff.md` if it exists
+- If `docs/components/README.md` needs updating, delegate to the `architecture-component-guardian` skill
+
+#### Phase 4: Propagation Report
+
+```
+═══════════════════════════════════════════════════════════
+DOWNSTREAM PROPAGATION — COMPLETION REPORT
+═══════════════════════════════════════════════════════════
+
+Source: {edited_file} ({section_name})
+Changes: {summary from Phase 1a}
+
+Completed:
+[x] docs/07-security-architecture.md — {what was updated}
+[x] docs/components/03-payment-service.md — {what was updated}
+
+Verified (no change needed):
+✓  docs/08-scalability-and-performance.md — content still accurate
+
+Deselected (manual update required):
+[ ] docs/09-operational-considerations.md — user chose manual update
+
+Failed (require manual review):
+⚠️  {any files where edit could not be applied cleanly}
+═══════════════════════════════════════════════════════════
+```
+
 6. **Verification**
    - After edits, re-read the modified `docs/` file to verify changes
    - Use Grep to search for specific content without loading multiple files
@@ -335,7 +459,7 @@ Full workflow and reference details are in `METRIC_CALCULATIONS.md` (Read it whe
 
 Full workflow and reference details are in `ARCHITECTURE_DOCUMENTATION_GUIDE.md` (Read it when this workflow is needed).
 
-**Quick summary**: Dependency-aware editing workflow that loads required upstream context (S1+S2, S3, ADRs, and section-specific parents) before any downstream section edit, requires source attribution for derived claims, and detects downstream impact when any section changes.
+**Quick summary**: Dependency-aware editing workflow that loads required upstream context (S1+S2, S3, ADRs, and section-specific parents) before any downstream section edit, requires source attribution for derived claims, and detects downstream impact when any section changes (executed via Step 5.5 Downstream Documentation Propagation).
 
 **When to invoke**: Before editing any docs/ file from `docs/03-architecture-layers.md` through `docs/09-operational-considerations.md`, or any `docs/components/*.md` file.
 
