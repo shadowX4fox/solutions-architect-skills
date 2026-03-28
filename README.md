@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -494,11 +494,9 @@ graph TD
     C -->|Creates| D[ARCHITECTURE.md]
     D -->|Generates| L[ADRs]
     L -->|Status Change| M{Propagation}
+    D -->|Section Edit| M
     M -->|Updates| D
     M -->|Updates| J
-    D -->|Section Edit| N{Downstream Propagation}
-    N -->|Cascades| D
-    N -->|Cascades| J
     D -->|Peer Review| E{Quality Gate}
     E -->|Approved| F[10 Compliance Contracts]
     E -->|Refine| C
@@ -546,7 +544,21 @@ Where:
 
 ## Roadmap
 
-### v2.12.8 (Current Release) ✅
+### v2.12.10 (Current Release) ✅
+**docs: merge propagation gates — unified ADR and downstream propagation node in workflow diagram**
+
+- Merged `{Propagation}` (ADR status change) and `{Downstream Propagation}` (section edit) diamond nodes into a single `{Propagation}` gate in the Workflow Integration diagram
+- Both triggers — `Status Change` from ADRs and `Section Edit` from ARCHITECTURE.md — now feed into one propagation gate with unified `Updates` outputs to ARCHITECTURE.md and Dev Handoffs
+
+### v2.12.9 (Previous Release) ✅
+**feat: asset regeneration advisory in downstream propagation workflows**
+
+- Added **Phase 5: Asset Regeneration Advisory** after Phase 4 Propagation Report in both `architecture-docs` (Step 5.5) and `architecture-definition-record` (Workflows 3 & 4)
+- After propagation completes, scans fact-deltas for asset-impact keywords (API, database, Redis, deployment, Kafka, Avro, Protobuf, cron) and cross-references against actual asset files in `docs/handoffs/assets/`
+- When stale assets are detected, displays advisory listing affected components and asset types, then asks the user whether to re-run `/skill architecture-dev-handoff`
+- Skips silently when no handoffs were affected or no asset-impact keywords match; also fires on propagation skip to warn that both text and assets may be stale
+
+### v2.12.8 (Previous Release) ✅
 **feat: context7 MCP integration for asset generation and component documentation**
 
 - `architecture-dev-handoff`: added Step 3.3b (Spec Documentation Lookup) — fetches current spec docs via context7 (`resolve-library-id` + `get-library-docs`) for each asset type before generation; caches per session
