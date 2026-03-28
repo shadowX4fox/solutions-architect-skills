@@ -21,10 +21,9 @@ Use this template when the playground generates the interactive architecture onb
 | [ Reset ]                      | [PROJECT] architecture.  |
 |                                | I already know: ...       |
 | Group toggles:                 | I'm fuzzy on: ...         |
-| ■ Use Cases   ■ Lifecycle      | I don't know: ...         |
-| ■ Sections    ■ Components     |                           |
-| ■ Compliance  ■ Principles     |                           |
-| ■ Skills                       | [ Copy Learning Prompt ]  |
+| ■ Use Cases  ■ Sections        | I don't know: ...         |
+| ■ Components (+ toggles)      |                           |
+|                                | [ Copy Learning Prompt ]  |
 |                                |                           |
 | Node list (scrollable):        |                           |
 | ● [Phase 1: Readiness]  Fuzzy |                           |
@@ -394,23 +393,20 @@ const onboardingData = {
   // ── Group definitions ─────────────────────────────────────
   groups: [
     { id: "usecases",   label: "Use Cases",               color: "#f778ba", visible: true },
-    { id: "lifecycle",   label: "Lifecycle Phases",       color: "#8957e5", visible: true },
     { id: "sections",    label: "Architecture Sections",   color: "#58a6ff", visible: true },
     { id: "components",  label: "Components",              color: "#3fb950", visible: true },
-    { id: "compliance",  label: "Compliance Contracts",    color: "#d29922", visible: true },
-    { id: "principles",  label: "Principles",              color: "#79c0ff", visible: true },
-    { id: "skills",      label: "Available Skills",        color: "#f0883e", visible: true }
+    { id: "lifecycle",   label: "Lifecycle Phases",       color: "#8957e5", visible: false },
+    { id: "compliance",  label: "Compliance Contracts",    color: "#d29922", visible: false },
+    { id: "principles",  label: "Principles",              color: "#79c0ff", visible: false },
+    { id: "skills",      label: "Available Skills",        color: "#f0883e", visible: false }
   ],
 
   // ── Preset views ──────────────────────────────────────────
   presets: [
     { name: "Use Case Traceability", visibleGroups: ["usecases","sections","components"] },
-    { name: "Full Map",             visibleGroups: ["usecases","lifecycle","sections","components","compliance","principles","skills"] },
-    { name: "Section Dependencies", visibleGroups: ["sections"] },
-    { name: "Component Map",        visibleGroups: ["sections","components"] },
-    { name: "Compliance Coverage",  visibleGroups: ["sections","compliance"] },
-    { name: "Lifecycle Flow",       visibleGroups: ["lifecycle","skills"] },
-    { name: "Principles View",      visibleGroups: ["sections","principles"] }
+    { name: "Section Dependencies",  visibleGroups: ["sections"] },
+    { name: "Component Map",         visibleGroups: ["sections","components"] },
+    { name: "Full Map",              visibleGroups: ["usecases","lifecycle","sections","components","compliance","principles","skills"] }
   ]
 };
 ```
@@ -481,15 +477,17 @@ function initializePositions() {
   const H = canvas.height || 600;
 
   // Group band configuration: { y center, x start, x end }
-  // Use cases at the top center, sections below, components further down
+  // TRACEABILITY SPINE — three bands spanning the full canvas width:
+  //   Use Cases (top)  →  Sections (middle)  →  Components (bottom)
+  const pad = 30;
   const bands = {
-    usecases:    { y: 60,  xStart: W * 0.15, xEnd: W * 0.65 },
-    lifecycle:   { y: 60,  xStart: W * 0.68, xEnd: W - 20   },
-    sections:    { y: 220, xStart: 20,       xEnd: W * 0.55 },
-    components:  { y: 400, xStart: 20,       xEnd: W * 0.55 },
-    compliance:  { y: 220, xStart: W * 0.60, xEnd: W - 20   },
-    principles:  { y: 520, xStart: 20,       xEnd: W * 0.55 },
-    skills:      { y: 520, xStart: W * 0.60, xEnd: W - 20   }
+    usecases:    { y: 70,  xStart: pad,  xEnd: W - pad },
+    sections:    { y: 250, xStart: pad,  xEnd: W - pad },
+    components:  { y: 430, xStart: pad,  xEnd: W - pad },
+    lifecycle:   { y: 70,  xStart: pad,  xEnd: W - pad },
+    compliance:  { y: 250, xStart: pad,  xEnd: W - pad },
+    principles:  { y: 430, xStart: pad,  xEnd: W - pad },
+    skills:      { y: 430, xStart: pad,  xEnd: W - pad }
   };
 
   // Group nodes by group id
