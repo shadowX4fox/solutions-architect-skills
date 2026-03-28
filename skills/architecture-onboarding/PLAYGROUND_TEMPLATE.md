@@ -284,11 +284,12 @@ function initializePositions() {
   // Group band configuration: { y center, x start, x end }
   // TRACEABILITY SPINE — three horizontal bands spanning the full canvas:
   //   Use Cases (top)  →  Sections (middle)  →  Components (bottom)
+  // Proportional to canvas height so layout adapts to any viewport size.
   const pad = 30;
   const bands = {
-    usecases:   { y: 70,  xStart: pad, xEnd: W - pad },
-    sections:   { y: 250, xStart: pad, xEnd: W - pad },
-    components: { y: 430, xStart: pad, xEnd: W - pad }
+    usecases:   { y: H * 0.15, xStart: pad, xEnd: W - pad },
+    sections:   { y: H * 0.45, xStart: pad, xEnd: W - pad },
+    components: { y: H * 0.80, xStart: pad, xEnd: W - pad }
   };
 
   // Group nodes by group id
@@ -475,60 +476,105 @@ function drawEdge(edge) {
 
 ```javascript
 function autoLayout() {
-  const REPULSION = 6000;
-  const ATTRACTION = 0.04;
-  const DAMPING = 0.85;
-  const REST_LEN = 180;
+  // Cross-group edges (traces-to, served-by) get weaker attraction because
+  // band gravity already handles vertical positioning between groups.
+  const CROSS_GROUP_TYPES = new Set(['traces-to', 'served-by']);
+  const ATTRACTION = 0.02;       // softer pull (was 0.04)
+  const ATTRACTION_CROSS = 0.01; // even softer for cross-group edges
+  const DAMPING = 0.82;
+  const REST_LEN = 120;          // shorter rest length (was 180)
+  const PAD = 20;                // minimum gap between node bounding boxes
+  const LONG_RANGE = 3000;       // mild long-range repulsion (was 6000 point-only)
+  const BAND_GRAVITY = 0.3;      // strength of pull back to group band
   const W = canvas.width;
   const H = canvas.height;
 
+  // Band Y centers — proportional, matching initializePositions()
+  const bandCenters = {
+    usecases:   H * 0.15,
+    sections:   H * 0.45,
+    components: H * 0.80
+  };
+
   const nodes = getVisibleNodes();
-  // Initialize velocities
   nodes.forEach(n => { n.vx = 0; n.vy = 0; });
 
-  for (let iter = 0; iter < 200; iter++) {
-    // Repulsion between all pairs
+  const nodeMap = {};
+  nodes.forEach(n => { nodeMap[n.id] = n; });
+  const edges = getVisibleEdges();
+
+  for (let iter = 0; iter < 300; iter++) {
+    // --- Rectangle-aware repulsion ---
+    // For overlapping nodes: push apart along axis of least overlap (collision response).
+    // For non-overlapping nodes: mild inverse-square long-range repulsion.
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
-        const ax = a.x + a.w / 2, ay = a.y + a.h / 2;
-        const bx = b.x + b.w / 2, by = b.y + b.h / 2;
-        const dx = bx - ax, dy = by - ay;
-        const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-        const force = REPULSION / (dist * dist);
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        a.vx -= fx; a.vy -= fy;
-        b.vx += fx; b.vy += fy;
+        const acx = a.x + a.w / 2, acy = a.y + a.h / 2;
+        const bcx = b.x + b.w / 2, bcy = b.y + b.h / 2;
+        const overlapX = (a.w / 2 + b.w / 2 + PAD) - Math.abs(acx - bcx);
+        const overlapY = (a.h / 2 + b.h / 2 + PAD) - Math.abs(acy - bcy);
+        if (overlapX > 0 && overlapY > 0) {
+          // Bounding boxes overlap — resolve along axis of minimum penetration
+          if (overlapX < overlapY) {
+            const sign = acx < bcx ? -1 : 1;
+            const push = overlapX * 0.55;
+            a.vx += sign * push; b.vx -= sign * push;
+          } else {
+            const sign = acy < bcy ? -1 : 1;
+            const push = overlapY * 0.55;
+            a.vy += sign * push; b.vy -= sign * push;
+          }
+        } else {
+          // No overlap — mild long-range repulsion to maintain spacing
+          const dx = bcx - acx, dy = bcy - acy;
+          const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+          const f = LONG_RANGE / (dist * dist);
+          a.vx -= (dx / dist) * f; a.vy -= (dy / dist) * f;
+          b.vx += (dx / dist) * f; b.vy += (dy / dist) * f;
+        }
       }
     }
 
-    // Attraction along edges
-    const nodeMap = {};
-    nodes.forEach(n => { nodeMap[n.id] = n; });
-    getVisibleEdges().forEach(edge => {
+    // --- Edge attraction ---
+    edges.forEach(edge => {
       const src = nodeMap[edge.from], tgt = nodeMap[edge.to];
       if (!src || !tgt) return;
       const sx = src.x + src.w / 2, sy = src.y + src.h / 2;
       const tx = tgt.x + tgt.w / 2, ty = tgt.y + tgt.h / 2;
       const dx = tx - sx, dy = ty - sy;
       const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      const force = ATTRACTION * (dist - REST_LEN);
+      const k = CROSS_GROUP_TYPES.has(edge.type) ? ATTRACTION_CROSS : ATTRACTION;
+      const force = k * (dist - REST_LEN);
       const fx = (dx / dist) * force;
       const fy = (dy / dist) * force;
       src.vx += fx; src.vy += fy;
       tgt.vx -= fx; tgt.vy -= fy;
     });
 
-    // Update positions with damping, clamp to canvas bounds
+    // --- Band gravity — pull each node toward its group's horizontal lane ---
+    nodes.forEach(n => {
+      const target = bandCenters[n.group];
+      if (target !== undefined) {
+        const cy = n.y + n.h / 2;
+        n.vy += (target - cy) * BAND_GRAVITY;
+      }
+    });
+
+    // --- Update positions with damping and boundary clamp ---
+    let energy = 0;
     nodes.forEach(n => {
       n.vx *= DAMPING;
       n.vy *= DAMPING;
+      energy += n.vx * n.vx + n.vy * n.vy;
       n.x += n.vx;
       n.y += n.vy;
       n.x = Math.max(10, Math.min(W - n.w - 10, n.x));
       n.y = Math.max(10, Math.min(H - n.h - 10, n.y));
     });
+
+    // Early exit when kinetic energy is negligible
+    if (energy < 0.1) break;
   }
 
   draw();

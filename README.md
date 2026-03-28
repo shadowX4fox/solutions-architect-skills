@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.0 (Current Release) ✅
+### v2.12.1 (Current Release) ✅
+**fix: concept map auto-layout — rectangle-aware repulsion, band gravity, and overlap resolution**
+
+Rewrote `autoLayout()` in the `architecture-onboarding` PLAYGROUND_TEMPLATE.md to eliminate node overlap. Three root causes fixed: (1) **Rectangle-aware collision** — replaced point-based `REPULSION/dist²` with bounding-box overlap detection; overlapping nodes are pushed apart along the axis of minimum penetration (push strength 0.55× overlap), while non-overlapping nodes use mild long-range repulsion (3000/dist²). (2) **Band gravity** — added a Y-axis restoring force (`BAND_GRAVITY=0.3`) per iteration that pulls each node back toward its group's proportional lane (15%/45%/80% of canvas height), preserving the Use Cases → Sections → Components traceability spine through the simulation. (3) **Weaker edge attraction** — reduced `ATTRACTION` from 0.04 → 0.02 and cross-group edges (`traces-to`, `served-by`) to 0.01 so band gravity and repulsion win locally. Also shortened `REST_LEN` 180→120, increased max iterations 200→300, and added early exit when kinetic energy drops below 0.1. `initializePositions()` band centers updated to proportional values (H×0.15/0.45/0.80) matching the simulation.
+
+### v2.12.0 (Previous Release) ✅
 **feat: new `architecture-definition-record` skill — single owner of all ADR write operations**
 
 Extracted ADR handling from `architecture-docs` into a dedicated `architecture-definition-record` skill (9th skill). The new skill owns five workflows: generate ADR files from ARCHITECTURE.md Section 12 table, create individual ADRs interactively (guided interview), update ADR status (Proposed → Accepted / Deprecated / Rejected), supersede an ADR (creates new + marks old as superseded), and list/audit the ADR inventory. All other skills now delegate write operations here while retaining direct read access to `adr/*.md`. Moved `ADR_GUIDE.md` and `ADR-000-template.md` into the new skill directory. Removed ~500-line Step 6 implementation from `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`, replaced with a single delegation instruction. Updated CLAUDE.md, README.md, and 4 other skills with delegation notes.
