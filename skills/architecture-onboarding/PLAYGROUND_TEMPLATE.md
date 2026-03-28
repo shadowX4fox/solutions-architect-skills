@@ -62,53 +62,6 @@ const onboardingData = {
     //   detail: "Actors: Retail Banking Customer\nSuccess: 99.99% on-time execution\nSource: docs/01-system-overview.md § 2.3"
     // },
 
-    // ── Lifecycle Phase nodes (always 5) ──
-    {
-      id: "phase-1",
-      label: "Phase 1: Readiness",
-      group: "lifecycle",
-      description: "Business requirements — PO Spec before architecture design begins",
-      status: "complete",          // "complete" if PRODUCT_OWNER_SPEC.md exists, else "not-started"
-      knowledge: "fuzzy",
-      detail: "Owner: Product Owner\nSkill: /skill architecture-readiness\nOutput: PRODUCT_OWNER_SPEC.md"
-    },
-    {
-      id: "phase-2",
-      label: "Phase 2: Docs",
-      group: "lifecycle",
-      description: "Architecture design — creates the 12-section ARCHITECTURE.md suite",
-      status: "complete",          // "complete" if docs/ has all sections, "in-progress" if partial
-      knowledge: "fuzzy",
-      detail: "Owner: Architecture Team\nSkill: /skill architecture-docs\nOutput: ARCHITECTURE.md + docs/"
-    },
-    {
-      id: "phase-3",
-      label: "Phase 3: Compliance",
-      group: "lifecycle",
-      description: "Compliance contracts — 10 adherence contracts generated from ARCHITECTURE.md",
-      status: "not-started",
-      knowledge: "fuzzy",
-      detail: "Owner: Compliance Team\nSkill: /skill architecture-compliance\nOutput: compliance-docs/ (10 contracts)"
-    },
-    {
-      id: "phase-4",
-      label: "Phase 4: Review",
-      group: "lifecycle",
-      description: "Quality review — peer review and compliance gap analysis playgrounds",
-      status: "not-started",
-      knowledge: "fuzzy",
-      detail: "Owner: Architecture Team\nSkills: /skill architecture-peer-review\n        /skill architecture-compliance-review"
-    },
-    {
-      id: "phase-5",
-      label: "Phase 5: Dev Handoff",
-      group: "lifecycle",
-      description: "Per-component 16-section handoff documents for development teams",
-      status: "not-started",
-      knowledge: "fuzzy",
-      detail: "Owner: Architecture Team\nSkills: /skill architecture-dev-handoff\n        /skill architecture-docs-export"
-    },
-
     // ── Architecture Section nodes (S1-S12, up to 11 slots) ──
     {
       id: "s1-s2",
@@ -215,119 +168,6 @@ const onboardingData = {
     //   description: "<short description>", status: "present", knowledge: "fuzzy",
     //   detail: "File: docs/components/<file>\nType: <type>\nPublishes: <topics>" }
 
-    // ── Compliance Contract nodes (always 10 slots) ──
-    {
-      id: "compliance-sre",
-      label: "SRE Contract",
-      group: "compliance",
-      description: "SRE Architecture compliance — operational practices, observability, automation",
-      status: "missing",           // "valid" | "expired" | "missing"
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S11 (Operational)"
-    },
-    {
-      id: "compliance-bc",
-      label: "Business Continuity",
-      group: "compliance",
-      description: "Business Continuity compliance — DR, backup, RTO/RPO, resilience patterns",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S11 (Operational)"
-    },
-    {
-      id: "compliance-cloud",
-      label: "Cloud Contract",
-      group: "compliance",
-      description: "Cloud Architecture compliance — deployment model, HA, network, cost",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S4 (Layers)"
-    },
-    {
-      id: "compliance-data",
-      label: "Data & AI Contract",
-      group: "compliance",
-      description: "Data & AI Architecture compliance — data quality, governance, AI lifecycle",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S6 (Data Flow)"
-    },
-    {
-      id: "compliance-dev",
-      label: "Development Contract",
-      group: "compliance",
-      description: "Development Architecture compliance — tech stack, code standards, CI/CD",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S8 (Tech Stack)"
-    },
-    {
-      id: "compliance-process",
-      label: "Process Contract",
-      group: "compliance",
-      description: "Process Transformation compliance — automation, workflow modernization",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S7 (Integration)"
-    },
-    {
-      id: "compliance-security",
-      label: "Security Contract",
-      group: "compliance",
-      description: "Security Architecture compliance — auth, encryption, data classification",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S9 (Security)"
-    },
-    {
-      id: "compliance-platform",
-      label: "Platform Contract",
-      group: "compliance",
-      description: "Platform & IT Infrastructure compliance — environments, K8s, IaC, networking",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S4 (Layers)"
-    },
-    {
-      id: "compliance-enterprise",
-      label: "Enterprise Contract",
-      group: "compliance",
-      description: "Enterprise Architecture compliance — modularity, reusability, strategic alignment",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S1+S2 (Overview)"
-    },
-    {
-      id: "compliance-integration",
-      label: "Integration Contract",
-      group: "compliance",
-      description: "Integration Architecture compliance — API standards, event patterns, data contracts",
-      status: "missing",
-      knowledge: "fuzzy",
-      detail: "Score: —\nValidates: S7 (Integration)"
-    },
-
-    // ── Principle nodes (9 required) ──
-    { id: "p-soc",   label: "Separation of Concerns", group: "principles", description: "Each component has a single, well-defined responsibility", status: "present", knowledge: "fuzzy", detail: "Required principle #1\nFile: docs/02-architecture-principles.md" },
-    { id: "p-ha",    label: "High Availability",       group: "principles", description: "System designed for continuous operation and fault tolerance", status: "present", knowledge: "fuzzy", detail: "Required principle #2" },
-    { id: "p-scale", label: "Scalability First",       group: "principles", description: "Architecture designed to scale horizontally from the start", status: "present", knowledge: "fuzzy", detail: "Required principle #3" },
-    { id: "p-sec",   label: "Security by Design",      group: "principles", description: "Security controls built in at every layer, not bolted on", status: "present", knowledge: "fuzzy", detail: "Required principle #4" },
-    { id: "p-obs",   label: "Observability",           group: "principles", description: "System state always inferable from logs, metrics, and traces", status: "present", knowledge: "fuzzy", detail: "Required principle #5" },
-    { id: "p-res",   label: "Resilience",              group: "principles", description: "Graceful degradation and recovery from failures", status: "present", knowledge: "fuzzy", detail: "Required principle #6" },
-    { id: "p-sim",   label: "Simplicity",              group: "principles", description: "Prefer the simplest solution that meets requirements", status: "present", knowledge: "fuzzy", detail: "Required principle #7" },
-    { id: "p-cn",    label: "Cloud-Native",            group: "principles", description: "Designed for cloud deployment: containers, managed services, IaC", status: "present", knowledge: "fuzzy", detail: "Required principle #8" },
-    { id: "p-os",    label: "Open Standards",          group: "principles", description: "Avoid vendor lock-in through open protocols and formats", status: "present", knowledge: "fuzzy", detail: "Required principle #9" },
-
-    // ── Skill nodes (always 9) ──
-    { id: "skill-readiness",          label: "architecture-readiness",          group: "skills", description: "Requirements elicitation — PO Spec creation and scoring", status: "present", knowledge: "fuzzy", detail: "Phase: 1\nUse: /skill architecture-readiness" },
-    { id: "skill-docs",               label: "architecture-docs",               group: "skills", description: "Create and maintain ARCHITECTURE.md — 12-section docs", status: "present", knowledge: "fuzzy", detail: "Phase: 2\nUse: /skill architecture-docs" },
-    { id: "skill-compliance",         label: "architecture-compliance",         group: "skills", description: "Generate 10 compliance contracts from ARCHITECTURE.md", status: "present", knowledge: "fuzzy", detail: "Phase: 3\nUse: /skill architecture-compliance" },
-    { id: "skill-peer-review",        label: "architecture-peer-review",        group: "skills", description: "Scored peer review (Light/Medium/Hard) with findings playground", status: "present", knowledge: "fuzzy", detail: "Phase: 4\nUse: /skill architecture-peer-review" },
-    { id: "skill-compliance-review",  label: "architecture-compliance-review",  group: "skills", description: "Compliance portfolio health and gap analysis playground", status: "present", knowledge: "fuzzy", detail: "Phase: 4\nUse: /skill architecture-compliance-review" },
-    { id: "skill-dev-handoff",        label: "architecture-dev-handoff",        group: "skills", description: "Per-component 16-section handoff docs with deliverable assets", status: "present", knowledge: "fuzzy", detail: "Phase: 5\nUse: /skill architecture-dev-handoff" },
-    { id: "skill-doc-export",         label: "architecture-docs-export",        group: "skills", description: "Export architecture docs and handoffs to Word (.docx) files", status: "present", knowledge: "fuzzy", detail: "Phase: 5\nUse: /skill architecture-docs-export" },
-    { id: "skill-component-guardian", label: "architecture-component-guardian", group: "skills", description: "Manage docs/components/README.md component index table", status: "present", knowledge: "fuzzy", detail: "Cross-cutting\nUse: /skill architecture-component-guardian" },
-    { id: "skill-blueprint",          label: "architecture-blueprint",          group: "skills", description: "Generate Business and Application blueprint markdown", status: "present", knowledge: "fuzzy", detail: "Cross-cutting\nUse: /skill architecture-blueprint" }
   ],
 
   // ── Edge definitions ──────────────────────────────────────
@@ -349,36 +189,6 @@ const onboardingData = {
     { from: "s11", to: "s8",    type: "depends-on", label: "runs" },
     { from: "s11", to: "s10",   type: "depends-on", label: "monitors" },
 
-    // Lifecycle → outputs
-    { from: "phase-1", to: "s1-s2",            type: "produces",   label: "informs" },
-    { from: "phase-2", to: "s1-s2",            type: "produces",   label: "creates" },
-    { from: "phase-2", to: "s4",               type: "produces",   label: "creates" },
-    { from: "phase-2", to: "s5",               type: "produces",   label: "creates" },
-    { from: "phase-3", to: "compliance-sre",   type: "produces",   label: "generates" },
-    { from: "phase-3", to: "compliance-security", type: "produces", label: "generates" },
-    { from: "phase-3", to: "compliance-dev",   type: "produces",   label: "generates" },
-
-    // Lifecycle → skills
-    { from: "phase-1", to: "skill-readiness",         type: "uses-skill", label: "uses" },
-    { from: "phase-2", to: "skill-docs",              type: "uses-skill", label: "uses" },
-    { from: "phase-3", to: "skill-compliance",        type: "uses-skill", label: "uses" },
-    { from: "phase-4", to: "skill-peer-review",       type: "uses-skill", label: "uses" },
-    { from: "phase-4", to: "skill-compliance-review", type: "uses-skill", label: "uses" },
-    { from: "phase-5", to: "skill-dev-handoff",       type: "uses-skill", label: "uses" },
-    { from: "phase-5", to: "skill-doc-export",        type: "uses-skill", label: "uses" },
-
-    // Compliance → sections
-    { from: "compliance-sre",         to: "s11",  type: "validates", label: "audits" },
-    { from: "compliance-bc",          to: "s11",  type: "validates", label: "audits" },
-    { from: "compliance-cloud",       to: "s4",   type: "validates", label: "audits" },
-    { from: "compliance-data",        to: "s6",   type: "validates", label: "audits" },
-    { from: "compliance-dev",         to: "s8",   type: "validates", label: "audits" },
-    { from: "compliance-process",     to: "s7",   type: "validates", label: "audits" },
-    { from: "compliance-security",    to: "s9",   type: "validates", label: "audits" },
-    { from: "compliance-platform",    to: "s4",   type: "validates", label: "audits" },
-    { from: "compliance-enterprise",  to: "s1-s2",type: "validates", label: "audits" },
-    { from: "compliance-integration", to: "s7",   type: "validates", label: "audits" },
-
     // Use case → section edges (traces-to) — injected by skill:
     // { from: "uc-1", to: "s1-s2", type: "traces-to", label: "defined in" }
     // { from: "uc-1", to: "s6",    type: "traces-to", label: "flow in" }
@@ -392,21 +202,16 @@ const onboardingData = {
 
   // ── Group definitions ─────────────────────────────────────
   groups: [
-    { id: "usecases",   label: "Use Cases",               color: "#f778ba", visible: true },
-    { id: "sections",    label: "Architecture Sections",   color: "#58a6ff", visible: true },
-    { id: "components",  label: "Components",              color: "#3fb950", visible: true },
-    { id: "lifecycle",   label: "Lifecycle Phases",       color: "#8957e5", visible: false },
-    { id: "compliance",  label: "Compliance Contracts",    color: "#d29922", visible: false },
-    { id: "principles",  label: "Principles",              color: "#79c0ff", visible: false },
-    { id: "skills",      label: "Available Skills",        color: "#f0883e", visible: false }
+    { id: "usecases",   label: "Use Cases",              color: "#f778ba", visible: true },
+    { id: "sections",   label: "Architecture Sections",  color: "#58a6ff", visible: true },
+    { id: "components", label: "Components",             color: "#3fb950", visible: true }
   ],
 
   // ── Preset views ──────────────────────────────────────────
   presets: [
     { name: "Use Case Traceability", visibleGroups: ["usecases","sections","components"] },
     { name: "Section Dependencies",  visibleGroups: ["sections"] },
-    { name: "Component Map",         visibleGroups: ["sections","components"] },
-    { name: "Full Map",              visibleGroups: ["usecases","lifecycle","sections","components","compliance","principles","skills"] }
+    { name: "Component Map",         visibleGroups: ["sections","components"] }
   ]
 };
 ```
@@ -477,17 +282,13 @@ function initializePositions() {
   const H = canvas.height || 600;
 
   // Group band configuration: { y center, x start, x end }
-  // TRACEABILITY SPINE — three bands spanning the full canvas width:
+  // TRACEABILITY SPINE — three horizontal bands spanning the full canvas:
   //   Use Cases (top)  →  Sections (middle)  →  Components (bottom)
   const pad = 30;
   const bands = {
-    usecases:    { y: 70,  xStart: pad,  xEnd: W - pad },
-    sections:    { y: 250, xStart: pad,  xEnd: W - pad },
-    components:  { y: 430, xStart: pad,  xEnd: W - pad },
-    lifecycle:   { y: 70,  xStart: pad,  xEnd: W - pad },
-    compliance:  { y: 250, xStart: pad,  xEnd: W - pad },
-    principles:  { y: 430, xStart: pad,  xEnd: W - pad },
-    skills:      { y: 430, xStart: pad,  xEnd: W - pad }
+    usecases:   { y: 70,  xStart: pad, xEnd: W - pad },
+    sections:   { y: 250, xStart: pad, xEnd: W - pad },
+    components: { y: 430, xStart: pad, xEnd: W - pad }
   };
 
   // Group nodes by group id
@@ -606,13 +407,10 @@ function drawEdge(edge) {
   if (!src || !tgt || src.x === undefined || tgt.x === undefined) return;
 
   const styles = {
-    'depends-on': { color: '#58a6ff', dash: [],       width: 1.5 },
-    'produces':   { color: '#3fb950', dash: [6, 3],   width: 1.5 },
-    'validates':  { color: '#d29922', dash: [3, 3],   width: 1.5 },
-    'uses-skill': { color: '#8b949e', dash: [],       width: 1.0 },
-    'implements': { color: '#3fb950', dash: [],       width: 1.5 },
-    'traces-to':  { color: '#f778ba', dash: [8, 4],   width: 2.0 },
-    'served-by':  { color: '#f778ba', dash: [],       width: 1.5 }
+    'depends-on': { color: '#58a6ff', dash: [],     width: 1.5 },
+    'implements': { color: '#3fb950', dash: [],     width: 1.5 },
+    'traces-to':  { color: '#f778ba', dash: [8, 4], width: 2.0 },
+    'served-by':  { color: '#f778ba', dash: [],     width: 1.5 }
   };
   const style = styles[edge.type] || styles['depends-on'];
 
@@ -1155,12 +953,9 @@ Modifications the skill makes before passing to the playground:
 1. **Inject use case nodes** — one node per use case from `docs/01-system-overview.md` Section 2.3 or PO Spec Section 4 (up to 10), using id `uc-N`
 2. **Inject use case → section edges** — `{ from: "uc-N", to: "s1-s2", type: "traces-to", label: "defined in" }` (all use cases trace to S1+S2; additional edges to S6/S7 if flows/integrations apply)
 3. **Inject use case → component edges** — `{ from: "uc-N", to: "comp-<slug>", type: "served-by", label: "served by" }` (from handoff docs' Business Context field)
-4. **Replace status values** on lifecycle, section, and compliance nodes based on extracted data
+4. **Replace status values** on section nodes based on which `docs/NN-*.md` files exist
 5. **Inject component nodes** — one node per entry in `docs/components/README.md` (up to 15), using id `comp-<slug>`
 6. **Inject component edges** — `{ from: "comp-<slug>", to: "s5", type: "implements", label: "part of" }`
-7. **Update compliance nodes** with actual score and date from `COMPLIANCE_MANIFEST.md`
-8. **Update principle nodes** with `status: "missing"` for any of the 9 not present in S3
-9. **Update phase statuses** based on artifact presence (PO Spec, compliance manifest, handoffs)
-10. **Update header chips** — stat chips show: phases complete count, ADR count, component count, use case count, avg compliance score
+7. **Update header chips** — stat chips show: use case count, section count, component count
 
 The playground does NOT modify `onboardingData` — it embeds it as-is and renders from it.

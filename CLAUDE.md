@@ -332,11 +332,10 @@ To manually activate the skill, use: `/skill architecture-onboarding`
 
 The skill includes:
 - **Use case traceability** — extracts use cases from PO Spec Section 4 or `docs/01-system-overview.md` Section 2.3, traces them through architecture sections to components via handoff docs
-- **Concept map playground** — draggable nodes, force-directed auto-layout, edge types (depends-on, produces, validates, uses-skill, implements, traces-to, served-by)
-- **3 core node groups** — Use Cases (pink), Architecture Sections (blue), Components (green) — the traceability spine shown by default
-- **4 supplementary groups** — Lifecycle Phases, Compliance Contracts, Principles, Available Skills — hidden by default, available via toggles or Full Map preset
-- **4 preset views** — Use Case Traceability (default), Section Dependencies, Component Map, Full Map
-- **Ghost nodes** — missing sections/contracts shown semi-transparent with actionable guidance on which skill to invoke
+- **Concept map playground** — draggable nodes, force-directed auto-layout, edge types (depends-on, traces-to, served-by, implements)
+- **3 node groups** — Use Cases (pink), Architecture Sections (blue), Components (green)
+- **3 preset views** — Use Case Traceability (default), Section Dependencies, Component Map
+- **Ghost nodes** — missing sections shown semi-transparent with actionable guidance
 - **Knowledge cycling** — Know / Fuzzy / Unknown per node; generates targeted learning prompt
 - **Fallback** — plain-text report with next-skill recommendations if playground plugin is not installed
 

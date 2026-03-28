@@ -110,9 +110,7 @@ Glob for `docs/NN-*.md` files. Map each found file to its S-number using this fi
 
 For monolithic docs: use heading patterns to infer which sections are present.
 
-**Principles extraction** (if S3 present): Search `docs/02-architecture-principles.md` for the 9 required principle headings. Mark each as `present: true` if found with non-empty Implementation subsection.
-
-**Design drivers** (if S1 present): Search `docs/01-system-overview.md` for `### Design Drivers` heading. Extract Value Delivery, Scale, and Impacts levels if present.
+**Design drivers** (if S1 present): Search `docs/01-system-overview.md` for `### Design Drivers` heading. Extract Value Delivery, Scale, and Impacts levels — include in S1+S2 node detail.
 
 ---
 
@@ -125,22 +123,12 @@ All items in this step are **optional** — the skill works with just `ARCHITECT
 - Limit to first 15 components to avoid node overload on large projects
 - Status: `"present"` if file exists, `"not-created"` otherwise
 
-**Compliance** (`compliance-docs/COMPLIANCE_MANIFEST.md`):
-- If exists: parse the contract table (type, filename, score, date)
-- Compute status per slot: `"valid"` (≤6 months old), `"expired"` (>6 months), `"missing"` (no file)
-- Status: `"present"` if manifest exists, `"not-generated"` otherwise
-
-**ADRs** (`adr/` directory):
-- If exists: list ADR files. Extract title from first H1 and status from `**Status**: XXX` line
-- Limit to first 10 ADRs
-- Status: `"present"` if directory exists with files, `"not-created"` otherwise
-
 **Handoffs** (`docs/handoffs/` directory):
-- If exists: list handoff files, extract component name from filename
-- Status: `"present"` if directory exists, `"not-created"` otherwise
+- If exists: scan each handoff file's "Business Context" field for UC references
+- Used to build use case → component `served-by` edges
 
 **PO Spec** (`PRODUCT_OWNER_SPEC.md`):
-- Check if file exists. Used to determine Phase 1 lifecycle status.
+- Check if file exists; used as fallback source for use case extraction if S2 lacks them
 
 **Use Cases** (extracted from two sources in priority order):
 1. **Primary source** — `docs/01-system-overview.md` Section 2.3 "Primary Use Cases": Parse use case headings (`### Use Case N: <Name>`) and extract: name, description (first line after heading), actors, and success metrics.
@@ -160,42 +148,22 @@ Assemble `onboardingData` JSON following the schema in `PLAYGROUND_TEMPLATE.md`.
 
 **Node construction rules:**
 - Create one node per **use case** extracted in Step 4 (id: `uc-N`, group: `usecases`). Include description, actors, and success metrics in the detail field.
-- Create one node per lifecycle phase (always 5, status derived from artifact existence)
-- Create one node per S-number (present nodes fully opaque, missing nodes as ghost nodes with `status: "missing"`)
-- Create one node per component (up to 15)
-- Create one node per compliance contract slot (always 10, using fixed contract list)
-- Create one node per required principle (9 nodes; mark present/missing from Step 3)
-- Create one node per available skill (always 9 nodes)
+- Create one node per S-number (id: `s1-s2`, `s3` … `s12`, group: `sections`). Present nodes fully opaque; missing nodes as ghost nodes with `status: "missing"`.
+- Create one node per component (id: `comp-<slug>`, group: `components`, up to 15).
 - Default all `knowledge` fields to `"fuzzy"`
 
-**Edge construction rules (fixed structural edges always present):**
+**Edge construction rules:**
 
-Section tier dependencies:
-- S4 → S1+S2 (depends-on)
-- S4 → S3 (depends-on)
-- S5 → S1+S2 (depends-on)
-- S5 → S4 (depends-on)
-- S6 → S5 (depends-on), S7 → S5 (depends-on), S8 → S5 (depends-on)
-- S9 → S5 (depends-on), S9 → S7 (depends-on), S9 → S8 (depends-on)
-- S10 → S5 (depends-on), S10 → S8 (depends-on)
-- S11 → S5 (depends-on), S11 → S8 (depends-on), S11 → S10 (depends-on)
-
-Lifecycle phase → output edges:
-- Phase 1 → PO Spec (produces) — always shown, ghost if missing
-- Phase 2 → S1-S12 sections (produces)
-- Phase 3 → Compliance contracts (produces)
-- Phase 4 → peer-review score (produces)
-- Phase 5 → handoffs (produces)
-
-Phase → skill edges (uses-skill):
-- Phase 1 → architecture-readiness skill
-- Phase 2 → architecture-docs skill
-- Phase 3 → architecture-compliance skill
-- Phase 4 → architecture-peer-review + architecture-compliance-review skills
-- Phase 5 → architecture-dev-handoff + architecture-docs-export skills
+Section tier dependencies (always present):
+- S4 → S1+S2 (depends-on), S4 → S3 (depends-on)
+- S5 → S1+S2 (depends-on), S5 → S4 (depends-on)
+- S6 → S5, S7 → S5, S8 → S5 (depends-on)
+- S9 → S5, S9 → S7, S9 → S8 (depends-on)
+- S10 → S5, S10 → S8 (depends-on)
+- S11 → S5, S11 → S8, S11 → S10 (depends-on)
 
 Use case → section edges (traces-to):
-- Every use case traces to S1+S2 (system overview is where use cases are technically defined)
+- Every use case traces to S1+S2 (where use cases are technically defined)
 - Use case → S6 (data flow) if the use case involves async flows or event processing
 - Use case → S7 (integration) if the use case involves external systems
 
@@ -203,10 +171,7 @@ Use case → component edges (served-by) — extracted from handoff docs:
 - Each component's "Business Context" field lists which use cases it serves
 - Create `{ from: "uc-N", to: "comp-<slug>", type: "served-by" }` for each mapping
 
-Component → S5 edges (implements) — extracted from component index
-
-Compliance → section edges (validates) — fixed mapping per contract type:
-- SRE → S11, Business Continuity → S11, Cloud → S4, Development → S8, Security → S9, Integration → S7, Data & AI → S6, Enterprise → S1+S2, Platform → S4, Process → S7
+Component → S5 edges (implements) — one per component from component index
 
 ---
 
@@ -297,6 +262,6 @@ Phase 5 (Handoff): [COMPLETE | PARTIAL | PENDING] — /skill architecture-dev-ha
 - [ ] `onboardingData` JSON assembled with nodes, edges, groups, and presets
 - [ ] Concept map HTML generated via playground plugin
 - [ ] File opened in browser
-- [ ] All node groups represented (usecases, lifecycle, sections, components, compliance, principles, skills)
-- [ ] Ghost nodes shown for missing sections/contracts with actionable guidance
+- [ ] All three node groups present: usecases, sections, components
+- [ ] Ghost nodes shown for missing sections with actionable guidance
 - [ ] If playground unavailable: plain-text report output with next-skill recommendations
