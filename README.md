@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.3 (Current Release) ✅
+### v2.12.4 (Current Release) ✅
+**feat: concept map node focus mode — click to highlight connections, dim unrelated nodes**
+
+Clicking a node in the onboarding concept map now enters focus mode: the clicked node and all directly connected nodes stay at full opacity while every unrelated node dims to 12% and unrelated edges dim to 6%. Clicking the same node again or clicking empty canvas clears focus and restores full rendering. Implementation: added `focusedNode` state variable; updated `draw()` to build a `connectedIds` set (node + both-direction edge neighbors) and pass it to `drawNode()`/`drawEdge()`; updated `drawNode()` to apply `alpha=0.12` for dimmed nodes; updated `drawEdge()` to apply `globalAlpha=0.06` for dimmed edges and `0.04` for their labels; updated `mouseup` to toggle focus on click-without-drag; updated `mousedown` to clear focus when clicking empty canvas. Drag behavior is unchanged — focus only triggers on click (mousedown + mouseup with no movement).
+
+### v2.12.3 (Previous Release) ✅
 **fix: enforce lowercase kebab-case naming convention for component files across all skills**
 
 Component file names under `docs/components/` must follow `NN-kebab-case-name.md` (e.g., `01-api-gateway.md`, `02-payment-service.md`) — lowercase, hyphens only, no spaces, no uppercase, no underscores. This was defined in RESTRUCTURING_GUIDE.md but not enforced downstream. Fixed in 4 skills: (1) `architecture-component-guardian` — added naming validation on scan with auto-rename offer for violations, and kebab-case conversion on `add component`; (2) `architecture-peer-review` NAMING-03 check — now explicitly requires `NN-kebab-case-name.md` with examples (was ambiguous `NN-component-name.md`); (3) `architecture-docs` SKILL.md — added component file examples alongside section file examples in naming convention; (4) `architecture-dev-handoff` — stated that handoff filenames derive from component file names using kebab-case.

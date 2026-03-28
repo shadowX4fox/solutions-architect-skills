@@ -359,15 +359,27 @@ function getGroupColor(groupId) {
 ```javascript
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  getVisibleEdges().forEach(drawEdge);
-  getVisibleNodes().forEach(drawNode);
+
+  // Focus mode: build the set of IDs connected to the focused node
+  let connectedIds = null;
+  if (focusedNode) {
+    connectedIds = new Set([focusedNode.id]);
+    getVisibleEdges().forEach(e => {
+      if (e.from === focusedNode.id) connectedIds.add(e.to);
+      if (e.to === focusedNode.id) connectedIds.add(e.from);
+    });
+  }
+
+  getVisibleEdges().forEach(e => drawEdge(e, connectedIds));
+  getVisibleNodes().forEach(n => drawNode(n, connectedIds));
 }
 
-function drawNode(node) {
+function drawNode(node, connectedIds) {
   if (node.x === undefined) return;
   const color = getGroupColor(node.group);
   const isMissing = node.status === 'missing' || node.status === 'not-started';
-  const alpha = isMissing ? 0.4 : 1.0;
+  const dimmed = connectedIds && !connectedIds.has(node.id);
+  const alpha = dimmed ? 0.12 : (isMissing ? 0.4 : 1.0);
   const knowledgeColor = { know: '#3fb950', fuzzy: '#d29922', unknown: '#cf222e' }[node.knowledge] || '#d29922';
 
   ctx.save();
@@ -392,7 +404,7 @@ function drawNode(node) {
   ctx.fillRect(node.x, node.y + 6, 4, node.h - 12);
 
   // Label
-  ctx.globalAlpha = isMissing ? 0.5 : 1.0;
+  ctx.globalAlpha = (dimmed || isMissing) ? alpha : 1.0;
   ctx.fillStyle = '#e6edf3';
   ctx.font = '12px system-ui, -apple-system, sans-serif';
   ctx.textAlign = 'center';
@@ -402,7 +414,7 @@ function drawNode(node) {
   ctx.restore();
 }
 
-function drawEdge(edge) {
+function drawEdge(edge, connectedIds) {
   const src = getNodeById(edge.from);
   const tgt = getNodeById(edge.to);
   if (!src || !tgt || src.x === undefined || tgt.x === undefined) return;
@@ -434,8 +446,10 @@ function drawEdge(edge) {
   const startX = sx + Math.cos(angle) * (src.w / 2 + 4);
   const startY = sy + Math.sin(angle) * (src.h / 2 + 4);
 
+  const dimmed = connectedIds && !(connectedIds.has(edge.from) && connectedIds.has(edge.to));
+
   ctx.save();
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = dimmed ? 0.06 : 0.6;
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.width;
   ctx.setLineDash(style.dash);
@@ -448,6 +462,7 @@ function drawEdge(edge) {
 
   // Arrowhead
   ctx.setLineDash([]);
+  ctx.globalAlpha = dimmed ? 0.06 : 0.6;
   ctx.fillStyle = style.color;
   ctx.beginPath();
   ctx.moveTo(endX, endY);
@@ -460,7 +475,7 @@ function drawEdge(edge) {
   if (edge.label) {
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = dimmed ? 0.04 : 0.5;
     ctx.fillStyle = '#8b949e';
     ctx.font = '10px system-ui, -apple-system, sans-serif';
     ctx.textAlign = 'center';
@@ -587,6 +602,7 @@ function autoLayout() {
 let dragNode = null;
 let dragOffX = 0, dragOffY = 0;
 let hasDragged = false;
+let focusedNode = null; // clicked node — its neighbors are highlighted, everything else dims
 
 function hitTest(mx, my) {
   const nodes = getVisibleNodes();
@@ -609,6 +625,10 @@ canvas.addEventListener('mousedown', e => {
     dragOffY = my - node.y;
     hasDragged = false;
     canvas.style.cursor = 'grabbing';
+  } else if (focusedNode) {
+    // Clicked empty canvas — clear focus
+    focusedNode = null;
+    draw();
   }
 });
 
@@ -636,6 +656,11 @@ canvas.addEventListener('mousemove', e => {
 });
 
 canvas.addEventListener('mouseup', () => {
+  if (dragNode && !hasDragged) {
+    // Click without drag — toggle focus mode
+    focusedNode = (focusedNode === dragNode) ? null : dragNode;
+    draw();
+  }
   dragNode = null;
   canvas.style.cursor = 'grab';
 });
