@@ -335,6 +335,135 @@ grep -l "**Status**" adr/ADR-*.md | xargs grep -H "^\*\*Status\*\*"
 **For Supersede (most common):**
 → Invoke Workflow 4 (Supersede ADR)
 
+#### Step 3.3: Documentation Impact Propagation
+
+**When to run**: After every Accepted / Deprecated / Rejected status change. Skip for Proposed→Proposed (no downstream impact) and for Supersede (handled by Workflow 4 Step 4.3).
+
+---
+
+##### Phase 1: Impact Discovery
+
+**1a. Citation scan** — find all files that explicitly reference this ADR:
+```bash
+grep -rl "ADR-{NNN}" docs/ docs/components/ docs/handoffs/ 2>/dev/null
+```
+
+**1b. Topic scan** — extract keywords from the ADR title and Context section. Match against the topic-to-file mapping table to find conceptually-affected files even without explicit citations:
+
+| ADR Topic Keywords | Architecture Files to Check |
+|---|---|
+| database, storage, data, persistence | `docs/04-data-flow-patterns.md`, `docs/06-technology-stack.md` |
+| API, protocol, REST, gRPC, HTTP | `docs/05-integration-points.md`, `docs/06-technology-stack.md` |
+| security, auth, encryption, identity | `docs/07-security-architecture.md` |
+| scaling, performance, cache, latency | `docs/08-scalability-and-performance.md` |
+| deployment, infrastructure, cloud | `docs/09-operational-considerations.md`, `docs/06-technology-stack.md` |
+| framework, language, runtime, library | `docs/06-technology-stack.md` |
+| architecture pattern, layer, structure | `docs/03-architecture-layers.md` |
+| messaging, events, queue, stream, kafka | `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md` |
+
+Add any matched files not already in the citation list.
+
+**1c. Handoff scan** — scan `docs/handoffs/` for references to this ADR; also include handoffs for components that match the ADR topic:
+```bash
+grep -rl "ADR-{NNN}" docs/handoffs/ 2>/dev/null
+```
+
+**1d. Fact-change extraction** — read the ADR and produce a concrete bullet list of what changed. For a status-only change:
+```
+- Status: {old} → {new} (decision is now {authoritative/deprecated/rejected})
+```
+For a content-bearing supersede, compare the old and new Decision sections and list changed parameters (e.g., "Kafka retention 7d → 1d", "Added PostgreSQL fallback").
+
+---
+
+##### Phase 2: Generate "Documentation Updates Required" Checklist
+
+Present to the user grouped by file type. For each file, state what needs to change and why.
+
+```
+═══════════════════════════════════════════════════════════
+DOCUMENTATION UPDATES REQUIRED — ADR-{NNN} ({title})
+═══════════════════════════════════════════════════════════
+
+Status change: {old_status} → {new_status}
+Fact changes:
+- {bullet list from Phase 1d}
+
+─── Architecture Docs (docs/) ────────────────────────────
+1. [ ] docs/04-data-flow-patterns.md — {what needs updating and why}
+2. [ ] docs/06-technology-stack.md — {what needs updating and why}
+
+─── Component Files (docs/components/) ───────────────────
+3. [ ] docs/components/08-confluent-kafka.md — {what needs updating}
+
+─── Handoff Docs (docs/handoffs/) ────────────────────────
+4. [ ] docs/handoffs/08-confluent-kafka-handoff.md — {what needs updating}
+
+─── No Updates Required ──────────────────────────────────
+ℹ️  docs/07-security-architecture.md — references ADR-{NNN} but content is status-independent
+═══════════════════════════════════════════════════════════
+Approve all updates? ('all' / comma-separated numbers to deselect / 'skip')
+```
+
+**Wait for user response:**
+- `all` or Enter → proceed with all items
+- `1,3` → deselect those numbers (mark as manual)
+- `skip` → add `<!-- PROPAGATION PENDING: downstream docs not yet updated ({date}) -->` to the ADR file and stop
+
+---
+
+##### Phase 3: Execute Updates
+
+For each approved item, apply the change following the architecture-docs Context Anchor Protocol. **Never modify `docs/` or `docs/handoffs/` without loading the required context first.**
+
+**For `docs/*.md` and `docs/components/*.md`:**
+1. Load Context Anchor — universal foundation (`docs/01-system-overview.md` + `docs/02-architecture-principles.md`) + section-specific parents per the dependency tier table + the changed ADR
+2. Read the target file
+3. Identify specific passages: ADR citations (`per [ADR-NNN]`), facts derived from the ADR, status references
+4. Apply changes:
+   - Status changes: update `per [ADR-NNN]` citations to note the new status where relevant
+   - Deprecated/rejected: add `<!-- ADR-{NNN} deprecated/rejected — review this section -->` beside affected content
+   - For supersede: replace `per [ADR-{old}]` with `per [ADR-{new}]`; update derived facts
+5. Run the 5-check Post-Write Alignment Audit (Checks A–E from architecture-docs)
+6. Mark `[x]` in the checklist
+
+**For `docs/handoffs/*.md`:**
+1. Read the handoff file
+2. Locate ADR references (typically Section 13 "ADRs Referenced") and any content derived from the ADR decision
+3. Update following the handoff Documentation Fidelity Policy: only change what the ADR changed; preserve all other content
+4. Mark `[x]` in the checklist
+
+**For `ARCHITECTURE.md` Section 12 table:**
+Update the ADR row's Status column to reflect the new status (this is within this skill's authority).
+
+---
+
+##### Phase 4: Propagation Report
+
+```
+═══════════════════════════════════════════════════════════
+ADR CHANGE PROPAGATION — COMPLETION REPORT
+═══════════════════════════════════════════════════════════
+
+ADR: ADR-{NNN} — {title}
+Change: {old_status} → {new_status}
+
+Documentation updates completed:
+[x] docs/04-data-flow-patterns.md — retention figures updated
+[x] docs/components/08-confluent-kafka.md — retention figures updated
+[x] docs/handoffs/08-confluent-kafka-handoff.md — acceptance criteria updated
+
+Deselected (manual update required):
+[ ] docs/09-operational-considerations.md — DR runbook: confirm two-phase recovery procedure
+
+Failed (require manual review):
+⚠️  {list any files where the edit could not be applied cleanly}
+
+Pending markers added:
+ℹ️  {list any <!-- PROPAGATION PENDING --> or <!-- ADR deprecated --> markers placed}
+═══════════════════════════════════════════════════════════
+```
+
 ---
 
 ### Workflow 4 — Supersede an ADR
@@ -358,12 +487,33 @@ Read the old ADR, update its status line:
 ```
 Add a `**Superseded Date**: {today}` field after the status line. Write the file back.
 
-#### Step 4.3: Confirm
+#### Step 4.3: Documentation Impact Propagation (Supersede)
+
+Run the same 4-phase Documentation Impact Propagation as Workflow 3 Step 3.3, with these supersede-specific adjustments:
+
+**Phase 1 adjustments:**
+- Step 1a: grep for BOTH `ADR-{old}` and `ADR-{new}` across all `docs/`, `docs/components/`, `docs/handoffs/`
+- Step 1d: compare the old ADR's Decision section with the new ADR's Decision section to produce concrete fact deltas (what changed, what was added, what was removed)
+
+**Phase 2 adjustments:**
+- Checklist header shows: `Supersede: ADR-{old} → ADR-{new}`
+- For each file: distinguish between (a) citation updates only (`per [ADR-{old}]` → `per [ADR-{new}]`) and (b) content updates where derived facts changed
+
+**Phase 3 adjustments:**
+- Replace all `per [ADR-{old}](../adr/ADR-{old}-slug.md)` citations with `per [ADR-{new}](../adr/ADR-{new}-slug.md)` in every affected file
+- Update derived content to reflect the new decision's facts (changed parameters, changed approach, changed technology)
+- Update `ARCHITECTURE.md` Section 12 table: old ADR row status → "Superseded", ensure new ADR row is present
+
+**Phase 4 adjustments:**
+- Report includes citation migration count: `{N} references migrated from ADR-{old} to ADR-{new}`
+
+#### Step 4.4: Confirm
 
 ```
 ✅ Done:
 - Created: adr/ADR-{new}-{slug}.md (new decision)
 - Updated: adr/ADR-{old}-{slug}.md (Status: Superseded by ADR-{new})
+- Propagated: {N} downstream files updated, {M} deselected for manual review
 ```
 
 ---
@@ -423,13 +573,13 @@ Proposed → Accepted → Deprecated → Superseded by ADR-NNN
 
 | Skill | ADR Interaction | Delegation Required? |
 |-------|----------------|---------------------|
-| `architecture-docs` | Reads ADRs for context; delegates creation to this skill | YES for create |
+| `architecture-docs` | Reads ADRs for context; delegates creation to this skill; **receives downstream update requests during ADR change propagation (Step 3.3 / 4.3)** | YES for create; YES for propagation edits |
 | `architecture-docs-export` | Reads `adr/*.md`, exports to .docx | NO (read-only) |
 | `architecture-peer-review` | Reads `adr/*.md` for quality review at Hard depth | NO (read-only) |
 | `architecture-blueprint` | Reads `adr/*.md` for structured data extraction | NO (read-only) |
 | `architecture-component-guardian` | Reads ADRs for alignment context | NO (read-only) |
 | `architecture-compliance` agents | Read `adr/README.md` for compliance validation | NO (read-only) |
-| `architecture-dev-handoff` | References ADRs in Section 13 of handoff docs | NO (read-only) |
+| `architecture-dev-handoff` | References ADRs in Section 13 of handoff docs; **receives update requests during ADR change propagation (Step 3.3 / 4.3)** | YES for propagation edits |
 
 ---
 
@@ -440,3 +590,5 @@ Proposed → Accepted → Deprecated → Superseded by ADR-NNN
 - [ ] Status field set correctly
 - [ ] ARCHITECTURE.md Section 12 table updated if requested
 - [ ] For supersede operations: old ADR marked `Superseded by ADR-NNN`, new ADR references old one
+- [ ] For status changes and supersede: Documentation Impact Propagation checklist generated and presented (Step 3.3 / 4.3)
+- [ ] All approved propagation items completed or marked with `<!-- PROPAGATION PENDING -->` / `<!-- ADR-NNN deprecated -->` tracking markers

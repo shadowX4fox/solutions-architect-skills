@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.5 (Current Release) ✅
+### v2.12.6 (Current Release) ✅
+**feat: ADR change propagation — downstream documentation impact tracking and execution**
+
+When an ADR is updated (status change) or superseded (Workflow 3/4), the `architecture-definition-record` skill now runs a 4-phase Documentation Impact Propagation step. Phase 1 (Impact Discovery): greps all `docs/`, `docs/components/`, and `docs/handoffs/` for explicit ADR citations, applies a keyword-to-file topic mapping table to find conceptually-affected files without explicit citations, and extracts concrete fact changes from the ADR content. Phase 2 (Checklist): presents a "Documentation Updates Required" checklist grouped by file type (Architecture Docs / Component Files / Handoff Docs) — each entry states what needs updating and why; user approves all or deselects items for manual handling. Phase 3 (Execute): applies each approved update following the architecture-docs Context Anchor Protocol (load foundation + section-specific parents + changed ADR, update citations and derived facts, run 5-check Post-Write Audit); handoff updates follow the dev-handoff Documentation Fidelity Policy. If user skips, adds `<!-- PROPAGATION PENDING -->` marker to the ADR file. Phase 4 (Report): completion report with `[x]` completed / `[ ]` deselected / `⚠️` failed items. For supersede: also migrates `per [ADR-old]` citations to `per [ADR-new]` across all docs and updates ARCHITECTURE.md Section 12 table. Integration table and Success Criteria updated.
+
+### v2.12.5 (Previous Release) ✅
 **feat: focus mode filters sidebar to connected nodes for scoped knowledge cycling and learning prompts**
 
 When a node is clicked (focus mode), the sidebar node list now filters to show only the focused node and its direct connections — with a header showing "Exploring: [node name] (N nodes)" and a "Show All" button to exit. The focused node appears bold in accent color. Knowledge cycling (Know/Fuzzy/Unknown) works within this filtered scope, so users can mark what they know about just the connected concepts. The learning prompt also scopes to the focused subset: only edges and nodes touching the focused node are included, and the prompt opens with "I'm currently exploring: **[node name]** and its N direct connections." Clicking empty canvas or "Show All" restores the full node list and global prompt.
