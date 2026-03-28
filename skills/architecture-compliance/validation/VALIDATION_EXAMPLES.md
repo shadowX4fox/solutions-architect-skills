@@ -100,7 +100,7 @@ Final Score = (9.5 × 0.4) + (10.0 × 0.5) + (9.0 × 0.1)
 
 **Final Calculation with Cloud-Specific Weights**:
 ```
-Weights from cloud_architecture_validation.json:
+Weights from cc-002-cloud-architecture-validation.json:
 - W_completeness = 0.35 (35%)
 - W_compliance = 0.55 (55%) [higher emphasis on compliance]
 - W_quality = 0.10 (10%)
@@ -476,7 +476,7 @@ Correct format: '## Section Name' (not '### A.X Section Name')
 ```markdown
 ## Document Control
 
-**Document ID**: CLOUD_ARCHITECTURE_TaskSchedulingSystem_2025-12-14
+**Document ID**: CC-002-cloud-architecture_TaskSchedulingSystem_2025-12-14
 **Template Version**: 2.0
 **Validation Framework Version**: 1.0.0
 **Approval Authority**: Cloud Architecture Review Board
@@ -514,7 +514,7 @@ Found list format instead of table.
 | Review Actor | System (Auto-Approved) |
 | Approval Authority | Cloud Architecture Review Board |
 
-**Validation Configuration**: `/skills/architecture-compliance/validation/cloud_architecture_validation.json`
+**Validation Configuration**: `/skills/architecture-compliance/validation/cc-002-cloud-architecture-validation.json`
 ```
 
 **Required Fields** (validated):
@@ -536,16 +536,16 @@ Found list format instead of table.
 | `document_control_table` | Enforce table structure | Bold field lists (`**Field**: Value`) | `\| Field \| Value \|` table | BLOCKING |
 
 **Files Affected**: All 10 compliance contract validation files
-- `template_validation_cloud_architecture.json`
-- `template_validation_development_architecture.json`
-- `template_validation_sre_architecture.json`
-- `template_validation_business_continuity.json`
-- `template_validation_data_ai_architecture.json`
-- `template_validation_security_architecture.json`
-- `template_validation_integration_architecture.json`
-- `template_validation_enterprise_architecture.json`
-- `template_validation_platform_it_infrastructure.json`
-- `template_validation_process_transformation.json`
+- `cc-001-business-continuity-template-validation.json`
+- `cc-002-cloud-architecture-template-validation.json`
+- `cc-003-data-ai-architecture-template-validation.json`
+- `cc-004-development-architecture-template-validation.json`
+- `cc-005-enterprise-architecture-template-validation.json`
+- `cc-006-integration-architecture-template-validation.json`
+- `cc-007-platform-it-infrastructure-template-validation.json`
+- `cc-008-process-transformation-template-validation.json`
+- `cc-009-security-architecture-template-validation.json`
+- `cc-010-sre-architecture-template-validation.json`
 
 ---
 

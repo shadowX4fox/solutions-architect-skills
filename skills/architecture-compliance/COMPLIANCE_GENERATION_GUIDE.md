@@ -71,7 +71,7 @@ Each compliance domain has a config file (e.g., `shared/config/business-continui
   "compliance_prefix": "LACN",
   "review_board": "Business Continuity Review Board",
   "approval_authority": "Business Continuity Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json"
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-001-business-continuity-validation.json"
 }
 ```
 
@@ -963,8 +963,8 @@ Output: ValidationResults object → cache for Phase 4
 
 Validation Workflow:
 1. Load validation config file from /skills/architecture-compliance/validation/
-   - Format: {contract_name}_validation.json
-   - Example: development_architecture_validation.json
+   - Format: cc-NNN-contract-type-validation.json
+   - Example: cc-004-development-architecture-validation.json
 
 2. Parse validation configuration:
    - Scoring thresholds (auto_approve: 8.0, ready_for_review: 7.0, needs_work: 5.0)
@@ -1063,9 +1063,9 @@ Cache Structure:
 
 **Step 4.1: Load Template**
 ```
-Template file: templates/TEMPLATE_[CONTRACT_TYPE].md
+Template file: templates/cc-NNN-contract-type.template.md
 
-Example: templates/TEMPLATE_SRE_ARCHITECTURE.md
+Example: templates/cc-010-sre-architecture.template.md
 
 If template not found:
 - Warn user
@@ -1504,7 +1504,7 @@ import { ErrorReporter } from './utils/error-reporter';
 
 // Load contract-specific validation rules
 const validator = new ComplianceValidator(
-  `validation/template_validation_${contractType}.json`
+  `validation/${contractType}-template-validation.json`
 );
 
 // Validate generated document
@@ -1524,7 +1524,7 @@ console.log(ErrorReporter.generateCompactSummary(result));
 #### Validation Process
 
 **Step 1: Load Validation Rules**
-- Contract-specific rules from `/validation/template_validation_{type}.json`
+- Contract-specific rules from `/validation/{type}-template-validation.json`
 - Includes requirement counts, allowed categories, special case handling
 
 **Step 2: Run Comprehensive Validation**
@@ -1570,7 +1570,7 @@ Found:
 
 Reference:
   - SKILL.md line 682 (Status value standardization)
-  - Template: TEMPLATE_SRE_ARCHITECTURE.md
+  - Template: cc-010-sre-architecture.template.md
   - Shared: shared/fragments/status-codes.md
 
 Fix:
@@ -1635,7 +1635,7 @@ SUMMARY:
 
 #### Business Continuity v2.0 Validation Configuration
 
-**Configuration File**: `/skills/architecture-compliance/validation/business_continuity_validation.json`
+**Configuration File**: `/skills/architecture-compliance/validation/cc-001-business-continuity-validation.json`
 
 **Template Characteristics**:
 - **Version**: 2.0.0
@@ -1690,16 +1690,16 @@ All validation rules are stored in:
 ```
 /validation/
   ├── TEMPLATE_VALIDATION_SCHEMA.json (Schema definition)
-  ├── template_validation_sre_architecture.json
-  ├── template_validation_cloud_architecture.json
-  ├── template_validation_security_architecture.json
-  ├── template_validation_data_ai_architecture.json
-  ├── template_validation_development_architecture.json
-  ├── template_validation_enterprise_architecture.json
-  ├── template_validation_integration_architecture.json
-  ├── template_validation_platform_it_infrastructure.json
-  ├── template_validation_process_transformation.json
-  └── template_validation_business_continuity.json
+  ├── cc-001-business-continuity-template-validation.json
+  ├── cc-002-cloud-architecture-template-validation.json
+  ├── cc-003-data-ai-architecture-template-validation.json
+  ├── cc-004-development-architecture-template-validation.json
+  ├── cc-005-enterprise-architecture-template-validation.json
+  ├── cc-006-integration-architecture-template-validation.json
+  ├── cc-007-platform-it-infrastructure-template-validation.json
+  ├── cc-008-process-transformation-template-validation.json
+  ├── cc-009-security-architecture-template-validation.json
+  └── cc-010-sre-architecture-template-validation.json
 ```
 
 #### Extending Validation Rules
@@ -3078,7 +3078,7 @@ Impact: LAS2 → Compliant (+0.6 points)
 
 **Files Modified**:
 - 1 modified shared file: `completion-guide-intro.md`
-- 10 updated templates: All TEMPLATE_*.md files in `/templates/`
+- 10 updated templates: All cc-*.template.md files in `/templates/`
 
 ### User Benefits
 

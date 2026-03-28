@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "architecture-docs", "runs": [{"id": "eval-0-new-architecture-with_skill", "prompt": "I have a Product Owner Specification at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/PRODUCT_OWNER_SPEC.md for the PayStream payment processing platform. Please create the full architecture documentation for this system. Use a Microservices architecture type.", "eval_id": 0, "outputs": [{"name": "ARCHITECTURE.md", "type": "text", "content": "# PayStream \u2014 Architecture\n\n> Cloud-native real-time payment processing platform built on a Microservices architecture, replacing legacy batch processing with sub-2-second transaction settlement for FinTech Corp.\n\n## Documentation\n\n| # | Section | File | Description |\n|---|---------|------|-------------|\n| S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | Problem, solution, use cases, key metrics |\n| S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles with trade-offs |\n| S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Microservices architecture model, layer diagram |\n| S5 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |\n| S6 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Payment flows, fraud detection, settlement |\n| S7 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | Banking partners, payment rails, external systems |\n| S8 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | Libraries, versions, tools |\n| S9 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | PCI-DSS, threat model, controls, GDPR |\n| S10 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | HPA, latency targets, capacity planning |\n| S11 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | Deployment, DR, monitoring, costs |\n\n> **Note**: The `#` column uses internal section numbers (S-prefix), not file prefix numbers.\n> File prefix `07` = S9 (Security Architecture). File prefix `09` = S11 (Operational Considerations).\n\n## Architecture Decision Records\n\n| ADR | Title | Status | Date | Impact |\n|-----|-------|--------|------|--------|\n| [ADR-001](adr/ADR-001-microservices-architecture.md) | Microservices Architecture Selection | Accepted | 2026-03-26 | High |\n| [ADR-002](adr/ADR-002-oracle-ledger-persistence.md) | Retain Oracle for Ledger Persistence | Accepted | 2026-03-26 | High |\n| [ADR-003](adr/ADR-003-event-driven-payment-processing.md) | Event-Driven Payment Processing with Kafka | Accepted | 2026-03-26 | High |\n| [ADR-004](adr/ADR-004-aws-cloud-platform.md) | AWS-Only Cloud Platform | Accepted | 2026-03-26 | High |\n| [ADR-005](adr/ADR-005-saga-pattern-distributed-transactions.md) | Saga Pattern for Distributed Transactions | Accepted | 2026-03-26 | High |\n\nSee [adr/README.md](adr/README.md) for ADR process \u00b7 [References](docs/10-references.md)\n"}], "grading": {"eval_id": 0, "variant": "with_skill", "expectations": [{"text": "ARCHITECTURE.md is nav index with docs/ links", "passed": true, "evidence": "docs/01- found in ARCHITECTURE.md"}, {"text": "System overview mentions PayStream, 500,000, 99.99%", "passed": true, "evidence": "All found"}, {"text": "Security at docs/07-security-architecture.md (not docs/09-*)", "passed": true, "evidence": "docs/07-security-architecture.md exists"}, {"text": "Ops at docs/09-operational-considerations.md (not docs/11-*)", "passed": true, "evidence": "docs/09-operational-considerations.md exists"}, {"text": "PO Spec traceability in docs/01-system-overview.md", "passed": true, "evidence": "PO_SPEC_SOURCE comment found"}, {"text": "Key metrics (P99, latency \u22642s, 500k) in system overview", "passed": true, "evidence": "P99=True, latency=True, 500k=True"}, {"text": "PCI-DSS in security section", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}, {"text": "Architecture type metadata in docs/03-*", "passed": true, "evidence": "\u2713 'Microservices' in 03-architecture-layers.md"}]}}, {"id": "eval-0-new-architecture-without_skill", "prompt": "I have a Product Owner Specification at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/PRODUCT_OWNER_SPEC.md for the PayStream payment processing platform. Please create the full architecture documentation for this system. Use a Microservices architecture type.", "eval_id": 0, "outputs": [{"name": "ARCHITECTURE.md", "type": "text", "content": "# PayStream \u2014 Architecture Documentation\n\n**Version**: 1.0.0\n**Date**: 2026-03-26\n**Status**: Draft \u2014 Under Review\n**Architecture Type**: Microservices\n**Cloud**: AWS (us-east-1 primary; eu-west-1 for EU data residency)\n**Regulatory**: PCI-DSS Level 1, GDPR\n\n---\n\n## Document Map\n\n| Section | File | Description |\n|---------|------|-------------|\n| 1. System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | Business context, personas, use cases, SLOs |\n| 2. Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Guiding principles, architecture style, constraints |\n| 3. Architecture Topology | [docs/03-architecture-topology.md](docs/03-architecture-topology.md) | High-level diagram, network zones, multi-AZ, deployment model |\n| 4. Component Details | [docs/04-components.md](docs/04-components.md) | Per-service responsibility, tech, data stores, scaling |\n| 5. Data Flow Patterns | [docs/05-data-flow.md](docs/05-data-flow.md) | Sequence diagrams, latency budgets, event schemas |\n| 6. Integration Points | [docs/06-integrations.md](docs/06-integrations.md) | External APIs, Kafka topics, Oracle, SFTP |\n| 7. Technology Stack | [docs/07-technology-stack.md](docs/07-technology-stack.md) | Full stack table, language versions, dependency governance |\n| 8. Security Architecture | [docs/08-security-architecture.md](docs/08-security-architecture.md) | PCI-DSS controls, GDPR, IAM, encryption, audit trail |\n| 9. Scalability and Performance | [docs/09-scalability-performance.md](docs/09-scalability-performance.md) | Capacity model, scaling strategy, DB scaling, performance testing |\n| 10. Operational Considerations | [docs/10-operational-considerations.md](docs/10-operational-considerations.md) | Observability, alerting, deployment pipeline, DR, runbooks |\n| 11. Architecture Decision Records | [docs/11-adrs.md](docs/11-adrs.md) | Key decisions with context, alternatives, and trade-offs |\n\n---\n\n## Executive Summary\n\nPayStream is FinTech Corp's cloud-native, real-time payment processing platform. It replaces a legacy batch system that imposed 8\u201312 hour settlement delays with a microservices architecture delivering end-to-end payment authorization in under 2 seconds.\n\n### Business Problem\n\nThe current monolithic system processes 50,000 transactions/day in nightly batches. Business partners require real-time payment confirmation. Volume is projected to reach 500,000 transactions/day within 18 months \u2014 a 10\u00d7 increase the legacy system cannot support.\n\n### Solution\n\nNine domain-scoped microservices running on AWS EKS, communicating via Apache Kafka (Amazon MSK) for async flows and gRPC/REST for latency-sensitive synchronous paths. All cardholder data is handled exclusively by a PCI-isolated Tokenisation Service backed by AWS CloudHSM.\n\n### Architecture at a Glance\n\n```mermaid\ngraph TD\n    subgraph Clients[\"Client Channels\"]\n        MOB[Mobile / Web]\n        BP[Business Partners]\n    end\n\n    subgraph Edge[\"Edge\"]\n        WAF[AWS WAF + ALB]\n        APIGW[API Gateway Service]\n    end\n\n    subgraph Core[\"Core Services \u2014 EKS\"]\n        PS[Payment Processor]\n        TS[Tokenisation Service\\nPCI Zone]\n        FD[Fraud Detection]\n        LS[Ledger Service]\n        NS[Notification]\n        WHS[Webhook Dispatcher]\n        BS[Bulk Ingest]\n        RS[Reconciliation]\n    end\n\n    subgraph Kafka[\"Amazon MSK \u2014 Kafka\"]\n        K[(payment.events\\nfraud.events\\nwebhook.dispatch)]\n    end\n\n    subgraph Data[\"Data Stores\"]\n        ORA[(Oracle \u2014 Ledger)]\n        RDS[(Aurora PostgreSQL)]\n        DDB[(DynamoDB)]\n        S3[(S3)]\n    end\n\n    MOB --> WAF --> APIGW --> PS\n    BP --> WAF --> APIGW --> BS\n    PS --> TS\n    PS --> FD\n    PS --> K\n    K --> LS --> ORA\n    K --> NS\n    K --> WHS\n    BS --> K\n    PS --> RDS\n    PS --> DDB\n    RS --> ORA\n    RS --> S3\n```\n\n### Key Design Decisions\n\n| Decision | Choice | Rationale |\n|---------|--------|-----------|\n| Architecture style | Microservices | Independent scaling, PCI isolation, fault isolation |\n| Async messaging | Apache Kafka (Amazon MSK) | Exactly-once, durable replay, fan-out |\n| Exactly-once events | Transactional Outbox + Debezium CDC | Atomic DB + event publish without distributed transactions |\n| Cardholder data | Tokenisation Service + AWS CloudHSM | PCI-DSS Req 3 (FIPS 140-2 Level 3); PAN never leaves PCI zone |\n| Ledger persistence | Oracle 19c (existing) | Finance team mandate; migration prohibited |\n| Container platform | AWS EKS | AWS-managed; aligns with enterprise agreement |\n| Key management | AWS CloudHSM | FIPS 140-2 Level 3; PCI-DSS Level 1 requirement |\n\n### SLO Summary\n\n| SLO | Target |\n|-----|--------|\n| P99 end-to-end transaction latency | \u2264 2 seconds |\n| Platform availability | 99.99% |\n| Settlement time | < 30 seconds |\n| Transaction loss | Zero (exactly-once) |\n| RTO (Tier 1) | < 5 minutes |\n| RPO (Tier 1) | < 30 seconds |\n\n### Timeline\n\n| Milestone | Target | Scope |\n|-----------|--------|-------|\n| MVP | Month 3 | Card payments, consumer channel |\n| Full Platform | Month 6 | All channels, 3 banking partner integrations |\n| PCI Audit | Month 7 | Level 1 certification |\n\n---\n\n## Stakeholders\n\n| Role | Name | Responsibility |\n|------|------|---------------|\n| Product Owner | Maria Chen | Business requirements, success criteria |\n| Engineering Lead | Carlos Mendez | Technical architecture, delivery |\n| Compliance Officer | Janet Kirk | PCI-DSS, GDPR oversight |\n| Banking Partner Integration | 3 external banks | Payment authorization and settlement APIs |\n\n---\n\n*For section details, follow the links in the Document Map above.*\n"}], "grading": {"eval_id": 0, "variant": "without_skill", "expectations": [{"text": "ARCHITECTURE.md is nav index with docs/ links", "passed": true, "evidence": "docs/01- found in ARCHITECTURE.md"}, {"text": "System overview mentions PayStream, 500,000, 99.99%", "passed": true, "evidence": "All found"}, {"text": "Security at docs/07-security-architecture.md (not docs/09-*)", "passed": false, "evidence": "docs/07-security-architecture.md MISSING"}, {"text": "Ops at docs/09-operational-considerations.md (not docs/11-*)", "passed": false, "evidence": "docs/09-operational-considerations.md MISSING"}, {"text": "PO Spec traceability in docs/01-system-overview.md", "passed": false, "evidence": "No traceability comment found"}, {"text": "Key metrics (P99, latency \u22642s, 500k) in system overview", "passed": true, "evidence": "P99=True, latency=True, 500k=True"}, {"text": "PCI-DSS in security section", "passed": true, "evidence": "\u2713 'PCI-DSS' in 08-security-architecture.md"}, {"text": "Architecture type metadata in docs/03-*", "passed": true, "evidence": "\u2713 'Microservices' in 03-architecture-topology.md"}]}}, {"id": "eval-1-section-update-with_skill", "prompt": "I'm working on the PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/. Update Section 9 (Security Architecture) to replace the current API key authentication with OAuth2 using PKCE flow for the API Gateway. Access tokens should expire in 15 minutes, refresh tokens in 7 days. The Authorization Server should be AWS Cognito.", "eval_id": 1, "outputs": [{"name": "ARCHITECTURE.md", "type": "text", "content": "# PayStream \u2014 Architecture\n\n> Real-time payment processing platform replacing legacy batch system\n\n## Documentation\n\n| # | Section | File | Description |\n|---|---------|------|-------------|\n| S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | System purpose, key metrics |\n| S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles |\n| S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Microservices topology |\n| S5 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |\n| S6 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Payment flows |\n| S7 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | Banking APIs |\n| S8 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | AWS, Java, Kafka |\n| S9 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | PCI-DSS controls |\n| S10 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | SLOs, HPA |\n| S11 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | DR, monitoring |\n\n## Architecture Decision Records\n\n| ADR | Title | Status |\n|-----|-------|--------|\n| [ADR-001](adr/ADR-001-kafka-event-bus.md) | Use Kafka as event bus | Accepted |\n"}], "grading": {"eval_id": 1, "variant": "with_skill", "expectations": [{"text": "Edits docs/07-security-architecture.md (S9 correct file)", "passed": true, "evidence": "exists"}, {"text": "Does NOT modify docs/09-* for security", "passed": true, "evidence": "ops file untouched (acceptable pass)"}, {"text": "OAuth2 mentioned", "passed": true, "evidence": "\u2713 'OAuth2' in 07-security-architecture.md"}, {"text": "PKCE flow documented", "passed": true, "evidence": "\u2713 'PKCE' in 07-security-architecture.md"}, {"text": "15-minute access token", "passed": true, "evidence": "\u2713 '15' in 07-security-architecture.md"}, {"text": "7-day refresh token", "passed": true, "evidence": "\u2713 '7 day' in 07-security-architecture.md"}, {"text": "AWS Cognito as auth server", "passed": true, "evidence": "\u2713 'Cognito' in 07-security-architecture.md"}, {"text": "PCI-DSS controls preserved", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}]}}, {"id": "eval-1-section-update-without_skill", "prompt": "I'm working on the PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/. Update Section 9 (Security Architecture) to replace the current API key authentication with OAuth2 using PKCE flow for the API Gateway. Access tokens should expire in 15 minutes, refresh tokens in 7 days. The Authorization Server should be AWS Cognito.", "eval_id": 1, "outputs": [{"name": "ARCHITECTURE.md", "type": "text", "content": "# PayStream \u2014 Architecture\n\n> Real-time payment processing platform replacing legacy batch system\n\n## Documentation\n\n| # | Section | File | Description |\n|---|---------|------|-------------|\n| S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | System purpose, key metrics |\n| S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles |\n| S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Microservices topology |\n| S5 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |\n| S6 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Payment flows |\n| S7 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | Banking APIs |\n| S8 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | AWS, Java, Kafka |\n| S9 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | PCI-DSS controls |\n| S10 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | SLOs, HPA |\n| S11 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | DR, monitoring |\n\n## Architecture Decision Records\n\n| ADR | Title | Status |\n|-----|-------|--------|\n| [ADR-001](adr/ADR-001-kafka-event-bus.md) | Use Kafka as event bus | Accepted |\n"}], "grading": {"eval_id": 1, "variant": "without_skill", "expectations": [{"text": "Edits docs/07-security-architecture.md (S9 correct file)", "passed": true, "evidence": "exists"}, {"text": "Does NOT modify docs/09-* for security", "passed": true, "evidence": "ops file untouched (acceptable pass)"}, {"text": "OAuth2 mentioned", "passed": true, "evidence": "\u2713 'OAuth2' in 07-security-architecture.md"}, {"text": "PKCE flow documented", "passed": true, "evidence": "\u2713 'PKCE' in 07-security-architecture.md"}, {"text": "15-minute access token", "passed": true, "evidence": "\u2713 '15' in 07-security-architecture.md"}, {"text": "7-day refresh token", "passed": true, "evidence": "\u2713 '7 day' in 07-security-architecture.md"}, {"text": "AWS Cognito as auth server", "passed": true, "evidence": "\u2713 'Cognito' in 07-security-architecture.md"}, {"text": "PCI-DSS controls preserved", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}]}}, {"id": "eval-2-architecture-query-with_skill", "prompt": "Looking at our PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/ \u2014 can you explain how the checkout flow works? What happens step by step when a customer makes a payment?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# PayStream Checkout Flow \u2014 Step-by-Step Explanation\n\n**Source sections consulted:**\n- S1+S2 (Executive Summary & System Overview) \u2014 `docs/01-system-overview.md`\n- S6 (Data Flow Patterns) \u2014 `docs/04-data-flow-patterns.md`\n\n---\n\n## Overview\n\nPayStream is a cloud-native, event-driven real-time payment processing platform built on AWS. The checkout flow is the primary path by which a customer initiates a payment and receives confirmation. It is designed to complete end-to-end in under 2 seconds at P99.\n\n---\n\n## Step-by-Step: The Checkout Flow (Section 6.1)\n\nWhen a customer makes a payment, the following sequence of steps occurs:\n\n### Step 0 \u2014 Customer App Initiates Payment\n\nThe customer submits payment details (card number, amount, etc.) from the Customer App (mobile or web). The request is sent to the platform's API Gateway.\n\n### Step 1 \u2014 API Gateway: Authentication and Rate Limiting\n\nThe API Gateway is the system's ingress point. It performs:\n- **Authentication** \u2014 verifies the caller's identity/token\n- **Rate limiting** \u2014 protects downstream services from abuse or overload\n\nOnce the request passes these checks, it is forwarded to the **Payment Orchestrator Service**.\n\n### Step 2 \u2014 Validation (Validation Service)\n\nThe Payment Orchestrator sends the request to the **Validation Service**. This service performs:\n- Input and business rule validation (e.g., required fields, amount limits)\n- **Fraud scoring** \u2014 returns a fraud risk score alongside the valid/invalid result\n\nIf the request is invalid, the flow terminates here and returns an error to the customer.\n\n### Step 3 \u2014 Card Tokenization (VGS Vault \u2014 External)\n\nThe Payment Orchestrator sends the raw card data (Primary Account Number, PAN) to **VGS Vault**, an external tokenization service. VGS returns a **payment token** in exchange.\n\n> **Important security note:** The raw PAN is never stored in PayStream's systems. Only the token is retained and used downstream. This is a core PCI-DSS control.\n\n### Step 4 \u2014 Authorization (Authorization Service \u2192 Card Networks \u2192 Acquirer Bank)\n\nUsing the payment token, the **Authorization Service** submits an authorization request to the card network (Visa or Mastercard), which routes it to the **acquirer bank**.\n\nThe bank responds with one of:\n- `auth_code` \u2014 authorization approved, funds reserved\n- `decline_reason` \u2014 authorization declined (insufficient funds, fraud block, etc.)\n\nIf the authorization is **declined**, the flow stops here. No Kafka event is published. The decline reason is returned directly to the customer.\n\n### Step 5 \u2014 Event Publication (Kafka: `payment.authorized`)\n\nOn a successful authorization, the Payment Orchestrator publishes an event to the Kafka topic **`payment.authorized`**. Three downstream consumers react asynchronously:\n\n| Consumer | What it does |\n|---|---|\n| **Ledger Service** | Writes the ledger entry (see Step 6) |\n| **Fraud ML Service** | Runs advanced fraud ML scoring on the authorized payment |\n| **Notification Service** | Sends payment confirmation notifications |\n\n> **Reliability guarantee:** Kafka publish failure causes a full transaction rollback using the **outbox pattern**, ensuring no orphaned authorization exists without a corresponding event.\n\n### Step 6 \u2014 Ledger Write (Ledger Service \u2192 Oracle DB)\n\nThe **Ledger Service**, triggered by the Kafka event, writes a permanent ledger entry to **Oracle DB**. This write is guaranteed **exactly-once** using an **idempotency key** \u2014 duplicate events (e.g., from retries) do not create duplicate ledger entries.\n\nIf the ledger write fails, a **compensating transaction** is executed via the **saga pattern** to reverse the authorization.\n\n### Step 7 \u2014 Confirmation Returned to Customer\n\nAfter authorization succeeds and all downstream processing is in motion, the Payment Orchestrator returns a payment confirmation to the customer.\n\n**P99 target: \u2264 2 seconds total** (end-to-end, from customer request to confirmation).\n\n---\n\n## Error Handling Summary\n\n| Failure Scenario | Behavior |\n|---|---|\n| Authorization declined | Return decline reason immediately; no Kafka event published |\n| VGS timeout (tokenization) | Retry 3 times with exponential backoff, then fail the transaction |\n| Kafka publish failure | Full transaction rollback using the outbox pattern |\n| Ledger write failure | Compensating transaction via saga pattern |\n\n---\n\n## High-Level Flow Diagram\n\n```\nCustomer App\n    \u2502\n    \u25bc\nAPI Gateway  (auth + rate-limit)\n    \u2502\n    \u25bc\nPayment Orchestrator Service\n    \u2502\n    \u251c\u2500\u2500 [1] Validate request \u2192 Validation Service\n    \u2502       Returns: valid/invalid + fraud score\n    \u2502\n    \u251c\u2500\u2500 [2] Tokenize card \u2192 VGS Vault (external)\n    \u2502       Returns: payment token (PAN never stored)\n    \u2502\n    \u251c\u2500\u2500 [3] Reserve funds \u2192 Authorization Service\n    \u2502       Calls: Card Network (Visa/MC) \u2192 acquirer bank\n    \u2502       Returns: auth_code or decline_reason\n    \u2502\n    \u251c\u2500\u2500 [4] Publish event \u2192 Kafka topic: payment.authorized\n    \u2502       Consumers: Ledger Service, Fraud ML Service, Notification Service\n    \u2502\n    \u251c\u2500\u2500 [5] Write ledger entry \u2192 Oracle DB (via Ledger Service)\n    \u2502       Guarantees: exactly-once with idempotency key\n    \u2502\n    \u2514\u2500\u2500 [6] Return confirmation to customer\n            P99 target: \u2264 2 seconds total\n```\n\n---\n\n## Key Design Decisions Behind This Flow\n\n1. **PAN never stored** \u2014 Tokenization via VGS is mandatory before any downstream processing. This is a PCI-DSS Level 1 requirement.\n2. **Event-driven decoupling** \u2014 Ledger writes, fraud ML scoring, and notifications are all triggered via Kafka rather than synchronous calls, reducing P99 latency and improving fault isolation.\n3. **Outbox pattern** \u2014 Ensures Kafka events are only published when a payment is truly authorized, preventing ghost events from failed transactions.\n4. **Saga pattern for compensation** \u2014 If the ledger write fails after authorization, the system executes a compensating transaction to reverse the authorization cleanly, maintaining consistency without distributed transactions.\n5. **Idempotency keys on ledger writes** \u2014 Protects against duplicate ledger entries caused by Kafka redelivery or consumer retries.\n"}], "grading": {"eval_id": 2, "variant": "with_skill", "expectations": [{"text": "Validation step covered", "passed": true, "evidence": "\u2713 'Validat' in response.md"}, {"text": "VGS tokenization mentioned", "passed": true, "evidence": "\u2713 'VGS' in response.md"}, {"text": "Authorization step covered", "passed": true, "evidence": "\u2713 'Authori' in response.md"}, {"text": "Kafka event step covered", "passed": true, "evidence": "\u2713 'Kafka' in response.md"}, {"text": "Ledger write step covered", "passed": true, "evidence": "\u2713 'Ledger' in response.md"}, {"text": "Confirmation step covered", "passed": true, "evidence": "\u2713 'Confirm' in response.md"}, {"text": "Kafka topic 'payment.authorized' named", "passed": true, "evidence": "\u2713 'payment.authorized' in response.md"}, {"text": "P99 latency mentioned", "passed": true, "evidence": "\u2713 'P99' in response.md"}, {"text": "P99 \u2264 2s latency target mentioned", "passed": true, "evidence": "latency target found"}, {"text": "Error handling (outbox/saga/rollback) noted", "passed": true, "evidence": "error handling pattern found"}]}}, {"id": "eval-2-architecture-query-without_skill", "prompt": "Looking at our PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/ \u2014 can you explain how the checkout flow works? What happens step by step when a customer makes a payment?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# PayStream Checkout Flow \u2014 Step-by-Step Explanation\n\n## Overview\n\nPayStream is a cloud-native, event-driven payment processing platform built on AWS with a Kafka event bus. The checkout flow is the platform's primary use case: real-time payment authorization initiated by a customer. The entire end-to-end flow is designed to complete within a P99 latency of 2 seconds.\n\n---\n\n## Step-by-Step Checkout Flow\n\n### Step 0 \u2014 Customer Initiates Payment\n\nThe customer submits payment details (card number, amount, merchant) from a client application (mobile app, web frontend, or partner-integrated checkout). The request is sent over HTTPS to PayStream's entry point.\n\n---\n\n### Step 1 \u2014 API Gateway: Authentication and Rate Limiting\n\nThe request first hits the **API Gateway**, which enforces:\n- **Authentication**: validates the caller's identity (OAuth token, API key, or session token).\n- **Rate limiting**: prevents abuse and protects downstream services from traffic spikes.\n\nIf the request passes these controls, it is forwarded to the Payment Orchestrator Service. If not, the gateway returns a `401 Unauthorized` or `429 Too Many Requests` response immediately, and processing stops here.\n\n---\n\n### Step 2 \u2014 Payment Orchestrator: Request Validation (Sub-step 1)\n\nThe **Payment Orchestrator Service** is the central coordinator for the entire checkout flow. It receives the validated request and immediately invokes the **Validation Service**:\n\n- Checks that all required fields are present and well-formed (amount, currency, card data, merchant ID, etc.).\n- Computes a **fraud score** using rules-based checks (velocity, geography, merchant risk, etc.).\n\n**Outcome:**\n- Returns `valid` or `invalid`, plus a fraud score.\n- If `invalid`, the orchestrator returns an error response to the customer immediately \u2014 no further processing occurs.\n\n---\n\n### Step 3 \u2014 Card Tokenization via VGS Vault (Sub-step 2)\n\nTo maintain PCI-DSS Level 1 compliance, the **raw card PAN (Primary Account Number) is never stored in PayStream's own systems**. Instead, the orchestrator sends card data to **VGS Vault** (Very Good Security), an external vault service:\n\n- VGS replaces the sensitive card number with a **payment token**.\n- All subsequent processing uses this token \u2014 PayStream never handles or persists raw card data.\n\n**Error handling:** If VGS times out, the orchestrator retries up to **3 times with exponential backoff**. If all retries fail, the transaction is aborted and the customer receives a failure response.\n\n---\n\n### Step 4 \u2014 Funds Authorization via Card Network (Sub-step 3)\n\nUsing the payment token, the **Authorization Service** initiates a real-time authorization request through the card network:\n\n- The request flows to **Visa or Mastercard** (depending on the card), then onward to the **customer's issuing/acquirer bank**.\n- The bank evaluates available funds, credit limits, and account standing.\n\n**Outcome:**\n- **Approved**: returns an `auth_code` \u2014 the funds are reserved (not yet captured) against the customer's account.\n- **Declined**: returns a `decline_reason` (e.g., insufficient funds, suspected fraud, expired card).\n\n**If declined:** The orchestrator immediately returns the decline reason to the customer. No Kafka event is published, and no ledger entry is written \u2014 processing stops here.\n\n---\n\n### Step 5 \u2014 Event Publication to Kafka (Sub-step 4)\n\nOn a successful authorization, the orchestrator publishes a `payment.authorized` event to the **Kafka** event bus. This event is consumed asynchronously and in parallel by three downstream services:\n\n| Consumer | Action |\n|---|---|\n| **Ledger Service** | Writes the authoritative financial ledger entry |\n| **Fraud ML Service** | Runs the ML-based fraud risk scoring model (async) |\n| **Notification Service** | Triggers customer-facing and internal notifications |\n\n**Reliability guarantee:** Kafka publishing uses the **Outbox Pattern** \u2014 the event is first written to a transactional outbox table atomically with the authorization result. If the Kafka publish fails, the entire transaction is rolled back, ensuring no orphaned authorization records exist.\n\n---\n\n### Step 6 \u2014 Ledger Entry Write (Sub-step 5)\n\nThe **Ledger Service** (a Kafka consumer from Step 5) writes the authoritative financial record to **Oracle DB**:\n\n- The write uses an **idempotency key** to guarantee **exactly-once semantics** \u2014 duplicate events or retries cannot produce duplicate ledger entries.\n- The ledger record captures: transaction ID, amount, currency, merchant, authorization code, timestamp, and payment token reference.\n\n**Error handling:** If the ledger write fails, a **compensating transaction via the Saga pattern** is triggered to reverse any side effects (e.g., notifying the card network to void the authorization).\n\n---\n\n### Step 7 \u2014 Confirmation Returned to Customer (Sub-step 6)\n\nOnce the authorization is confirmed and the Kafka event is published, the **Payment Orchestrator returns a success confirmation** to the customer application. This includes:\n\n- Transaction ID\n- Authorization code\n- Confirmation status\n\nThe total elapsed time for Steps 1\u20137 must meet the **P99 target of 2 seconds or less**.\n\n---\n\n### Step 8 \u2014 Async Fraud ML Review (Post-Authorization)\n\nIn parallel, after the `payment.authorized` event is published, the **Fraud ML Service** performs a deeper machine-learning-based risk assessment:\n\n- If the ML model scores the transaction at a **risk score > 0.8**, the service publishes a `payment.fraud.flagged` event.\n- This triggers the **Fraud Hold Flow**:\n  - **Risk Review Service** creates a manual review task for the operations team.\n  - **Notification Service** alerts the operations team.\n  - **Payment Orchestrator** places a **hold on settlement** \u2014 the payment has been authorized (customer sees it as pending), but settlement is delayed **up to 24 hours** pending human review.\n\nNote: this fraud hold happens asynchronously and does not affect the 2-second confirmation already returned to the customer.\n\n---\n\n## End-to-End Flow Summary\n\n```\nCustomer App\n    |\n    v\n[API Gateway] \u2014 auth + rate-limit\n    |\n    v\n[Payment Orchestrator Service]\n    |\n    |-- [1] Validation Service \u2192 valid/invalid + fraud score\n    |-- [2] VGS Vault (external) \u2192 payment token (PAN never stored)\n    |-- [3] Authorization Service \u2192 Card Network (Visa/MC) \u2192 Acquirer Bank\n    |            auth_code  OR  decline_reason\n    |-- [4] Kafka: publish payment.authorized\n    |            \u2192 Ledger Service (write Oracle DB, exactly-once)\n    |            \u2192 Fraud ML Service (async risk scoring)\n    |            \u2192 Notification Service (customer + ops alerts)\n    |-- [5] Ledger write confirmed (idempotency key, saga on failure)\n    |\n    v\n[Return confirmation to customer] \u2014 P99 \u2264 2 seconds\n```\n\n---\n\n## Error Handling Reference\n\n| Failure Point | Behavior |\n|---|---|\n| Validation fails | Return error immediately, no further processing |\n| Authorization declined | Return decline reason, no Kafka event, no ledger write |\n| VGS timeout | Retry 3x with exponential backoff, then fail the transaction |\n| Kafka publish failure | Transaction rolled back via Outbox Pattern |\n| Ledger write failure | Compensating transaction triggered via Saga Pattern |\n| Fraud ML score > 0.8 (async) | Settlement placed on 24h hold pending manual review |\n\n---\n\n## Key Design Decisions\n\n- **PCI-DSS Level 1 compliance** is enforced by never storing raw card data \u2014 VGS Vault handles all sensitive card tokenization.\n- **Exactly-once ledger writes** are guaranteed via idempotency keys on Oracle DB.\n- **Saga pattern** ensures distributed consistency across authorization and ledger steps without a two-phase commit.\n- **Outbox pattern** ensures Kafka events are never published without a committed authorization record.\n- **Async fraud ML** keeps the critical path (2-second SLO) clean while still enabling post-authorization fraud review.\n"}], "grading": {"eval_id": 2, "variant": "without_skill", "expectations": [{"text": "Validation step covered", "passed": true, "evidence": "\u2713 'Validat' in response.md"}, {"text": "VGS tokenization mentioned", "passed": true, "evidence": "\u2713 'VGS' in response.md"}, {"text": "Authorization step covered", "passed": true, "evidence": "\u2713 'Authori' in response.md"}, {"text": "Kafka event step covered", "passed": true, "evidence": "\u2713 'Kafka' in response.md"}, {"text": "Ledger write step covered", "passed": true, "evidence": "\u2713 'Ledger' in response.md"}, {"text": "Confirmation step covered", "passed": true, "evidence": "\u2713 'Confirm' in response.md"}, {"text": "Kafka topic 'payment.authorized' named", "passed": true, "evidence": "\u2713 'payment.authorized' in response.md"}, {"text": "P99 latency mentioned", "passed": true, "evidence": "\u2713 'P99' in response.md"}, {"text": "P99 \u2264 2s latency target mentioned", "passed": true, "evidence": "latency target found"}, {"text": "Error handling (outbox/saga/rollback) noted", "passed": true, "evidence": "error handling pattern found"}]}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "architecture-docs", "skill_path": "/home/shadowx4fox/Project/Personal/solutions-architect-skills/skills/architecture-docs", "executor_model": "claude-sonnet-4-6", "analyzer_model": "claude-sonnet-4-6", "timestamp": "2026-03-27T00:35:00Z", "evals_run": [0, 1, 2], "runs_per_configuration": 1}, "runs": [{"eval_id": 0, "eval_name": "new-architecture-from-po-spec", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 8, "failed": 0, "total": 8, "time_seconds": 982.4, "tokens": 102846, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "ARCHITECTURE.md is nav index with docs/ links", "passed": true, "evidence": "docs/01- found in ARCHITECTURE.md"}, {"text": "System overview mentions PayStream, 500,000, 99.99%", "passed": true, "evidence": "All found"}, {"text": "Security at docs/07-security-architecture.md (not docs/09-*)", "passed": true, "evidence": "docs/07-security-architecture.md exists"}, {"text": "Ops at docs/09-operational-considerations.md (not docs/11-*)", "passed": true, "evidence": "docs/09-operational-considerations.md exists"}, {"text": "PO Spec traceability in docs/01-system-overview.md", "passed": true, "evidence": "PO_SPEC_SOURCE comment found"}, {"text": "Key metrics (P99, latency \u22642s, 500k) in system overview", "passed": true, "evidence": "P99=True, latency=True, 500k=True"}, {"text": "PCI-DSS in security section", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}, {"text": "Architecture type metadata in docs/03-*", "passed": true, "evidence": "\u2713 'Microservices' in 03-architecture-layers.md"}], "notes": []}, {"eval_id": 0, "eval_name": "new-architecture-from-po-spec", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.625, "passed": 5, "failed": 3, "total": 8, "time_seconds": 498.0, "tokens": 40348, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "ARCHITECTURE.md is nav index with docs/ links", "passed": true, "evidence": "docs/01- found in ARCHITECTURE.md"}, {"text": "System overview mentions PayStream, 500,000, 99.99%", "passed": true, "evidence": "All found"}, {"text": "Security at docs/07-security-architecture.md (not docs/09-*)", "passed": false, "evidence": "docs/07-security-architecture.md MISSING"}, {"text": "Ops at docs/09-operational-considerations.md (not docs/11-*)", "passed": false, "evidence": "docs/09-operational-considerations.md MISSING"}, {"text": "PO Spec traceability in docs/01-system-overview.md", "passed": false, "evidence": "No traceability comment found"}, {"text": "Key metrics (P99, latency \u22642s, 500k) in system overview", "passed": true, "evidence": "P99=True, latency=True, 500k=True"}, {"text": "PCI-DSS in security section", "passed": true, "evidence": "\u2713 'PCI-DSS' in 08-security-architecture.md"}, {"text": "Architecture type metadata in docs/03-*", "passed": true, "evidence": "\u2713 'Microservices' in 03-architecture-topology.md"}], "notes": []}, {"eval_id": 1, "eval_name": "section-update-oauth2-pkce", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 8, "failed": 0, "total": 8, "time_seconds": 81.8, "tokens": 25015, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Edits docs/07-security-architecture.md (S9 correct file)", "passed": true, "evidence": "exists"}, {"text": "Does NOT modify docs/09-* for security", "passed": true, "evidence": "ops file untouched (acceptable pass)"}, {"text": "OAuth2 mentioned", "passed": true, "evidence": "\u2713 'OAuth2' in 07-security-architecture.md"}, {"text": "PKCE flow documented", "passed": true, "evidence": "\u2713 'PKCE' in 07-security-architecture.md"}, {"text": "15-minute access token", "passed": true, "evidence": "\u2713 '15' in 07-security-architecture.md"}, {"text": "7-day refresh token", "passed": true, "evidence": "\u2713 '7 day' in 07-security-architecture.md"}, {"text": "AWS Cognito as auth server", "passed": true, "evidence": "\u2713 'Cognito' in 07-security-architecture.md"}, {"text": "PCI-DSS controls preserved", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}], "notes": []}, {"eval_id": 1, "eval_name": "section-update-oauth2-pkce", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 8, "failed": 0, "total": 8, "time_seconds": 44.8, "tokens": 30874, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Edits docs/07-security-architecture.md (S9 correct file)", "passed": true, "evidence": "exists"}, {"text": "Does NOT modify docs/09-* for security", "passed": true, "evidence": "ops file untouched (acceptable pass)"}, {"text": "OAuth2 mentioned", "passed": true, "evidence": "\u2713 'OAuth2' in 07-security-architecture.md"}, {"text": "PKCE flow documented", "passed": true, "evidence": "\u2713 'PKCE' in 07-security-architecture.md"}, {"text": "15-minute access token", "passed": true, "evidence": "\u2713 '15' in 07-security-architecture.md"}, {"text": "7-day refresh token", "passed": true, "evidence": "\u2713 '7 day' in 07-security-architecture.md"}, {"text": "AWS Cognito as auth server", "passed": true, "evidence": "\u2713 'Cognito' in 07-security-architecture.md"}, {"text": "PCI-DSS controls preserved", "passed": true, "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"}], "notes": []}, {"eval_id": 2, "eval_name": "architecture-query-checkout-flow", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 10, "failed": 0, "total": 10, "time_seconds": 76.0, "tokens": 21997, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Validation step covered", "passed": true, "evidence": "\u2713 'Validat' in response.md"}, {"text": "VGS tokenization mentioned", "passed": true, "evidence": "\u2713 'VGS' in response.md"}, {"text": "Authorization step covered", "passed": true, "evidence": "\u2713 'Authori' in response.md"}, {"text": "Kafka event step covered", "passed": true, "evidence": "\u2713 'Kafka' in response.md"}, {"text": "Ledger write step covered", "passed": true, "evidence": "\u2713 'Ledger' in response.md"}, {"text": "Confirmation step covered", "passed": true, "evidence": "\u2713 'Confirm' in response.md"}, {"text": "Kafka topic 'payment.authorized' named", "passed": true, "evidence": "\u2713 'payment.authorized' in response.md"}, {"text": "P99 latency mentioned", "passed": true, "evidence": "\u2713 'P99' in response.md"}, {"text": "P99 \u2264 2s latency target mentioned", "passed": true, "evidence": "latency target found"}, {"text": "Error handling (outbox/saga/rollback) noted", "passed": true, "evidence": "error handling pattern found"}], "notes": []}, {"eval_id": 2, "eval_name": "architecture-query-checkout-flow", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 10, "failed": 0, "total": 10, "time_seconds": 68.0, "tokens": 18842, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Validation step covered", "passed": true, "evidence": "\u2713 'Validat' in response.md"}, {"text": "VGS tokenization mentioned", "passed": true, "evidence": "\u2713 'VGS' in response.md"}, {"text": "Authorization step covered", "passed": true, "evidence": "\u2713 'Authori' in response.md"}, {"text": "Kafka event step covered", "passed": true, "evidence": "\u2713 'Kafka' in response.md"}, {"text": "Ledger write step covered", "passed": true, "evidence": "\u2713 'Ledger' in response.md"}, {"text": "Confirmation step covered", "passed": true, "evidence": "\u2713 'Confirm' in response.md"}, {"text": "Kafka topic 'payment.authorized' named", "passed": true, "evidence": "\u2713 'payment.authorized' in response.md"}, {"text": "P99 latency mentioned", "passed": true, "evidence": "\u2713 'P99' in response.md"}, {"text": "P99 \u2264 2s latency target mentioned", "passed": true, "evidence": "latency target found"}, {"text": "Error handling (outbox/saga/rollback) noted", "passed": true, "evidence": "error handling pattern found"}], "notes": []}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 380.1, "stddev": 521.6, "min": 76.0, "max": 982.4}, "tokens": {"mean": 49953, "stddev": 45832, "min": 21997, "max": 102846}}, "without_skill": {"pass_rate": {"mean": 0.875, "stddev": 0.2165, "min": 0.625, "max": 1.0}, "time_seconds": {"mean": 203.6, "stddev": 255.2, "min": 44.8, "max": 498.0}, "tokens": {"mean": 30021, "stddev": 10778, "min": 18842, "max": 40348}}, "delta": {"pass_rate": "+0.12", "time_seconds": "+176.5", "tokens": "+19931"}}, "notes": ["Eval 0 is the most discriminating: with_skill produces the canonical file structure (docs/07-*, docs/09-*) while without_skill creates non-standard numbering (docs/08-*, docs/10-*)", "Eval 1 shows both configs correctly resolving 'Section 9' to docs/07-security-architecture.md \u2014 the model handles this without the skill too when ARCHITECTURE.md nav index is provided", "Eval 2 is non-discriminating: both configs score 10/10 \u2014 query tasks on well-structured docs don't benefit from the skill as much as creation tasks", "Token cost: with_skill uses ~5\u00d7 more tokens on eval 0 due to reading all guide files (ARCHITECTURE_DOCUMENTATION_GUIDE.md, QUERY_SECTION_MAPPING.md, etc.)", "The key skill value is in eval 0 (creation): canonical file naming, PO Spec traceability comment, metadata tags \u2014 things not produced by the baseline"]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

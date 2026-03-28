@@ -21,16 +21,16 @@ Each compliance template has a corresponding validation configuration file:
 
 | Template | Validation Config File |
 |----------|------------------------|
-| Development Architecture | `development_architecture_validation.json` |
-| Business Continuity | `business_continuity_validation.json` |
-| SRE Architecture | `sre_architecture_validation.json` |
-| Cloud Architecture | `cloud_architecture_validation.json` |
-| Security Architecture | `security_architecture_validation.json` |
-| Data & Analytics - AI | `data_analytics_ai_validation.json` |
-| Process Transformation | `process_transformation_validation.json` |
-| Platform & IT Infrastructure | `platform_it_infrastructure_validation.json` |
-| Enterprise Architecture | `enterprise_architecture_validation.json` |
-| Integration Architecture | `integration_architecture_validation.json` |
+| Business Continuity | `cc-001-business-continuity-validation.json` |
+| Cloud Architecture | `cc-002-cloud-architecture-validation.json` |
+| Data & Analytics - AI | `cc-003-data-ai-architecture-validation.json` |
+| Development Architecture | `cc-004-development-architecture-validation.json` |
+| Enterprise Architecture | `cc-005-enterprise-architecture-validation.json` |
+| Integration Architecture | `cc-006-integration-architecture-validation.json` |
+| Platform & IT Infrastructure | `cc-007-platform-it-infrastructure-validation.json` |
+| Process Transformation | `cc-008-process-transformation-validation.json` |
+| Security Architecture | `cc-009-security-architecture-validation.json` |
+| SRE Architecture | `cc-010-sre-architecture-validation.json` |
 
 ## Validation Schema
 
@@ -343,7 +343,7 @@ Validate configuration files against the schema:
 
 ```bash
 # Using a JSON schema validator tool
-jsonschema -i development_architecture_validation.json VALIDATION_SCHEMA.json
+jsonschema -i cc-004-development-architecture-validation.json VALIDATION_SCHEMA.json
 ```
 
 ## Version History

@@ -3,7 +3,7 @@
   "compliance_prefix": "LACN",
   "review_board": "Business Continuity Review Board",
   "approval_authority": "Business Continuity Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-001-business-continuity-validation.json",
 
   "weights": {
     "completeness": 0.4,

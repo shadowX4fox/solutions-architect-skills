@@ -4,10 +4,10 @@
   "domain": {
     "name": "SRE Architecture",
     "short_name": "SRE",
-    "contract_type": "sre_architecture",
-    "template_filename": "TEMPLATE_SRE_ARCHITECTURE.md",
+    "contract_type": "cc-010-sre-architecture",
+    "template_filename": "cc-010-sre-architecture.template.md",
     "tmp_prefix": "sre",
-    "output_prefix": "SRE_ARCHITECTURE",
+    "output_prefix": "CC-010-sre-architecture",
     "compliance_prefix": "LASRE",
     "requirement_range": "LASRE01-LASRE57",
     "requirement_count": 57,

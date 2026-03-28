@@ -19,7 +19,7 @@ const MOCK_CONFIG = {
   compliance_prefix: 'SRE',
   review_board: 'SRE Architecture Review Board',
   approval_authority: 'Architecture Committee',
-  validation_config_path: 'validation/sre_architecture_validation.json',
+  validation_config_path: 'validation/cc-010-sre-architecture-validation.json',
   weights: {
     completeness: 0.4,
     compliance: 0.5,

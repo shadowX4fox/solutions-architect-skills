@@ -13,7 +13,7 @@
  *
  * const result = await validateGeneratedContract(
  *   generatedContent,
- *   'sre_architecture'
+ *   'cc-010-sre-architecture'
  * );
  *
  * if (!result.isValid) {
@@ -56,7 +56,7 @@ export interface GenerationValidationResult {
  * and formatted error reporting.
  *
  * @param content - The generated contract content (markdown)
- * @param contractType - Contract type identifier (e.g., 'sre_architecture')
+ * @param contractType - Contract type identifier (e.g., 'cc-010-sre-architecture')
  * @param options - Optional configuration
  * @returns Validation result with formatted reports
  *
@@ -64,7 +64,7 @@ export interface GenerationValidationResult {
  * ```typescript
  * const result = await validateGeneratedContract(
  *   generatedContent,
- *   'sre_architecture'
+ *   'cc-010-sre-architecture'
  * );
  *
  * if (!result.isValid) {
@@ -151,8 +151,8 @@ export class ValidationError extends Error {
  * @example
  * ```typescript
  * const results = await validateMultipleContracts([
- *   { content: sreContent, contractType: 'sre_architecture' },
- *   { content: cloudContent, contractType: 'cloud_architecture' },
+ *   { content: sreContent, contractType: 'cc-010-sre-architecture' },
+ *   { content: cloudContent, contractType: 'cc-002-cloud-architecture' },
  * ]);
  *
  * const failedContracts = results.filter(r => !r.isValid);

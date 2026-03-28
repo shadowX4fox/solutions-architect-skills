@@ -4,10 +4,10 @@
   "domain": {
     "name": "Development Architecture",
     "short_name": "Development",
-    "contract_type": "development",
-    "template_filename": "TEMPLATE_DEVELOPMENT_ARCHITECTURE.md",
+    "contract_type": "cc-004-development-architecture",
+    "template_filename": "cc-004-development-architecture.template.md",
     "tmp_prefix": "dev",
-    "output_prefix": "DEVELOPMENT_ARCHITECTURE",
+    "output_prefix": "CC-004-development-architecture",
     "compliance_prefix": "LADES",
     "requirement_range": "LADES1-LADES2",
     "requirement_count": 2,

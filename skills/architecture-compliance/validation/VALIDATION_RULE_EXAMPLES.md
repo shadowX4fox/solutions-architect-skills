@@ -588,8 +588,8 @@ To test validation rules manually:
 ```typescript
 import { ComplianceValidator } from './utils/validators';
 
-const validator = new ComplianceValidator('validation/template_validation_sre_architecture.json');
-const result = await validator.validateDocument(documentContent, 'sre_architecture');
+const validator = new ComplianceValidator('validation/cc-010-sre-architecture-template-validation.json');
+const result = await validator.validateDocument(documentContent, 'cc-010-sre-architecture');
 
 console.log(result.isValid);  // true or false
 console.log(result.errors);    // Array of validation errors

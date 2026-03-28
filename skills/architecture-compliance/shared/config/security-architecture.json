@@ -3,7 +3,7 @@
   "compliance_prefix": "LAS",
   "review_board": "Security Review Board",
   "approval_authority": "Security Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/security_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-009-security-architecture-validation.json",
 
   "weights": {
     "completeness": 0.3,

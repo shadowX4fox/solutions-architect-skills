@@ -1,0 +1,67 @@
+{
+  "eval_id": 1,
+  "eval_name": "section-update-oauth2-pkce",
+  "prompt": "I'm working on the PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/. Update Section 9 (Security Architecture) to replace the current API key authentication with OAuth2 using PKCE flow for the API Gateway. Access tokens should expire in 15 minutes, refresh tokens in 7 days. The Authorization Server should be AWS Cognito.",
+  "assertions": [
+    {
+      "id": "edits-correct-file",
+      "text": "Edits docs/07-security-architecture.md (S9 correct file), NOT docs/09-*",
+      "check": "file_exists",
+      "file": "docs/07-security-architecture.md"
+    },
+    {
+      "id": "no-wrong-file-created",
+      "text": "Does NOT create or edit docs/09-* for security (wrong file)",
+      "check": "file_not_modified",
+      "file": "docs/09-operational-considerations.md"
+    },
+    {
+      "id": "oauth2-mentioned",
+      "text": "The updated security section mentions OAuth2",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "OAuth2"
+    },
+    {
+      "id": "pkce-mentioned",
+      "text": "PKCE flow is documented in the security section",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "PKCE"
+    },
+    {
+      "id": "access-token-15min",
+      "text": "Access token expiry of 15 minutes is documented",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "15"
+    },
+    {
+      "id": "refresh-token-7days",
+      "text": "Refresh token expiry of 7 days is documented",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "7 day"
+    },
+    {
+      "id": "aws-cognito-named",
+      "text": "AWS Cognito is named as the Authorization Server",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "Cognito"
+    },
+    {
+      "id": "pci-dss-preserved",
+      "text": "Existing PCI-DSS controls table is preserved in the file",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "PCI-DSS"
+    },
+    {
+      "id": "no-new-file-created",
+      "text": "Does NOT create a new security file — edits the existing docs/07-security-architecture.md only",
+      "check": "no_extra_security_file",
+      "note": "Manual check: only docs/07-security-architecture.md should be modified"
+    }
+  ]
+}

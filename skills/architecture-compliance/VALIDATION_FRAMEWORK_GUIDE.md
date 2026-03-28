@@ -35,7 +35,7 @@ Validate template structure after expanding @include directives:
 
 ```bash
 # Expand template with structure validation
-bun run utils/resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate
+bun run utils/resolve-includes.ts templates/cc-010-sre-architecture.template.md expanded.md --validate
 ```
 
 Output:
@@ -58,18 +58,18 @@ import { ErrorReporter } from './utils/error-reporter';
 
 // 1. Create validator with contract-specific rules
 const validator = new ComplianceValidator(
-  'validation/template_validation_sre_architecture.json'
+  'validation/cc-010-sre-architecture-template-validation.json'
 );
 
 // 2. Validate document
 const result = await validator.validateDocument(
   documentContent,
-  'sre_architecture'
+  'cc-010-sre-architecture'
 );
 
 // 3. Check results
 if (!result.isValid) {
-  const report = ErrorReporter.generateReport(result, 'sre_architecture');
+  const report = ErrorReporter.generateReport(result, 'cc-010-sre-architecture');
   console.error(report);
   throw new Error('Validation failed');
 }
@@ -107,7 +107,7 @@ bun test tests/validators.test.ts
 skills/architecture-compliance/
 ├── utils/
 │   ├── validators.ts               (883 lines) - Post-validation engine (Phase 4.6)
-│   ├── template-prevalidator.ts    (300 lines) - Pre-validation engine (Phase 4.1)
+│   ├── template-prevalidator.ts     (300 lines) - Pre-validation engine (Phase 4.1)
 │   ├── error-reporter.ts           (409 lines) - Error formatting & reporting
 │   ├── generation-helper.ts        (250 lines) - Integration helper module
 │   ├── validate-cli.ts             (200 lines) - Standalone CLI tool
@@ -116,7 +116,7 @@ skills/architecture-compliance/
 ├── validation/
 │   ├── TEMPLATE_VALIDATION_SCHEMA.json     - JSON schema for rules
 │   ├── VALIDATION_RULE_EXAMPLES.md         - Examples & patterns
-│   ├── template_validation_sre_architecture.json (10 files total)
+│   ├── cc-010-sre-architecture-template-validation.json (10 files total)
 │   └── ... (9 more contract-specific rule files)
 └── tests/
     └── validators.test.ts          (300 lines) - Comprehensive test suite
@@ -167,7 +167,7 @@ skills/architecture-compliance/
 ┌─────────────────────────────────────────┐
 │   Phase 4.6: POST-VALIDATION            │
 │   Load Validation Rules                 │
-│   (validation/template_validation_*.json)│
+│   (validation/cc-*-template-validation.json)│
 └────────────────┬────────────────────────┘
                  │
                  ▼

@@ -1,0 +1,61 @@
+{
+  "eval_id": 0,
+  "eval_name": "new-architecture-from-po-spec",
+  "prompt": "I have a Product Owner Specification at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/PRODUCT_OWNER_SPEC.md for the PayStream payment processing platform. Please create the full architecture documentation for this system. Use a Microservices architecture type.",
+  "assertions": [
+    {
+      "id": "nav-index-structure",
+      "text": "ARCHITECTURE.md is a navigation index with links to docs/ files, not a monolithic document",
+      "check": "file_contains",
+      "file": "ARCHITECTURE.md",
+      "pattern": "docs/01-"
+    },
+    {
+      "id": "system-overview-paystream",
+      "text": "docs/01-system-overview.md mentions PayStream, 500,000 transactions, and 99.99% availability",
+      "check": "file_contains_all",
+      "file": "docs/01-system-overview.md",
+      "patterns": ["PayStream", "500,000", "99.99"]
+    },
+    {
+      "id": "security-at-07-not-09",
+      "text": "Security architecture is at docs/07-security-architecture.md (not docs/09-*)",
+      "check": "file_exists",
+      "file": "docs/07-security-architecture.md"
+    },
+    {
+      "id": "operations-at-09-not-11",
+      "text": "Operational considerations is at docs/09-operational-considerations.md (not docs/11-*)",
+      "check": "file_exists",
+      "file": "docs/09-operational-considerations.md"
+    },
+    {
+      "id": "po-spec-traceability",
+      "text": "PO Spec traceability comment is embedded in docs/01-system-overview.md",
+      "check": "file_contains",
+      "file": "docs/01-system-overview.md",
+      "pattern": "PO Spec"
+    },
+    {
+      "id": "key-metrics-present",
+      "text": "Key metrics from PO Spec appear in system overview (P99 ≤ 2s, 99.99%, 500k)",
+      "check": "file_contains_all",
+      "file": "docs/01-system-overview.md",
+      "patterns": ["P99", "2s", "500"]
+    },
+    {
+      "id": "pci-dss-in-security",
+      "text": "PCI-DSS compliance requirements appear in the security section",
+      "check": "file_contains",
+      "file": "docs/07-security-architecture.md",
+      "pattern": "PCI-DSS"
+    },
+    {
+      "id": "architecture-type-metadata",
+      "text": "Architecture type metadata comment is present in docs/03-architecture-layers.md",
+      "check": "file_contains",
+      "file": "docs/03-architecture-layers.md",
+      "pattern": "Microservices"
+    }
+  ]
+}

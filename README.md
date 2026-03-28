@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.13.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.14.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.13.0` in the list.
+You should see `solutions-architect-skills v2.14.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -591,7 +591,16 @@ Where:
 
 ## Roadmap
 
-### v2.13.0 (Current Release) ✅
+### v2.14.0 (Current Release) ✅
+**refactor: compliance contract naming — CC-prefixed kebab-case with numbered types**
+
+- Renamed all compliance contracts to `CC-NNN-{type}` convention: templates, output files, validation configs, and type identifiers
+- Template files: `TEMPLATE_BUSINESS_CONTINUITY.md` → `cc-001-business-continuity.template.md` (10 templates)
+- Output files: `BUSINESS_CONTINUITY_Project_Date.md` → `CC-001-business-continuity_Project_Date.md`
+- Fixed numbering: CC-001 (Business Continuity) through CC-010 (SRE Architecture)
+- Updated all TypeScript registries, validation schemas (20 files), utility CLIs, tests (334 pass), and documentation references
+
+### v2.13.0 (Previous Release) ✅
 **refactor: compliance agent build system — base template + domain configs + 10 validation agents**
 
 - Refactored 10 compliance agents (~85% shared boilerplate) into a build-time generation system: `agents/base/AGENT_BASE.md` + 9 shared sections + 10 domain config JSONs → 10 generated agent .md files via `bun run build:agents`

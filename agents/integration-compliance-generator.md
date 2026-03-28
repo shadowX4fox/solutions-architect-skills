@@ -28,8 +28,8 @@ Apply this personality when filling placeholders, writing gap analysis comments,
 
 ## Specialized Configuration
 
-**Contract Type**: `integration`
-**Template**: `TEMPLATE_INTEGRATION_ARCHITECTURE.md`
+**Contract Type**: `cc-006-integration-architecture`
+**Template**: `cc-006-integration-architecture.template.md`
 **Section Mapping**: docs/components/README.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md, docs/07-security-architecture.md (primary)
 > File prefix numbers (01-10) differ from internal section numbers (S1-S12). S9 = `docs/07-*`, S11 = `docs/09-*`. Use file paths above for source references — never bare section numbers.
 
@@ -145,7 +145,7 @@ Strip the "/skills/architecture-compliance/SKILL.md" suffix to get plugin_dir
 Use Bash tool to run resolve-includes.ts with `--strip-internal` (removes internal instruction blocks in one pass, no separate `sed` step needed):
 ```bash
 bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts \
-  [plugin_dir]/skills/architecture-compliance/templates/TEMPLATE_INTEGRATION_ARCHITECTURE.md \
+  [plugin_dir]/skills/architecture-compliance/templates/cc-006-integration-architecture.template.md \
   /tmp/expanded_integration_template.md \
   --strip-internal
 ```
@@ -616,15 +616,15 @@ Before writing the output file, verify the following:
 - ❌ DO NOT create any files other than the contract .md file
 
 **Allowed Output**:
-- ✅ ONLY: `compliance-docs/INTEGRATION_ARCHITECTURE_[PROJECT]_[DATE].md`
+- ✅ ONLY: `compliance-docs/CC-006-integration-architecture_[PROJECT]_[DATE].md`
 
 **Step 5.1: Determine Output Filename**
 
-Format: `compliance-docs/INTEGRATION_ARCHITECTURE_[PROJECT]_[DATE].md`
+Format: `compliance-docs/CC-006-integration-architecture_[PROJECT]_[DATE].md`
 
 **IMPORTANT**: This is the ONLY file this agent creates. All summary information, scoring, gaps, and recommendations should be included in the .md contract file, NOT in separate report files.
 
-Example: `compliance-docs/INTEGRATION_ARCHITECTURE_PaymentPlatform_2026-03-28.md`
+Example: `compliance-docs/CC-006-integration-architecture_PaymentPlatform_2026-03-28.md`
 
 **Step 5.2: Create Output Directory**
 

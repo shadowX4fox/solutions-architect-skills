@@ -71,8 +71,7 @@ const POST_APPENDIX_SECTIONS = [
  * Scoring model identifiers for each contract type
  */
 const SCORING_MODEL_MAP: Record<string, string> = {
-  'sre-architecture': 'two-tier',
-  'sre_architecture': 'two-tier'
+  'cc-010-sre-architecture': 'two-tier'
 };
 
 /**
@@ -98,7 +97,7 @@ function validateRequiredSections(
   }
 
   // Check table-based sections (all except Business Continuity)
-  if (contractType !== 'business_continuity') {
+  if (contractType !== 'cc-001-business-continuity') {
     for (const section of TABLE_BASED_REQUIRED_SECTIONS) {
       checksPerformed++;
 
@@ -110,7 +109,7 @@ function validateRequiredSections(
   }
 
   if (missingSections.length > 0) {
-    const allRequired = contractType === 'business_continuity'
+    const allRequired = contractType === 'cc-001-business-continuity'
       ? MINIMUM_REQUIRED_SECTIONS
       : [...MINIMUM_REQUIRED_SECTIONS, ...TABLE_BASED_REQUIRED_SECTIONS];
 
@@ -136,7 +135,7 @@ function validateAppendixStructure(
   errors: TemplateValidationError[]
 ): number {
   // Business Continuity doesn't require A.2
-  const requiredAppendices = contractType === 'business_continuity'
+  const requiredAppendices = contractType === 'cc-001-business-continuity'
     ? ['A.1', 'A.3', 'A.4']
     : ['A.1', 'A.2', 'A.3', 'A.4'];
 
@@ -375,7 +374,7 @@ function validateSummaryTable(
   contractType: string,
   errors: TemplateValidationError[]
 ): number {
-  if (contractType === 'business_continuity') {
+  if (contractType === 'cc-001-business-continuity') {
     return 0; // BC uses narrative format, no summary table required
   }
 

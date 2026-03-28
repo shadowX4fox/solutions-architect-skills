@@ -29,15 +29,15 @@ Determine the domain identifier from template filename:
 
 | Template File | Domain Name | Config File |
 |--------------|-------------|-------------|
-| TEMPLATE_CLOUD_ARCHITECTURE.md | cloud-architecture | cloud-architecture.json |
-| TEMPLATE_SRE_ARCHITECTURE.md | sre-architecture | sre-architecture.json |
-| TEMPLATE_SECURITY_ARCHITECTURE.md | security-architecture | security-architecture.json |
-| TEMPLATE_DATA_AI_ARCHITECTURE.md | data-ai-architecture | data-ai-architecture.json |
-| TEMPLATE_DEVELOPMENT_ARCHITECTURE.md | development-architecture | development-architecture.json |
-| TEMPLATE_PLATFORM_IT_INFRASTRUCTURE.md | platform-it-infrastructure | platform-it-infrastructure.json |
-| TEMPLATE_ENTERPRISE_ARCHITECTURE.md | enterprise-architecture | enterprise-architecture.json |
-| TEMPLATE_INTEGRATION_ARCHITECTURE.md | integration-architecture | integration-architecture.json |
-| TEMPLATE_PROCESS_TRANSFORMATION.md | process-transformation | process-transformation.json |
+| cc-002-cloud-architecture.template.md | cloud-architecture | cloud-architecture.json |
+| cc-010-sre-architecture.template.md | sre-architecture | sre-architecture.json |
+| cc-009-security-architecture.template.md | security-architecture | security-architecture.json |
+| cc-003-data-ai-architecture.template.md | data-ai-architecture | data-ai-architecture.json |
+| cc-004-development-architecture.template.md | development-architecture | development-architecture.json |
+| cc-007-platform-it-infrastructure.template.md | platform-it-infrastructure | platform-it-infrastructure.json |
+| cc-005-enterprise-architecture.template.md | enterprise-architecture | enterprise-architecture.json |
+| cc-006-integration-architecture.template.md | integration-architecture | integration-architecture.json |
+| cc-008-process-transformation.template.md | process-transformation | process-transformation.json |
 
 ### Step 2: Create Domain Config
 
@@ -49,7 +49,7 @@ Create `shared/config/<domain-name>.json` with required variables:
   "compliance_prefix": "LAC",
   "review_board": "Cloud Architecture Review Board",
   "approval_authority": "Cloud Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/cloud_architecture_validation.json"
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-002-cloud-architecture-validation.json"
 }
 ```
 
@@ -57,27 +57,27 @@ Create `shared/config/<domain-name>.json` with required variables:
 
 | Domain | compliance_prefix | review_board | validation_config_path |
 |--------|------------------|--------------|------------------------|
-| Cloud Architecture | LAC | Cloud Architecture Review Board | validation/cloud_architecture_validation.json |
-| SRE Architecture | LASRE | SRE Review Board | validation/sre_architecture_validation.json |
-| Security Architecture | LAS | Security Review Board | validation/security_architecture_validation.json |
-| Data & AI Architecture | LAD / LAIA | Data & AI Architecture Review Board | validation/data_ai_architecture_validation.json |
-| Development Architecture | LADES | Development Architecture Review Board | validation/development_architecture_validation.json |
-| Platform IT Infrastructure | LAPI | Infrastructure Review Board | validation/platform_it_infrastructure_validation.json |
-| Enterprise Architecture | LAE | Enterprise Architecture Review Board | validation/enterprise_architecture_validation.json |
-| Integration Architecture | LAI | Integration Architecture Review Board | validation/integration_architecture_validation.json |
-| Process Transformation | LAP | Process Transformation Review Board | validation/process_transformation_validation.json |
+| Cloud Architecture | LAC | Cloud Architecture Review Board | validation/cc-002-cloud-architecture-validation.json |
+| SRE Architecture | LASRE | SRE Review Board | validation/cc-010-sre-architecture-validation.json |
+| Security Architecture | LAS | Security Review Board | validation/cc-009-security-architecture-validation.json |
+| Data & AI Architecture | LAD / LAIA | Data & AI Architecture Review Board | validation/cc-003-data-ai-architecture-validation.json |
+| Development Architecture | LADES | Development Architecture Review Board | validation/cc-004-development-architecture-validation.json |
+| Platform IT Infrastructure | LAPI | Infrastructure Review Board | validation/cc-007-platform-it-infrastructure-validation.json |
+| Enterprise Architecture | LAE | Enterprise Architecture Review Board | validation/cc-005-enterprise-architecture-validation.json |
+| Integration Architecture | LAI | Integration Architecture Review Board | validation/cc-006-integration-architecture-validation.json |
+| Process Transformation | LAP | Process Transformation Review Board | validation/cc-008-process-transformation-validation.json |
 
 ### Step 3: Backup Original Template
 
 Always create a backup before making changes:
 
 ```bash
-cp TEMPLATE_<NAME>.md TEMPLATE_<NAME>.md.backup
+cp cc-NNN-<name>.template.md cc-NNN-<name>.template.md.backup
 ```
 
 Example:
 ```bash
-cp TEMPLATE_CLOUD_ARCHITECTURE.md TEMPLATE_CLOUD_ARCHITECTURE.md.backup
+cp cc-002-cloud-architecture.template.md cc-002-cloud-architecture.template.md.backup
 ```
 
 ### Step 4: Identify Sections to Replace
@@ -177,8 +177,8 @@ Use the Edit tool or text editor to make the replacements identified in Step 4.
 Check lines saved:
 
 ```bash
-wc -l TEMPLATE_<NAME>.md*
-echo "Lines saved:" && echo "$(($(wc -l < TEMPLATE_<NAME>.md.backup) - $(wc -l < TEMPLATE_<NAME>.md)))"
+wc -l cc-NNN-<name>.template.md*
+echo "Lines saved:" && echo "$(($(wc -l < cc-NNN-<name>.template.md.backup) - $(wc -l < cc-NNN-<name>.template.md)))"
 ```
 
 **Expected savings**: 60-90 lines per template
@@ -210,7 +210,7 @@ Update the template's A.4 Change History:
 
 ```bash
 git add shared/config/<domain-name>.json
-git add templates/TEMPLATE_<NAME>.md
+git add templates/cc-NNN-<name>.template.md
 git commit -m "refactor: Migrate <Domain Name> template to shared content system
 
 - Create domain config: shared/config/<domain-name>.json
@@ -253,7 +253,7 @@ Related: Business Continuity proof-of-concept (87 lines saved)"
 
 ## Template-Specific Notes
 
-### SRE Architecture (TEMPLATE_SRE_ARCHITECTURE.md)
+### SRE Architecture (cc-010-sre-architecture.template.md)
 
 **Unique Characteristics**:
 - Two-tier scoring (Blocker vs Desired)
@@ -265,7 +265,7 @@ Related: Business Continuity proof-of-concept (87 lines saved)"
 - Keep two-tier scoring logic (domain-specific)
 - May need custom variables in config for "Blocker" vs "Desired" distinction
 
-### Development Architecture (TEMPLATE_DEVELOPMENT_ARCHITECTURE.md)
+### Development Architecture (cc-004-development-architecture.template.md)
 
 **Unique Characteristics**:
 - Stack Validation Checklist integration (LADES1.6)
@@ -277,7 +277,7 @@ Related: Business Continuity proof-of-concept (87 lines saved)"
 - Keep Stack Validation Checklist content (domain-specific)
 - Add note in config about checklist requirement
 
-### Data & AI Architecture (TEMPLATE_DATA_AI_ARCHITECTURE.md)
+### Data & AI Architecture (cc-003-data-ai-architecture.template.md)
 
 **Unique Characteristics**:
 - Dual prefix: LAD (Data) and LAIA (AI)
@@ -287,7 +287,7 @@ Related: Business Continuity proof-of-concept (87 lines saved)"
 - Use `compliance_prefix: "LAD / LAIA"` in config
 - May need special handling if prefixes used separately in validation
 
-### Integration Architecture (TEMPLATE_INTEGRATION_ARCHITECTURE.md)
+### Integration Architecture (cc-006-integration-architecture.template.md)
 
 **Unique Characteristics**:
 - Has A.1-A.4 already

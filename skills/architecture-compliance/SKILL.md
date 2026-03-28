@@ -343,18 +343,18 @@ Resolves to the Document Control table with `{{variables}}` replaced from `share
 
 **File Naming Pattern:**
 ```
-[CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md
+[CC-NNN-contract-type]_[PROJECT_NAME]_[DATE].md
 ```
 
 **Examples:**
-- `SRE_ARCHITECTURE_JobScheduler_2025-11-26.md`
-- `BUSINESS_CONTINUITY_PaymentGateway_2025-11-26.md`
-- `DEVELOPMENT_ARCHITECTURE_JobScheduler_2025-11-26.md`
+- `CC-010-sre-architecture_JobScheduler_2025-11-26.md`
+- `CC-001-business-continuity_PaymentGateway_2025-11-26.md`
+- `CC-004-development-architecture_JobScheduler_2025-11-26.md`
 
 **Regeneration Behavior:**
 - When regenerating an existing contract (same type, project, date), the file is REPLACED
 - Previous content is overwritten with newly generated contract
-- No timestamp appending - same filename is used: `[CONTRACT_TYPE]_[PROJECT_NAME]_[DATE].md`
+- No timestamp appending - same filename is used: `[CC-NNN-contract-type]_[PROJECT_NAME]_[DATE].md`
 - To preserve old versions, manually rename/copy files before regenerating
 - Alternatively, use git for version control of generated contracts
 
@@ -571,10 +571,10 @@ Output: Validated contract type
 **Bulk Contracts Validation** (when selected_contracts.length > 1):
 ```
 1. For each contract in selected_contracts:
-   - Validate template exists: templates/TEMPLATE_[CONTRACT_TYPE].md
-   - Validate validation config exists: validation/template_validation_[contract_type].json
+   - Validate template exists: templates/cc-NNN-contract-type.template.md
+   - Validate validation config exists: validation/cc-NNN-contract-type-template-validation.json
 2. If any templates missing:
-   - Warn user: "Template not found for [CONTRACT_TYPE]"
+   - Warn user: "Template not found for [CC-NNN-contract-type]"
    - Offer options:
      a) Skip missing contracts, generate remaining ones
      b) Cancel entire operation

@@ -3,7 +3,7 @@
   "compliance_prefix": "LAI",
   "review_board": "Integration Architecture Review Board",
   "approval_authority": "Integration Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/integration_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-006-integration-architecture-validation.json",
 
   "weights": {
     "completeness": 0.3,

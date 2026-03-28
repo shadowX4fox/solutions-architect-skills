@@ -84,13 +84,13 @@ While most sections use shared includes, some templates have domain-specific req
 
 ### Appendix A.2 - Validation Methodology Exceptions
 
-**TEMPLATE_DEVELOPMENT_ARCHITECTURE.md**:
+**cc-004-development-architecture.template.md**:
 - Uses inline A.2 validation methodology
 - **Reason**: LADES1.6 (Stack Validation Checklist) is a blocking requirement
 - **Unique Logic**: Contract cannot be approved if LADES1.6 status is "Unknown"
 - **Impact**: Requires custom compliance scoring formula
 
-**TEMPLATE_INTEGRATION_ARCHITECTURE.md**:
+**cc-006-integration-architecture.template.md**:
 - Uses inline A.2 validation methodology
 - **Reason**: Custom weight distribution (30% Completeness, 60% Compliance, 10% Quality)
 - **Standard Weights**: 40% Completeness, 50% Compliance, 10% Quality
@@ -127,7 +127,7 @@ Variables are replaced during include processing using values from `shared/confi
   "compliance_prefix": "LABC",
   "review_board": "Business Continuity Review Board",
   "approval_authority": "Business Continuity Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/business_continuity_validation.json"
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-001-business-continuity-validation.json"
 }
 ```
 
@@ -137,7 +137,7 @@ Variables are replaced during include processing using values from `shared/confi
 
 During template loading (Phase 4, Step 4.1 of compliance generation):
 
-1. **Read template file** (e.g., `TEMPLATE_BUSINESS_CONTINUITY.md`)
+1. **Read template file** (e.g., `cc-001-business-continuity.template.md`)
 2. **Detect include directives** using regex: `<!-- @include(-with-config)?\s+(.+?)\s*(?:config=(\S+))?\s*-->`
 3. **For each directive**:
    - Parse type (simple or with-config)
@@ -230,7 +230,7 @@ These variables should be in all domain configs:
 - `compliance_prefix`: Code prefix for requirements (e.g., "LABC", "LAC", "LASRE")
 - `review_board`: Name of the review board (e.g., "Business Continuity Review Board")
 - `approval_authority`: Authority that approves contracts (usually same as review_board)
-- `validation_config_path`: Path to validation JSON (e.g., `/skills/architecture-compliance/validation/business_continuity_validation.json`)
+- `validation_config_path`: Path to validation JSON (e.g., `/skills/architecture-compliance/validation/cc-001-business-continuity-validation.json`)
 - `primary_source_sections`: ARCHITECTURE.md sections where data is sourced (e.g., "10 (Non-Functional Requirements), 11 (Operational Considerations)")
 - `framework_description`: Brief description of framework requirements (e.g., "RTO/RPO, backup, DR, and high availability")
 - `compliance_framework_code`: Full compliance code with domain name (e.g., "LABC (Business Continuity)")

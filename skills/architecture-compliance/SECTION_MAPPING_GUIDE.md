@@ -1814,10 +1814,10 @@ All templates with Section 9 references must use this standard:
 
 | Template | Section 9 Usage | Compliance Status |
 |----------|----------------|-------------------|
-| TEMPLATE_CLOUD_ARCHITECTURE.md | 5 references (LAC3) | ✅ Updated (2025-11-27) |
-| TEMPLATE_SECURITY_ARCHITECTURE.md | 8 references (primary) | ⚠️ Needs review |
-| TEMPLATE_DATA_AI_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
-| TEMPLATE_INTEGRATION_ARCHITECTURE.md | 2 references | ⚠️ Needs review |
+| cc-002-cloud-architecture.template.md | 5 references (LAC3) | ✅ Updated (2025-11-27) |
+| cc-009-security-architecture.template.md | 8 references (primary) | ⚠️ Needs review |
+| cc-003-data-ai-architecture.template.md | 2 references | ⚠️ Needs review |
+| cc-006-integration-architecture.template.md | 2 references | ⚠️ Needs review |
 
 **Action Required**: Review and update templates marked ⚠️ to ensure compliance with this standard.
 

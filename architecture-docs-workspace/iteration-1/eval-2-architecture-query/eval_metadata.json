@@ -1,0 +1,43 @@
+{
+  "eval_id": 2,
+  "eval_name": "architecture-query-checkout-flow",
+  "prompt": "Looking at our PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/ — can you explain how the checkout flow works? What happens step by step when a customer makes a payment?",
+  "assertions": [
+    {
+      "id": "six-steps-covered",
+      "text": "Response covers all 6 steps: Validation, VGS tokenization, Authorization, Kafka publish, Ledger write, Confirmation",
+      "check": "response_contains_all",
+      "patterns": ["Validat", "VGS", "Authori", "Kafka", "Ledger", "Confirm"]
+    },
+    {
+      "id": "vgs-tokenization-mentioned",
+      "text": "VGS vault tokenization step is mentioned (PAN is never stored)",
+      "check": "response_contains_all",
+      "patterns": ["VGS", "token"]
+    },
+    {
+      "id": "kafka-topic-named",
+      "text": "Kafka topic 'payment.authorized' is referenced in the explanation",
+      "check": "response_contains",
+      "pattern": "payment.authorized"
+    },
+    {
+      "id": "p99-latency-mentioned",
+      "text": "P99 ≤ 2 second latency target is mentioned",
+      "check": "response_contains_all",
+      "patterns": ["P99", "2"]
+    },
+    {
+      "id": "error-handling-noted",
+      "text": "Error handling or saga/outbox pattern is noted (rollback, retry, or compensating transaction)",
+      "check": "response_contains_any",
+      "patterns": ["rollback", "outbox", "saga", "retry", "compensat"]
+    },
+    {
+      "id": "sourced-from-data-flow",
+      "text": "Answer is sourced from docs/04-data-flow-patterns.md (the correct S6 file)",
+      "check": "response_contains_any",
+      "patterns": ["04-data-flow", "Data Flow", "S6"]
+    }
+  ]
+}

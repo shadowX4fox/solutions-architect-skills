@@ -1,0 +1,56 @@
+{
+  "eval_id": 2,
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "Validation step covered",
+      "passed": true,
+      "evidence": "\u2713 'Validat' in response.md"
+    },
+    {
+      "text": "VGS tokenization mentioned",
+      "passed": true,
+      "evidence": "\u2713 'VGS' in response.md"
+    },
+    {
+      "text": "Authorization step covered",
+      "passed": true,
+      "evidence": "\u2713 'Authori' in response.md"
+    },
+    {
+      "text": "Kafka event step covered",
+      "passed": true,
+      "evidence": "\u2713 'Kafka' in response.md"
+    },
+    {
+      "text": "Ledger write step covered",
+      "passed": true,
+      "evidence": "\u2713 'Ledger' in response.md"
+    },
+    {
+      "text": "Confirmation step covered",
+      "passed": true,
+      "evidence": "\u2713 'Confirm' in response.md"
+    },
+    {
+      "text": "Kafka topic 'payment.authorized' named",
+      "passed": true,
+      "evidence": "\u2713 'payment.authorized' in response.md"
+    },
+    {
+      "text": "P99 latency mentioned",
+      "passed": true,
+      "evidence": "\u2713 'P99' in response.md"
+    },
+    {
+      "text": "P99 \u2264 2s latency target mentioned",
+      "passed": true,
+      "evidence": "latency target found"
+    },
+    {
+      "text": "Error handling (outbox/saga/rollback) noted",
+      "passed": true,
+      "evidence": "error handling pattern found"
+    }
+  ]
+}

@@ -4,10 +4,10 @@
   "domain": {
     "name": "Cloud Architecture",
     "short_name": "Cloud",
-    "contract_type": "cloud_architecture",
-    "template_filename": "TEMPLATE_CLOUD_ARCHITECTURE.md",
+    "contract_type": "cc-002-cloud-architecture",
+    "template_filename": "cc-002-cloud-architecture.template.md",
     "tmp_prefix": "cloud",
-    "output_prefix": "CLOUD_ARCHITECTURE",
+    "output_prefix": "CC-002-cloud-architecture",
     "compliance_prefix": "LAC",
     "requirement_range": "LAC1-LAC6",
     "requirement_count": 6,

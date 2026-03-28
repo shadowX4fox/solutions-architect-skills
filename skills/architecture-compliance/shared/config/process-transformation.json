@@ -3,7 +3,7 @@
   "compliance_prefix": "LAP",
   "review_board": "Process Transformation Review Board",
   "approval_authority": "Process Transformation Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/process_transformation_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-008-process-transformation-validation.json",
 
   "weights": {
     "completeness": 0.4,

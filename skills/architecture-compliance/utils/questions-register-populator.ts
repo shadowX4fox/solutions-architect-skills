@@ -335,7 +335,7 @@ function updateA31Section(content: string, summaryTable: string): string {
  * Populate the Questions & Gaps Register in a compliance contract.
  *
  * @param contractContent  Full markdown content of the generated contract
- * @param validationConfigPath  Path to the domain validation JSON (e.g., "validation/sre_architecture_validation.json")
+ * @param validationConfigPath  Path to the domain validation JSON (e.g., "validation/cc-010-sre-architecture-validation.json")
  * @returns Updated contract content with the register filled in
  */
 export function populateQuestionsRegister(

@@ -26,22 +26,22 @@ chmod +x resolve-includes.ts
 
 **Expand a single template:**
 ```bash
-bun utils/resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md
+bun utils/resolve-includes.ts templates/cc-001-business-continuity.template.md expanded.md
 ```
 
 **Output to stdout:**
 ```bash
-bun utils/resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md
+bun utils/resolve-includes.ts templates/cc-010-sre-architecture.template.md
 ```
 
 **Expand with validation:**
 ```bash
-bun utils/resolve-includes.ts templates/TEMPLATE_SECURITY_ARCHITECTURE.md expanded.md --validate
+bun utils/resolve-includes.ts templates/cc-009-security-architecture.template.md expanded.md --validate
 ```
 
 **Test all templates:**
 ```bash
-for template in templates/TEMPLATE_*.md; do
+for template in templates/cc-*.template.md; do
   echo "Testing: $(basename $template)"
   bun utils/resolve-includes.ts "$template" /tmp/test.md
   rm /tmp/test.md
@@ -160,7 +160,7 @@ The include resolution utility is used during contract generation (Phase 4, Step
 When using the `--validate` flag, the utility runs structural validation on the expanded template to catch common issues early:
 
 ```bash
-bun utils/resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate
+bun utils/resolve-includes.ts templates/cc-010-sre-architecture.template.md expanded.md --validate
 ```
 
 **Validates:**
@@ -257,7 +257,7 @@ Without this parameter, manifest-generator uses `process.cwd()/compliance-docs`,
 ```bash
 bun utils/manifest-generator.ts --mode create --project "Task Scheduling System" \
   --contract-type "Development Architecture" \
-  --filename "DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --filename "CC-004-development-architecture_TaskScheduling_2025-12-14.md" \
   --score 8.5 --status "Approved" --completeness 85
 ```
 
@@ -265,7 +265,7 @@ bun utils/manifest-generator.ts --mode create --project "Task Scheduling System"
 ```bash
 bun utils/manifest-generator.ts --mode update --project "Task Scheduling System" \
   --contract-type "Cloud Architecture" \
-  --filename "CLOUD_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --filename "CC-002-cloud-architecture_TaskScheduling_2025-12-14.md" \
   --score 7.8 --status "In Review" --completeness 78
 ```
 
@@ -273,7 +273,7 @@ bun utils/manifest-generator.ts --mode update --project "Task Scheduling System"
 ```bash
 bun utils/manifest-generator.ts --mode update --project "Task Scheduling System" \
   --contract-type "Development Architecture" \
-  --filename "DEVELOPMENT_ARCHITECTURE_TaskScheduling_2025-12-14.md" \
+  --filename "CC-004-development-architecture_TaskScheduling_2025-12-14.md" \
   --score 9.0 --status "Approved" --completeness 95
 ```
 
@@ -323,9 +323,9 @@ bun utils/manifest-generator.ts --mode update --project "Task Scheduling System"
 
 | Contract Type | Filename | Score | Status | Completeness | Generated |
 |---------------|----------|-------|--------|--------------|-----------|
-| Cloud Architecture | CLOUD_ARCHITECTURE_Task_2025-12-14.md | 7.8 | In Review | 78% | 2025-12-14 |
-| Development Architecture | DEV_ARCHITECTURE_Task_2025-12-14.md | 8.5 | Approved | 85% | 2025-12-14 |
-| SRE Architecture | SRE_ARCHITECTURE_Task_2025-12-14.md | 9.2 | Approved | 92% | 2025-12-14 |
+| Cloud Architecture | CC-002-cloud-architecture_Task_2025-12-14.md | 7.8 | In Review | 78% | 2025-12-14 |
+| Development Architecture | CC-004-development-architecture_Task_2025-12-14.md | 8.5 | Approved | 85% | 2025-12-14 |
+| SRE Architecture | CC-010-sre-architecture_Task_2025-12-14.md | 9.2 | Approved | 92% | 2025-12-14 |
 
 ---
 
@@ -371,12 +371,12 @@ bun utils/manifest-generator.ts --mode update --project "Task Scheduling System"
 ```bash
 # Initial generation
 bun manifest-generator.ts --mode create --project "Project" \
-  --contract-type "Development Architecture" --filename "DEV_v1.md" \
+  --contract-type "Development Architecture" --filename "CC-004-development-architecture_v1.md" \
   --score 8.0 --status "Draft" --completeness 75
 
 # Later regeneration (replaces entry)
 bun manifest-generator.ts --mode update --project "Project" \
-  --contract-type "Development Architecture" --filename "DEV_v2.md" \
+  --contract-type "Development Architecture" --filename "CC-004-development-architecture_v2.md" \
   --score 9.5 --status "Approved" --completeness 98
 
 # Result: Only ONE "Development Architecture" entry in manifest (v2 replaced v1)
@@ -436,7 +436,7 @@ mkdir -p compliance-docs
 
 # Test create mode
 bun utils/manifest-generator.ts --mode create --project "Test Project" \
-  --contract-type "Development Architecture" --filename "DEV_Test.md" \
+  --contract-type "Development Architecture" --filename "CC-004-development-architecture_Test.md" \
   --score 8.5 --status "Approved" --completeness 85
 
 # Verify manifest was created
@@ -444,7 +444,7 @@ cat compliance-docs/COMPLIANCE_MANIFEST.md
 
 # Test update mode (add second contract)
 bun utils/manifest-generator.ts --mode update --project "Test Project" \
-  --contract-type "Cloud Architecture" --filename "CLOUD_Test.md" \
+  --contract-type "Cloud Architecture" --filename "CC-002-cloud-architecture_Test.md" \
   --score 7.8 --status "In Review" --completeness 78
 
 # Verify manifest was updated
@@ -452,7 +452,7 @@ cat compliance-docs/COMPLIANCE_MANIFEST.md
 
 # Test regeneration (same contract type)
 bun utils/manifest-generator.ts --mode update --project "Test Project" \
-  --contract-type "Development Architecture" --filename "DEV_Test_v2.md" \
+  --contract-type "Development Architecture" --filename "CC-004-development-architecture_Test_v2.md" \
   --score 9.2 --status "Approved" --completeness 95
 
 # Verify entry was replaced (not duplicated)
@@ -476,7 +476,7 @@ import {
 // Example: Programmatic usage
 const contractMetadata: ContractMetadata = {
   contractType: "Development Architecture",
-  filename: "DEV_Project_2025-12-14.md",
+  filename: "CC-004-development-architecture_Project_2025-12-14.md",
   score: 8.5,
   status: "Approved",
   completeness: 85,

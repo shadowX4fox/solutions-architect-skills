@@ -4,10 +4,10 @@
   "domain": {
     "name": "Process Transformation",
     "short_name": "Process",
-    "contract_type": "process",
-    "template_filename": "TEMPLATE_PROCESS_TRANSFORMATION.md",
+    "contract_type": "cc-008-process-transformation",
+    "template_filename": "cc-008-process-transformation.template.md",
     "tmp_prefix": "process",
-    "output_prefix": "PROCESS_TRANSFORMATION",
+    "output_prefix": "CC-008-process-transformation",
     "compliance_prefix": "LAA",
     "requirement_range": "LAA1-LAA4",
     "requirement_count": 4,

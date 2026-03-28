@@ -204,19 +204,18 @@ async function resolveIncludes(
 
 /**
  * Extract contract type from template filename
- * Example: TEMPLATE_SRE_ARCHITECTURE.md → sre_architecture
+ * Example: cc-010-sre-architecture.template.md → cc-010-sre-architecture
  */
 function extractContractType(templatePath: string): string | null {
-  const filename = basename(templatePath, '.md');
+  const filename = basename(templatePath);
 
-  // Pattern: TEMPLATE_CONTRACT_TYPE or template_contract_type
-  const match = filename.match(/^TEMPLATE_(.+)$/i);
-  if (!match) {
-    return null;
+  // Pattern: cc-NNN-name.template.md
+  const match = filename.match(/^(cc-\d{3}-[a-z-]+)\.template\.md$/);
+  if (match) {
+    return match[1];
   }
 
-  // Convert to lowercase with underscores
-  return match[1].toLowerCase();
+  return null;
 }
 
 /**
@@ -232,9 +231,9 @@ async function main() {
     console.error('  --validate    Run template structure pre-validation after expansion');
     console.error('');
     console.error('Example:');
-    console.error('  bun resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md');
-    console.error('  bun resolve-includes.ts templates/TEMPLATE_SRE_ARCHITECTURE.md expanded.md --validate');
-    console.error('  ./resolve-includes.ts templates/TEMPLATE_BUSINESS_CONTINUITY.md expanded.md --validate');
+    console.error('  bun resolve-includes.ts templates/cc-001-business-continuity.template.md expanded.md');
+    console.error('  bun resolve-includes.ts templates/cc-010-sre-architecture.template.md expanded.md --validate');
+    console.error('  ./resolve-includes.ts templates/cc-001-business-continuity.template.md expanded.md --validate');
     process.exit(1);
   }
 
@@ -260,10 +259,12 @@ async function main() {
     let config: DomainConfig | null = null;
 
     if (contractType) {
+      // Strip cc-NNN- prefix to get config name (e.g., cc-010-sre-architecture → sre-architecture)
+      const configName = contractType.replace(/^cc-\d{3}-/, '');
       try {
-        config = await loadConfig(contractType.replace(/_/g, '-'));
+        config = await loadConfig(configName);
       } catch (error) {
-        console.warn(`Warning: Could not load config for ${contractType}. Variables in template won't be replaced.`);
+        console.warn(`Warning: Could not load config for ${configName}. Variables in template won't be replaced.`);
       }
     }
 
@@ -290,7 +291,7 @@ async function main() {
     if (validateFlag) {
       if (!contractType) {
         console.error('Warning: Could not extract contract type from filename. Skipping validation.');
-        console.error('Expected filename format: TEMPLATE_CONTRACT_TYPE.md');
+        console.error('Expected filename format: cc-NNN-name.template.md');
       } else {
         console.log('\n📋 Running template structure pre-validation...');
 

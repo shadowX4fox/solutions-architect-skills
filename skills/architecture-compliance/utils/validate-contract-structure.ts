@@ -275,8 +275,8 @@ async function main() {
     console.error('Usage: bun validate-contract-structure.ts <contract-file>');
     console.error('');
     console.error('Example:');
-    console.error('  bun validate-contract-structure.ts /compliance-docs/SRE_ARCHITECTURE_MyProject_2025-12-30.md');
-    console.error('  ./validate-contract-structure.ts /compliance-docs/BUSINESS_CONTINUITY_MyProject_2025-12-30.md');
+    console.error('  bun validate-contract-structure.ts /compliance-docs/CC-010-sre-architecture_MyProject_2025-12-30.md');
+    console.error('  ./validate-contract-structure.ts /compliance-docs/CC-001-business-continuity_MyProject_2025-12-30.md');
     process.exit(1);
   }
 

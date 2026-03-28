@@ -15,16 +15,16 @@
  * All supported contract type identifiers.
  */
 export const CONTRACT_TYPES = [
-  'business_continuity',
-  'sre_architecture',
-  'cloud_architecture',
-  'data_ai_architecture',
-  'development_architecture',
-  'process_transformation',
-  'security_architecture',
-  'platform_it_infrastructure',
-  'enterprise_architecture',
-  'integration_architecture',
+  'cc-001-business-continuity',
+  'cc-002-cloud-architecture',
+  'cc-003-data-ai-architecture',
+  'cc-004-development-architecture',
+  'cc-005-enterprise-architecture',
+  'cc-006-integration-architecture',
+  'cc-007-platform-it-infrastructure',
+  'cc-008-process-transformation',
+  'cc-009-security-architecture',
+  'cc-010-sre-architecture',
 ] as const;
 
 export type ContractType = typeof CONTRACT_TYPES[number];
@@ -33,16 +33,16 @@ export type ContractType = typeof CONTRACT_TYPES[number];
  * Human-readable display names for each contract type.
  */
 export const CONTRACT_DISPLAY_NAMES: Record<string, string> = {
-  business_continuity:      'Business Continuity',
-  sre_architecture:         'SRE Architecture',
-  cloud_architecture:       'Cloud Architecture',
-  data_ai_architecture:     'Data & AI Architecture',
-  development_architecture: 'Development Architecture',
-  process_transformation:   'Process Transformation',
-  security_architecture:    'Security Architecture',
-  platform_it_infrastructure: 'Platform IT Infrastructure',
-  enterprise_architecture:  'Enterprise Architecture',
-  integration_architecture: 'Integration Architecture',
+  'cc-001-business-continuity':      'Business Continuity',
+  'cc-002-cloud-architecture':       'Cloud Architecture',
+  'cc-003-data-ai-architecture':     'Data & AI Architecture',
+  'cc-004-development-architecture': 'Development Architecture',
+  'cc-005-enterprise-architecture':  'Enterprise Architecture',
+  'cc-006-integration-architecture': 'Integration Architecture',
+  'cc-007-platform-it-infrastructure': 'Platform IT Infrastructure',
+  'cc-008-process-transformation':   'Process Transformation',
+  'cc-009-security-architecture':    'Security Architecture',
+  'cc-010-sre-architecture':         'SRE Architecture',
 };
 
 /**
@@ -50,16 +50,16 @@ export const CONTRACT_DISPLAY_NAMES: Record<string, string> = {
  * to validate contract structure against the template schema).
  */
 export const TEMPLATE_VALIDATION_FILES: Record<string, string> = {
-  business_continuity:      'validation/template_validation_business_continuity.json',
-  sre_architecture:         'validation/template_validation_sre_architecture.json',
-  cloud_architecture:       'validation/template_validation_cloud_architecture.json',
-  data_ai_architecture:     'validation/template_validation_data_ai_architecture.json',
-  development_architecture: 'validation/template_validation_development_architecture.json',
-  process_transformation:   'validation/template_validation_process_transformation.json',
-  security_architecture:    'validation/template_validation_security_architecture.json',
-  platform_it_infrastructure: 'validation/template_validation_platform_it_infrastructure.json',
-  enterprise_architecture:  'validation/template_validation_enterprise_architecture.json',
-  integration_architecture: 'validation/template_validation_integration_architecture.json',
+  'cc-001-business-continuity':      'validation/cc-001-business-continuity-template-validation.json',
+  'cc-002-cloud-architecture':       'validation/cc-002-cloud-architecture-template-validation.json',
+  'cc-003-data-ai-architecture':     'validation/cc-003-data-ai-architecture-template-validation.json',
+  'cc-004-development-architecture': 'validation/cc-004-development-architecture-template-validation.json',
+  'cc-005-enterprise-architecture':  'validation/cc-005-enterprise-architecture-template-validation.json',
+  'cc-006-integration-architecture': 'validation/cc-006-integration-architecture-template-validation.json',
+  'cc-007-platform-it-infrastructure': 'validation/cc-007-platform-it-infrastructure-template-validation.json',
+  'cc-008-process-transformation':   'validation/cc-008-process-transformation-template-validation.json',
+  'cc-009-security-architecture':    'validation/cc-009-security-architecture-template-validation.json',
+  'cc-010-sre-architecture':         'validation/cc-010-sre-architecture-template-validation.json',
 };
 
 /**
@@ -67,35 +67,35 @@ export const TEMPLATE_VALIDATION_FILES: Record<string, string> = {
  * to calculate compliance scores after contracts are written to disk).
  */
 export const SCORING_VALIDATION_FILES: Record<string, string> = {
-  business_continuity:      'validation/business_continuity_validation.json',
-  sre_architecture:         'validation/sre_architecture_validation.json',
-  cloud_architecture:       'validation/cloud_architecture_validation.json',
-  data_ai_architecture:     'validation/data_ai_architecture_validation.json',
-  development_architecture: 'validation/development_architecture_validation.json',
-  process_transformation:   'validation/process_transformation_validation.json',
-  security_architecture:    'validation/security_architecture_validation.json',
-  platform_it_infrastructure: 'validation/platform_it_infrastructure_validation.json',
-  enterprise_architecture:  'validation/enterprise_architecture_validation.json',
-  integration_architecture: 'validation/integration_architecture_validation.json',
+  'cc-001-business-continuity':      'validation/cc-001-business-continuity-validation.json',
+  'cc-002-cloud-architecture':       'validation/cc-002-cloud-architecture-validation.json',
+  'cc-003-data-ai-architecture':     'validation/cc-003-data-ai-architecture-validation.json',
+  'cc-004-development-architecture': 'validation/cc-004-development-architecture-validation.json',
+  'cc-005-enterprise-architecture':  'validation/cc-005-enterprise-architecture-validation.json',
+  'cc-006-integration-architecture': 'validation/cc-006-integration-architecture-validation.json',
+  'cc-007-platform-it-infrastructure': 'validation/cc-007-platform-it-infrastructure-validation.json',
+  'cc-008-process-transformation':   'validation/cc-008-process-transformation-validation.json',
+  'cc-009-security-architecture':    'validation/cc-009-security-architecture-validation.json',
+  'cc-010-sre-architecture':         'validation/cc-010-sre-architecture-validation.json',
 };
 
 /**
  * Contract filename prefix → contract type key.
  * Used by post-generation-pipeline.ts to identify contract type from filename.
  *
- * Example: "SRE_ARCHITECTURE_Project_2026-03-25.md" → 'sre_architecture'
+ * Example: "CC-010-sre-architecture_Project_2026-03-25.md" → 'cc-010-sre-architecture'
  */
 export const FILENAME_PREFIX_TO_CONTRACT_TYPE: Record<string, string> = {
-  INTEGRATION_ARCHITECTURE:  'integration_architecture',
-  SECURITY_ARCHITECTURE:     'security_architecture',
-  CLOUD_ARCHITECTURE:        'cloud_architecture',
-  DEVELOPMENT_ARCHITECTURE:  'development_architecture',
-  SRE_ARCHITECTURE:          'sre_architecture',
-  BUSINESS_CONTINUITY:       'business_continuity',
-  DATA_AI_ARCHITECTURE:      'data_ai_architecture',
-  ENTERPRISE_ARCHITECTURE:   'enterprise_architecture',
-  PLATFORM_IT_INFRASTRUCTURE: 'platform_it_infrastructure',
-  PROCESS_TRANSFORMATION:    'process_transformation',
+  'CC-001-business-continuity':      'cc-001-business-continuity',
+  'CC-002-cloud-architecture':       'cc-002-cloud-architecture',
+  'CC-003-data-ai-architecture':     'cc-003-data-ai-architecture',
+  'CC-004-development-architecture': 'cc-004-development-architecture',
+  'CC-005-enterprise-architecture':  'cc-005-enterprise-architecture',
+  'CC-006-integration-architecture': 'cc-006-integration-architecture',
+  'CC-007-platform-it-infrastructure': 'cc-007-platform-it-infrastructure',
+  'CC-008-process-transformation':   'cc-008-process-transformation',
+  'CC-009-security-architecture':    'cc-009-security-architecture',
+  'CC-010-sre-architecture':         'cc-010-sre-architecture',
 };
 
 /**

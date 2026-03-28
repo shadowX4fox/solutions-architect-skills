@@ -4,10 +4,10 @@
   "domain": {
     "name": "Security Architecture",
     "short_name": "Security",
-    "contract_type": "security",
-    "template_filename": "TEMPLATE_SECURITY_ARCHITECTURE.md",
+    "contract_type": "cc-009-security-architecture",
+    "template_filename": "cc-009-security-architecture.template.md",
     "tmp_prefix": "security",
-    "output_prefix": "SECURITY_ARCHITECTURE",
+    "output_prefix": "CC-009-security-architecture",
     "compliance_prefix": "LAS",
     "requirement_range": "LAS1-LAS8",
     "requirement_count": 8,

@@ -91,13 +91,13 @@ function makeNARow(code = 'SRE1.4'): string {
 describe('populateQuestionsRegister — basic behavior', () => {
   test('returns original content when Compliance Summary is absent', () => {
     const content = 'No compliance summary here.';
-    const result = populateQuestionsRegister(content, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(content, 'validation/cc-010-sre-architecture-validation.json');
     expect(result).toBe(content);
   });
 
   test('compliant-only table produces "no gaps found" row', () => {
     const contract = makeContract([makeCompliantRow()]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     expect(register).toContain('No gaps found');
     expect(register).not.toContain('[PIPELINE_POPULATED]');
@@ -105,7 +105,7 @@ describe('populateQuestionsRegister — basic behavior', () => {
 
   test('replaces PIPELINE_POPULATED placeholder with real rows', () => {
     const contract = makeContract([makeCompliantRow(), makeNonCompliantRow()]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     expect(result).not.toContain('[PIPELINE_POPULATED]');
     const register = extractRegisterSection(result);
     expect(register).toContain('SRE1.2');
@@ -113,7 +113,7 @@ describe('populateQuestionsRegister — basic behavior', () => {
 
   test('compliant rows are excluded from the register', () => {
     const contract = makeContract([makeCompliantRow('SRE1.1'), makeNonCompliantRow('SRE1.2')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     expect(register).not.toContain('SRE1.1');
     expect(register).toContain('SRE1.2');
@@ -125,7 +125,7 @@ describe('populateQuestionsRegister — basic behavior', () => {
       makeUnknownRow('X2'),
       makeNARow('X3'),
     ]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     expect(register).toContain('Non-Compliant');
     expect(register).toContain('Unknown');
@@ -140,7 +140,7 @@ describe('populateQuestionsRegister — basic behavior', () => {
 describe('populateQuestionsRegister — priority in register rows', () => {
   test('Not Applicable rows always have Low priority', () => {
     const contract = makeContract([makeNARow('NA1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     const lines = register.split('\n').filter(l => l.includes('NA1'));
     expect(lines.length).toBeGreaterThan(0);
@@ -149,7 +149,7 @@ describe('populateQuestionsRegister — priority in register rows', () => {
 
   test('Non-Compliant rows have Critical or Medium priority (never High)', () => {
     const contract = makeContract([makeNonCompliantRow('NC1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     const lines = register.split('\n').filter(l => l.includes('NC1'));
     expect(lines.length).toBeGreaterThan(0);
@@ -159,7 +159,7 @@ describe('populateQuestionsRegister — priority in register rows', () => {
 
   test('Unknown rows have High or Medium priority (never Critical or Low)', () => {
     const contract = makeContract([makeUnknownRow('UN1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     const lines = register.split('\n').filter(l => l.includes('UN1'));
     expect(lines.length).toBeGreaterThan(0);
@@ -179,7 +179,7 @@ describe('populateQuestionsRegister — sort order', () => {
       makeNonCompliantRow('Z1'),  // Critical (blocker)
       makeUnknownRow('Z2'),       // High (blocker)
     ]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const register = extractRegisterSection(result);
     const z1Pos = register.indexOf('Z1');
     const z2Pos = register.indexOf('Z2');
@@ -196,7 +196,7 @@ describe('populateQuestionsRegister — sort order', () => {
 describe('replaceRegisterSection (via populateQuestionsRegister)', () => {
   test('replaces register section when followed by ## heading', () => {
     const contract = makeContract([makeNonCompliantRow('R1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     expect(result).not.toContain('[PIPELINE_POPULATED]');
     expect(result).toContain('## Questions & Gaps Register');
     // Generation Metadata must still be present (not swallowed by register regex)
@@ -224,7 +224,7 @@ describe('replaceRegisterSection (via populateQuestionsRegister)', () => {
 
     // No trailing ## section — register is last
     const contract = summary + '\n' + register;
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     expect(result).not.toContain('[PIPELINE_POPULATED]');
     const register2 = extractRegisterSection(result);
     expect(register2).toContain('EOF1');
@@ -243,7 +243,7 @@ describe('replaceRegisterSection (via populateQuestionsRegister)', () => {
       'Meta content.',
     ].join('\n');
 
-    const result = populateQuestionsRegister(content, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(content, 'validation/cc-010-sre-architecture-validation.json');
     const registerPos = result.indexOf('## Questions & Gaps Register');
     const metaPos = result.indexOf('## Generation Metadata');
     expect(registerPos).toBeGreaterThanOrEqual(0);
@@ -262,7 +262,7 @@ describe('A.3.1 gap summary statistics', () => {
       makeUnknownRow('S2'),
       makeNARow('S3'),
     ]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const a31 = extractA31(result);
     expect(a31).toContain('A.3.1 Gap Summary Statistics');
     expect(a31).toMatch(/\*\*Total gaps\*\*\s*\|\s*\*\*3\*\*/);
@@ -270,7 +270,7 @@ describe('A.3.1 gap summary statistics', () => {
 
   test('A.3.1 shows zero total when all requirements are compliant', () => {
     const contract = makeContract([makeCompliantRow('C1'), makeCompliantRow('C2')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const a31 = extractA31(result);
     expect(a31).toContain('A.3.1 Gap Summary Statistics');
     expect(a31).toMatch(/\*\*Total gaps\*\*\s*\|\s*\*\*0\*\*/);
@@ -278,7 +278,7 @@ describe('A.3.1 gap summary statistics', () => {
 
   test('A.3.1 references the Questions & Gaps Register section', () => {
     const contract = makeContract([makeNonCompliantRow('REF1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const a31 = extractA31(result);
     expect(a31).toContain('Questions & Gaps Register');
   });
@@ -290,7 +290,7 @@ describe('A.3.1 gap summary statistics', () => {
       makeUnknownRow('T3'),
       makeNARow('T4'),
     ]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     const a31 = extractA31(result);
     // 2 Non-Compliant
     expect(a31).toMatch(/Non-Compliant\s*\|\s*2/);
@@ -309,7 +309,7 @@ describe('cell pipe escaping', () => {
   test('rows with pipe characters in requirement are still emitted', () => {
     // Use a simple row — pipe-in-content is handled by escapeCell
     const contract = makeContract([makeNonCompliantRow('PIPE1')]);
-    const result = populateQuestionsRegister(contract, 'validation/sre_architecture_validation.json');
+    const result = populateQuestionsRegister(contract, 'validation/cc-010-sre-architecture-validation.json');
     expect(result).toContain('PIPE1');
   });
 });

@@ -1,0 +1,57 @@
+{
+  "eval_id": 0,
+  "eval_name": "new-architecture-from-po-spec",
+  "variant": "without_skill",
+  "summary": {
+    "passed": 5,
+    "failed": 3,
+    "total": 8,
+    "pass_rate": 0.625
+  },
+  "timing": {
+    "total_duration_seconds": 498.0,
+    "total_tokens": 40348
+  },
+  "expectations": [
+    {
+      "text": "ARCHITECTURE.md is nav index with docs/ links",
+      "passed": true,
+      "evidence": "docs/01- found in ARCHITECTURE.md"
+    },
+    {
+      "text": "System overview mentions PayStream, 500,000, 99.99%",
+      "passed": true,
+      "evidence": "All found"
+    },
+    {
+      "text": "Security at docs/07-security-architecture.md (not docs/09-*)",
+      "passed": false,
+      "evidence": "docs/07-security-architecture.md MISSING"
+    },
+    {
+      "text": "Ops at docs/09-operational-considerations.md (not docs/11-*)",
+      "passed": false,
+      "evidence": "docs/09-operational-considerations.md MISSING"
+    },
+    {
+      "text": "PO Spec traceability in docs/01-system-overview.md",
+      "passed": false,
+      "evidence": "No traceability comment found"
+    },
+    {
+      "text": "Key metrics (P99, latency \u22642s, 500k) in system overview",
+      "passed": true,
+      "evidence": "P99=True, latency=True, 500k=True"
+    },
+    {
+      "text": "PCI-DSS in security section",
+      "passed": true,
+      "evidence": "\u2713 'PCI-DSS' in 08-security-architecture.md"
+    },
+    {
+      "text": "Architecture type metadata in docs/03-*",
+      "passed": true,
+      "evidence": "\u2713 'Microservices' in 03-architecture-topology.md"
+    }
+  ]
+}

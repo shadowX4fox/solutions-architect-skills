@@ -102,7 +102,7 @@ export interface ValidationConfig {
  * Calculate compliance validation score from contract markdown content
  *
  * @param contractContent - Full markdown content of generated contract
- * @param validationConfigPath - Path to validation JSON config (e.g., "validation/business_continuity_validation.json")
+ * @param validationConfigPath - Path to validation JSON config (e.g., "validation/cc-001-business-continuity-validation.json")
  * @returns ValidationScore object with all score components
  */
 export function calculateComplianceScore(

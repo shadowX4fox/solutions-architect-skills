@@ -1,0 +1,58 @@
+{
+  "skill_name": "architecture-docs",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I have a Product Owner Specification at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/PRODUCT_OWNER_SPEC.md for the PayStream payment processing platform. Please create the full architecture documentation for this system. Use a Microservices architecture type.",
+      "expected_output": "Full multi-file architecture docs created: ARCHITECTURE.md (nav index), docs/01-system-overview.md through docs/09-operational-considerations.md, with content derived from the PO Spec. Correct structure, section content, and PO Spec traceability.",
+      "files": ["/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/PRODUCT_OWNER_SPEC.md"],
+      "expectations": [
+        "Creates ARCHITECTURE.md as a navigation index (not monolithic) with links to docs/ files",
+        "Creates docs/01-system-overview.md with content from the PO Spec (mentions PayStream, 500,000 transactions/day, 99.99% availability)",
+        "Creates docs/07-security-architecture.md for S9 Security (not docs/09-*)",
+        "Creates docs/09-operational-considerations.md for S11 Operational (not docs/11-*)",
+        "PO Spec traceability comment is embedded in docs/01-system-overview.md",
+        "Key metrics from PO Spec appear in the system overview (P99 ≤ 2s, 99.99% availability, 500k TPS)",
+        "PCI-DSS compliance requirements are reflected in the security section",
+        "Architecture type metadata comment is present in docs/03-architecture-layers.md"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I'm working on the PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/. Update Section 9 (Security Architecture) to replace the current API key authentication with OAuth2 using PKCE flow for the API Gateway. Access tokens should expire in 15 minutes, refresh tokens in 7 days. The Authorization Server should be AWS Cognito.",
+      "expected_output": "The file docs/07-security-architecture.md is updated (not docs/09-*) with OAuth2/PKCE details, token expiry values, and AWS Cognito as the auth server. Existing PCI-DSS content preserved.",
+      "files": [
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/ARCHITECTURE.md",
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/docs/07-security-architecture.md",
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-1-section-update/docs/01-system-overview.md"
+      ],
+      "expectations": [
+        "Edits docs/07-security-architecture.md (correct file for S9), NOT docs/09-operational-considerations.md",
+        "The updated security section mentions OAuth2 and PKCE",
+        "Access token expiry of 15 minutes is documented",
+        "Refresh token expiry of 7 days is documented",
+        "AWS Cognito is named as the Authorization Server",
+        "Existing PCI-DSS controls table is preserved in the file",
+        "Does NOT create a new file — edits the existing docs/07-security-architecture.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Looking at our PayStream architecture at /home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/ — can you explain how the checkout flow works? What happens step by step when a customer makes a payment?",
+      "expected_output": "A clear explanation of the checkout flow sourced from docs/04-data-flow-patterns.md (S6), covering the 6-step sequence from API Gateway through authorization to confirmation, with specific details like Kafka topic names, VGS tokenization, and latency target.",
+      "files": [
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/ARCHITECTURE.md",
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/docs/04-data-flow-patterns.md",
+        "/home/shadowx4fox/Project/Personal/solutions-architect-skills/architecture-docs-workspace/evals/files/eval-2-query/docs/01-system-overview.md"
+      ],
+      "expectations": [
+        "Answer is sourced from docs/04-data-flow-patterns.md (S6 Data Flow), not from docs/06-* or other files",
+        "Response covers all 6 steps of the checkout flow (Validation, VGS tokenization, Authorization, Kafka publish, Ledger write, Confirmation)",
+        "VGS vault tokenization step is mentioned (PAN is never stored)",
+        "Kafka topic 'payment.authorized' is referenced in the explanation",
+        "P99 ≤ 2 second latency target is mentioned",
+        "Error handling or saga/outbox pattern is noted (e.g., rollback on Kafka failure)"
+      ]
+    }
+  ]
+}

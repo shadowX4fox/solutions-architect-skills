@@ -3,7 +3,7 @@
   "compliance_prefix": "LAC",
   "review_board": "Cloud Architecture Review Board",
   "approval_authority": "Cloud Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/cloud_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-002-cloud-architecture-validation.json",
 
   "weights": {
     "completeness": 0.35,

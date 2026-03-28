@@ -21,7 +21,7 @@ import {
 function makeContract(overrides: Partial<ContractMetadata> = {}): ContractMetadata {
   return {
     contractType: 'SRE Architecture',
-    filename: 'SRE_ARCHITECTURE_Project_2026-01-01.md',
+    filename: 'CC-010-sre-architecture_Project_2026-01-01.md',
     score: 8.5,
     status: 'Approved',
     completeness: 85,
@@ -66,7 +66,7 @@ describe('generateManifestContent — structure', () => {
   test('contains contract row with correct data', () => {
     const result = generateManifestContent(makeManifest([makeContract()]));
     expect(result).toContain('SRE Architecture');
-    expect(result).toContain('SRE_ARCHITECTURE_Project_2026-01-01.md');
+    expect(result).toContain('CC-010-sre-architecture_Project_2026-01-01.md');
     expect(result).toContain('8.5');
     expect(result).toContain('Approved');
     expect(result).toContain('85%');

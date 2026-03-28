@@ -4,10 +4,10 @@
   "domain": {
     "name": "Business Continuity",
     "short_name": "Business Continuity",
-    "contract_type": "business_continuity",
-    "template_filename": "TEMPLATE_BUSINESS_CONTINUITY.md",
+    "contract_type": "cc-001-business-continuity",
+    "template_filename": "cc-001-business-continuity.template.md",
     "tmp_prefix": "bc",
-    "output_prefix": "BUSINESS_CONTINUITY",
+    "output_prefix": "CC-001-business-continuity",
     "compliance_prefix": "LACN",
     "requirement_range": "LACN001-LACN043",
     "requirement_count": 43,

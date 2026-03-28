@@ -48,7 +48,7 @@ interface ContractResult {
 
 /**
  * Extract date string (YYYY-MM-DD) from a contract filename, or null if not present.
- * Example: "SRE_ARCHITECTURE_Project_2026-03-25.md" → "2026-03-25"
+ * Example: "CC-010-sre-architecture_Project_2026-03-25.md" → "2026-03-25"
  */
 function extractDateFromFilename(filename: string): string | null {
   const match = filename.match(/_(\d{4}-\d{2}-\d{2})\.md$/);
@@ -57,7 +57,7 @@ function extractDateFromFilename(filename: string): string | null {
 
 /**
  * Determine contract type from filename by matching known prefixes.
- * Example: "INTEGRATION_ARCHITECTURE_Project_2025-01-01.md" → "integration_architecture"
+ * Example: "CC-006-integration-architecture_Project_2025-01-01.md" → "cc-006-integration-architecture"
  */
 function getContractTypeFromFilename(filename: string): string | null {
   for (const [prefix, contractType] of Object.entries(FILENAME_PREFIX_TO_CONTRACT_TYPE)) {

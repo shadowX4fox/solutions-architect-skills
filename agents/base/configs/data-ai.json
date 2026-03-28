@@ -4,10 +4,10 @@
   "domain": {
     "name": "Data & AI Architecture",
     "short_name": "Data & AI",
-    "contract_type": "data_ai",
-    "template_filename": "TEMPLATE_DATA_AI_ARCHITECTURE.md",
+    "contract_type": "cc-003-data-ai-architecture",
+    "template_filename": "cc-003-data-ai-architecture.template.md",
     "tmp_prefix": "data_ai",
-    "output_prefix": "DATA_AI_ARCHITECTURE",
+    "output_prefix": "CC-003-data-ai-architecture",
     "compliance_prefix": "LAD/LAIA",
     "requirement_range": "LAD1-LAD8, LAIA1-LAIA3",
     "requirement_count": 11,

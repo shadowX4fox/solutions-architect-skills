@@ -3,7 +3,7 @@
   "compliance_prefix": "LADES",
   "review_board": "Technical Architecture Review Board",
   "approval_authority": "Technical Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/development_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-004-development-architecture-validation.json",
 
   "weights": {
     "completeness": 0.4,

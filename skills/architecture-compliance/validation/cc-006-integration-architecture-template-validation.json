@@ -1,0 +1,113 @@
+{
+  "contract_type": "cc-006-integration-architecture",
+  "contract_name": "Integration Architecture",
+  "template_file": "cc-006-integration-architecture.template.md",
+  "version": "1.0.0",
+  "validations": {
+    "compliance_summary_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "requirement_count": 18,
+      "column_validation": {
+        "columns": [
+          {
+            "name": "Code",
+            "pattern": "^LAINT\\d+$",
+            "required": true
+          },
+          {
+            "name": "Requirement",
+            "max_length": 120,
+            "required": true
+          },
+          {
+            "name": "Category",
+            "allowed_values": [
+              "Integration Architecture",
+              "API Management",
+              "Message Queues",
+              "Event Streaming",
+              "Integration Patterns",
+              "Data Synchronization"
+            ],
+            "required": true
+          },
+          {
+            "name": "Status",
+            "allowed_values": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"],
+            "required": true
+          },
+          {
+            "name": "Source Section",
+            "pattern": "^(\\d+\\.\\d+|Not documented)$",
+            "required": true
+          },
+          {
+            "name": "Responsible Role",
+            "required": true
+          }
+        ]
+      }
+    },
+    "status_value_standardization": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "allowed_values": ["Compliant", "Non-Compliant", "Not Applicable", "Unknown"],
+      "case_sensitive": true
+    },
+    "appendix_structure": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_appendices": ["A.1", "A.2", "A.3", "A.4"],
+      "strict_order": true
+    },
+    "forbidden_section_numbering": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "forbidden_patterns": [
+        "### A\\.5",
+        "### A\\.6",
+        "### A\\.7",
+        "### A\\.8",
+        "### A\\.9"
+      ],
+      "error_message": "Sections after A.4 must be H2 headers WITHOUT numbering. Found: {pattern}. Correct format: '## Section Name' (not '### A.X Section Name')"
+    },
+    "document_control_table": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_table_pattern": "\\| Field \\| Value \\|",
+      "required_fields": [
+        "Document Owner",
+        "Last Review Date",
+        "Status",
+        "Validation Score",
+        "Approval Authority"
+      ],
+      "error_message": "Document Control section must use table format with | Field | Value | structure. Found list format instead of table."
+    },
+    "compliance_calculation": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "total_requirements": 18,
+      "percentage_tolerance": 0,
+      "completeness_tolerance": 1
+    },
+    "template_completeness": {
+      "enabled": true,
+      "severity": "BLOCKING",
+      "required_sections": [
+        "header",
+        "document_control",
+        "compliance_summary",
+        "overall_compliance",
+        "appendix_a1_a4",
+        "dynamic_sections",
+        "questions_gaps_register"
+      ]
+    }
+  },
+  "error_messages": {
+    "table_row_count_mismatch": "Integration Architecture requires exactly 18 requirement rows. Found {actual} rows."
+  }
+}

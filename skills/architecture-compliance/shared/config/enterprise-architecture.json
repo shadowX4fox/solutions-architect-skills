@@ -3,7 +3,7 @@
   "compliance_prefix": "LAE",
   "review_board": "Enterprise Architecture Review Board",
   "approval_authority": "Enterprise Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/enterprise_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-005-enterprise-architecture-validation.json",
 
   "weights": {
     "completeness": 0.4,

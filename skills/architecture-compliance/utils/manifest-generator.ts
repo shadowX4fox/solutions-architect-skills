@@ -27,7 +27,7 @@ const MANIFEST_FILENAME = 'COMPLIANCE_MANIFEST.md';
 // Type Definitions
 interface ContractMetadata {
   contractType: string;        // "Development Architecture"
-  filename: string;             // "DEVELOPMENT_ARCHITECTURE_Project_2025-12-14.md"
+  filename: string;             // "CC-004-development-architecture_Project_2025-12-14.md"
   score: number;                // 8.5
   status: string;               // "Approved" | "In Review" | "Draft" | "Rejected"
   completeness: number;         // 85 (percentage)
@@ -431,13 +431,13 @@ Examples:
   # Create new manifest
   bun manifest-generator.ts --mode create --project "Task Scheduling" \\
     --contract-type "Development Architecture" \\
-    --filename "DEVELOPMENT_ARCHITECTURE_Task_2025-12-14.md" \\
+    --filename "CC-004-development-architecture_Task_2025-12-14.md" \\
     --score 8.5 --status "Approved" --completeness 85
 
   # Update existing manifest
   bun manifest-generator.ts --mode update --project "Task Scheduling" \\
     --contract-type "Cloud Architecture" \\
-    --filename "CLOUD_ARCHITECTURE_Task_2025-12-14.md" \\
+    --filename "CC-002-cloud-architecture_Task_2025-12-14.md" \\
     --score 7.8 --status "In Review" --completeness 78
 `);
     process.exit(args.includes('--help') || args.includes('-h') ? 0 : 1);

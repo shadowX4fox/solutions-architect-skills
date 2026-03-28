@@ -5,7 +5,7 @@
  *
  * Note: validateGeneratedContract requires a real validation rules file
  * on disk (it calls ComplianceValidator which reads JSON rules). These
- * tests use the actual sre_architecture rules file that ships with the
+ * tests use the actual cc-010-sre-architecture rules file that ships with the
  * skill rather than mocking the filesystem.
  *
  * @module generation-helper.test
@@ -25,16 +25,16 @@ import { getLocalDateString } from '../utils/date-utils';
 
 describe('getContractDisplayName', () => {
   test('returns human-readable name for all supported types', () => {
-    expect(getContractDisplayName('sre_architecture')).toBe('SRE Architecture');
-    expect(getContractDisplayName('cloud_architecture')).toBe('Cloud Architecture');
-    expect(getContractDisplayName('business_continuity')).toBe('Business Continuity');
-    expect(getContractDisplayName('data_ai_architecture')).toBe('Data & AI Architecture');
-    expect(getContractDisplayName('development_architecture')).toBe('Development Architecture');
-    expect(getContractDisplayName('process_transformation')).toBe('Process Transformation');
-    expect(getContractDisplayName('security_architecture')).toBe('Security Architecture');
-    expect(getContractDisplayName('platform_it_infrastructure')).toBe('Platform IT Infrastructure');
-    expect(getContractDisplayName('enterprise_architecture')).toBe('Enterprise Architecture');
-    expect(getContractDisplayName('integration_architecture')).toBe('Integration Architecture');
+    expect(getContractDisplayName('cc-010-sre-architecture')).toBe('SRE Architecture');
+    expect(getContractDisplayName('cc-002-cloud-architecture')).toBe('Cloud Architecture');
+    expect(getContractDisplayName('cc-001-business-continuity')).toBe('Business Continuity');
+    expect(getContractDisplayName('cc-003-data-ai-architecture')).toBe('Data & AI Architecture');
+    expect(getContractDisplayName('cc-004-development-architecture')).toBe('Development Architecture');
+    expect(getContractDisplayName('cc-008-process-transformation')).toBe('Process Transformation');
+    expect(getContractDisplayName('cc-009-security-architecture')).toBe('Security Architecture');
+    expect(getContractDisplayName('cc-007-platform-it-infrastructure')).toBe('Platform IT Infrastructure');
+    expect(getContractDisplayName('cc-005-enterprise-architecture')).toBe('Enterprise Architecture');
+    expect(getContractDisplayName('cc-006-integration-architecture')).toBe('Integration Architecture');
   });
 
   test('returns raw string for unknown type', () => {
@@ -54,10 +54,10 @@ describe('getSupportedContractTypes', () => {
 
   test('includes all expected types', () => {
     const types = getSupportedContractTypes();
-    expect(types).toContain('sre_architecture');
-    expect(types).toContain('cloud_architecture');
-    expect(types).toContain('security_architecture');
-    expect(types).toContain('business_continuity');
+    expect(types).toContain('cc-010-sre-architecture');
+    expect(types).toContain('cc-002-cloud-architecture');
+    expect(types).toContain('cc-009-security-architecture');
+    expect(types).toContain('cc-001-business-continuity');
   });
 
   test('returns a new array each call (not mutating the source)', () => {
@@ -74,8 +74,8 @@ describe('getSupportedContractTypes', () => {
 
 describe('getValidationRulesPath', () => {
   test('returns path ending in .json for known type', () => {
-    const path = getValidationRulesPath('sre_architecture');
-    expect(path).toContain('sre_architecture');
+    const path = getValidationRulesPath('cc-010-sre-architecture');
+    expect(path).toContain('cc-010-sre-architecture');
     expect(path).toEndWith('.json');
   });
 
@@ -88,7 +88,7 @@ describe('getValidationRulesPath', () => {
 // getLocalDateString (re-exported via generation-helper)
 // ============================================================================
 
-describe('getLocalDateString (via date-utils)', () => {
+describe('getLocalDateString', () => {
   test('returns YYYY-MM-DD format', () => {
     const date = getLocalDateString();
     expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);

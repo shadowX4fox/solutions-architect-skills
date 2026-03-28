@@ -18,8 +18,8 @@
     },
     "template_file": {
       "type": "string",
-      "description": "Name of the template file (e.g., 'TEMPLATE_SRE_ARCHITECTURE.md')",
-      "pattern": "^TEMPLATE_[A-Z_]+\\.md$"
+      "description": "Name of the template file (e.g., 'cc-010-sre-architecture.template.md')",
+      "pattern": "^cc-\\d{3}-[a-z-]+\\.template\\.md$"
     },
     "version": {
       "type": "string",

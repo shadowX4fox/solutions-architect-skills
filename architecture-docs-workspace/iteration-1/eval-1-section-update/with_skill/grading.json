@@ -1,0 +1,46 @@
+{
+  "eval_id": 1,
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "Edits docs/07-security-architecture.md (S9 correct file)",
+      "passed": true,
+      "evidence": "exists"
+    },
+    {
+      "text": "Does NOT modify docs/09-* for security",
+      "passed": true,
+      "evidence": "ops file untouched (acceptable pass)"
+    },
+    {
+      "text": "OAuth2 mentioned",
+      "passed": true,
+      "evidence": "\u2713 'OAuth2' in 07-security-architecture.md"
+    },
+    {
+      "text": "PKCE flow documented",
+      "passed": true,
+      "evidence": "\u2713 'PKCE' in 07-security-architecture.md"
+    },
+    {
+      "text": "15-minute access token",
+      "passed": true,
+      "evidence": "\u2713 '15' in 07-security-architecture.md"
+    },
+    {
+      "text": "7-day refresh token",
+      "passed": true,
+      "evidence": "\u2713 '7 day' in 07-security-architecture.md"
+    },
+    {
+      "text": "AWS Cognito as auth server",
+      "passed": true,
+      "evidence": "\u2713 'Cognito' in 07-security-architecture.md"
+    },
+    {
+      "text": "PCI-DSS controls preserved",
+      "passed": true,
+      "evidence": "\u2713 'PCI-DSS' in 07-security-architecture.md"
+    }
+  ]
+}

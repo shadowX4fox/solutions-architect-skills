@@ -5,8 +5,8 @@
  *
  * Usage:
  *   bun questions-register-populator-cli.ts \
- *     --input compliance-docs/SRE_ARCHITECTURE_Project_2026-03-25.md \
- *     --validation validation/sre_architecture_validation.json
+ *     --input compliance-docs/CC-010-sre-architecture_Project_2026-03-25.md \
+ *     --validation validation/cc-010-sre-architecture-validation.json
  *
  * Reads the contract file, populates the Questions & Gaps Register,
  * and writes the updated content back to the same file.
@@ -48,7 +48,7 @@ table from the Compliance Summary, and writes the result back in-place.
 Usage:
   bun questions-register-populator-cli.ts \\
     --input <contract.md> \\
-    --validation <validation/xxx_validation.json>
+    --validation <validation/cc-NNN-name-validation.json>
 
 Arguments:
   --input       Path to the compliance contract markdown file

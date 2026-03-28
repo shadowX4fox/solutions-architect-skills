@@ -14,8 +14,8 @@
     "template_id": {
       "type": "string",
       "description": "Unique identifier matching the template filename",
-      "pattern": "^TEMPLATE_[A-Z_]+$",
-      "examples": ["TEMPLATE_DEVELOPMENT_ARCHITECTURE", "TEMPLATE_SECURITY_ARCHITECTURE"]
+      "pattern": "^cc-\\d{3}-[a-z-]+$",
+      "examples": ["cc-004-development-architecture", "cc-009-security-architecture"]
     },
     "version": {
       "type": "string",

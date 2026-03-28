@@ -8,7 +8,7 @@
  *
  * Usage:
  *   bun run utils/validate-cli.ts <contract-file> <contract-type>
- *   bun run utils/validate-cli.ts compliance-docs/sre_architecture.md sre_architecture
+ *   bun run utils/validate-cli.ts compliance-docs/CC-010-sre-architecture_Project_2026-03-25.md cc-010-sre-architecture
  *   bun run utils/validate-cli.ts --help
  *
  * Options:
@@ -19,13 +19,13 @@
  *
  * Examples:
  *   # Validate SRE Architecture contract
- *   bun run utils/validate-cli.ts compliance-docs/sre_architecture.md sre_architecture
+ *   bun run utils/validate-cli.ts compliance-docs/CC-010-sre-architecture_Project_2026-03-25.md cc-010-sre-architecture
  *
  *   # Validate with markdown report
- *   bun run utils/validate-cli.ts compliance-docs/cloud.md cloud_architecture --markdown
+ *   bun run utils/validate-cli.ts compliance-docs/CC-002-cloud-architecture_Project_2026-03-25.md cc-002-cloud-architecture --markdown
  *
  *   # Compact summary for CI/CD
- *   bun run utils/validate-cli.ts compliance-docs/security.md security_architecture --compact
+ *   bun run utils/validate-cli.ts compliance-docs/CC-009-security-architecture_Project_2026-03-25.md cc-009-security-architecture --compact
  *
  *   # List supported contract types
  *   bun run utils/validate-cli.ts --list-types
@@ -175,16 +175,16 @@ Exit Codes:
 
 Examples:
   # Validate SRE Architecture contract
-  bun run utils/validate-cli.ts compliance-docs/sre_architecture.md sre_architecture
+  bun run utils/validate-cli.ts compliance-docs/CC-010-sre-architecture_Project_2026-03-25.md cc-010-sre-architecture
 
   # Validate with markdown report
-  bun run utils/validate-cli.ts compliance-docs/cloud.md cloud_architecture --markdown
+  bun run utils/validate-cli.ts compliance-docs/CC-002-cloud-architecture_Project_2026-03-25.md cc-002-cloud-architecture --markdown
 
   # Compact summary for CI/CD pipelines
-  bun run utils/validate-cli.ts compliance-docs/security.md security_architecture --compact
+  bun run utils/validate-cli.ts compliance-docs/CC-009-security-architecture_Project_2026-03-25.md cc-009-security-architecture --compact
 
   # Strict mode (fail on warnings)
-  bun run utils/validate-cli.ts compliance-docs/data_ai.md data_ai_architecture --strict
+  bun run utils/validate-cli.ts compliance-docs/CC-003-data-ai-architecture_Project_2026-03-25.md cc-003-data-ai-architecture --strict
 
   # List all supported contract types
   bun run utils/validate-cli.ts --list-types

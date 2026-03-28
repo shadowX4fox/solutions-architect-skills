@@ -4,10 +4,10 @@
   "domain": {
     "name": "Integration Architecture",
     "short_name": "Integration",
-    "contract_type": "integration",
-    "template_filename": "TEMPLATE_INTEGRATION_ARCHITECTURE.md",
+    "contract_type": "cc-006-integration-architecture",
+    "template_filename": "cc-006-integration-architecture.template.md",
     "tmp_prefix": "integration",
-    "output_prefix": "INTEGRATION_ARCHITECTURE",
+    "output_prefix": "CC-006-integration-architecture",
     "compliance_prefix": "LAI",
     "requirement_range": "LAI1-LAI7",
     "requirement_count": 7,

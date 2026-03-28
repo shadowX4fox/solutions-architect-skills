@@ -3,7 +3,7 @@
   "compliance_prefix": "LASRE",
   "review_board": "SRE Leadership/Operations",
   "approval_authority": "SRE Leadership/Operations",
-  "validation_config_path": "/skills/architecture-compliance/validation/sre_architecture_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-010-sre-architecture-validation.json",
 
   "weights": {
     "completeness": 0.3,

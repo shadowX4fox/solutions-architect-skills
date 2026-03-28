@@ -4,10 +4,10 @@
   "domain": {
     "name": "Enterprise Architecture",
     "short_name": "Enterprise",
-    "contract_type": "enterprise",
-    "template_filename": "TEMPLATE_ENTERPRISE_ARCHITECTURE.md",
+    "contract_type": "cc-005-enterprise-architecture",
+    "template_filename": "cc-005-enterprise-architecture.template.md",
     "tmp_prefix": "enterprise",
-    "output_prefix": "ENTERPRISE_ARCHITECTURE",
+    "output_prefix": "CC-005-enterprise-architecture",
     "compliance_prefix": "LAE",
     "requirement_range": "LAE1-LAE7",
     "requirement_count": 7,

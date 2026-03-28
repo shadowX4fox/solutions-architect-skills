@@ -107,17 +107,17 @@ async function main() {
 
   try {
     const validator1 = new ComplianceValidator(
-      'validation/template_validation_sre_architecture.json'
+      'validation/cc-010-sre-architecture-template-validation.json'
     );
 
     const result1 = await validator1.validateDocument(
       EXAMPLE_DOCUMENT_WITH_ERRORS,
-      'sre_architecture'
+      'cc-010-sre-architecture'
     );
 
     if (!result1.isValid) {
       console.log('❌ Validation failed!\n');
-      const report = ErrorReporter.generateReport(result1, 'sre_architecture');
+      const report = ErrorReporter.generateReport(result1, 'cc-010-sre-architecture');
       console.log(report);
     }
   } catch (error) {
@@ -133,17 +133,17 @@ async function main() {
 
   try {
     const validator2 = new ComplianceValidator(
-      'validation/template_validation_sre_architecture.json'
+      'validation/cc-010-sre-architecture-template-validation.json'
     );
 
     const result2 = await validator2.validateDocument(
       EXAMPLE_DOCUMENT_VALID,
-      'sre_architecture'
+      'cc-010-sre-architecture'
     );
 
     if (result2.isValid) {
       console.log('✅ Validation passed!\n');
-      const report = ErrorReporter.generateReport(result2, 'sre_architecture');
+      const report = ErrorReporter.generateReport(result2, 'cc-010-sre-architecture');
       console.log(report);
     } else {
       console.log('❌ Unexpected validation failure');
@@ -162,12 +162,12 @@ async function main() {
 
   try {
     const validator3 = new ComplianceValidator(
-      'validation/template_validation_sre_architecture.json'
+      'validation/cc-010-sre-architecture-template-validation.json'
     );
 
     const result3 = await validator3.validateDocument(
       EXAMPLE_DOCUMENT_WITH_ERRORS,
-      'sre_architecture'
+      'cc-010-sre-architecture'
     );
 
     const summary = ErrorReporter.generateCompactSummary(result3);
@@ -185,15 +185,15 @@ async function main() {
 
   try {
     const validator4 = new ComplianceValidator(
-      'validation/template_validation_sre_architecture.json'
+      'validation/cc-010-sre-architecture-template-validation.json'
     );
 
     const result4 = await validator4.validateDocument(
       EXAMPLE_DOCUMENT_WITH_ERRORS,
-      'sre_architecture'
+      'cc-010-sre-architecture'
     );
 
-    const markdownReport = ErrorReporter.generateMarkdownReport(result4, 'sre_architecture');
+    const markdownReport = ErrorReporter.generateMarkdownReport(result4, 'cc-010-sre-architecture');
     console.log('Markdown report generated (first 500 chars):');
     console.log(markdownReport.substring(0, 500) + '...\n');
   } catch (error) {

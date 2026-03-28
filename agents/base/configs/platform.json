@@ -4,10 +4,10 @@
   "domain": {
     "name": "Platform & IT Infrastructure",
     "short_name": "Platform",
-    "contract_type": "platform",
-    "template_filename": "TEMPLATE_PLATFORM_IT_INFRASTRUCTURE.md",
+    "contract_type": "cc-007-platform-it-infrastructure",
+    "template_filename": "cc-007-platform-it-infrastructure.template.md",
     "tmp_prefix": "platform",
-    "output_prefix": "PLATFORM_IT_INFRASTRUCTURE",
+    "output_prefix": "CC-007-platform-it-infrastructure",
     "compliance_prefix": "LAPI",
     "requirement_range": "LAPI01-LAPI09",
     "requirement_count": 9,

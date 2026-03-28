@@ -3,7 +3,7 @@
   "compliance_prefix": "LAD / LAIA",
   "review_board": "Data & AI Architecture Review Board",
   "approval_authority": "Data & AI Architecture Review Board",
-  "validation_config_path": "/skills/architecture-compliance/validation/data_analytics_ai_validation.json",
+  "validation_config_path": "/skills/architecture-compliance/validation/cc-003-data-ai-architecture-validation.json",
 
   "weights": {
     "completeness": 0.4,

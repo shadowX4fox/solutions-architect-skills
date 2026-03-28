@@ -71,7 +71,7 @@ Override templates must include:
 - The same N/A counting rule as default
 
 Which templates use override:
-- `TEMPLATE_SRE_ARCHITECTURE.md` → `two-tier` (Blocker 70% + Desired 30%)
+- `cc-010-sre-architecture.template.md` → `two-tier` (Blocker 70% + Desired 30%)
 
 ---
 

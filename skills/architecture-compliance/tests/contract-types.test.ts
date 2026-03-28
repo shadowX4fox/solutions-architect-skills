@@ -22,16 +22,16 @@ import {
 } from '../utils/contract-types';
 
 const EXPECTED_TYPES = [
-  'business_continuity',
-  'sre_architecture',
-  'cloud_architecture',
-  'data_ai_architecture',
-  'development_architecture',
-  'process_transformation',
-  'security_architecture',
-  'platform_it_infrastructure',
-  'enterprise_architecture',
-  'integration_architecture',
+  'cc-001-business-continuity',
+  'cc-002-cloud-architecture',
+  'cc-003-data-ai-architecture',
+  'cc-004-development-architecture',
+  'cc-005-enterprise-architecture',
+  'cc-006-integration-architecture',
+  'cc-007-platform-it-infrastructure',
+  'cc-008-process-transformation',
+  'cc-009-security-architecture',
+  'cc-010-sre-architecture',
 ] as const;
 
 // ============================================================================
@@ -75,9 +75,9 @@ describe('CONTRACT_DISPLAY_NAMES', () => {
   });
 
   test('known display names are correct', () => {
-    expect(CONTRACT_DISPLAY_NAMES['sre_architecture']).toBe('SRE Architecture');
-    expect(CONTRACT_DISPLAY_NAMES['business_continuity']).toBe('Business Continuity');
-    expect(CONTRACT_DISPLAY_NAMES['data_ai_architecture']).toBe('Data & AI Architecture');
+    expect(CONTRACT_DISPLAY_NAMES['cc-010-sre-architecture']).toBe('SRE Architecture');
+    expect(CONTRACT_DISPLAY_NAMES['cc-001-business-continuity']).toBe('Business Continuity');
+    expect(CONTRACT_DISPLAY_NAMES['cc-003-data-ai-architecture']).toBe('Data & AI Architecture');
   });
 });
 
@@ -98,9 +98,9 @@ describe('TEMPLATE_VALIDATION_FILES', () => {
     }
   });
 
-  test('all filenames follow template_validation_*.json pattern', () => {
+  test('all filenames follow cc-NNN-*-template-validation.json pattern', () => {
     for (const path of Object.values(TEMPLATE_VALIDATION_FILES)) {
-      expect(path).toMatch(/template_validation_.+\.json$/);
+      expect(path).toMatch(/cc-\d{3}-.+-template-validation\.json$/);
     }
   });
 
@@ -128,9 +128,9 @@ describe('SCORING_VALIDATION_FILES', () => {
     }
   });
 
-  test('all filenames end with _validation.json', () => {
+  test('all filenames follow cc-NNN-*-validation.json pattern', () => {
     for (const path of Object.values(SCORING_VALIDATION_FILES)) {
-      expect(path).toMatch(/_validation\.json$/);
+      expect(path).toMatch(/cc-\d{3}-.+-validation\.json$/);
     }
   });
 
@@ -156,9 +156,9 @@ describe('FILENAME_PREFIX_TO_CONTRACT_TYPE', () => {
     expect(Object.keys(FILENAME_PREFIX_TO_CONTRACT_TYPE).length).toBe(10);
   });
 
-  test('all prefixes are SCREAMING_SNAKE_CASE', () => {
+  test('all prefixes follow CC-NNN-kebab-case format', () => {
     for (const prefix of Object.keys(FILENAME_PREFIX_TO_CONTRACT_TYPE)) {
-      expect(prefix).toMatch(/^[A-Z][A-Z0-9_]*$/);
+      expect(prefix).toMatch(/^CC-\d{3}-.+$/);
     }
   });
 
@@ -170,10 +170,10 @@ describe('FILENAME_PREFIX_TO_CONTRACT_TYPE', () => {
   });
 
   test('maps known prefixes correctly', () => {
-    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['SRE_ARCHITECTURE']).toBe('sre_architecture');
-    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['BUSINESS_CONTINUITY']).toBe('business_continuity');
-    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['DATA_AI_ARCHITECTURE']).toBe('data_ai_architecture');
-    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['PLATFORM_IT_INFRASTRUCTURE']).toBe('platform_it_infrastructure');
+    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['CC-010-sre-architecture']).toBe('cc-010-sre-architecture');
+    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['CC-001-business-continuity']).toBe('cc-001-business-continuity');
+    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['CC-003-data-ai-architecture']).toBe('cc-003-data-ai-architecture');
+    expect(FILENAME_PREFIX_TO_CONTRACT_TYPE['CC-007-platform-it-infrastructure']).toBe('cc-007-platform-it-infrastructure');
   });
 
   test('no duplicate values (each type has exactly one prefix)', () => {
@@ -189,7 +189,7 @@ describe('FILENAME_PREFIX_TO_CONTRACT_TYPE', () => {
 
 describe('getContractDisplayName', () => {
   test('returns display name for known type', () => {
-    expect(getContractDisplayName('sre_architecture')).toBe('SRE Architecture');
+    expect(getContractDisplayName('cc-010-sre-architecture')).toBe('SRE Architecture');
   });
 
   test('returns raw string for unknown type (fallback)', () => {
@@ -229,8 +229,8 @@ describe('getSupportedContractTypes', () => {
 
 describe('getTemplateValidationFile', () => {
   test('returns file path for known type', () => {
-    const path = getTemplateValidationFile('sre_architecture');
-    expect(path).toContain('sre_architecture');
+    const path = getTemplateValidationFile('cc-010-sre-architecture');
+    expect(path).toContain('cc-010-sre-architecture');
     expect(path).toMatch(/\.json$/);
   });
 
@@ -249,8 +249,8 @@ describe('getTemplateValidationFile', () => {
 
 describe('getScoringValidationFile', () => {
   test('returns file path for known type', () => {
-    const path = getScoringValidationFile('sre_architecture');
-    expect(path).toContain('sre_architecture');
+    const path = getScoringValidationFile('cc-010-sre-architecture');
+    expect(path).toContain('cc-010-sre-architecture');
     expect(path).toMatch(/\.json$/);
   });
 
@@ -263,8 +263,8 @@ describe('getScoringValidationFile', () => {
   });
 
   test('returns different file than getTemplateValidationFile for same type', () => {
-    const scoring = getScoringValidationFile('sre_architecture');
-    const template = getTemplateValidationFile('sre_architecture');
+    const scoring = getScoringValidationFile('cc-010-sre-architecture');
+    const template = getTemplateValidationFile('cc-010-sre-architecture');
     expect(scoring).not.toBe(template);
   });
 });
