@@ -188,10 +188,58 @@ Evaluate the project's architecture documentation against development technology
 
 ## Execution Steps
 
+### Phase 1: Stack Validation (26 items)
+
 1. Read ARCHITECTURE.md to identify the navigation index and project name
 2. Read the relevant docs/ files listed below for evidence
-3. For each validation item, evaluate against the criteria above
+3. For each validation item (DEV-01 through DEV-26), evaluate against the criteria above
 4. Collect all results into the VALIDATION_RESULT format
+
+### Phase 2: EOL Validation (context7)
+
+**After** completing the 26 standard items, perform end-of-life checks for every technology detected in Phase 1 that has a specific version number.
+
+**Skip this phase entirely** if context7 MCP tools are not available — degrade gracefully with no errors or warnings.
+
+**For each detected technology with a version** (e.g., "Java 17", "Spring Boot 3.2", "PostgreSQL 15", "React 18"):
+
+1. Use `mcp__context7__resolve-library-id` to find the library ID:
+   ```
+   libraryName: "{technology name}" (e.g., "java", "spring-boot", "postgresql", "react")
+   ```
+   Pick the best match by source reputation and relevance.
+
+2. Use `mcp__context7__query-docs` to check lifecycle status:
+   ```
+   libraryId: "{resolved ID}"
+   topic: "end of life support lifecycle versions {version}"
+   ```
+
+3. From the docs response, determine EOL status:
+   - **PASS**: Version is actively supported (has future EOL date or is current LTS)
+   - **FAIL**: Version is EOL, end-of-support, or deprecated
+   - **UNKNOWN**: context7 returned no clear lifecycle information for this version
+
+4. Add an EOL item to the VALIDATION_RESULT:
+   ```
+   - id: DEV-EOL-{N}
+     category: EOL Validation
+     question: "Is {technology} {version} still supported?"
+     status: {PASS|FAIL|UNKNOWN}
+     evidence: "{EOL date or support status from context7} — context7/{libraryId}"
+   ```
+
+**EOL items are supplementary** — they appear after DEV-26 in the items list. They do NOT count toward `total_items` (which stays at 26 for standard items). However, EOL FAIL items ARE included in `deviations` and EOL UNKNOWN items in `recommendations`.
+
+**Add EOL summary fields** to the VALIDATION_RESULT:
+```
+  eol_items_checked: {count of technologies checked}
+  eol_pass: {count}
+  eol_fail: {count}
+  eol_unknown: {count}
+```
+
+5. Continue to output format
 
 ### Required Files
 
@@ -232,6 +280,10 @@ VALIDATION_RESULT:
   na: {count}
   unknown: {count}
   status: {PASS if fail == 0, else FAIL}
+  eol_items_checked: {count or 0 if context7 unavailable}
+  eol_pass: {count}
+  eol_fail: {count}
+  eol_unknown: {count}
   items:
     - id: DEV-01
       category: Java Backend
@@ -363,6 +415,13 @@ VALIDATION_RESULT:
       question: "Are exception action plans approved and registered?"
       status: {PASS|FAIL|N/A|UNKNOWN}
       evidence: "{evidence text with source file reference}"
+    # EOL items (only if context7 available, omit section if not)
+    - id: DEV-EOL-01
+      category: EOL Validation
+      question: "Is {technology} {version} still supported?"
+      status: {PASS|FAIL|UNKNOWN}
+      evidence: "{EOL date or support status} — context7/{libraryId}"
+    # ... one item per detected technology with a version number
   deviations:
     - "{description of each FAIL item with source}"
     ...
