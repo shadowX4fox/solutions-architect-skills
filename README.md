@@ -492,6 +492,13 @@ graph TD
     A[Product Owner] -->|Creates| B[PO Spec]
     B -->|Input to| C[Architecture Team]
     C -->|Creates| D[ARCHITECTURE.md]
+    D -->|Generates| L[ADRs]
+    L -->|Status Change| M{Propagation}
+    M -->|Updates| D
+    M -->|Updates| J
+    D -->|Section Edit| N{Downstream Propagation}
+    N -->|Cascades| D
+    N -->|Cascades| J
     D -->|Peer Review| E{Quality Gate}
     E -->|Approved| F[10 Compliance Contracts]
     E -->|Refine| C
