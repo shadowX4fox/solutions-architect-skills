@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -91,7 +91,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.12.7` in the list.
+You should see `solutions-architect-skills v2.12.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -546,7 +546,17 @@ Where:
 
 ## Roadmap
 
-### v2.12.7 (Current Release) ✅
+### v2.12.8 (Current Release) ✅
+**feat: context7 MCP integration for asset generation and component documentation**
+
+- `architecture-dev-handoff`: added Step 3.3b (Spec Documentation Lookup) — fetches current spec docs via context7 (`resolve-library-id` + `get-library-docs`) for each asset type before generation; caches per session
+- `ASSET_GENERATION_GUIDE.md`: new "Spec Documentation Integration (context7)" section with asset→library mapping table; per-asset `context7 validation` callouts for all 8 asset types (OpenAPI, DDL, Kubernetes Deployment, AsyncAPI, CronJob, Avro, Protobuf, Redis)
+- `architecture-docs`: new "Technology Context Enrichment (context7)" subsection — fetches framework docs during Workflow 1 component creation and presents advisory Technology Context Brief (never auto-fills)
+- All 4 Section 5 templates: HTML comment hint on `**Technology**:` field directing Claude to use context7 advisory lookup
+- `CLAUDE.md`: documented context7 as an optional MCP dependency with graceful degradation
+- Syntax/structure only — "no invention" / Asset Fidelity Rule unchanged; all data values still come exclusively from architecture docs
+
+### v2.12.7 (Previous Release) ✅
 **feat: architecture-docs downstream propagation — cascade updates to dependent sections, components, and handoffs after any substantive section edit**
 
 - Added Step 5.5 to the architecture-docs editing workflow: Downstream Documentation Propagation

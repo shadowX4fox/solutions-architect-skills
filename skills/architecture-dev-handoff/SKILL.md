@@ -184,6 +184,26 @@ For any section where source data is absent:
 - Replace placeholder with `[NOT DOCUMENTED — add to <source-file>]`
 - Add an entry to Section 15 (Open Questions & Assumptions)
 
+**Step 3.3b: Spec Documentation Lookup (context7)**
+
+Before generating assets, fetch current specification documentation for each unique asset type detected in Step 3.2. This ensures generated scaffolds use correct, current syntax.
+
+**Prerequisite**: The context7 MCP tool must be available (`resolve-library-id` and `get-library-docs` functions). If not available, skip this step silently — assets are generated using the built-in scaffold templates as-is.
+
+**Procedure**:
+1. For each unique asset type detected across all selected components, call `resolve-library-id` once:
+   - `openapi.yaml` → resolve `openapi`
+   - `asyncapi.yaml` → resolve `asyncapi`
+   - `deployment.yaml` or `cronjob.yaml` → resolve `kubernetes`
+   - `ddl.sql` → resolve the database engine from the component's Technology field (e.g., `postgresql`, `mysql`, `mongodb`)
+   - `schema.avsc` → resolve `apache-avro`
+   - `schema.proto` → resolve `protobuf`
+   - `redis-key-schema.md` → resolve `redis`
+2. For each resolved library ID, call `get-library-docs` with a topic hint scoped to the relevant spec version and structures (see `ASSET_GENERATION_GUIDE.md` → "Spec Documentation Integration" table for topic hints).
+3. Cache the resolved library ID and fetched docs for the duration of this generation session — do not re-fetch for subsequent components requiring the same spec.
+
+**Usage constraint**: Fetched spec docs inform **syntax and structure only** — never data values. The Asset Fidelity Rule (all values from architecture docs) applies unchanged. If the spec requires a field absent from architecture docs, mark it `# TODO: [NOT DOCUMENTED — required by <spec> <version>]`.
+
 **Step 3.4: Generate Deliverable Assets**
 
 For each asset type detected in Step 3.2, generate the corresponding artifact file following `ASSET_GENERATION_GUIDE.md`.

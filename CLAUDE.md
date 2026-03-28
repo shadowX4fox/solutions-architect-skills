@@ -393,3 +393,24 @@ The skill has two export modes:
 "Write(exports/*)"
 ```
 
+---
+
+### Optional MCP Integration: context7
+
+The `architecture-dev-handoff` and `architecture-docs` skills optionally use the context7 MCP tool when available. context7 provides two functions:
+- `resolve-library-id` — finds the context7 library ID for a given framework or tool name
+- `get-library-docs` — fetches up-to-date documentation for a resolved library, scoped to a topic
+
+**How it is used**:
+
+| Skill | When | What |
+|-------|------|------|
+| `architecture-dev-handoff` | During asset generation (Step 3.3b) | Fetches current spec docs (OpenAPI, AsyncAPI, Kubernetes, Protobuf, Avro, database DDL, Redis) to validate that generated scaffolds use correct, current syntax |
+| `architecture-docs` | During new component doc creation (Workflow 1, Section 5) | Fetches framework documentation for technologies listed in the `**Technology**` field and presents an advisory Technology Context Brief to the architect |
+
+**Key constraint**: context7 informs **syntax and structure only** — never content or data values. The Asset Fidelity Rule and "no invention" policy remain absolute. All data values come from architecture docs.
+
+**Configuration**: To enable this integration, configure context7 as an MCP server in Claude Code settings. If context7 is not configured, both skills degrade gracefully and generate documents using their built-in templates with no errors or warnings.
+
+**No hard dependency**: context7 is purely optional. Every skill workflow completes successfully without it.
+

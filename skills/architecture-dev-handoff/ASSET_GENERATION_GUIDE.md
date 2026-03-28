@@ -19,6 +19,50 @@ Values the development team must supply are marked with `# TODO: <description>` 
 
 ---
 
+## Spec Documentation Integration (context7)
+
+When the context7 MCP tool is available (`resolve-library-id` and `get-library-docs` functions), use it to validate scaffold syntax and structure before writing each asset file.
+
+### How It Works
+
+**Before asset generation** (SKILL.md Step 3.3b), resolve and fetch current spec documentation for each unique asset type in the session:
+
+| Asset | `resolve-library-id` query | `get-library-docs` topic hint |
+|-------|---------------------------|-------------------------------|
+| `openapi.yaml` | `openapi` | `OpenAPI 3.1 paths, components, securitySchemes, info` |
+| `asyncapi.yaml` | `asyncapi` | `AsyncAPI 3.0 channels, operations, messages, servers` |
+| `deployment.yaml` | `kubernetes` | `Deployment apps/v1, Service v1, HorizontalPodAutoscaler autoscaling/v2` |
+| `cronjob.yaml` | `kubernetes` | `CronJob batch/v1 spec, concurrencyPolicy, jobTemplate` |
+| `ddl.sql` | database name from component's Technology field (e.g., `postgresql`, `mysql`) | `CREATE TABLE syntax, data types, constraints` for that engine |
+| `schema.avsc` | `apache-avro` | `Avro schema specification, logical types, union syntax` |
+| `schema.proto` | `protobuf` | `proto3 syntax, scalar field types, message definition` |
+| `redis-key-schema.md` | `redis` | `Redis data structures, key naming conventions, TTL, eviction policies` |
+
+Cache each resolved library for the duration of the generation session — do not re-fetch the same spec for subsequent components.
+
+### How Fetched Docs Are Applied
+
+After filling all `[PLACEHOLDER]` tokens from architecture docs, compare the generated scaffold against the fetched spec docs:
+
+1. **Field name validation** — If a field name in the scaffold does not match the current spec (renamed field, typo in the spec version), update the field name and add a `# NOTE: Updated to match <spec> <version>` comment.
+2. **Required field check** — If the spec requires a field that is absent from the scaffold AND absent from architecture docs, add `# TODO: [NOT DOCUMENTED — required by <spec> <version>]`.
+3. **Deprecation flagging** — If a construct used in the scaffold is marked deprecated in the fetched docs, add `# NOTE: Deprecated in <spec> <version> — consider <replacement>`.
+
+### What It Must NOT Do
+
+- **Never inject data values** — fetched spec docs inform syntax and structure only; all data (endpoints, field names, resource limits, env vars, schemas, etc.) must come exclusively from architecture docs
+- **Never add fields beyond what architecture docs contain** — even if the spec recommends optional fields, if they are not documented, leave them absent or mark as `# TODO: [NOT DOCUMENTED]`
+- **Never block generation** — if context7 is unavailable (not configured, network error, library not resolved), skip silently and generate using the built-in scaffold templates as-is
+
+### Graceful Degradation
+
+If context7 is not available or a library cannot be resolved:
+- Generate assets using the scaffold templates exactly as documented below
+- Do NOT warn the user or insert error messages into generated files
+- The scaffold templates target the spec versions hardcoded in their headers (OpenAPI 3.1.0, AsyncAPI 3.0.0, Kubernetes apps/v1, proto3) and are designed to be correct for those versions
+
+---
+
 ## Asset Detection Rules
 
 Read the component's `**Type:**` field (and the component doc body) to determine which assets to generate.
@@ -132,6 +176,8 @@ components:
 
 **Post-generation check**: Verify 1:1 correspondence — every documented endpoint appears as a `paths:` entry, every request/response schema is defined, and no undocumented endpoints or schemas are present.
 
+**context7 validation** (if available): Compare the generated scaffold against fetched OpenAPI 3.1 docs. Verify field names (`openapi`, `info`, `paths`, `components`, `securitySchemes`) match the spec. Flag deprecated constructs. Do NOT add fields or values not derived from architecture docs.
+
 ---
 
 ## Asset 2: DDL Script (`ddl.sql`)
@@ -214,6 +260,8 @@ COMMENT ON TABLE [table_name_1] IS '[ENTITY_DESCRIPTION]';
 6. Leave `-- TODO: [NOT DOCUMENTED]` for columns/constraints not documented in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented entity has a `CREATE TABLE` block, every documented column and index is present, and no undocumented tables or columns exist.
+
+**context7 validation** (if available): Fetch docs for the specific database engine (e.g., `postgresql`, `mysql`). Verify data type names, constraint syntax, and DDL keywords match the engine version used by the project. Flag any syntax that is engine-specific (e.g., PostgreSQL `COMMENT ON`, `TIMESTAMP WITH TIME ZONE`) if the target engine differs. Do NOT add columns or constraints not derived from architecture docs.
 
 ---
 
@@ -365,6 +413,8 @@ spec:
 
 **Post-generation check**: Verify 1:1 correspondence — every documented env var, resource limit, replica count, port, and health check path is present, and no undocumented values have been added.
 
+**context7 validation** (if available): Fetch Kubernetes docs for `apps/v1` Deployment, `v1` Service, and `autoscaling/v2` HPA. Verify `apiVersion` values are current, probe field names (`livenessProbe`, `readinessProbe`, `httpGet`, `initialDelaySeconds`) match the API spec, and HPA `metrics[].resource.target` structure is correct. Do NOT add fields not derived from architecture docs.
+
 ---
 
 ## Asset 4: AsyncAPI Specification (`asyncapi.yaml`)
@@ -441,6 +491,8 @@ components:
 5. Leave `# TODO: [NOT DOCUMENTED]` for values not documented.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented topic/queue has a `channels:` entry and a corresponding `operations:` entry, and no undocumented channels are present.
+
+**context7 validation** (if available): Fetch AsyncAPI 3.0 docs. AsyncAPI 3.0 changed significantly from v2 — verify that `channels`, `operations`, and `messages` structure matches v3 spec (operations are now top-level, `action: send|receive` replaces `publish|subscribe`). Flag any v2 patterns that may have carried over. Do NOT add channels or operations not derived from architecture docs.
 
 ---
 
@@ -528,6 +580,8 @@ spec:
 
 **Post-generation check**: Verify 1:1 correspondence — the schedule, command, args, env vars, and resource limits all match the architecture docs exactly; no defaults have been substituted.
 
+**context7 validation** (if available): Fetch Kubernetes `batch/v1` CronJob docs. Verify `concurrencyPolicy` allowed values (`Allow`, `Forbid`, `Replace`), `restartPolicy` valid values for CronJob pods (`OnFailure`, `Never`), and `jobTemplate.spec.template.spec` structure. Do NOT add fields not derived from architecture docs.
+
 ---
 
 ## Asset 6: Message Serialization Schemas (`schema.avsc` / `schema.proto`)
@@ -607,6 +661,8 @@ Generate one `.avsc` file per message type the component produces or consumes.
 
 **Post-generation check**: Verify every documented message field is present in `fields`, no undocumented fields have been added, and `namespace` and `name` match the docs exactly.
 
+**context7 validation** (if available): Fetch Apache Avro schema specification. Verify logical type names (`timestamp-millis`, `timestamp-micros`, `date`, `time-millis`, `uuid`), union syntax (`["null", "string"]` notation), and `default` value rules for nullable fields. Flag any non-standard logical types. Do NOT add fields not derived from architecture docs.
+
 ---
 
 ### Protobuf Schema Scaffold (`*.proto`)
@@ -674,6 +730,8 @@ message [MESSAGE_NAME] {
 5. Generate one `.proto` file per distinct message type (topic).
 
 **Post-generation check**: Verify every documented message field is present with the correct type and field number, no undocumented fields have been added, and `package` and message name match the docs exactly.
+
+**context7 validation** (if available): Fetch Protobuf (proto3) syntax docs. Verify scalar field type names (`string`, `int32`, `int64`, `bool`, `bytes`, `float`, `double`, `sint32`, `sfixed64`, etc.), that field numbers start at 1 and 19000–19999 are reserved, and `syntax = "proto3"` is at the top. Do NOT add fields not derived from architecture docs.
 
 ---
 
@@ -794,6 +852,8 @@ Defines application behavior when the Redis instance is unavailable (network par
 8. Leave `<!-- TODO: [NOT DOCUMENTED] -->` for any values not found in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented key pattern appears in the Key Patterns table, every documented TTL is listed in the TTL Strategy, eviction policy and memory limits match the docs exactly, and no undocumented key patterns or configuration values have been added.
+
+**context7 validation** (if available): Fetch Redis documentation. Verify eviction policy names match current Redis naming (`allkeys-lru`, `volatile-lru`, `allkeys-lfu`, `volatile-lfu`, `volatile-ttl`, `volatile-random`, `allkeys-random`, `noeviction`), data structure names are correct (`STRING`, `HASH`, `SET`, `SORTED SET`, `LIST`, `STREAM`, `JSON`), and deployment mode terminology matches the Redis version documented. Do NOT add key patterns or configuration values not derived from architecture docs.
 
 ---
 

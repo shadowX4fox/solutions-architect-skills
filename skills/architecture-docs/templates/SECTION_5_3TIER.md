@@ -20,6 +20,7 @@ For each component in your system, document using the template below. **Group co
 
 **Type**: Web UI | API Controller | REST Endpoint | GraphQL Resolver | Client App
 **Technology**: [Specific technology used]
+<!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Package/directory path or repository]
 

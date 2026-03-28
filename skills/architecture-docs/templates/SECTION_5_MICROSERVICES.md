@@ -24,6 +24,7 @@ For each microservice, use this comprehensive template:
 
 **Type**: Microservice
 **Technology**: [Language/framework - e.g., Java/Spring Boot, Node.js/NestJS]
+<!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Repository URL or directory path]
 **Team Owner**: [Team responsible for this service]

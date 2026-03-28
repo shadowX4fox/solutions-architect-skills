@@ -24,6 +24,7 @@ For each component in your system, document using the template below. **Group co
 
 **Type**: Mobile App | Web Application | ATM Interface | Branch Terminal | API Gateway | Chatbot
 **Technology**: [Specific technology used - e.g., React Native, Angular, Java]
+<!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Package/directory path or repository]
 
