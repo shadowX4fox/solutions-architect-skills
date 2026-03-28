@@ -466,9 +466,10 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 
 **Action**: Invoke `/skill architecture-definition-record` and pass context:
 - ARCHITECTURE.md path
-- Trigger reason: "Post-architecture-docs creation — generate ADRs from Section 12 table"
+- Trigger reason: "Post-architecture-docs creation — generate ADRs from Section 12 table using full template"
+- **Critical context note**: The full architecture documentation (all `docs/` files created in Step 5) is in the current conversation context. The ADR skill MUST use this context to populate ALL body sections of each ADR (Context, Decision, Rationale, Consequences, Alternatives) — not just metadata placeholders. Do NOT generate abbreviated stubs.
 
-The `architecture-definition-record` skill handles the full interactive workflow (prompt user, parse table, generate files, conflict resolution, summary report). Do not replicate that logic here.
+The `architecture-definition-record` skill handles the full interactive workflow (prompt user, parse table, generate files with fully populated content, conflict resolution, summary report). Do not replicate that logic here.
 
 **If `architecture-definition-record` skill is not available**: Fall back to displaying this message:
 

@@ -149,6 +149,8 @@ Store template content in memory for reuse across all ADR files.
 
 #### Step 1.5: Generate Each ADR File
 
+> **CRITICAL**: Use the **full canonical template** (all 10 sections). Do NOT produce abbreviated stubs with empty body sections. Every section for which architecture documentation provides relevant context MUST be populated. Only Implementation Plan and Success Metrics may remain as optional stubs.
+
 For each ADR in the list:
 
 **Generate file path:**
@@ -164,7 +166,48 @@ For each ADR in the list:
 4. [Review Existing] - Show me what's in the existing file first
 ```
 
-**Populate template:** Replace `ADR-XXX`, `[Short Decision Title]`, status, date, authors placeholders. If title is placeholder, add `> **TODO**: Auto-generated with placeholder title. Update with actual decision.` after the H1.
+**Load relevant architecture docs for this ADR** — before populating, identify which `docs/` files are relevant based on the ADR title/topic:
+
+| ADR Topic Keywords | Architecture Files to Load |
+|---|---|
+| database, storage, data, persistence | `docs/04-data-flow-patterns.md`, `docs/06-technology-stack.md` |
+| API, protocol, REST, gRPC, HTTP | `docs/05-integration-points.md`, `docs/06-technology-stack.md` |
+| security, auth, encryption, identity | `docs/07-security-architecture.md` |
+| scaling, performance, cache, latency | `docs/08-scalability-and-performance.md` |
+| deployment, infrastructure, cloud | `docs/09-operational-considerations.md`, `docs/06-technology-stack.md` |
+| framework, language, runtime, library | `docs/06-technology-stack.md` |
+| architecture pattern, layer, structure | `docs/03-architecture-layers.md` |
+| messaging, events, queue, stream, kafka | `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md` |
+
+Always also read `ARCHITECTURE.md` (navigation index) and `docs/02-architecture-principles.md` for every ADR — they provide universal context (constraints, principles, design drivers).
+
+**Populate template — section by section from architecture documentation:**
+
+| Template Section | How to populate |
+|---|---|
+| **Header metadata** | ADR number, title from table, status, date, authors: "Architecture Team" |
+| **Context → Problem Statement** | Infer from ADR title + relevant docs — why did this decision need to be made? What gap or requirement prompted it? |
+| **Context → Functional Requirements** | Extract from the relevant docs/ section — what the system must do that drives this decision |
+| **Context → Non-Functional Requirements** | From S3 (principles) + S10 (scalability) + S9 (security) as applicable |
+| **Context → Constraints** | From S3 principles and S8 tech stack constraints |
+| **Context → Business Drivers** | From S1+S2 system overview — business goals that made this decision necessary |
+| **Decision → Summary** | The chosen approach stated in the ADR title (e.g., "Use PostgreSQL as the primary relational database") |
+| **Decision → Detailed Decision** | From the relevant architecture section — the specific technology/pattern/approach and how it is used |
+| **Decision → Scope** | What is included in this decision; what is explicitly excluded |
+| **Rationale → Primary Drivers** | From architecture principles (S3) and design drivers — why this choice satisfies the requirements; include quantitative evidence from architecture docs where available |
+| **Rationale → Comparison Summary table** | Build a real comparison table with actual data from architecture docs — **never use placeholder rows**; include at least 3 evaluation criteria with the chosen option and at least one rejected alternative |
+| **Consequences → Positive** | Benefits the decision delivers, mapped to architecture goals |
+| **Consequences → Negative** | Trade-offs and costs accepted; mitigation strategy for each |
+| **Consequences → Trade-offs** | What was gained vs. what was given up |
+| **Alternatives Considered** | Extract alternatives from architecture context (tech stack alternatives, pattern alternatives); for each: what it is, why it was considered, why it was rejected |
+| **Implementation Plan** | Mark as `[OPTIONAL — populate during implementation planning]` |
+| **Success Metrics** | Mark as `[OPTIONAL — populate during implementation planning]` |
+| **References** | Cite architecture docs sections used: e.g., `docs/06-technology-stack.md`, `docs/03-architecture-layers.md`; add any external references if known |
+
+If the ADR title is a placeholder (`[Title]`, `[title]`, `Title`), add at the top:
+```
+> **TODO**: Auto-generated with placeholder title. Update title, filename, and all sections with the actual architectural decision.
+```
 
 **Write file** and report: `✅ Created: adr/ADR-001-technology-stack.md`
 
@@ -179,10 +222,11 @@ Skipped: [list with reason]
 Failed:  [list with error]
 
 Next steps:
-1. Fill in Context, Decision, and Rationale sections
-2. Update placeholder titles (marked with TODO)
-3. Link related ADRs in the "Related" field
-4. Update status to "Accepted" once reviewed and approved
+1. Review and refine populated sections — verify accuracy against your intent
+2. Strengthen the comparison table with benchmark data, POC results, or vendor metrics
+3. Add Implementation Plan and Success Metrics when implementation planning begins
+4. Update status to "Accepted" once reviewed and approved by the architecture team
+5. Link related ADRs in the "Related" field
 ```
 
 ---

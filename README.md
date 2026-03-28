@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.1 (Current Release) ✅
+### v2.12.2 (Current Release) ✅
+**fix: ADR generation uses full template with populated body sections, not abbreviated stubs**
+
+When ADRs are generated from the ARCHITECTURE.md Section 12 table (Workflow 1 in `architecture-definition-record`), all 10 template sections are now populated from architecture documentation context — not just the metadata placeholders. Root cause: Step 1.5 only instructed replacing ADR number, title, status, date, and authors, leaving Context, Decision, Rationale, Consequences, and Alternatives empty for the user to fill in later. Fixed by rewriting Step 1.5 with: (1) a keyword-based topic-to-docs mapping table that identifies which `docs/` files are relevant per ADR title, (2) a section-by-section population guide mapping every template section to its architecture doc source, (3) an explicit "CRITICAL: use the full canonical template — do NOT produce abbreviated stubs" directive. Comparison tables must use real data (not placeholder rows). Only Implementation Plan and Success Metrics remain as optional stubs. Step 1.6 summary now says "review and refine" instead of "fill in Context, Decision, and Rationale". Step 6 delegation in ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md also updated to explicitly pass the full-template instruction to the ADR skill.
+
+### v2.12.1 (Previous Release) ✅
 **fix: concept map auto-layout — rectangle-aware repulsion, band gravity, and overlap resolution**
 
 Rewrote `autoLayout()` in the `architecture-onboarding` PLAYGROUND_TEMPLATE.md to eliminate node overlap. Three root causes fixed: (1) **Rectangle-aware collision** — replaced point-based `REPULSION/dist²` with bounding-box overlap detection; overlapping nodes are pushed apart along the axis of minimum penetration (push strength 0.55× overlap), while non-overlapping nodes use mild long-range repulsion (3000/dist²). (2) **Band gravity** — added a Y-axis restoring force (`BAND_GRAVITY=0.3`) per iteration that pulls each node back toward its group's proportional lane (15%/45%/80% of canvas height), preserving the Use Cases → Sections → Components traceability spine through the simulation. (3) **Weaker edge attraction** — reduced `ATTRACTION` from 0.04 → 0.02 and cross-group edges (`traces-to`, `served-by`) to 0.01 so band gravity and repulsion win locally. Also shortened `REST_LEN` 180→120, increased max iterations 200→300, and added early exit when kinetic energy drops below 0.1. `initializePositions()` band centers updated to proportional values (H×0.15/0.45/0.80) matching the simulation.
