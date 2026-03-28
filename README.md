@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.11.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.11.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -537,7 +537,12 @@ Where:
 
 ## Roadmap
 
-### v2.11.1 (Current Release) ✅
+### v2.11.2 (Current Release) ✅
+**feat: use case traceability in onboarding concept map; focus on UC → Sections → Components spine**
+
+Redesigned the `architecture-onboarding` concept map around a business-to-technical traceability spine. Adds a **Use Cases** node group (pink) extracted from PO Spec Section 4 or `docs/01-system-overview.md` Section 2.3 — placed at the top band, tracing down through Architecture Sections (middle) to Components (bottom). New edge types: `traces-to` (UC → section, dashed pink) and `served-by` (UC → component, from handoff docs' Business Context field). Removed lifecycle, compliance, principles, and skill groups entirely — they don't add value to onboarding exploration. Concept map now contains exactly 3 node groups and 3 presets (Use Case Traceability, Section Dependencies, Component Map). Default preset is "Use Case Traceability".
+
+### v2.11.1 (Previous Release) ✅
 **fix: complete concept map rendering — full JS implementation in PLAYGROUND_TEMPLATE.md**
 
 Rewrote `PLAYGROUND_TEMPLATE.md` for the `architecture-onboarding` skill to include complete, verbatim JavaScript implementations for all canvas rendering functions. Previously, key functions (`initializePositions`, `autoLayout`, `drawEdge`, drag handlers, tooltip) had elided `// ...` bodies that the playground plugin could not fill in — causing most nodes to render at undefined positions (invisible). All functions are now fully specified: grid-based initial node placement per group band, force-directed auto-layout with pairwise repulsion + edge attraction, full Canvas 2D arrowhead drawing, bounding-box drag, and absolute-positioned tooltips.
