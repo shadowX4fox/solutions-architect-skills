@@ -147,7 +147,9 @@ If the user's request doesn't match any workflow triggers:
 - All section content lives under **`docs/`** as numbered Markdown files
 - Component details (Section 5) live under **`docs/components/`** — one file per component
 
-**File naming pattern**: `NN-kebab-case-section-name.md` (e.g., `01-system-overview.md`)
+**File naming pattern**: `NN-kebab-case-name.md` — lowercase, hyphens only, no spaces, no uppercase, no underscores.
+- Section files: `docs/01-system-overview.md`, `docs/06-technology-stack.md`
+- Component files: `docs/components/01-api-gateway.md`, `docs/components/02-payment-service.md`
 
 See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conventions.
 

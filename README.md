@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.12.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.12.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -538,7 +538,12 @@ Where:
 
 ## Roadmap
 
-### v2.12.2 (Current Release) ✅
+### v2.12.3 (Current Release) ✅
+**fix: enforce lowercase kebab-case naming convention for component files across all skills**
+
+Component file names under `docs/components/` must follow `NN-kebab-case-name.md` (e.g., `01-api-gateway.md`, `02-payment-service.md`) — lowercase, hyphens only, no spaces, no uppercase, no underscores. This was defined in RESTRUCTURING_GUIDE.md but not enforced downstream. Fixed in 4 skills: (1) `architecture-component-guardian` — added naming validation on scan with auto-rename offer for violations, and kebab-case conversion on `add component`; (2) `architecture-peer-review` NAMING-03 check — now explicitly requires `NN-kebab-case-name.md` with examples (was ambiguous `NN-component-name.md`); (3) `architecture-docs` SKILL.md — added component file examples alongside section file examples in naming convention; (4) `architecture-dev-handoff` — stated that handoff filenames derive from component file names using kebab-case.
+
+### v2.12.2 (Previous Release) ✅
 **fix: ADR generation uses full template with populated body sections, not abbreviated stubs**
 
 When ADRs are generated from the ARCHITECTURE.md Section 12 table (Workflow 1 in `architecture-definition-record`), all 10 template sections are now populated from architecture documentation context — not just the metadata placeholders. Root cause: Step 1.5 only instructed replacing ADR number, title, status, date, and authors, leaving Context, Decision, Rationale, Consequences, and Alternatives empty for the user to fill in later. Fixed by rewriting Step 1.5 with: (1) a keyword-based topic-to-docs mapping table that identifies which `docs/` files are relevant per ADR title, (2) a section-by-section population guide mapping every template section to its architecture doc source, (3) an explicit "CRITICAL: use the full canonical template — do NOT produce abbreviated stubs" directive. Comparison tables must use real data (not placeholder rows). Only Implementation Plan and Success Metrics remain as optional stubs. Step 1.6 summary now says "review and refine" instead of "fill in Context, Decision, and Rationale". Step 6 delegation in ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md also updated to explicitly pass the full-template instruction to the ADR skill.

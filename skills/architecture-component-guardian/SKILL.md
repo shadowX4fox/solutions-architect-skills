@@ -102,14 +102,25 @@ Sort by filename prefix ascending (01, 02, 03 …).
 
 For each file extract: section number, component name, file link, type.
 
+**Validate naming convention**: Every component file MUST follow `NN-kebab-case-name.md` — lowercase, hyphens only, no spaces, no uppercase, no underscores. If any file violates this convention, warn the user:
+
+```
+⚠️  Component file naming violation (must be lowercase kebab-case):
+  docs/components/03-PaymentService.md → rename to 03-payment-service.md
+```
+
+Offer to rename the file automatically.
+
 ### Step 3 — Apply requested change
 
 | Argument | Action |
 |----------|--------|
 | `sync` | Rebuild table from current files, no other change |
-| `add component <description>` | Create the new component file if not present, then sync |
+| `add component <description>` | Create the new component file using **lowercase kebab-case** naming (`NN-kebab-case-name.md`), then sync |
 | `remove component <name>` | Confirm deletion of component file, then sync |
 | `update component <name>` | Edit the relevant component file fields, then sync |
+
+**When creating a new component file** (`add`): always convert the component name to lowercase kebab-case for the filename. Examples: "Payment Service" → `NN-payment-service.md`, "CRM Domain Service" → `NN-crm-domain-service.md`, "Redis Cache" → `NN-redis-cache.md`. The display name in the `# Heading` inside the file keeps its natural casing (e.g., `# Payment Service`).
 
 ### Step 4 — Regenerate `docs/components/README.md`
 

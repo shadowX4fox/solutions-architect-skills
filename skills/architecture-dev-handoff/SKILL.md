@@ -49,10 +49,12 @@ This skill generates **Component Development Handoff** documents — one per com
 
 **Output location:** `docs/handoffs/` directory
 
-**Per-component output:**
+**Per-component output** (all names use **lowercase kebab-case** — no spaces, no uppercase, no underscores):
 - `docs/handoffs/NN-<component-name>-handoff.md` — 16-section handoff document
 - `docs/handoffs/assets/NN-<component-name>/` — scaffolded deliverable assets (OpenAPI spec, DDL, Kubernetes manifests, etc.)
 - `docs/handoffs/README.md` — managed index updated after each generation
+
+The `<component-name>` slug is derived from the component file name in `docs/components/` (e.g., `docs/components/03-payment-service.md` → `docs/handoffs/03-payment-service-handoff.md`).
 
 ---
 
