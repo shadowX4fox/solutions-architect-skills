@@ -18,43 +18,27 @@ Evaluate the project's architecture documentation against development technology
 - `architecture_file`: Path to ARCHITECTURE.md
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory
 
-## EOL Cross-Check Rule (applies to ALL version-bearing items)
+## Critical Rule: EOL-First Validation
 
-**IMPORTANT**: For every validation item that checks a technology version (items 1, 2, 7, 8, 13, 19, 20, 21, 22, 23), being on the "approved list" is NOT sufficient for PASS. You MUST also verify the specific version is **not end-of-life**.
+**Approved does NOT mean supported.** A technology version can be on the organizational approved list and still be end-of-life. EOL is a **blocking condition** — no version-bearing item can PASS if the version is within 6 months of EOL or already past it.
 
-**Procedure for version items**:
-1. Evaluate against the approved list criteria below (standard check)
-2. If the version matches the approved list, use **WebSearch** to verify EOL status:
-   ```
-   query: "{technology} {version} end of life support date"
-   ```
-   Prioritize results from: endoflife.date, official vendor release pages, and maintenance blogs.
-3. Final status:
-   - **PASS**: Version is on approved list AND still actively supported
-   - **FAIL**: Version is NOT on approved list, OR version IS on approved list but is **EOL/end-of-support**
-   - **N/A**: Technology not used
-   - **UNKNOWN**: Version unspecified, OR EOL status could not be determined (WebSearch unavailable or inconclusive)
+**Safety period**: 6 months. If a version's EOL date is within 6 months from today, it is treated as **approaching EOL** and marked FAIL with an advisory.
 
-If WebSearch is unavailable, skip the EOL check and evaluate against the approved list only — do NOT block the validation.
-
-When a version is approved but EOL, include both facts in the evidence:
-```
-"{technology} {version} is in approved list but EOL since {date} — endoflife.date"
-```
+**EOL data is gathered FIRST (Phase 1)**, before any stack validation items are evaluated (Phase 2). This ensures the EOL lookup table is available when scoring every version-bearing item.
 
 ## Validation Items
 
 ### Java Backend (6 items)
 
 1. **Is Java version LTS (11/17/21)?**
-   - PASS: Java 11, 17, or 21 LTS documented **and** not EOL (verify via WebSearch)
-   - FAIL: Java 8 or older detected, OR LTS version that has reached end-of-support
+   - PASS: Java 11, 17, or 21 LTS documented **and** EOL table confirms supported (>6 months remaining)
+   - FAIL: Java 8 or older, OR LTS version that is EOL or within 6-month safety period
    - N/A: Java not used in the technology stack
    - UNKNOWN: Java is present but version is unspecified
 
 2. **Is Spring Boot version 2.7+ or 3.x?**
-   - PASS: Spring Boot 2.7+ or 3.x documented **and** not EOL (verify via WebSearch)
-   - FAIL: Spring Boot version < 2.7, OR version is EOL/end-of-support
+   - PASS: Spring Boot 2.7+ or 3.x documented **and** EOL table confirms supported (>6 months remaining)
+   - FAIL: Spring Boot < 2.7, OR version is EOL or within 6-month safety period
    - N/A: Spring Boot not used
    - UNKNOWN: Spring Boot mentioned but version unspecified
 
@@ -85,8 +69,8 @@ When a version is approved but EOL, include both facts in the evidence:
 ### .NET Backend (6 items)
 
 7. **Is C#/.NET version current (.NET 6/7/8 or .NET Core 3.1)?**
-   - PASS: .NET 6, 7, 8, or .NET Core 3.1 documented **and** not EOL (verify via WebSearch)
-   - FAIL: .NET Core 2.x or .NET Framework 4.x detected, OR approved version that is EOL
+   - PASS: .NET 6, 7, 8, or .NET Core 3.1 documented **and** EOL table confirms supported (>6 months remaining)
+   - FAIL: .NET Core 2.x or .NET Framework 4.x, OR approved version that is EOL or within 6-month safety period
    - N/A: .NET not used
    - UNKNOWN: .NET present but version unspecified
 
@@ -123,8 +107,8 @@ When a version is approved but EOL, include both facts in the evidence:
 ### Frontend (6 items)
 
 13. **Is frontend framework approved (Angular 12+, React 17+, Vue.js 3+)?**
-    - PASS: Framework and version in approved list **and** not EOL (verify via WebSearch)
-    - FAIL: Deprecated framework version detected, OR approved version that is EOL
+    - PASS: Framework and version in approved list **and** EOL table confirms supported (>6 months remaining)
+    - FAIL: Deprecated version, OR approved version that is EOL or within 6-month safety period
     - N/A: No frontend in the architecture
     - UNKNOWN: Framework present but version unspecified
 
@@ -161,8 +145,8 @@ When a version is approved but EOL, include both facts in the evidence:
 ### Other Stacks and Components (5 items)
 
 19. **Are automation tools approved (Python 3.x / Shell / RPA)?**
-    - PASS: Automation tool in approved list with version **and** not EOL (verify via WebSearch)
-    - FAIL: Python 2.x or unapproved RPA tool detected, OR approved version that is EOL
+    - PASS: Automation tool in approved list with version **and** EOL table confirms supported
+    - FAIL: Python 2.x or unapproved tool, OR approved version that is EOL or within 6-month safety period
     - N/A: No automation components in the architecture
     - UNKNOWN: Automation mentioned but tool/version unspecified
 
@@ -173,8 +157,8 @@ When a version is approved but EOL, include both facts in the evidence:
     - UNKNOWN: IaC mentioned but specific tool unspecified
 
 21. **Is database platform approved with version (PostgreSQL, SQL Server, Oracle, MongoDB)?**
-    - PASS: Database in approved catalog with version documented **and** not EOL (verify via WebSearch)
-    - FAIL: Unapproved database, OR approved database with EOL version
+    - PASS: Database in approved catalog with version **and** EOL table confirms supported (>6 months remaining)
+    - FAIL: Unapproved database, OR approved database with EOL version or within 6-month safety period
     - N/A: Stateless application with no database
     - UNKNOWN: Database present but platform or version unspecified
 
@@ -212,37 +196,43 @@ When a version is approved but EOL, include both facts in the evidence:
 
 ## Execution Steps
 
-### Phase 1: Stack Validation (26 items)
+### Phase 1: EOL Data Gathering (MUST run first)
 
-1. Read ARCHITECTURE.md to identify the navigation index and project name
-2. Read the relevant docs/ files listed below for evidence
-3. For each validation item (DEV-01 through DEV-26), evaluate against the criteria above
-4. Collect all results into the VALIDATION_RESULT format
+**This phase runs BEFORE any validation items are evaluated.** It builds an EOL lookup table used by Phase 2.
 
-### Phase 2: Supplementary EOL Scan
-
-**Note**: EOL checks are already integrated into Phase 1 version-bearing items (1, 2, 7, 8, 13, 19, 20, 21, 22, 23). Phase 2 catches any **additional** technologies detected in the docs that are not covered by the 26 standard items (e.g., middleware, message brokers, caching layers).
-
-**Skip this phase** if WebSearch is not available or no additional technologies with versions were found beyond those already checked in Phase 1.
-
-For each additional technology with a version:
-1. WebSearch: `"{technology} {version} end of life support date"`
-2. Add a supplementary EOL row to the items table:
+1. Read ARCHITECTURE.md navigation index and `docs/06-technology-stack.md`
+2. Extract every technology + version pair found (e.g., Java 17, Spring Boot 3.2, Angular 19, PostgreSQL 16, Docker 24, Terraform, etc.)
+3. For each technology with a specific version, use **WebSearch**:
    ```
-   | DEV-EOL-{N} | EOL | {PASS|FAIL|UNKNOWN} | {evidence} — {source} |
+   query: "{technology} {version} end of life support date site:endoflife.date OR site:{vendor}"
    ```
+4. Build the **EOL lookup table** in memory:
 
-Supplementary EOL items do NOT count toward `total_items` (stays at 26). FAIL items are added to `deviations`.
+   | Technology | Version | EOL Date | Status | Source |
+   |-----------|---------|----------|--------|--------|
+   | Java | 17 | 2030-09 | Supported | endoflife.date |
+   | Spring Boot | 3.2 | 2024-12-31 | **EOL** | endoflife.date |
+   | Angular | 19 | 2026-06-04 | **< 6 months** | endoflife.date |
+   | PostgreSQL | 16 | 2028-11 | Supported | endoflife.date |
 
-**Add EOL summary fields** to the VALIDATION_RESULT:
-```
-  eol_items_checked: {count of technologies checked}
-  eol_pass: {count}
-  eol_fail: {count}
-  eol_unknown: {count}
-```
+   Status rules (using today's date):
+   - **Supported**: EOL date is >6 months from today
+   - **< 6 months**: EOL date is within 6 months (safety period) → treated as FAIL
+   - **EOL**: EOL date is in the past → FAIL
+   - **Unknown**: WebSearch returned no conclusive EOL data
 
-5. Continue to output format
+**If WebSearch is unavailable**, set all EOL statuses to "Unknown" and proceed — do NOT block validation.
+
+### Phase 2: Stack Validation (26 items)
+
+1. Read remaining required files (`adr/README.md`, `docs/09-operational-considerations.md`)
+2. For each validation item (DEV-01 through DEV-26), evaluate against the criteria in the Validation Items section
+3. **For version-bearing items** (1, 2, 7, 8, 13, 19, 20, 21, 22, 23): consult the Phase 1 EOL lookup table. A version that is EOL or within the 6-month safety period **cannot** PASS regardless of approved list status.
+4. Evidence for version items must include the EOL status:
+   - Supported: `"Java 17 LTS — approved, supported until 2030-09 — endoflife.date"`
+   - EOL: `"Spring Boot 3.2 — approved but EOL since 2024-12-31 — endoflife.date"`
+   - Approaching EOL: `"Angular 19 — approved but EOL in < 6 months (2026-06-04) — endoflife.date"`
+5. Collect all results into the VALIDATION_RESULT format
 
 ### Required Files
 

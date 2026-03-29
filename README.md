@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.14.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.14.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.14.2` in the list.
+You should see `solutions-architect-skills v2.14.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,16 @@ Where:
 
 ## Roadmap
 
-### v2.14.2 (Current Release) ✅
+### v2.14.3 (Current Release) ✅
+**fix: EOL-first validation — Phase 1 gathers EOL data before any stack checks**
+
+- Restructured development validator: Phase 1 now builds an EOL lookup table via WebSearch BEFORE Phase 2 evaluates the 26 stack items
+- 6-month safety period: versions within 6 months of EOL are treated as FAIL, not just past-EOL
+- Version-bearing items (1, 2, 7, 8, 13, 19-23) consult the EOL table — approved + EOL = FAIL regardless of catalog status
+- Evidence now includes EOL dates: `"Spring Boot 3.2 — approved but EOL since 2024-12-31 — endoflife.date"`
+- Glob permission for marketplace directory added to settings.json.example
+
+### v2.14.2 (Previous Release) ✅
 **fix: EOL checks integrated into Phase 1 version items — approved does not mean supported**
 
 - Version-bearing validation items (1, 2, 7, 8, 13, 19, 20, 21, 22, 23) now verify EOL status via WebSearch as part of PASS/FAIL criteria — a technology on the approved list but past end-of-support is marked FAIL
