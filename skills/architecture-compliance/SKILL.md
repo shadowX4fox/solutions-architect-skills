@@ -612,9 +612,37 @@ compliance_docs_dir = dirname(realpath(architecture_file)) + "/compliance-docs"
 
 This is needed for the pipeline in Phase 4.
 
-**Step 3.3: Spawn Agents**
+**Step 3.3: Spawn Validators (FIRST)**
 
-Invoke all selected agents in a **single message** (Claude handles parallel Task execution natively). Pass `plugin_dir` and `architecture_file` in each prompt.
+⛔ **Validators MUST run before generators.** Each validator performs external checks (EOL verification via WebSearch, stack validation) and returns a `VALIDATION_RESULT` block. The generator needs this result to populate the contract correctly.
+
+Invoke validators for the selected contracts in a **single message** (parallel):
+
+| Contract Type | Validator | Subagent Type |
+|---------------|-----------|---------------|
+| Business Continuity | Aegis Validator | `solutions-architect-skills:business-continuity-validator` |
+| SRE Architecture | Prometheus Validator | `solutions-architect-skills:sre-validator` |
+| Cloud Architecture | Atlas Validator | `solutions-architect-skills:cloud-validator` |
+| Data & AI Architecture | Mnemosyne Validator | `solutions-architect-skills:data-ai-validator` |
+| Development Architecture | Hephaestus Validator | `solutions-architect-skills:development-validator` |
+| Process Transformation | Hermes Validator | `solutions-architect-skills:process-validator` |
+| Security Architecture | Argus Validator | `solutions-architect-skills:security-validator` |
+| Platform & IT Infrastructure | Vulcan Validator | `solutions-architect-skills:platform-validator` |
+| Enterprise Architecture | Athena Validator | `solutions-architect-skills:enterprise-validator` |
+| Integration Architecture | Iris Validator | `solutions-architect-skills:integration-validator` |
+
+**Validator prompt template:**
+```
+Validate [Contract Type] compliance.
+architecture_file: [absolute path to ARCHITECTURE.md]
+plugin_dir: [plugin_dir resolved in Step 3.1]
+```
+
+Each validator returns a `VALIDATION_RESULT:` block. **Collect and store all results** before proceeding to Step 3.4.
+
+**Step 3.4: Spawn Generators (with validation results)**
+
+After all validators complete, invoke generators for the selected contracts. **Include the validator's VALIDATION_RESULT in each generator's prompt.**
 
 | Contract Type | Agent | Subagent Type |
 |---------------|-------|---------------|
@@ -629,37 +657,64 @@ Invoke all selected agents in a **single message** (Claude handles parallel Task
 | Enterprise Architecture | Athena | `solutions-architect-skills:enterprise-compliance-generator` |
 | Integration Architecture | Iris | `solutions-architect-skills:integration-compliance-generator` |
 
-**Agent prompt template** (use for all agents, fill in contract type and agent name):
+**Generator prompt template** (includes validation result):
 ```
 Generate [Contract Type] compliance contract.
 architecture_file: [absolute path to ARCHITECTURE.md]
 plugin_dir: [plugin_dir resolved in Step 3.1]
+
+VALIDATION_RESULT:
+[paste the full VALIDATION_RESULT block returned by the validator for this contract type]
 ```
+
+Invoke all selected generators in a **single message** (parallel).
 
 **Single contract example:**
 ```python
+# Step 1: Spawn validator
+validator_result = Task(
+    subagent_type="solutions-architect-skills:development-validator",
+    prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]",
+    description="Hephaestus Validator — Development"
+)
+
+# Step 2: Spawn generator with validation result
 Task(
-    subagent_type="solutions-architect-skills:cloud-compliance-generator",
-    prompt="Generate Cloud Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: /home/user/.claude/plugins/solutions-architect-skills",
-    description="Atlas — Generate Cloud compliance"
+    subagent_type="solutions-architect-skills:development-compliance-generator",
+    prompt="Generate Development Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n" + validator_result,
+    description="Hephaestus — Development"
 )
 ```
 
-**All 10 contracts (single message, all in parallel):**
+**All 10 contracts — Step 1 (validators, single message, all parallel):**
 ```python
-Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Business Continuity", prompt="Generate Business Continuity compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — SRE", prompt="Generate SRE Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Cloud", prompt="Generate Cloud Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Data & AI", prompt="Generate Data & AI Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Development", prompt="Generate Development Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Process", prompt="Generate Process Transformation compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Security", prompt="Generate Security Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Platform", prompt="Generate Platform & IT Infrastructure compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Enterprise", prompt="Generate Enterprise Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Integration", prompt="Generate Integration Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="solutions-architect-skills:business-continuity-validator", description="Aegis Validator", prompt="Validate Business Continuity compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:sre-validator", description="Prometheus Validator", prompt="Validate SRE Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:cloud-validator", description="Atlas Validator", prompt="Validate Cloud Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:data-ai-validator", description="Mnemosyne Validator", prompt="Validate Data & AI Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:development-validator", description="Hephaestus Validator", prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:process-validator", description="Hermes Validator", prompt="Validate Process Transformation compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:security-validator", description="Argus Validator", prompt="Validate Security Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:platform-validator", description="Vulcan Validator", prompt="Validate Platform & IT Infrastructure compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:enterprise-validator", description="Athena Validator", prompt="Validate Enterprise Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:integration-validator", description="Iris Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 ```
 
-**Step 3.4: Collect Results**
+**All 10 contracts — Step 2 (generators with results, single message, all parallel):**
+```python
+Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Business Continuity", prompt="Generate Business Continuity compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — SRE", prompt="Generate SRE Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Cloud", prompt="Generate Cloud Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Data & AI", prompt="Generate Data & AI Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Development", prompt="Generate Development Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Process", prompt="Generate Process Transformation compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Security", prompt="Generate Security Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Platform", prompt="Generate Platform & IT Infrastructure compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Enterprise", prompt="Generate Enterprise Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Integration", prompt="Generate Integration Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
+```
+
+**Step 3.5: Collect Results**
 
 After all tasks complete, check for failures. If any agent failed:
 - Report which contracts failed

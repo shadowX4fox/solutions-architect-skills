@@ -286,18 +286,11 @@ output_mode: content
 -n: true
 ```
 
-**Step 3.4: External Validation**
+**Step 3.4: Parse Validation Results**
 
-Invoke the domain validation agent to evaluate the project against Data & AI Architecture standards:
+The orchestrator (architecture-compliance skill) runs your domain's validator agent **before** spawning you, and passes the `VALIDATION_RESULT` block in your prompt. **Do NOT invoke the validator yourself** — the result is already provided.
 
-```
-Agent tool:
-  subagent_type: "solutions-architect-skills:data-ai-validator"
-  prompt: "Validate Data & AI Architecture compliance.\narchitecture_file: [architecture_file]\nplugin_dir: [plugin_dir]"
-  description: "Mnemosyne Validator — Data & AI Architecture"
-```
-
-Parse the returned `VALIDATION_RESULT:` block. The format is:
+Look for the `VALIDATION_RESULT:` block in your input prompt and parse it:
 ```
 VALIDATION_RESULT:
   domain: ...
@@ -317,7 +310,7 @@ Store: `validation_total`, `validation_pass`, `validation_fail`, `validation_na`
 
 Use these values in PHASE 4 when populating validation-related placeholders.
 
-If the validation agent fails or times out, set `validation_status` to "PENDING" and continue with PHASE 4 — mark validation-dependent fields as "Unknown".
+If no `VALIDATION_RESULT:` block is found in your prompt, set `validation_status` to "PENDING" and continue with PHASE 4 — mark validation-dependent fields as "Unknown".
 
 ### PHASE 4: Populate Template
 

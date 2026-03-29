@@ -32,6 +32,7 @@
       "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
       "Glob(**/skills/architecture-compliance/SKILL.md)",
       "Glob(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
+      "Glob(**/agents/development-validator*)",
       "Read(//tmp/*)",
       "Write(//tmp/*)",
       "Write(compliance-docs/*)",

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.14.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.15.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.14.4` in the list.
+You should see `solutions-architect-skills v2.15.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,16 @@ Where:
 
 ## Roadmap
 
-### v2.14.4 (Current Release) ✅
+### v2.15.0 (Current Release) ✅
+**refactor: orchestrator-spawned validators — validators run before generators with results passed via prompt**
+
+- Validators are now spawned by the orchestrator (SKILL.md Step 3.3) in parallel, before generators
+- Each validator's VALIDATION_RESULT is collected and passed into its generator's prompt (Step 3.4)
+- Generators no longer attempt nested sub-agent spawning — they parse the pre-provided VALIDATION_RESULT
+- Fixes EOL detection failure: validators now run at orchestrator level with full WebSearch access
+- Architecture: Orchestrator → 10 validators (parallel) → collect results → 10 generators (parallel, with results)
+
+### v2.14.4 (Previous Release) ✅
 **fix: harden EOL enforcement — WebSearch in tools, context7 forbidden for EOL, Spring Boot 3.2 example**
 
 - Added `WebSearch` to development validator tools frontmatter (was missing — agent couldn't invoke it)
