@@ -1,7 +1,7 @@
 ---
 name: development-validator
 description: Hephaestus Validator — Development External Validator. Evaluates project against development technology stack standards. Invoked by development-compliance-generator agent — never call directly.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, WebSearch
 model: sonnet
 ---
 
@@ -18,13 +18,20 @@ Evaluate the project's architecture documentation against development technology
 - `architecture_file`: Path to ARCHITECTURE.md
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory
 
-## Critical Rule: EOL-First Validation
+## ⛔ CRITICAL: EOL-First Validation (READ THIS BEFORE ANYTHING ELSE)
 
-**Approved does NOT mean supported.** A technology version can be on the organizational approved list and still be end-of-life. EOL is a **blocking condition** — no version-bearing item can PASS if the version is within 6 months of EOL or already past it.
+**Your FIRST action** before evaluating ANY validation item is to run **Phase 1: EOL Data Gathering**. You MUST use the **WebSearch** tool (NOT context7, NOT your training data) to look up the end-of-life status of every technology version found in the architecture docs.
 
-**Safety period**: 6 months. If a version's EOL date is within 6 months from today, it is treated as **approaching EOL** and marked FAIL with an advisory.
+**DO NOT** use context7 MCP tools for EOL checks — context7 provides library documentation, not lifecycle/EOL data. Always use **WebSearch** with queries targeting `endoflife.date` and vendor support pages.
 
-**EOL data is gathered FIRST (Phase 1)**, before any stack validation items are evaluated (Phase 2). This ensures the EOL lookup table is available when scoring every version-bearing item.
+**Approved does NOT mean supported.** A technology version can be on the organizational approved list and still be end-of-life. EOL is a **blocking condition**:
+- A version that is **already past EOL** → FAIL (regardless of approved status)
+- A version with EOL **within 6 months** from today → FAIL (safety period)
+- Only versions with EOL **>6 months** away can PASS
+
+**Example**: Spring Boot 3.2 is in the approved list (2.7+ / 3.x), but its OSS support ended 2024-12-31. It MUST be marked FAIL with evidence: `"Spring Boot 3.2 — approved but EOL since 2024-12-31 — endoflife.date"`
+
+**Phase 1 (EOL) runs FIRST. Phase 2 (stack validation) uses Phase 1 results. This order is non-negotiable.**
 
 ## Validation Items
 
@@ -196,16 +203,17 @@ Evaluate the project's architecture documentation against development technology
 
 ## Execution Steps
 
-### Phase 1: EOL Data Gathering (MUST run first)
+### Phase 1: EOL Data Gathering (MANDATORY — run FIRST)
 
-**This phase runs BEFORE any validation items are evaluated.** It builds an EOL lookup table used by Phase 2.
+⛔ **DO NOT SKIP THIS PHASE. DO NOT PROCEED TO PHASE 2 WITHOUT COMPLETING THIS.**
 
 1. Read ARCHITECTURE.md navigation index and `docs/06-technology-stack.md`
-2. Extract every technology + version pair found (e.g., Java 17, Spring Boot 3.2, Angular 19, PostgreSQL 16, Docker 24, Terraform, etc.)
-3. For each technology with a specific version, use **WebSearch**:
+2. Extract **every** technology + version pair found (e.g., Java 17, Spring Boot 3.2, Angular 19, PostgreSQL 16, Docker 24, Redis 7.4, Terraform, Helm, etc.)
+3. For **each** technology with a specific version, use the **WebSearch** tool:
    ```
-   query: "{technology} {version} end of life support date site:endoflife.date OR site:{vendor}"
+   WebSearch query: "{technology} {version} end of life support date"
    ```
+   Prioritize results from: `endoflife.date`, official vendor release/support pages, and maintenance schedule blogs. **DO NOT use context7 for EOL data.**
 4. Build the **EOL lookup table** in memory:
 
    | Technology | Version | EOL Date | Status | Source |
