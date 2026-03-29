@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.16.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.16.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.16.0` in the list.
+You should see `solutions-architect-skills v2.16.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,14 @@ Where:
 
 ## Roadmap
 
-### v2.16.0 (Current Release) ✅
+### v2.16.1 (Current Release) ✅
+**fix: clean up agent permissions — remove unused Bash commands, align CLAUDE.md with settings.json.example**
+
+- Removed unused Bash permissions (`ls`, `cat`, `cp`, `grep`, `python3`) — agents self-constrain via TOOL DISCIPLINE
+- Added 10 validator Agent permissions and WebSearch to CLAUDE.md permissions block
+- Verified all 20 agent references (SKILL.md → agent names → permissions) are in sync
+
+### v2.16.0 (Previous Release) ✅
 **refactor: standardized External Validation Summary across all 10 contracts + generators folder**
 
 - All 10 compliance templates now have a consistent `## External Validation Summary` section (table with Status, Validator, Date, Items, Result + Deviations + Recommendations)
