@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.14.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.14.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.14.3` in the list.
+You should see `solutions-architect-skills v2.14.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,15 @@ Where:
 
 ## Roadmap
 
-### v2.14.3 (Current Release) ✅
+### v2.14.4 (Current Release) ✅
+**fix: harden EOL enforcement — WebSearch in tools, context7 forbidden for EOL, Spring Boot 3.2 example**
+
+- Added `WebSearch` to development validator tools frontmatter (was missing — agent couldn't invoke it)
+- Explicitly forbids context7 for EOL checks in 3 locations — context7 provides docs, not lifecycle data
+- Spring Boot 3.2 EOL example in mission section as concrete FAIL reference
+- Phase 1 marked ⛔ DO NOT SKIP with non-negotiable ordering enforcement
+
+### v2.14.3 (Previous Release) ✅
 **fix: EOL-first validation — Phase 1 gathers EOL data before any stack checks**
 
 - Restructured development validator: Phase 1 now builds an EOL lookup table via WebSearch BEFORE Phase 2 evaluates the 26 stack items
