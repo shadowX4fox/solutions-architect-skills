@@ -56,7 +56,8 @@
       "Agent(solutions-architect-skills:platform-validator)",
       "Agent(solutions-architect-skills:process-validator)",
       "Agent(solutions-architect-skills:security-validator)",
-      "Agent(solutions-architect-skills:sre-validator)"
+      "Agent(solutions-architect-skills:sre-validator)",
+      "WebSearch"
     ]
   },
 

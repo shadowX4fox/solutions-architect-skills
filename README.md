@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.15.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.15.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.15.0` in the list.
+You should see `solutions-architect-skills v2.15.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,12 @@ Where:
 
 ## Roadmap
 
-### v2.15.0 (Current Release) ✅
+### v2.15.1 (Current Release) ✅
+**fix: add WebSearch permission to settings.json.example for validator EOL checks**
+
+- Added `WebSearch` to the permissions allow list in `.claude/settings.json.example`
+
+### v2.15.0 (Previous Release) ✅
 **refactor: orchestrator-spawned validators — validators run before generators with results passed via prompt**
 
 - Validators are now spawned by the orchestrator (SKILL.md Step 3.3) in parallel, before generators
