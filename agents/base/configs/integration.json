@@ -1,6 +1,6 @@
 {
-  "agent_name": "integration-compliance-generator",
-  "agent_description": "Iris — Integration Architecture Compliance Contract Generator - Generates Integration Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "agent_name": "integration-validator",
+  "agent_description": "Iris — Integration Architecture Validator. Evaluates project against API standards, message patterns, and interoperability standards.",
   "domain": {
     "name": "Integration Architecture",
     "short_name": "Integration",
@@ -49,20 +49,76 @@
   "phase3": {
     "step31_title": "Required Sections for Integration Architecture",
     "required_files": [
-      { "path": "docs/components/README.md", "label": "Component Details", "description": "Data integration patterns" },
-      { "path": "docs/04-data-flow-patterns.md", "label": "Data Flow Patterns", "description": "API catalog, integration patterns" },
-      { "path": "docs/05-integration-points.md", "label": "Integration Points", "description": "Integration protocols, patterns" },
-      { "path": "docs/07-security-architecture.md", "label": "Security Architecture", "description": "Integration security controls" }
+      {
+        "path": "docs/components/README.md",
+        "label": "Component Details",
+        "description": "Data integration patterns"
+      },
+      {
+        "path": "docs/04-data-flow-patterns.md",
+        "label": "Data Flow Patterns",
+        "description": "API catalog, integration patterns"
+      },
+      {
+        "path": "docs/05-integration-points.md",
+        "label": "Integration Points",
+        "description": "Integration protocols, patterns"
+      },
+      {
+        "path": "docs/07-security-architecture.md",
+        "label": "Security Architecture",
+        "description": "Integration security controls"
+      }
     ],
     "data_points": [
-      { "name": "Integration Catalog", "file": "docs/05-integration-points.md", "pattern": "(integration catalog|API catalog|integration inventory|API registry)", "case_insensitive": true },
-      { "name": "OpenAPI Compliance", "file": "docs/05-integration-points.md", "pattern": "(OpenAPI|Swagger|AsyncAPI|API specification|API schema)", "case_insensitive": true },
-      { "name": "Correlation IDs", "file": "docs/05-integration-points.md", "pattern": "(correlation ID|trace ID|request ID|transaction ID|distributed tracing)", "case_insensitive": true },
-      { "name": "API Versioning", "file": "docs/05-integration-points.md", "pattern": "(API version|versioning strategy|version control|URI versioning|header versioning)", "case_insensitive": true },
-      { "name": "Integration Security", "file": "docs/07-security-architecture.md", "pattern": "(OAuth 2.0|API key|mutual TLS|integration security|API authentication)", "case_insensitive": true },
-      { "name": "API Protocols", "file": "docs/05-integration-points.md", "pattern": "(REST|GraphQL|gRPC|WebSocket|SOAP|HTTP)", "case_insensitive": true },
-      { "name": "Message Patterns", "file": "docs/04-data-flow-patterns.md", "pattern": "(message queue|pub/sub|publish subscribe|message broker|Kafka|RabbitMQ)", "case_insensitive": true },
-      { "name": "Async Patterns", "file": "docs/04-data-flow-patterns.md", "pattern": "(asynchronous|async|selective async|event notification|request/reply)", "case_insensitive": true }
+      {
+        "name": "Integration Catalog",
+        "file": "docs/05-integration-points.md",
+        "pattern": "(integration catalog|API catalog|integration inventory|API registry)",
+        "case_insensitive": true
+      },
+      {
+        "name": "OpenAPI Compliance",
+        "file": "docs/05-integration-points.md",
+        "pattern": "(OpenAPI|Swagger|AsyncAPI|API specification|API schema)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Correlation IDs",
+        "file": "docs/05-integration-points.md",
+        "pattern": "(correlation ID|trace ID|request ID|transaction ID|distributed tracing)",
+        "case_insensitive": true
+      },
+      {
+        "name": "API Versioning",
+        "file": "docs/05-integration-points.md",
+        "pattern": "(API version|versioning strategy|version control|URI versioning|header versioning)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Integration Security",
+        "file": "docs/07-security-architecture.md",
+        "pattern": "(OAuth 2.0|API key|mutual TLS|integration security|API authentication)",
+        "case_insensitive": true
+      },
+      {
+        "name": "API Protocols",
+        "file": "docs/05-integration-points.md",
+        "pattern": "(REST|GraphQL|gRPC|WebSocket|SOAP|HTTP)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Message Patterns",
+        "file": "docs/04-data-flow-patterns.md",
+        "pattern": "(message queue|pub/sub|publish subscribe|message broker|Kafka|RabbitMQ)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Async Patterns",
+        "file": "docs/04-data-flow-patterns.md",
+        "pattern": "(asynchronous|async|selective async|event notification|request/reply)",
+        "case_insensitive": true
+      }
     ]
   },
   "overrides": [],
@@ -77,7 +133,5 @@
   ],
   "phase4_anchor_title": "# Compliance Contract: Integration Architecture",
   "requirement_codes_list": "LAI1, LAI2, LAI3, LAI4, LAI5, LAI6, LAI7",
-  "success_sections": "docs/components/README.md, docs/04, docs/05, docs/07",
-  "validation_agent": "solutions-architect-skills:integration-validator",
-  "validation_agent_name": "integration-validator"
+  "success_sections": "docs/components/README.md, docs/04, docs/05, docs/07"
 }

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.16.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.16.1` in the list.
+You should see `solutions-architect-skills v3.0.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,19 @@ Where:
 
 ## Roadmap
 
-### v2.16.1 (Current Release) ✅
+### v3.0.0 (Current Release) ✅
+**major: universal compliance generator — 10 agents consolidated to 1 + config-driven validators**
+
+- Replaced 10 domain-specific generator agents with a single `agents/compliance-generator.md` that reads domain config at runtime
+- Personality, key data points, focus areas, and agent notes moved from generators to validators — generators are pure template-fillers
+- Validators read their domain config (`agents/base/configs/*.json`) at startup for extensibility
+- Removed build system (`scripts/build-agents.ts`, `agents/base/AGENT_BASE.md`, `agents/base/sections/`, `agents/base/overrides/`) — no longer needed
+- Removed `Glob` from validator tools (caused wildcard permission prompts)
+- Simplified permissions: 10 generator Agent rules → 1 (`compliance-generator`)
+- Cleaned redundant `validation_agent`/`validation_agent_name` fields from configs
+- Architecture: Orchestrator → 10 validators (parallel, with personality + EOL) → 1 universal generator ×10 (parallel, config-driven)
+
+### v2.16.1 (Previous Release) ✅
 **fix: clean up agent permissions — remove unused Bash commands, align CLAUDE.md with settings.json.example**
 
 - Removed unused Bash permissions (`ls`, `cat`, `cp`, `grep`, `python3`) — agents self-constrain via TOOL DISCIPLINE

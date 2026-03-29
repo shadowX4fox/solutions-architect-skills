@@ -35,7 +35,7 @@ This repository follows the Claude Code plugin structure:
 
 - `.claude-plugin/` - Plugin manifest (`plugin.json`) and marketplace registry (`marketplace.json`) — version is tracked here (authoritative)
 - `package.json` - Root Bun workspace config; `bun run build` / `bun run typecheck` operate here
-- `agents/` - `agents/generators/` holds 10 generated compliance agents; `agents/validators/` holds 10 hand-maintained validation agents; `agents/base/` holds the template, sections, overrides, and configs
+- `agents/` - `agents/compliance-generator.md` is the single universal generator; `agents/validators/` holds 10 domain validation agents; `agents/base/configs/` holds 10 domain config JSONs read at runtime
 - `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-docs-export)
 - `tools/docgen/` - Standalone `generate-doc.js` (Word/.docx generation via `docx` v8); its own `package.json` under the Bun workspace
 - `scripts/build-agents.ts` - Assembles 10 compliance agent .md files from base template + domain configs
@@ -59,14 +59,12 @@ For more on plugin structure, see [Plugin Directory Structure](https://docs.anth
 
 **Agents vs. Skills**: The `agents/` directory holds 10 compliance generator agents and 10 validation agents consumed by Claude Code's Agent tool. They are **not** skills; compliance generators are spawned as sub-agents from the `architecture-compliance` skill, and validation agents are spawned by their respective compliance generators. NEVER invoke them directly from user-facing prompts.
 
-**Agent build system**: The 10 compliance generator agents (`agents/generators/*-compliance-generator.md`) are **generated files** — assembled from `agents/base/AGENT_BASE.md` + domain configs in `agents/base/configs/*.json` by `scripts/build-agents.ts`. Do NOT edit generated agent files directly; edit the base template or configs instead, then run `bun run build:agents`. Validation agents (`agents/validators/*.md`) are hand-maintained.
+**Agent architecture**: A single universal `agents/compliance-generator.md` handles all 10 contract types. It reads its domain config at runtime from `agents/base/configs/{contract_type}.json` to load template filename, section mappings, grep patterns, and requirement codes. Domain-specific validation (EOL checks, stack validation) is handled by 10 separate validator agents in `agents/validators/`.
 
 **Agent directory structure**:
-- `agents/base/AGENT_BASE.md` — shared template with `{{variable}}` placeholders
-- `agents/base/sections/` — extracted shared sections (Phase 0-5, tool discipline, error handling)
-- `agents/base/overrides/` — domain-specific unique sections (Development Step 4.6, SRE two-tier scoring)
-- `agents/base/configs/` — 10 JSON files with domain-specific values (persona, grep patterns, requirements, etc.)
-- `agents/validators/` — 10 validation agents that perform external standard checks per domain
+- `agents/compliance-generator.md` — single universal generator (reads config at runtime)
+- `agents/base/configs/` — 10 JSON files with domain-specific values (section mappings, grep patterns, requirements, etc.)
+- `agents/validators/` — 10 validation agents with domain personality, EOL checks, and standard validation
 
 **Versioning**: The canonical version lives in `.claude-plugin/plugin.json`. Commits follow `feat: <description> v<semver>` and the `/release` skill bumps the version, commits, and pushes.
 
@@ -201,16 +199,7 @@ The skill includes:
     "Write(//tmp/*)",
     "Write(compliance-docs/*)",
     "Read(compliance-docs/*)",
-    "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
-    "Agent(solutions-architect-skills:cloud-compliance-generator)",
-    "Agent(solutions-architect-skills:data-ai-compliance-generator)",
-    "Agent(solutions-architect-skills:development-compliance-generator)",
-    "Agent(solutions-architect-skills:enterprise-compliance-generator)",
-    "Agent(solutions-architect-skills:integration-compliance-generator)",
-    "Agent(solutions-architect-skills:platform-compliance-generator)",
-    "Agent(solutions-architect-skills:process-compliance-generator)",
-    "Agent(solutions-architect-skills:security-compliance-generator)",
-    "Agent(solutions-architect-skills:sre-compliance-generator)",
+    "Agent(solutions-architect-skills:compliance-generator)",
     "Agent(solutions-architect-skills:business-continuity-validator)",
     "Agent(solutions-architect-skills:cloud-validator)",
     "Agent(solutions-architect-skills:data-ai-validator)",

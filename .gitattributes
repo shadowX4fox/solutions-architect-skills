@@ -1,3 +1,2 @@
-# Generated compliance agent files — assembled from base template + domain configs
-# Regenerate with: bun run build:agents
-agents/generators/*.md linguist-generated=true
+# No generated files — compliance-generator.md is hand-maintained
+# Domain configs in agents/base/configs/ are the source of truth for domain-specific values

@@ -1,6 +1,6 @@
 {
-  "agent_name": "platform-compliance-generator",
-  "agent_description": "Vulcan — Platform & IT Infrastructure Compliance Contract Generator - Generates Platform & IT Infrastructure compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "agent_name": "platform-validator",
+  "agent_description": "Vulcan — Platform & IT Infrastructure Validator. Evaluates project against infrastructure, environment, and database standards.",
   "domain": {
     "name": "Platform & IT Infrastructure",
     "short_name": "Platform",
@@ -49,19 +49,70 @@
   "phase3": {
     "step31_title": "Required Sections for Platform & IT Infrastructure",
     "required_files": [
-      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "Component topology, environment design" },
-      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "Infrastructure specifications, IaC" },
-      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Operational infrastructure requirements" },
-      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "Capacity requirements (secondary)" }
+      {
+        "path": "docs/03-architecture-layers.md",
+        "label": "Architecture Layers",
+        "description": "Component topology, environment design"
+      },
+      {
+        "path": "docs/06-technology-stack.md",
+        "label": "Technology Stack",
+        "description": "Infrastructure specifications, IaC"
+      },
+      {
+        "path": "docs/09-operational-considerations.md",
+        "label": "Operational Considerations",
+        "description": "Operational infrastructure requirements"
+      },
+      {
+        "path": "docs/08-scalability-and-performance.md",
+        "label": "Scalability & Performance",
+        "description": "Capacity requirements (secondary)"
+      }
     ],
     "data_points": [
-      { "name": "Environment Isolation", "file": "docs/03-architecture-layers.md", "pattern": "(environment isolation|production environment|staging|development|network isolation)", "case_insensitive": true },
-      { "name": "Operating Systems", "file": "docs/06-technology-stack.md", "pattern": "(operating system|OS|Linux|Windows Server|Ubuntu|RHEL|CentOS)", "case_insensitive": true },
-      { "name": "Database", "file": "docs/06-technology-stack.md", "pattern": "(database|PostgreSQL|MySQL|MongoDB|SQL Server|Oracle|database capacity)", "case_insensitive": true },
-      { "name": "Retention Policies", "file": "docs/09-operational-considerations.md", "pattern": "(retention policy|data retention|backup retention|log retention)", "case_insensitive": true },
-      { "name": "Naming Conventions", "file": "docs/06-technology-stack.md", "pattern": "(naming convention|naming standard|resource naming|nomenclature)", "case_insensitive": true },
-      { "name": "Capacity Planning", "file": "docs/08-scalability-and-performance.md", "pattern": "(capacity|TPS|transactions per second|throughput|scalability|3x growth)", "case_insensitive": true },
-      { "name": "Infrastructure as Code", "file": "docs/06-technology-stack.md", "pattern": "(Infrastructure as Code|IaC|Terraform|CloudFormation|Ansible|Puppet)", "case_insensitive": true }
+      {
+        "name": "Environment Isolation",
+        "file": "docs/03-architecture-layers.md",
+        "pattern": "(environment isolation|production environment|staging|development|network isolation)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Operating Systems",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(operating system|OS|Linux|Windows Server|Ubuntu|RHEL|CentOS)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Database",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(database|PostgreSQL|MySQL|MongoDB|SQL Server|Oracle|database capacity)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Retention Policies",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(retention policy|data retention|backup retention|log retention)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Naming Conventions",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(naming convention|naming standard|resource naming|nomenclature)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Capacity Planning",
+        "file": "docs/08-scalability-and-performance.md",
+        "pattern": "(capacity|TPS|transactions per second|throughput|scalability|3x growth)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Infrastructure as Code",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(Infrastructure as Code|IaC|Terraform|CloudFormation|Ansible|Puppet)",
+        "case_insensitive": true
+      }
     ]
   },
   "overrides": [],
@@ -75,7 +126,5 @@
   ],
   "phase4_anchor_title": "# Compliance Contract: Platform & IT Infrastructure",
   "requirement_codes_list": "LAPI01, LAPI02, LAPI03, LAPI04, LAPI05, LAPI06, LAPI07, LAPI08, LAPI09",
-  "success_sections": "docs/03, docs/06, docs/09, docs/08",
-  "validation_agent": "solutions-architect-skills:platform-validator",
-  "validation_agent_name": "platform-validator"
+  "success_sections": "docs/03, docs/06, docs/09, docs/08"
 }

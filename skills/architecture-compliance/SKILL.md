@@ -644,22 +644,12 @@ Each validator returns a `VALIDATION_RESULT:` block. **Collect and store all res
 
 After all validators complete, invoke generators for the selected contracts. **Include the validator's VALIDATION_RESULT in each generator's prompt.**
 
-| Contract Type | Agent | Subagent Type |
-|---------------|-------|---------------|
-| Business Continuity | Aegis | `solutions-architect-skills:business-continuity-compliance-generator` |
-| SRE Architecture | Prometheus | `solutions-architect-skills:sre-compliance-generator` |
-| Cloud Architecture | Atlas | `solutions-architect-skills:cloud-compliance-generator` |
-| Data & AI Architecture | Mnemosyne | `solutions-architect-skills:data-ai-compliance-generator` |
-| Development Architecture | Hephaestus | `solutions-architect-skills:development-compliance-generator` |
-| Process Transformation | Hermes | `solutions-architect-skills:process-compliance-generator` |
-| Security Architecture | Argus | `solutions-architect-skills:security-compliance-generator` |
-| Platform & IT Infrastructure | Vulcan | `solutions-architect-skills:platform-compliance-generator` |
-| Enterprise Architecture | Athena | `solutions-architect-skills:enterprise-compliance-generator` |
-| Integration Architecture | Iris | `solutions-architect-skills:integration-compliance-generator` |
+All generators use the **single universal agent** `solutions-architect-skills:compliance-generator`. The `contract_type` parameter determines which config and template to use.
 
-**Generator prompt template** (includes validation result):
+**Generator prompt template** (includes contract_type and validation result):
 ```
-Generate [Contract Type] compliance contract.
+Generate compliance contract.
+contract_type: [config name, e.g., cloud]
 architecture_file: [absolute path to ARCHITECTURE.md]
 plugin_dir: [plugin_dir resolved in Step 3.1]
 
@@ -678,11 +668,11 @@ validator_result = Task(
     description="Hephaestus Validator — Development"
 )
 
-# Step 2: Spawn generator with validation result
+# Step 2: Spawn universal generator with contract_type and validation result
 Task(
-    subagent_type="solutions-architect-skills:development-compliance-generator",
-    prompt="Generate Development Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n" + validator_result,
-    description="Hephaestus — Development"
+    subagent_type="solutions-architect-skills:compliance-generator",
+    prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n" + validator_result,
+    description="CC-004 — Development Architecture"
 )
 ```
 
@@ -700,18 +690,18 @@ Task(subagent_type="solutions-architect-skills:enterprise-validator", descriptio
 Task(subagent_type="solutions-architect-skills:integration-validator", description="Iris Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 ```
 
-**All 10 contracts — Step 2 (generators with results, single message, all parallel):**
+**All 10 contracts — Step 2 (universal generator × 10, single message, all parallel):**
 ```python
-Task(subagent_type="solutions-architect-skills:business-continuity-compliance-generator", description="Aegis — Business Continuity", prompt="Generate Business Continuity compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:sre-compliance-generator", description="Prometheus — SRE", prompt="Generate SRE Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:cloud-compliance-generator", description="Atlas — Cloud", prompt="Generate Cloud Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:data-ai-compliance-generator", description="Mnemosyne — Data & AI", prompt="Generate Data & AI Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:development-compliance-generator", description="Hephaestus — Development", prompt="Generate Development Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:process-compliance-generator", description="Hermes — Process", prompt="Generate Process Transformation compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:security-compliance-generator", description="Argus — Security", prompt="Generate Security Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:platform-compliance-generator", description="Vulcan — Platform", prompt="Generate Platform & IT Infrastructure compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:enterprise-compliance-generator", description="Athena — Enterprise", prompt="Generate Enterprise Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:integration-compliance-generator", description="Iris — Integration", prompt="Generate Integration Architecture compliance contract.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-001 — Business Continuity", prompt="Generate compliance contract.\ncontract_type: business-continuity\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-010 — SRE", prompt="Generate compliance contract.\ncontract_type: sre\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-002 — Cloud", prompt="Generate compliance contract.\ncontract_type: cloud\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-003 — Data & AI", prompt="Generate compliance contract.\ncontract_type: data-ai\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-004 — Development", prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-008 — Process", prompt="Generate compliance contract.\ncontract_type: process\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-009 — Security", prompt="Generate compliance contract.\ncontract_type: security\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-007 — Platform", prompt="Generate compliance contract.\ncontract_type: platform\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-005 — Enterprise", prompt="Generate compliance contract.\ncontract_type: enterprise\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-006 — Integration", prompt="Generate compliance contract.\ncontract_type: integration\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
 ```
 
 **Step 3.5: Collect Results**

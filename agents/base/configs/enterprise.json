@@ -1,6 +1,6 @@
 {
-  "agent_name": "enterprise-compliance-generator",
-  "agent_description": "Athena — Enterprise Architecture Compliance Contract Generator - Generates Enterprise Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "agent_name": "enterprise-validator",
+  "agent_description": "Athena — Enterprise Architecture Validator. Evaluates project against business alignment, architecture principles, and governance standards.",
   "domain": {
     "name": "Enterprise Architecture",
     "short_name": "Enterprise",
@@ -49,19 +49,70 @@
   "phase3": {
     "step31_title": "Required Sections for Enterprise Architecture",
     "required_files": [
-      { "path": "docs/01-system-overview.md", "label": "System Overview", "description": "Business capabilities, strategic alignment" },
-      { "path": "docs/02-architecture-principles.md", "label": "Architecture Principles", "description": "Modularity, bounded contexts" },
-      { "path": "docs/03-architecture-layers.md", "label": "Architecture Layers", "description": "Component design, service boundaries" },
-      { "path": "adr/README.md", "label": "ADRs", "description": "Technology decisions, architecture rationale (secondary)" }
+      {
+        "path": "docs/01-system-overview.md",
+        "label": "System Overview",
+        "description": "Business capabilities, strategic alignment"
+      },
+      {
+        "path": "docs/02-architecture-principles.md",
+        "label": "Architecture Principles",
+        "description": "Modularity, bounded contexts"
+      },
+      {
+        "path": "docs/03-architecture-layers.md",
+        "label": "Architecture Layers",
+        "description": "Component design, service boundaries"
+      },
+      {
+        "path": "adr/README.md",
+        "label": "ADRs",
+        "description": "Technology decisions, architecture rationale (secondary)"
+      }
     ],
     "data_points": [
-      { "name": "Business Capability Alignment", "file": "docs/01-system-overview.md", "pattern": "(business capability|capability map|business alignment|business domain)", "case_insensitive": true },
-      { "name": "Modularity", "file": "docs/02-architecture-principles.md", "pattern": "(modularity|bounded context|domain-driven|microservice|service boundary)", "case_insensitive": true },
-      { "name": "Third-Party Customization", "file": "docs/01-system-overview.md", "pattern": "(third-party|COTS|vendor|customization|SaaS customization)", "case_insensitive": true },
-      { "name": "Cloud-First", "file": "docs/03-architecture-layers.md", "pattern": "(cloud-first|cloud-native|cloud adoption|cloud strategy)", "case_insensitive": true },
-      { "name": "Technology Lifecycle", "file": "adr/README.md", "pattern": "(technology lifecycle|EOL|end of life|technology age|obsolescence)", "case_insensitive": true },
-      { "name": "API-First", "file": "docs/02-architecture-principles.md", "pattern": "(API-first|API design|API strategy|RESTful|GraphQL)", "case_insensitive": true },
-      { "name": "Event-Driven", "file": "docs/02-architecture-principles.md", "pattern": "(event-driven|event sourcing|message queue|Kafka|event stream|asynchronous)", "case_insensitive": true }
+      {
+        "name": "Business Capability Alignment",
+        "file": "docs/01-system-overview.md",
+        "pattern": "(business capability|capability map|business alignment|business domain)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Modularity",
+        "file": "docs/02-architecture-principles.md",
+        "pattern": "(modularity|bounded context|domain-driven|microservice|service boundary)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Third-Party Customization",
+        "file": "docs/01-system-overview.md",
+        "pattern": "(third-party|COTS|vendor|customization|SaaS customization)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Cloud-First",
+        "file": "docs/03-architecture-layers.md",
+        "pattern": "(cloud-first|cloud-native|cloud adoption|cloud strategy)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Technology Lifecycle",
+        "file": "adr/README.md",
+        "pattern": "(technology lifecycle|EOL|end of life|technology age|obsolescence)",
+        "case_insensitive": true
+      },
+      {
+        "name": "API-First",
+        "file": "docs/02-architecture-principles.md",
+        "pattern": "(API-first|API design|API strategy|RESTful|GraphQL)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Event-Driven",
+        "file": "docs/02-architecture-principles.md",
+        "pattern": "(event-driven|event sourcing|message queue|Kafka|event stream|asynchronous)",
+        "case_insensitive": true
+      }
     ]
   },
   "overrides": [],
@@ -76,7 +127,5 @@
   ],
   "phase4_anchor_title": "# Compliance Contract: Enterprise Architecture",
   "requirement_codes_list": "LAE1, LAE2, LAE3, LAE4, LAE5, LAE6, LAE7",
-  "success_sections": "docs/01, docs/02, docs/03, adr/README.md",
-  "validation_agent": "solutions-architect-skills:enterprise-validator",
-  "validation_agent_name": "enterprise-validator"
+  "success_sections": "docs/01, docs/02, docs/03, adr/README.md"
 }

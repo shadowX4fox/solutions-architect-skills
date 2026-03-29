@@ -1,6 +1,6 @@
 {
-  "agent_name": "sre-compliance-generator",
-  "agent_description": "Prometheus — SRE Architecture Compliance Contract Generator - Generates SRE Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "agent_name": "sre-validator",
+  "agent_description": "Prometheus — SRE Architecture Validator. Evaluates project against SLO/SLI, observability, incident management, and automation standards.",
   "domain": {
     "name": "SRE Architecture",
     "short_name": "SRE",
@@ -55,21 +55,83 @@
   "phase3": {
     "step31_title": "Required Sections for SRE Architecture",
     "required_files": [
-      { "path": "docs/08-scalability-and-performance.md", "label": "Scalability & Performance", "description": "SLO, SLI, latency targets (30%)" },
-      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Monitoring, DR, deployment (50%)" },
-      { "path": "docs/components/README.md", "label": "Component Details", "description": "Infrastructure resilience (10%)" }
+      {
+        "path": "docs/08-scalability-and-performance.md",
+        "label": "Scalability & Performance",
+        "description": "SLO, SLI, latency targets (30%)"
+      },
+      {
+        "path": "docs/09-operational-considerations.md",
+        "label": "Operational Considerations",
+        "description": "Monitoring, DR, deployment (50%)"
+      },
+      {
+        "path": "docs/components/README.md",
+        "label": "Component Details",
+        "description": "Infrastructure resilience (10%)"
+      }
     ],
     "data_points": [
-      { "name": "SLO Detection", "file": "docs/08-scalability-and-performance.md", "pattern": "SLO[:\\s]+([0-9]+\\.?[0-9]*)%", "case_insensitive": false },
-      { "name": "SLI Detection", "file": "docs/08-scalability-and-performance.md", "pattern": "(SLI|service level indicator|availability|latency|throughput|error rate)", "case_insensitive": true },
-      { "name": "Error Budget", "file": "docs/09-operational-considerations.md", "pattern": "error budget[:\\s]+([0-9]+\\.?[0-9]*)%", "case_insensitive": true },
-      { "name": "MTTR", "file": "docs/09-operational-considerations.md", "pattern": "MTTR[:\\s]+([0-9]+)\\s*(minute|hour|min|hr)", "case_insensitive": true },
-      { "name": "MTBF", "file": "docs/09-operational-considerations.md", "pattern": "MTBF[:\\s]+([0-9]+)\\s*(day|hour|week)", "case_insensitive": true },
-      { "name": "Monitoring Tools", "file": "docs/09-operational-considerations.md", "pattern": "(Prometheus|Grafana|Datadog|New Relic|CloudWatch|Azure Monitor|Stackdriver|Dynatrace)", "case_insensitive": true },
-      { "name": "Observability Triad", "file": "docs/09-operational-considerations.md", "pattern": "(metrics|logs|traces|distributed tracing|log aggregation|metric collection)", "case_insensitive": true },
-      { "name": "Incident Response", "file": "docs/09-operational-considerations.md", "pattern": "(incident response|on[- ]call|P1|P2|P3|incident severity|postmortem|post[- ]incident)", "case_insensitive": true },
-      { "name": "Runbooks", "file": "docs/09-operational-considerations.md", "pattern": "(runbook|operational procedure|troubleshooting guide|playbook)", "case_insensitive": true },
-      { "name": "Deployment Automation", "file": "docs/09-operational-considerations.md", "pattern": "(CI/CD|deployment automation|blue[- ]green|canary|rolling deployment)", "case_insensitive": true }
+      {
+        "name": "SLO Detection",
+        "file": "docs/08-scalability-and-performance.md",
+        "pattern": "SLO[:\\s]+([0-9]+\\.?[0-9]*)%",
+        "case_insensitive": false
+      },
+      {
+        "name": "SLI Detection",
+        "file": "docs/08-scalability-and-performance.md",
+        "pattern": "(SLI|service level indicator|availability|latency|throughput|error rate)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Error Budget",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "error budget[:\\s]+([0-9]+\\.?[0-9]*)%",
+        "case_insensitive": true
+      },
+      {
+        "name": "MTTR",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "MTTR[:\\s]+([0-9]+)\\s*(minute|hour|min|hr)",
+        "case_insensitive": true
+      },
+      {
+        "name": "MTBF",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "MTBF[:\\s]+([0-9]+)\\s*(day|hour|week)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Monitoring Tools",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(Prometheus|Grafana|Datadog|New Relic|CloudWatch|Azure Monitor|Stackdriver|Dynatrace)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Observability Triad",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(metrics|logs|traces|distributed tracing|log aggregation|metric collection)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Incident Response",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(incident response|on[- ]call|P1|P2|P3|incident severity|postmortem|post[- ]incident)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Runbooks",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(runbook|operational procedure|troubleshooting guide|playbook)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Deployment Automation",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(CI/CD|deployment automation|blue[- ]green|canary|rolling deployment)",
+        "case_insensitive": true
+      }
     ]
   },
   "overrides": [
@@ -88,7 +150,5 @@
   ],
   "phase4_anchor_title": "# Compliance Contract: SRE Architecture",
   "requirement_codes_list": "LASRE01, LASRE02, LASRE03, LASRE04, LASRE05, LASRE06, LASRE07, LASRE08, LASRE09, LASRE10, LASRE11, LASRE12, LASRE13, LASRE14, LASRE15, LASRE16, LASRE17, LASRE18, LASRE19, LASRE20, LASRE21, LASRE22, LASRE23, LASRE24, LASRE25, LASRE26, LASRE27, LASRE28, LASRE29, LASRE30, LASRE31, LASRE32, LASRE33, LASRE34, LASRE35, LASRE36, LASRE37, LASRE38, LASRE39, LASRE40, LASRE41, LASRE42, LASRE43, LASRE44, LASRE45, LASRE46, LASRE47, LASRE48, LASRE49, LASRE50, LASRE51, LASRE52, LASRE53, LASRE54, LASRE55, LASRE56, LASRE57",
-  "success_sections": "docs/08-scalability-and-performance.md, docs/09-operational-considerations.md, docs/components/README.md",
-  "validation_agent": "solutions-architect-skills:sre-validator",
-  "validation_agent_name": "sre-validator"
+  "success_sections": "docs/08-scalability-and-performance.md, docs/09-operational-considerations.md, docs/components/README.md"
 }

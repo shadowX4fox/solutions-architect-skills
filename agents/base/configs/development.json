@@ -1,6 +1,6 @@
 {
-  "agent_name": "development-compliance-generator",
-  "agent_description": "Hephaestus — Development Architecture Compliance Contract Generator - Generates Development Architecture compliance contracts from ARCHITECTURE.md. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.",
+  "agent_name": "development-validator",
+  "agent_description": "Hephaestus — Development Architecture Validator. Evaluates project against technology stack, coding standards, and EOL compliance.",
   "domain": {
     "name": "Development Architecture",
     "short_name": "Development",
@@ -49,19 +49,69 @@
   "phase3": {
     "step31_title": "Required Sections for Development Architecture",
     "required_files": [
-      { "path": "docs/02-architecture-principles.md", "label": "Architecture Principles", "description": "Architecture patterns, design principles" },
-      { "path": "docs/components/README.md", "label": "Component Details", "description": "Development infrastructure, CI/CD" },
-      { "path": "docs/06-technology-stack.md", "label": "Technology Stack", "description": "Languages, frameworks, versions" },
-      { "path": "adr/README.md", "label": "ADRs", "description": "Architectural decisions, technology choices" },
-      { "path": "docs/09-operational-considerations.md", "label": "Operational Considerations", "description": "Build/deployment automation (secondary)" }
+      {
+        "path": "docs/02-architecture-principles.md",
+        "label": "Architecture Principles",
+        "description": "Architecture patterns, design principles"
+      },
+      {
+        "path": "docs/components/README.md",
+        "label": "Component Details",
+        "description": "Development infrastructure, CI/CD"
+      },
+      {
+        "path": "docs/06-technology-stack.md",
+        "label": "Technology Stack",
+        "description": "Languages, frameworks, versions"
+      },
+      {
+        "path": "adr/README.md",
+        "label": "ADRs",
+        "description": "Architectural decisions, technology choices"
+      },
+      {
+        "path": "docs/09-operational-considerations.md",
+        "label": "Operational Considerations",
+        "description": "Build/deployment automation (secondary)"
+      }
     ],
     "data_points": [
-      { "name": "Technology Stack", "file": "docs/06-technology-stack.md", "pattern": "(language|framework|library|Java|Python|Node|React|Spring|.NET)", "case_insensitive": true },
-      { "name": "Code Coverage", "file": "docs/09-operational-considerations.md", "pattern": "(code coverage|test coverage|unit test|integration test)", "case_insensitive": true },
-      { "name": "Technical Debt", "file": "adr/README.md", "pattern": "(technical debt|tech debt|refactoring|code quality|code smell)", "case_insensitive": true },
-      { "name": "Dependency Management", "file": "docs/06-technology-stack.md", "pattern": "(dependency|vulnerability|CVE|security patch|version upgrade)", "case_insensitive": true },
-      { "name": "CI/CD Pipeline", "file": "docs/09-operational-considerations.md", "pattern": "(CI/CD|continuous integration|continuous deployment|Jenkins|GitHub Actions|GitLab CI)", "case_insensitive": true },
-      { "name": "Code Review", "file": "docs/09-operational-considerations.md", "pattern": "(code review|peer review|pull request|PR review)", "case_insensitive": true }
+      {
+        "name": "Technology Stack",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(language|framework|library|Java|Python|Node|React|Spring|.NET)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Code Coverage",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(code coverage|test coverage|unit test|integration test)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Technical Debt",
+        "file": "adr/README.md",
+        "pattern": "(technical debt|tech debt|refactoring|code quality|code smell)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Dependency Management",
+        "file": "docs/06-technology-stack.md",
+        "pattern": "(dependency|vulnerability|CVE|security patch|version upgrade)",
+        "case_insensitive": true
+      },
+      {
+        "name": "CI/CD Pipeline",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(CI/CD|continuous integration|continuous deployment|Jenkins|GitHub Actions|GitLab CI)",
+        "case_insensitive": true
+      },
+      {
+        "name": "Code Review",
+        "file": "docs/09-operational-considerations.md",
+        "pattern": "(code review|peer review|pull request|PR review)",
+        "case_insensitive": true
+      }
     ]
   },
   "overrides": [],
@@ -75,7 +125,5 @@
   ],
   "phase4_anchor_title": "# Compliance Contract: Development Architecture",
   "requirement_codes_list": "LADES1, LADES2",
-  "success_sections": "docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09",
-  "validation_agent": "solutions-architect-skills:development-validator",
-  "validation_agent_name": "development-validator"
+  "success_sections": "docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09"
 }
