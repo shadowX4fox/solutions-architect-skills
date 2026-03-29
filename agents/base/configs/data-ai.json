@@ -78,5 +78,6 @@
   "phase4_anchor_title": "# Compliance Contract: Data & AI Architecture",
   "requirement_codes_list": "LAD1, LAD2, LAD3, LAD4, LAD5, LAD6, LAD7, LAD8, LAIA1, LAIA2, LAIA3",
   "success_sections": "docs/components/README.md, docs/04, docs/05, docs/06, docs/08",
-  "validation_agent": "solutions-architect-skills:data-ai-validator"
+  "validation_agent": "solutions-architect-skills:data-ai-validator",
+  "validation_agent_name": "data-ai-validator"
 }

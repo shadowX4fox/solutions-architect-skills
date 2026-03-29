@@ -76,5 +76,6 @@
   "phase4_anchor_title": "# Compliance Contract: Platform & IT Infrastructure",
   "requirement_codes_list": "LAPI01, LAPI02, LAPI03, LAPI04, LAPI05, LAPI06, LAPI07, LAPI08, LAPI09",
   "success_sections": "docs/03, docs/06, docs/09, docs/08",
-  "validation_agent": "solutions-architect-skills:platform-validator"
+  "validation_agent": "solutions-architect-skills:platform-validator",
+  "validation_agent_name": "platform-validator"
 }

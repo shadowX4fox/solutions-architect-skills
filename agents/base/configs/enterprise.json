@@ -77,5 +77,6 @@
   "phase4_anchor_title": "# Compliance Contract: Enterprise Architecture",
   "requirement_codes_list": "LAE1, LAE2, LAE3, LAE4, LAE5, LAE6, LAE7",
   "success_sections": "docs/01, docs/02, docs/03, adr/README.md",
-  "validation_agent": "solutions-architect-skills:enterprise-validator"
+  "validation_agent": "solutions-architect-skills:enterprise-validator",
+  "validation_agent_name": "enterprise-validator"
 }

@@ -89,5 +89,6 @@
   "phase4_anchor_title": "# Compliance Contract: SRE Architecture",
   "requirement_codes_list": "LASRE01, LASRE02, LASRE03, LASRE04, LASRE05, LASRE06, LASRE07, LASRE08, LASRE09, LASRE10, LASRE11, LASRE12, LASRE13, LASRE14, LASRE15, LASRE16, LASRE17, LASRE18, LASRE19, LASRE20, LASRE21, LASRE22, LASRE23, LASRE24, LASRE25, LASRE26, LASRE27, LASRE28, LASRE29, LASRE30, LASRE31, LASRE32, LASRE33, LASRE34, LASRE35, LASRE36, LASRE37, LASRE38, LASRE39, LASRE40, LASRE41, LASRE42, LASRE43, LASRE44, LASRE45, LASRE46, LASRE47, LASRE48, LASRE49, LASRE50, LASRE51, LASRE52, LASRE53, LASRE54, LASRE55, LASRE56, LASRE57",
   "success_sections": "docs/08-scalability-and-performance.md, docs/09-operational-considerations.md, docs/components/README.md",
-  "validation_agent": "solutions-architect-skills:sre-validator"
+  "validation_agent": "solutions-architect-skills:sre-validator",
+  "validation_agent_name": "sre-validator"
 }

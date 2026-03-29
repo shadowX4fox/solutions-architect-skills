@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-2.15.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-2.16.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v2.15.1` in the list.
+You should see `solutions-architect-skills v2.16.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -664,7 +664,16 @@ Where:
 
 ## Roadmap
 
-### v2.15.1 (Current Release) ✅
+### v2.16.0 (Current Release) ✅
+**refactor: standardized External Validation Summary across all 10 contracts + generators folder**
+
+- All 10 compliance templates now have a consistent `## External Validation Summary` section (table with Status, Validator, Date, Items, Result + Deviations + Recommendations)
+- Step 4.6 (Populate External Validation Summary) moved from development-only override into the base template — all agents now have it
+- Development-specific overrides removed (development-step46.md, development-validation-summary.md) — no longer needed
+- Generated agents moved to `agents/generators/` for clean separation from `agents/validators/` and `agents/base/`
+- Validator name parameterized per domain (e.g., `Atlas Validator (cloud-validator)`, `Prometheus Validator (sre-validator)`)
+
+### v2.15.1 (Previous Release) ✅
 **fix: add WebSearch permission to settings.json.example for validator EOL checks**
 
 - Added `WebSearch` to the permissions allow list in `.claude/settings.json.example`

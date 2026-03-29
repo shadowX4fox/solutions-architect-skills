@@ -79,5 +79,6 @@
   "phase4_anchor_title": "# Compliance Contract: Security Architecture",
   "requirement_codes_list": "LAS1, LAS2, LAS3, LAS4, LAS5, LAS6, LAS7, LAS8",
   "success_sections": "docs/03, docs/components/README.md, docs/05, docs/07, docs/09",
-  "validation_agent": "solutions-architect-skills:security-validator"
+  "validation_agent": "solutions-architect-skills:security-validator",
+  "validation_agent_name": "security-validator"
 }

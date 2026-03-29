@@ -458,6 +458,25 @@ Before writing output, verify:
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
+**Step 4.6: Populate External Validation Summary**
+
+The validator agent (invoked by the orchestrator in Step 3.3) is the **sole source of truth** for external validation. Do NOT re-evaluate items — use the `VALIDATION_RESULT` block passed in your prompt.
+
+**Replace these placeholders in the External Validation Summary section**:
+
+- `[VALIDATION_STATUS_BADGE]` → `✅ **PASS**` if validation_status == PASS, else `❌ **FAIL**`
+- `[VALIDATOR_AGENT]` → `Aegis Validator (business-continuity-validator)`
+- `[VALIDATION_DATE]` → current date (from Step 2.2)
+- `[TOTAL_ITEMS]` → `validation_total`
+- `[PASS_COUNT]` → `validation_pass`
+- `[FAIL_COUNT]` → `validation_fail`
+- `[NA_COUNT]` → `validation_na`
+- `[UNKNOWN_COUNT]` → `validation_unknown`
+- `[DEVIATIONS_LIST]` → numbered list from `validation_deviations`, or `"None detected"` if empty
+- `[RECOMMENDATIONS_LIST]` → numbered list from `validation_recommendations`, or `"None"` if empty
+
+If no `VALIDATION_RESULT` was provided in the prompt, set status to `⚠️ **PENDING**` and all counts to 0.
+
 
 ### PHASE 4 Examples: Correct vs Incorrect Replacements
 

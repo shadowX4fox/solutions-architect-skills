@@ -78,5 +78,6 @@
   "phase4_anchor_title": "# Compliance Contract: Integration Architecture",
   "requirement_codes_list": "LAI1, LAI2, LAI3, LAI4, LAI5, LAI6, LAI7",
   "success_sections": "docs/components/README.md, docs/04, docs/05, docs/07",
-  "validation_agent": "solutions-architect-skills:integration-validator"
+  "validation_agent": "solutions-architect-skills:integration-validator",
+  "validation_agent_name": "integration-validator"
 }

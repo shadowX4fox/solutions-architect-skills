@@ -14,7 +14,7 @@ import { join, resolve, basename } from "path";
 
 const ROOT = resolve(import.meta.dir, "..");
 const BASE_DIR = join(ROOT, "agents", "base");
-const AGENTS_DIR = join(ROOT, "agents");
+const AGENTS_DIR = join(ROOT, "agents", "generators");
 const CONFIGS_DIR = join(BASE_DIR, "configs");
 
 // ── Helpers ──────────────────────────────────────────────

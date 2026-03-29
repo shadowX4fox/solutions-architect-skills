@@ -85,8 +85,6 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 - Replace conditional placeholders `[If X: ... If Y: ...]` with exact matching branch text
 - Replace `[Source Section]` with the docs/ file path (e.g., `docs/09-operational-considerations.md`)
 - Replace role placeholders (`[Role or N/A]`, `[X Architect or N/A]`, etc.) with the role name specified in the template; use "N/A" ONLY if Status = "Not Applicable"
-- Replace `[VALIDATION_SUMMARY]` with: "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)" if overall_status = PASS, "❌ FAIL (...) - See LADES1.6 for details" if FAIL, or "PENDING - Validation not performed" otherwise
-
 
 **How to work**:
 1. Read the cleaned template as immutable content
@@ -430,59 +428,24 @@ Before writing output, verify:
 - [ ] Conditional placeholders extracted exact branch text (no enhancements)
 - [ ] No extra prose or explanatory text added beyond template
 
-**Step 4.6: Populate Section 1.6 from Validator Results**
+**Step 4.6: Populate External Validation Summary**
 
-The development validator agent (Step 3.4) is the **sole source of truth** for stack validation. Do NOT re-evaluate items — use the `VALIDATION_RESULT` block returned by the validator.
+The validator agent (invoked by the orchestrator in Step 3.3) is the **sole source of truth** for external validation. Do NOT re-evaluate items — use the `VALIDATION_RESULT` block passed in your prompt.
 
-**Status icons**: ✅ PASS | ❌ FAIL | ❓ UNKNOWN | ⚪ N/A
+**Replace these placeholders in the External Validation Summary section**:
 
-**Map validator items to template placeholders**:
-
-| Validator Items | Template Placeholders | Category |
-|---|---|---|
-| DEV-01 through DEV-06 | `[JAVA_ITEM_1]` through `[JAVA_ITEM_6]` | Java Backend |
-| DEV-07 through DEV-12 | `[DOTNET_ITEM_1]` through `[DOTNET_ITEM_6]` | .NET Backend |
-| DEV-13 through DEV-18 | `[FRONTEND_ITEM_1]` through `[FRONTEND_ITEM_6]` | Frontend |
-| DEV-19 through DEV-23 | `[OTHER_STACKS_ITEM_1]` through `[OTHER_STACKS_ITEM_5]` | Other Stacks |
-| DEV-24 through DEV-26 | `[EXCEPTIONS_ITEM_1]` through `[EXCEPTIONS_ITEM_3]` | Exceptions |
-
-**For each row in the `items` table**, format the placeholder value as:
-```
-- {STATUS_ICON} {Evidence}
-```
-
-Status icon mapping: `PASS` → ✅ | `FAIL` → ❌ | `UNKNOWN` → ❓ | `N/A` → ⚪
-
-**Replace summary placeholders from VALIDATION_RESULT counts**:
-
-- `[TOTAL_ITEMS]` → `validation_total` (standard items only, excludes EOL items)
+- `[VALIDATION_STATUS_BADGE]` → `✅ **PASS**` if validation_status == PASS, else `❌ **FAIL**`
+- `[VALIDATOR_AGENT]` → `Hephaestus Validator (development-validator)`
+- `[VALIDATION_DATE]` → current date (from Step 2.2)
+- `[TOTAL_ITEMS]` → `validation_total`
 - `[PASS_COUNT]` → `validation_pass`
 - `[FAIL_COUNT]` → `validation_fail`
 - `[NA_COUNT]` → `validation_na`
 - `[UNKNOWN_COUNT]` → `validation_unknown`
-- `[PASS_PERCENTAGE]` → `round((PASS_COUNT / TOTAL_ITEMS) * 100)` (integer)
-- `[FAIL_PERCENTAGE]` → `round((FAIL_COUNT / TOTAL_ITEMS) * 100)` (integer)
-- `[NA_PERCENTAGE]` → `round((NA_COUNT / TOTAL_ITEMS) * 100)` (integer)
-- `[UNKNOWN_PERCENTAGE]` → `round((UNKNOWN_COUNT / TOTAL_ITEMS) * 100)` (integer)
-- `[VALIDATION_STATUS_BADGE]` → `✅ **PASS** (Compliant)` if FAIL_COUNT == 0, else `❌ **FAIL** (Non-Compliant)`
+- `[DEVIATIONS_LIST]` → numbered list from `validation_deviations`, or `"None detected"` if empty
+- `[RECOMMENDATIONS_LIST]` → numbered list from `validation_recommendations`, or `"None"` if empty
 
-**Per-category summaries** — count items by category from VALIDATION_RESULT:
-- `[JAVA_SUMMARY]` → e.g., `5 PASS, 0 FAIL, 1 N/A, 0 UNKNOWN`
-- `[DOTNET_SUMMARY]` → same format for .NET items (DEV-07 to DEV-12)
-- `[FRONTEND_SUMMARY]` → same format for Frontend items (DEV-13 to DEV-18)
-- `[OTHER_STACKS_SUMMARY]` → same format for Other Stacks items (DEV-19 to DEV-23)
-- `[EXCEPTIONS_SUMMARY]` → same format for Exceptions items (DEV-24 to DEV-26)
-
-**Deviations and recommendations** — directly from VALIDATION_RESULT:
-- `[DEVIATIONS_LIST]` → `validation_deviations` as numbered list, or `"None detected"` if empty
-- `[RECOMMENDATIONS_LIST]` → `validation_recommendations` as numbered list, or `"None"` if empty
-- `[SOURCE_LINES]` → `docs/06-technology-stack.md` (primary source used by validator)
-
-**EOL warnings** (if validator returned DEV-EOL-* items):
-If any EOL items have status FAIL, append an EOL advisory note after the deviations list:
-```
-> ⚠️ **EOL Warning**: {count} technology version(s) are at or approaching end-of-life. See validator EOL items for details.
-```
+If no `VALIDATION_RESULT` was provided in the prompt, set status to `⚠️ **PENDING**` and all counts to 0.
 
 
 ### PHASE 4 Examples: Correct vs Incorrect Replacements
@@ -633,8 +596,6 @@ INCORRECT (converted to bold list):
 **If ANY check fails**: DO NOT write the output file. Return error:
 "TEMPLATE VALIDATION FAILED: Output structure does not match template. Contract generation aborted."
 
-- [ ] Section 1.6 has NO remaining placeholders (`[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, etc.)
-
 
 ### PHASE 5: Write Output
 
@@ -654,7 +615,6 @@ Before writing the output file, verify the following:
 
 **If any validation check fails, STOP and fix the issue before proceeding.**
 
-- [ ] **Section 1.6 complete**: No `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, or other Section 1.6 placeholders remain
 
 **CRITICAL: This agent creates EXACTLY ONE output file - the .md contract.**
 

@@ -35,7 +35,7 @@ This repository follows the Claude Code plugin structure:
 
 - `.claude-plugin/` - Plugin manifest (`plugin.json`) and marketplace registry (`marketplace.json`) — version is tracked here (authoritative)
 - `package.json` - Root Bun workspace config; `bun run build` / `bun run typecheck` operate here
-- `agents/` - 10 generated compliance agents + 10 validation agents; `agents/base/` holds the template, sections, overrides, and configs; `agents/validators/` holds hand-maintained validation agents
+- `agents/` - `agents/generators/` holds 10 generated compliance agents; `agents/validators/` holds 10 hand-maintained validation agents; `agents/base/` holds the template, sections, overrides, and configs
 - `skills/` - Eight skill directories (architecture-readiness, architecture-docs, architecture-compliance, architecture-compliance-review, architecture-component-guardian, architecture-peer-review, architecture-dev-handoff, architecture-docs-export)
 - `tools/docgen/` - Standalone `generate-doc.js` (Word/.docx generation via `docx` v8); its own `package.json` under the Bun workspace
 - `scripts/build-agents.ts` - Assembles 10 compliance agent .md files from base template + domain configs
@@ -59,7 +59,7 @@ For more on plugin structure, see [Plugin Directory Structure](https://docs.anth
 
 **Agents vs. Skills**: The `agents/` directory holds 10 compliance generator agents and 10 validation agents consumed by Claude Code's Agent tool. They are **not** skills; compliance generators are spawned as sub-agents from the `architecture-compliance` skill, and validation agents are spawned by their respective compliance generators. NEVER invoke them directly from user-facing prompts.
 
-**Agent build system**: The 10 compliance generator agents (`agents/*-compliance-generator.md`) are **generated files** — assembled from `agents/base/AGENT_BASE.md` + domain configs in `agents/base/configs/*.json` by `scripts/build-agents.ts`. Do NOT edit generated agent files directly; edit the base template or configs instead, then run `bun run build:agents`. Validation agents (`agents/validators/*.md`) are hand-maintained.
+**Agent build system**: The 10 compliance generator agents (`agents/generators/*-compliance-generator.md`) are **generated files** — assembled from `agents/base/AGENT_BASE.md` + domain configs in `agents/base/configs/*.json` by `scripts/build-agents.ts`. Do NOT edit generated agent files directly; edit the base template or configs instead, then run `bun run build:agents`. Validation agents (`agents/validators/*.md`) are hand-maintained.
 
 **Agent directory structure**:
 - `agents/base/AGENT_BASE.md` — shared template with `{{variable}}` placeholders

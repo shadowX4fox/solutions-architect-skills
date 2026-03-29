@@ -74,5 +74,6 @@
   "phase4_anchor_title": "# Compliance Contract: Process Transformation",
   "requirement_codes_list": "LAA1, LAA2, LAA3, LAA4",
   "success_sections": "docs/01, docs/04, docs/components/README.md, docs/05",
-  "validation_agent": "solutions-architect-skills:process-validator"
+  "validation_agent": "solutions-architect-skills:process-validator",
+  "validation_agent_name": "process-validator"
 }

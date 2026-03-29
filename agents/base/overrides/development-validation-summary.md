@@ -1,1 +1,0 @@
-- Replace `[VALIDATION_SUMMARY]` with: "✅ PASS (pass_count PASS, fail_count FAIL, na_count N/A, unknown_count UNKNOWN)" if overall_status = PASS, "❌ FAIL (...) - See LADES1.6 for details" if FAIL, or "PENDING - Validation not performed" otherwise

@@ -1,12 +1,3 @@
 # Generated compliance agent files — assembled from base template + domain configs
 # Regenerate with: bun run build:agents
-agents/business-continuity-compliance-generator.md linguist-generated=true
-agents/cloud-compliance-generator.md linguist-generated=true
-agents/data-ai-compliance-generator.md linguist-generated=true
-agents/development-compliance-generator.md linguist-generated=true
-agents/enterprise-compliance-generator.md linguist-generated=true
-agents/integration-compliance-generator.md linguist-generated=true
-agents/platform-compliance-generator.md linguist-generated=true
-agents/process-compliance-generator.md linguist-generated=true
-agents/security-compliance-generator.md linguist-generated=true
-agents/sre-compliance-generator.md linguist-generated=true
+agents/generators/*.md linguist-generated=true

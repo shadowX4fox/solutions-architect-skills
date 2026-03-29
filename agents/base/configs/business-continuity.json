@@ -81,5 +81,6 @@
   "phase4_anchor_title": "# Compliance Contract: Business Continuity",
   "requirement_codes_list": "LACN001, LACN002, LACN003, LACN004, LACN005, LACN006, LACN007, LACN008, LACN009, LACN010, LACN011, LACN012, LACN013, LACN014, LACN015, LACN016, LACN017, LACN018, LACN019, LACN020, LACN021, LACN022, LACN023, LACN024, LACN025, LACN026, LACN027, LACN028, LACN029, LACN030, LACN031, LACN032, LACN033, LACN034, LACN035, LACN036, LACN037, LACN038, LACN039, LACN040, LACN041, LACN042, LACN043",
   "success_sections": "docs/01, docs/02, docs/03, docs/components/README.md, docs/05, docs/06, docs/08, docs/09",
-  "validation_agent": "solutions-architect-skills:business-continuity-validator"
+  "validation_agent": "solutions-architect-skills:business-continuity-validator",
+  "validation_agent_name": "business-continuity-validator"
 }

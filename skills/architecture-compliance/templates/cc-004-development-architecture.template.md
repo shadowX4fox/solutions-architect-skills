@@ -101,85 +101,19 @@
 - Source: [ARCHITECTURE.md Section 11 (Operational Considerations → Deployment) or Section 8 (Technology Stack → Infrastructure), lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Document IaC tool, version, and infrastructure-as-code repository. Verify against checklist Section 4 (Other Stacks → Infrastructure as Code). Authorized: Terraform, Ansible, Azure DevOps Pipelines]
 
-### 1.6 Stack Validation Checklist Compliance (Automatic Validation)
+## External Validation Summary
 
-**Validation Status**: [VALIDATION_STATUS_BADGE]
-**Validation Date**: [VALIDATION_DATE]
-**Validation Evaluator**: [VALIDATION_EVALUATOR]
+| Field | Value |
+|-------|-------|
+| Status | [VALIDATION_STATUS_BADGE] |
+| Validator | [VALIDATOR_AGENT] |
+| Date | [VALIDATION_DATE] |
+| Items Evaluated | [TOTAL_ITEMS] |
+| Result | [PASS_COUNT] PASS, [FAIL_COUNT] FAIL, [NA_COUNT] N/A, [UNKNOWN_COUNT] UNKNOWN |
 
-**Overall Results**:
-- **Total Items**: [TOTAL_ITEMS]
-- **PASS**: [PASS_COUNT] ([PASS_PERCENTAGE]%)
-- **FAIL**: [FAIL_COUNT] ([FAIL_PERCENTAGE]%)
-- **N/A**: [NA_COUNT] ([NA_PERCENTAGE]%)
-- **UNKNOWN**: [UNKNOWN_COUNT] ([UNKNOWN_PERCENTAGE]%)
-
-**Dynamic Content**: The following validation summary is automatically generated from `validation_results` cache:
-
----
-
-#### Java Backend (6 items): [JAVA_SUMMARY]
-
-[JAVA_ITEM_1]
-[JAVA_ITEM_2]
-[JAVA_ITEM_3]
-[JAVA_ITEM_4]
-[JAVA_ITEM_5]
-[JAVA_ITEM_6]
-
----
-
-#### .NET Backend (6 items): [DOTNET_SUMMARY]
-
-[DOTNET_ITEM_1]
-[DOTNET_ITEM_2]
-[DOTNET_ITEM_3]
-[DOTNET_ITEM_4]
-[DOTNET_ITEM_5]
-[DOTNET_ITEM_6]
-
----
-
-#### Frontend (6 items): [FRONTEND_SUMMARY]
-
-[FRONTEND_ITEM_1]
-[FRONTEND_ITEM_2]
-[FRONTEND_ITEM_3]
-[FRONTEND_ITEM_4]
-[FRONTEND_ITEM_5]
-[FRONTEND_ITEM_6]
-
----
-
-#### Other Stacks and Components (5 items): [OTHER_STACKS_SUMMARY]
-
-[OTHER_STACKS_ITEM_1]
-[OTHER_STACKS_ITEM_2]
-[OTHER_STACKS_ITEM_3]
-[OTHER_STACKS_ITEM_4]
-[OTHER_STACKS_ITEM_5]
-
----
-
-#### Exceptions and Action Plan (3 items): [EXCEPTIONS_SUMMARY]
-
-[EXCEPTIONS_ITEM_1]
-[EXCEPTIONS_ITEM_2]
-[EXCEPTIONS_ITEM_3]
-
----
-
-**Stack Deviations**: [DEVIATIONS_LIST or "None detected"]
+**Deviations**: [DEVIATIONS_LIST or "None detected"]
 
 **Recommendations**: [RECOMMENDATIONS_LIST or "None"]
-
-**Source**: ARCHITECTURE.md Section 8 (Technology Stack), lines [SOURCE_LINES]
-
-**Legend**:
-- ✅ PASS: Complies with authorized technology catalog
-- ❌ FAIL: Non-compliant (deprecated version, unapproved technology, or missing documentation)
-- ❓ UNKNOWN: Insufficient data in Section 8 to validate
-- ⚪ N/A: Not applicable to this architecture
 
 
 **Naming Convention Compliance**: [Value or "Not specified"]

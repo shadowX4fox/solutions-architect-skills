@@ -64,32 +64,7 @@
       { "name": "Code Review", "file": "docs/09-operational-considerations.md", "pattern": "(code review|peer review|pull request|PR review)", "case_insensitive": true }
     ]
   },
-  "overrides": [
-    {
-      "id": "step46",
-      "insert_after": "phase4-post",
-      "file": "development-step46.md"
-    },
-    {
-      "id": "validation_summary_placeholder",
-      "append_to": "phase0-can-do-list",
-      "file": "development-validation-summary.md"
-    },
-    {
-      "id": "phase45_extra_checks",
-      "append_to": "phase45-extra-checks",
-      "content_lines": [
-        "- [ ] Section 1.6 has NO remaining placeholders (`[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, `[TOTAL_ITEMS]`, etc.)"
-      ]
-    },
-    {
-      "id": "phase5_extra_checks",
-      "append_to": "phase5-extra-checks",
-      "content_lines": [
-        "- [ ] **Section 1.6 complete**: No `[JAVA_`, `[DOTNET_`, `[FRONTEND_`, `[OTHER_STACKS_`, `[EXCEPTIONS_`, or other Section 1.6 placeholders remain"
-      ]
-    }
-  ],
+  "overrides": [],
   "agent_notes": [
     "Technology Stack: Must use supported versions (not deprecated)",
     "Code Coverage: Minimum 80% for critical paths",
@@ -101,5 +76,6 @@
   "phase4_anchor_title": "# Compliance Contract: Development Architecture",
   "requirement_codes_list": "LADES1, LADES2",
   "success_sections": "docs/02, docs/components/README.md, docs/06, adr/README.md, docs/09",
-  "validation_agent": "solutions-architect-skills:development-validator"
+  "validation_agent": "solutions-architect-skills:development-validator",
+  "validation_agent_name": "development-validator"
 }

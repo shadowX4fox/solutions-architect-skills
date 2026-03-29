@@ -1520,6 +1520,22 @@
 
 ---
 
+## External Validation Summary
+
+| Field | Value |
+|-------|-------|
+| Status | [VALIDATION_STATUS_BADGE] |
+| Validator | [VALIDATOR_AGENT] |
+| Date | [VALIDATION_DATE] |
+| Items Evaluated | [TOTAL_ITEMS] |
+| Result | [PASS_COUNT] PASS, [FAIL_COUNT] FAIL, [NA_COUNT] N/A, [UNKNOWN_COUNT] UNKNOWN |
+
+**Deviations**: [DEVIATIONS_LIST or "None detected"]
+
+**Recommendations**: [RECOMMENDATIONS_LIST or "None"]
+
+---
+
 ## Appendix: Source Traceability and Completion Status
 
 ### A.1 Definitions and Terminology
