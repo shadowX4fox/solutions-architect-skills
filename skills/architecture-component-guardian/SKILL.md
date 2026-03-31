@@ -1,10 +1,6 @@
 ---
 name: architecture-component-guardian
-description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when: adding a component, removing a component, updating a component name or type, syncing the index after a migration, or any time docs/components/README.md needs to change.
-triggers:
-  - component index
-  - update components
-  - docs/components
+description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when adding, removing, or updating components, syncing the index, or migrating flat components to C4 multi-system structure.
 ---
 
 # Architecture Component Guardian Skill
@@ -17,17 +13,36 @@ write and refuses ad-hoc direct edits.
 
 ## C4 Model Governance
 
-This skill's behavior is governed by the **IcePanel C4 Model** reference at:
+This skill enforces **C4 Level 2 (Container diagram)** rules from:
 ```
 [plugin_dir]/skills/architecture-docs/references/ICEPANEL-C4-MODEL.md
 ```
+Read that reference for the full C4 model (abstractions, 4 diagram levels, IcePanel conventions). Below are only the **guardian-specific enforcement rules** that extend the C4 reference.
 
-**Key constraints from C4 Level 2 (Container diagram)**:
-- Every component in the index MUST be a **separately deployable unit** — either an **App** or a **Store**
-- The **Type** column MUST use C4 L2 canonical types: API Service, Web Application, Worker/Consumer, Database, Cache, Message Broker, Object Storage, Gateway
-- The **Technology** column MUST use IcePanel bracket convention: `[Spring Boot 3.2]`, `[PostgreSQL 16]`
-- Code modules, libraries, and namespaces are C3 level — they do NOT get component entries
-- External systems you don't own are NOT components — they're integration references
+### C4 L2 Canonical Types
+
+The **Type** column accepts exactly these 8 values:
+
+| Type | C4 Category | Description | Examples |
+|------|------------|-------------|---------|
+| API Service | App | Exposes a request/reply interface (REST, GraphQL, gRPC) | Payment API, Account Service, BFF |
+| Web Application | App | Serves a browser-based UI or server-rendered pages | React SPA, Angular portal, Next.js SSR |
+| Worker/Consumer | App | Processes work asynchronously — messages, scheduled jobs, background tasks | Kafka consumer, Celery worker, cron scheduler |
+| Gateway | App | Routes, authenticates, rate-limits at the edge | Kong, NGINX, AWS API Gateway, Envoy |
+| Database | Store | Primary persistence — system of record for a domain | PostgreSQL, MongoDB, SQL Server, DynamoDB |
+| Cache | Store | Fast-access temporary data store | Redis, Memcached, Valkey, ElastiCache |
+| Message Broker | Store | Async communication backbone — buffers and replays messages | Apache Kafka, RabbitMQ, Azure Service Bus, SQS |
+| Object Storage | Store | Unstructured binary/file storage | S3, Azure Blob, MinIO, GCS |
+
+### Ambiguous Cases
+
+| Scenario | Resolution |
+|----------|-----------|
+| Dual-role: consumer AND exposes API (e.g., History Service) | Classify by **primary external interface** — API exposed → `API Service` |
+| In-memory cache inside a service (Caffeine, Guava) | NOT a component — mention in parent service description |
+| External managed service (SendGrid, Auth0) | NOT a component — integration reference. If user tracks it, flag as external in system header |
+| Sidecar / service mesh proxy (Envoy, Istio) | NOT a component — transparent infrastructure, mention in description |
+| Shared library or SDK | NOT a component — technology stack item, not a deployable unit |
 
 ---
 
@@ -39,6 +54,7 @@ This skill's behavior is governed by the **IcePanel C4 Model** reference at:
 - User asks to "sync", "regenerate", or "rebuild" the component index
 - After a migration that produces the `docs/components/` structure for the first time
 - Any request to modify `docs/components/README.md` directly → redirect here instead
+- User asks to "migrate", "convert to C4", or "restructure components" → triggers the C4 multi-system migration workflow
 
 **Do NOT invoke for**: questions about individual components (use `architecture-docs`
 skill), compliance generation, presentation creation, or **component development handoffs**
@@ -156,6 +172,7 @@ Offer to rename the file automatically.
 | `add component <description>` | Create the new component file using **lowercase kebab-case** naming (`NN-kebab-case-name.md`), then sync |
 | `remove component <name>` | Confirm deletion of component file, then sync |
 | `update component <name>` | Edit the relevant component file fields, then sync |
+| `migrate` | Run the full C4 multi-system migration workflow (Phases M1–M8). Converts flat `docs/components/` to system-subfolder structure with canonical C4 metadata and updates all cross-references. See "Migrate Workflow" section below. |
 
 **When creating a new component file** (`add`): always convert the component name to lowercase kebab-case for the filename. Examples: "Payment Service" → `NN-payment-service.md`, "CRM Domain Service" → `NN-crm-domain-service.md`, "Redis Cache" → `NN-redis-cache.md`. The display name in the `# Heading` inside the file keeps its natural casing (e.g., `# Payment Service`).
 
@@ -179,9 +196,173 @@ Before finishing, confirm:
 
 ---
 
+## Migrate Workflow — C4 Multi-System Migration
+
+**Trigger**: User invokes with `migrate`, or asks to "convert to C4 structure" or "restructure components into systems".
+
+**Prerequisite**: `docs/components/` exists with at least one `.md` file (besides README.md). If no component files exist, abort:
+```
+⚠️ No component files found in docs/components/. Nothing to migrate.
+```
+
+**Reference**: Load `C4-MIGRATION-REFERENCE.md` from this skill's directory for type mapping tables, ownership heuristics, and cross-reference patterns.
+
+---
+
+### Phase M1 — Detect & Scan
+
+**M1.1 Check C4 compliance**: Scan `docs/components/` for subdirectories with `.md` files. If subfolders already exist AND all Type values are canonical → report "Already C4-compliant. Use `sync` instead." Offer to proceed anyway for partial re-migrations.
+
+**M1.2 Scan all component files**: Read every `.md` file in `docs/components/` (excluding README.md). For each file, extract:
+- `heading` — first `#` heading
+- `heading_has_section_number` — starts with digits + dot (e.g., `## 5.1 ...`)
+- `type_raw` — value of `**Type:**` field
+- `type_is_canonical` — matches C4 L2 types
+- `technology_raw` — value of `**Technology:**` field
+- `technology_has_brackets` — wrapped in `[...]`
+- `location` — value of `**Location:**` (may be absent)
+- `team_owner` — value of `**Team Owner:**` (may be absent)
+- `has_c4_header` — file contains all 5 C4 metadata fields
+
+Present scan summary with issue counts.
+
+---
+
+### Phase M2 — Classify Systems
+
+**M2.1 Apply ownership heuristics** (from C4-MIGRATION-REFERENCE.md):
+- `**Location:** services/...` → internal
+- Technology says "managed by domain service team" → external
+- No Location AND no Version → likely external
+- `**Bounded Context:**` grouping → same system
+
+**M2.2 Present classification to user**:
+```
+🔍 C4 Level 1 — System Classification (Migration)
+
+  1. task-scheduling-system — 9 containers (6 Apps, 3 Stores)
+  2. bian-domain-services (external) — 3 API Services
+
+Please confirm, adjust system names, or reassign components.
+```
+Wait for user confirmation.
+
+**M2.3 Confirm focus system** (if multiple internal systems):
+```
+🔎 Which system is the main focus? (Listed first in README.md)
+```
+
+---
+
+### Phase M3 — Migrate Metadata (per file)
+
+**M3.1 Fix headings**: Strip section number prefixes, enforce H1. Record old→new heading text (needed for anchor slug updates in M5).
+
+**M3.2 Fix Type values**: Use the auto-map table in C4-MIGRATION-REFERENCE.md. For unmapped types, prompt user with the 8 canonical options.
+
+**M3.3 Fix Technology format**: Wrap in IcePanel brackets. Strip tier/SKU/pricing details. Keep primary tech + version.
+
+**M3.4 Add C4 metadata header** (if missing): Insert after Type/Technology fields:
+```
+**C4 Level:** Container (L2)
+**Deploys as:** [infer or placeholder]
+**Communicates via:** [infer or placeholder]
+```
+
+Present Phase 3 summary with all fixes applied.
+
+---
+
+### Phase M4 — Create Folders & Move Files
+
+**M4.1 Create system subfolders**: `docs/components/<system-name>/` (kebab-case).
+
+**M4.2 Detect project type**: Check if `.git/` exists in project root.
+- Git repo → use `git mv` (preserves history)
+- Non-git → Read source file content → Write to new path → delete original
+
+**M4.3 Move files**: For each component, move to its system subfolder.
+
+**M4.4 Renumber within folders**: If numbering has gaps after grouping, renumber contiguously (01, 02, 03...) within each system folder.
+
+**M4.5 Build MOVE MANIFEST**: Complete mapping of old paths → new paths. This drives all reference updates in Phase M5.
+
+**M4.6 Update breadcrumbs in moved files**:
+- Old (flat): `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > Name`
+- New (multi): `[Architecture](../../../ARCHITECTURE.md) > [Components](../README.md) > [System](.) > Name`
+
+---
+
+### Phase M5 — Update References (CRITICAL)
+
+**This is where manual migrations break.** Every markdown reference to a moved component must be updated.
+
+**M5.1 Build search patterns**: From the MOVE MANIFEST, generate search patterns for each moved file across all possible relative path forms.
+
+**M5.2 Scan ALL markdown files** in: `docs/`, `adr/`, `docs/handoffs/`, `compliance-docs/`, `ARCHITECTURE.md`
+
+**M5.3 For each reference found**, classify:
+- **Markdown link** `[text](path)` → compute new relative path → update automatically
+- **Plain text** (path in prose without link syntax) → LOG for manual review, do NOT auto-update
+
+**M5.4 Update anchor slugs**: If headings changed in M3 (e.g., `#51-job-scheduler-service` → `#job-scheduler-service`), find and update all anchor references.
+
+**M5.5 Update cross-system references**: Component files referencing files in different system folders need relative paths through `../other-system/`.
+
+Present Phase M5 summary: links updated count, anchor slugs updated, plain-text references logged.
+
+---
+
+### Phase M6 — Regenerate README.md
+
+Use the existing Format Specification in multi-system mode:
+- Focus system listed first
+- `### System Name` header before each system's table
+- 5-column table with updated file paths including system folder prefix
+- Renumbered `#` column contiguous within README
+
+---
+
+### Phase M7 — Update ARCHITECTURE.md
+
+Update Section 5 description to reflect system count:
+```
+| S5 | Component Details | [docs/components/README.md](...) | N systems, M containers |
+```
+
+---
+
+### Phase M8 — Verify & Report
+
+**M8.1 Orphaned path check**: Grep all `.md` files for old flat component paths not updated.
+
+**M8.2 Link validation**: Every file in system folders has a README row; every README row has a file.
+
+**M8.3 Diagram update prompt**:
+```
+⚠️ Component migration detected — diagrams may be out of date.
+Update now? [Yes/No]
+```
+If No → add `<!-- DIAGRAM UPDATE PENDING: C4 migration (YYYY-MM-DD) -->` to `docs/03-architecture-layers.md`.
+
+**M8.4 Final report**:
+```
+═══════════════════════════════════════════════════════════
+C4 MIGRATION — COMPLETE
+═══════════════════════════════════════════════════════════
+Systems: N (M internal, K external)
+Files moved: X
+Metadata fixes: Y (headings, types, technology, C4 headers)
+References updated: Z markdown links, W anchor slugs
+Plain-text refs logged: N (manual review recommended)
+═══════════════════════════════════════════════════════════
+```
+
+---
+
 ### Step 6 — Update architecture documentation
 
-**Runs for**: `add`, `remove`, `update` operations only. **Skip for `sync`** — sync rebuilds the index from existing files without changing architecture content.
+**Runs for**: `add`, `remove`, `update` operations only. **Skip for `sync` and `migrate`** (migrate handles its own architecture updates in Phase M7).
 
 ---
 
@@ -315,3 +496,12 @@ Sections with no applicable content for this component:
 ### Flow D — Rejected direct edit
 1. User or Claude tries to edit `docs/components/README.md` directly
 2. `CLAUDE.md` project rule redirects to this skill
+
+### Flow E — C4 Multi-System Migration
+1. User has existing flat `docs/components/` with non-C4 metadata
+2. User invokes this skill with `migrate`
+3. Skill runs Phases M1–M8: scan → classify systems → fix metadata → move files → update references → regenerate README → update ARCHITECTURE.md → verify
+4. User confirms system classification (Phase M2) and ambiguous type mappings (Phase M3)
+5. File moves use `git mv` if git repo detected, otherwise Read→Write→delete
+6. References across docs/, adr/, handoffs/, compliance-docs/ are updated automatically
+7. Final report shows all changes with any items needing manual review

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.0` in the list.
+You should see `solutions-architect-skills v3.1.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,16 @@ Where:
 
 ## Roadmap
 
-### v3.1.0 (Current Release) ✅
+### v3.1.1 (Current Release) ✅
+**feat: C4 migration workflow + guardian governance cleanup**
+
+- Added `migrate` operation to component guardian — 8-phase automated workflow converting flat `docs/components/` to C4 multi-system structure (detect → classify → fix metadata → move files → update references → regenerate README → update ARCHITECTURE.md → verify)
+- Supports both git repos (`git mv`) and non-git folders (Read → Write → delete)
+- `C4-MIGRATION-REFERENCE.md` — type mapping table (28 entries), ownership heuristics, cross-reference impact map, edge cases from live migration session
+- C4 Model Governance section cleaned — removed redundancies with ICEPANEL-C4-MODEL.md, kept only guardian-specific enforcement rules (canonical types table, ambiguous cases)
+- Removed unsupported `triggers` frontmatter from component guardian
+
+### v3.1.0 (Previous Release) ✅
 **feat: C4 model integration, architecture reference docs, multi-system components, async intake reorder**
 
 - **C4 Model Integration**: Components follow C4 L2 (Container diagram) — boundary test, App/Store classification, IcePanel bracket convention for technology
