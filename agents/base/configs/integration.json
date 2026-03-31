@@ -1,6 +1,6 @@
 {
   "agent_name": "integration-validator",
-  "agent_description": "Iris — Integration Architecture Validator. Evaluates project against API standards, message patterns, and interoperability standards.",
+  "agent_description": "Iris Validator — Integration External Validator. Evaluates project against integration architecture standards. Invoked by integration-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Integration Architecture",
     "short_name": "Integration",

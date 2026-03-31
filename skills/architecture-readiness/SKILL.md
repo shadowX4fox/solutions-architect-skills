@@ -45,7 +45,33 @@ Invoke this skill when:
 
 ## How to Use This Skill
 
-### For Requirements Elicitation
+### 1. Async Intake (Non-Interactive)
+
+⛔ **This flow NEVER transitions to elicitation.** It analyzes a file, produces a gap report with email-ready questions, and STOPS. The output is meant to be sent back to the requester asynchronously (email, ticket, Slack).
+
+When business context arrives via ticket, email, or document (not a live conversation):
+
+1. **Locate the context file**: Ask the user for the file path, or detect common patterns (`business-context.*`, `ticket-*.*`, `requirements-*.*`, `email-*.*`)
+2. **Read and parse the file**: Load the full content
+3. **Load scoring guide**: Read `PO_SPEC_SCORING_GUIDE.md` for the 8-section weighted rubric
+4. **Load async intake guide**: Read `ASYNC_INTAKE_GUIDE.md` for extraction methodology and keyword indicators
+5. **Map content to 8 PO Spec sections**: Extract what's present, mark what's missing per section
+6. **Score against the rubric**: Calculate per-section completeness % and weighted total score
+7. **Generate gap report** (`PO_SPEC_GAP_REPORT.md`): Structured markdown containing:
+   - **Source file**: filename and processing date
+   - **Extraction summary**: what was found mapped to each of the 8 sections with completeness %
+   - **Score**: weighted total and per-section breakdown
+   - **Gap report**: for each section below 75% completeness:
+     - What's missing (specific sub-criteria from the scoring guide)
+     - 2-3 ready-to-send questions for the requester
+     - Priority level (HIGH / MEDIUM / LOW based on section weight)
+   - **Ready-to-Send Message**: A complete, copyable email/ticket message block with subject line, prioritized gap questions, and sign-off — ready to paste into email, ticket, or Slack (see ASYNC_INTAKE_GUIDE.md for template)
+   - **Next steps**: "Send the Ready-to-Send Message to the requester → receive answers → re-run async intake with the updated file"
+8. **Save gap report**: Write to `PO_SPEC_GAP_REPORT.md` in the project root
+9. **If score ≥ 7.5**: Also draft `PRODUCT_OWNER_SPEC.md` from the extracted data using `templates/PO_SPEC_TEMPLATE.md`; flag any inferred values with `[Default — confirm before architecture handoff]`
+10. **If score < 7.5**: Save gap report only — do NOT draft a PO Spec, do NOT start elicitation. The gap report with its Ready-to-Send Message is the final output.
+
+### 2. Requirements Elicitation (Interactive)
 
 When this skill is activated and no existing PO Spec is found (or the user requests discovery/elicitation):
 
@@ -63,7 +89,7 @@ When this skill is activated and no existing PO Spec is found (or the user reque
 6. **Draft PO Spec**: Load `templates/PO_SPEC_TEMPLATE.md`, fill from elicited data, self-score against `PO_SPEC_SCORING_GUIDE.md`
 7. **Gap loop if needed**: If score < 7.5, ask targeted follow-ups on weakest sections; re-score; save final as `PRODUCT_OWNER_SPEC.md`
 
-### For PO Spec Creation
+### 3. PO Spec Creation (Template-Guided)
 
 When this skill is activated for document creation:
 
@@ -75,7 +101,7 @@ When this skill is activated for document creation:
 4. **Guide document creation**: Help user fill out each section with business context
 5. **Reference mapping**: Explain how PO Spec maps to ARCHITECTURE.md (see guide Section "Mapping to ARCHITECTURE.md")
 
-### For PO Spec Evaluation
+### 4. PO Spec Evaluation (Score Existing)
 
 When this skill is activated to evaluate a PO Spec:
 
@@ -89,29 +115,6 @@ When this skill is activated to evaluate a PO Spec:
    - Identify gaps in critical sections (Use Cases, Business Constraints, Business Objectives)
    - Provide actionable recommendations for improvement
 6. **Determine readiness**: Score ≥7.5/10 indicates ready for architecture team handoff
-
-### For Async Intake
-
-When business context arrives via ticket, email, or document (not a live conversation):
-
-1. **Locate the context file**: Ask the user for the file path, or detect common patterns (`business-context.*`, `ticket-*.*`, `requirements-*.*`, `email-*.*`)
-2. **Read and parse the file**: Load the full content
-3. **Load scoring guide**: Read `PO_SPEC_SCORING_GUIDE.md` for the 8-section weighted rubric
-4. **Load async intake guide**: Read `ASYNC_INTAKE_GUIDE.md` for extraction methodology and keyword indicators
-5. **Map content to 8 PO Spec sections**: Extract what's present, mark what's missing per section
-6. **Score against the rubric**: Calculate per-section completeness % and weighted total score
-7. **Generate gap report**: Produce a structured markdown report containing:
-   - **Source file**: filename and processing date
-   - **Extraction summary**: what was found mapped to each of the 8 sections with completeness %
-   - **Score**: weighted total and per-section breakdown
-   - **Gap report**: for each section below 75% completeness, list:
-     - What's missing (specific sub-criteria from the scoring guide)
-     - 2-3 ready-to-send questions the architect can forward back to the requester
-     - Priority level (HIGH / MEDIUM / LOW based on section weight)
-   - **Next steps**: "Send gap questions to requester → receive answers → re-run async intake or paste answers inline"
-8. **Save gap report**: Write to `PO_SPEC_GAP_REPORT.md` in the project root
-9. **If score ≥ 7.5**: Also draft `PRODUCT_OWNER_SPEC.md` from the extracted data using `templates/PO_SPEC_TEMPLATE.md`; flag any inferred values with `[Default — confirm before architecture handoff]`
-10. **If score < 7.5**: Save gap report only — do NOT draft a PO Spec yet; gaps must be resolved first
 
 ## Key Principles
 

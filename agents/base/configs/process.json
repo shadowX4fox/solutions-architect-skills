@@ -1,6 +1,6 @@
 {
   "agent_name": "process-validator",
-  "agent_description": "Hermes — Process Transformation Validator. Evaluates project against automation coverage, process maturity, and change management standards.",
+  "agent_description": "Hermes Validator — Process External Validator. Evaluates project against process transformation and automation standards. Invoked by process-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Process Transformation",
     "short_name": "Process",

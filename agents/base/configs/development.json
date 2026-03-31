@@ -1,6 +1,6 @@
 {
   "agent_name": "development-validator",
-  "agent_description": "Hephaestus — Development Architecture Validator. Evaluates project against technology stack, coding standards, and EOL compliance.",
+  "agent_description": "Hephaestus Validator — Development External Validator. Evaluates project against development technology stack standards. Invoked by development-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Development Architecture",
     "short_name": "Development",

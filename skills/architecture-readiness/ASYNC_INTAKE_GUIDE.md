@@ -215,3 +215,57 @@ Fields marked `[Default — confirm before architecture handoff]` were inferred 
 | < 7.5 | Save `PO_SPEC_GAP_REPORT.md` only — do NOT draft a PO Spec |
 
 In both cases: report the score, highlight the top 3 gaps by priority, and present the next steps to the user.
+
+⛔ **This flow NEVER transitions to elicitation.** The gap report with its Ready-to-Send Message is the final output. Do NOT start a discovery interview.
+
+---
+
+## Step 8: Ready-to-Send Message (Email/Ticket/Slack)
+
+**Always include this section at the end of `PO_SPEC_GAP_REPORT.md`** when there are gaps (score < 7.5 or any section below 75%).
+
+This block is designed to be copied directly into an email, ticket, or Slack message and sent to the business requester.
+
+### Template
+
+```markdown
+## Ready-to-Send Message
+
+> Copy the block below and send it to the requester via email, ticket, or message:
+
+---
+
+**Subject: Additional Information Needed — Architecture Requirements ({project_name})**
+
+Hi,
+
+Thank you for the business context provided in `{source_file}`. We've analyzed it against our architecture requirements framework and identified areas where we need additional information before proceeding with the technical architecture design.
+
+**Current Score: {score}/10.0** (minimum 7.5 required to proceed)
+
+**HIGH Priority — Please address these first:**
+
+{For each HIGH priority gap (sections with weight ≥ 1.5 and completeness < 75%):}
+{N}. **{Section Name}**: {Gap question}
+
+**MEDIUM Priority:**
+
+{For each MEDIUM priority gap (sections with weight < 1.5 and completeness < 75%):}
+{N}. **{Section Name}**: {Gap question}
+
+Please respond to this message with your answers. Once received, we'll complete the requirements assessment and proceed to architecture design.
+
+Best regards,
+Architecture Team
+
+---
+```
+
+### Rules
+
+- **Subject line**: Always include the project name
+- **Score**: Show current score and the 7.5 threshold
+- **Question ordering**: HIGH priority first (Use Cases weight 2.5, Business Constraints 2.0, Business Objectives 1.5), then MEDIUM
+- **Questions**: Use the exact gap questions generated in Step 6, not summaries
+- **No technical language**: The requester is a business stakeholder — keep questions business-focused
+- **Max 8 questions**: If more gaps exist, prioritize by weight and combine related questions

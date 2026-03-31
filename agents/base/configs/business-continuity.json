@@ -1,6 +1,6 @@
 {
   "agent_name": "business-continuity-validator",
-  "agent_description": "Aegis — Business Continuity Validator. Evaluates project against business continuity and disaster recovery standards.",
+  "agent_description": "Aegis Validator — Business Continuity External Validator. Evaluates project against business continuity and disaster recovery standards. Invoked by business-continuity-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Business Continuity",
     "short_name": "Business Continuity",

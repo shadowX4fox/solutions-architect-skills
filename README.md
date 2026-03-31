@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.0.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.0.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -96,7 +96,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.0.1` in the list.
+You should see `solutions-architect-skills v3.0.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -684,7 +684,18 @@ Where:
 
 ## Roadmap
 
-### v3.0.1 (Current Release) ✅
+### v3.0.2 (Current Release) ✅
+**fix: align validator names, enforce canonical ADR template, async intake isolation + email-ready output**
+
+- Validator spawn descriptions now use full codename + domain format (e.g., `Aegis — Business Continuity Validator`)
+- Config `agent_description` fields aligned with validator frontmatter (single source of truth)
+- Removed `Glob` from validator tools — prevents wildcard permission prompts
+- ADR canonical template rule enforced across all workflows (Workflows 1, 2, 4) with explicit gate checks
+- Async intake reordered to flow #1 in readiness skill, with `⛔ NEVER transitions to elicitation` isolation rule
+- PO Spec menu reordered: (1) Elicitation, (2) Async intake, (3) Inline context, (4) Skip
+- Added Ready-to-Send Message template to async intake gap report — email/ticket-ready copyable block
+
+### v3.0.1 (Previous Release) ✅
 **docs: update README Phase 3 with v3.0.0 architecture — two-phase diagram, CC-004 sequence flow**
 
 - Rewrote Phase 3 Compliance Documentation section for the universal generator architecture

@@ -1,6 +1,6 @@
 {
   "agent_name": "cloud-validator",
-  "agent_description": "Atlas — Cloud Architecture Validator. Evaluates project against cloud deployment, IaC, cost optimization, and security standards.",
+  "agent_description": "Atlas Validator — Cloud External Validator. Evaluates project against cloud architecture standards. Invoked by cloud-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Cloud Architecture",
     "short_name": "Cloud",

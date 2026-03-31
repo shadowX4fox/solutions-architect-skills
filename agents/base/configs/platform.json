@@ -1,6 +1,6 @@
 {
   "agent_name": "platform-validator",
-  "agent_description": "Vulcan — Platform & IT Infrastructure Validator. Evaluates project against infrastructure, environment, and database standards.",
+  "agent_description": "Vulcan Validator — Platform External Validator. Evaluates project against platform and infrastructure standards. Invoked by platform-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Platform & IT Infrastructure",
     "short_name": "Platform",

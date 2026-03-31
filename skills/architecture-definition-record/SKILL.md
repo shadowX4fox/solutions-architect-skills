@@ -57,6 +57,22 @@ This skill is the **single owner of all ADR write operations**. It creates, upda
 
 ---
 
+## Canonical Template Rule (ALL Workflows)
+
+Every ADR file written by this skill MUST use the full 10-section canonical template from:
+```
+[plugin_dir]/skills/architecture-definition-record/adr/ADR-000-template.md
+```
+
+**No workflow may write an ADR file without first loading this template.** If the template cannot be loaded, the workflow MUST abort with:
+```
+TEMPLATE LOAD FAILURE: Could not load ADR-000-template.md. ADR generation aborted.
+```
+
+This applies to Workflows 1, 2, and 4. There are no exceptions.
+
+---
+
 ## Workflows
 
 ### Workflow 1 — Generate ADRs from ARCHITECTURE.md Section 12 Table
@@ -280,9 +296,19 @@ Apply slug rules: lowercase, spaces → hyphens, strip `?*<>|"`, max 50 chars.
 
 File: `adr/ADR-{NNN}-{slug}.md`
 
-#### Step 2.4: Populate Template
+#### Step 2.4: Load Template and Populate
 
-Load template (from Step 1.4 method), populate all sections from the interview answers. Leave Implementation Plan and Success Metrics sections as optional stubs unless user provided that information.
+**Load the canonical template** (same as Workflow 1 Step 1.4):
+```
+Read(file_path="$PLUGIN_DIR/skills/architecture-definition-record/adr/ADR-000-template.md")
+```
+
+**GATE CHECK**: If the template was NOT loaded (read failed or content is empty), DO NOT generate the ADR. Return error:
+```
+TEMPLATE LOAD FAILURE: Could not load ADR-000-template.md. ADR generation aborted.
+```
+
+Populate all sections from the interview answers. Leave Implementation Plan and Success Metrics as optional stubs unless user provided that information.
 
 #### Step 2.5: Write File
 

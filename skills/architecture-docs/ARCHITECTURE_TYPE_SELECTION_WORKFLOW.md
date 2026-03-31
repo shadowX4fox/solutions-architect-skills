@@ -72,23 +72,24 @@ The three-phase workflow requires business context before architecture design:
 
 How would you like to proceed?
 
-  1️⃣  Run the full elicitation flow
+  1️⃣  Run the full elicitation flow (interactive interview)
       → Launches /skill architecture-readiness to create a complete PO Spec
       → Recommended for new projects with no documented requirements
 
-  2️⃣  Provide business context now
+  2️⃣  Async intake from a file (non-interactive)
+      → Provide a file (ticket export, email, requirements doc) and I'll
+        extract requirements, score them, and generate a gap report with
+        email-ready questions to send back to the requester
+      → Best when business context arrived asynchronously via ticket or email
+
+  3️⃣  Provide business context now (inline)
       → Type your business context here and I'll evaluate it against the
         PO Spec scoring rubric, then interview you for any gaps
       → Best when you have context in mind but no formal document yet
 
-  3️⃣  Skip (SKIP PO SPEC)
+  4️⃣  Skip (SKIP PO SPEC)
       → Proceed without any business context
       → A PO_SPEC_GATE: SKIPPED warning will be recorded
-
-  4️⃣  Async intake from a file
-      → Provide a file (ticket export, email, requirements doc) and I'll
-        extract requirements, score them, and generate a gap report
-      → Best when business context arrived asynchronously via ticket or email
 
 Enter 1, 2, 3, or 4:
 ```
@@ -105,7 +106,19 @@ Wait for user response before proceeding.
 
 ---
 
-**Option 2 — Provide business context now (inline elicitation):**
+**Option 2 — Async intake from a file:**
+
+⛔ **This flow NEVER transitions to elicitation.** It produces a gap report and STOPS.
+
+Ask the user for the file path (ticket export, email, requirements document). Then:
+
+- Invoke the `architecture-readiness` skill's Async Intake workflow: read the file, map content to 8 PO Spec sections, score, and generate `PO_SPEC_GAP_REPORT.md` with a **Ready-to-Send Message** block (email-ready questions)
+- **If score ≥ 7.5**: A draft `PRODUCT_OWNER_SPEC.md` is also created — re-run Step 0 detection (it will now be found), then proceed with the standard "PO Spec FOUND" path
+- **If score < 7.5**: Present the gap report to the user. The Ready-to-Send Message in the gap report can be copied directly into an email, ticket, or Slack message. Do NOT proceed to architecture creation — do NOT start elicitation. STOP here.
+
+---
+
+**Option 3 — Provide business context now (inline elicitation):**
 
 **Step 0.2a: Capture initial context**
 
@@ -173,7 +186,7 @@ Wait for user input.
 
 ---
 
-**Option 3 — Skip:**
+**Option 4 — Skip:**
 
 Display the following warning and proceed:
 
@@ -196,14 +209,6 @@ Record override metadata (embed in `docs/01-system-overview.md` during Step 5):
 No PO Spec context is available for section pre-population — proceed to Step 1 without it.
 
 ---
-
-**Option 4 — Async intake from a file:**
-
-Ask the user for the file path (ticket export, email, requirements document). Then:
-
-- Invoke the `architecture-readiness` skill's Async Intake workflow: read the file, map content to 8 PO Spec sections, score, and generate `PO_SPEC_GAP_REPORT.md`
-- **If score ≥ 7.5**: A draft `PRODUCT_OWNER_SPEC.md` is also created — re-run Step 0 detection (it will now be found), then proceed with the standard "PO Spec FOUND" path
-- **If score < 7.5**: Present the gap report to the user, advise them to send the gap questions to the requester and re-run intake once answers arrive — do NOT proceed to architecture creation yet
 
 ---
 
@@ -468,6 +473,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 - ARCHITECTURE.md path
 - Trigger reason: "Post-architecture-docs creation — generate ADRs from Section 12 table using full template"
 - **Critical context note**: The full architecture documentation (all `docs/` files created in Step 5) is in the current conversation context. The ADR skill MUST use this context to populate ALL body sections of each ADR (Context, Decision, Rationale, Consequences, Alternatives) — not just metadata placeholders. Do NOT generate abbreviated stubs.
+- **Canonical template requirement**: The ADR skill MUST load and use the canonical template (`ADR-000-template.md`) for every generated file. If any ADR is produced without the full 10-section structure (Context, Decision, Rationale, Consequences, Alternatives, Implementation Plan, Success Metrics, References, Review History, Notes), the generation has FAILED.
 
 The `architecture-definition-record` skill handles the full interactive workflow (prompt user, parse table, generate files with fully populated content, conflict resolution, summary report). Do not replicate that logic here.
 

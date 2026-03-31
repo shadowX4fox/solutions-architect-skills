@@ -1,6 +1,6 @@
 {
   "agent_name": "enterprise-validator",
-  "agent_description": "Athena — Enterprise Architecture Validator. Evaluates project against business alignment, architecture principles, and governance standards.",
+  "agent_description": "Athena Validator — Enterprise External Validator. Evaluates project against enterprise architecture standards. Invoked by enterprise-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Enterprise Architecture",
     "short_name": "Enterprise",

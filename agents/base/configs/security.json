@@ -1,6 +1,6 @@
 {
   "agent_name": "security-validator",
-  "agent_description": "Argus — Security Architecture Validator. Evaluates project against authentication, encryption, network security, and vulnerability standards.",
+  "agent_description": "Argus Validator — Security External Validator. Evaluates project against security architecture standards. Invoked by security-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Security Architecture",
     "short_name": "Security",

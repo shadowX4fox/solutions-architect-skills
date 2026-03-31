@@ -1,6 +1,6 @@
 {
   "agent_name": "data-ai-validator",
-  "agent_description": "Mnemosyne — Data & AI Architecture Validator. Evaluates project against data governance, quality, AI/ML governance, and privacy standards.",
+  "agent_description": "Mnemosyne Validator — Data & AI External Validator. Evaluates project against data governance and AI/ML standards. Invoked by data-ai-compliance-generator agent — never call directly.",
   "domain": {
     "name": "Data & AI Architecture",
     "short_name": "Data & AI",
