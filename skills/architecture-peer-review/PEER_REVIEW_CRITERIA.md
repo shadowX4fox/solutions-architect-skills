@@ -80,7 +80,7 @@ Checks that the document has the correct top-level structure.
 | STRUCT-01 | All 12 required sections present | Critical | Sections 1–12 must all exist: Executive Summary, System Overview, Architecture Principles, Architecture Layers, Component Details, Data Flow Patterns, Integration Points, Technology Stack, Security Architecture, Scalability & Performance, Operational Considerations, Architecture Decision Records |
 | STRUCT-02 | Architecture type comment present in Section 4 | Major | HTML comment `<!-- ARCHITECTURE_TYPE: {TYPE} -->` at top of Section 4. Valid types: MICROSERVICES, META, 3-TIER, N-LAYER, BIAN |
 | STRUCT-03 | Document Index or navigation present | Minor | For monolithic files: Document Index section with line range references. For multi-file: ARCHITECTURE.md serves as navigation index with links to docs/ files |
-| STRUCT-04 | Multi-file structure follows convention | Minor | If multi-file detected: ARCHITECTURE.md as nav index, `docs/NN-section-name.md` numbered files, `docs/components/NN-component-name.md` per-component files |
+| STRUCT-04 | Multi-file structure follows convention | Minor | If multi-file detected: ARCHITECTURE.md as nav index, `docs/NN-section-name.md` numbered files, `docs/components/NN-component-name.md` per-component files (or `docs/components/<system>/NN-*.md` for multi-system) |
 | STRUCT-05 | ADR directory or section exists | Major | Either `adr/` directory with at least one ADR file, OR Section 12 contains inline ADR content. Empty Section 12 with no content is a major gap |
 
 ---

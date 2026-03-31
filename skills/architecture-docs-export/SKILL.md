@@ -90,7 +90,7 @@ Read these files:
 |------|----------|---------|
 | `docs/01-system-overview.md` | ✅ Yes | Executive Summary + System Overview sections |
 | `docs/02-architecture-principles.md` | ✅ Yes | Architecture principles that drove the design |
-| `docs/components/README.md` | ✅ Yes | Component index table (4-column: #, Component, File, Type) |
+| `docs/components/README.md` | ✅ Yes | Component index table (5-column: #, Component, File, Type, Technology) — may have system group headers |
 | `compliance-docs/COMPLIANCE_MANIFEST.md` | ⬜ Optional | Compliance summary table and scores |
 
 If `docs/01-system-overview.md` is not found:
@@ -125,7 +125,7 @@ Build a temporary markdown document (`sa-executive-summary.md`) with the followi
 
 <!-- source: docs/components/README.md -->
 ## Architecture Components
-<Paste the Markdown table from docs/components/README.md (the 4-column # / Component / File / Type table only — skip the managed-by comment, breadcrumb, and prose)>
+<Paste the Markdown table from docs/components/README.md (the 5-column # / Component / File / Type / Technology table — include system group headers if present, skip the managed-by comment, breadcrumb, and prose)>
 
 <!-- source: compliance-docs/COMPLIANCE_MANIFEST.md — only if file exists -->
 ## Compliance Summary
@@ -149,7 +149,7 @@ Build a temporary markdown document (`sa-executive-summary.md`) with the followi
 1. Extract content **verbatim** from source files — do not paraphrase, rewrite, or add commentary
 2. If a heading exists but has no content beneath it, write: `[NOT DOCUMENTED — add content to <source-file>]`
 3. Compliance statistics (score, completeness, status counts) must be **computed from the manifest table** — do not estimate
-4. The component table must be pasted exactly as it appears in `docs/components/README.md` — do not reformat or add columns
+4. The component table must be pasted exactly as it appears in `docs/components/README.md` — do not reformat, remove columns, or alter system group headers
 5. Do not add sections, content, or data not present in the source files
 
 Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-case it for the output filename).

@@ -113,8 +113,9 @@ Search order:
 ```
 Check for:
 - ARCHITECTURE.md exists (navigation index)
-- docs/components/ directory exists with at least one NN-*.md file
+- docs/components/ directory exists with at least one NN-*.md file (may be in system subfolders for multi-system architectures)
 - docs/components/README.md exists (if not, suggest running architecture-component-guardian sync first)
+- Note: multi-system architectures use `docs/components/<system-name>/NN-*.md` with grouped tables in README.md
 
 Warn (do not block) if:
 - compliance-docs/ is absent (skill works without it, but security/SRE enrichment is skipped)
@@ -122,9 +123,10 @@ Warn (do not block) if:
 
 **Step 1.3: Load Component Index**
 ```
-Read docs/components/README.md to get the component table.
-If absent, scan docs/components/*.md directly (excluding README.md).
-Present the component list to the user.
+Read docs/components/README.md to get the component table (5-column: #, Component, File, Type, Technology).
+If the table has system group headers (### System Name), parse all groups.
+If README.md absent, scan docs/components/*.md and docs/components/**/*.md (including system subfolders).
+Present the component list to the user (grouped by system if multi-system).
 ```
 
 ### Phase 2: Component Selection
@@ -150,7 +152,7 @@ Selection modes:
 When multiple components are selected (including "all"), sort them by dependency count **ascending** — components with the fewest dependencies are generated first, components with the most dependencies last.
 
 ```
-1. For each selected component, read its docs/components/NN-<component>.md file
+1. For each selected component, read its component file (path from README.md File column — may be `docs/components/NN-<component>.md` or `docs/components/<system>/NN-<component>.md`)
 2. Count the number of inter-component dependencies (look for **Dependencies:**,
    **Depends On:**, or integration references to other selected components)
 3. Sort ascending by dependency count (least → most)

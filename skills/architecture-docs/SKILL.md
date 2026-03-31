@@ -580,6 +580,28 @@ Full workflow and reference details are in `DESIGN_DRIVER_CALCULATIONS.md` (Read
 
 ---
 
+## Architecture Reference Docs (C4 Model + Type-Specific Rules)
+
+The `references/` directory contains the architecture rules and C4 translation guides for each architecture type. These are loaded during Step 3 of the Architecture Type Selection Workflow.
+
+| File | Purpose |
+|------|---------|
+| `references/ICEPANEL-C4-MODEL.md` | **Governing C4 reference** — defines C4 abstractions, diagram levels, boundary test. Constrains component documentation behavior. |
+| `references/MICROSERVICES-ARCHITECTURE.md` | Microservices architecture rules and patterns |
+| `references/MICROSERVICES-TO-C4-TRANSLATION.md` | Microservices → C4 mapping (services=containers, not systems) |
+| `references/3-TIER-ARCHITECTURE.md` | 3-Tier architecture rules (Presentation, Logic, Data) |
+| `references/3-TIER-TO-C4-TRANSLATION.md` | 3-Tier → C4 mapping (tier≠container distinction) |
+| `references/N-LAYER-ARCHITECTURE.md` | N-Layer variants (DDD, Clean, Hexagonal, 5-Layer Extended) |
+| `references/N-LAYER-TO-C4-TRANSLATION.md` | N-Layer → C4 mapping (inner layers=C3, infra=C2) |
+| `references/META-ARCHITECTURE.md` | META 6-layer banking architecture rules |
+| `references/META-TO-C4-TRANSLATION.md` | META → C4 mapping (layers as visual groupings at C2) |
+| `references/BIAN-ARCHITECTURE.md` | BIAN V12.0 5-layer architecture rules |
+| `references/BIAN-TO-C4-TRANSLATION.md` | BIAN → C4 mapping (Service Domains as containers) |
+
+**Critical rule**: Every architecture type MUST have both reference docs. Types without them are greyed out in the selection menu and cannot be used.
+
+---
+
 ## Documentation Structure
 
 Full workflow and reference details are in `QUERY_SECTION_MAPPING.md` (Read it when this workflow is needed).

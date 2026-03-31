@@ -25,6 +25,40 @@ For supporting operations and algorithms:
 - **→ ADR_GUIDE.md**: Architectural Decision Record format and creation guidelines
 - **→ RESTRUCTURING_GUIDE.md**: Multi-file docs/ directory structure, naming conventions, cross-reference conventions, verification checklist
 
+## C4 Model Alignment
+
+Components in this architecture follow the **C4 model** (IcePanel convention):
+
+### C4 Level 1 — Systems
+Systems are logical groups of applications and data stores, typically owned by a single development team. In multi-system architectures, each system becomes a **folder** under `docs/components/`.
+
+### C4 Level 2 — Containers
+Each component file represents a **container** — a separately deployable/runnable unit. Containers are classified as:
+
+| Type | C4 Category | Examples |
+|------|------------|---------|
+| API Service | App | REST API, GraphQL server, gRPC service |
+| Web Application | App | SPA, SSR frontend, admin portal |
+| Worker/Consumer | App | Message consumer, background processor, scheduler |
+| Database | Store | PostgreSQL, MongoDB, SQL Server |
+| Cache | Store | Redis, Memcached |
+| Message Broker | Store | Kafka, RabbitMQ, Azure Service Bus |
+| Object Storage | Store | S3, Azure Blob, MinIO |
+| Gateway | App | API Gateway, reverse proxy, load balancer |
+
+### Boundary Test
+Before creating a component file, verify:
+- "Can this be deployed independently?" → YES = valid container
+- "Does this run as its own process/container?" → YES = valid container
+- Code module inside a deployable → NOT a container (C3 level — document within parent)
+- External system you don't own → NOT a container (reference in integration docs)
+
+### Naming Convention (IcePanel)
+- Technology in brackets: `[Spring Boot 3.2]`, `[PostgreSQL 16]`, `[React 18 SPA]`
+- Communication protocols on relationships: HTTPS, gRPC, AMQP, TCP
+
+---
+
 ## Architecture Type Selection
 
 **Before creating your ARCHITECTURE.md, choose your architecture type.** The architecture type determines the structure and content of **Section 4 (Meta Architecture)** and **Section 5 (Component Details)**.

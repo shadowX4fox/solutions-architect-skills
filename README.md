@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.0.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -49,12 +49,20 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
   Plus `architecture-blueprint`: generates Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
 
-- **10 Compliance Templates**
-  - Business Continuity, SRE, Cloud, Security, Enterprise Architecture, and more
+- **C4 Model Integration (IcePanel)**
+  - Components follow C4 Level 2 (Container diagram) rules — every component must be a separately deployable unit (App or Store)
+  - 5 architecture types with reference docs + C4 translation guides: Microservices, 3-Tier, N-Layer, META, BIAN
+  - C4 L1 systems become folder structure, C4 L2 containers become component files
+  - Component guardian enforces C4 boundary test and IcePanel naming conventions (`[Technology in brackets]`)
+
+- **10 Compliance Contracts (CC-001 to CC-010)**
+  - Universal generator + 10 domain validators with personality and EOL checks
+  - 4-tier approval workflow (Auto-approve, Manual review, Needs work, Rejected)
+  - External Validation Summary in every contract
+  - EOL-first validation via WebSearch (6-month safety period)
 
 - **Automatic Validation**
   - External validation system (0-10 scoring) for all 10 contracts
-  - 4-tier approval workflow (Auto-approve, Manual review, Needs work, Rejected)
   - Template-specific validation configurations
   - Metric consistency checking
   - Design Drivers calculation
@@ -96,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.0.2` in the list.
+You should see `solutions-architect-skills v3.1.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -150,17 +158,14 @@ Generate your API key at the [context7 dashboard](https://context7.com).
 /skill architecture-readiness
 ```
 
-The skill auto-detects whether a PO Spec already exists:
+The skill has 4 modes (ordered by priority):
 
-- **No PO Spec found** → starts a guided discovery interview (4 phases, ~35 min):
-  1. Foundation — business problem, stakeholders, personas
-  2. Value & Boundaries — goals with targets, budget, timeline, regulatory constraints
-  3. Behavior — use cases (scenario walking), user stories
-  4. Experience & Measurement — UX expectations, KPIs with baselines and targets
-
-  After the interview: Discovery Summary for your review → draft PO Spec → self-scored to ≥ 7.5/10 → saved as `PRODUCT_OWNER_SPEC.md`
-
-- **PO Spec found** → offers Evaluation (scored out of 10) or Creation (template-guided)
+1. **Async Intake** — provide a file (ticket, email, requirements doc) → gap report with email-ready questions → STOPS (never enters elicitation)
+2. **Requirements Elicitation** — guided discovery interview (4 phases):
+   - Foundation → Value & Boundaries → Behavior → Experience & Measurement
+   - Discovery Summary → draft PO Spec → self-scored to ≥ 7.5/10 → `PRODUCT_OWNER_SPEC.md`
+3. **PO Spec Creation** — template-guided document creation
+4. **PO Spec Evaluation** — score existing PO Spec (0-10 weighted rubric)
 
 **Phase 2 — Technical Architecture**
 
@@ -240,7 +245,10 @@ Create and maintain technical architecture documentation following enterprise st
 
 **Key Features:**
 - **Multi-file structure** — `ARCHITECTURE.md` at project root is a navigation index (~130 lines); all content lives in `docs/` as numbered section files; components in `docs/components/` (one file per component); see [RESTRUCTURING_GUIDE.md](skills/architecture-docs/RESTRUCTURING_GUIDE.md)
-- 5 architecture type templates (META, 3-Tier, Microservices, N-Layer, BIAN)
+- **5 architecture types** with reference docs + C4 translation guides:
+  - `STANDARD`: Microservices (1), 3-Tier (2), N-Layer (3)
+  - `ENTERPRISE`: META (4), BIAN (5)
+- **C4 component process**: C4 L1 systems → confirm → select focus system → C4 L2 boundary test → create component files
 - Interactive Mermaid diagrams in `docs/03-architecture-layers.md`
 - Metric consistency validation across document
 - Design Drivers calculation (Value Delivery %, Scale, Impacts)
@@ -254,7 +262,7 @@ Create and maintain technical architecture documentation following enterprise st
 ```
 <project-root>/
 ├── ARCHITECTURE.md          (~130 lines — navigation index only)
-├── adr/                     (ADR files)
+├── adr/                     (ADR files — canonical 10-section template)
 └── docs/
     ├── 01-system-overview.md
     ├── 02-architecture-principles.md
@@ -266,9 +274,13 @@ Create and maintain technical architecture documentation following enterprise st
     ├── 08-scalability-and-performance.md
     ├── 09-operational-considerations.md
     └── components/
-        ├── README.md        (component index)
-        └── NN-<name>.md     (one file per component)
+        ├── README.md                (5-column index: #, Component, File, Type, Technology)
+        ├── NN-<name>.md             (single-system: components at root)
+        └── <system-name>/           (multi-system: C4 L1 folder per system)
+            └── NN-<name>.md         (C4 L2 containers inside system folder)
 ```
+
+Each component file includes a **C4 metadata header**: Type, Technology `[in brackets]`, C4 Level, Deploys as, Communicates via. Multi-system architectures use **grouped tables** with `### System Name` headers in README.md.
 
 #### Peer Review (Quality Gate)
 
@@ -292,6 +304,40 @@ Use `/skill architecture-blueprint` when organizational blueprint forms are requ
 - Bilingual (ES/EN) with explicit language override support
 
 **Output location:** same directory as `ARCHITECTURE.md`
+
+#### Architecture Type Selection & C4 Model
+
+When creating a new architecture, the user selects from 5 types. Each type comes with two reference documents that govern the architecture and component structure:
+
+```
+📐 Architecture Type Selection
+
+── Industry Standard ─────────────────────────────
+  1. Microservices    STANDARD  RECOMMENDED
+  2. 3-Tier           STANDARD
+  3. N-Layer          STANDARD
+
+── Enterprise / Domain-Specific ──────────────────
+  4. META             ENTERPRISE
+  5. BIAN             ENTERPRISE  BANKING
+```
+
+Each type loads:
+- **Section 4 + 5 templates** — structure and component format
+- **Architecture Rules** (`references/{TYPE}-ARCHITECTURE.md`) — defines the pattern, layers, principles
+- **C4 Translation** (`references/{TYPE}-TO-C4-TRANSLATION.md`) — maps the architecture to C4 levels
+
+Types without both reference docs are **greyed out** and cannot be selected.
+
+After type selection, the C4 component process runs:
+
+```
+Step 4a: C4 Level 1 — Identify systems → confirm with user
+Step 4b: C4 Level 2 — Confirm focus system
+Step 4c: C4 Level 2 — Identify containers per system (boundary test)
+Step 4d: Create component files with C4 metadata headers
+Step 4e: Create README.md index (5-column, grouped by system)
+```
 
 ### Phase 3: Compliance Documentation
 
@@ -684,7 +730,23 @@ Where:
 
 ## Roadmap
 
-### v3.0.2 (Current Release) ✅
+### v3.1.0 (Current Release) ✅
+**feat: C4 model integration, architecture reference docs, multi-system components, async intake reorder**
+
+- **C4 Model Integration**: Components follow C4 L2 (Container diagram) — boundary test, App/Store classification, IcePanel bracket convention for technology
+- **11 architecture reference docs** in `references/`: C4 model + 5 architecture rules + 5 C4 translation guides (Microservices, 3-Tier, N-Layer, META, BIAN)
+- **Multi-system components**: C4 L1 systems → folders under `docs/components/`, C4 L2 containers → component files. Single-system = flat (no folders)
+- **5-column component index**: `#`, `Component`, `File`, `Type`, `Technology` with grouped system headers for multi-system
+- **C4 metadata header** on all component templates: Type, Technology `[in brackets]`, C4 Level, Deploys as, Communicates via
+- **Architecture type selection reordered**: Industry Standard (1-3) first, Enterprise (4-5) after, with `STANDARD`/`ENTERPRISE`/`BANKING` tags
+- **Reference doc gate**: Types without both reference docs are greyed out and cannot be selected
+- **Component guardian** governed by `ICEPANEL-C4-MODEL.md` — enforces C4 boundary test and canonical types
+- **Async intake** reordered to flow #1 in readiness skill with email-ready gap report output
+- **Canonical ADR template rule** enforced across all write workflows (1, 2, 4) with explicit gate checks
+- **Validator personalities** moved from generators to validators; validators load domain config at runtime
+- Cross-skill compatibility: handoff, peer review, ADR, docs-export all updated for 5-column index + system subfolders
+
+### v3.0.2 (Previous Release) ✅
 **fix: align validator names, enforce canonical ADR template, async intake isolation + email-ready output**
 
 - Validator spawn descriptions now use full codename + domain format (e.g., `Aegis — Business Continuity Validator`)

@@ -12,8 +12,22 @@ triggers:
 ## Purpose
 
 This skill is the single source of truth for generating and maintaining
-`docs/components/README.md`. It enforces a fixed 4-column table schema on every
+`docs/components/README.md`. It enforces a fixed 5-column table schema on every
 write and refuses ad-hoc direct edits.
+
+## C4 Model Governance
+
+This skill's behavior is governed by the **IcePanel C4 Model** reference at:
+```
+[plugin_dir]/skills/architecture-docs/references/ICEPANEL-C4-MODEL.md
+```
+
+**Key constraints from C4 Level 2 (Container diagram)**:
+- Every component in the index MUST be a **separately deployable unit** — either an **App** or a **Store**
+- The **Type** column MUST use C4 L2 canonical types: API Service, Web Application, Worker/Consumer, Database, Cache, Message Broker, Object Storage, Gateway
+- The **Technology** column MUST use IcePanel bracket convention: `[Spring Boot 3.2]`, `[PostgreSQL 16]`
+- Code modules, libraries, and namespaces are C3 level — they do NOT get component entries
+- External systems you don't own are NOT components — they're integration references
 
 ---
 
@@ -46,8 +60,8 @@ Line 6:  <intro paragraph>
 Line 7:  (blank)
 Line 8:  ## <System Name> Components
 Line 9:  (blank)
-Line 10: | # | Component | File | Type |
-Line 11: |---|-----------|------|------|
+Line 10: | # | Component | File | Type | Technology |
+Line 11: |---|-----------|------|------|------------|
 Line 12: | 5.1 | ... | ... | ... |
          ...
          (blank)
@@ -60,10 +74,32 @@ Line 12: | 5.1 | ... | ... | ... |
          - link list
 ```
 
-**Table schema — exactly 4 columns, never add or remove:**
+**Table schema — exactly 5 columns, never add or remove:**
 
-| # | Component | File | Type |
-|---|-----------|------|------|
+| # | Component | File | Type | Technology |
+|---|-----------|------|------|------------|
+
+**Type canonical values (C4 L2 set):**
+
+| Type | C4 Category |
+|------|------------|
+| API Service | App |
+| Web Application | App |
+| Worker/Consumer | App |
+| Database | Store |
+| Cache | Store |
+| Message Broker | Store |
+| Object Storage | Store |
+| Gateway | App |
+
+**Multi-system grouped tables:**
+
+- **Multi-system architecture**: Use a `### System Name` header before each system's table. File column paths include system folder: `[01-name.md](system-name/01-name.md)`
+- **Single-system architecture**: Single table with no system header
+
+**Technology column — IcePanel bracket convention:**
+
+Use brackets around the technology with version: `[Spring Boot 3.2]`, `[PostgreSQL 16]`, `[React 18 SPA]`
 
 **Column extraction rules:**
 
@@ -71,8 +107,9 @@ Line 12: | 5.1 | ... | ... | ... |
 |--------|--------|
 | `#` | Filename prefix `NN-` → formatted as `5.N` (e.g. `01` → `5.1`) |
 | `Component` | First `# Heading` in the component file |
-| `File` | `[NN-filename.md](NN-filename.md)` relative link; anchor fragment allowed for files grouping multiple components |
-| `Type` | Value of `**Type:**` field in the component file; if absent, first classification sentence |
+| `File` | `[NN-filename.md](NN-filename.md)` relative link; anchor fragment allowed for files grouping multiple components. For multi-system: `[NN-filename.md](system-name/NN-filename.md)` |
+| `Type` | Value of `**Type:**` field in the component file; must be one of the C4 L2 canonical values above |
+| `Technology` | Value of `**Technology:**` field in the component file, formatted in IcePanel brackets |
 
 **What belongs here vs. elsewhere:**
 
@@ -82,7 +119,7 @@ Line 12: | 5.1 | ... | ... | ... |
 | Monthly cost per component | `docs/09-operational-considerations.md` Cost Management section |
 | Component relationships | `## Key Relationships` section of this README |
 | Scaling details | `docs/08-scalability-and-performance.md` |
-| Extra index columns | **Not permitted** — update this skill's format spec first |
+| Extra index columns beyond 5 | **Not permitted** — update this skill's format spec first |
 | Development handoff docs | `docs/handoffs/NN-*-handoff.md` — managed by `architecture-dev-handoff` skill |
 
 ---
@@ -134,7 +171,7 @@ supplementary document. The index table schema is fixed by this skill.
 
 Before finishing, confirm:
 - [ ] Line 1 is the managed-by HTML comment
-- [ ] Table has exactly 4 columns: `#`, `Component`, `File`, `Type`
+- [ ] Table has exactly 5 columns: `#`, `Component`, `File`, `Type`, `Technology`
 - [ ] All `.md` files in `docs/components/` (except README.md) are represented in the table
 - [ ] No component appears twice
 - [ ] Breadcrumb is `[Architecture](../../ARCHITECTURE.md) > Components`
@@ -270,7 +307,7 @@ Sections with no applicable content for this component:
 ### Flow C — Ongoing maintenance
 1. Developer adds/changes/removes a `docs/components/NN-*.md` file
 2. Invoke this skill — README is regenerated with the change reflected
-3. 4-column format is enforced on every write
+3. 5-column format is enforced on every write
 4. Architecture documentation sections (S6–S11) are updated with component references
 5. `ARCHITECTURE.md` navigation index is updated (add/remove only)
 6. Diagram update prompt is presented; pending updates are tracked with a comment marker

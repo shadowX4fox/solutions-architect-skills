@@ -20,10 +20,13 @@ For each microservice, use this comprehensive template:
 
 ### [Service Name] Service
 
-**Bounded Context**: [Domain/business capability this service owns]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
-**Type**: Microservice
-**Technology**: [Language/framework - e.g., Java/Spring Boot, Node.js/NestJS]
+**Bounded Context**: [Domain/business capability this service owns]
 <!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Repository URL or directory path]

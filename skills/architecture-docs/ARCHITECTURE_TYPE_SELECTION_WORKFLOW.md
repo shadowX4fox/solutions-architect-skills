@@ -18,11 +18,14 @@
 
 ### Available Architecture Types
 
-1. **Microservices Architecture (Recommended)** - Cloud-native distributed systems with independent services
-2. **META Architecture** - 6-layer enterprise model (Channels → UX → Business Scenarios → Business → Domain → Core) with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 Domain service domains
-3. **3-Tier Architecture** - Classic web application pattern (Presentation → Application/Business Logic → Data)
-4. **N-Layer Architecture** - Customizable patterns (DDD, Clean Architecture, Hexagonal)
-5. **BIAN Architecture** - 5-layer BIAN-compliant model (Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems) with full [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) compliance across layers 2-4
+**Industry Standard:**
+1. **Microservices** `STANDARD` `RECOMMENDED` — Cloud-native distributed systems with independently deployable services
+2. **3-Tier** `STANDARD` — Classic web application pattern (Presentation → Application/Business Logic → Data)
+3. **N-Layer** `STANDARD` — Customizable layered patterns (DDD, Clean Architecture, Hexagonal)
+
+**Enterprise / Domain-Specific:**
+4. **META** `ENTERPRISE` — 6-layer enterprise model (Channels → UX → Business Scenarios → Integration → Domain → Core) with [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) alignment for Layer 5 Domain
+5. **BIAN** `ENTERPRISE` `BANKING` — 5-layer BIAN-compliant model with full [BIAN V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) compliance across layers 2-4
 
 **BIAN Standard for META**: BIAN V12.0 is the default and recommended version for META architecture. Use the [BIAN Service Landscape V12.0](https://bian.org/servicelandscape-12-0-0/views/view_51891.html) to identify and define service domains for Layer 5 (Domain).
 
@@ -312,43 +315,39 @@ When creating a new ARCHITECTURE.md, present the user with architecture type sel
 
 Before creating your ARCHITECTURE.md, please select the architecture type that best describes your system:
 
-**1. Microservices Architecture (Recommended)** (Cloud-Native Distributed)
-   - Best for: Cloud-native systems, independently deployable services, modern applications
+── Industry Standard ──────────────────────────────────────
+
+**1. Microservices** `STANDARD` `RECOMMENDED`
+   Cloud-native distributed services — independently deployable containers
    - Components: API Gateway → Services → Data Stores → Event Bus
-   - Complexity: High
-   - Team Size: Large (10+)
-   - Why Recommended: Industry standard for scalable, resilient modern applications
+   - Complexity: High | Team Size: Large (10+)
 
-**2. META Architecture** (6-Layer Enterprise)
-   - Best for: Large enterprise systems, financial services, complex integrations
-   - Layers: Channels → UX → Business Scenarios → Integration → Domain → Core
-   - Complexity: Very High
-   - Team Size: Large (10+)
-
-**3. 3-Tier Architecture** (Classic Web Application)
-   - Best for: Web apps, REST APIs, standard CRUD systems
+**2. 3-Tier** `STANDARD`
+   Classic web application — presentation, business logic, data layers
    - Tiers: Presentation → Application/Business Logic → Data
-   - Complexity: Low
-   - Team Size: Small-Medium (2-8)
+   - Complexity: Low | Team Size: Small-Medium (2-8)
 
-**4. N-Layer Architecture** (Customizable Patterns)
-   - Best for: DDD, Clean Architecture, Hexagonal Architecture
-   - Patterns: 4-Layer DDD, 5-Layer Extended, Clean Architecture, Hexagonal
-   - Complexity: Medium-High
-   - Team Size: Medium (4-10)
+**3. N-Layer** `STANDARD`
+   Customizable layered patterns — DDD, Clean Architecture, Hexagonal
+   - Patterns: 4-Layer DDD, 5-Layer Extended, Clean, Hexagonal
+   - Complexity: Medium-High | Team Size: Medium (4-10)
 
-**5. BIAN Architecture** (5-Layer BIAN-Compliant)
-   - Best for: Banking systems requiring BIAN V12.0 certification, full BIAN compliance
-   - Layers: Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems
-   - Complexity: Very High
-   - Team Size: Large (10+)
-   - BIAN Compliance: Full BIAN V12.0 across layers 2-4
+── Enterprise / Domain-Specific ───────────────────────────
 
-For detailed comparison and decision guidance, refer to: `templates/ARCHITECTURE_TYPE_SELECTOR.md`
+**4. META** `ENTERPRISE`
+   6-layer enterprise model with BIAN V12.0 alignment for domain services
+   - Layers: Channels → UX → Business Scenarios → Integration → Domain → Core
+   - Complexity: Very High | Team Size: Large (10+)
+
+**5. BIAN** `ENTERPRISE` `BANKING`
+   5-layer BIAN-compliant model — full BIAN V12.0 certification
+   - Layers: Channels → BIAN Business Scenarios → BIAN Capabilities → BIAN Service Domains → Core
+   - Complexity: Very High | Team Size: Large (10+)
+   - BIAN Compliance: Full V12.0 across layers 2-4
+
+────────────────────────────────────────────────────────────
 
 **Which architecture type best describes your system? (1-5, or type name)**
-
-Note: Option 1 (Microservices) is recommended for most modern cloud-native applications.
 ```
 
 #### Step 2: Capture User Selection
@@ -357,33 +356,43 @@ Wait for user response (1, 2, 3, 4, or 5) or architecture type name.
 
 **Valid inputs:**
 - Numeric: `1`, `2`, `3`, `4`, `5`
-- Type names: `Microservices`, `META`, `3-Tier`, `N-Layer`, `BIAN`
-- Variations: `microservices`, `meta`, `three-tier`, `n-layer`, `bian`
+- Type names: `Microservices`, `3-Tier`, `N-Layer`, `META`, `BIAN`
+- Variations: `microservices`, `three-tier`, `n-layer`, `meta`, `bian`
 
 **If user is unsure:**
 - Offer to load `templates/ARCHITECTURE_TYPE_SELECTOR.md` decision guide
 - Provide quick decision tree questions
-- Default to **Microservices (Recommended)** for modern cloud-native systems
-- Default to **META** if user has enterprise requirements and regulatory compliance needs
-- Default to **3-Tier** if user wants maximum simplicity and minimal operational complexity
+- Default to **Microservices (1)** for modern cloud-native systems
+- Default to **3-Tier (2)** if user wants maximum simplicity and minimal operational complexity
+- Default to **META (4)** if user has enterprise requirements and regulatory compliance needs
 
 #### Step 3: Load Type-Specific Templates
 
 Based on user selection, load the appropriate templates:
 
-| Selection | Section 4 Template | Section 5 Template |
-|-----------|-------------------|-------------------|
-| Microservices (1) | `templates/SECTION_4_MICROSERVICES.md` | `templates/SECTION_5_MICROSERVICES.md` |
-| META (2) | `templates/SECTION_4_META.md` | `templates/SECTION_5_META.md` |
-| 3-Tier (3) | `templates/SECTION_4_3TIER.md` | `templates/SECTION_5_3TIER.md` |
-| N-Layer (4) | `templates/SECTION_4_NLAYER_PATTERNS.md` | *(Use generic component template)* |
-| BIAN (5) | `templates/SECTION_4_BIAN.md` | `templates/SECTION_5_BIAN.md` |
+| Selection | Tag | Section 4 Template | Section 5 Template | Architecture Rules | C4 Translation |
+|-----------|-----|-------------------|-------------------|-------------------|----------------|
+| 1 — Microservices | `STANDARD` | `templates/SECTION_4_MICROSERVICES.md` | `templates/SECTION_5_MICROSERVICES.md` | `references/MICROSERVICES-ARCHITECTURE.md` | `references/MICROSERVICES-TO-C4-TRANSLATION.md` |
+| 2 — 3-Tier | `STANDARD` | `templates/SECTION_4_3TIER.md` | `templates/SECTION_5_3TIER.md` | `references/3-TIER-ARCHITECTURE.md` | `references/3-TIER-TO-C4-TRANSLATION.md` |
+| 3 — N-Layer | `STANDARD` | `templates/SECTION_4_NLAYER_PATTERNS.md` | *(generic)* | `references/N-LAYER-ARCHITECTURE.md` | `references/N-LAYER-TO-C4-TRANSLATION.md` |
+| 4 — META | `ENTERPRISE` | `templates/SECTION_4_META.md` | `templates/SECTION_5_META.md` | `references/META-ARCHITECTURE.md` | `references/META-TO-C4-TRANSLATION.md` |
+| 5 — BIAN | `ENTERPRISE` | `templates/SECTION_4_BIAN.md` | `templates/SECTION_5_BIAN.md` | `references/BIAN-ARCHITECTURE.md` | `references/BIAN-TO-C4-TRANSLATION.md` |
 
 **Loading Process:**
 1. Read the appropriate Section 4 template file
 2. Read the appropriate Section 5 template file (if exists)
-3. Extract template content (excluding metadata comments)
-4. Prepare for insertion into ARCHITECTURE.md at correct section boundaries
+3. **Read the Architecture Rules reference** — defines the architecture pattern, layers, principles
+4. **Read the C4 Translation reference** — maps the architecture to C4 levels for component documentation
+5. Extract template content (excluding metadata comments)
+6. Prepare for insertion into ARCHITECTURE.md at correct section boundaries
+
+**GATE CHECK**: If either reference doc (Architecture Rules or C4 Translation) is missing for the selected type:
+```
+⚠️ Cannot proceed — {type} is missing its architecture reference docs.
+Required: references/{TYPE}-ARCHITECTURE.md and references/{TYPE}-TO-C4-TRANSLATION.md
+
+This architecture type is unavailable until the reference docs are added to the plugin.
+```
 
 #### Step 4: Add Architecture Type Metadata
 
@@ -427,27 +436,125 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    - `docs/08-scalability-and-performance.md` — Section 10 (Scalability & Performance)
    - `docs/09-operational-considerations.md` — Section 11 (Operational Considerations)
    - `docs/10-references.md` — References
-4. **Section 5 — Create Individual Component Files** (MANDATORY)
+4. **Section 5 — Create Individual Component Files (C4 Model)** (MANDATORY)
 
-   Every component identified during architecture design MUST get its own file. Do NOT write Section 5 content into a single monolithic file.
+   Every component identified during architecture design MUST get its own file. Do NOT write Section 5 content into a single monolithic file. Components follow the **C4 model**: systems (L1) organize into folders, containers (L2) become component files.
 
-   **4a.** Identify all components from the architecture discussion (services, modules, infrastructure components, etc.)
-   **4b.** For each component, create `docs/components/NN-<component-name>.md`:
-      - `NN` = two-digit zero-padded index (01, 02, 03, ...)
-      - Name = lowercase kebab-case (e.g., `01-api-gateway.md`, `02-order-service.md`)
-      - Add breadcrumb: `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>`
-      - Add `# <Component Name>` heading
-      - Add `**Type:** <type>` field (e.g., Microservice, Infrastructure, Module, Service Domain)
-      - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
-      - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
-   **4c.** Create `docs/components/README.md` component index using the architecture-component-guardian format:
-      - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
-      - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
-      - 4-column table: `#`, `Component`, `File`, `Type`
-      - One row per component file created in 4b
-   **4d.** Verify: count of component files created must match count of rows in README.md table
+   **4a. C4 Level 1 — Identify and Confirm Systems**
 
-   > **HARD GATE**: Do NOT proceed to Step 5 (ARCHITECTURE.md index) until at least one component file exists in `docs/components/`. If no components were identified, ask the user to define at least the primary components before continuing.
+   From the architecture discussion, identify all systems. A system is a logical group of applications and data stores, typically owned by a single development team. Present to the user for confirmation:
+
+   ```
+   🔍 C4 Level 1 — Systems Identified
+
+   Based on the architecture discussion, I've identified these systems:
+
+     1. [System Name] — [brief description]
+     2. [System Name] — [brief description]
+     3. [System Name] (external) — [provider, not owned by us]
+
+   Internal systems (1, 2) will get component documentation.
+   External systems (3) are referenced as dependencies only.
+
+   Please confirm or adjust this list before we proceed.
+   ```
+
+   Wait for user confirmation. Adjust if needed.
+
+   **4b. C4 Level 2 — Confirm Focus System**
+
+   If multiple internal systems detected, ask which is the **main system of concern**:
+
+   ```
+   🔎 C4 Level 2 — Confirm Focus System
+
+   Which system is the main focus of this architecture?
+   (All systems get full documentation. The focus system is listed first and centers the C2 diagram.)
+
+     1. [System Name] ← (main system of concern)
+     2. [System Name]
+
+   Enter the number of your main system:
+   ```
+
+   Single system → skip this prompt, it is the focus by default.
+
+   All identified internal systems get **full detailed component documentation** — same depth for every system. The focus system designation only affects:
+   - Priority in the README.md index (focus system listed first)
+   - Architecture diagram scope (C2 diagram centers on the focus system)
+
+   **4c. C4 Level 2 — Identify Containers per System**
+
+   For each system, identify all containers (C4 Level 2). Each MUST pass the **boundary test**:
+   - "Can this be deployed independently?" → YES = valid container
+   - "Does this run as its own process/container?" → YES = valid container
+   - Code module inside a deployable → NOT a container (C3 level — document within parent)
+   - External system you don't own → NOT a container (reference in integration docs)
+
+   Classify each container as **App** or **Store**:
+
+   | Type | C4 Category | Examples |
+   |------|------------|---------|
+   | API Service | App | REST API, GraphQL server, gRPC service |
+   | Web Application | App | SPA, SSR frontend, admin portal |
+   | Worker/Consumer | App | Message consumer, background processor, scheduler |
+   | Database | Store | PostgreSQL, MongoDB, SQL Server |
+   | Cache | Store | Redis, Memcached |
+   | Message Broker | Store | Kafka, RabbitMQ, Azure Service Bus |
+   | Object Storage | Store | S3, Azure Blob, MinIO |
+   | Gateway | App | API Gateway, reverse proxy, load balancer |
+
+   **4d. Create Component Files**
+
+   For each container identified in 4c, create a component file:
+   - **Single system**: `docs/components/NN-<component-name>.md`
+   - **Multi-system**: `docs/components/<system-name>/NN-<component-name>.md` (system folder = kebab-case)
+   - `NN` = two-digit zero-padded index (01, 02, 03, ...) — resets per system folder
+   - Name = lowercase kebab-case (e.g., `01-payment-api.md`, `02-payment-db.md`)
+   - Add breadcrumb (adjust depth for system folders):
+     - Single: `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>`
+     - Multi: `[Architecture](../../../ARCHITECTURE.md) > [Components](../README.md) > [System Name](.) > <Component Name>`
+   - Add `# <Component Name>` heading
+   - Add C4 metadata header:
+     ```
+     **Type:** <C4 type from table above>
+     **Technology:** [<technology with version>]
+     **C4 Level:** Container (L2)
+     **Deploys as:** <Docker container | serverless function | managed service | VM>
+     **Communicates via:** <HTTPS | gRPC | AMQP | TCP | ...>
+     ```
+   - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
+   - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+
+   **4e. Create README.md Component Index**
+
+   Create `docs/components/README.md` using the architecture-component-guardian format:
+   - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
+   - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
+   - **Multi-system**: Grouped tables with `### <System Name>` headers (focus system first)
+   - **Single-system**: Single table (no system header)
+   - **5-column table**: `#`, `Component`, `File`, `Type`, `Technology`
+
+   **4f. Verify Counts**
+
+   Count of component files created must match count of rows in README.md table (across all system groups).
+
+   **4g. Summary**
+
+   Report all systems and components created:
+   ```
+   ✅ C4 Component Documentation Complete
+
+   Focus System: [name]
+   Systems: [count] internal, [count] external (dependencies only)
+
+   [System Name] ([count] containers):
+     - 01-component-name.md (API Service) [Spring Boot 3.2]
+     - 02-component-name.md (Database) [PostgreSQL 16]
+     ...
+   ```
+
+   > **HARD GATE**: Do NOT proceed to Step 5 (ARCHITECTURE.md index) until at least one component file exists in `docs/components/`. If no components were identified, ask the user to define at least the primary containers before continuing.
 
 5. Write `ARCHITECTURE.md` as the navigation index using the template from RESTRUCTURING_GUIDE.md
 6. Add the `<!-- ARCHITECTURE_TYPE: TYPE -->` metadata comment at the top of `docs/03-architecture-layers.md`

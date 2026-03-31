@@ -18,8 +18,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: Web UI | API Controller | REST Endpoint | GraphQL Resolver | Client App
-**Technology**: [Specific technology used]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 <!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Package/directory path or repository]

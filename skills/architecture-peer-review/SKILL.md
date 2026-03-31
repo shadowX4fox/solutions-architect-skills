@@ -55,7 +55,7 @@ Search for `ARCHITECTURE.md` at the project root.
 **Multi-file structure detected** if `ARCHITECTURE.md` exists as a navigation index and a `docs/` directory contains numbered section files. In this case, the full architecture spans:
 - `ARCHITECTURE.md` (navigation index)
 - `docs/NN-section-name.md` files (one per section)
-- `docs/components/NN-component-name.md` files
+- `docs/components/NN-component-name.md` files (or `docs/components/<system>/NN-*.md` for multi-system architectures)
 - `adr/*.md` files (for Hard depth)
 
 **Monolithic structure**: A single `ARCHITECTURE.md` file contains all 12 sections.
@@ -102,7 +102,7 @@ Read `PEER_REVIEW_CRITERIA.md`. Load only the depth-relevant sections:
 **For multi-file structure**: Read files in this order, concatenating content with file separator markers for the playground:
 1. `ARCHITECTURE.md`
 2. `docs/NN-*.md` files in numeric order
-3. `docs/components/NN-*.md` files in numeric order (for Medium and Hard depth)
+3. `docs/components/NN-*.md` and `docs/components/*/NN-*.md` files in numeric order (for Medium and Hard depth)
 4. `adr/*.md` files in alphabetic order (for Hard depth only)
 
 Track line numbers per source file (each file restarts at line 1).

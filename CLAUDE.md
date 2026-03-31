@@ -219,7 +219,7 @@ A pre-configured example is provided at `.claude/settings.json.example`. Users i
 
 ### Using the Architecture Component Guardian Skill
 
-The `architecture-component-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 4-column table schema on every write.
+The `architecture-component-guardian` skill is the **only sanctioned way** to create or update `docs/components/README.md`. It enforces a fixed 5-column table schema on every write, with grouped system headers for multi-system architectures.
 
 To manually activate the skill, use: `/skill architecture-component-guardian`
 
@@ -228,7 +228,7 @@ To manually activate the skill, use: `/skill architecture-component-guardian`
 - To sync the index after a migration that produces the `docs/components/` structure
 - Any time `docs/components/README.md` needs to change (redirect direct-edit requests here)
 
-**Output**: Generates `docs/components/README.md` with a managed-by comment, breadcrumb, and a 4-column table (`#`, `Component`, `File`, `Type`).
+**Output**: Generates `docs/components/README.md` with a managed-by comment, breadcrumb, and a 5-column table (`#`, `Component`, `File`, `Type`, `Technology`). Multi-system architectures use grouped tables with `### System Name` headers.
 
 | Change | How |
 |--------|-----|

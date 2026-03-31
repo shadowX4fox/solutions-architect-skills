@@ -442,7 +442,7 @@ Approve all updates? ('all' / comma-separated numbers to deselect / 'skip')
 
 For each approved item, apply the change following the architecture-docs Context Anchor Protocol. **Never modify `docs/` or `docs/handoffs/` without loading the required context first.**
 
-**For `docs/*.md` and `docs/components/*.md`:**
+**For `docs/*.md`, `docs/components/*.md`, and `docs/components/**/*.md`:**
 1. Load Context Anchor — universal foundation (`docs/01-system-overview.md` + `docs/02-architecture-principles.md`) + section-specific parents per the dependency tier table + the changed ADR
 2. Read the target file
 3. Identify specific passages: ADR citations (`per [ADR-NNN]`), facts derived from the ADR, status references
