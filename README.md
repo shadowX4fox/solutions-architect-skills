@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.1` in the list.
+You should see `solutions-architect-skills v3.1.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,15 @@ Where:
 
 ## Roadmap
 
-### v3.1.1 (Current Release) ✅
+### v3.1.2 (Current Release) ✅
+**feat: guardian loads architecture-type C4 translation on every invocation**
+
+- Component guardian now detects `<!-- ARCHITECTURE_TYPE: -->` from `docs/03-architecture-layers.md` on every operation (sync, add, migrate)
+- Loads the matching C4 translation guide (`{TYPE}-TO-C4-TRANSLATION.md`) to apply type-specific container rules
+- Type-specific validation: flags components that violate the translation guide (e.g., "Service Layer" in 3-Tier = C3, not a valid C2 component)
+- Graceful fallback: if no architecture type detected, uses generic C4 L2 rules only
+
+### v3.1.1 (Previous Release) ✅
 **feat: C4 migration workflow + guardian governance cleanup**
 
 - Added `migrate` operation to component guardian — 8-phase automated workflow converting flat `docs/components/` to C4 multi-system structure (detect → classify → fix metadata → move files → update references → regenerate README → update ARCHITECTURE.md → verify)

@@ -44,6 +44,56 @@ The **Type** column accepts exactly these 8 values:
 | Sidecar / service mesh proxy (Envoy, Istio) | NOT a component — transparent infrastructure, mention in description |
 | Shared library or SDK | NOT a component — technology stack item, not a deployable unit |
 
+### Architecture Type → C4 Translation
+
+**On every invocation** (sync, add, migrate), detect the project's architecture type and load its C4 translation guide. The translation guide defines how that specific architecture maps to C4 levels — this affects what qualifies as a component.
+
+**Step 0: Detect architecture type**
+
+Search for the type metadata comment:
+```
+Grep pattern: "<!-- ARCHITECTURE_TYPE:"
+file: docs/03-architecture-layers.md
+```
+
+Extract the type value (e.g., `MICROSERVICES`, `3-TIER`, `META`, `N-LAYER`, `BIAN`).
+
+**Step 0.1: Load the C4 translation guide**
+
+Read the matching translation file from the plugin:
+```
+[plugin_dir]/skills/architecture-docs/references/{TYPE}-TO-C4-TRANSLATION.md
+```
+
+Mapping:
+| ARCHITECTURE_TYPE | Translation File |
+|-------------------|-----------------|
+| MICROSERVICES | `MICROSERVICES-TO-C4-TRANSLATION.md` |
+| 3-TIER | `3-TIER-TO-C4-TRANSLATION.md` |
+| N-LAYER | `N-LAYER-TO-C4-TRANSLATION.md` |
+| META | `META-TO-C4-TRANSLATION.md` |
+| BIAN | `BIAN-TO-C4-TRANSLATION.md` |
+
+If `docs/03-architecture-layers.md` doesn't exist or has no type comment, skip translation loading and use the generic C4 L2 rules from `ICEPANEL-C4-MODEL.md` only.
+
+**Step 0.2: Apply type-specific container rules**
+
+The translation guide overrides the generic C4 rules for what counts as a component:
+
+| Architecture Type | Key Translation Rule |
+|-------------------|---------------------|
+| **Microservices** | Each service = Container (App). Each DB per service = Container (Store). Event bus = Container. API Gateway = Container. |
+| **3-Tier** | Backend code (tiers 2+3) = ONE Container. Only the database, cache, and external processes are separate Containers. Do NOT create a component per tier. |
+| **N-Layer** | All inner layers (Domain, Application, Use Cases) = C3 level inside one backend Container. Only infrastructure that runs as a separate process (DB, cache, broker) = Container. |
+| **META** | Channels (L1) = separate Systems. Layers 2–5 containers grouped by layer. Transversal = vertical column. BIAN SDs at L5 = Containers. |
+| **BIAN** | Each BIAN Service Domain = Container (App) labeled with BIAN SD name + `[BIAN V12.0]`. Core systems = external. |
+
+**When validating component entries**, check the Type value against what the translation guide considers a valid C4 L2 container for this architecture. Flag violations:
+```
+⚠️ Architecture type is 3-TIER but component "Service Layer" looks like an internal code layer (C3), not a deployable container (C2).
+The 3-Tier C4 translation says: backend code (tiers 2+3) deploys as ONE container.
+```
+
 ---
 
 ## When to Invoke This Skill
