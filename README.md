@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.0` in the list.
+You should see `solutions-architect-skills v3.2.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -647,19 +647,17 @@ The architecture-compliance skill uses Bun for:
 
 ## Recommended VS Code Setup
 
-For the best experience working with this plugin, install these three VS Code extensions:
+For the best experience working with this plugin, install these VS Code extensions:
 
 | Extension | Publisher | Purpose |
 |-----------|-----------|---------|
 | [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) | Anthropic | Run Claude Code skills directly from the editor |
-| [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) | Mermaid OSS | Live preview of Mermaid diagrams in architecture docs |
-| [Office Viewer](https://marketplace.visualstudio.com/items?itemName=cweijan.vscode-office) | Database Client | Preview `.docx` exports without leaving VS Code |
+| [Mermaid Chart](https://marketplace.visualstudio.com/items?itemName=MermaidChart.vscode-mermaid-chart) | Mermaid Chart | Live preview of Mermaid diagrams (v11.4.1) with pan, zoom, and export |
 
 ### Why these extensions?
 
 - **Claude Code** is required to run the plugin's 9 skills from VS Code
-- **Mermaid Preview** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated
-- **Office Viewer** lets you open and review `.docx` files produced by the `architecture-docs-export` skill directly in the editor
+- **Mermaid Chart** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated — supports native C4 diagrams, sequence diagrams, and all diagram types used by this plugin
 
 ## Use Cases
 
@@ -730,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.2.0 (Current Release) ✅
+### v3.2.1 (Current Release) ✅
+**fix: recommended VS Code setup — Mermaid Chart extension replaces Office Viewer**
+
+- Removed Office Viewer from recommended extensions
+- Replaced Mermaid Preview with Mermaid Chart (official extension from Mermaid.js creators, v11.4.1)
+- Recommended setup simplified to 2 extensions: Claude Code + Mermaid Chart
+
+### v3.2.0 (Previous Release) ✅
 **feat: Mermaid v11.4.1 target — native C4 diagrams + classic sequenceDiagram**
 
 - All generated Mermaid diagrams now target **Mermaid v11.4.1** (Mermaid Chart VS Code extension 2.1.0+)
