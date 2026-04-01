@@ -287,6 +287,8 @@ CoreSystemA["Core System A<br/>(External)"]
 
 ## 5. Data Flow Guidelines
 
+> **Note**: This section covers data flow **arrows in `graph TB` topology diagrams** (Diagrams 1–4). For per-flow **sequence diagrams**, use ZenUML format as defined in `references/DIAGRAM-GENERATION-GUIDE.md` → "Data Flow Diagrams — ZenUML".
+
 ### Synchronous Flows (Solid Arrows)
 
 **Syntax**:

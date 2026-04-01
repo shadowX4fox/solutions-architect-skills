@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.5` in the list.
+You should see `solutions-architect-skills v3.1.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,17 @@ Where:
 
 ## Roadmap
 
-### v3.1.5 (Current Release) ✅
+### v3.1.6 (Current Release) ✅
+**feat: data flow diagrams migrated to ZenUML syntax**
+
+- Data flow diagrams now use Mermaid ZenUML syntax instead of classic `sequenceDiagram`
+- New "Data Flow Diagrams — ZenUML" section in DIAGRAM-GENERATION-GUIDE.md with complete syntax reference, architecture conventions, and template
+- ZenUML provides code-like readability: method-call syntax for sync, arrow syntax for async, `if/else`/`try/catch`/`par`/`while` for control flow
+- Mermaid Compatibility Rules updated with ZenUML DO/DON'T (requires Mermaid 9.3+)
+- Step 7 and Workflow 8 updated to generate ZenUML diagrams for data flows
+- MERMAID_DIAGRAMS_GUIDE.md Section 5 clarifies topology arrows vs ZenUML sequence diagrams
+
+### v3.1.5 (Previous Release) ✅
 **feat: multi-architecture diagram generation guide — 4 standard diagrams for all 5 architecture types**
 
 - New `references/DIAGRAM-GENERATION-GUIDE.md` defining 4 standard architecture diagrams: Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View (Mermaid)

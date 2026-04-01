@@ -410,7 +410,151 @@ graph TB
 
 ---
 
+## Data Flow Diagrams — ZenUML
+
+**Purpose**: Per-flow sequence diagrams showing step-by-step interactions between components for each documented data flow. One diagram per H3 flow subsection in `docs/04-data-flow-patterns.md`.
+
+**Format**: ZenUML block inside a Mermaid fence — rendered natively by Mermaid 9.3+.
+
+```mermaid
+zenuml
+    // diagram content here
+```
+
+**Placement**: Insert each diagram **immediately after its corresponding H3 subsection** in `docs/04-data-flow-patterns.md`, with heading `#### Diagram: [Flow Name] Sequence`.
+
+### Why ZenUML over classic `sequenceDiagram`
+
+- **Code-like readability**: Method-call syntax (`A.process()`) is closer to how developers think about service interactions
+- **Natural control flow**: `if/else`, `while`, `try/catch/finally`, `par` blocks read like pseudocode (vs `alt/loop/opt/break` in classic)
+- **Nested scoping**: Curly braces `{}` create visual activation blocks automatically
+- **Return values**: `return` keyword and variable assignment (`result = A.call()`) make response flows explicit
+
+### ZenUML Syntax Reference
+
+#### Message Types
+
+| Type | Syntax | Use For |
+|------|--------|---------|
+| Sync (blocking) | `Receiver.method()` | REST, gRPC, JDBC calls |
+| Sync with nesting | `Receiver.method() { nested calls }` | Call chains with sub-interactions |
+| Async (fire-and-forget) | `Sender->Receiver: description` | Kafka publish, queue push, event emit |
+| Reply | `return value` | Explicit response from sync call |
+| Reply (annotated) | `@return` then `A->B: result` | Async reply |
+| Variable assignment | `result = A.call()` | Capture sync response for later use |
+| Typed assignment | `Type result = A.call()` | Capture with type annotation |
+| Creation | `new Participant` | Service/object instantiation |
+
+#### Control Flow
+
+| Construct | Syntax | Use For |
+|-----------|--------|---------|
+| Conditional | `if(condition) { } else if(cond) { } else { }` | Branching logic (success/failure paths) |
+| Loop | `while(condition) { }` | Retry loops, polling, batch processing |
+| Error handling | `try { } catch { } finally { }` | Error paths with rollback/cleanup |
+| Parallel | `par { stmt1 stmt2 }` | Concurrent operations (fan-out) |
+| Comment | `// text` | Protocol annotations, context notes |
+
+### Architecture Conventions
+
+1. **Participant naming**: Use component technical names from `docs/components/README.md` — e.g., `APIGateway`, `PaymentService`, `PostgreSQL`, `KafkaBroker`
+2. **Sync calls**: Use method-call syntax with protocol in comments:
+   ```
+   // HTTPS + OAuth2
+   APIGateway.validateRequest() {
+     // gRPC/mTLS
+     AuthService.authenticate()
+   }
+   ```
+3. **Async events**: Use arrow syntax with topic/queue name:
+   ```
+   PaymentService->KafkaBroker: payment.completed.v1
+   KafkaBroker->NotificationService: consume(payment.completed.v1)
+   ```
+4. **Error paths**: Use `try/catch` for error handling flows:
+   ```
+   try {
+     PaymentService.processPayment() {
+       BankAdapter.executeTransfer()
+     }
+   } catch {
+     PaymentService->DLQ: payment.failed
+   } finally {
+     AuditService.logTransaction()
+   }
+   ```
+5. **Parallel processing**: Use `par` for concurrent fan-out:
+   ```
+   par {
+     NotificationService.sendEmail()
+     NotificationService.sendSMS()
+   }
+   ```
+6. **Return values**: Use `return` for explicit responses:
+   ```
+   APIGateway.submitPayment() {
+     result = PaymentService.process() {
+       status = BankAdapter.transfer()
+       return status
+     }
+     return result
+   }
+   ```
+
+### Template
+
+```mermaid
+zenuml
+    title [Flow Name] Flow
+
+    // Step 1: Client initiates request
+    // Protocol: HTTPS + OAuth2
+    Client->APIGateway: [action description]
+
+    // Step 2: Gateway validates and routes
+    APIGateway.validateAndRoute() {
+
+        // Step 3: Service processes request
+        // Protocol: gRPC/mTLS
+        result = BusinessService.process() {
+
+            // Step 4: Persist data
+            // Protocol: JDBC/TLS
+            DataStore.save()
+
+            // Step 5: Publish event
+            BusinessService->MessageBroker: event.name.v1
+
+            return result
+        }
+
+        // Step 6: Handle success/failure
+        if(result.success) {
+            return response
+        } else {
+            // Step 7: Error handling
+            APIGateway->DLQ: request.failed
+            return errorResponse
+        }
+    }
+```
+
+### Data Sources
+
+| Element | Source File |
+|---------|-----------|
+| Flow steps | `docs/04-data-flow-patterns.md` → each `### [Flow Name] Flow` H3 subsection |
+| Participant names | `docs/components/README.md` → Component column |
+| Protocols | `docs/05-integration-points.md` → integration entries |
+| Topic/queue names | `docs/05-integration-points.md` → internal integrations section |
+| Error handling | `docs/04-data-flow-patterns.md` → `**Error Handling:**` per flow |
+| Performance constraints | `docs/04-data-flow-patterns.md` → `**Performance:**` per flow |
+
+---
+
 ## Mermaid Compatibility Rules
+
+### Topology Diagrams (Diagrams 1–4)
 
 Target: **Mermaid 8.8.0+** (VS Code, GitHub, GitLab).
 
@@ -433,6 +577,25 @@ Target: **Mermaid 8.8.0+** (VS Code, GitHub, GitLab).
 - Do not connect subgraph IDs as link endpoints (`L1 --> L2` fails) — connect nodes only
 - Do not use `flowchart` keyword — use `graph` for maximum compatibility
 
+### Data Flow Diagrams (ZenUML)
+
+Target: **Mermaid 9.3.0+** (VS Code, GitHub, GitLab).
+
+**DO:**
+- Use `zenuml` as the first line inside the Mermaid fence block
+- Use `title` for diagram titles
+- Use `//` for comments (renders above next message)
+- Use `A.method()` for sync calls, `A->B: msg` for async
+- Use `{ }` blocks for nesting and activation
+- Use `return` for explicit responses
+- Use `if/else`, `while`, `try/catch/finally`, `par` for control flow
+
+**DO NOT:**
+- Do not mix classic `sequenceDiagram` syntax with ZenUML — they are separate diagram types
+- Do not use `participant`, `activate/deactivate`, `alt/opt/loop/break` (those are classic syntax)
+- Do not use `Note over` or `Note right of` (not available in ZenUML)
+- Do not use HTML tags in participant names or messages
+
 ---
 
 ## Generation Workflow
@@ -445,11 +608,13 @@ When generating or updating diagrams:
 4. **Read** `docs/04-data-flow-patterns.md` for flow wiring between components
 5. **Detect** architecture type from `<!-- ARCHITECTURE_TYPE: ... -->` comment in `docs/03-architecture-layers.md`
 6. **Select** grouping strategy, naming pattern, and color conventions from the Architecture Type Adaptation table and Diagram 4 color conventions
-7. **Generate** all 4 diagrams in order (ASCII logical → C4 L1 → C4 L2 → Detailed)
-8. **Place** all diagrams under `## Architecture Diagrams` in `docs/03-architecture-layers.md`
+7. **Generate** all 4 topology diagrams in order (ASCII logical → C4 L1 → C4 L2 → Detailed)
+8. **Place** all 4 topology diagrams under `## Architecture Diagrams` in `docs/03-architecture-layers.md`
 9. **Include** a `**Reading the diagram:**` section after the ASCII logical view with bullet points explaining the arrow conventions
+10. **Generate** ZenUML data flow diagrams — one per H3 flow subsection in `docs/04-data-flow-patterns.md`
+11. **Place** each ZenUML diagram immediately after its H3 subsection with heading `#### Diagram: [Flow Name] Sequence`
 
 ### Update vs. Create
 
-- **Create**: Generate all 4 diagrams from scratch using source files
-- **Update**: When components change (add/remove/rename), update all 4 diagrams to match. Check that every component in `docs/components/README.md` appears in Diagrams 1, 3, and 4. Diagram 2 (C4 L1) only shows system-level boxes — individual components do not appear.
+- **Create**: Generate all 4 topology diagrams + all ZenUML data flow diagrams from scratch using source files
+- **Update**: When components change (add/remove/rename), update all 4 topology diagrams to match. Check that every component in `docs/components/README.md` appears in Diagrams 1, 3, and 4. Diagram 2 (C4 L1) only shows system-level boxes — individual components do not appear. Also update ZenUML data flow diagrams if affected participants or flows changed.
