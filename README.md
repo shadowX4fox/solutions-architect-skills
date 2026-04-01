@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.4` in the list.
+You should see `solutions-architect-skills v3.1.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,19 @@ Where:
 
 ## Roadmap
 
-### v3.1.4 (Current Release) ✅
+### v3.1.5 (Current Release) ✅
+**feat: multi-architecture diagram generation guide — 4 standard diagrams for all 5 architecture types**
+
+- New `references/DIAGRAM-GENERATION-GUIDE.md` defining 4 standard architecture diagrams: Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View (Mermaid)
+- Architecture Type Adaptation table maps grouping, naming, and color conventions for META, BIAN, 3-Tier, N-Layer, and Microservices
+- C4 L1 translation table per architecture type (what collapses into Internal System vs External)
+- Diagram 4 color convention tables per architecture type
+- Mermaid 8.x compatibility rules (DO/DON'T) and generation workflow algorithm
+- Workflow 8 now references DIAGRAM-GENERATION-GUIDE (primary) + MERMAID_DIAGRAMS_GUIDE (authoring)
+- Step 7 in Architecture Type Selection generates all 4 diagrams + data flow sequences
+- CLAUDE.md Diagram Enforcement Policy updated to list 4 mandatory standard diagrams
+
+### v3.1.4 (Previous Release) ✅
 **feat: dev handoff enforces C4 L2-only gate — no Level 1 components processed**
 
 - Dev handoff skill now explicitly scoped to C4 Level 2 (Container) components only

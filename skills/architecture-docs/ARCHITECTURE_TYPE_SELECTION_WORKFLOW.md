@@ -647,25 +647,49 @@ This skill will create adr/ADR-XXX-title.md files from the table entries.
 
 **Process**:
 
-1. Load `MERMAID_DIAGRAMS_GUIDE.md` for templates and color scheme
+1. Load `references/DIAGRAM-GENERATION-GUIDE.md` (primary generation reference) and `MERMAID_DIAGRAMS_GUIDE.md` (authoring reference)
 2. Read `docs/03-architecture-layers.md` in full (just created in Step 5)
 3. Read `docs/04-data-flow-patterns.md` in full (just created in Step 5)
-4. Determine architecture type from the `<!-- ARCHITECTURE_TYPE: ... -->` comment inserted in Step 4 (already known in context)
+4. Read `docs/components/README.md` for the component index
+5. Read `docs/05-integration-points.md` for protocols and topic/queue names
+6. Determine architecture type from the `<!-- ARCHITECTURE_TYPE: ... -->` comment inserted in Step 4 (already known in context)
+7. Select grouping strategy, naming pattern, and color conventions from DIAGRAM-GENERATION-GUIDE's Architecture Type Adaptation table
 
-**Generate Diagram A — High-Level Architecture**:
-- Type: `graph TB` (top-to-bottom flowchart)
-- Source: `docs/03-architecture-layers.md` — extract all layers, tiers, and component relationships
-- Apply color scheme from MERMAID_DIAGRAMS_GUIDE (`classDef presentation`, `classDef application`, `classDef data`, etc.)
-- Placement: **append at the end of `docs/03-architecture-layers.md`** with heading `#### Diagram: High-Level System Architecture`
+**Generate all 4 standard diagrams** (in order, under `## Architecture Diagrams` in `docs/03-architecture-layers.md`):
 
-**Generate Diagram B — Data Flow Diagrams**:
+**Diagram 1 — Logical View (ASCII)**:
+- Format: ASCII art in a fenced code block (no language tag)
+- Source: `docs/03-architecture-layers.md` — extract all layers/tiers/groups and components
+- Grouping: per Architecture Type Adaptation table (layers for META/BIAN/N-Layer, tiers for 3-Tier, functional groups for Microservices)
+- Heading: `#### Diagram: Logical View`
+- Include `**Reading the diagram:**` section after with arrow convention bullet points
+
+**Diagram 2 — C4 Level 1 System Context (Mermaid)**:
+- Format: Mermaid `graph TB`
+- Source: `ARCHITECTURE.md` + `docs/01-system-overview.md` + `docs/05-integration-points.md`
+- Apply C4 L1 translation per architecture type (see DIAGRAM-GENERATION-GUIDE → C4 L1 Translation table)
+- Heading: `#### Diagram: C4 Level 1 — System Context`
+
+**Diagram 3 — C4 Level 2 Container (Mermaid)**:
+- Format: Mermaid `graph TB`
+- Source: `docs/components/README.md` + `docs/components/**/*.md` + `docs/05-integration-points.md`
+- Group containers by layer/tier/functional group (same grouping as Diagram 1)
+- Heading: `#### Diagram: C4 Level 2 — Container`
+
+**Diagram 4 — Detailed View (Mermaid)**:
+- Format: Mermaid `graph TB`
+- Source: all docs — full component wiring with topic names, queue names, protocols
+- Apply type-specific color conventions from DIAGRAM-GENERATION-GUIDE → Color Conventions by Architecture Type
+- Heading: `#### Diagram: Detailed View`
+
+**Generate Data Flow Diagrams** (separately, in `docs/04-data-flow-patterns.md`):
 - Type: `sequenceDiagram` (one per H3 flow subsection)
 - Source: `docs/04-data-flow-patterns.md` — parse every `### [Flow Name] Flow` H3 subsection
 - For each H3 flow: extract participants and interactions, generate one `sequenceDiagram`
 - Placement: insert each diagram **immediately after its corresponding H3 subsection** in `docs/04-data-flow-patterns.md`
 - Heading: `#### Diagram: [Flow Name] Sequence`
 
-**Canonical location rule**: Same as Workflow 8 Step 4 — placements above are not configurable and cannot be overridden.
+**Canonical location rule**: Same as Workflow 8 — placements above are not configurable and cannot be overridden.
 
 ---
 
@@ -675,7 +699,10 @@ After mandatory diagrams are written, present the optional diagram menu:
 
 ```
 ✅ Mandatory diagrams generated:
-- High-Level Architecture → docs/03-architecture-layers.md
+- Logical View (ASCII) → docs/03-architecture-layers.md
+- C4 Level 1 — System Context → docs/03-architecture-layers.md
+- C4 Level 2 — Container → docs/03-architecture-layers.md
+- Detailed View → docs/03-architecture-layers.md
 - Data Flow Diagrams ([N] sequence diagrams) → docs/04-data-flow-patterns.md
 
 **Additional Diagrams** (opt-in — select any or none):
@@ -694,11 +721,13 @@ Generate any selected optional diagrams using the same Workflow 8 Step 8 rules a
 
 ##### Step 7.3: Mandatory Diagram Completeness Audit
 
-Run the completeness audit on the two mandatory types only (scoped version of Workflow 8 Step 10):
+Run the completeness audit on all mandatory diagrams (scoped version of Workflow 8):
 
 1. Re-read `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`
-2. Verify at least one `mermaid` block exists in each file
-3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a diagram within 30 lines below it
+2. Verify `docs/03-architecture-layers.md` contains all 4 standard diagrams under `## Architecture Diagrams`:
+   - One ASCII code block (Logical View)
+   - Three `mermaid` blocks (C4 L1, C4 L2, Detailed View)
+3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a `sequenceDiagram` within 30 lines below it
 
 **If any REQUIRED diagram is missing**: generate it now (do not skip or defer).
 
@@ -716,7 +745,10 @@ Run the completeness audit on the two mandatory types only (scoped version of Wo
 [- adr/ with [N] ADR files]  ← only if Step 6 generated ADRs
 
 **Diagrams generated**:
-- ✅ High-Level Architecture → docs/03-architecture-layers.md [REQUIRED]
+- ✅ Logical View (ASCII) → docs/03-architecture-layers.md [REQUIRED]
+- ✅ C4 Level 1 — System Context → docs/03-architecture-layers.md [REQUIRED]
+- ✅ C4 Level 2 — Container → docs/03-architecture-layers.md [REQUIRED]
+- ✅ Detailed View → docs/03-architecture-layers.md [REQUIRED]
 - ✅ Data Flow Diagrams ([N]) → docs/04-data-flow-patterns.md [REQUIRED]
 [- ✅ [Optional diagram name] → [file]]  ← only if user opted in
 

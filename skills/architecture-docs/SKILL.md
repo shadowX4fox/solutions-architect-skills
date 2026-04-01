@@ -597,6 +597,7 @@ The `references/` directory contains the architecture rules and C4 translation g
 | `references/META-TO-C4-TRANSLATION.md` | META → C4 mapping (layers as visual groupings at C2) |
 | `references/BIAN-ARCHITECTURE.md` | BIAN V12.0 5-layer architecture rules |
 | `references/BIAN-TO-C4-TRANSLATION.md` | BIAN → C4 mapping (Service Domains as containers) |
+| `references/DIAGRAM-GENERATION-GUIDE.md` | **Diagram generation reference** — defines 4 standard architecture diagrams with type-specific templates for META, BIAN, 3-Tier, N-Layer, and Microservices. Includes C4 color conventions, Mermaid compatibility rules, and generation workflow. |
 
 **Critical rule**: Every architecture type MUST have both reference docs. Types without them are greyed out in the selection menu and cannot be used.
 
@@ -614,9 +615,11 @@ Full workflow and reference details are in `QUERY_SECTION_MAPPING.md` (Read it w
 
 ## Workflow 8: Diagram Generation (Generate Architecture Diagrams)
 
-Full workflow and reference details are in `MERMAID_DIAGRAMS_GUIDE.md` (Read it when this workflow is needed).
+**Two reference files** (read both when this workflow is needed):
+- `references/DIAGRAM-GENERATION-GUIDE.md` — **Primary generation reference**: defines the 4 standard diagrams (Logical View ASCII, C4 L1 Context, C4 L2 Container, Detailed View Mermaid), architecture-type-specific templates for all 5 types (META, BIAN, 3-Tier, N-Layer, Microservices), data sources, C4 color conventions, Mermaid compatibility rules, and the generation workflow algorithm.
+- `MERMAID_DIAGRAMS_GUIDE.md` — **Authoring reference**: Mermaid syntax patterns, component guidelines, data flow conventions, standard color scheme, common scenarios, and best practices.
 
-**Quick summary**: 11-step diagram generation workflow covering mandatory diagrams (High-Level Architecture and Data Flow), optional on-request diagrams, external diagram intake and reconciliation, canonical location enforcement, existing diagram detection, and a flow-diagram completeness audit.
+**Quick summary**: Generate all 4 standard diagrams in order (ASCII logical → C4 L1 → C4 L2 → Detailed) under `## Architecture Diagrams` in `docs/03-architecture-layers.md`. Each diagram adapts its grouping, naming, and color conventions to the detected architecture type. Data Flow sequence diagrams are generated separately in `docs/04-data-flow-patterns.md`. External diagram reconciliation, canonical location enforcement, and completeness audit rules apply.
 
 **When to invoke**: When user requests "generate diagrams", "create diagrams", "add diagrams", "update diagrams", or references Mermaid/architecture/visual diagrams.
 

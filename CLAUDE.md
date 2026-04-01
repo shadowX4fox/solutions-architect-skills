@@ -149,10 +149,10 @@ The skill includes:
 **Note**: The skill is optimized to minimize context usage by loading document sections incrementally rather than reading entire files.
 
 **Diagram Enforcement Policy** (Workflow 8):
-- **Mandatory diagrams**: High-Level Architecture and Data Flow diagrams are always generated (not optional)
-- **Canonical locations**: All diagrams must reside in their designated `docs/` file — not configurable, no override
+- **Mandatory diagrams**: 4 standard diagrams always generated — Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View — plus Data Flow sequence diagrams per documented flow. Each diagram adapts grouping, naming, and colors to the detected architecture type (META, BIAN, 3-Tier, N-Layer, Microservices).
+- **Canonical locations**: All 4 standard diagrams reside in `docs/03-architecture-layers.md`; Data Flow diagrams in `docs/04-data-flow-patterns.md` — not configurable, no override
 - **Source of truth**: Architecture docs are authoritative — diagrams for undocumented flows are discarded
-- **Completeness audit**: Every documented flow is checked for a corresponding Mermaid diagram after generation
+- **Completeness audit**: Every documented flow is checked for a corresponding diagram after generation; all 4 standard diagrams verified present
 - **External reconciliation**: Diagrams from external files are classified, validated against architecture docs, then relocated or discarded
 
 
