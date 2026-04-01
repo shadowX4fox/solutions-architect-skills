@@ -126,6 +126,7 @@ Warn (do not block) if:
 Read docs/components/README.md to get the component table (5-column: #, Component, File, Type, Technology).
 If the table has system group headers (### System Name), parse all groups.
 If README.md absent, scan docs/components/*.md and docs/components/**/*.md (including system subfolders).
+Exclude C4 L1 system descriptor files (files without NN- prefix that match a subfolder name, e.g., `payment-system.md`) — these are system overviews, not handoff targets.
 Present the component list to the user (grouped by system if multi-system).
 ```
 

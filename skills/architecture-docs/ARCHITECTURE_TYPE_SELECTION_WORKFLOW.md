@@ -504,7 +504,47 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    | Object Storage | Store | S3, Azure Blob, MinIO |
    | Gateway | App | API Gateway, reverse proxy, load balancer |
 
-   **4d. Create Component Files**
+   **4d. Create System Files and Component Files**
+
+   **Multi-system only — Create C4 L1 system descriptor files first:**
+
+   For each identified system (internal and external), create `docs/components/<system-name>.md` at the root of `docs/components/`:
+
+   ```markdown
+   [Architecture](../../ARCHITECTURE.md) > [Components](README.md) > {System Name}
+
+   # {System Name}
+
+   **C4 Level:** System (L1)
+   **Type:** {Internal System | External System}
+   **Owner:** {team or organization}
+   **Containers:** {count} ({N} Apps, {M} Stores)
+
+   ## Description
+
+   {1-2 paragraph description of the system's business purpose and scope}
+
+   ## Containers
+
+   | Component | Type | Technology |
+   |-----------|------|------------|
+   | [Component Name](<system-name>/01-component.md) | {C4 type} | [{technology}] |
+
+   ## System Boundaries
+
+   **Owns:** {what data/capabilities this system is responsible for}
+   **Depends on:** {other systems it calls}
+   **Consumed by:** {other systems that call it}
+
+   ## Communication
+
+   | From | To | Protocol | Description |
+   |------|----|----------|-------------|
+   ```
+
+   File name = kebab-case system name (same as the folder name). Single-system architectures do NOT create a system file.
+
+   **Then create C4 L2 container files:**
 
    For each container identified in 4c, create a component file:
    - **Single system**: `docs/components/NN-<component-name>.md`
@@ -531,7 +571,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    Create `docs/components/README.md` using the architecture-component-guardian format:
    - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
    - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
-   - **Multi-system**: Grouped tables with `### <System Name>` headers (focus system first)
+   - **Multi-system**: Grouped tables with `### [<System Name>](<system-name>.md)` headers linked to system files (focus system first)
    - **Single-system**: Single table (no system header)
    - **5-column table**: `#`, `Component`, `File`, `Type`, `Technology`
 

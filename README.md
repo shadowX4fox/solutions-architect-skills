@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.2` in the list.
+You should see `solutions-architect-skills v3.1.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,18 @@ Where:
 
 ## Roadmap
 
-### v3.1.2 (Current Release) ✅
+### v3.1.3 (Current Release) ✅
+**feat: C4 L1 system descriptor files + cross-skill impact fixes**
+
+- Multi-system architectures now create C4 L1 system descriptor files at `docs/components/` root (`{system-name}.md`) alongside system subfolders
+- System files contain: C4 Level (System L1), Type (Internal/External), Owner, Containers table, System Boundaries, Communication patterns
+- README.md system headers now link to system files: `### [System Name](system-name.md)`
+- Guardian scan distinguishes `NN-*.md` (L2 containers) from `{name}.md` (L1 system descriptors)
+- Migration workflow Phase M4.1b creates system files automatically
+- Dev handoff excludes system descriptor files from handoff targets
+- Peer review NAMING-03 recognizes both L1 (no NN- prefix) and L2 (NN- prefix) naming patterns
+
+### v3.1.2 (Previous Release) ✅
 **feat: guardian loads architecture-type C4 translation on every invocation**
 
 - Component guardian now detects `<!-- ARCHITECTURE_TYPE: -->` from `docs/03-architecture-layers.md` on every operation (sync, add, migrate)

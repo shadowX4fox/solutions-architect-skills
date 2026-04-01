@@ -92,6 +92,23 @@ Files within the same subfolder still reference each other as siblings — no pa
 
 ---
 
+## C4 L1 System Descriptor Files
+
+During migration, create a system descriptor file at `docs/components/` root for each identified system:
+
+| System Type | File | Content |
+|-------------|------|---------|
+| Internal | `docs/components/task-scheduling-system.md` | C4 Level: System (L1), Type: Internal System, containers table, boundaries, communication |
+| External | `docs/components/bian-domain-services.md` | C4 Level: System (L1), Type: External System, containers table, boundaries |
+
+**Rules**:
+- File name = kebab-case system name (matches the folder name)
+- NOT indexed as rows in README.md — linked from `### [System Name](system-name.md)` headers
+- Contains a Containers table linking to all L2 files in the system folder
+- Single-system architectures do NOT create a system file
+
+---
+
 ## Heading Migration Rules
 
 | Before | After | Rule |

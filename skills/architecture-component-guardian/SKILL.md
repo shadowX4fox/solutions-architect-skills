@@ -160,8 +160,18 @@ Line 12: | 5.1 | ... | ... | ... |
 
 **Multi-system grouped tables:**
 
-- **Multi-system architecture**: Use a `### System Name` header before each system's table. File column paths include system folder: `[01-name.md](system-name/01-name.md)`
-- **Single-system architecture**: Single table with no system header
+- **Multi-system architecture**: Use a `### [System Name](system-name.md)` header linked to the system descriptor file before each system's table. File column paths include system folder: `[01-name.md](system-name/01-name.md)`
+- **Single-system architecture**: Single table with no system header, no system descriptor file
+
+**C4 L1 System descriptor files** (multi-system only):
+
+- Located at `docs/components/` root: `{system-name}.md` (kebab-case, matches folder name)
+- NOT indexed as rows in the README table — they are linked from the `### System Name` section headers
+- Contain: C4 Level (System L1), Type (Internal/External), Owner, Container summary table, System Boundaries, Communication patterns
+- When scanning `docs/components/`, distinguish files by name pattern:
+  - `NN-*.md` (starts with digits) = C4 L2 container → indexed in table
+  - `{name}.md` matching a subfolder name = C4 L1 system descriptor → NOT in table, linked from header
+  - `README.md` = index file → managed by this skill
 
 **Technology column — IcePanel bracket convention:**
 
@@ -327,6 +337,8 @@ Present Phase 3 summary with all fixes applied.
 
 **M4.1 Create system subfolders**: `docs/components/<system-name>/` (kebab-case).
 
+**M4.1b Create C4 L1 system descriptor files**: For each system, write `docs/components/<system-name>.md` at the root using the L1 system file format (C4 Level: System L1, Type: Internal/External, Owner, Container table, System Boundaries, Communication). Populate from architecture docs context.
+
 **M4.2 Detect project type**: Check if `.git/` exists in project root.
 - Git repo → use `git mv` (preserves history)
 - Non-git → Read source file content → Write to new path → delete original
@@ -367,7 +379,7 @@ Present Phase M5 summary: links updated count, anchor slugs updated, plain-text 
 
 Use the existing Format Specification in multi-system mode:
 - Focus system listed first
-- `### System Name` header before each system's table
+- `### [System Name](system-name.md)` header linked to system descriptor file before each system's table
 - 5-column table with updated file paths including system folder prefix
 - Renumbered `#` column contiguous within README
 
