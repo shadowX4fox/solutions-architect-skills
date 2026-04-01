@@ -279,7 +279,7 @@ The skill includes:
 
 ### Using the Architecture Dev Handoff Skill
 
-The `architecture-dev-handoff` skill generates per-component **Component Development Handoff** documents that give development teams everything needed to implement a component without reading the full ARCHITECTURE.md suite.
+The `architecture-dev-handoff` skill generates per-component **Component Development Handoff** documents — scoped to **C4 Level 2 (Container) components only** — that give development teams everything needed to implement a component without reading the full ARCHITECTURE.md suite. C4 Level 1 (System) descriptors are excluded; they describe system boundaries, not implementable units.
 
 To manually activate the skill, use: `/skill architecture-dev-handoff`
 

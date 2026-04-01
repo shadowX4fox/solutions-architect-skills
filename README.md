@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.1.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.3` in the list.
+You should see `solutions-architect-skills v3.1.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,7 +730,18 @@ Where:
 
 ## Roadmap
 
-### v3.1.3 (Current Release) ✅
+### v3.1.4 (Current Release) ✅
+**feat: dev handoff enforces C4 L2-only gate — no Level 1 components processed**
+
+- Dev handoff skill now explicitly scoped to C4 Level 2 (Container) components only
+- Two-layer filter in Step 1.3: file naming heuristic + `**C4 Level:**` metadata check
+- C4 Level Validation Gate in Step 2.1: rejects System (L1) components with clear warning message
+- Missing `**C4 Level:**` metadata triggers a warning but proceeds (assumes L2)
+- If all selected components are L1, skill stops before Phase 3
+- SECTION_EXTRACTION_GUIDE.md updated with C4 L2 scope note
+- CLAUDE.md dev-handoff description updated to reflect L2-only scope
+
+### v3.1.3 (Previous Release) ✅
 **feat: C4 L1 system descriptor files + cross-skill impact fixes**
 
 - Multi-system architectures now create C4 L1 system descriptor files at `docs/components/` root (`{system-name}.md`) alongside system subfolders

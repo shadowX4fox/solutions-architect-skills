@@ -47,6 +47,8 @@ This skill is **manually activated** when users request component handoff docume
 
 This skill generates **Component Development Handoff** documents — one per component — that give development teams everything needed to implement a component without reading the full ARCHITECTURE.md suite.
 
+**Scope:** C4 Level 2 (Container) components only. C4 Level 1 (System) descriptors are excluded — they describe system boundaries, not implementable units.
+
 **Output location:** `docs/handoffs/` directory
 
 **Per-component output** (all names use **lowercase kebab-case** — no spaces, no uppercase, no underscores):
@@ -126,7 +128,15 @@ Warn (do not block) if:
 Read docs/components/README.md to get the component table (5-column: #, Component, File, Type, Technology).
 If the table has system group headers (### System Name), parse all groups.
 If README.md absent, scan docs/components/*.md and docs/components/**/*.md (including system subfolders).
-Exclude C4 L1 system descriptor files (files without NN- prefix that match a subfolder name, e.g., `payment-system.md`) — these are system overviews, not handoff targets.
+
+Filter out non-L2 files using BOTH checks (either match excludes the file):
+  1. File naming heuristic: exclude files without an NN- prefix that match a subfolder name
+     (e.g., `payment-system.md`) — these are C4 L1 system descriptors.
+  2. Metadata check: for every candidate file, read the first 15 lines and check for
+     `**C4 Level:**`. If the value is anything other than `Container (L2)`, exclude the file.
+     Files with `**C4 Level:** System (L1)` are system overviews, not handoff targets.
+
+Only files that pass both checks (NN- prefix AND C4 Level = Container L2) enter the component list.
 Present the component list to the user (grouped by system if multi-system).
 ```
 
@@ -147,6 +157,20 @@ Selection modes:
 3. Component name      → process that single component
 4. Comma-separated     → process that subset (e.g. "1, 3" or "payment-api, auth-service")
 ```
+
+**C4 Level Validation Gate** (applied to every selected component before proceeding):
+
+For each selected component file, read its `**C4 Level:**` metadata field.
+- If `**C4 Level:** Container (L2)` → proceed.
+- If `**C4 Level:** System (L1)` or any non-L2 value → reject with message:
+  "⚠ Skipping [Component Name] — C4 Level is [value], not Container (L2).
+   Dev handoff documents are only generated for C4 L2 (Container) components.
+   System-level (L1) files describe system boundaries, not implementable units."
+- If `**C4 Level:**` field is missing → warn but proceed:
+  "⚠ [Component Name] has no C4 Level metadata. Proceeding as L2 (Container).
+   Consider adding `**C4 Level:** Container (L2)` to [file path]."
+
+If all selected components are rejected, report the rejections and stop (do not proceed to Phase 3).
 
 **Step 2.2: Dependency-Based Ordering (batch only)**
 

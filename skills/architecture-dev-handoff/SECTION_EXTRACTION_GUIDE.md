@@ -13,6 +13,10 @@ is extracted, and defines the extraction rules for each field.
    the gap in Section 15 (Open Questions & Assumptions).
 4. Never infer, guess, or use industry-standard defaults as substitutes for missing values.
 5. Always cite the source file in your extraction notes (for traceability).
+6. **C4 Level scope**: This guide applies exclusively to C4 Level 2 (Container) component files.
+   C4 Level 1 (System) descriptor files are never processed as handoff targets. If a file's
+   `**C4 Level:**` metadata is not `Container (L2)`, the dev-handoff skill rejects it before
+   extraction begins.
 
 ---
 
