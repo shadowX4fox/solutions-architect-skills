@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.1.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.1.6` in the list.
+You should see `solutions-architect-skills v3.2.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -730,17 +730,22 @@ Where:
 
 ## Roadmap
 
-### v3.1.6 (Current Release) ✅
+### v3.2.0 (Current Release) ✅
+**feat: classic sequence diagrams + native Mermaid C4 diagrams**
+
+- Data flow diagrams reverted from ZenUML to classic Mermaid `sequenceDiagram` syntax for broader previewer compatibility
+- C4 Level 1 (System Context) now uses native Mermaid `C4Context` diagram type instead of `graph TB` with manual styling
+- C4 Level 2 (Container) now uses native Mermaid `C4Container` diagram type with `Container_Boundary`, `ContainerDb`, `ContainerQueue`
+- DIAGRAM-GENERATION-GUIDE.md updated with complete `sequenceDiagram` syntax reference, architecture conventions, and template
+- Mermaid Compatibility Rules reorganized: Diagrams 1/4 target Mermaid 8.8+, Diagrams 2/3 (C4) and data flow diagrams target Mermaid 9.3+
+- All secondary files updated: SKILL.md, ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md, MERMAID_DIAGRAMS_GUIDE.md
+
+### v3.1.6 (Previous Release) ✅
 **feat: data flow diagrams migrated to ZenUML syntax**
 
-- Data flow diagrams now use Mermaid ZenUML syntax instead of classic `sequenceDiagram`
-- New "Data Flow Diagrams — ZenUML" section in DIAGRAM-GENERATION-GUIDE.md with complete syntax reference, architecture conventions, and template
-- ZenUML provides code-like readability: method-call syntax for sync, arrow syntax for async, `if/else`/`try/catch`/`par`/`while` for control flow
-- Mermaid Compatibility Rules updated with ZenUML DO/DON'T (requires Mermaid 9.3+)
-- Step 7 and Workflow 8 updated to generate ZenUML diagrams for data flows
-- MERMAID_DIAGRAMS_GUIDE.md Section 5 clarifies topology arrows vs ZenUML sequence diagrams
+- Data flow diagrams used Mermaid ZenUML syntax (reverted in v3.2.0)
 
-### v3.1.5 (Previous Release) ✅
+### v3.1.5 ✅
 **feat: multi-architecture diagram generation guide — 4 standard diagrams for all 5 architecture types**
 
 - New `references/DIAGRAM-GENERATION-GUIDE.md` defining 4 standard architecture diagrams: Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View (Mermaid)

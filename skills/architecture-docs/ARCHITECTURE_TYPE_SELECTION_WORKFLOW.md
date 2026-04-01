@@ -683,9 +683,9 @@ This skill will create adr/ADR-XXX-title.md files from the table entries.
 - Heading: `#### Diagram: Detailed View`
 
 **Generate Data Flow Diagrams** (separately, in `docs/04-data-flow-patterns.md`):
-- Type: `zenuml` (one per H3 flow subsection) — see DIAGRAM-GENERATION-GUIDE → "Data Flow Diagrams — ZenUML" for syntax reference and conventions
+- Type: `sequenceDiagram` (one per H3 flow subsection) — see DIAGRAM-GENERATION-GUIDE → "Data Flow Diagrams — Sequence Diagrams" for syntax reference and conventions
 - Source: `docs/04-data-flow-patterns.md` — parse every `### [Flow Name] Flow` H3 subsection
-- For each H3 flow: extract participants and interactions, generate one ZenUML diagram using method-call syntax for sync calls, arrow syntax for async events, and `try/catch`/`if/else`/`par` for control flow
+- For each H3 flow: extract participants and interactions, generate one `sequenceDiagram` using `->>` for sync calls, `-)` for async events, and `alt/else/end`, `loop/end`, `par/and/end` for control flow
 - Placement: insert each diagram **immediately after its corresponding H3 subsection** in `docs/04-data-flow-patterns.md`
 - Heading: `#### Diagram: [Flow Name] Sequence`
 
@@ -703,7 +703,7 @@ After mandatory diagrams are written, present the optional diagram menu:
 - C4 Level 1 — System Context → docs/03-architecture-layers.md
 - C4 Level 2 — Container → docs/03-architecture-layers.md
 - Detailed View → docs/03-architecture-layers.md
-- Data Flow Diagrams ([N] ZenUML diagrams) → docs/04-data-flow-patterns.md
+- Data Flow Diagrams ([N] sequence diagrams) → docs/04-data-flow-patterns.md
 
 **Additional Diagrams** (opt-in — select any or none):
 A. Infrastructure & Deployment → docs/09-operational-considerations.md
@@ -727,7 +727,7 @@ Run the completeness audit on all mandatory diagrams (scoped version of Workflow
 2. Verify `docs/03-architecture-layers.md` contains all 4 standard diagrams under `## Architecture Diagrams`:
    - One ASCII code block (Logical View)
    - Three `mermaid` blocks (C4 L1, C4 L2, Detailed View)
-3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a `zenuml` diagram within 30 lines below it
+3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a `sequenceDiagram` within 30 lines below it
 
 **If any REQUIRED diagram is missing**: generate it now (do not skip or defer).
 
