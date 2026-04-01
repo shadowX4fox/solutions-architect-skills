@@ -149,7 +149,7 @@ The skill includes:
 **Note**: The skill is optimized to minimize context usage by loading document sections incrementally rather than reading entire files.
 
 **Diagram Enforcement Policy** (Workflow 8):
-- **Mandatory diagrams**: 4 standard diagrams always generated — Logical View (ASCII), C4 L1 System Context (Mermaid C4Context), C4 L2 Container (Mermaid C4Container), and Detailed View — plus Data Flow sequence diagrams per documented flow. Each diagram adapts grouping, naming, and colors to the detected architecture type (META, BIAN, 3-Tier, N-Layer, Microservices).
+- **Mandatory diagrams**: 4 standard diagrams always generated — Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View — plus Data Flow sequence diagrams per documented flow. All Mermaid diagrams target Mermaid 8.8.0+ compatibility. Each diagram adapts grouping, naming, and colors to the detected architecture type (META, BIAN, 3-Tier, N-Layer, Microservices).
 - **Canonical locations**: All 4 standard diagrams reside in `docs/03-architecture-layers.md`; Data Flow diagrams in `docs/04-data-flow-patterns.md` — not configurable, no override
 - **Source of truth**: Architecture docs are authoritative — diagrams for undocumented flows are discarded
 - **Completeness audit**: Every documented flow is checked for a corresponding diagram after generation; all 4 standard diagrams verified present

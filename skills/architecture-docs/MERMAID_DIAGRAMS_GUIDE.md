@@ -287,7 +287,7 @@ CoreSystemA["Core System A<br/>(External)"]
 
 ## 5. Data Flow Guidelines
 
-> **Note**: This section covers data flow **arrows in `graph TB` topology diagrams** (Diagrams 1 and 4). For per-flow **sequence diagrams**, use classic `sequenceDiagram` format as defined in `references/DIAGRAM-GENERATION-GUIDE.md` → "Data Flow Diagrams — Sequence Diagrams". For C4 diagrams (Diagrams 2 and 3), use native `C4Context` / `C4Container` syntax — see DIAGRAM-GENERATION-GUIDE for templates.
+> **Note**: This section covers data flow **arrows in `graph TB` topology diagrams** (Diagrams 1–4). For per-flow **sequence diagrams**, use classic `sequenceDiagram` format as defined in `references/DIAGRAM-GENERATION-GUIDE.md` → "Data Flow Diagrams — Sequence Diagrams".
 
 ### Synchronous Flows (Solid Arrows)
 

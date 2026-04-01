@@ -731,13 +731,13 @@ Where:
 ## Roadmap
 
 ### v3.2.0 (Current Release) ✅
-**feat: classic sequence diagrams + native Mermaid C4 diagrams**
+**feat: Mermaid 8.8.0 compliant diagrams — classic sequenceDiagram + graph TB for C4**
 
-- Data flow diagrams reverted from ZenUML to classic Mermaid `sequenceDiagram` syntax for broader previewer compatibility
-- C4 Level 1 (System Context) now uses native Mermaid `C4Context` diagram type instead of `graph TB` with manual styling
-- C4 Level 2 (Container) now uses native Mermaid `C4Container` diagram type with `Container_Boundary`, `ContainerDb`, `ContainerQueue`
+- All generated Mermaid diagrams now target **Mermaid 8.8.0+** for maximum previewer compatibility
+- Data flow diagrams reverted from ZenUML to classic Mermaid `sequenceDiagram` syntax
+- C4 Level 1 and Level 2 diagrams use `graph TB` with `classDef` styling (C4 color conventions)
+- Compatibility rules enforce 8.8.0 constraints: no `-)` async arrows, no `par/and/end`, no `critical/break`, no native C4 diagram types
 - DIAGRAM-GENERATION-GUIDE.md updated with complete `sequenceDiagram` syntax reference, architecture conventions, and template
-- Mermaid Compatibility Rules reorganized: Diagrams 1/4 target Mermaid 8.8+, Diagrams 2/3 (C4) and data flow diagrams target Mermaid 9.3+
 - All secondary files updated: SKILL.md, ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md, MERMAID_DIAGRAMS_GUIDE.md
 
 ### v3.1.6 (Previous Release) ✅
