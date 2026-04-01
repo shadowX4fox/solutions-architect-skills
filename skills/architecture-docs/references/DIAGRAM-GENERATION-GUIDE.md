@@ -125,64 +125,57 @@ Legend:
 
 ---
 
-## Diagram 2 — C4 Level 1 System Context (Mermaid)
+## Diagram 2 — C4 Level 1 System Context (Mermaid C4)
 
 **Purpose**: Highest zoom level. Shows the system as a single box, who uses it, and what external systems it depends on.
 
-**Format**: Mermaid `graph TB` — compatible with Mermaid 8.8.0+.
+**Format**: Mermaid `C4Context` — native C4 diagram type.
 
 ### Structure Rules
 
-1. **3–7 boxes max**: 1 internal system, 1–3 external actors, 1–3 external systems
+1. **3–7 elements max**: 1 internal system, 1–3 external actors, 1–3 external systems
 2. **No internal details**: The system is a single opaque box — no containers, no layers
-3. **Actor labels**: Include role and what they do (e.g., "Cash withdrawals and deposits for clients")
-4. **Arrow labels**: Protocol + what flows (e.g., "HTTPS + OAuth2 / pacs.008 / pacs.003")
-5. **Phase 2 systems**: Use dashed arrows (`-.->`) with "Phase 2" label
+3. **Actor labels**: Use `Person()` or `Person_Ext()` with role description in third parameter
+4. **Relationship labels**: Use `Rel()` with description and protocol — e.g., `Rel(actor, system, "Submits payments", "HTTPS + OAuth2")`
+5. **Phase 2 systems**: Add "(Phase 2)" suffix in the description parameter
 
 ### Template
 
 ```mermaid
-graph TB
-    %% Actors
-    ACTOR["Actor Name\n(Role)\nWhat they do"]
+C4Context
+    title System Context Diagram — [System Name]
 
-    %% Internal System
-    SYSTEM["System Name\n[Internal System]\nOne-line description\nKey technologies"]
+    Person(actor1, "Actor Name", "Role — What they do")
 
-    %% External Systems
-    EXT1["External System\n[External System]\nWhat it does\nTechnology"]
+    System(system, "System Name", "One-line description — Key technologies")
 
-    %% Relationships
-    ACTOR -->|"Protocol\nWhat flows"| SYSTEM
-    SYSTEM -->|"Protocol\n(network context)"| EXT1
+    System_Ext(ext1, "External System", "What it does — Technology")
 
-    %% Styling — C4 color conventions
-    classDef person fill:#08427B,stroke:#052E56,stroke-width:2px,color:#fff
-    classDef system fill:#1168BD,stroke:#0B4884,stroke-width:2px,color:#fff
-    classDef external fill:#999999,stroke:#6B6B6B,stroke-width:2px,color:#fff
-
-    class ACTOR person
-    class SYSTEM system
-    class EXT1 external
+    Rel(actor1, system, "What flows", "Protocol")
+    Rel(system, ext1, "What flows", "Protocol")
 ```
 
-### Color Conventions (C4 standard — all architecture types)
+### Color Conventions (C4 standard — built-in)
 
-| Element | Fill | Meaning |
-|---------|------|---------|
-| Person/Actor | `#08427B` (dark blue) | External user or system that initiates interaction |
-| Internal System | `#1168BD` (blue) | The system being documented |
-| External System | `#999999` (gray) | Systems outside your control |
+Native Mermaid C4 diagrams apply C4 color conventions automatically:
+
+| Element | Function | Built-in Color |
+|---------|----------|---------------|
+| Person/Actor | `Person()` / `Person_Ext()` | Dark blue |
+| Internal System | `System()` | Blue |
+| External System | `System_Ext()` | Gray |
+
+No `classDef` or manual styling is needed — the Mermaid C4 renderer handles colors.
 
 ### Architecture Type → C4 L1 Translation
 
-| Architecture Type | What collapses into Internal System box | What becomes External Actor/System |
+| Architecture Type | What collapses into `System()` | What becomes `Person()` / `System_Ext()` |
 |-------------------|----------------------------------------|-----------------------------------|
-| META | Layers 2–5 (UX through Domain) | Layer 1 actors → Person boxes; Layer 6 core/legacy → External System boxes |
-| BIAN | All BIAN service domains | External channels → Person boxes; Core banking/legacy → External System boxes |
-| 3-TIER | All 3 tiers (Presentation + Logic + Data) | External users → Person boxes; External integrations → External System boxes |
-| N-LAYER | All internal layers (UI through Infrastructure) | External users → Person boxes; External systems → External System boxes |
-| MICROSERVICES | All services + stores + brokers | External users/clients → Person boxes; External APIs/systems → External System boxes |
+| META | Layers 2–5 (UX through Domain) | Layer 1 actors → `Person()`; Layer 6 core/legacy → `System_Ext()` |
+| BIAN | All BIAN service domains | External channels → `Person()`; Core banking/legacy → `System_Ext()` |
+| 3-TIER | All 3 tiers (Presentation + Logic + Data) | External users → `Person()`; External integrations → `System_Ext()` |
+| N-LAYER | All internal layers (UI through Infrastructure) | External users → `Person()`; External systems → `System_Ext()` |
+| MICROSERVICES | All services + stores + brokers | External users/clients → `Person()`; External APIs/systems → `System_Ext()` |
 
 ### Data Sources
 
@@ -195,85 +188,65 @@ graph TB
 
 ---
 
-## Diagram 3 — C4 Level 2 Container (Mermaid)
+## Diagram 3 — C4 Level 2 Container (Mermaid C4)
 
 **Purpose**: Zooms into the system boundary. Shows all deployable containers, grouped by architectural layer/tier/group, with protocols on every arrow.
 
-**Format**: Mermaid `graph TB` — compatible with Mermaid 8.8.0+.
+**Format**: Mermaid `C4Container` — native C4 diagram type.
 
 ### Structure Rules
 
-1. **System boundary subgraph**: Wraps all internal containers
-2. **Group subgraphs inside**: Group containers by layer/tier/functional group (per Architecture Type Adaptation table)
-3. **External actor outside**: Above the system boundary
-4. **External systems outside**: Below the system boundary
-5. **Every arrow has a protocol label**: `HTTPS`, `HTTP`, `AMQP`, `Kafka`, `JDBC`, `Redis protocol`
-6. **Solid arrows** (`-->`) for synchronous calls
-7. **Dashed arrows** (`-.->`) for asynchronous messaging
-8. **Container labels**: `component-name\n[C4 Type: Technology]\nKey responsibility`
+1. **System boundary**: Use `Container_Boundary()` to wrap all internal containers
+2. **Grouping inside boundary**: Use nested `Container_Boundary()` blocks for layer/tier/functional grouping (per Architecture Type Adaptation table)
+3. **External actor outside**: Declared before the boundary
+4. **External systems outside**: Declared after the boundary
+5. **Every relationship has a protocol label**: Use the 4th parameter of `Rel()` — `HTTPS`, `gRPC`, `Kafka`, `JDBC`, etc.
+6. **Sync vs async**: Indicate in the relationship description (3rd parameter) — e.g., "Publishes events (async)" vs "Queries (sync)"
+7. **Container types**: Use `Container()` for apps/services, `ContainerDb()` for databases, `ContainerQueue()` for message brokers/queues
 
 ### Template
 
 ```mermaid
-graph TB
-    %% External Actor
-    ACTOR["Actor Name\n(Role)"]
+C4Container
+    title Container Diagram — [System Name]
 
-    %% System Boundary
-    subgraph SYS["System Name (System Boundary)"]
+    Person(actor, "Actor Name", "Role")
 
-        subgraph GROUP_A["Group Name"]
-            C1["component-name\n[Type: Technology]\nResponsibility"]
-        end
+    Container_Boundary(sys, "System Name") {
 
-        subgraph GROUP_B["Group Name"]
-            C2["component-name\n[Type: Technology]\nResponsibility"]
-            C3["component-name\n[Type: Technology]\nResponsibility"]
-        end
+        Container(c1, "component-name", "Technology", "Responsibility")
+        Container(c2, "component-name", "Technology", "Responsibility")
 
-        subgraph STORES["Data Stores"]
-            S1["store-name\n[Type: Technology]\nPurpose"]
-        end
+        ContainerDb(s1, "store-name", "Technology", "Purpose")
 
-    end
+        ContainerQueue(q1, "broker-name", "Technology", "Purpose")
 
-    %% External System
-    EXT["External System\n[External System: Technology]"]
+    }
 
-    %% Sync flows
-    ACTOR -->|"Protocol"| C1
-    C2 -->|"Protocol"| EXT
+    System_Ext(ext, "External System", "Technology")
 
-    %% Async flows
-    C1 -.->|"Protocol: topic/queue"| S1
-    S1 -.->|"Protocol: consume"| C2
-
-    %% Styling
-    classDef person fill:#08427B,stroke:#052E56,stroke-width:2px,color:#fff
-    classDef gateway fill:#9B9B9B,stroke:#6B6B6B,stroke-width:2px,color:#fff
-    classDef app fill:#438DD5,stroke:#2E6295,stroke-width:2px,color:#fff
-    classDef store fill:#417505,stroke:#2D5204,stroke-width:2px,color:#fff
-    classDef external fill:#999999,stroke:#6B6B6B,stroke-width:2px,color:#fff
-    classDef boundary fill:transparent,stroke:#444,stroke-width:2px,stroke-dasharray: 5 5
-
-    class ACTOR person
-    class C1 gateway
-    class C2,C3 app
-    class S1 store
-    class EXT external
-    class GROUP_A,GROUP_B,STORES boundary
+    Rel(actor, c1, "Uses", "Protocol")
+    Rel(c1, c2, "Calls", "Protocol")
+    Rel(c2, s1, "Reads/Writes", "Protocol")
+    Rel(c1, q1, "Publishes events", "Protocol")
+    Rel(q1, c2, "Consumes events", "Protocol")
+    Rel(c2, ext, "Calls", "Protocol")
 ```
 
-### Color Conventions (C4 standard — all architecture types)
+### Color Conventions (C4 standard — built-in)
 
-| Element | Fill | classDef name |
-|---------|------|--------------|
-| External actor | `#08427B` dark blue | `person` |
-| Gateway containers | `#9B9B9B` gray | `gateway` |
-| Application containers | `#438DD5` medium blue | `app` |
-| Store containers | `#417505` dark green | `store` |
-| External systems | `#999999` gray | `external` |
-| Group subgraphs | transparent, dashed | `boundary` |
+Native Mermaid C4 diagrams apply consistent styling automatically:
+
+| Element | Function | Built-in Appearance |
+|---------|----------|-------------------|
+| External actor | `Person()` | Dark blue box with person icon |
+| Application containers | `Container()` | Blue box |
+| Database containers | `ContainerDb()` | Blue cylinder |
+| Queue/broker containers | `ContainerQueue()` | Blue queue shape |
+| External systems | `System_Ext()` | Gray box |
+| System boundary | `Container_Boundary()` | Dashed border |
+
+**Custom styling** (optional): Use `UpdateElementStyle()` to differentiate container categories by color if needed — e.g., green for stores, gray for gateways.
 
 ### Data Sources
 
@@ -291,7 +264,7 @@ graph TB
 
 **Purpose**: Full wiring diagram showing every component, topic name, queue name, and flow. The most detailed diagram — used by architects and SREs for operational understanding.
 
-**Format**: Mermaid `graph TB` — compatible with Mermaid 8.x+.
+**Format**: Mermaid `graph TB`.
 
 ### Structure Rules
 
@@ -414,7 +387,7 @@ graph TB
 
 **Purpose**: Per-flow sequence diagrams showing step-by-step interactions between components for each documented data flow. One diagram per H3 flow subsection in `docs/04-data-flow-patterns.md`.
 
-**Format**: Classic Mermaid `sequenceDiagram` — compatible with Mermaid 8.x+.
+**Format**: Mermaid `sequenceDiagram`.
 
 ```mermaid
 sequenceDiagram
@@ -432,7 +405,7 @@ sequenceDiagram
 |------|--------|---------|
 | Sync request | `A->>B: description` | REST, gRPC, JDBC calls (solid arrow) |
 | Sync response | `B-->>A: description` | Return values, acknowledgements (dashed arrow) |
-| Async (fire-and-forget) | `A-->>B: description` | Kafka publish, queue push, event emit (dashed arrow) |
+| Async (fire-and-forget) | `A-)B: description` | Kafka publish, queue push, event emit (open arrow) |
 | Participant declaration | `participant Alias as Full Name` | Declare and alias participants |
 | Activation | `activate A` / `deactivate A` | Show processing scope (or use `+`/`-` on arrows) |
 | Note | `Note over A,B: text` | Protocol annotations, context notes |
@@ -445,7 +418,9 @@ sequenceDiagram
 | Conditional | `alt condition` ... `else condition` ... `end` | Branching logic (success/failure paths) |
 | Optional | `opt condition` ... `end` | Optional execution path |
 | Loop | `loop condition` ... `end` | Retry loops, polling, batch processing |
-| Grouping | `rect rgb(...)` ... `end` | Visual grouping of related steps |
+| Parallel | `par description` ... `and description` ... `end` | Concurrent operations (fan-out) |
+| Critical | `critical description` ... `option fallback` ... `end` | Critical sections with fallback |
+| Break | `break condition` ... `end` | Early exit from a flow |
 
 ### Architecture Conventions
 
@@ -457,25 +432,27 @@ sequenceDiagram
    APIGW->>+AuthService: validateToken()
    AuthService-->>-APIGW: token valid
    ```
-3. **Async events**: Use dashed-arrow syntax with topic/queue name:
+3. **Async events**: Use open-arrow syntax with topic/queue name:
    ```
-   PS-->>Kafka: payment.completed.v1
-   Kafka-->>NS: consume(payment.completed.v1)
+   PS-)Kafka: payment.completed.v1
+   Kafka-)NS: consume(payment.completed.v1)
    ```
 4. **Error paths**: Use `alt` for success/failure branching:
    ```
    alt success
        PS-->>APIGW: 200 OK {payment_id}
    else failure
-       PS-->>DLQ: payment.failed
+       PS-)DLQ: payment.failed
        PS-->>APIGW: 500 Error
    end
    ```
-5. **Parallel processing**: Use `Note over` to annotate concurrent fan-out:
+5. **Parallel processing**: Use `par` for concurrent fan-out:
    ```
-   Note over NS,SMSService: Parallel execution
-   NS->>EmailService: sendEmail()
-   NS->>SMSService: sendSMS()
+   par Send email
+       NS->>EmailService: sendEmail()
+   and Send SMS
+       NS->>SMSService: sendSMS()
+   end
    ```
 6. **Activation bars**: Use `+`/`-` on arrows to show processing scope:
    ```
@@ -508,14 +485,14 @@ sequenceDiagram
     BizSvc->>+Store: save(data)
     Store-->>-BizSvc: saved
 
-    BizSvc-->>MQ: event.name.v1
+    BizSvc-)MQ: event.name.v1
 
     BizSvc-->>-APIGW: result
 
     alt success
         APIGW-->>-Client: 200 OK response
     else failure
-        APIGW-->>DLQ: request.failed
+        APIGW-)DLQ: request.failed
         APIGW-->>Client: error response
     end
 ```
@@ -535,49 +512,64 @@ sequenceDiagram
 
 ## Mermaid Compatibility Rules
 
-### Topology Diagrams (Diagrams 1–4)
+### Target Version
 
-Target: **Mermaid 8.8.0+** (VS Code, GitHub, GitLab).
+All generated Mermaid diagrams target **Mermaid v11.4.1** (Mermaid Chart VS Code extension 2.1.0+).
 
-Applies to: All 4 standard diagrams — Logical View (ASCII), C4 L1 System Context, C4 L2 Container, and Detailed View. Diagrams 2–4 use `graph TB`.
+### Topology Diagrams — Diagrams 1 and 4 (graph TB)
+
+Applies to: Diagram 1 (ASCII Logical View) and Diagram 4 (Detailed View) — these use `graph TB`.
 
 ### DO
 
-- Use `graph TB` (not `flowchart TB` — `flowchart` is unreliable in 8.x)
+- Use `graph TB` (or `flowchart TB` — both supported in v11)
 - Use `subgraph NAME["Label"]` for grouping
 - Use `-->` for solid arrows, `-.->` for dashed arrows, `-.-` for dotted lines (no arrow)
 - Use `|"label"| ` for edge labels (quoted)
 - Use `\n` for line breaks inside node labels
 - Use `classDef` + `class` for styling
+- Use `direction LR` inside subgraphs when horizontal layout aids readability
 
 ### DO NOT
 
-- Do not use `direction LR` inside subgraphs (requires Mermaid 10+)
-- Do not use nested subgraphs more than 2 levels deep (fragile in 8.x)
 - Do not use HTML tags (`<b>`, `<i>`, `<sup>`) in labels
 - Do not use emoji characters in node labels (rendering varies)
 - Do not use `|` pipe characters inside node label text (breaks parsing) — use `/` instead
 - Do not connect subgraph IDs as link endpoints (`L1 --> L2` fails) — connect nodes only
-- Do not use `flowchart` keyword — use `graph` for maximum compatibility
-- Do not use native C4 diagram types (`C4Context`, `C4Container`) — they require Mermaid 9.3+
+
+### C4 Diagrams — Diagrams 2 and 3 (C4Context / C4Container)
+
+Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 Container) uses `C4Container`.
+
+**DO:**
+- Use `C4Context` or `C4Container` as the first line inside the Mermaid fence block
+- Use `Person()`, `System()`, `System_Ext()` for C4 L1 elements
+- Use `Container()`, `ContainerDb()`, `ContainerQueue()`, `Container_Boundary()` for C4 L2 elements
+- Use `Rel(from, to, "description", "protocol")` for all relationships
+- Use `title` for diagram titles
+- Use `UpdateElementStyle()` for custom colors when needed
+
+**DO NOT:**
+- Do not mix `graph TB` syntax (`-->`, `subgraph`, `classDef`) with C4 diagram types
+- Do not use `\n` in labels — use the function parameters for multi-line information
+- Do not use HTML tags in element labels
 
 ### Data Flow Diagrams (Sequence Diagrams)
-
-Target: **Mermaid 8.8.0+** (VS Code, GitHub, GitLab).
 
 **DO:**
 - Use `sequenceDiagram` as the first line inside the Mermaid fence block
 - Use `participant Alias as Full Name` for declaring participants
-- Use `->>` for sync requests (solid arrow), `-->>` for responses and async messages (dashed arrow)
+- Use `->>` for sync requests (solid arrow), `-->>` for sync responses (dashed arrow)
+- Use `-)` for async fire-and-forget messages (open arrow)
 - Use `+`/`-` on arrows for activation bars (e.g., `->>+` to activate, `-->>-` to deactivate)
 - Use `alt/else/end` for branching, `opt/end` for optional paths, `loop/end` for retries
+- Use `par/and/end` for concurrent fan-out
+- Use `critical/option/end` for critical sections with fallback
+- Use `break/end` for early exit from a flow
 - Use `Note over A,B: text` for protocol annotations
 
 **DO NOT:**
-- Do not use `-)` open-arrow syntax (requires Mermaid 9.1+) — use `-->>` instead
-- Do not use `par/and/end` (requires Mermaid 9.1+) — use `Note over` to annotate parallel execution
-- Do not use `critical/option/end` or `break/end` (requires Mermaid 9.1+)
-- Do not use `flowchart` or `graph TB` syntax inside sequence diagrams
+- Do not use `graph TB` or `flowchart` syntax inside sequence diagrams
 - Do not use HTML tags in participant names or messages
 - Do not use emoji characters in labels (rendering varies)
 - Do not nest `alt` blocks more than 2 levels deep (readability degrades)

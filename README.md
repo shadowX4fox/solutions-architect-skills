@@ -731,13 +731,14 @@ Where:
 ## Roadmap
 
 ### v3.2.0 (Current Release) ✅
-**feat: Mermaid 8.8.0 compliant diagrams — classic sequenceDiagram + graph TB for C4**
+**feat: Mermaid v11.4.1 target — native C4 diagrams + classic sequenceDiagram**
 
-- All generated Mermaid diagrams now target **Mermaid 8.8.0+** for maximum previewer compatibility
-- Data flow diagrams reverted from ZenUML to classic Mermaid `sequenceDiagram` syntax
-- C4 Level 1 and Level 2 diagrams use `graph TB` with `classDef` styling (C4 color conventions)
-- Compatibility rules enforce 8.8.0 constraints: no `-)` async arrows, no `par/and/end`, no `critical/break`, no native C4 diagram types
-- DIAGRAM-GENERATION-GUIDE.md updated with complete `sequenceDiagram` syntax reference, architecture conventions, and template
+- All generated Mermaid diagrams now target **Mermaid v11.4.1** (Mermaid Chart VS Code extension 2.1.0+)
+- Data flow diagrams reverted from ZenUML to Mermaid `sequenceDiagram` with full modern syntax (`-)` async, `par/and/end`, `critical/break`)
+- C4 Level 1 uses native `C4Context` with `Person()`, `System()`, `System_Ext()`, `Rel()`
+- C4 Level 2 uses native `C4Container` with `Container()`, `ContainerDb()`, `ContainerQueue()`, `Container_Boundary()`
+- Diagrams 1 (Logical View) and 4 (Detailed View) remain `graph TB` with `classDef` styling
+- DIAGRAM-GENERATION-GUIDE.md updated with complete syntax references, templates, and compatibility rules for v11
 - All secondary files updated: SKILL.md, ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md, MERMAID_DIAGRAMS_GUIDE.md
 
 ### v3.1.6 (Previous Release) ✅
