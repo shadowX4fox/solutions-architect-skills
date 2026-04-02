@@ -172,6 +172,7 @@ See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conve
    - Example: "Edit security architecture" → navigate to `docs/07-security-architecture.md`
 
 2. **Load Context Anchor** *(REQUIRED for downstream sections)*
+   - **Section 3 Enforcement Gate**: Any write to `docs/02-architecture-principles.md` — whether creation, migration, or edit — MUST pass the Section 3 validation checklist from VALIDATIONS.md (9 principles present in exact order, three subsections each: Description/Implementation/Trade-offs, system-specific content, no custom principles). Run the checklist before finalizing the write.
    - **SKIP** this step when editing `docs/01-system-overview.md`, `docs/02-architecture-principles.md`, or for typo/formatting-only fixes
    - **REQUIRED** when editing any file from `docs/03-architecture-layers.md` through `docs/09-operational-considerations.md`, or any `docs/components/*.md` file
    - **Universal Foundation**: Always load `docs/01-system-overview.md` + `docs/02-architecture-principles.md`

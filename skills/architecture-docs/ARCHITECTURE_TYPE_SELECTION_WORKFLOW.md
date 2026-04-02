@@ -428,6 +428,13 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
        - `<!-- PO_SPEC_SOURCE: [filename] (loaded YYYY-MM-DD) -->` if a PO Spec was found and used
        - `<!-- PO_SPEC_GATE: SKIPPED (user override at YYYY-MM-DD) -->` if the gate was overridden
    - `docs/02-architecture-principles.md` — Section 3 (Architecture Principles)
+     - **MUST follow the mandatory 9-principle template** from ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Section 3: Architecture Principles"
+     - Include ALL 9 core principles in EXACT order: (1) Separation of Concerns, (2) High Availability, (3) Scalability First, (4) Security by Design, (5) Observability, (6) Resilience, (7) Simplicity, (8) Cloud-Native, (9) Open Standards
+     - Each principle MUST have three subsections: **Description**, **Implementation** (system-specific, not generic), **Trade-offs** (honest cost assessment)
+     - Optional principle 10 (Decouple Through Events): include ONLY if async patterns are documented in the architecture
+     - Populate Implementation and Trade-offs using: PO Spec Section 7 (Business Constraints), architecture type decisions, and technology choices from the architecture discussion
+     - Do NOT invent custom principles, omit any of the 9, or reorder them
+     - Validate against VALIDATIONS.md → "Section 3: Architecture Principles Validation" checklist before finalizing
    - `docs/03-architecture-layers.md` — Section 4 (Architecture Layers, type-specific template)
    - `docs/04-data-flow-patterns.md` — Section 6 (Data Flow Patterns)
    - `docs/05-integration-points.md` — Section 7 (Integration Points)

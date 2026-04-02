@@ -65,6 +65,8 @@ After creating all `docs/` files, `ARCHITECTURE.md` at the project root should u
 | S1+S2 | Executive Summary & System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | Problem, solution, use cases, key metrics |
 | S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | Design principles with trade-offs |
 | S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | Architecture model, layer diagram |
+
+> **Section 3 Enforcement**: When extracting or writing `docs/02-architecture-principles.md` during migration, validate the content against the mandatory 9-principle template (ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Section 3: Architecture Principles"). All 9 core principles must be present in exact order, each with Description/Implementation/Trade-offs subsections. If the source document has non-standard principles, apply the update workflow from VALIDATIONS.md → "Updating Existing Documents" (identify missing → re-order → add missing → restructure format → remove non-standard → preserve content).
 | S5 | Component Details | [docs/components/README.md](docs/components/README.md) | All components |
 | S6 | Data Flow Patterns | [docs/04-data-flow-patterns.md](docs/04-data-flow-patterns.md) | Async execution flows |
 | S7 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | External integrations |

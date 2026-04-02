@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.1` in the list.
+You should see `solutions-architect-skills v3.2.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.2.1 (Current Release) ✅
+### v3.2.2 (Current Release) ✅
+**fix: enforce Section 3 (Architecture Principles) 9-principle template across all paths**
+
+- Creation workflow (Workflow 1) now explicitly enforces the mandatory 9-principle template with exact order, three subsections (Description/Implementation/Trade-offs), and validation checklist reference
+- Migration workflow (Workflow 9) now validates Section 3 against the template during extraction, with update workflow for non-standard source documents
+- Universal enforcement gate added to SKILL.md for any write to `docs/02-architecture-principles.md` — creation, migration, or edit
+
+### v3.2.1 (Previous Release) ✅
 **fix: recommended VS Code setup — Mermaid Chart extension replaces Office Viewer**
 
 - Removed Office Viewer from recommended extensions
