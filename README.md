@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.3` in the list.
+You should see `solutions-architect-skills v3.2.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.2.3 (Current Release) ✅
+### v3.2.4 (Current Release) ✅
+**feat: pure C4 grouping for Level 2 Container diagram — no architecture-specific layers**
+
+- C4 L2 Container diagram now groups by C4 element type (`Container()`, `ContainerDb()`, `ContainerQueue()`) instead of architecture-specific layers/tiers
+- Architecture Type Adaptation table scoped to Diagrams 1 and 4 only — C4 diagrams use pure C4 conventions
+- All 5 C4 translation files updated (META, BIAN, 3-Tier, N-Layer, Microservices) to enforce pure C4 grouping at L2
+- Layer/tier visual grouping explicitly directed to Logical View (Diagram 1) and Detailed View (Diagram 4)
+
+### v3.2.3 (Previous Release) ✅
 **fix: dynamic principle count in Section 3 header — 9 or 10 based on content**
 
 - Section 3 heading now reflects actual principle count: "(9 Core Principles)" or "(10 Core Principles)" when optional Decouple Through Events is included

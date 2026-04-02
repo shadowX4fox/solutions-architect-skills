@@ -87,66 +87,33 @@ Person: "Regulator"
 
 ## 3. C2 — Container Diagram
 
-At C2, you **zoom into the Banking Platform System** and show its internal structure. This is where the META layering becomes visible — but as visual groupings, not C4 elements.
+At C2, you **zoom into the Banking Platform System** and show its internal structure as pure C4 containers. META layers do NOT appear as visual groupings in the C4 L2 diagram — layer grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View).
 
 ### Translation Rules
 
 | META Element | C2 Mapping |
 |-------------|------------|
-| Each microservice in Layer 3 | **Container** (application) — e.g., "Transfer Orchestrator [Spring Boot]" |
-| Each microservice in Layer 4 | **Container** (application) — e.g., "Payment Service [Spring Boot]" |
-| Each microservice in Layer 5 | **Container** (application) — e.g., "Current Account SD [Quarkus]" |
-| Layer 2 BFF services | **Container** (application) — e.g., "Mobile BFF [Node.js]" |
-| Each database per service | **Container** (data store) — e.g., "Payment DB [PostgreSQL]" |
-| Message broker (Kafka) | **Container** (infrastructure) — e.g., "Event Bus [Apache Kafka]" |
-| API Gateway | **Container** (infrastructure) — e.g., "API Gateway [Kong]" |
-| Transversal services | **Containers** in a vertical grouping |
+| Each microservice in Layer 3 | `Container()` — e.g., "Transfer Orchestrator [Spring Boot]" |
+| Each microservice in Layer 4 | `Container()` — e.g., "Payment Service [Spring Boot]" |
+| Each microservice in Layer 5 | `Container()` — e.g., "Current Account SD [Quarkus]" |
+| Layer 2 BFF services | `Container()` — e.g., "Mobile BFF [Node.js]" |
+| API Gateway | `Container()` — e.g., "API Gateway [Kong]" |
+| Transversal services | `Container()` — e.g., "IAM Service [Keycloak]" |
+| Each database per service | `ContainerDb()` — e.g., "Payment DB [PostgreSQL]" |
+| Message broker (Kafka) | `ContainerQueue()` — e.g., "Event Bus [Apache Kafka]" |
+| Cache | `ContainerDb()` — e.g., "Session Cache [Redis]" |
 
-### Visual Layout Convention
+### C2 Grouping Convention
 
-The META-to-C2 translation uses a specific layout to preserve the layered mental model while conforming to C4:
+The C4 L2 diagram uses **pure C4 conventions** — containers are grouped by their C4 element type, not by META layers:
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     BANKING PLATFORM (System Boundary)                   │
-│                                                                         │
-│  ┌──────────────────────────────────────────────────────┐  ┌─────────┐ │
-│  │ Layer 2: Experience                                   │  │         │ │
-│  │  [Mobile BFF]  [Web BFF]  [Corporate BFF]            │  │ Trans-  │ │
-│  └──────────────────────────────────────────────────────┘  │ versal  │ │
-│                           │                                 │         │ │
-│                      [API Gateway]                          │ [IAM]   │ │
-│                           │                                 │ [Fraud] │ │
-│  ┌──────────────────────────────────────────────────────┐  │ [Rules] │ │
-│  │ Layer 3: Business Scenarios                           │  │ [Audit] │ │
-│  │  [Transfer Orch.]  [Onboarding Orch.]  [Loan Orch.] │  │ [GL     │ │
-│  └──────────────────────────────────────────────────────┘  │  Post]  │ │
-│                           │                                 │         │ │
-│  ┌──────────────────────────────────────────────────────┐  │         │ │
-│  │ Layer 4: Business Capabilities                        │  │         │ │
-│  │  [Payments]  [Accounts]  [Cards]  [Lending]          │  │         │ │
-│  └──────────────────────────────────────────────────────┘  │         │ │
-│                           │                                 │         │ │
-│  ┌──────────────────────────────────────────────────────┐  │         │ │
-│  │ Layer 5: Domain (BIAN SDs)                            │  │         │ │
-│  │  [Current Acct SD]  [Payment Order SD]  [Card Tx SD] │  │         │ │
-│  └──────────────────────────────────────────────────────┘  └─────────┘ │
-│                           │                                             │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ Data Stores                                                       │  │
-│  │  [Payment DB]  [Account DB]  [Card DB]  [Event Bus]  [Cache]    │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+- **`Container()`** for all application/service containers (BFFs, orchestrators, business services, domain services, transversal services, API gateway)
+- **`ContainerDb()`** for all data stores (databases, caches)
+- **`ContainerQueue()`** for message brokers (Kafka, RabbitMQ)
 
-**Key conventions:**
+The Mermaid C4 renderer visually differentiates these by shape (box, cylinder, queue). No nested `Container_Boundary()` blocks are used for META layer grouping.
 
-- **Horizontal bands** represent META layers — these are visual groupings (dashed rectangles), NOT C4 elements
-- **Each box within a band** is a C4 Container with technology in brackets
-- **Vertical column on the right** represents Transversal services — also Containers
-- **Data stores at the bottom** — each service's database is its own Container
-- **API Gateway** sits between Layer 2 and Layer 3 as a Container
-- **Arrows flow top-to-bottom** for synchronous calls, with async arrows to the Event Bus
+**Note**: META layer grouping (horizontal bands for L2–L5, transversal column) is expressed in Diagram 1 (ASCII Logical View) and Diagram 4 (Detailed View), not in the C4 L2 diagram.
 
 ### Example C2 Elements
 

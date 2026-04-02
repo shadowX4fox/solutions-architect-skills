@@ -68,7 +68,7 @@ System: "Order Management System"
 
 ## 3. C2 — Container Diagram
 
-At C2, you **zoom into the System** and show each independently deployed unit. This is where the 3-tier structure becomes partially visible — but mapped to deployment units, not logical tiers.
+At C2, you **zoom into the System** and show each independently deployed unit using pure C4 conventions. The 3-tier layer structure does NOT appear as visual groupings in the C4 L2 diagram — tier grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
 
 ### Deployment Variant 1: SPA + API + Database
 

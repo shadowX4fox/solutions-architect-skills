@@ -84,7 +84,7 @@ At C1, the entire BIAN platform is shown as systems and persons. Individual Serv
 
 ### C2 — Container Diagram
 
-At C2, zoom into the "Banking Platform" System to show its deployable units. Each BIAN Service Domain is a **separate Container** because in a BIAN-compliant architecture, SDs run as independent services (microservice-per-SD pattern).
+At C2, zoom into the "Banking Platform" System to show its deployable units using pure C4 conventions. Each BIAN Service Domain is a **separate Container** because in a BIAN-compliant architecture, SDs run as independent services (microservice-per-SD pattern). BIAN layer grouping does NOT appear in the C4 L2 diagram — layer grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
 
 #### What to Show
 

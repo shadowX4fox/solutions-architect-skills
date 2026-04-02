@@ -12,7 +12,7 @@
 |---|---------|--------|----------|-------|
 | 1 | Logical View | ASCII art | Executives, architects | Layers/tiers/groups as horizontal bands with components inside, arrows between groups only |
 | 2 | C4 Level 1 — System Context | Mermaid `graph TB` | Non-technical stakeholders | The system as a single box, external actors, external systems |
-| 3 | C4 Level 2 — Container | Mermaid `graph TB` | Development teams | All containers inside the system boundary, grouped by layer/tier, with protocols |
+| 3 | C4 Level 2 — Container | Mermaid `C4Container` | Development teams | All containers inside the system boundary, grouped by C4 category (apps, stores, brokers), with protocols |
 | 4 | Detailed View | Mermaid `graph TB` | Architects, SREs | Full component wiring with topic names, queue names, all async/sync flows |
 
 **Ordering in the file**: Always place diagrams in this order (1→2→3→4) under a `## Architecture Diagrams` heading.
@@ -23,7 +23,7 @@
 
 ## Architecture Type Adaptation
 
-All 4 diagrams use the same grouping logic, determined by the detected architecture type:
+Diagrams 1 (Logical View) and 4 (Detailed View) use architecture-specific grouping. Diagrams 2 (C4 L1) and 3 (C4 L2) use pure C4 conventions — they do NOT group by architecture layers/tiers.
 
 | Architecture Type | Grouping Strategy | Group Naming Pattern | Layer/Group Source |
 |-------------------|-------------------|---------------------|--------------------|
@@ -190,19 +190,18 @@ No `classDef` or manual styling is needed — the Mermaid C4 renderer handles co
 
 ## Diagram 3 — C4 Level 2 Container (Mermaid C4)
 
-**Purpose**: Zooms into the system boundary. Shows all deployable containers, grouped by architectural layer/tier/group, with protocols on every arrow.
+**Purpose**: Zooms into the system boundary. Shows all deployable containers grouped by C4 category (apps/services, data stores, message brokers), with protocols on every arrow. This diagram uses pure C4 conventions — architecture-specific layers belong in Diagrams 1 and 4.
 
 **Format**: Mermaid `C4Container` — native C4 diagram type.
 
 ### Structure Rules
 
 1. **System boundary**: Use `Container_Boundary()` to wrap all internal containers
-2. **Grouping inside boundary**: Use nested `Container_Boundary()` blocks for layer/tier/functional grouping (per Architecture Type Adaptation table)
+2. **Pure C4 grouping**: Group containers by C4 element type — `Container()` for apps/services, `ContainerDb()` for databases, `ContainerQueue()` for message brokers/queues. The element function itself provides visual differentiation (box vs cylinder vs queue shape). Do NOT group by architecture-specific layers/tiers — that belongs in Diagrams 1 and 4
 3. **External actor outside**: Declared before the boundary
 4. **External systems outside**: Declared after the boundary
 5. **Every relationship has a protocol label**: Use the 4th parameter of `Rel()` — `HTTPS`, `gRPC`, `Kafka`, `JDBC`, etc.
 6. **Sync vs async**: Indicate in the relationship description (3rd parameter) — e.g., "Publishes events (async)" vs "Queries (sync)"
-7. **Container types**: Use `Container()` for apps/services, `ContainerDb()` for databases, `ContainerQueue()` for message brokers/queues
 
 ### Template
 

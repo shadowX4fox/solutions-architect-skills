@@ -99,13 +99,15 @@ At C2, you **zoom into the System** and show every independently deployable unit
 - **Database arrows**: Service → Database (the service depends on the database, not the reverse)
 - **Async arrows**: Distinguish synchronous (solid) from asynchronous (dashed) communication
 
-### Container Grouping
+### C2 Grouping Convention
 
-Group related containers visually:
+The C4 L2 diagram uses **pure C4 conventions** — containers are grouped by their C4 element type, not by architecture layers:
 
-- **By bounded context**: Order context (Order Service + Order DB), Payment context (Payment Service + Payment DB)
-- **By deployment boundary**: Kubernetes namespace, AWS account, VPC
-- **By layer**: Frontend containers at top, backend services in middle, data stores at bottom
+- **`Container()`** for all application/service containers (API gateway, microservices, BFFs, workers)
+- **`ContainerDb()`** for all data stores (databases, caches)
+- **`ContainerQueue()`** for message brokers (Kafka, RabbitMQ)
+
+The Mermaid C4 renderer visually differentiates these by shape (box, cylinder, queue). Architecture-specific grouping (bounded contexts, deployment boundaries, functional groups) belongs in Diagrams 1 and 4.
 
 ### Example C2 Elements
 

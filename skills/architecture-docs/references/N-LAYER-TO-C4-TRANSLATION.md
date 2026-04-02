@@ -98,7 +98,7 @@ At C1, you show:
 
 ## C2 — Container Diagram
 
-At C2, zoom into the System to show its deployable units. The N-Layer backend is still **ONE Container** here. The separate containers are databases, caches, and message brokers.
+At C2, zoom into the System to show its deployable units using pure C4 conventions. The N-Layer backend is still **ONE Container** here — internal layers do NOT appear as visual groupings in the C4 L2 diagram (layer grouping belongs in Diagrams 1 and 4). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
 
 ### What to Show
 
