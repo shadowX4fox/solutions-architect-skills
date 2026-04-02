@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.4` in the list.
+You should see `solutions-architect-skills v3.2.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,16 @@ Where:
 
 ## Roadmap
 
-### v3.2.4 (Current Release) ✅
+### v3.2.5 (Current Release) ✅
+**feat: ADR Context Block — pre-identify decisions from PO Spec and propagate through creation**
+
+- New Step 0.5 in Workflow 1: derives ADR candidate list from PO Spec analysis (Sections 1, 3, 4, 7) before architecture design begins
+- ADR Context Block maintained through all creation steps — decisions tracked from PENDING to DECIDED with rationale
+- Step 2 (architecture type selection) resolves first ADR candidate automatically
+- Step 5 (section creation) references the block for consistency across principles, tech stack, security, and ADR table
+- Step 6 (ADR generation) passes enriched context with drivers, decisions, and rationale to the ADR skill
+
+### v3.2.4 (Previous Release) ✅
 **feat: pure C4 grouping for Level 2 Container diagram — no architecture-specific layers**
 
 - C4 L2 Container diagram now groups by C4 element type (`Container()`, `ContainerDb()`, `ContainerQueue()`) instead of architecture-specific layers/tiers

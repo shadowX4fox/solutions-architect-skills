@@ -306,6 +306,64 @@ Type **skip** or press Enter to proceed without extra context.
 
 ---
 
+#### Step 0.5: Pre-Identify Architecture Decision Records (ADR Context Block)
+
+**Trigger**: Immediately after PO Spec is loaded (Step 0 passes) and before architecture type selection.
+
+**Objective**: Derive an initial ADR candidate list from PO Spec analysis. This list — the **ADR Context Block** — is carried through all subsequent steps to ensure every section references the same decisions with consistent rationale.
+
+**Input sources** (already loaded in Step 0):
+- **PO Spec Section 1 (Business Context)** → industry, domain, strategic direction → ADRs for architecture pattern, framework selection
+- **PO Spec Section 3 (Business Objectives)** → scalability/performance/cost targets → ADRs for infrastructure strategy, caching approach
+- **PO Spec Section 4 (Use Cases)** → sync vs async patterns, integration approaches → ADRs for communication patterns, API strategy
+- **PO Spec Section 7 (Business Constraints)** → technology mandates, vendor constraints, compliance requirements, budget → ADRs for technology choices, deployment platform, compliance approach
+
+**Action**: Analyze the loaded PO Spec sections and present the ADR Candidate Table:
+
+```
+📋 Pre-Identified Architecture Decision Records
+
+Based on the PO Spec analysis, these architectural decisions will need to be made
+during architecture design. Each will become a formal ADR in the adr/ directory.
+
+| # | ADR Title (Candidate)              | Driver (PO Spec Source)                  | Impact |
+|---|------------------------------------|------------------------------------------|--------|
+| 1 | Select architecture pattern        | Business Objectives, Use Cases           | High   |
+| 2 | Choose primary programming language| Business Constraints (team skills)       | High   |
+| 3 | Select database technology         | Use Cases (data model requirements)      | High   |
+| 4 | Define API communication strategy  | Use Cases (sync/async needs)             | Medium |
+| 5 | Choose deployment platform         | Business Constraints (budget, cloud)     | High   |
+| 6 | Select authentication approach     | Business Constraints (compliance)        | High   |
+| N | [Additional decisions from PO Spec]| [Source section]                         | ...    |
+
+Please confirm, adjust, or add decisions before we begin architecture design.
+```
+
+**Rules**:
+- Derive candidates from PO Spec content — do NOT invent generic ADRs unrelated to the project
+- Minimum 3 candidates, typical range 5–10
+- Each candidate must trace to a specific PO Spec section as its driver
+- Impact = High if it affects multiple architecture sections, Medium if 1–2 sections, Low if localized
+
+**Wait for user confirmation.** Adjust the list based on user feedback. The confirmed list becomes the **ADR Context Block** — a structured reference maintained through Steps 1–6.
+
+**If PO Spec was skipped (SKIP PO SPEC)**: Present a minimal ADR Candidate Table with the universal decisions (architecture pattern, primary language, database, deployment platform) and ask the user to provide drivers inline.
+
+**ADR Context Block format** (maintained in conversation context):
+
+```
+ADR CONTEXT BLOCK (confirmed at Step 0.5)
+──────────────────────────────────────────
+ADR-001: [Title] | Driver: [source] | Status: PENDING
+ADR-002: [Title] | Driver: [source] | Status: PENDING
+ADR-003: [Title] | Driver: [source] | Status: PENDING
+...
+```
+
+As decisions are made during Steps 1–5, update each ADR's status from `PENDING` to `DECIDED: [decision summary]` with the rationale captured in context.
+
+---
+
 #### Step 1: Present Architecture Type Options
 
 When creating a new ARCHITECTURE.md, present the user with architecture type selection:
@@ -366,6 +424,8 @@ Wait for user response (1, 2, 3, 4, or 5) or architecture type name.
 - Default to **3-Tier (2)** if user wants maximum simplicity and minimal operational complexity
 - Default to **META (4)** if user has enterprise requirements and regulatory compliance needs
 
+**ADR Context Block update**: After the user selects an architecture type, update the ADR Context Block — mark the "Select architecture pattern" ADR as `DECIDED: [selected type] — [rationale from user input]`.
+
 #### Step 3: Load Type-Specific Templates
 
 Based on user selection, load the appropriate templates:
@@ -417,7 +477,14 @@ When creating the ARCHITECTURE.md, add an HTML comment metadata tag at the begin
 
 #### Step 5: Create Multi-File Architecture Documentation
 
-Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs/` structure:
+Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs/` structure.
+
+**ADR Context Block consistency**: Reference the ADR Context Block (from Step 0.5) when writing each section. As decisions are made during section creation, update the corresponding ADR candidate from `PENDING` to `DECIDED` with the decision summary and rationale. This ensures:
+- **Section 3 (Principles)**: Trade-offs align with ADR candidates — each principle's Implementation/Trade-offs should reference relevant pending or decided ADRs
+- **Section 4 (Architecture Layers)**: References ADR for architecture pattern (decided at Step 2)
+- **Section 8 (Technology Stack)**: Each technology choice resolves a technology-related ADR candidate
+- **Section 9 (Security)**: References security/compliance ADR candidates
+- **Section 12 (ADR Table)**: Populate directly from the ADR Context Block — all confirmed candidates become rows with their final status, drivers, and impact
 
 **Creation Order:**
 1. Create `docs/` directory
@@ -627,6 +694,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 **Action**: Invoke `/skill architecture-definition-record` and pass context:
 - ARCHITECTURE.md path
 - Trigger reason: "Post-architecture-docs creation — generate ADRs from Section 12 table using full template"
+- **ADR Context Block**: Pass the full ADR Context Block from Step 0.5 — each ADR candidate now has its driver (PO Spec source), decision summary, rationale, and the section(s) where it was resolved. This enriched context ensures ADR files are complete and consistent with the architecture documentation.
 - **Critical context note**: The full architecture documentation (all `docs/` files created in Step 5) is in the current conversation context. The ADR skill MUST use this context to populate ALL body sections of each ADR (Context, Decision, Rationale, Consequences, Alternatives) — not just metadata placeholders. Do NOT generate abbreviated stubs.
 - **Canonical template requirement**: The ADR skill MUST load and use the canonical template (`ADR-000-template.md`) for every generated file. If any ADR is produced without the full 10-section structure (Context, Decision, Rationale, Consequences, Alternatives, Implementation Plan, Success Metrics, References, Review History, Notes), the generation has FAILED.
 

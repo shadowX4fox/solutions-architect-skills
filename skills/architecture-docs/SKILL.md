@@ -128,7 +128,7 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 #### Other Workflows
 If the user's request matches other documented workflows (1-9), follow their respective trigger patterns.
 
-**Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check) before Step 1 (type selection).
+**Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check), then Step 0.5 (ADR pre-identification) establishes the **ADR Context Block** — a list of ADR candidates derived from PO Spec analysis that is maintained through all creation steps for decision consistency. See ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md for the full flow.
 
 ### If No Pattern Matches
 
