@@ -552,7 +552,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    Enter the number of your main system:
    ```
 
-   Single system → skip this prompt, it is the focus by default.
+   Single system → skip this prompt (it is the focus by default), but still create the system folder and system descriptor file.
 
    All identified internal systems get **full detailed component documentation** — same depth for every system. The focus system designation only affects:
    - Priority in the README.md index (focus system listed first)
@@ -617,18 +617,15 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    |------|----|----------|-------------|
    ```
 
-   File name = kebab-case system name (same as the folder name). Single-system architectures do NOT create a system file.
+   File name = kebab-case system name (same as the folder name). ALL architectures — including single-system — create a system descriptor file and a system folder for their containers.
 
    **Then create C4 L2 container files:**
 
    For each container identified in 4c, create a component file:
-   - **Single system**: `docs/components/NN-<component-name>.md`
-   - **Multi-system**: `docs/components/<system-name>/NN-<component-name>.md` (system folder = kebab-case)
+   - Path: `docs/components/<system-name>/NN-<component-name>.md` (always nested in system folder)
    - `NN` = two-digit zero-padded index (01, 02, 03, ...) — resets per system folder
    - Name = lowercase kebab-case (e.g., `01-payment-api.md`, `02-payment-db.md`)
-   - Add breadcrumb (adjust depth for system folders):
-     - Single: `[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>`
-     - Multi: `[Architecture](../../../ARCHITECTURE.md) > [Components](../README.md) > [System Name](.) > <Component Name>`
+   - Breadcrumb: `[Architecture](../../../ARCHITECTURE.md) > [Components](../README.md) > [System Name](.) > <Component Name>`
    - Add `# <Component Name>` heading
    - Add C4 metadata header:
      ```
@@ -646,8 +643,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    Create `docs/components/README.md` using the architecture-component-guardian format:
    - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
    - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
-   - **Multi-system**: Grouped tables with `### [<System Name>](<system-name>.md)` headers linked to system files (focus system first)
-   - **Single-system**: Single table (no system header)
+   - **All architectures**: Grouped tables with `### [<System Name>](<system-name>.md)` headers linked to system files (focus system first)
    - **5-column table**: `#`, `Component`, `File`, `Type`, `Technology`
 
    **4f. Verify Counts**

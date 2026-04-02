@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.5` in the list.
+You should see `solutions-architect-skills v3.2.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -274,13 +274,13 @@ Create and maintain technical architecture documentation following enterprise st
     ├── 08-scalability-and-performance.md
     ├── 09-operational-considerations.md
     └── components/
-        ├── README.md                (5-column index: #, Component, File, Type, Technology)
-        ├── NN-<name>.md             (single-system: components at root)
-        └── <system-name>/           (multi-system: C4 L1 folder per system)
+        ├── README.md                (5-column index grouped by system)
+        ├── <system-name>.md         (C4 L1 system descriptor)
+        └── <system-name>/           (C4 L1 folder per system)
             └── NN-<name>.md         (C4 L2 containers inside system folder)
 ```
 
-Each component file includes a **C4 metadata header**: Type, Technology `[in brackets]`, C4 Level, Deploys as, Communicates via. Multi-system architectures use **grouped tables** with `### System Name` headers in README.md.
+Each component file includes a **C4 metadata header**: Type, Technology `[in brackets]`, C4 Level, Deploys as, Communicates via. All architectures use **grouped tables** with `### System Name` headers in README.md.
 
 #### Peer Review (Quality Gate)
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.2.5 (Current Release) ✅
+### v3.2.6 (Current Release) ✅
+**feat: always nest C4 L2 containers in system folders — remove flat single-system exception**
+
+- All architectures now use nested folder structure: `docs/components/<system-name>/NN-component.md`
+- Removed single-system flat layout exception — system descriptor file and folder always created
+- README.md component index always uses grouped tables with `### System Name` headers
+- Updated across 5 files: workflow, guardian, C4 migration reference, restructuring guide, README
+
+### v3.2.5 (Previous Release) ✅
 **feat: ADR Context Block — pre-identify decisions from PO Spec and propagate through creation**
 
 - New Step 0.5 in Workflow 1: derives ADR candidate list from PO Spec analysis (Sections 1, 3, 4, 7) before architecture design begins
@@ -839,8 +847,8 @@ Where:
 
 - **C4 Model Integration**: Components follow C4 L2 (Container diagram) — boundary test, App/Store classification, IcePanel bracket convention for technology
 - **11 architecture reference docs** in `references/`: C4 model + 5 architecture rules + 5 C4 translation guides (Microservices, 3-Tier, N-Layer, META, BIAN)
-- **Multi-system components**: C4 L1 systems → folders under `docs/components/`, C4 L2 containers → component files. Single-system = flat (no folders)
-- **5-column component index**: `#`, `Component`, `File`, `Type`, `Technology` with grouped system headers for multi-system
+- **C4 component structure**: C4 L1 systems → folders under `docs/components/`, C4 L2 containers → component files nested in system folders (all architectures)
+- **5-column component index**: `#`, `Component`, `File`, `Type`, `Technology` with grouped system headers
 - **C4 metadata header** on all component templates: Type, Technology `[in brackets]`, C4 Level, Deploys as, Communicates via
 - **Architecture type selection reordered**: Industry Standard (1-3) first, Enterprise (4-5) after, with `STANDARD`/`ENTERPRISE`/`BANKING` tags
 - **Reference doc gate**: Types without both reference docs are greyed out and cannot be selected

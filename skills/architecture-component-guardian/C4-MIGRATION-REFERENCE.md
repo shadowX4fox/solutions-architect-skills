@@ -105,7 +105,7 @@ During migration, create a system descriptor file at `docs/components/` root for
 - File name = kebab-case system name (matches the folder name)
 - NOT indexed as rows in README.md — linked from `### [System Name](system-name.md)` headers
 - Contains a Containers table linking to all L2 files in the system folder
-- Single-system architectures do NOT create a system file
+- ALL architectures — including single-system — create a system descriptor file and a system folder for their containers
 
 ---
 

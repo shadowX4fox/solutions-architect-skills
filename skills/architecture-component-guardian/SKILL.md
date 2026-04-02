@@ -160,10 +160,9 @@ Line 12: | 5.1 | ... | ... | ... |
 
 **Multi-system grouped tables:**
 
-- **Multi-system architecture**: Use a `### [System Name](system-name.md)` header linked to the system descriptor file before each system's table. File column paths include system folder: `[01-name.md](system-name/01-name.md)`
-- **Single-system architecture**: Single table with no system header, no system descriptor file
+- **All architectures**: Use a `### [System Name](system-name.md)` header linked to the system descriptor file before each system's table. File column paths include system folder: `[01-name.md](system-name/01-name.md)`. This applies to both single-system and multi-system architectures — there is no flat layout exception.
 
-**C4 L1 System descriptor files** (multi-system only):
+**C4 L1 System descriptor files** (all architectures):
 
 - Located at `docs/components/` root: `{system-name}.md` (kebab-case, matches folder name)
 - NOT indexed as rows in the README table — they are linked from the `### System Name` section headers
@@ -183,7 +182,7 @@ Use brackets around the technology with version: `[Spring Boot 3.2]`, `[PostgreS
 |--------|--------|
 | `#` | Filename prefix `NN-` → formatted as `5.N` (e.g. `01` → `5.1`) |
 | `Component` | First `# Heading` in the component file |
-| `File` | `[NN-filename.md](NN-filename.md)` relative link; anchor fragment allowed for files grouping multiple components. For multi-system: `[NN-filename.md](system-name/NN-filename.md)` |
+| `File` | `[NN-filename.md](system-name/NN-filename.md)` relative link (always includes system folder path) |
 | `Type` | Value of `**Type:**` field in the component file; must be one of the C4 L2 canonical values above |
 | `Technology` | Value of `**Technology:**` field in the component file, formatted in IcePanel brackets |
 

@@ -32,8 +32,10 @@ All architecture documentation uses a multi-file structure from day one:
     ├── 09-operational-considerations.md      (Section 11: Operational Considerations)
     ├── 10-references.md                      (References)
     └── components/
-        ├── README.md                         (Component index — links to all component files)
-        └── NN-<component-name>.md            (One file per Section 5 component)
+        ├── README.md                         (Component index — grouped by system)
+        ├── <system-name>.md                  (C4 L1 system descriptor)
+        └── <system-name>/                    (C4 L2 containers nested in system folder)
+            └── NN-<component-name>.md        (One file per container)
 ```
 
 **All files should be under ~400 lines each.**
@@ -92,11 +94,16 @@ See [adr/README.md](adr/README.md) for ADR process · [References](docs/10-refer
 
 ## Breadcrumb Convention
 
-Add a breadcrumb at the top of every `docs/components/` file:
+Add a breadcrumb at the top of every component file:
 
-```markdown
-[Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <Component Name>
-```
+- **C4 L1 system descriptor** (`docs/components/<system-name>.md`):
+  ```markdown
+  [Architecture](../../ARCHITECTURE.md) > [Components](README.md) > <System Name>
+  ```
+- **C4 L2 container** (`docs/components/<system-name>/NN-component.md`):
+  ```markdown
+  [Architecture](../../../ARCHITECTURE.md) > [Components](../README.md) > [System Name](.) > <Component Name>
+  ```
 
 ---
 
