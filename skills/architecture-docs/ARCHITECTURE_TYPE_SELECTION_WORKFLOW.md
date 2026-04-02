@@ -433,6 +433,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      - Each principle MUST have three subsections: **Description**, **Implementation** (system-specific, not generic), **Trade-offs** (honest cost assessment)
      - Optional principle 10 (Decouple Through Events): include ONLY if async patterns are documented in the architecture
      - Populate Implementation and Trade-offs using: PO Spec Section 7 (Business Constraints), architecture type decisions, and technology choices from the architecture discussion
+     - **Document header**: Use `## Architecture Principles (9 Core Principles)` — or `(10 Core Principles)` if optional principle 10 is included
      - Do NOT invent custom principles, omit any of the 9, or reorder them
      - Validate against VALIDATIONS.md → "Section 3: Architecture Principles Validation" checklist before finalizing
    - `docs/03-architecture-layers.md` — Section 4 (Architecture Layers, type-specific template)

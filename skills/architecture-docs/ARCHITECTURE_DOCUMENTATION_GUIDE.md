@@ -612,12 +612,18 @@ All architecture documents must include these 9 core principles in this exact or
     - Loose coupling via domain events
     - Asynchronous communication patterns
 
+**Document Header Rule:**
+
+The section heading must reflect the actual principle count:
+- If only principles 1–9 are included: `## Architecture Principles (9 Core Principles)`
+- If optional principle 10 is also included: `## Architecture Principles (10 Core Principles)`
+
 **Template Structure:**
 
 Each principle must follow this three-part structure:
 
 ```markdown
-## Architecture Principles
+## Architecture Principles (9 Core Principles)
 
 ### 1. Separation of Concerns
 

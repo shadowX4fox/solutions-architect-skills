@@ -153,6 +153,7 @@ Principle Presence:
 
 Structure Validation:
 ☐ All principles in exact order (1-9, optional 10)
+☐ Section heading says "(9 Core Principles)" or "(10 Core Principles)" matching actual count
 ☐ Each principle has "Description" subsection
 ☐ Each principle has "Implementation" subsection
 ☐ Each principle has "Trade-offs" subsection

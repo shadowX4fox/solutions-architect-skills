@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.2` in the list.
+You should see `solutions-architect-skills v3.2.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.2.2 (Current Release) ✅
+### v3.2.3 (Current Release) ✅
+**fix: dynamic principle count in Section 3 header — 9 or 10 based on content**
+
+- Section 3 heading now reflects actual principle count: "(9 Core Principles)" or "(10 Core Principles)" when optional Decouple Through Events is included
+- Document Header Rule added to ARCHITECTURE_DOCUMENTATION_GUIDE.md template
+- Validation checklist updated to verify heading matches principle count
+- Creation workflow enforcement block includes header rule
+
+### v3.2.2 (Previous Release) ✅
 **fix: enforce Section 3 (Architecture Principles) 9-principle template across all paths**
 
 - Creation workflow (Workflow 1) now explicitly enforces the mandatory 9-principle template with exact order, three subsections (Description/Implementation/Trade-offs), and validation checklist reference
