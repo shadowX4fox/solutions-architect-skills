@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.6` in the list.
+You should see `solutions-architect-skills v3.2.7` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.2.6 (Current Release) ✅
+### v3.2.7 (Current Release) ✅
+**fix: delegate README.md creation to guardian skill during initial architecture creation**
+
+- Step 4e now invokes `architecture-component-guardian` with `sync` instead of creating README.md directly
+- Fixes 6 format inconsistencies: title ("Component Details"), em dash comment, 5.N numbering, intro paragraph, Key Relationships section, Related Documentation section
+- Fallback to manual creation using guardian format spec when skill is unavailable
+
+### v3.2.6 (Previous Release) ✅
 **feat: always nest C4 L2 containers in system folders — remove flat single-system exception**
 
 - All architectures now use nested folder structure: `docs/components/<system-name>/NN-component.md`

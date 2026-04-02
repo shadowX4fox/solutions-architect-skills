@@ -638,13 +638,23 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
    - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
 
-   **4e. Create README.md Component Index**
+   **4e. Create README.md Component Index — DELEGATE TO GUARDIAN**
 
-   Create `docs/components/README.md` using the architecture-component-guardian format:
-   - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->`
-   - Breadcrumb: `[Architecture](../../ARCHITECTURE.md) > Components`
-   - **All architectures**: Grouped tables with `### [<System Name>](<system-name>.md)` headers linked to system files (focus system first)
-   - **5-column table**: `#`, `Component`, `File`, `Type`, `Technology`
+   **Do NOT create `docs/components/README.md` directly.** Invoke the `architecture-component-guardian` skill to generate it. The guardian is the only sanctioned way to create or modify the component index — it enforces the canonical format specification.
+
+   Invoke: `/skill architecture-component-guardian` with action `sync`
+
+   The guardian will scan all component files created in Steps 4d and generate `docs/components/README.md` with the correct format:
+   - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian — do not edit manually -->` (em dash, not double hyphen)
+   - Title: `# Component Details` (fixed — not "Component Index" or project-specific)
+   - Intro paragraph: prose summary of the component structure
+   - Grouped tables with `### [<System Name>](<system-name>.md)` headers (all architectures)
+   - 5-column table: `#`, `Component`, `File`, `Type`, `Technology`
+   - Row numbering: `5.1`, `5.2`, `5.3` format (not sequential 1, 2, 3)
+   - `## Key Relationships` section
+   - `## Related Documentation` section
+
+   **If the guardian skill is not available** (e.g., plugin not installed), fall back to creating README.md manually following the exact format specification in `skills/architecture-component-guardian/SKILL.md` → "Format Specification".
 
    **4f. Verify Counts**
 
