@@ -228,12 +228,92 @@ Offer to rename the file automatically.
 | Argument | Action |
 |----------|--------|
 | `sync` | Rebuild table from current files, no other change |
-| `add component <description>` | Create the new component file using **lowercase kebab-case** naming (`NN-kebab-case-name.md`), then sync |
+| `add component <description>` | Resolve target system folder, create the new component file, then sync (see Step 3a below) |
 | `remove component <name>` | Confirm deletion of component file, then sync |
 | `update component <name>` | Edit the relevant component file fields, then sync |
 | `migrate` | Run the full C4 multi-system migration workflow (Phases M1–M8). Converts flat `docs/components/` to system-subfolder structure with canonical C4 metadata and updates all cross-references. See "Migrate Workflow" section below. |
 
 **When creating a new component file** (`add`): always convert the component name to lowercase kebab-case for the filename. Examples: "Payment Service" → `NN-payment-service.md`, "CRM Domain Service" → `NN-crm-domain-service.md`, "Redis Cache" → `NN-redis-cache.md`. The display name in the `# Heading` inside the file keeps its natural casing (e.g., `# Payment Service`).
+
+#### Step 3a — Resolve target system folder (`add` only)
+
+Before creating the component file, determine which system folder it belongs to.
+
+**3a.1 Detect existing system folders**: Scan `docs/components/` for subdirectories containing `.md` files. List all system folders found along with their L1 descriptor files.
+
+**3a.2 System selection prompt** (when system folders exist):
+
+```
+📂 Existing systems in docs/components/:
+  1. notification-inbox-platform (Internal) — 8 containers
+  2. campaign-management-system (External) — 1 container
+
+Add "<component-name>" to which system?
+  [1] notification-inbox-platform
+  [2] campaign-management-system
+  [N] Create new system
+```
+
+Wait for user selection.
+
+- **Existing system selected**: Place the new file in that system's subfolder with the next sequential `NN-` number. Skip to Step 3a.5.
+- **Create new system selected**: Proceed to Step 3a.3.
+
+**3a.3 New system — classify and create L1+L2 structure**:
+
+When the user wants to add a component under a new system (or the component description implies a system that does not yet have a folder), prompt:
+
+```
+🆕 New system: "<system-name>"
+
+System type?
+  [1] Internal System — owned and developed by your team
+  [2] External System — third-party, SaaS, or owned by another team
+
+Create Level 1 (system descriptor) + Level 2 (container folder) structure? [Yes/No]
+```
+
+- **If Yes**: Proceed to create the full L1+L2 structure (Step 3a.4)
+- **If No**: Create the component file in the most appropriate existing system folder, or abort if the user declines
+
+**3a.4 Create L1+L2 folder structure**:
+
+1. **Create system subfolder**: `docs/components/<system-name>/` (kebab-case)
+2. **Create L1 system descriptor**: `docs/components/<system-name>.md` with:
+   ```markdown
+   # <System Display Name>
+
+   **C4 Level:** System (L1)
+   **Type:** <Internal System | External System>
+   **Owner:** <ask user or infer from context>
+
+   ## Overview
+   <brief system description — infer from architecture docs or ask user>
+
+   ## Containers
+
+   | # | Container | File | Type | Technology |
+   |---|-----------|------|------|------------|
+   | 1 | <component-name> | [01-<component>.md](<system-name>/01-<component>.md) | <type> | <technology> |
+
+   ## System Boundaries
+   <what is inside this system boundary>
+
+   ## Communication Patterns
+   <how this system communicates with others — protocols, events, APIs>
+   ```
+3. **Create L2 container file**: `docs/components/<system-name>/01-<component-name>.md` with the standard C4 L2 metadata fields
+
+**3a.5 Confirm placement**: Before writing files, display:
+
+```
+✅ Component placement:
+  System: <system-name> (<Internal|External>)
+  File: docs/components/<system-name>/NN-<component-name>.md
+  L1 descriptor: docs/components/<system-name>.md [new | existing]
+```
+
+Proceed to Step 4 (regenerate README.md).
 
 ### Step 4 — Regenerate `docs/components/README.md`
 
@@ -539,6 +619,7 @@ CHANGE PROPAGATION — DOWNSTREAM IMPACT REPORT
 ═══════════════════════════════════════════════════════════
 
 Component: <component-name> (<operation>: add | remove | update)
+System: <system-name> (<Internal|External>) [new system created | existing]
 
 Sections updated:
 → docs/04-data-flow-patterns.md (S6) — [summary of change]
@@ -576,11 +657,12 @@ Sections with no applicable content for this component:
 
 ### Flow C — Ongoing maintenance
 1. Developer adds/changes/removes a `docs/components/NN-*.md` file
-2. Invoke this skill — README is regenerated with the change reflected
-3. 5-column format is enforced on every write
-4. Architecture documentation sections (S6–S11) are updated with component references
-5. `ARCHITECTURE.md` navigation index is updated (add/remove only)
-6. Architecture diagrams are regenerated automatically; failures are tracked with a comment marker
+2. Invoke this skill — system folder selection prompt presented (Step 3a)
+3. For new systems or external systems, user is asked whether to create L1+L2 folder structure
+4. README is regenerated with the change reflected; 5-column format enforced
+5. Architecture documentation sections (S6–S11) are updated with component references
+6. `ARCHITECTURE.md` navigation index is updated (add/remove only)
+7. Architecture diagrams are regenerated automatically; failures are tracked with a comment marker
 
 ### Flow D — Rejected direct edit
 1. User or Claude tries to edit `docs/components/README.md` directly

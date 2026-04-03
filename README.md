@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -728,7 +728,16 @@ Where:
 
 ## Roadmap
 
-### v3.2.8 (Current Release) ✅
+### v3.2.9 (Current Release) ✅
+**feat: system-folder-aware component add with L1+L2 structure creation for external systems**
+
+- Step 3a added: detects existing system folders and prompts user to select target system
+- New system creation workflow: asks Internal/External classification and creates L1 descriptor + L2 container folder
+- External system "explode" support: promotes external system references into full C4 L1+L2 hierarchy
+- Change Propagation Report now shows system context (new vs existing, Internal/External)
+- Flow C updated to reflect system selection and L1+L2 creation steps
+
+### v3.2.8 (Previous Release) ✅
 **fix: mandatory diagram cascade on component add/remove — replace optional prompt with `/skill architecture-docs` delegation**
 
 - Step 6e now mandatory: diagrams are regenerated automatically after add/remove operations (no Yes/No prompt)
@@ -738,7 +747,7 @@ Where:
 - M8.3 (C4 migration) updated with same mandatory pattern
 - Step 6f Change Propagation Report now includes diagram update status row
 
-### v3.2.7 (Previous Release) ✅
+### v3.2.7 ✅
 **fix: delegate README.md creation to guardian skill during initial architecture creation**
 
 - Step 4e now invokes `architecture-component-guardian` with `sync` instead of creating README.md directly
