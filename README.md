@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -728,14 +728,24 @@ Where:
 
 ## Roadmap
 
-### v3.2.7 (Current Release) ✅
+### v3.2.8 (Current Release) ✅
+**fix: mandatory diagram cascade on component add/remove — replace optional prompt with `/skill architecture-docs` delegation**
+
+- Step 6e now mandatory: diagrams are regenerated automatically after add/remove operations (no Yes/No prompt)
+- Explicit `/skill architecture-docs` invocation with structured context block (component name, type, system, connections)
+- Post-generation verification: grep diagrams for component name to confirm it appears in C4 L2 and Detailed View
+- Fallback path if generation fails: PENDING marker + manual instructions (does not block component operation)
+- M8.3 (C4 migration) updated with same mandatory pattern
+- Step 6f Change Propagation Report now includes diagram update status row
+
+### v3.2.7 (Previous Release) ✅
 **fix: delegate README.md creation to guardian skill during initial architecture creation**
 
 - Step 4e now invokes `architecture-component-guardian` with `sync` instead of creating README.md directly
 - Fixes 6 format inconsistencies: title ("Component Details"), em dash comment, 5.N numbering, intro paragraph, Key Relationships section, Related Documentation section
 - Fallback to manual creation using guardian format spec when skill is unavailable
 
-### v3.2.6 (Previous Release) ✅
+### v3.2.6 ✅
 **feat: always nest C4 L2 containers in system folders — remove flat single-system exception**
 
 - All architectures now use nested folder structure: `docs/components/<system-name>/NN-component.md`

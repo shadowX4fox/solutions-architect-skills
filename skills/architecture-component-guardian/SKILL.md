@@ -399,12 +399,19 @@ Update Section 5 description to reflect system count:
 
 **M8.2 Link validation**: Every file in system folders has a README row; every README row has a file.
 
-**M8.3 Diagram update prompt**:
+**M8.3 Mandatory diagram regeneration**:
+
+C4 migration changes the system's container topology. Invoke `/skill architecture-docs` and pass context:
+
 ```
-⚠️ Component migration detected — diagrams may be out of date.
-Update now? [Yes/No]
+Trigger reason: "C4 migration — full diagram regeneration required"
+Operation: migrate
+Request: Update architecture diagrams
 ```
-If No → add `<!-- DIAGRAM UPDATE PENDING: C4 migration (YYYY-MM-DD) -->` to `docs/03-architecture-layers.md`.
+
+The architecture-docs skill detects this as a Workflow 8 trigger and regenerates all 4 standard diagrams plus data flow sequence diagrams from the updated source files.
+
+**Fallback**: If diagram generation fails, log `<!-- DIAGRAM UPDATE PENDING: C4 migration (YYYY-MM-DD) -->` at the top of `docs/03-architecture-layers.md` and report failure in M8.4.
 
 **M8.4 Final report**:
 ```
@@ -486,22 +493,39 @@ Applies to `add` and `remove` only (skip for `update`):
 
 ---
 
-#### Step 6e — Prompt for diagram update
+#### Step 6e — Mandatory diagram regeneration
 
-Component changes affect the High-Level Architecture diagram and potentially Data Flow diagrams. Present:
+Component add/remove operations change the system's container topology. Diagrams **MUST** be regenerated to reflect the current state. This step is not optional.
+
+**Applies to**: `add` and `remove` operations. **Skip for `update`** unless the update changed the component's **Name**, **Type**, or communication/integration fields (topology-affecting changes).
+
+**Action**: Invoke `/skill architecture-docs` and pass context:
 
 ```
-⚠️  Component change detected — architecture diagrams may be out of date.
-
-Affected diagrams:
-- High-Level Architecture → docs/03-architecture-layers.md  [REQUIRED diagram]
-- Data Flow Diagrams → docs/04-data-flow-patterns.md  [REQUIRED diagram]
-
-Update architecture diagrams now? [Yes/No]
+Trigger reason: "Component <operation> — diagram regeneration required"
+Component name: <component display name>
+Component type: <C4 L2 type>
+Component system: <system name from system subfolder>
+Operation: add | remove
+Affected connections: <list of components/external systems this component communicates with, from the component file's integration/communication fields>
+Files already updated in this workflow: <list of docs/ files modified in Steps 6c-6d>
+Request: Update architecture diagrams
 ```
 
-- If **Yes**: invoke the `architecture-docs` skill with diagram update intent — Workflow 8 runs in update mode (existing diagrams are replaced, Step 5a detects and inventories them, all source-traceability and canonical-location rules apply)
-- If **No**: log a `<!-- DIAGRAM UPDATE PENDING: <component-name> <operation> (YYYY-MM-DD) -->` comment at the top of `docs/03-architecture-layers.md` so the outstanding update is traceable
+The architecture-docs skill detects this as a Workflow 8 (Diagram Generation) trigger. It reads all source files (`docs/03-architecture-layers.md`, `docs/04-data-flow-patterns.md`, `docs/components/README.md`, `docs/components/**/*.md`, `docs/05-integration-points.md`) and regenerates:
+
+1. **All 4 standard diagrams** in `docs/03-architecture-layers.md` (Logical View ASCII, C4 L1 Context, C4 L2 Container, Detailed View) — the new/removed component must appear/disappear in Diagrams 1, 3, and 4
+2. **Data Flow sequence diagrams** in `docs/04-data-flow-patterns.md` — any flow involving the component must be added/updated/removed
+
+**Verification after diagram generation**:
+- For `add`: Grep `docs/03-architecture-layers.md` for the component name — it MUST appear in at least Diagram 3 (C4 L2 Container) and Diagram 4 (Detailed View)
+- For `remove`: Grep `docs/03-architecture-layers.md` for the component name — it MUST NOT appear in any diagram
+- If verification fails, report the discrepancy and retry diagram generation once
+
+**Fallback**: If diagram generation fails (skill unavailable, generation error, or context limit exceeded), do NOT block the component operation. Instead:
+1. Log `<!-- DIAGRAM UPDATE PENDING: <component-name> <operation> (YYYY-MM-DD) -->` at the top of `docs/03-architecture-layers.md`
+2. Report the failure in the Step 6f Change Propagation Report under the `Diagram update` row
+3. Display: `⚠️ Diagram regeneration failed — component <operation> completed successfully but diagrams are stale. Run '/skill architecture-docs' with 'update diagrams' to regenerate manually.`
 
 ---
 
@@ -523,6 +547,10 @@ Sections updated:
 → docs/07-security-architecture.md (S9) — [summary of change]
 → docs/08-scalability-and-performance.md (S10) — [summary of change]
 → docs/09-operational-considerations.md (S11) — [summary of change]
+
+Diagram update:
+→ docs/03-architecture-layers.md — [4 diagrams regenerated | FAILED — see fallback]
+→ docs/04-data-flow-patterns.md — [N sequence diagrams regenerated | no flows affected]
 
 Sections with no applicable content for this component:
 ℹ️  [list sections where no update was needed, with reason]
@@ -552,7 +580,7 @@ Sections with no applicable content for this component:
 3. 5-column format is enforced on every write
 4. Architecture documentation sections (S6–S11) are updated with component references
 5. `ARCHITECTURE.md` navigation index is updated (add/remove only)
-6. Diagram update prompt is presented; pending updates are tracked with a comment marker
+6. Architecture diagrams are regenerated automatically; failures are tracked with a comment marker
 
 ### Flow D — Rejected direct edit
 1. User or Claude tries to edit `docs/components/README.md` directly
