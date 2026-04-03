@@ -369,6 +369,55 @@ graph TB
 | Data stores | `#417505` dark green | `datastore` |
 | External systems | `#999999` gray | `external` |
 
+#### Dark Theme Palettes (all architecture types)
+
+When `<!-- DIAGRAM_THEME: dark -->` is active, replace the light-mode `classDef` declarations with these dark-mode variants. The classDef **names** remain identical — only the color values change. Dark fills are ~15-20% lighter than light-mode counterparts. Strokes are lighter than fills to remain visible against dark backgrounds. Text color flips to `#000` on lighter fills for WCAG AA contrast.
+
+**META / BIAN dark classDef**:
+
+| Group Role | Dark Fill | Dark Stroke | Text | classDef name |
+|-----------|-----------|-------------|------|--------------|
+| Channel (L1) | `#5BA0F2` | `#7DB8FF` | `#fff` | `channel` |
+| User Experience (L2) | `#B0B0B0` | `#D0D0D0` | `#000` | `ux` |
+| Business Scenarios (L3) | `#FFB83D` | `#FFCE6D` | `#000` | `scenario` |
+| Business (L4) | `#8FE432` | `#A8F060` | `#000` | `business` |
+| Domain (L5) | `#60F3D2` | `#80FFE6` | `#000` | `domain` |
+| Core (L6) | `#F03050` | `#FF6080` | `#fff` | `core` |
+| Messaging | `#D040F0` | `#E070FF` | `#fff` | `messaging` |
+| Data stores | `#5CAE20` | `#78D040` | `#000` | `datastore` |
+
+**3-TIER dark classDef**:
+
+| Group Role | Dark Fill | Dark Stroke | Text | classDef name |
+|-----------|-----------|-------------|------|--------------|
+| Presentation (Tier 1) | `#5BA0F2` | `#7DB8FF` | `#fff` | `presentation` |
+| Logic (Tier 2) | `#FFB83D` | `#FFCE6D` | `#000` | `logic` |
+| Data (Tier 3) | `#5CAE20` | `#78D040` | `#000` | `data` |
+| Messaging | `#D040F0` | `#E070FF` | `#fff` | `messaging` |
+| Data stores | `#5CAE20` | `#78D040` | `#000` | `datastore` |
+
+**N-LAYER dark classDef**:
+
+| Group Role | Dark Fill | Dark Stroke | Text | classDef name |
+|-----------|-----------|-------------|------|--------------|
+| UI / Presentation | `#5BA0F2` | `#7DB8FF` | `#fff` | `ui` |
+| Application / Service | `#FFB83D` | `#FFCE6D` | `#000` | `application` |
+| Domain / Business | `#8FE432` | `#A8F060` | `#000` | `domain` |
+| Infrastructure | `#B0B0B0` | `#D0D0D0` | `#000` | `infrastructure` |
+| Messaging | `#D040F0` | `#E070FF` | `#fff` | `messaging` |
+| Data stores | `#5CAE20` | `#78D040` | `#000` | `datastore` |
+
+**MICROSERVICES dark classDef**:
+
+| Group Role | Dark Fill | Dark Stroke | Text | classDef name |
+|-----------|-----------|-------------|------|--------------|
+| API Gateway | `#B0B0B0` | `#D0D0D0` | `#000` | `gateway` |
+| Application Services | `#5A9DE5` | `#7DB8FF` | `#fff` | `service` |
+| Workers / Consumers | `#FFB83D` | `#FFCE6D` | `#000` | `worker` |
+| Messaging | `#D040F0` | `#E070FF` | `#fff` | `messaging` |
+| Data stores | `#5CAE20` | `#78D040` | `#000` | `datastore` |
+| External systems | `#AAAAAA` | `#CCCCCC` | `#000` | `external` |
+
 ### Data Sources
 
 | Element | Source File |
@@ -575,6 +624,62 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 
 ---
 
+## Theme Preference Detection
+
+Mermaid diagrams render differently on light vs. dark backgrounds. Before generating diagrams, detect the user's preferred theme to apply appropriate colors.
+
+### Detection Step
+
+**When**: Run once per session, before generating any diagrams. Reuse the result for all diagrams in the same session.
+
+**How**: Check `docs/03-architecture-layers.md` for `<!-- DIAGRAM_THEME: light|dark -->`. If present, use that value. If absent, ask the user:
+
+```
+Do you use a light or dark theme in your editor/viewer? (Default: light)
+```
+
+Store the answer as `<!-- DIAGRAM_THEME: light -->` or `<!-- DIAGRAM_THEME: dark -->` in `docs/03-architecture-layers.md`, immediately after the `<!-- ARCHITECTURE_TYPE: ... -->` comment.
+
+### Theme Application by Diagram Type
+
+| Diagram | Light Theme | Dark Theme |
+|---------|------------|------------|
+| Diagram 1 (ASCII Logical View) | No change needed | No change needed — plain text works on both |
+| Diagram 2 (C4 L1 System Context) | No init block (Mermaid default) | Add `%%{init: {'theme': 'dark'}}%%` as first line |
+| Diagram 3 (C4 L2 Container) | No init block (Mermaid default) | Add `%%{init: {'theme': 'dark'}}%%` as first line |
+| Diagram 4 (Detailed View) | Light classDef palette | Dark classDef palette (see "Dark Theme Palettes" above) |
+| Sequence Diagrams | No init block (Mermaid default) | Add `%%{init: {'theme': 'dark'}}%%` as first line |
+
+### Dark Theme Init Block
+
+When dark theme is active, prepend this directive as the **very first line** inside the Mermaid code fence, before `C4Context`, `C4Container`, or `sequenceDiagram`:
+
+```
+%%{init: {'theme': 'dark'}}%%
+```
+
+**Example — C4 L1 (dark)**:
+````
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+C4Context
+    title System Context Diagram — [System Name]
+    ...
+```
+````
+
+**Example — Sequence diagram (dark)**:
+````
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    participant A as Component A
+    ...
+```
+````
+
+---
+
 ## Generation Workflow
 
 When generating or updating diagrams:
@@ -584,7 +689,8 @@ When generating or updating diagrams:
 3. **Read** `docs/05-integration-points.md` for protocols and topic/queue names
 4. **Read** `docs/04-data-flow-patterns.md` for flow wiring between components
 5. **Detect** architecture type from `<!-- ARCHITECTURE_TYPE: ... -->` comment in `docs/03-architecture-layers.md`
-6. **Select** grouping strategy, naming pattern, and color conventions from the Architecture Type Adaptation table and Diagram 4 color conventions
+5.5. **Detect** theme preference from `<!-- DIAGRAM_THEME: ... -->` comment in `docs/03-architecture-layers.md` — if absent, ask user and persist (see "Theme Preference Detection" section above)
+6. **Select** grouping strategy, naming pattern, and color conventions from the Architecture Type Adaptation table and Diagram 4 color conventions — use light or dark palette per detected theme
 7. **Generate** all 4 topology diagrams in order (ASCII logical → C4 L1 → C4 L2 → Detailed)
 8. **Place** all 4 topology diagrams under `## Architecture Diagrams` in `docs/03-architecture-layers.md`
 9. **Include** a `**Reading the diagram:**` section after the ASCII logical view with bullet points explaining the arrow conventions

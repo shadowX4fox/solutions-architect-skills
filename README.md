@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.2.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -728,7 +728,16 @@ Where:
 
 ## Roadmap
 
-### v3.2.9 (Current Release) ✅
+### v3.2.10 (Current Release) ✅
+**feat: theme-aware diagram generation — light/dark mode support for all Mermaid diagrams**
+
+- Theme detection: asks user light/dark once, persists as `<!-- DIAGRAM_THEME: light|dark -->` in `docs/03-architecture-layers.md`
+- Dark mode C4/sequence diagrams: `%%{init: {'theme': 'dark'}}%%` init block prepended automatically
+- Dark classDef palettes for all 4 architecture types (META/BIAN, 3-Tier, N-Layer, Microservices) with WCAG AA contrast
+- Generation Workflow step 5.5 added for theme detection before diagram generation
+- Updated across 4 files: DIAGRAM-GENERATION-GUIDE, MERMAID_DIAGRAMS_GUIDE, SKILL.md, ARCHITECTURE_TYPE_SELECTION_WORKFLOW
+
+### v3.2.9 (Previous Release) ✅
 **feat: system-folder-aware component add with L1+L2 structure creation for external systems**
 
 - Step 3a added: detects existing system folders and prompts user to select target system
@@ -737,7 +746,7 @@ Where:
 - Change Propagation Report now shows system context (new vs existing, Internal/External)
 - Flow C updated to reflect system selection and L1+L2 creation steps
 
-### v3.2.8 (Previous Release) ✅
+### v3.2.8 ✅
 **fix: mandatory diagram cascade on component add/remove — replace optional prompt with `/skill architecture-docs` delegation**
 
 - Step 6e now mandatory: diagrams are regenerated automatically after add/remove operations (no Yes/No prompt)

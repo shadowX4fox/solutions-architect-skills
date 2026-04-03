@@ -431,6 +431,26 @@ class APIGateway,BFF gateway
 - Assign multiple components to same class with comma separation
 - Use consistent naming for classDef IDs
 
+### Dark Theme Color Scheme
+
+When generating diagrams for dark-background environments, use these `classDef` declarations instead. The class **names** are identical to the light scheme — only hex values differ.
+
+**Detect**: Read `<!-- DIAGRAM_THEME: dark -->` from `docs/03-architecture-layers.md`. See `references/DIAGRAM-GENERATION-GUIDE.md` → "Theme Preference Detection" for the full detection workflow.
+
+**Dark classDef declarations**:
+```mermaid
+classDef orchestrator fill:#5BA0F2,stroke:#7DB8FF,stroke-width:2px,color:#fff
+classDef worker fill:#FFB83D,stroke:#FFCE6D,stroke-width:2px,color:#000
+classDef query fill:#8FE432,stroke:#A8F060,stroke-width:2px,color:#000
+classDef events fill:#D040F0,stroke:#E070FF,stroke-width:2px,color:#fff
+classDef domain fill:#60F3D2,stroke:#80FFE6,stroke-width:2px,color:#000
+classDef gateway fill:#B0B0B0,stroke:#D0D0D0,stroke-width:2px,color:#000
+```
+
+**Design rationale**: Dark-mode fills are ~15-20% lighter than their light-mode counterparts. Strokes are lighter than fills to remain visible against dark backgrounds (`#1e1e1e` to `#2d2d2d`). Text color flips to black (`#000`) on lighter fills for WCAG AA contrast compliance.
+
+**C4 and Sequence diagrams**: For dark theme, prepend `%%{init: {'theme': 'dark'}}%%` as the first line inside the Mermaid code fence (before `C4Context`, `C4Container`, or `sequenceDiagram`). No `classDef` needed — Mermaid applies dark theme natively.
+
 ---
 
 ## 7. Legend Template

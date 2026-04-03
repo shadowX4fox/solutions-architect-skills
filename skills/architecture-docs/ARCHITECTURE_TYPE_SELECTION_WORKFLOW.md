@@ -735,7 +735,8 @@ This skill will create adr/ADR-XXX-title.md files from the table entries.
 4. Read `docs/components/README.md` for the component index
 5. Read `docs/05-integration-points.md` for protocols and topic/queue names
 6. Determine architecture type from the `<!-- ARCHITECTURE_TYPE: ... -->` comment inserted in Step 4 (already known in context)
-7. Select grouping strategy, naming pattern, and color conventions from DIAGRAM-GENERATION-GUIDE's Architecture Type Adaptation table
+6.5. Detect theme preference from `<!-- DIAGRAM_THEME: ... -->` in `docs/03-architecture-layers.md` — if absent (expected for new docs), ask: "Do you use a **light** or **dark** theme in your editor/viewer? (Default: light)". Persist the answer as `<!-- DIAGRAM_THEME: light|dark -->` immediately after the `<!-- ARCHITECTURE_TYPE: ... -->` comment.
+7. Select grouping strategy, naming pattern, and color conventions from DIAGRAM-GENERATION-GUIDE's Architecture Type Adaptation table — use light or dark palette per detected theme
 
 **Generate all 4 standard diagrams** (in order, under `## Architecture Diagrams` in `docs/03-architecture-layers.md`):
 
