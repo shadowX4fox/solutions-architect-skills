@@ -404,6 +404,37 @@ The skill has two export modes:
 
 ---
 
+### Using the Architecture IcePanel Sync Skill (Beta)
+
+The `architecture-icepanel-sync` skill (beta) syncs architecture documentation to IcePanel for live C4 model visualization. It extracts C4 elements (systems, containers, connections) from Mermaid diagrams and component metadata, generates an IcePanel-compatible import YAML, and optionally pushes via the IcePanel REST API.
+
+To manually activate the skill, use: `/skill architecture-icepanel-sync`
+
+The skill has two modes:
+
+| Mode | Requirement | Behavior |
+|------|-------------|----------|
+| **Online** | `ICEPANEL_API_KEY` + `ICEPANEL_LANDSCAPE_ID` set in env or `.env` | Checks existing objects, imports new, reports drift |
+| **Offline** | No credentials needed | Generates import YAML for manual upload via IcePanel UI |
+
+**Output location**: `icepanel-sync/` at project root.
+- `c4-model.yaml` — IcePanel import file (LandscapeImportData schema)
+- `sync-report.md` — validation results, model summary, sync status
+
+**When to use**: After architecture documentation is complete (Phase 2+), when you want to visualize the C4 model in IcePanel, or to check if IcePanel is in sync with documentation.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Write(icepanel-sync/*)",
+"Read(icepanel-sync/*)",
+"Bash(curl *)"
+```
+
+**Note**: Import adds model objects and connections to IcePanel. Diagrams (layout views) are NOT auto-created — create C4 L1 and L2 diagram views manually in IcePanel after import.
+
+---
+
 ### Optional MCP Integration: context7
 
 The `architecture-dev-handoff` and `architecture-docs` skills optionally use the context7 MCP tool when available. context7 provides two functions:

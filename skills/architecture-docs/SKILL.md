@@ -233,8 +233,23 @@ Runs immediately after the Post-Write Alignment Audit passes. Detects downstream
 | S9 (Security) | `docs/07-security-architecture.md` | *(leaf)* |
 | S10 (Scalability) | `docs/08-scalability-and-performance.md` | S11 (`docs/09-operational-considerations.md`) |
 | S11 (Operations) | `docs/09-operational-considerations.md` | *(leaf)* |
+| S12 (ADRs) | `ARCHITECTURE.md` (navigation table) | `adr/` directory → delegate to `/skill architecture-definition-record` |
 
 **Cross-cutting** (always scanned regardless of table): `docs/components/`, `docs/handoffs/`
+
+#### S12 ADR Table Propagation (Special Rule)
+
+When the edited file is `ARCHITECTURE.md` **and** the edit added or modified rows in the Section 12 ADR table:
+
+1. **Detect new ADR rows**: Compare the ADR table before and after the edit. Extract any new rows matching `| [ADR-NNN](...) | ... |`
+2. **Check for existing files**: For each new ADR row, check if `adr/ADR-NNN-slug.md` already exists
+3. **Delegate creation**: For ADR rows where the file does NOT exist, invoke `/skill architecture-definition-record` with context:
+   - Trigger reason: "Section 12 ADR table updated — generate ADR files for new entries"
+   - Pass the ADR metadata (number, title, status, date, impact) from the table row
+   - The architecture-definition-record skill runs Workflow 1 Steps 1.3–1.5 (extract → load template → generate)
+4. **Skip if file exists**: If the ADR file already exists, do not overwrite — report: `adr/ADR-NNN-slug.md already exists — skipped`
+
+This rule runs **instead of** the standard Phase 1–3 propagation for S12 changes. ADR table changes do not trigger downstream section updates — they only trigger ADR file creation.
 
 #### Phase 1: Impact Discovery
 

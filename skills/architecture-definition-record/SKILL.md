@@ -77,7 +77,7 @@ This applies to Workflows 1, 2, and 4. There are no exceptions.
 
 ### Workflow 1 — Generate ADRs from ARCHITECTURE.md Section 12 Table
 
-**Trigger**: Called by `architecture-docs` after ARCHITECTURE.md creation, or by user explicitly.
+**Trigger**: Called by `architecture-docs` after ARCHITECTURE.md creation, after Section 12 ADR table updates, or by user explicitly.
 
 **Objective**: Extract the ADR table from ARCHITECTURE.md and generate `adr/ADR-XXX-title.md` files.
 

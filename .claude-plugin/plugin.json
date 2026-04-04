@@ -1,7 +1,7 @@
 {
   "name": "solutions-architect-skills",
-  "version": "3.2.10",
-  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export (9 skills, 10 compliance agents, per-component asset generation)",
+  "version": "3.3.0",
+  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (10 skills, 10 compliance agents, per-component asset generation)",
   "author": {
     "name": "shadowX4fox",
     "email": "your-email@example.com",
@@ -23,6 +23,8 @@
     "technical-writing",
     "docx",
     "export",
-    "word"
+    "word",
+    "icepanel",
+    "c4-model"
   ]
 }

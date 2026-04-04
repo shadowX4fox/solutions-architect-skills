@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.2.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -728,7 +728,18 @@ Where:
 
 ## Roadmap
 
-### v3.2.10 (Current Release) ✅
+### v3.3.0 (Current Release) ✅
+**feat: IcePanel C4 model sync skill (beta) + Section 12 ADR propagation fix**
+
+- New `architecture-icepanel-sync` skill (beta): extracts C4 elements from architecture docs, generates IcePanel-compatible import YAML, checks IcePanel API for existing objects, and imports or reports drift
+- Three workflows: Full Sync (online/offline), Drift Report Only, YAML Export Only
+- Online mode uses IcePanel REST API (`ICEPANEL_API_KEY` + `ICEPANEL_LANDSCAPE_ID`) for check/import/drift detection
+- Offline mode generates `icepanel-sync/c4-model.yaml` for manual import via IcePanel UI
+- Includes `ICEPANEL_IMPORT_REFERENCE.md` with LandscapeImportData schema, type mapping, and tag conventions
+- Fix: Section 12 ADR table updates now trigger ADR file creation via `/skill architecture-definition-record` delegation
+- Added S12 to Reverse Dependency Table in architecture-docs skill
+
+### v3.2.10 (Previous Release) ✅
 **feat: theme-aware diagram generation — light/dark mode support for all Mermaid diagrams**
 
 - Theme detection: asks user light/dark once, persists as `<!-- DIAGRAM_THEME: light|dark -->` in `docs/03-architecture-layers.md`
