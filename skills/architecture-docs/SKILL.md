@@ -226,16 +226,29 @@ Runs immediately after the Post-Write Alignment Audit passes. Detects downstream
 | S1+S2 (System Overview) | `docs/01-system-overview.md` | ALL sections (S4–S11) + `docs/components/*` |
 | S3 (Principles) | `docs/02-architecture-principles.md` | ALL sections (S4–S11) + `docs/components/*` |
 | S4 (Layers) | `docs/03-architecture-layers.md` | S5 (`docs/components/*`), S8 (`docs/06-technology-stack.md`) |
-| S5 (Components) | `docs/components/*.md` | S6 (`docs/04-data-flow-patterns.md`), S7 (`docs/05-integration-points.md`), S8 (`docs/06-technology-stack.md`), S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`) |
+| S5 (Components) | `docs/components/*.md` | S6 (`docs/04-data-flow-patterns.md`), S7 (`docs/05-integration-points.md`), S8 (`docs/06-technology-stack.md`), S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`), Refs (`docs/10-references.md`) |
 | S6 (Data Flow) | `docs/04-data-flow-patterns.md` | *(leaf — no downstream sections)* |
 | S7 (Integration) | `docs/05-integration-points.md` | S9 (`docs/07-security-architecture.md`) |
-| S8 (Tech Stack) | `docs/06-technology-stack.md` | S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`) |
+| S8 (Tech Stack) | `docs/06-technology-stack.md` | S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`), Refs (`docs/10-references.md`) |
 | S9 (Security) | `docs/07-security-architecture.md` | *(leaf)* |
 | S10 (Scalability) | `docs/08-scalability-and-performance.md` | S11 (`docs/09-operational-considerations.md`) |
 | S11 (Operations) | `docs/09-operational-considerations.md` | *(leaf)* |
-| S12 (ADRs) | `ARCHITECTURE.md` (navigation table) | `adr/` directory → delegate to `/skill architecture-definition-record` |
+| S12 (ADRs) | `ARCHITECTURE.md` (navigation table) | `adr/` directory → delegate to `/skill architecture-definition-record`, Refs (`docs/10-references.md`) |
 
-**Cross-cutting** (always scanned regardless of table): `docs/components/`, `docs/handoffs/`
+**Cross-cutting** (always scanned regardless of table): `docs/components/`, `docs/handoffs/`, `docs/10-references.md`
+
+##### References file (`docs/10-references.md`) propagation
+
+`docs/10-references.md` is a cross-cutting file that aggregates links from multiple sections. It MUST be included in the downstream scan when **any** of these change:
+
+| Change Type | What to update in `10-references.md` |
+|---|---|
+| ADR added, removed, renamed, or status changed (`adr/*.md`) | ADR index table — add/remove/rename row, update status |
+| New technology in S5 components or S8 tech stack | Technology documentation links — add official doc URL |
+| Technology removed or replaced | Technology documentation links — remove or replace entry |
+| New glossary-worthy term introduced in any section | Glossary — add definition |
+
+When `10-references.md` is flagged for update during Phase 2 (Generate Checklist), present specific sub-items showing which table(s) need updating (ADR index, technology links, glossary).
 
 #### S12 ADR Table Propagation (Special Rule)
 
@@ -249,7 +262,12 @@ When the edited file is `ARCHITECTURE.md` **and** the edit added or modified row
    - The architecture-definition-record skill runs Workflow 1 Steps 1.3–1.5 (extract → load template → generate)
 4. **Skip if file exists**: If the ADR file already exists, do not overwrite — report: `adr/ADR-NNN-slug.md already exists — skipped`
 
-This rule runs **instead of** the standard Phase 1–3 propagation for S12 changes. ADR table changes do not trigger downstream section updates — they only trigger ADR file creation.
+After ADR file creation (or skip), **always update `docs/10-references.md`**:
+- Add new ADRs to the ADR index table
+- Update ADR titles or status if changed
+- Remove entries for deleted ADRs
+
+This rule runs **instead of** the standard Phase 1–3 propagation for S12 changes. ADR table changes do not trigger downstream section updates — they trigger ADR file creation and references update.
 
 #### Phase 1: Impact Discovery
 

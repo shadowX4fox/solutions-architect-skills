@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.0 (Current Release) ✅
+### v3.3.1 (Current Release) ✅
+**fix: references file (`docs/10-references.md`) now included in downstream propagation**
+
+- Added `docs/10-references.md` to cross-cutting files in Step 5.5 Downstream Documentation Propagation
+- S5 (Components), S8 (Tech Stack), S12 (ADRs) now list `docs/10-references.md` as downstream in Reverse Dependency Table
+- New propagation rule: ADR changes update ADR index table, technology changes update doc links, new terms update glossary
+- S12 ADR special rule now always syncs references after ADR file creation
+
+### v3.3.0 (Previous Release) ✅
 **feat: IcePanel C4 model sync skill (beta) + Section 12 ADR propagation fix**
 
 - New `architecture-icepanel-sync` skill (beta): extracts C4 elements from architecture docs, generates IcePanel-compatible import YAML, checks IcePanel API for existing objects, and imports or reports drift
