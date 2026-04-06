@@ -292,10 +292,146 @@ function copyScorecard() {
 
 ---
 
+## Expected HTML Structure
+
+The following IDs **must** be used for the structural containers so the CSS layout rules below apply correctly:
+
+```html
+<div id="app">
+  <div id="main">
+    <div id="doc-panel"><!-- line-numbered document content --></div>
+    <div id="right-column">
+      <div id="scorecard-panel"><!-- overall score, rating, category bars --></div>
+      <div id="findings-panel">
+        <div id="findings-filters"><!-- status tabs + severity/category dropdowns --></div>
+        <div id="findings-list"><!-- finding cards --></div>
+      </div>
+    </div>
+  </div>
+  <div id="prompt-panel">
+    <div class="prompt-actions"><!-- Copy Fix Prompt + Copy Scorecard buttons --></div>
+    <div class="prompt-content"><!-- generated prompt text --></div>
+  </div>
+</div>
+```
+
+---
+
 ## Styling
 
 ```css
-/* Severity color scheme */
+/* ===== Structural Layout ===== */
+
+/* Full-viewport shell — no page-level scroll */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: #0d1117; color: #c9d1d9;
+}
+
+/* Top-level vertical flex: main area above, prompt panel below */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Horizontal split: document panel (left) + right column */
+#main {
+  display: flex;
+  flex: 1;
+  min-height: 0;        /* critical: allows flex children to shrink below content size */
+  overflow: hidden;
+}
+
+/* Document panel — independently scrollable */
+#doc-panel {
+  flex: 1;
+  overflow-y: auto;
+  border-right: 1px solid #30363d;
+  min-height: 0;
+}
+
+/* Right column — fixed width, scorecard stacked above findings */
+#right-column {
+  width: 420px;
+  min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Scorecard — natural height, never scrolls */
+#scorecard-panel {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #30363d;
+  background: #161b22;
+  overflow: hidden;
+}
+
+/* Findings panel — fills remaining vertical space after scorecard */
+#findings-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Filter bar — always visible at top of findings panel */
+#findings-filters {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #161b22;
+  padding: 8px 12px;
+  border-bottom: 1px solid #30363d;
+}
+
+/* Scrollable findings list */
+#findings-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  min-height: 0;
+}
+
+/* Prompt output — fixed height at bottom with its own scroll */
+#prompt-panel {
+  flex-shrink: 0;
+  height: 180px;
+  border-top: 1px solid #30363d;
+  background: #161b22;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#prompt-panel .prompt-actions {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+}
+
+#prompt-panel .prompt-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 8px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  font-family: monospace;
+  min-height: 0;
+}
+
+/* ===== Severity color scheme ===== */
 .sev-critical { border-left: 3px solid #cf222e; background: rgba(207,34,46,0.06); }
 .sev-major    { border-left: 3px solid #bf5700; background: rgba(191,87,0,0.06); }
 .sev-minor    { border-left: 3px solid #9a6700; background: rgba(154,103,0,0.06); }

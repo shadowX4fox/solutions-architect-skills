@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.2` in the list.
+You should see `solutions-architect-skills v3.3.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.2 (Current Release) ✅
+### v3.3.3 (Current Release) ✅
+**fix: peer review playground layout for large finding counts**
+
+- Added structural layout CSS to `PLAYGROUND_TEMPLATE.md`: viewport constraints, flex containers, panel scroll isolation
+- Document panel and findings panel now scroll independently — no more full-page scroll with 19+ findings
+- Filter bar (All/Pending/Approved/Rejected tabs + dropdowns) is now sticky at top of findings panel
+- Added explicit HTML structure reference (`#app`, `#main`, `#doc-panel`, `#findings-filters`, `#findings-list`, etc.) so generated playground uses correct IDs
+
+### v3.3.2 (Previous Release) ✅
 **fix: compliance-docs write permission glob pattern for subdirectories**
 
 - Fixed `.claude/settings.json` permission glob: `Write(compliance-docs/*)` → `Write(compliance-docs/**)` to allow writing to subdirectories
