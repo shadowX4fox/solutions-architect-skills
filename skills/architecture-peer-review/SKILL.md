@@ -119,8 +119,6 @@ Determine the ordered list of files to review (`doc_files`). This list is passed
 
 Store the result as `doc_files` — an ordered list of **absolute file paths**.
 
-**For Step 7 (playground)**: You still need the full concatenated document text with `--- path ---` separators for the `docContent` HTML embed. Read and concatenate those files in Step 7, after the agents complete. Do not do it here.
-
 ---
 
 ### Step 5 — Perform Review (Parallel Category Agents)
@@ -255,20 +253,10 @@ Each `CATEGORY_REVIEW_RESULT` block already contains `score` and `weight` comput
 
 ### Step 7 — Generate Interactive Playground
 
-**First**: Read and concatenate all files from `doc_files` (Step 4) to build `docContent`. Concatenate with file separator markers between each file:
-```
---- ARCHITECTURE.md ---
-<content of ARCHITECTURE.md>
-
---- docs/01-executive-summary.md ---
-<content>
-...
-```
-
 Invoke the `playground` skill using `PLAYGROUND_TEMPLATE.md` as the template.
 
 Embed in the generated HTML file:
-1. `docContent` — the concatenated text built above (with file separator markers)
+1. `doc_files` — the ordered list of absolute file paths (from Step 4); the playground reads and concatenates these itself with `--- filename ---` separators between files
 2. `findings` — the findings array as a JSON literal
 3. `scorecard` — the calculated scorecard (overall score, rating, per-category scores)
 4. `depthLevel` — the chosen depth level

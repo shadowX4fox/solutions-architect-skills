@@ -41,6 +41,8 @@ Display a compact summary:
 
 ### Document panel (left)
 
+**Building `docContent`**: The playground generator receives `doc_files` (an ordered list of absolute paths). Read each file using the Read tool, then concatenate with `--- <filename> ---` separator lines between files. Store as the `docContent` string embedded in the HTML. Do NOT ask the orchestrator to pre-read these files — the generator reads them once here.
+
 - Full document content with line numbers
 - File separator headers when document spans multiple files: `--- docs/02-architecture-principles.md ---` styled as a sticky banner
 - Highlight lines with findings using a colored left border (color matches severity)

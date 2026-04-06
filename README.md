@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.6` in the list.
+You should see `solutions-architect-skills v3.3.7` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.6 (Current Release) ✅
+### v3.3.7 (Current Release) ✅
+**perf: eliminate redundant file reads in peer review playground generation**
+
+- Removed orchestrator's Step 7 file-read/concatenation loop — no longer reads all architecture files between agent completion and playground spawn
+- Playground generator now receives `doc_files` (path list) and reads + concatenates once, replacing the previous triple-read pattern (agents → orchestrator → playground agent)
+- `PLAYGROUND_TEMPLATE.md` updated with explicit instruction: generator reads `doc_files` via Read tool and builds `docContent` itself
+- Eliminates ~100KB of redundant token usage per HARD depth review (~66% reduction in doc-related tokens)
+
+### v3.3.6 (Previous Release) ✅
 **fix: peer review playground syntax error + agent scorecard delegation**
 
 - Fixed `Uncaught SyntaxError: missing } in template string` in generated playground HTML — root cause was nested template literals in `PLAYGROUND_TEMPLATE.md` `renderDocument()` function; extracted to local variables + added warning comment
