@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.2.7` in the list.
+You should see `solutions-architect-skills v3.3.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,13 @@ Where:
 
 ## Roadmap
 
-### v3.3.1 (Current Release) ✅
+### v3.3.2 (Current Release) ✅
+**fix: compliance-docs write permission glob pattern for subdirectories**
+
+- Fixed `.claude/settings.json` permission glob: `Write(compliance-docs/*)` → `Write(compliance-docs/**)` to allow writing to subdirectories
+- Fixed README.md installation verification version (was stuck at v3.2.7)
+
+### v3.3.1 (Previous Release) ✅
 **fix: references file (`docs/10-references.md`) now included in downstream propagation**
 
 - Added `docs/10-references.md` to cross-cutting files in Step 5.5 Downstream Documentation Propagation

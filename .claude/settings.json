@@ -12,7 +12,7 @@
       "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
       "Read(//tmp/*)",
       "Write(//tmp/*)",
-      "Write(compliance-docs/*)",
+      "Write(compliance-docs/**)",
       "Read(compliance-docs/*)",
       "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
       "Agent(solutions-architect-skills:sre-compliance-generator)",
