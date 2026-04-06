@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.9` in the list.
+You should see `solutions-architect-skills v3.3.10` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.9 (Current Release) ✅
+### v3.3.10 (Current Release) ✅
+**fix: clean up old compliance contracts before regeneration**
+
+- Added Step 3.2.1 to compliance skill: deletes existing contracts for selected types before spawning generators, preventing stale dated files from accumulating
+- Previously, regenerating contracts on a different date left old files behind (e.g., both `_2026-04-04.md` and `_2026-04-06.md` coexisted)
+- Post-generation pipeline cleanup (Phase 4) retained as a safety net
+- Updated Regeneration Behavior documentation to reflect new pre-generation cleanup
+
+### v3.3.9 (Previous Release) ✅
 **perf: remove document panel from peer review playground**
 
 - Eliminated the left-side document viewer from the peer review playground — findings already carry `file` + `lineRef` on each card, making full document embedding redundant

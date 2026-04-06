@@ -352,11 +352,10 @@ Resolves to the Document Control table with `{{variables}}` replaced from `share
 - `CC-004-development-architecture_JobScheduler_2025-11-26.md`
 
 **Regeneration Behavior:**
-- When regenerating an existing contract (same type, project, date), the file is REPLACED
-- Previous content is overwritten with newly generated contract
-- No timestamp appending - same filename is used: `[CC-NNN-contract-type]_[PROJECT_NAME]_[DATE].md`
-- To preserve old versions, manually rename/copy files before regenerating
-- Alternatively, use git for version control of generated contracts
+- Before generating, old contracts for the selected types are deleted (Step 3.2.1)
+- Each generation produces a fresh file with today's date
+- The post-generation pipeline (Phase 4) also removes any superseded contracts as a safety net
+- To preserve old versions, use git for version control of generated contracts
 
 **Additional Outputs:**
 - `COMPLIANCE_MANIFEST.md`: Index of all generated compliance documents with metadata
@@ -611,6 +610,34 @@ compliance_docs_dir = dirname(realpath(architecture_file)) + "/compliance-docs"
 ```
 
 This is needed for the pipeline in Phase 4.
+
+**Step 3.2.1: Clean Up Old Contracts**
+
+Before generating new contracts, remove existing contracts for the selected types to prevent stale dated files from accumulating:
+
+```bash
+# For each selected contract type, delete any existing files matching the prefix
+# Example: rm compliance-docs/CC-001-business-continuity_*.md
+for prefix in [selected contract prefixes]:
+    rm -f compliance_docs_dir/PREFIX_*.md
+```
+
+Only delete prefixes for the contract types being generated (from `selected_contracts`). Use the contract type → filename prefix mapping:
+
+| Contract Type | Filename Prefix |
+|---------------|----------------|
+| business-continuity | `CC-001-business-continuity` |
+| cloud | `CC-002-cloud-architecture` |
+| data-ai | `CC-003-data-ai-architecture` |
+| development | `CC-004-development-architecture` |
+| enterprise | `CC-005-enterprise-architecture` |
+| integration | `CC-006-integration-architecture` |
+| platform | `CC-007-platform-it-infrastructure` |
+| process | `CC-008-process-transformation` |
+| security | `CC-009-security-architecture` |
+| sre | `CC-010-sre-architecture` |
+
+Run all deletions in a single `rm -f` command. If `compliance-docs/` does not exist yet, skip this step.
 
 **Step 3.3: Spawn Validators (FIRST)**
 
