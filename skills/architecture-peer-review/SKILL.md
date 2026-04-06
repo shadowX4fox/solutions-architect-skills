@@ -91,13 +91,7 @@ Everything in Medium plus deep architectural analysis: scalability design, secur
 
 Read `PEER_REVIEW_CRITERIA.md`. Parse it into per-category blocks — one block per category, containing that category's full markdown criteria table (header row + all check rows).
 
-Active categories by depth:
-
-| Depth | Active Categories |
-|-------|-----------------|
-| Light | STRUCT, NAMING, SECTIONS |
-| Medium | STRUCT, NAMING, SECTIONS, COHERENCE, TECH, INTEG, METRICS |
-| Hard | All 13: STRUCT, NAMING, SECTIONS, COHERENCE, TECH, INTEG, METRICS, SCALE, SECURITY, PERF, OPS, ADR, TRADEOFF |
+Active categories for each depth are defined by the **Depth Level** column in the Scoring Weights table in `PEER_REVIEW_CRITERIA.md`.
 
 Store for each active category:
 - `code` — e.g., `SECURITY`
@@ -146,58 +140,13 @@ FILES:
 
 Pass all file paths from `doc_files` in every agent prompt. Agents read only what they need.
 
-**LIGHT depth — single message with 3 agents:**
-```python
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="STRUCT — Structural Completeness",
-     prompt="Review category.\ncategory_code: STRUCT\ncategory_name: Structural Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[STRUCT checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="NAMING — Naming & Conventions",
-     prompt="Review category.\ncategory_code: NAMING\ncategory_name: Naming & Conventions\nweight: 0.05\ndepth_level: light\n\nCHECKS:\n[NAMING checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="SECTIONS — Section Completeness",
-     prompt="Review category.\ncategory_code: SECTIONS\ncategory_name: Section Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[SECTIONS checks table]\n\nFILES:\n[doc_files, one path per line]")
-```
+For each active category (from Step 3), issue one Task() call substituting that category's `code`, `name`, `weight`, and the chosen `depth_level`. Set `description` to `"CODE — Name"`. **Issue all calls in a single message** so the harness runs them concurrently.
 
-**MEDIUM depth — single message with 7 agents** (Light 3 + 4 more):
-```python
-# ... same 3 Light agents above, plus:
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="COHERENCE — Content Coherence",
-     prompt="Review category.\ncategory_code: COHERENCE\ncategory_name: Content Coherence\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[COHERENCE checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="TECH — Technology Alignment",
-     prompt="Review category.\ncategory_code: TECH\ncategory_name: Technology Alignment\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[TECH checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="INTEG — Integration Soundness",
-     prompt="Review category.\ncategory_code: INTEG\ncategory_name: Integration Soundness\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[INTEG checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="METRICS — Metric Realism",
-     prompt="Review category.\ncategory_code: METRICS\ncategory_name: Metric Realism\nweight: 0.05\ndepth_level: medium\n\nCHECKS:\n[METRICS checks table]\n\nFILES:\n[doc_files, one path per line]")
-```
+- **Light**: 3 agents — STRUCT, NAMING, SECTIONS
+- **Medium**: 7 agents — Light + COHERENCE, TECH, INTEG, METRICS
+- **Hard**: 13 agents — Medium + SCALE, SECURITY, PERF, OPS, ADR, TRADEOFF
 
-**HARD depth — single message with 13 agents** (Medium 7 + 6 more):
-```python
-# ... same 7 Medium agents above, plus:
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="SCALE — Scalability Design",
-     prompt="Review category.\ncategory_code: SCALE\ncategory_name: Scalability Design\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SCALE checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="SECURITY — Security Posture",
-     prompt="Review category.\ncategory_code: SECURITY\ncategory_name: Security Posture\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SECURITY checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="PERF — Performance Design",
-     prompt="Review category.\ncategory_code: PERF\ncategory_name: Performance Design\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[PERF checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="OPS — Operational Readiness",
-     prompt="Review category.\ncategory_code: OPS\ncategory_name: Operational Readiness\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[OPS checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="ADR — ADR Quality",
-     prompt="Review category.\ncategory_code: ADR\ncategory_name: ADR Quality\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[ADR checks table]\n\nFILES:\n[doc_files, one path per line]"),
-Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
-     description="TRADEOFF — Trade-off Honesty",
-     prompt="Review category.\ncategory_code: TRADEOFF\ncategory_name: Trade-off Honesty\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[TRADEOFF checks table]\n\nFILES:\n[doc_files, one path per line]")
-```
+All category codes, names, weights, and depth assignments are in the **Scoring Weights table** in `PEER_REVIEW_CRITERIA.md`.
 
 **[BARRIER — wait for all agents to complete]**
 
@@ -218,7 +167,9 @@ After all agents return:
 
 4. **Renumber IDs** sequentially across the merged array (1, 2, 3...). Sort order: by category depth level (LIGHT categories first, then MEDIUM, then HARD), then by severity within each category (critical → major → minor → suggestion).
 
-5. **Report progress:**
+5. **Inject category fields** into each finding from its parent `CATEGORY_REVIEW_RESULT` envelope: set `category`, `categoryName`, and `depthLevel`. Agents omit these from individual findings to reduce output size.
+
+6. **Report progress:**
    ```
    ✅ Review complete — N categories, M total findings (X critical, Y major, Z minor, Z suggestions)
    Generating scorecard and playground...
@@ -241,13 +192,7 @@ Each `CATEGORY_REVIEW_RESULT` block already contains `score` and `weight` comput
 
 **Overall score** = sum of (category score × renormalized weight) across all active categories.
 
-**Rating bands:**
-| Score | Label |
-|-------|-------|
-| 9.0–10.0 | Production-ready |
-| 7.5–8.9 | Minor improvements recommended |
-| 5.0–7.4 | Significant gaps — address before implementation |
-| 0.0–4.9 | Major rework needed |
+Apply the **Scorecard Rating Bands** from `PEER_REVIEW_CRITERIA.md` to assign the rating label.
 
 ---
 

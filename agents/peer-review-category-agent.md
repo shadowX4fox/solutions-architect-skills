@@ -61,18 +61,15 @@ For each check in the table, evaluate the document content against the `whatToLo
   "file": "<source file path, e.g., docs/09-security-architecture.md>",
   "lineRef": "Lines N–M",
   "checkId": "<e.g., SECURITY-04>",
-  "category": "<category_code>",
-  "categoryName": "<category_name>",
   "severity": "<critical | major | minor | suggestion>",
-  "depthLevel": "<depth_level>",
   "title": "<short descriptive title, max 60 chars>",
   "finding": "<what was found — describe the current state of the document, 1-3 sentences>",
   "recommendation": "<what a Solution Architect would recommend — specific and actionable>",
-  "rationale": "<why this matters architecturally — real-world consequences of leaving it unaddressed>",
-  "status": "pending",
-  "userComment": ""
+  "rationale": "<why this matters architecturally — real-world consequences of leaving it unaddressed>"
 }
 ```
+
+`category`, `categoryName`, and `depthLevel` are omitted — the orchestrator injects them from the result envelope during merge. `status` and `userComment` are also injected by the orchestrator.
 
 **Finding quality rules:**
 - `finding` — describes the current state only (not the solution). Example: "The security architecture documents TLS for the public API gateway but does not specify encryption in transit for internal service-to-service communication."
@@ -85,17 +82,7 @@ For each check in the table, evaluate the document content against the `whatToLo
 
 ### Step 3.5 — Compute Category Score
 
-After evaluating all checks, calculate the category score:
-
-1. Start at **10.0**
-2. For each finding in this category, deduct:
-   - Critical: −2.5
-   - Major: −1.5
-   - Minor: −0.5
-   - Suggestion: 0 (informational only)
-3. Floor at **0.0** — score cannot go negative
-
-Store this as `score` for inclusion in the result block.
+After evaluating all checks, compute the category score using the **Category Score Calculation** formula in `PEER_REVIEW_CRITERIA.md`. Store as `score`.
 
 ### Step 4 — Return Result
 
@@ -119,21 +106,7 @@ CATEGORY_REVIEW_RESULT:
 ```
 ```
 
-If no checks failed, score is 10.0:
-```
-CATEGORY_REVIEW_RESULT:
-```json
-{
-  "category": "STRUCT",
-  "categoryName": "Structural Completeness",
-  "weight": 0.10,
-  "score": 10.0,
-  "checksEvaluated": 5,
-  "findingsCount": 0,
-  "findings": []
-}
-```
-```
+If no checks failed: `score: 10.0`, `findingsCount: 0`, `findings: []`.
 
 ---
 

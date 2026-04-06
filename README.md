@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.7` in the list.
+You should see `solutions-architect-skills v3.3.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,17 @@ Where:
 
 ## Roadmap
 
-### v3.3.7 (Current Release) ✅
+### v3.3.8 (Current Release) ✅
+**refactor: reduce peer review token usage — eliminate duplicated content across skill files**
+
+- Replaced 13 near-identical Task() examples in SKILL.md with a concise loop instruction referencing the Scoring Weights table (~53 lines removed)
+- Removed Active Categories table and Rating Bands table from SKILL.md — both are now single references to `PEER_REVIEW_CRITERIA.md` as the source of truth
+- Removed per-finding `category`, `categoryName`, `depthLevel` fields from agent output schema — orchestrator injects them during merge (Step 5.2), eliminating ~3 redundant fields per finding × 30+ findings in HARD depth
+- Collapsed score formula in agent file to a reference to `PEER_REVIEW_CRITERIA.md`; removed duplicate "no findings" example (one sentence suffices)
+- Removed Pre-Populating section from `PLAYGROUND_TEMPLATE.md` (duplicated SKILL.md Step 7); collapsed 13-row hardcoded scorecard example to a 2-line comment
+- Net: 1,285 → 1,168 lines (−117 lines, ~11% reduction across the 4 skill files)
+
+### v3.3.7 (Previous Release) ✅
 **perf: eliminate redundant file reads in peer review playground generation**
 
 - Removed orchestrator's Step 7 file-read/concatenation loop — no longer reads all architecture files between agent completion and playground spawn

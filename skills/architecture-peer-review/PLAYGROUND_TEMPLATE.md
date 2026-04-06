@@ -86,19 +86,8 @@ const reviewData = {
     overall: 7.2,
     rating: "Significant gaps — address before implementation",
     categories: [
-      { code: "STRUCT",   name: "Structural Completeness", score: 9.0, weight: 0.10 },
-      { code: "NAMING",   name: "Naming & Conventions",    score: 8.5, weight: 0.05 },
-      { code: "SECTIONS", name: "Section Completeness",    score: 7.5, weight: 0.10 },
-      { code: "COHERENCE",name: "Content Coherence",       score: 6.0, weight: 0.10 },
-      { code: "TECH",     name: "Technology Alignment",    score: 8.0, weight: 0.10 },
-      { code: "INTEG",    name: "Integration Soundness",   score: 5.5, weight: 0.10 },
-      { code: "METRICS",  name: "Metric Realism",          score: 7.0, weight: 0.05 },
-      { code: "SCALE",    name: "Scalability Design",      score: 6.0, weight: 0.10 },
-      { code: "SECURITY", name: "Security Posture",        score: 4.0, weight: 0.10 },
-      { code: "PERF",     name: "Performance Design",      score: 7.5, weight: 0.05 },
-      { code: "OPS",      name: "Operational Readiness",   score: 6.5, weight: 0.05 },
-      { code: "ADR",      name: "ADR Quality",             score: 8.0, weight: 0.05 },
-      { code: "TRADEOFF", name: "Trade-off Honesty",       score: 5.0, weight: 0.05 }
+      // One entry per active category: { code, name, score, weight }
+      // Category codes, names, and weights: see Scoring Weights table in PEER_REVIEW_CRITERIA.md
     ]
   },
   findings: [
@@ -480,30 +469,6 @@ html, body {
 .finding-gutter { color: inherit; font-size: 8px; width: 12px; display: inline-block; }
 .finding-gutter-empty { width: 12px; display: inline-block; }
 ```
-
----
-
-## Pre-Populating from the Skill
-
-When the `architecture-peer-review` skill builds this playground:
-
-1. Read and concatenate all architecture document files with file separator markers:
-   ```
-   --- ARCHITECTURE.md ---
-   <content of ARCHITECTURE.md>
-
-   --- docs/01-executive-summary.md ---
-   <content>
-
-   --- docs/02-architecture-principles.md ---
-   <content>
-   ...
-   ```
-2. Perform the review and generate the `findings` array with specific line references
-3. Calculate scorecard scores per category
-4. Embed `docContent`, `findings`, and `scorecard` JSON directly in the HTML `<script>` block
-5. Set `depthLevel` to match the user's chosen depth
-6. Run `open <filename>.html` to launch in browser after writing the file
 
 ---
 
