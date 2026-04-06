@@ -248,13 +248,20 @@ The `architecture-peer-review` skill performs Solution Architect peer reviews of
 To manually activate the skill, use: `/skill architecture-peer-review`
 
 The skill includes:
-- **3 review depth levels**: Light (structural, 22 checks), Medium (content quality, 44 checks), Hard (deep analysis, 82 checks)
+- **3 review depth levels**: Light (~40 sec, 22 checks, 3 parallel agents), Medium (~90 sec, 44 checks, 7 parallel agents), Hard (~2-3 min, 82 checks, 13 parallel agents)
 - **13 review categories** with weighted scoring: Structural Completeness, Naming & Conventions, Section Completeness, Content Coherence, Technology Alignment, Integration Soundness, Metric Realism, Scalability Design, Security Posture, Performance Design, Operational Readiness, ADR Quality, Trade-off Honesty
+- **Parallel category review** — each category is evaluated by a dedicated `peer-review-category-agent` sub-agent; all spawn in a single message for concurrent execution
 - **Interactive HTML playground** via the `playground` plugin — approve/reject/comment workflow
 - **Weighted 0–10 scorecard** per category and overall
 - **Fix prompt generation** for approved findings to paste back into Claude
 
 **When to use**: After ARCHITECTURE.md passes form validation (use `architecture-docs` review first), when a peer review or architectural quality assessment is needed, or before finalizing architecture for implementation.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Agent(solutions-architect-skills:peer-review-category-agent)"
+```
 
 ### Using the Architecture Compliance Review Skill
 

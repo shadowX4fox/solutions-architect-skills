@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.3` in the list.
+You should see `solutions-architect-skills v3.3.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,16 @@ Where:
 
 ## Roadmap
 
-### v3.3.3 (Current Release) ✅
+### v3.3.4 (Current Release) ✅
+**feat: parallel category agents for architecture peer review**
+
+- New universal `agents/peer-review-category-agent.md` sub-agent — evaluates one review category's checks against architecture docs and returns a `CATEGORY_REVIEW_RESULT` JSON block
+- Peer review skill now fans out all active categories in a single parallel message (3 agents for Light, 7 for Medium, 13 for Hard)
+- Dramatic speed improvement: Light ~40s (was ~2 min), Medium ~90s (was ~5 min), Hard ~2-3 min (was ~10 min)
+- Added Step 5.2 (merge + renumber): collects all `CATEGORY_REVIEW_RESULT` blocks, merges findings, renumbers IDs globally, handles per-agent failures gracefully
+- Added `Agent(solutions-architect-skills:peer-review-category-agent)` to `.claude/settings.json.example` and CLAUDE.md permissions
+
+### v3.3.3 (Previous Release) ✅
 **fix: peer review playground layout for large finding counts**
 
 - Added structural layout CSS to `PLAYGROUND_TEMPLATE.md`: viewport constraints, flex containers, panel scroll isolation

@@ -41,8 +41,9 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 | File | Purpose |
 |------|---------|
 | `SKILL.md` | This file — entry point and workflow |
-| `PEER_REVIEW_CRITERIA.md` | All review checks organized by depth level and category (60+ checks across 13 categories) |
+| `PEER_REVIEW_CRITERIA.md` | All review checks organized by depth level and category (82 checks across 13 categories) |
 | `PLAYGROUND_TEMPLATE.md` | Custom playground template for the interactive review HTML file |
+| `agents/peer-review-category-agent.md` | Universal category reviewer sub-agent — evaluates one category's checks in parallel |
 
 ---
 
@@ -72,26 +73,37 @@ Present the three options. **Do not default or assume.** If the user says "revie
 
 **Choose review depth:**
 
-**Light** (~2 min)
+**Light** (~40 sec)
 Structural check: are all required sections present? Do naming conventions follow standards? Are required fields populated?
-- Checks: STRUCT (5), NAMING (5), SECTIONS (12) = 22 checks
+- Checks: STRUCT (5), NAMING (5), SECTIONS (12) = 22 checks — 3 parallel agents
 
-**Medium** (~5 min)
+**Medium** (~90 sec)
 Everything in Light plus content quality: are sections internally consistent? Do technology choices make sense together? Are integration patterns sound? Are metrics realistic?
-- Checks: Light + COHERENCE (7), TECH (5), INTEG (5), METRICS (5) = 44 checks
+- Checks: Light + COHERENCE (7), TECH (5), INTEG (5), METRICS (5) = 44 checks — 7 parallel agents
 
-**Hard** (~10 min)
+**Hard** (~2-3 min)
 Everything in Medium plus deep architectural analysis: scalability design, security posture, performance patterns, operational readiness, ADR quality, trade-off honesty, TOGAF/BIAN alignment.
-- Checks: Medium + SCALE (7), SECURITY (9), PERF (5), OPS (7), ADR (5), TRADEOFF (5) = 82 checks
+- Checks: Medium + SCALE (7), SECURITY (9), PERF (5), OPS (7), ADR (5), TRADEOFF (5) = 82 checks — 13 parallel agents
 
 ---
 
 ### Step 3 — Load Review Criteria
 
-Read `PEER_REVIEW_CRITERIA.md`. Load only the depth-relevant sections:
-- **Light**: Load STRUCT, NAMING, SECTIONS
-- **Medium**: Load STRUCT, NAMING, SECTIONS + COHERENCE, TECH, INTEG, METRICS
-- **Hard**: Load all 13 category sections
+Read `PEER_REVIEW_CRITERIA.md`. Parse it into per-category blocks — one block per category, containing that category's full markdown criteria table (header row + all check rows).
+
+Active categories by depth:
+
+| Depth | Active Categories |
+|-------|-----------------|
+| Light | STRUCT, NAMING, SECTIONS |
+| Medium | STRUCT, NAMING, SECTIONS, COHERENCE, TECH, INTEG, METRICS |
+| Hard | All 13: STRUCT, NAMING, SECTIONS, COHERENCE, TECH, INTEG, METRICS, SCALE, SECURITY, PERF, OPS, ADR, TRADEOFF |
+
+Store for each active category:
+- `code` — e.g., `SECURITY`
+- `name` — e.g., `Security Posture`
+- `weight` — as defined in the Scoring Weights table
+- `checks_table` — the full markdown table text for that category (to be passed to the sub-agent)
 
 ---
 
@@ -107,37 +119,110 @@ Read `PEER_REVIEW_CRITERIA.md`. Load only the depth-relevant sections:
 
 Track line numbers per source file (each file restarts at line 1).
 
+Store the concatenated result as `doc_content` — this exact string is passed to every category agent.
+
 ---
 
-### Step 5 — Perform Review
+### Step 5 — Perform Review (Parallel Category Agents)
 
-Apply every check from the loaded criteria against the document content. For each failed check, create a finding object:
+Spawn one `peer-review-category-agent` per active category. **Issue all Task() calls in a single message** so the harness runs them concurrently.
 
+All agents use: `solutions-architect-skills:peer-review-category-agent`
+
+**Agent prompt template:**
 ```
-{
-  id: <sequential integer>,
-  file: <source file path>,
-  lineRef: "Lines N–M" or "Line N",
-  checkId: <e.g., "SECURITY-04">,
-  category: <category code, e.g., "SECURITY">,
-  categoryName: <category name, e.g., "Security Posture">,
-  severity: <"critical" | "major" | "minor" | "suggestion">,
-  depthLevel: <"light" | "medium" | "hard">,
-  title: <short descriptive title, max 60 chars>,
-  finding: <what was found — current state of the document, 1-3 sentences>,
-  recommendation: <what a Solution Architect would recommend — specific and actionable>,
-  rationale: <why this matters architecturally — real-world consequences>,
-  status: "pending",
-  userComment: ""
-}
+Review category.
+category_code: [CODE]
+category_name: [Name]
+weight: [0.XX]
+depth_level: [light|medium|hard]
+
+CHECKS:
+[paste the full markdown criteria table for this category]
+
+DOCUMENT:
+[paste the full doc_content — all files concatenated with --- path --- separators]
 ```
 
-**Finding quality rules:**
-- `finding` describes the current state (not the solution)
-- `recommendation` is specific — name technologies, patterns, thresholds (not "improve X")
-- `rationale` states real-world consequences of leaving the issue unaddressed
-- `lineRef` points to the specific lines in the document where the issue exists
-- If a check passes cleanly, do not create a finding for it
+**LIGHT depth — single message with 3 agents:**
+```python
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="STRUCT — Structural Completeness",
+     prompt="Review category.\ncategory_code: STRUCT\ncategory_name: Structural Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[STRUCT checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="NAMING — Naming & Conventions",
+     prompt="Review category.\ncategory_code: NAMING\ncategory_name: Naming & Conventions\nweight: 0.05\ndepth_level: light\n\nCHECKS:\n[NAMING checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="SECTIONS — Section Completeness",
+     prompt="Review category.\ncategory_code: SECTIONS\ncategory_name: Section Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[SECTIONS checks table]\n\nDOCUMENT:\n[doc_content]")
+```
+
+**MEDIUM depth — single message with 7 agents** (Light 3 + 4 more):
+```python
+# ... same 3 Light agents above, plus:
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="COHERENCE — Content Coherence",
+     prompt="Review category.\ncategory_code: COHERENCE\ncategory_name: Content Coherence\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[COHERENCE checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="TECH — Technology Alignment",
+     prompt="Review category.\ncategory_code: TECH\ncategory_name: Technology Alignment\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[TECH checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="INTEG — Integration Soundness",
+     prompt="Review category.\ncategory_code: INTEG\ncategory_name: Integration Soundness\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[INTEG checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="METRICS — Metric Realism",
+     prompt="Review category.\ncategory_code: METRICS\ncategory_name: Metric Realism\nweight: 0.05\ndepth_level: medium\n\nCHECKS:\n[METRICS checks table]\n\nDOCUMENT:\n[doc_content]")
+```
+
+**HARD depth — single message with 13 agents** (Medium 7 + 6 more):
+```python
+# ... same 7 Medium agents above, plus:
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="SCALE — Scalability Design",
+     prompt="Review category.\ncategory_code: SCALE\ncategory_name: Scalability Design\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SCALE checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="SECURITY — Security Posture",
+     prompt="Review category.\ncategory_code: SECURITY\ncategory_name: Security Posture\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SECURITY checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="PERF — Performance Design",
+     prompt="Review category.\ncategory_code: PERF\ncategory_name: Performance Design\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[PERF checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="OPS — Operational Readiness",
+     prompt="Review category.\ncategory_code: OPS\ncategory_name: Operational Readiness\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[OPS checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="ADR — ADR Quality",
+     prompt="Review category.\ncategory_code: ADR\ncategory_name: ADR Quality\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[ADR checks table]\n\nDOCUMENT:\n[doc_content]"),
+Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
+     description="TRADEOFF — Trade-off Honesty",
+     prompt="Review category.\ncategory_code: TRADEOFF\ncategory_name: Trade-off Honesty\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[TRADEOFF checks table]\n\nDOCUMENT:\n[doc_content]")
+```
+
+**[BARRIER — wait for all agents to complete]**
+
+---
+
+### Step 5.2 — Collect and Merge Results
+
+After all agents return:
+
+1. **Collect** the `CATEGORY_REVIEW_RESULT:` JSON block from each agent response.
+
+2. **Check for failures.** If any agent failed to return a valid result:
+   - Report which category failed (e.g., "⚠️ SECURITY agent failed — findings for this category unavailable")
+   - Offer to retry: "Would you like me to re-run the failed categories?"
+   - Continue processing successful results.
+
+3. **Merge** all `findings` arrays from all `CATEGORY_REVIEW_RESULT` blocks into a single flat `findings` array.
+
+4. **Renumber IDs** sequentially across the merged array (1, 2, 3...). Sort order: by category depth level (LIGHT categories first, then MEDIUM, then HARD), then by severity within each category (critical → major → minor → suggestion).
+
+5. **Report progress:**
+   ```
+   ✅ Review complete — N categories, M total findings (X critical, Y major, Z minor, Z suggestions)
+   Generating scorecard and playground...
+   ```
+
+The `findings` array is now ready for Step 6 (scorecard) and Step 7 (playground).
 
 ---
 
@@ -257,7 +342,7 @@ If the user pastes the generated fix prompt back into Claude, apply the approved
 
 A successful peer review produces:
 
-- [ ] All checks for the chosen depth level are evaluated (no skipped categories)
+- [ ] All category agents for the chosen depth level complete (no skipped categories)
 - [ ] Every finding has a specific `lineRef` pointing to actual content in the document
 - [ ] Every finding has an actionable `recommendation` (not vague advice)
 - [ ] Scorecard shows a score and rating for each active category
