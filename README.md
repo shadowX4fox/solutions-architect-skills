@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.5` in the list.
+You should see `solutions-architect-skills v3.3.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.3.5 (Current Release) ✅
+### v3.3.6 (Current Release) ✅
+**fix: peer review playground syntax error + agent scorecard delegation**
+
+- Fixed `Uncaught SyntaxError: missing } in template string` in generated playground HTML — root cause was nested template literals in `PLAYGROUND_TEMPLATE.md` `renderDocument()` function; extracted to local variables + added warning comment
+- Category agents now compute their own score (start 10.0, deduct per severity, floor 0.0) and return `score` + `weight` in `CATEGORY_REVIEW_RESULT` — orchestrator assembles scorecard directly without recalculation
+- Simplified `SKILL.md` Step 6: reads `score`/`weight` from agent results, applies renormalization, computes weighted average — no per-finding deduction logic in orchestrator
+
+### v3.3.5 (Previous Release) ✅
 **refactor: peer review category agents read files directly instead of receiving inline content**
 
 - Category agents now receive a `FILES:` list of file paths and read them via the Read tool — no more full document text duplicated 13× in HARD depth prompts

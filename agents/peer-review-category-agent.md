@@ -83,9 +83,23 @@ For each check in the table, evaluate the document content against the `whatToLo
 - `id` — use local sequential integers (1, 2, 3...). The orchestrator will renumber globally.
 - `severity` — use the severity from the checks table. Do not change it.
 
+### Step 3.5 — Compute Category Score
+
+After evaluating all checks, calculate the category score:
+
+1. Start at **10.0**
+2. For each finding in this category, deduct:
+   - Critical: −2.5
+   - Major: −1.5
+   - Minor: −0.5
+   - Suggestion: 0 (informational only)
+3. Floor at **0.0** — score cannot go negative
+
+Store this as `score` for inclusion in the result block.
+
 ### Step 4 — Return Result
 
-Return your findings as a fenced `CATEGORY_REVIEW_RESULT:` block:
+Return your findings as a fenced `CATEGORY_REVIEW_RESULT:` block. Include `weight` (echoed from your input) and `score` (computed in Step 3.5) so the orchestrator can assemble the scorecard directly without recalculation:
 
 ```
 CATEGORY_REVIEW_RESULT:
@@ -93,6 +107,8 @@ CATEGORY_REVIEW_RESULT:
 {
   "category": "<category_code>",
   "categoryName": "<category_name>",
+  "weight": <weight from your input, e.g. 0.10>,
+  "score": <computed score, e.g. 4.0>,
   "checksEvaluated": <total number of checks in the table>,
   "findingsCount": <number of findings generated>,
   "findings": [
@@ -103,13 +119,15 @@ CATEGORY_REVIEW_RESULT:
 ```
 ```
 
-If no checks failed, return an empty findings array:
+If no checks failed, score is 10.0:
 ```
 CATEGORY_REVIEW_RESULT:
 ```json
 {
   "category": "STRUCT",
   "categoryName": "Structural Completeness",
+  "weight": 0.10,
+  "score": 10.0,
   "checksEvaluated": 5,
   "findingsCount": 0,
   "findings": []

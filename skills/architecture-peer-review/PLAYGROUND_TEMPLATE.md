@@ -133,6 +133,8 @@ const reviewData = {
 Render the document panel with file separators for multi-file architectures:
 
 ```javascript
+// IMPORTANT: Do NOT use nested template literals (backticks inside ${} expressions).
+// Use string concatenation or single-quoted strings inside ${} ternaries instead.
 function renderDocument() {
   const lines = reviewData.docContent.split('\n');
   let html = '';
@@ -149,13 +151,15 @@ function renderDocument() {
     lineNum++;
     const finding = findingForLine(lineNum);
     const statusClass = finding ? finding.status : '';
-    const severityClass = finding ? `sev-${finding.severity}` : '';
+    const severityClass = finding ? 'sev-' + finding.severity : '';
+    const onclickAttr = finding ? 'highlightFinding(' + finding.id + ')' : '';
+    const gutterHtml = finding ? '<span class="finding-gutter">●</span>' : '<span class="finding-gutter-empty"></span>';
 
     html += `<div class="doc-line ${finding ? 'has-finding' : ''} ${statusClass} ${severityClass}"
                   data-line="${lineNum}"
-                  onclick="${finding ? `highlightFinding(${finding.id})` : ''}">
+                  onclick="${onclickAttr}">
       <span class="line-num">${lineNum}</span>
-      ${finding ? `<span class="finding-gutter">●</span>` : '<span class="finding-gutter-empty"></span>'}
+      ${gutterHtml}
       <span class="line-content">${escapeHtml(renderInlineMarkdown(line))}</span>
     </div>`;
   }

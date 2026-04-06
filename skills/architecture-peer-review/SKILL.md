@@ -230,25 +230,18 @@ The `findings` array is now ready for Step 6 (scorecard) and Step 7 (playground)
 
 ---
 
-### Step 6 — Generate Scorecard
+### Step 6 — Assemble Scorecard
 
-After collecting all findings, calculate scores per category:
+Each `CATEGORY_REVIEW_RESULT` block already contains `score` and `weight` computed by the agent. Assemble the scorecard directly from those values — no recalculation needed.
 
-**Per-category score:**
-1. Start at 10.0
-2. Subtract per finding in that category:
-   - Critical: −2.5
-   - Major: −1.5
-   - Minor: −0.5
-   - Suggestion: no deduction
-3. Floor at 0.0
+**Per-category scores**: read `score` and `weight` directly from each agent's result block.
 
-**Overall score** = weighted average of active category scores using weights from `PEER_REVIEW_CRITERIA.md`.
+**Renormalization for partial depths** (weights must sum to 1.0 across active categories):
+- **Light** (3 categories): STRUCT → 0.40, NAMING → 0.20, SECTIONS → 0.40
+- **Medium** (7 categories): divide each original weight by the sum of active weights (0.60) → STRUCT 0.167, NAMING 0.083, SECTIONS 0.167, COHERENCE 0.167, TECH 0.167, INTEG 0.167, METRICS 0.083
+- **Hard** (13 categories): use weights as reported by agents (sum to 1.0)
 
-**Renormalization for partial depths:**
-- Light: active weights are STRUCT (0.40), NAMING (0.20), SECTIONS (0.40)
-- Medium: distribute proportionally across the 7 active categories
-- Hard: use full weights as defined
+**Overall score** = sum of (category score × renormalized weight) across all active categories.
 
 **Rating bands:**
 | Score | Label |
