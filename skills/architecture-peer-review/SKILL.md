@@ -107,19 +107,19 @@ Store for each active category:
 
 ---
 
-### Step 4 — Read Architecture Document
+### Step 4 — Resolve Architecture File List
 
-**For monolithic ARCHITECTURE.md**: Read the full file. Track all line numbers.
+Determine the ordered list of files to review (`doc_files`). This list is passed to each category agent — agents read the files themselves.
 
-**For multi-file structure**: Read files in this order, concatenating content with file separator markers for the playground:
-1. `ARCHITECTURE.md`
-2. `docs/NN-*.md` files in numeric order
+**File discovery order** (same for monolithic and multi-file):
+1. `ARCHITECTURE.md` (always)
+2. `docs/NN-*.md` files in numeric order (if `docs/` exists)
 3. `docs/components/NN-*.md` and `docs/components/*/NN-*.md` files in numeric order (for Medium and Hard depth)
 4. `adr/*.md` files in alphabetic order (for Hard depth only)
 
-Track line numbers per source file (each file restarts at line 1).
+Store the result as `doc_files` — an ordered list of **absolute file paths**.
 
-Store the concatenated result as `doc_content` — this exact string is passed to every category agent.
+**For Step 7 (playground)**: You still need the full concatenated document text with `--- path ---` separators for the `docContent` HTML embed. Read and concatenate those files in Step 7, after the agents complete. Do not do it here.
 
 ---
 
@@ -140,21 +140,25 @@ depth_level: [light|medium|hard]
 CHECKS:
 [paste the full markdown criteria table for this category]
 
-DOCUMENT:
-[paste the full doc_content — all files concatenated with --- path --- separators]
+FILES:
+[absolute path 1]
+[absolute path 2]
+...
 ```
+
+Pass all file paths from `doc_files` in every agent prompt. Agents read only what they need.
 
 **LIGHT depth — single message with 3 agents:**
 ```python
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="STRUCT — Structural Completeness",
-     prompt="Review category.\ncategory_code: STRUCT\ncategory_name: Structural Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[STRUCT checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: STRUCT\ncategory_name: Structural Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[STRUCT checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="NAMING — Naming & Conventions",
-     prompt="Review category.\ncategory_code: NAMING\ncategory_name: Naming & Conventions\nweight: 0.05\ndepth_level: light\n\nCHECKS:\n[NAMING checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: NAMING\ncategory_name: Naming & Conventions\nweight: 0.05\ndepth_level: light\n\nCHECKS:\n[NAMING checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="SECTIONS — Section Completeness",
-     prompt="Review category.\ncategory_code: SECTIONS\ncategory_name: Section Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[SECTIONS checks table]\n\nDOCUMENT:\n[doc_content]")
+     prompt="Review category.\ncategory_code: SECTIONS\ncategory_name: Section Completeness\nweight: 0.10\ndepth_level: light\n\nCHECKS:\n[SECTIONS checks table]\n\nFILES:\n[doc_files, one path per line]")
 ```
 
 **MEDIUM depth — single message with 7 agents** (Light 3 + 4 more):
@@ -162,16 +166,16 @@ Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
 # ... same 3 Light agents above, plus:
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="COHERENCE — Content Coherence",
-     prompt="Review category.\ncategory_code: COHERENCE\ncategory_name: Content Coherence\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[COHERENCE checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: COHERENCE\ncategory_name: Content Coherence\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[COHERENCE checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="TECH — Technology Alignment",
-     prompt="Review category.\ncategory_code: TECH\ncategory_name: Technology Alignment\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[TECH checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: TECH\ncategory_name: Technology Alignment\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[TECH checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="INTEG — Integration Soundness",
-     prompt="Review category.\ncategory_code: INTEG\ncategory_name: Integration Soundness\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[INTEG checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: INTEG\ncategory_name: Integration Soundness\nweight: 0.10\ndepth_level: medium\n\nCHECKS:\n[INTEG checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="METRICS — Metric Realism",
-     prompt="Review category.\ncategory_code: METRICS\ncategory_name: Metric Realism\nweight: 0.05\ndepth_level: medium\n\nCHECKS:\n[METRICS checks table]\n\nDOCUMENT:\n[doc_content]")
+     prompt="Review category.\ncategory_code: METRICS\ncategory_name: Metric Realism\nweight: 0.05\ndepth_level: medium\n\nCHECKS:\n[METRICS checks table]\n\nFILES:\n[doc_files, one path per line]")
 ```
 
 **HARD depth — single message with 13 agents** (Medium 7 + 6 more):
@@ -179,22 +183,22 @@ Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
 # ... same 7 Medium agents above, plus:
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="SCALE — Scalability Design",
-     prompt="Review category.\ncategory_code: SCALE\ncategory_name: Scalability Design\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SCALE checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: SCALE\ncategory_name: Scalability Design\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SCALE checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="SECURITY — Security Posture",
-     prompt="Review category.\ncategory_code: SECURITY\ncategory_name: Security Posture\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SECURITY checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: SECURITY\ncategory_name: Security Posture\nweight: 0.10\ndepth_level: hard\n\nCHECKS:\n[SECURITY checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="PERF — Performance Design",
-     prompt="Review category.\ncategory_code: PERF\ncategory_name: Performance Design\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[PERF checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: PERF\ncategory_name: Performance Design\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[PERF checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="OPS — Operational Readiness",
-     prompt="Review category.\ncategory_code: OPS\ncategory_name: Operational Readiness\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[OPS checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: OPS\ncategory_name: Operational Readiness\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[OPS checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="ADR — ADR Quality",
-     prompt="Review category.\ncategory_code: ADR\ncategory_name: ADR Quality\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[ADR checks table]\n\nDOCUMENT:\n[doc_content]"),
+     prompt="Review category.\ncategory_code: ADR\ncategory_name: ADR Quality\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[ADR checks table]\n\nFILES:\n[doc_files, one path per line]"),
 Task(subagent_type="solutions-architect-skills:peer-review-category-agent",
      description="TRADEOFF — Trade-off Honesty",
-     prompt="Review category.\ncategory_code: TRADEOFF\ncategory_name: Trade-off Honesty\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[TRADEOFF checks table]\n\nDOCUMENT:\n[doc_content]")
+     prompt="Review category.\ncategory_code: TRADEOFF\ncategory_name: Trade-off Honesty\nweight: 0.05\ndepth_level: hard\n\nCHECKS:\n[TRADEOFF checks table]\n\nFILES:\n[doc_files, one path per line]")
 ```
 
 **[BARRIER — wait for all agents to complete]**
@@ -258,10 +262,20 @@ After collecting all findings, calculate scores per category:
 
 ### Step 7 — Generate Interactive Playground
 
+**First**: Read and concatenate all files from `doc_files` (Step 4) to build `docContent`. Concatenate with file separator markers between each file:
+```
+--- ARCHITECTURE.md ---
+<content of ARCHITECTURE.md>
+
+--- docs/01-executive-summary.md ---
+<content>
+...
+```
+
 Invoke the `playground` skill using `PLAYGROUND_TEMPLATE.md` as the template.
 
 Embed in the generated HTML file:
-1. `docContent` — full document text with file separator markers (see PLAYGROUND_TEMPLATE.md)
+1. `docContent` — the concatenated text built above (with file separator markers)
 2. `findings` — the findings array as a JSON literal
 3. `scorecard` — the calculated scorecard (overall score, rating, per-category scores)
 4. `depthLevel` — the chosen depth level

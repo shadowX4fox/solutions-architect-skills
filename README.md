@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.4` in the list.
+You should see `solutions-architect-skills v3.3.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.3.4 (Current Release) ✅
+### v3.3.5 (Current Release) ✅
+**refactor: peer review category agents read files directly instead of receiving inline content**
+
+- Category agents now receive a `FILES:` list of file paths and read them via the Read tool — no more full document text duplicated 13× in HARD depth prompts
+- `SKILL.md` Step 4 now resolves `doc_files` (ordered path list) instead of concatenating content; Step 7 handles concatenation for the playground `docContent` embed
+- `peer-review-category-agent.md` Step 2 updated: reads each file in `FILES:` using the Read tool, tracks per-file line numbers for accurate `lineRef` values
+
+### v3.3.4 (Previous Release) ✅
 **feat: parallel category agents for architecture peer review**
 
 - New universal `agents/peer-review-category-agent.md` sub-agent — evaluates one review category's checks against architecture docs and returns a `CATEGORY_REVIEW_RESULT` JSON block
