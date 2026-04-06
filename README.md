@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.8` in the list.
+You should see `solutions-architect-skills v3.3.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,17 @@ Where:
 
 ## Roadmap
 
-### v3.3.8 (Current Release) ✅
+### v3.3.9 (Current Release) ✅
+**perf: remove document panel from peer review playground**
+
+- Eliminated the left-side document viewer from the peer review playground — findings already carry `file` + `lineRef` on each card, making full document embedding redundant
+- Removed `doc_files` from Step 7 embed list in `SKILL.md` — playground agent no longer reads and embeds all architecture files
+- Removed `renderDocument()`, `findingForLine()`, `docContent` state field, `#doc-panel` HTML element, and all associated CSS from `PLAYGROUND_TEMPLATE.md`
+- Layout simplified to single-column: scorecard → findings → prompt output
+- Runtime token savings: ~50-80K tokens per review (no more reading and embedding ~2,000 lines of architecture files as HTML)
+- Net: ~143 lines removed from PLAYGROUND_TEMPLATE.md
+
+### v3.3.8 (Previous Release) ✅
 **refactor: reduce peer review token usage — eliminate duplicated content across skill files**
 
 - Replaced 13 near-identical Task() examples in SKILL.md with a concise loop instruction referencing the Scoring Weights table (~53 lines removed)

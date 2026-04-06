@@ -5,21 +5,18 @@ Use this template when the playground generates an interactive peer review tool 
 ## Layout
 
 ```
-+---------------------------+--------------------+
-|                           |  Scorecard panel   |
-|                           |  Overall: 7.2/10   |
-|                           |  ■■■■■■■□□□ STRUCT |
-|                           |  ■■■■■■■■■□ NAMING |
-|                           +-+------------------+
-|  Architecture document    |  Findings panel    |
-|  with line numbers and    |  [All▼][Severity▼] |
-|  finding highlights       |  [Category▼]       |
-|                           |                    |
-|  --- docs/02-arch.md ---  |  🔴 SECURITY-01    |
-|  45  ┃ ...content...      |  Lines 45-52       |
-|  46  ┃ ...content...      |  [Approve][Reject] |
-|                           |  [Comment]         |
-+---------------------------+--------------------+
++------------------------------------------------+
+|  Scorecard panel                               |
+|  Overall: 7.2/10 · HARD                        |
+|  ■■■■■■■□□□ STRUCT  ■■■■■■■■■□ NAMING  ...    |
++------------------------------------------------+
+|  Findings panel          [All▼][Severity▼]     |
+|  [Category▼]                                   |
+|                                                |
+|  🔴 SECURITY-01                                |
+|  docs/09-security.md · Lines 45–52             |
+|  [Approve] [Reject] [Comment]                  |
++------------------------------------------------+
 |  Prompt output (approved findings grouped)     |
 |  [ Copy Fix Prompt ]   [ Copy Scorecard ]      |
 +------------------------------------------------+
@@ -27,7 +24,7 @@ Use this template when the playground generates an interactive peer review tool 
 
 ## Key Components
 
-### Scorecard panel (top-right)
+### Scorecard panel (top)
 
 Display a compact summary:
 - **Overall score** — large number (e.g., "7.2") with `/10`, color-coded by rating band
@@ -39,18 +36,7 @@ Display a compact summary:
   - Red if score < 5.0
 - **Finding count by severity** — compact row: 🔴 N critical · 🟠 N major · 🟡 N minor · 🔵 N suggestion
 
-### Document panel (left)
-
-**Building `docContent`**: The playground generator receives `doc_files` (an ordered list of absolute paths). Read each file using the Read tool, then concatenate with `--- <filename> ---` separator lines between files. Store as the `docContent` string embedded in the HTML. Do NOT ask the orchestrator to pre-read these files — the generator reads them once here.
-
-- Full document content with line numbers
-- File separator headers when document spans multiple files: `--- docs/02-architecture-principles.md ---` styled as a sticky banner
-- Highlight lines with findings using a colored left border (color matches severity)
-- Status-based coloring: pending (amber), approved (green), rejected (red with opacity)
-- Click a finding card in the right panel to scroll to and highlight the relevant lines
-- Finding indicator icon on the left gutter for lines with findings
-
-### Findings panel (right, below scorecard)
+### Findings panel (middle, scrollable)
 
 - Filter bar with three controls:
   - **Status tabs**: All / Pending / Approved / Rejected (with count badges)
@@ -81,7 +67,6 @@ Display a compact summary:
 ```javascript
 const reviewData = {
   depthLevel: "hard",         // "light" | "medium" | "hard"
-  docContent: "",             // Full document text (multi-file concatenated with separators)
   scorecard: {
     overall: 7.2,
     rating: "Significant gaps — address before implementation",
@@ -115,64 +100,6 @@ const reviewData = {
   activeCategoryFilter: "all",   // "all" | <category code>
   activeFindingId: null
 };
-```
-
----
-
-## Document Rendering
-
-Render the document panel with file separators for multi-file architectures:
-
-```javascript
-// IMPORTANT: Do NOT use nested template literals (backticks inside ${} expressions).
-// Use string concatenation or single-quoted strings inside ${} ternaries instead.
-function renderDocument() {
-  const lines = reviewData.docContent.split('\n');
-  let html = '';
-  let lineNum = 0;
-  let inCodeBlock = false;
-
-  for (const line of lines) {
-    // File separator lines (--- path/to/file.md ---)
-    if (line.startsWith('--- ') && line.endsWith(' ---')) {
-      html += `<div class="file-separator">${line}</div>`;
-      continue;
-    }
-
-    lineNum++;
-    const finding = findingForLine(lineNum);
-    const statusClass = finding ? finding.status : '';
-    const severityClass = finding ? 'sev-' + finding.severity : '';
-    const onclickAttr = finding ? 'highlightFinding(' + finding.id + ')' : '';
-    const gutterHtml = finding ? '<span class="finding-gutter">●</span>' : '<span class="finding-gutter-empty"></span>';
-
-    html += `<div class="doc-line ${finding ? 'has-finding' : ''} ${statusClass} ${severityClass}"
-                  data-line="${lineNum}"
-                  onclick="${onclickAttr}">
-      <span class="line-num">${lineNum}</span>
-      ${gutterHtml}
-      <span class="line-content">${escapeHtml(renderInlineMarkdown(line))}</span>
-    </div>`;
-  }
-  return html;
-}
-```
-
----
-
-## Finding-to-Line Matching
-
-```javascript
-function findingForLine(lineNum) {
-  return reviewData.findings.find(f => {
-    // Parse "Lines 45–52" or "Line 45"
-    const range = f.lineRef.match(/Lines?\s*(\d+)(?:[–-](\d+))?/i);
-    if (!range) return false;
-    const start = parseInt(range[1]);
-    const end = range[2] ? parseInt(range[2]) : start;
-    return lineNum >= start && lineNum <= end;
-  });
-}
 ```
 
 ---
@@ -294,13 +221,10 @@ The following IDs **must** be used for the structural containers so the CSS layo
 ```html
 <div id="app">
   <div id="main">
-    <div id="doc-panel"><!-- line-numbered document content --></div>
-    <div id="right-column">
-      <div id="scorecard-panel"><!-- overall score, rating, category bars --></div>
-      <div id="findings-panel">
-        <div id="findings-filters"><!-- status tabs + severity/category dropdowns --></div>
-        <div id="findings-list"><!-- finding cards --></div>
-      </div>
+    <div id="scorecard-panel"><!-- overall score, rating, category bars --></div>
+    <div id="findings-panel">
+      <div id="findings-filters"><!-- status tabs + severity/category dropdowns --></div>
+      <div id="findings-list"><!-- finding cards --></div>
     </div>
   </div>
   <div id="prompt-panel">
@@ -335,28 +259,11 @@ html, body {
   overflow: hidden;
 }
 
-/* Horizontal split: document panel (left) + right column */
+/* Vertical stack: scorecard above findings */
 #main {
   display: flex;
-  flex: 1;
-  min-height: 0;        /* critical: allows flex children to shrink below content size */
-  overflow: hidden;
-}
-
-/* Document panel — independently scrollable */
-#doc-panel {
-  flex: 1;
-  overflow-y: auto;
-  border-right: 1px solid #30363d;
-  min-height: 0;
-}
-
-/* Right column — fixed width, scorecard stacked above findings */
-#right-column {
-  width: 420px;
-  min-width: 340px;
-  display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
   overflow: hidden;
 }
@@ -432,10 +339,6 @@ html, body {
 .sev-minor    { border-left: 3px solid #9a6700; background: rgba(154,103,0,0.06); }
 .sev-suggestion { border-left: 3px solid #0969da; background: rgba(9,105,218,0.06); }
 
-/* Status overrides */
-.doc-line.approved  { border-left-color: #1a7f37; background: rgba(26,127,55,0.08); }
-.doc-line.rejected  { border-left-color: #6e7781; opacity: 0.5; }
-
 /* Depth badges */
 .depth-badge { font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 3px; }
 .depth-light  { background: #1a7f37; color: #fff; }
@@ -445,29 +348,11 @@ html, body {
 /* Category badge */
 .cat-badge { font-size: 10px; padding: 2px 5px; border-radius: 3px; background: #30363d; color: #8b949e; font-family: monospace; }
 
-/* File separator */
-.file-separator {
-  padding: 4px 12px;
-  background: #161b22;
-  color: #58a6ff;
-  font-size: 11px;
-  font-family: monospace;
-  border-top: 1px solid #30363d;
-  border-bottom: 1px solid #30363d;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
 /* Scorecard bars */
 .score-bar-fill { height: 6px; border-radius: 3px; transition: width 0.3s; }
 .score-green { background: #1a7f37; }
 .score-amber { background: #bf8700; }
 .score-red   { background: #cf222e; }
-
-/* Finding gutter indicator */
-.finding-gutter { color: inherit; font-size: 8px; width: 12px; display: inline-block; }
-.finding-gutter-empty { width: 12px; display: inline-block; }
 ```
 
 ---

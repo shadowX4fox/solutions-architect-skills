@@ -201,10 +201,9 @@ Apply the **Scorecard Rating Bands** from `PEER_REVIEW_CRITERIA.md` to assign th
 Invoke the `playground` skill using `PLAYGROUND_TEMPLATE.md` as the template.
 
 Embed in the generated HTML file:
-1. `doc_files` — the ordered list of absolute file paths (from Step 4); the playground reads and concatenates these itself with `--- filename ---` separators between files
-2. `findings` — the findings array as a JSON literal
-3. `scorecard` — the calculated scorecard (overall score, rating, per-category scores)
-4. `depthLevel` — the chosen depth level
+1. `findings` — the findings array as a JSON literal
+2. `scorecard` — the calculated scorecard (overall score, rating, per-category scores)
+3. `depthLevel` — the chosen depth level
 
 Follow all core playground requirements:
 - Single HTML file, no external dependencies
