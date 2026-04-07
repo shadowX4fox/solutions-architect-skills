@@ -94,7 +94,7 @@ Checks that naming follows the established conventions.
 | NAMING-01 | Section names match standard names exactly | Minor | Case-sensitive match: "Executive Summary", "System Overview", "Architecture Principles", "Architecture Layers", "Component Details", "Data Flow Patterns", "Integration Points", "Technology Stack", "Security Architecture", "Scalability & Performance", "Operational Considerations", "Architecture Decision Records" |
 | NAMING-02 | Multi-file docs/ filenames follow convention | Minor | Files must follow `NN-kebab-case.md` pattern (e.g., `01-executive-summary.md`, `05-component-details.md`) |
 | NAMING-03 | Component files follow naming convention | Minor | C4 L2 container files in `docs/components/` (or system subfolders) must follow `NN-kebab-case-name.md` pattern. C4 L1 system descriptor files at root use `kebab-case-name.md` (no NN- prefix, matching a subfolder name). |
-| NAMING-04 | ADR files follow naming convention | Minor | ADR files must follow `NNN-kebab-case.md` pattern (e.g., `001-architecture-type-selection.md`) |
+| NAMING-04 | ADR files follow naming convention | Minor | ADR files must follow `ADR-NNN-kebab-case.md` pattern (e.g., `ADR-001-architecture-type-selection.md`) |
 | NAMING-05 | Section numbering is sequential without gaps | Minor | Section numbers 1 through 12 must be present and sequential. No gaps, duplicates, or out-of-order numbers |
 
 ---

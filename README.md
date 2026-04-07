@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.11-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.11` in the list.
+You should see `solutions-architect-skills v3.3.12` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,13 @@ Where:
 
 ## Roadmap
 
-### v3.3.11 (Current Release) ✅
+### v3.3.12 (Current Release) ✅
+**fix: NAMING-04 ADR file naming pattern false positive**
+
+- Fixed peer review NAMING-04 check: pattern was `NNN-kebab-case.md` but correct ADR convention is `ADR-NNN-kebab-case.md`
+- Previously flagged valid ADR files (e.g., `ADR-001-architecture-type-selection.md`) as incorrectly named
+
+### v3.3.11 (Previous Release) ✅
 **perf: persist peer review results as JSON + fast-path playground regeneration**
 
 - Review data now saved to `architecture-peer-review-<date>.json` after each run (Step 6.1)
