@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.12-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.12` in the list.
+You should see `solutions-architect-skills v3.3.13` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.12 (Current Release) ✅
+### v3.3.13 (Current Release) ✅
+**fix: use case count is a complexity indicator, not a hard minimum**
+
+- Reframed use case count across all architecture-readiness scoring and elicitation files
+- Previously enforced "minimum 3 use cases" as a hard constraint; now treated as architecture complexity signal
+- Simple systems may need 1-2 use cases, complex ones may need 5+ — no fixed minimum
+- Updated: PO_SPEC_SCORING_GUIDE.md (evaluation criteria, completeness scoring, gap analysis), REQUIREMENTS_ELICITATION_GUIDE.md (Phase 3 goal, target, phase transition), PRODUCT_OWNER_SPEC_GUIDE.md (scoring prep, self-assessment checklist), SKILL.md (Phase 3 description)
+
+### v3.3.12 (Previous Release) ✅
 **fix: NAMING-04 ADR file naming pattern false positive**
 
 - Fixed peer review NAMING-04 check: pattern was `NNN-kebab-case.md` but correct ADR convention is `ADR-NNN-kebab-case.md`

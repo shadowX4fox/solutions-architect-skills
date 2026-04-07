@@ -83,7 +83,7 @@ When this skill is activated and no existing PO Spec is found (or the user reque
 4. **Conduct the 4-phase interview**:
    - Phase 1 — Foundation (Business Context, Stakeholders)
    - Phase 2 — Value & Boundaries (Objectives, Constraints) ← highest weight, invest depth here
-   - Phase 3 — Behavior (Use Cases, User Stories) ← deepest phase, min 3 use cases
+   - Phase 3 — Behavior (Use Cases, User Stories) ← deepest phase, use case count reflects architecture complexity
    - Phase 4 — Experience & Measurement (UX Requirements, Success Metrics)
 5. **Produce Discovery Summary**: Structured by all 8 sections with confidence levels and open questions; present for PO confirmation before drafting
 6. **Draft PO Spec**: Load `templates/PO_SPEC_TEMPLATE.md`, fill from elicited data, self-score against `PO_SPEC_SCORING_GUIDE.md`

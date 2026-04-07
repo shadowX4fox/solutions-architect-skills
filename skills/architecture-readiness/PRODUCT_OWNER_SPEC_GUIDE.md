@@ -1926,7 +1926,7 @@ Your PO Spec will be evaluated on a **0-10 scale** using a weighted scoring meth
 
 **Focus on high-weight sections first:**
 
-1. **Use Cases (2.5 points)**: Ensure you have at least 3 detailed use cases with primary flows, alternative flows, edge cases, and success metrics
+1. **Use Cases (2.5 points)**: Ensure your use cases capture the full scope and complexity of the desired architecture, with primary flows, alternative flows, edge cases, and success metrics
 2. **Business Constraints (2.0 points)**: Document all constraints - budget breakdown, hard deadlines, compliance requirements, integration constraints, operational constraints
 3. **Business Objectives (1.5 points)**: Define at least 3 measurable business goals with specific targets, timeframes, and ROI expectations
 
@@ -1937,7 +1937,7 @@ Your PO Spec will be evaluated on a **0-10 scale** using a weighted scoring meth
 Before submitting to architecture team, verify:
 
 **Critical Sections (High Weight):**
-- [ ] At least 3 complete use cases with flows and success metrics
+- [ ] Use cases cover the full business scope with flows and success metrics (count reflects architecture complexity)
 - [ ] Budget constraints specified with breakdown
 - [ ] Timeline constraints with hard deadlines and reasoning
 - [ ] Regulatory/compliance requirements documented

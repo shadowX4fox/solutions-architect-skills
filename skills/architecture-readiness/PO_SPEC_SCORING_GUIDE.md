@@ -141,16 +141,16 @@ For each section, evaluate completeness using the criteria below, then assign a 
 
 | Criteria | Points | Evaluation Question |
 |----------|--------|---------------------|
-| Number of Use Cases | 20% | Are at least 3 primary use cases defined? |
+| Number of Use Cases | 20% | Are primary use cases defined? The count indicates architecture complexity (more use cases = more complex architecture), not a hard minimum. |
 | Use Case Structure | 30% | Does each use case have: description, actors, primary flow, success metrics? |
 | Alternative Flows | 25% | Are alternative flows and edge cases documented? |
 | Business Perspective | 25% | Is the focus on business flows (no technical implementation details)? |
 
 **Completeness Scoring:**
-- **100%**: 3+ complete use cases with all required elements, alternatives, business-focused
-- **75%**: 3 use cases with most elements, some alternatives documented
-- **50%**: 2-3 use cases with partial details, few or no alternatives
-- **25%**: 1-2 use cases with minimal detail
+- **100%**: Use cases fully cover the business scope with all required elements, alternatives, business-focused. The number of use cases reflects the true complexity of the desired architecture.
+- **75%**: Use cases cover most of the business scope with most elements, some alternatives documented
+- **50%**: Partial coverage with partial details, few or no alternatives
+- **25%**: Minimal use cases with minimal detail, scope unclear
 - **0%**: Section missing or use cases are too vague/technical
 
 **Example - 100% Complete:**
@@ -395,11 +395,11 @@ When a PO Spec scores below threshold (< 7.5/10), provide actionable feedback us
 
 **Section 4: Use Cases** (Completeness: 40%, Weight: 2.5, Score: 1.0/2.5)
 - **Missing**:
-  - Only 1 use case defined (need minimum 3 primary use cases)
+  - Only 1 use case defined (may not reflect the full complexity of the desired architecture)
   - Use case lacks alternative flows and edge cases
   - Success metrics not specified
 - **Actionable Feedback**:
-  - Add 2 more primary use cases (reference PRODUCT_OWNER_SPEC_GUIDE.md Section 4 examples)
+  - Consider adding more use cases to capture the full scope and complexity (reference PRODUCT_OWNER_SPEC_GUIDE.md Section 4 examples)
   - For each use case, document: description, actors, primary flow, alternative flows, edge cases, success metrics
   - Ensure use cases focus on business flows, not technical implementation details
 - **Example**: See "Use Case 1: Scheduled Transfers" in PRODUCT_OWNER_SPEC_GUIDE.md lines 101-118

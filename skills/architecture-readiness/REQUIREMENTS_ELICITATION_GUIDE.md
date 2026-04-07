@@ -145,7 +145,7 @@ Open the interview with a brief orientation message. Adapt to the user's languag
 
 **Sections covered**: Use Cases (2.5), User Stories (0.5)
 **Min exchanges**: 6–10
-**Goal**: Elicit minimum 3 use cases with flows, alternatives, and edge cases. Derive user stories from use cases. Use Cases carry 25% of the total score — this is the deepest phase.
+**Goal**: Elicit use cases that capture the full scope of the desired architecture, with flows, alternatives, and edge cases. Derive user stories from use cases. Use Cases carry 25% of the total score — this is the deepest phase. The number of use cases indicates architecture complexity, not a hard minimum.
 
 **Scenario Walking Technique** (primary technique for this phase):
 
@@ -157,17 +157,18 @@ For each use case, walk the PO through this structure:
 5. "How does success look for the user?"
 6. "Is there a time constraint or performance expectation for this use case?"
 
-**Target**: Minimum 3 use cases. Aim for:
-- 1 primary/happy-path use case
-- 1 use case involving error or failure handling
-- 1 use case involving a secondary persona or edge scenario
+**Target**: Use cases that cover the business scope. Aim to include:
+- Primary/happy-path use cases
+- Use cases involving error or failure handling
+- Use cases involving secondary personas or edge scenarios
+The number of use cases reflects architecture complexity — a simple system may need 1-2, a complex one may need 5+.
 
 **Deriving User Stories**: After each use case, extract user stories:
 > "From this use case, can we say: As a [persona], I want to [action] so that [benefit]?"
 
 Aim for 3–5 user stories per use case.
 
-**Phase transition**: Once 3 use cases with primary flows are documented:
+**Phase transition**: Once use cases covering the business scope with primary flows are documented:
 > "Great. Last phase — let's cover experience expectations and how you'll measure success after launch."
 
 ---
