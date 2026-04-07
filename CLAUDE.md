@@ -254,8 +254,9 @@ The skill includes:
 - **Interactive HTML playground** via the `playground` plugin — approve/reject/comment workflow
 - **Weighted 0–10 scorecard** per category and overall
 - **Fix prompt generation** for approved findings to paste back into Claude
+- **JSON result persistence** — review data saved to `architecture-peer-review-<date>.json` after each run; enables fast-path playground regeneration without re-running agents
 
-**When to use**: After ARCHITECTURE.md passes form validation (use `architecture-docs` review first), when a peer review or architectural quality assessment is needed, or before finalizing architecture for implementation.
+**When to use**: After ARCHITECTURE.md passes form validation (use `architecture-docs` review first), when a peer review or architectural quality assessment is needed, before finalizing architecture for implementation, or to regenerate the review playground from saved results.
 
 **Permissions required** (add to project `.claude/settings.json`):
 

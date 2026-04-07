@@ -26,6 +26,7 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 - User wants a second opinion on their ARCHITECTURE.md
 - User asks for scalability, security, or performance review of their architecture
 - User uses `/skill architecture-peer-review`
+- User asks to "regenerate peer review playground", "rebuild review playground", or "reload peer review results" — activates the **fast path** (Step 0) to regenerate from saved JSON without re-running agents
 
 **Do NOT invoke for:**
 - Form/template compliance validation → use `architecture-docs` skill (REVIEW_AUDIT_WORKFLOW)
@@ -48,6 +49,31 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 ---
 
 ## Workflow
+
+### Step 0 — Check for Existing Review Data (Fast Path)
+
+Before starting a full review, check if the user explicitly requested regeneration from existing data (e.g., "regenerate playground", "rebuild review playground", "reload peer review results").
+
+**If the user requested regeneration:**
+
+1. Glob for `architecture-peer-review-*.json` in the project root.
+2. If found, present the most recent file(s) with dates and let the user pick one.
+3. Read the selected JSON file and parse it as `reviewData`.
+4. **Validate** the JSON contains: `findings` (array), `scorecard` (object with `overall`, `rating`, `categories`), and `depthLevel` (string).
+5. **Staleness check**: if the JSON contains `metadata.sourceFiles`, compare each file's `lastModified` timestamp against the current file modification time. If any source file has been modified since the review, warn:
+   ```
+   ⚠️ Source files changed since this review was saved:
+     - docs/07-security-architecture.md (modified 2026-04-05, review from 2026-04-03)
+   Results may be stale. Proceed with regeneration or run a fresh review?
+   ```
+6. If the user confirms, **skip directly to Step 7** (Generate Interactive Playground) using the loaded `reviewData`.
+7. Report: `♻️ Regenerated playground from saved results (skipped agent evaluation)`
+
+**If no JSON files found**: inform the user and proceed with the full review workflow (Step 1).
+
+**If the user did NOT request regeneration**: proceed normally to Step 1.
+
+---
 
 ### Step 1 — Locate Architecture Document
 
@@ -196,9 +222,40 @@ Apply the **Scorecard Rating Bands** from `PEER_REVIEW_CRITERIA.md` to assign th
 
 ---
 
+### Step 6.1 — Persist Review Data
+
+Write the complete `reviewData` object to a JSON file for future fast-path regeneration (Step 0).
+
+1. **Assemble** the full `reviewData` object:
+   ```json
+   {
+     "depthLevel": "hard",
+     "scorecard": { "overall": 7.2, "rating": "...", "categories": [...] },
+     "findings": [...],
+     "metadata": {
+       "reviewDate": "YYYY-MM-DD",
+       "sourceFiles": [
+         { "path": "docs/07-security-architecture.md", "lastModified": "YYYY-MM-DDTHH:mm:ss" }
+       ]
+     }
+   }
+   ```
+   - `metadata.reviewDate`: current ISO date
+   - `metadata.sourceFiles`: array of `{ path, lastModified }` for each file in `doc_files` (enables staleness detection on fast-path load in Step 0)
+
+2. **Write** to `architecture-peer-review-<YYYY-MM-DD>.json` in the project root (pretty-printed).
+
+3. **Report**: `💾 Review data saved to architecture-peer-review-<date>.json`
+
+---
+
 ### Step 7 — Generate Interactive Playground
 
 Invoke the `playground` skill using `PLAYGROUND_TEMPLATE.md` as the template.
+
+The `reviewData` object (containing `findings`, `scorecard`, and `depthLevel`) comes from either:
+- **Full review path**: assembled in Steps 5.2 + 6
+- **Fast path**: loaded from a saved JSON file (Step 0)
 
 Embed in the generated HTML file:
 1. `findings` — the findings array as a JSON literal
@@ -273,6 +330,12 @@ If the user pastes the generated fix prompt back into Claude, apply the approved
 
 "Review my architecture — just the security parts"
 → Activates skill, suggests Hard depth and notes only SECURITY category findings will be most relevant
+
+"Regenerate the peer review playground"
+→ Fast path: reads saved JSON, regenerates HTML, skips agent evaluation
+
+"Rebuild the review from the last results"
+→ Fast path: reads most recent architecture-peer-review-*.json
 ```
 
 ---
