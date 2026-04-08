@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.13-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.14-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.13` in the list.
+You should see `solutions-architect-skills v3.3.14` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.13 (Current Release) ✅
+### v3.3.14 (Current Release) ✅
+**fix: suppress false-positive peer review finding on file prefix vs section number offset**
+
+- Added explicit clarification to PEER_REVIEW_CRITERIA.md checks STRUCT-04, NAMING-02, and NAMING-05
+- Reviewer agents no longer flag the intentional two-number offset between docs/ file prefixes (01–10) and internal section numbers (S1–S12)
+- Offset is by design: S1+S2 share `01-system-overview.md`, S5 uses `docs/components/` (no numbered file)
+- Updated: PEER_REVIEW_CRITERIA.md (STRUCT-04, NAMING-02, NAMING-05 "What to Look For" columns)
+
+### v3.3.13 (Previous Release) ✅
 **fix: use case count is a complexity indicator, not a hard minimum**
 
 - Reframed use case count across all architecture-readiness scoring and elicitation files

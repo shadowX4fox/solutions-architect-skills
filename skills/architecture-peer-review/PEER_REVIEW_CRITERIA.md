@@ -80,7 +80,7 @@ Checks that the document has the correct top-level structure.
 | STRUCT-01 | All 12 required sections present | Critical | Sections 1–12 must all exist: Executive Summary, System Overview, Architecture Principles, Architecture Layers, Component Details, Data Flow Patterns, Integration Points, Technology Stack, Security Architecture, Scalability & Performance, Operational Considerations, Architecture Decision Records |
 | STRUCT-02 | Architecture type comment present in Section 4 | Major | HTML comment `<!-- ARCHITECTURE_TYPE: {TYPE} -->` at top of Section 4. Valid types: MICROSERVICES, META, 3-TIER, N-LAYER, BIAN |
 | STRUCT-03 | Document Index or navigation present | Minor | For monolithic files: Document Index section with line range references. For multi-file: ARCHITECTURE.md serves as navigation index with links to docs/ files |
-| STRUCT-04 | Multi-file structure follows convention | Minor | If multi-file detected: ARCHITECTURE.md as nav index, `docs/NN-section-name.md` numbered files, `docs/components/NN-component-name.md` per-component files (or `docs/components/<system>/NN-*.md` for multi-system) |
+| STRUCT-04 | Multi-file structure follows convention | Minor | If multi-file detected: ARCHITECTURE.md as nav index, `docs/NN-section-name.md` numbered files, `docs/components/NN-component-name.md` per-component files (or `docs/components/<system>/NN-*.md` for multi-system). Note: file prefix NN is a sequential file-ordering number, NOT the internal section number. S1+S2 share `01-*`, S5 uses `docs/components/` (no numbered file), creating a two-number offset from S6 onward (e.g., S9 → `07-*`, S11 → `09-*`). This offset is intentional — do not flag it. |
 | STRUCT-05 | ADR directory or section exists | Major | Either `adr/` directory with at least one ADR file, OR Section 12 contains inline ADR content. Empty Section 12 with no content is a major gap |
 
 ---
@@ -92,10 +92,10 @@ Checks that naming follows the established conventions.
 | ID | Check | Severity | What to Look For |
 |----|-------|----------|-----------------|
 | NAMING-01 | Section names match standard names exactly | Minor | Case-sensitive match: "Executive Summary", "System Overview", "Architecture Principles", "Architecture Layers", "Component Details", "Data Flow Patterns", "Integration Points", "Technology Stack", "Security Architecture", "Scalability & Performance", "Operational Considerations", "Architecture Decision Records" |
-| NAMING-02 | Multi-file docs/ filenames follow convention | Minor | Files must follow `NN-kebab-case.md` pattern (e.g., `01-executive-summary.md`, `05-component-details.md`) |
+| NAMING-02 | Multi-file docs/ filenames follow convention | Minor | Files must follow `NN-kebab-case.md` pattern (e.g., `01-executive-summary.md`, `05-component-details.md`). The NN prefix is a sequential file-order number, not a section number — the offset between file prefix and section number is intentional (see STRUCT-04). |
 | NAMING-03 | Component files follow naming convention | Minor | C4 L2 container files in `docs/components/` (or system subfolders) must follow `NN-kebab-case-name.md` pattern. C4 L1 system descriptor files at root use `kebab-case-name.md` (no NN- prefix, matching a subfolder name). |
 | NAMING-04 | ADR files follow naming convention | Minor | ADR files must follow `ADR-NNN-kebab-case.md` pattern (e.g., `ADR-001-architecture-type-selection.md`) |
-| NAMING-05 | Section numbering is sequential without gaps | Minor | Section numbers 1 through 12 must be present and sequential. No gaps, duplicates, or out-of-order numbers |
+| NAMING-05 | Section numbering is sequential without gaps | Minor | Section numbers 1 through 12 must be present and sequential. No gaps, duplicates, or out-of-order numbers. This check validates internal section numbers in headings (S1–S12), NOT file prefix numbers. File prefixes (01–10) are intentionally offset from section numbers because S1+S2 share one file and S5 has no numbered file — do not flag this offset. |
 
 ---
 
