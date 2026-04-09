@@ -264,6 +264,25 @@ The skill includes:
 "Agent(solutions-architect-skills:peer-review-category-agent)"
 ```
 
+### Using the Architecture Traceability Skill
+
+The `architecture-traceability` skill compares PO Spec use cases against architecture documentation to detect coverage gaps. It generates a portable markdown report (`TRACEABILITY_REPORT.md`) designed for tickets, emails, and external platforms.
+
+To manually activate the skill, use: `/skill architecture-traceability`
+
+The skill includes:
+- **Use case parsing** from PO Spec Section 4 — extracts requirements from primary flows, alternative flows, edge cases, preconditions, postconditions, and success metrics
+- **Architecture coverage search** — maps each requirement to the relevant architecture section (S1-S12) and classifies as Covered, Partial, or Not Covered
+- **Per-use-case coverage tables** with evidence citations (section + quote)
+- **Summary statistics** — total/covered/partial/gaps with percentages, per-phase breakdown
+- **Gap Report** — consolidated list of all Not Covered and Partial items with suggested architecture sections
+
+**Output**: `TRACEABILITY_REPORT.md` at project root (overwritten on each run).
+
+**When to use**: After both the PO Spec and ARCHITECTURE.md exist, when validating architecture coverage of business requirements, checking for deviations from the PO Spec, or preparing traceability evidence for stakeholders.
+
+---
+
 ### Using the Architecture Compliance Review Skill
 
 The `architecture-compliance-review` skill validates compliance contract portfolio health and generates an interactive playground for exploring what needs to be fixed in ARCHITECTURE.md to reach the auto-approve threshold (≥8.0/10) across all 10 contracts.
