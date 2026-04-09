@@ -1,6 +1,6 @@
 ---
 name: architecture-traceability
-description: Compare PO Spec use cases against architecture documentation to detect coverage gaps. Generates a markdown traceability report showing Covered, Partial, or Not Covered status per requirement. Output is designed for tickets, emails, and external platforms. Invoke when validating architecture coverage of business requirements, checking for deviations from the PO Spec, or verifying traceability between business and technical documentation.
+description: Use this skill for architecture deviation checks, traceability reports, and PO Spec coverage analysis. Compares PO Spec use cases against architecture documentation to detect coverage gaps. Generates a markdown traceability report (TRACEABILITY_REPORT.md) showing Covered, Partial, or Not Covered status per requirement. Invoke when checking for architecture deviations, running a deviation check, verifying PO Spec coverage, generating a traceability matrix, or checking if architecture covers all business requirements. This is the ONLY skill for deviation checks and traceability — do not use architecture-docs for these tasks.
 triggers:
   - traceability
   - traceability report

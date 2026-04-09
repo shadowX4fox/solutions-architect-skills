@@ -88,6 +88,12 @@ This skill automatically activates when users ask questions about documented arc
 - Cross-cutting concerns (e.g., "How does authentication work with external systems?")
 - Implementation details spanning components, data, and deployment
 
+**Do NOT activate for** (redirect to the correct skill):
+- Deviation checks, traceability reports, or PO Spec coverage analysis → use `architecture-traceability` skill
+- Peer review or architecture quality assessment → use `architecture-peer-review` skill
+- Compliance contract generation → use `architecture-compliance` skill
+- Component index maintenance → use `architecture-component-guardian` skill
+
 ---
 
 ## 🎯 AUTOMATIC WORKFLOW DETECTION
