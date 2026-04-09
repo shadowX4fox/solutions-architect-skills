@@ -71,10 +71,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: Application Service | Business Service | Domain Service | Integration Client
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -119,10 +120,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: Database | Repository | Cache | Data Access Object (DAO) | File Storage
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path or database instance]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {managed service | Docker container | VM}
+**Communicates via:** {TCP | HTTPS | AMQP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -175,10 +177,11 @@ For each component in your system, document using the template below. **Group co
 
 ### User API Controller
 
-**Type**: REST API Controller
-**Technology**: Express.js 4.18 (Node.js)
-**Version**: v2.1.0
-**Location**: `src/controllers/UserController.ts` (example path)
+**Type:** API Service
+**Technology:** [Express.js 4.18, Node.js 20]
+**C4 Level:** Container (L2)
+**Deploys as:** Docker container
+**Communicates via:** HTTPS
 
 **Purpose**:
 Expose REST endpoints for user account management (create, read, update, delete).
@@ -225,10 +228,11 @@ Expose REST endpoints for user account management (create, read, update, delete)
 
 ### User Service
 
-**Type**: Application Service
-**Technology**: TypeScript, NestJS 10
-**Version**: v2.1.0
-**Location**: `src/services/UserService.ts` (example path)
+**Type:** API Service
+**Technology:** [NestJS 10, TypeScript 5]
+**C4 Level:** Container (L2)
+**Deploys as:** Docker container
+**Communicates via:** HTTPS
 
 **Purpose**:
 Implement business logic for user account lifecycle and profile management.
@@ -280,10 +284,11 @@ Implement business logic for user account lifecycle and profile management.
 
 ### User Repository
 
-**Type**: Data Access Object (DAO) / Repository
-**Technology**: TypeORM 0.3
-**Version**: v2.1.0
-**Location**: `src/repositories/UserRepository.ts` (example path)
+**Type:** Database
+**Technology:** [PostgreSQL 15, TypeORM 0.3]
+**C4 Level:** Container (L2)
+**Deploys as:** managed service
+**Communicates via:** TCP
 
 **Purpose**:
 Provide data access layer for User entity persistence to PostgreSQL database.

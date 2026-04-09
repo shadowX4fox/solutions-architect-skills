@@ -78,10 +78,11 @@ For each component in your system, document using the template below. **Group co
 
 **BIAN Business Area Alignment**: [Sales and Service | Reference Data | Operations and Execution | Risk and Compliance | Business Support]
 
-**Type**: Scenario Orchestrator | Process Engine | Business Rules Engine | Workflow Manager
-**Technology**: [Specific technology used - e.g., Camunda, Apache Airflow]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this business scenario orchestrates]
@@ -135,10 +136,11 @@ For each component in your system, document using the template below. **Group co
 
 **BIAN Business Domain Alignment**: [From 30+ BIAN Business Domains - e.g., Payments, Customer Management, Loans and Deposits]
 
-**Type**: Business Capability Service | API Layer | Domain Coordinator
-**Technology**: [Specific technology used - e.g., Spring Boot, Node.js]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this business capability manages]
@@ -270,10 +272,11 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 
 **Implementation Details**:
 
-**Type**: BIAN Service Domain | Microservice
-**Technology**: [Language/framework - e.g., Java/Spring Boot, Node.js, Python]
-**Version**: [Version number]
-**Location**: [Repository URL or directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 **Team Owner**: [Team responsible for this service domain]
 
 **Purpose**:
@@ -514,10 +517,11 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 
 ### [Core System Name]
 
-**Type**: Core Banking System | Mainframe | Legacy System | Transaction Processor | Master Data Management
-**Technology**: [Specific technology used - e.g., Finacle, Temenos T24, IBM z/OS]
-**Version**: [Version number]
-**Location**: [Data center, on-premise, cloud]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {VM | on-premise | managed service}
+**Communicates via:** {TCP | HTTPS | MQ | ...}
 
 **Purpose**:
 [1-2 sentence description of core system and its role]
@@ -574,10 +578,11 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 
 ### Mobile Banking App
 
-**Type**: Mobile Application
-**Technology**: React Native 0.72, TypeScript
-**Version**: v4.2.1
-**Location**: `repos/mobile-banking-app`
+**Type:** Web Application
+**Technology:** [React Native 0.72, TypeScript 5]
+**C4 Level:** Container (L2)
+**Deploys as:** serverless function
+**Communicates via:** HTTPS
 
 **Purpose**:
 Provide retail customers with mobile access to banking services on iOS and Android, offering account management, payments, and financial services through a native mobile experience.
@@ -701,10 +706,11 @@ Provide retail customers with mobile access to banking services on iOS and Andro
 
 **Implementation Details**:
 
-**Type**: BIAN Service Domain | Microservice
-**Technology**: Java 17, Spring Boot 3.2, Spring Data JPA
-**Version**: v3.1.0
-**Location**: `repos/bian-service-domains/payment-order`
+**Type:** API Service
+**Technology:** [Java 17, Spring Boot 3.2, Spring Data JPA]
+**C4 Level:** Container (L2)
+**Deploys as:** Docker container
+**Communicates via:** HTTPS
 **Team Owner**: Payments Team
 
 **Purpose**:

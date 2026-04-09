@@ -68,10 +68,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: BFF | API Gateway | Session Manager | Experience Orchestrator
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -112,10 +113,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: Orchestrator | Process Engine | Business Rules Engine | Workflow Manager
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -156,10 +158,11 @@ For each component in your system, document using the template below. **Group co
 
 ### [Component Name]
 
-**Type**: Business Service | API Layer | Business Rules Engine | Capability Service
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -211,10 +214,11 @@ For each component in your system, document using the template below. **Group co
 
 **Note**: The Official BIAN Name must match the official BIAN V12.0 Service Landscape definition exactly. The BIAN ID is for internal tracking to count service domains in this document. BIAN Business Domain and Business Area must be traceable to the BIAN hierarchy.
 
-**Type**: Service Domain | Microservice
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Package/directory path or repository]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**:
 [1-2 sentence description aligned with BIAN V12.0 service domain definition]
@@ -358,10 +362,11 @@ This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper
 
 ### [Core System Name]
 
-**Type**: Core Banking | Mainframe | Legacy System | Transaction Processor
-**Technology**: [Specific technology used]
-**Version**: [Version number]
-**Location**: [Data center, on-premise, cloud]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {VM | on-premise | managed service}
+**Communicates via:** {TCP | HTTPS | MQ | ...}
 
 **Purpose**:
 [1-2 sentence description of core system]
@@ -408,10 +413,11 @@ This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper
 
 ### Mobile Banking App
 
-**Type**: Mobile Application
-**Technology**: React Native 0.72
-**Version**: v3.5.2
-**Location**: `apps/mobile-banking/` (example path)
+**Type:** Web Application
+**Technology:** [React Native 0.72, TypeScript 5]
+**C4 Level:** Container (L2)
+**Deploys as:** serverless function
+**Communicates via:** HTTPS
 
 **Purpose**:
 Provide retail banking services to customers via iOS and Android mobile devices.

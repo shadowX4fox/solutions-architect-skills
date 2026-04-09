@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.19` in the list.
+You should see `solutions-architect-skills v3.3.20` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.19 (Current Release) ✅
+### v3.3.20 (Current Release) ✅
+**fix: C4 metadata missing from Section 5 template layers/tiers — all architecture types**
+
+- All Section 5 templates now include `**Type:** {C4 type}`, `**C4 Level:** Container (L2)`, `**Deploys as:**`, `**Communicates via:**` in every layer/tier template, not just Layer 1
+- Previously only the first layer had C4 metadata; subsequent layers used non-canonical type hints (e.g., `Application Service`, `Scenario Orchestrator`, `BIAN Service Domain`) requiring C4 migration afterward
+- Updated: `SECTION_5_3TIER.md` (Tier 2, Tier 3, all 3 examples), `SECTION_5_META.md` (Layers 2–6 + example), `SECTION_5_BIAN.md` (Layers 2–5 + 2 examples), `SECTION_5_MICROSERVICES.md` (infrastructure template + example)
+- Fixed stale references in `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`: flat component path (`docs/components/NN-name.md` → `docs/components/<system-name>/NN-name.md`) and column count (`4-column` → `5-column` index)
+
+### v3.3.19 (Previous Release) ✅
 **fix: traceability triggers use "requirements" prefix to avoid peer-review/docs collision**
 
 - Replaced ambiguous triggers (`architecture deviation`, `deviation check`) with requirements-prefixed phrases: `requirements deviation`, `requirements coverage`, `PO spec deviation`

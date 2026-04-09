@@ -685,10 +685,10 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 **Include:**
 - All template content from the type-specific templates, properly formatted
 - Placeholder values in each file for the user to customize
-- Breadcrumbs in all `docs/components/NN-name.md` files
+- Breadcrumbs in all `docs/components/<system-name>/NN-name.md` files
 - Cross-references as relative Markdown links (never bare `Section X.Y`)
 - At least one `docs/components/NN-name.md` file per identified component
-- `docs/components/README.md` with 4-column index matching all component files
+- `docs/components/README.md` with 5-column index matching all component files
 - Each component file has: breadcrumb, `# Heading`, `**Type:**` field
 
 #### Step 6: Delegate ADR Generation (Optional)

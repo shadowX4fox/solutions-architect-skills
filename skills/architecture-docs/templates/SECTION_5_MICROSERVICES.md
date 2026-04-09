@@ -254,9 +254,11 @@ Document each infrastructure component supporting the microservices:
 
 ### [Component Name]
 
-**Type**: API Gateway | Service Mesh | Event Bus | Service Discovery | Configuration | Monitoring
-**Technology**: [Specific technology]
-**Version**: [Version number]
+**Type:** {C4 type}
+**Technology:** [{technology with version}]
+**C4 Level:** Container (L2)
+**Deploys as:** {Docker container | serverless function | managed service | VM}
+**Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
 **Purpose**: [What this component provides]
 
@@ -280,10 +282,11 @@ Document each infrastructure component supporting the microservices:
 
 **Bounded Context**: Order Management (order lifecycle from creation to fulfillment)
 
-**Type**: Microservice
-**Technology**: Java 17, Spring Boot 3.1.5, Spring Data JPA
-**Version**: v2.4.1
-**Location**: `https://github.com/company/order-service`
+**Type:** API Service
+**Technology:** [Java 17, Spring Boot 3.1.5, Spring Data JPA]
+**C4 Level:** Container (L2)
+**Deploys as:** Docker container
+**Communicates via:** HTTPS
 **Team Owner**: Orders Team
 
 **Purpose**:
