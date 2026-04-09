@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.18-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.19-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.18` in the list.
+You should see `solutions-architect-skills v3.3.19` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.3.18 (Current Release) ✅
+### v3.3.19 (Current Release) ✅
+**fix: traceability triggers use "requirements" prefix to avoid peer-review/docs collision**
+
+- Replaced ambiguous triggers (`architecture deviation`, `deviation check`) with requirements-prefixed phrases: `requirements deviation`, `requirements coverage`, `PO spec deviation`
+- Removes collision with peer-review skill ("architecture quality") and architecture-docs skill ("architecture validation")
+- Updated architecture-docs exclusion to reference "requirements deviation checks"
+
+### v3.3.18 (Previous Release) ✅
 **fix: traceability skill description + architecture-docs exclusion for deviation checks**
 
 - Rewrote traceability skill description to lead with "deviation checks, traceability reports, PO Spec coverage" for stronger signal matching

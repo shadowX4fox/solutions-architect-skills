@@ -1,21 +1,21 @@
 ---
 name: architecture-traceability
-description: Use this skill for architecture deviation checks, traceability reports, and PO Spec coverage analysis. Compares PO Spec use cases against architecture documentation to detect coverage gaps. Generates a markdown traceability report (TRACEABILITY_REPORT.md) showing Covered, Partial, or Not Covered status per requirement. Invoke when checking for architecture deviations, running a deviation check, verifying PO Spec coverage, generating a traceability matrix, or checking if architecture covers all business requirements. This is the ONLY skill for deviation checks and traceability — do not use architecture-docs for these tasks.
+description: Use this skill for requirements deviation checks, requirements traceability, and PO Spec coverage analysis. Compares PO Spec use cases against architecture documentation to detect coverage gaps. Generates a markdown traceability report (TRACEABILITY_REPORT.md) showing Covered, Partial, or Not Covered status per requirement. Invoke when checking for requirements deviations, running a requirements coverage check, verifying PO Spec coverage, generating a traceability matrix, or checking if architecture covers all business requirements.
 triggers:
   - traceability
   - traceability report
   - traceability matrix
-  - coverage matrix
+  - requirements deviation
+  - requirements deviation check
+  - requirements coverage
+  - requirements coverage check
   - PO spec coverage
-  - architecture coverage
-  - requirements traceability
-  - check coverage
-  - deviation check
-  - architecture deviation
-  - architecture deviation check
-  - coverage check
+  - PO spec deviation
   - PO spec vs architecture
   - check PO spec
+  - check requirements coverage
+  - coverage matrix
+  - requirements traceability
 ---
 
 # Architecture Traceability Skill
@@ -30,9 +30,10 @@ This skill compares **PO Spec use cases** against **architecture documentation**
 
 ## When to Invoke This Skill
 
-- User asks to "check PO spec coverage", "verify traceability", or "check architecture coverage"
+- User asks to "check requirements coverage", "verify traceability", or "check PO spec coverage"
+- User asks for a "requirements deviation check" or "requirements traceability"
 - User asks if the architecture covers all business requirements
-- User wants to detect deviations from the PO Spec
+- User wants to detect requirements deviations or PO Spec deviations
 - User needs a traceability matrix or coverage report
 - User uses `/skill architecture-traceability`
 
@@ -277,13 +278,16 @@ Copy the Gap Report section to address coverage gaps using /skill architecture-d
 /skill architecture-traceability
 → Locates PO Spec and architecture docs, generates coverage report
 
-"Check if my architecture covers all the PO Spec use cases"
+"Requirements deviation check"
+→ Compares PO Spec requirements against architecture, generates traceability report
+
+"Check requirements coverage"
 → Same as above
 
 "Generate a traceability matrix"
 → Same as above
 
-"Are we deviating from the PO Spec?"
+"PO spec coverage check"
 → Generates report highlighting gaps and partial coverage
 ```
 
