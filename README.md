@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.15-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.16-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.15` in the list.
+You should see `solutions-architect-skills v3.3.16` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.15 (Current Release) ✅
+### v3.3.16 (Current Release) ✅
+**fix: traceability skill enforces PO Spec "what" vs architecture "how" boundary**
+
+- Added PO Spec Scope Rule: evaluate business capabilities, not implementation paths
+- Requirement extraction now strips "how" details (technologies, integration paths) from PO Spec — keeps only business capability as traceable requirement
+- Architecture satisfying a requirement via a different path than PO expected is ✅ Covered (not a gap)
+- Only flags gaps when the business capability itself is missing from the architecture
+
+### v3.3.15 (Previous Release) ✅
 **feat: architecture-traceability skill — PO Spec use cases vs architecture coverage report**
 
 - New `architecture-traceability` skill comparing PO Spec use cases against architecture documentation

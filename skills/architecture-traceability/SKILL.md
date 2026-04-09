@@ -123,6 +123,8 @@ For each use case found (identified by `### UC-NNN:`, `### N.N UC-NNN:`, `### Us
 
 For **simplified PO Specs** (bullet-point format without formal UC structure), each bullet under the Use Cases section becomes one requirement.
 
+**Extraction filter — strip "how" from PO Spec requirements**: When the PO Spec mentions specific technologies, integration paths, or implementation details (e.g., "integrate with Push Notification Gateway via FCM"), extract only the business capability ("push notification delivery with status tracking") as the traceable requirement. The architecture team decides the "how" — the traceability check validates the "what."
+
 ---
 
 ### Step 4 — Search Architecture Docs for Coverage
@@ -146,6 +148,15 @@ For each requirement from Step 3, search the architecture files for coverage evi
 - **❌ Not Covered**: No evidence found in any architecture doc. Suggest which architecture section should document this.
 
 **Important**: Coverage matching is **semantic, not lexical**. The PO Spec may say "User configures schedule" while the architecture says "Cron-based scheduling." Use architectural understanding to determine coverage — grep is a locating hint, classification is judgment.
+
+**PO Spec Scope Rule — "What" vs "How"**:
+
+The PO Spec defines **what** the business needs (capabilities, outcomes, constraints). It does **not** define **how** the architecture implements those needs (technology choices, integration paths, component decomposition). When evaluating coverage:
+
+- **Evaluate the business capability**, not the implementation path. If the PO Spec says "Push Notification Gateway integration" but the architecture delegates push delivery to a different component that achieves the same outcome, the requirement is **✅ Covered** — the business need (push notifications) is satisfied.
+- **Never flag a gap** because the architecture uses a different integration path, technology, or component structure than the PO Spec imagined. The PO owns the "what"; the architecture team owns the "how."
+- **Do flag a gap** when the business capability itself is missing — e.g., the PO Spec requires push notifications but no component in the architecture handles push delivery at all.
+- When the architecture satisfies the requirement through a different path than the PO Spec expected, note this in the evidence column: `"Covered via [component/path] (differs from PO Spec's expected [path])"`
 
 ---
 
