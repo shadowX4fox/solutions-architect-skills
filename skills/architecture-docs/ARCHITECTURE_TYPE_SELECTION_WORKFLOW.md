@@ -790,6 +790,17 @@ This skill will create adr/ADR-XXX-title.md files from the table entries.
 - Placement: insert each diagram **immediately after its corresponding H3 subsection** in `docs/04-data-flow-patterns.md`
 - Heading: `#### Diagram: [Flow Name] Sequence`
 
+**Pre-Write Validation (MANDATORY)**:
+
+Before writing any generated Mermaid/ZenUML diagram to its destination file, scan the code for forbidden patterns. See `references/DIAGRAM-GENERATION-GUIDE.md` → "Pre-Write Validation" for the full checklist. Critical patterns to catch:
+
+- `<br/>`, `<br>`, or any HTML tag in labels → replace with `\n` or remove
+- `;` (semicolon) in message/node/edge labels → replace with `,`
+- Emoji characters in labels → remove
+- `|` in node label text → replace with `/`
+
+If any forbidden pattern is found, fix it and re-scan before writing. Do NOT write broken diagrams that will fail at render time.
+
 **Canonical location rule**: Same as Workflow 8 — placements above are not configurable and cannot be overridden.
 
 ---

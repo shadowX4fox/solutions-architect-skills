@@ -1,6 +1,6 @@
 {
   "name": "solutions-architect-skills",
-  "version": "3.3.24",
+  "version": "3.3.25",
   "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (10 skills, 10 compliance agents, per-component asset generation)",
   "author": {
     "name": "shadowX4fox",

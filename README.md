@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -106,7 +106,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.24` in the list.
+You should see `solutions-architect-skills v3.3.25` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -748,7 +748,16 @@ Where:
 
 ## Roadmap
 
-### v3.3.24 (Current Release) ✅
+### v3.3.25 (Current Release) ✅
+**fix: Pre-Write Validation control prevents Mermaid parse errors**
+
+- Added Pre-Write Validation section to DIAGRAM-GENERATION-GUIDE.md with 6-row forbidden pattern checklist (HTML tags, semicolons, emoji, pipe, quotes, subgraph arrows)
+- Strengthened HTML tag rules: both topology and sequence DO NOT lists now explicitly list `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, `<span>` and "any `<...>` element"
+- New Step 10.5 in Generation Workflow: validate all Mermaid/ZenUML blocks against forbidden patterns before writing
+- Added mandatory Pre-Write Validation block to Step 7.1 in ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md
+- Prevents `<br/>`, `;`, emoji, and other parse-breaking patterns from reaching diagram files
+
+### v3.3.24 (Previous Release) ✅
 **docs: README updated with latest skill count (13) and diagram generation changes**
 
 - Updated "What's Included" list: 9 → 13 skills (added traceability, onboarding, icepanel-sync, definition-record)

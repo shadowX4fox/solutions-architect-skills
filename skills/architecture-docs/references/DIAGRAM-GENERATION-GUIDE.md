@@ -580,7 +580,7 @@ Applies to: Diagram 1 (ASCII Logical View) and Diagram 4 (Detailed View) — the
 
 ### DO NOT
 
-- Do not use HTML tags (`<b>`, `<i>`, `<sup>`) in labels
+- Do not use HTML tags in labels — including `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, `<span>`, or any `<...>` element. Mermaid renders labels as plain text; HTML breaks the parser. Use `\n` for line breaks in node labels.
 - Do not use emoji characters in node labels (rendering varies)
 - Do not use `|` pipe characters inside node label text (breaks parsing) — use `/` instead
 - Do not use `;` (semicolons) in node labels or edge labels — semicolons terminate statements and cause parse errors. Use `,` (comma) instead
@@ -619,7 +619,7 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 
 **DO NOT:**
 - Do not use `graph TB` or `flowchart` syntax inside sequence diagrams
-- Do not use HTML tags in participant names or messages
+- Do not use HTML tags in participant names or messages — including `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, or any `<...>` element. Use `\n` for multi-line messages.
 - Do not use emoji characters in labels (rendering varies)
 - Do not use `;` (semicolons) in message labels — semicolons terminate statements in Mermaid/ZenUML and cause parse errors. Use `,` (comma) instead (e.g., "Replace skeletons with cards, hide null sections")
 - Do not nest `alt` blocks more than 2 levels deep (readability degrades)
@@ -699,7 +699,39 @@ When generating or updating diagrams:
 8. **Place** all 4 topology diagrams under `## Architecture Diagrams` in `docs/03-architecture-layers.md`
 9. **Include** a `**Reading the diagram:**` section after the ASCII logical view with bullet points explaining the arrow conventions
 10. **Generate** sequence diagrams — one per H3 flow subsection in `docs/04-data-flow-patterns.md`
+10.5. **Validate** all generated Mermaid/ZenUML blocks against the Pre-Write Validation checklist (see next section) — fix any forbidden patterns before proceeding
 11. **Place** each sequence diagram immediately after its H3 subsection with heading `#### Diagram: [Flow Name] Sequence`
+
+---
+
+## Pre-Write Validation
+
+**CRITICAL**: Before writing any generated Mermaid/ZenUML block to a file, scan the generated code for the following forbidden patterns. If any are found, **fix them before writing** — do NOT write broken diagrams that will fail at render time.
+
+### Forbidden Patterns Checklist
+
+Run this check on every generated Mermaid block:
+
+| Pattern | What to look for | Fix |
+|---------|------------------|-----|
+| HTML tags | `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, `<span>`, any `<...>` | Replace `<br/>` with `\n` (sequence/C4) or remove entirely (topology node labels can use `\n`) |
+| Semicolons in labels | `;` inside message labels, node labels, or edge labels | Replace with `,` (comma) or `.` (period) |
+| Emoji in labels | Any Unicode emoji characters (`🔴`, `✅`, etc.) | Remove — rendering varies by platform |
+| Pipe in node text | `\|` inside node label text (not as edge delimiter) | Replace with `/` |
+| Unescaped double quotes | `"` inside `"..."` labels | Replace inner quotes with `'` (single quotes) |
+| Subgraph ID arrows | `L1 --> L2` where L1/L2 are subgraph IDs | Connect to nodes inside the subgraph instead |
+
+### Validation Procedure
+
+1. **Scan** each generated Mermaid/ZenUML code block with the forbidden pattern list above
+2. **For each violation found**, report which pattern and which line
+3. **Rewrite** the diagram with the fix applied
+4. **Re-scan** the fixed diagram to confirm no violations remain
+5. **Only then write** the diagram to its destination file
+
+If a pattern cannot be safely fixed (e.g., the content genuinely requires the forbidden character), escalate to the user — do NOT write a broken diagram.
+
+---
 
 ### Update vs. Create
 
