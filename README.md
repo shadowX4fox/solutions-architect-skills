@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.21-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.22-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.21` in the list.
+You should see `solutions-architect-skills v3.3.22` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.3.21 (Current Release) ✅
+### v3.3.22 (Current Release) ✅
+**fix: architecture-docs must delegate all component structural operations to guardian**
+
+- Added Component Operations Delegation Rule to architecture-docs SKILL.md
+- All structural operations on `docs/components/` (create, rename, delete, README update, migration, C4 metadata) MUST delegate to architecture-component-guardian
+- Architecture-docs may read component files for context but must NOT create, restructure, or modify the component index directly
+
+### v3.3.21 (Previous Release) ✅
 **fix: C4 component folder structure missing when using inline PO Spec (option 3)**
 
 - Fixed CLAUDE.md PO Spec gate: listed 3 options but workflow has 4 — numbering mismatch caused "option 2" confusion (inline vs async intake)

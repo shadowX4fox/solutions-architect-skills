@@ -93,7 +93,14 @@ This skill automatically activates when users ask questions about documented arc
 - Component migration to C4, component index sync, add/remove/update components → use `architecture-component-guardian` skill
 - Peer review or architecture quality assessment → use `architecture-peer-review` skill
 - Compliance contract generation → use `architecture-compliance` skill
-- Component index maintenance → use `architecture-component-guardian` skill
+
+**Component Operations Delegation Rule**:
+All structural operations on `docs/components/` MUST delegate to `architecture-component-guardian`:
+- Creating, renaming, or deleting component files → delegate to guardian
+- Creating or updating `docs/components/README.md` → delegate to guardian (`sync` action)
+- Migrating flat components to C4 multi-system structure → delegate to guardian (`migrate` action)
+- Adding C4 metadata (Type, C4 Level, system folders) → delegate to guardian
+This skill may **read** component files for context (editing sections, propagation checks) but must NOT directly create, restructure, or modify the component index.
 
 ---
 
