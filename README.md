@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.24-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -28,7 +28,7 @@ This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Ma
 
 - **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
 - **Plugin**: This repository, installable from the marketplace
-- **Skills**: Nine specialized skills within the plugin
+- **Skills**: Thirteen specialized skills within the plugin
 
 For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
 
@@ -36,18 +36,20 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **9 Integrated Skills**
+- **13 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
-  - `architecture-docs`: ARCHITECTURE.md creation and maintenance
-  - `architecture-compliance`: Generate 10 compliance contracts
-  - `architecture-compliance-review`: Compliance portfolio health review + gap explorer
-  - `architecture-component-guardian`: Manages `docs/components/README.md` index
-  - `architecture-peer-review`: Interactive peer review with playground tool
-  - `architecture-dev-handoff`: Component development handoffs with deliverable assets
-  - `architecture-docs-export`: On-demand Word (.docx) export for architecture docs and handoffs
+  - `architecture-docs`: ARCHITECTURE.md creation and maintenance (with diagram generation)
+  - `architecture-component-guardian`: Single owner of `docs/components/README.md` index + C4 migration
   - `architecture-definition-record`: Create, update, and manage Architecture Decision Records (ADRs)
-
-  Plus `architecture-blueprint`: generates Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
+  - `architecture-compliance`: Generate 10 compliance contracts from ARCHITECTURE.md
+  - `architecture-compliance-review`: Compliance portfolio health review + gap explorer playground
+  - `architecture-peer-review`: Interactive peer review with playground tool + JSON persistence
+  - `architecture-traceability`: PO Spec use cases vs architecture coverage report (markdown, portable)
+  - `architecture-dev-handoff`: Component development handoffs (C4 L2 only) with deliverable assets
+  - `architecture-docs-export`: On-demand Word (.docx) export for architecture docs and handoffs
+  - `architecture-blueprint`: Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
+  - `architecture-onboarding`: Interactive concept map playground for new team members
+  - `architecture-icepanel-sync` (beta): Sync C4 model to IcePanel via import YAML or REST API
 
 - **C4 Model Integration (IcePanel)**
   - Components follow C4 Level 2 (Container diagram) rules — every component must be a separately deployable unit (App or Store)
@@ -104,7 +106,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.23` in the list.
+You should see `solutions-architect-skills v3.3.24` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -206,14 +208,26 @@ Generates per-component handoff documents with deliverable assets into `docs/han
 
 Exports architecture documents to professional Word (.docx) files: SA executive summary (synthesized from overview + component index + compliance manifest), individual ADRs, or component handoffs.
 
+**Quality Gates (recommended after Phase 2)**
+
+```bash
+/skill architecture-peer-review       # Quality review — 3 depth levels, 13 categories, scorecard
+/skill architecture-traceability      # PO Spec coverage check — generates TRACEABILITY_REPORT.md
+/skill architecture-compliance-review # Portfolio health + concept gap explorer (after Phase 3)
+```
+
 ### Supporting Skills
 
 | Skill | When to Use |
 |-------|-------------|
-| `/skill architecture-peer-review` | After ARCHITECTURE.md is complete — interactive quality review with approve/reject/fix workflow |
+| `/skill architecture-peer-review` | After ARCHITECTURE.md is complete — interactive quality review with approve/reject/fix workflow (JSON persistence for fast regeneration) |
+| `/skill architecture-traceability` | Check if architecture covers all PO Spec requirements — generates portable markdown report |
 | `/skill architecture-blueprint` | When organizational blueprint forms (datos de iniciativa) are required |
 | `/skill architecture-compliance-review` | After compliance contracts are generated — explore gaps across all 10 contracts |
-| `/skill architecture-component-guardian` | When adding, removing, or updating a component in `docs/components/` |
+| `/skill architecture-component-guardian` | Adding, removing, updating components, or migrating flat components to C4 multi-system structure |
+| `/skill architecture-definition-record` | All ADR write operations — create, update, supersede |
+| `/skill architecture-onboarding` | Onboarding new team members — interactive concept map of the architecture suite |
+| `/skill architecture-icepanel-sync` | Sync architecture C4 model to IcePanel (beta) |
 
 ## Features
 
@@ -549,11 +563,20 @@ Choose the architecture type that best fits your system:
 
 ### Diagram Generation & Enforcement (Workflow 8)
 
-Architecture diagrams are generated by the `architecture-docs` skill with strict placement enforcement:
+Architecture diagrams are generated by the `architecture-docs` skill with strict placement enforcement. All diagrams adapt their grouping, naming, and colors to the detected architecture type (META, BIAN, 3-Tier, N-Layer, Microservices) and support light/dark theme variants.
 
-**Mandatory diagrams** (always generated, not optional):
-- **High-Level Architecture** → `docs/03-architecture-layers.md`
-- **Data Flow Diagrams** → `docs/04-data-flow-patterns.md`
+**Mandatory diagrams** (always generated, 4 standard + data flow):
+
+All 4 standard diagrams live in `docs/03-architecture-layers.md` under `## Architecture Diagrams`:
+
+| # | Diagram | Format | Audience |
+|---|---------|--------|----------|
+| 1 | Logical View | ASCII art | Executives, architects |
+| 2 | C4 Level 1 — System Context | Mermaid `C4Context` | Non-technical stakeholders |
+| 3 | C4 Level 2 — Container | Mermaid `C4Container` | Development teams |
+| 4 | Detailed View | Mermaid `graph TB` | Architects, SREs |
+
+Plus **Data Flow Diagrams** — one Mermaid **ZenUML** sequence diagram per H3 flow subsection in `docs/04-data-flow-patterns.md`. ZenUML provides code-like readability with method-call syntax for sync, arrow syntax for async, and native `if/else`/`try/catch`/`par` control flow.
 
 **On-request diagrams** (opt-in):
 - Infrastructure / Deployment → `docs/09-operational-considerations.md`
@@ -563,17 +586,14 @@ Architecture diagrams are generated by the `architecture-docs` skill with strict
 
 **Enforcement rules**:
 - ⛔ Non-canonical placement is **denied** — diagrams go to their designated `docs/` file, no override
+- 🎨 **Theme selection** — user must choose light or dark theme before diagram generation; persisted as `<!-- DIAGRAM_THEME: light|dark -->`
 - 📥 **External diagram reconciliation** — diagrams from external files are classified, matched against architecture docs, and either relocated or discarded (no undocumented flows)
-- 📊 **Completeness audit** — after generation, every documented flow is checked for a corresponding diagram; missing `[REQUIRED]` diagrams produce a compliance warning
+- 📊 **Completeness audit** — after generation, every documented flow is checked for a corresponding diagram; all 4 standard diagrams verified present
+- 🚫 **Semicolon in labels is forbidden** — `;` terminates Mermaid/ZenUML statements and causes parse errors; use `,` instead
 
-**Diagram Capabilities**:
-- ✅ Interactive visualization (zoom, pan, clickable components)
-- ✅ Color-coded components (Blue=Orchestrators, Orange=Workers, Green=Query, Purple=Events)
-- ✅ Data flow patterns (solid arrows=synchronous, dashed arrows=asynchronous)
-- ✅ Security protocol visualization (OAuth 2.0, JWT, mTLS, TLS 1.2+, SASL)
-- ✅ GitHub/GitLab native rendering (no plugins required)
+**Target**: Mermaid v11.4.1 (VS Code Mermaid Chart extension 2.1.0+).
 
-**Comprehensive Guide**: See [MERMAID_DIAGRAMS_GUIDE.md](skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md) for templates, color schemes, and examples.
+**Comprehensive Guide**: See [DIAGRAM-GENERATION-GUIDE.md](skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md) for the 4 standard diagrams with architecture-type-specific templates, C4 color conventions, ZenUML syntax reference, and generation workflow. See [MERMAID_DIAGRAMS_GUIDE.md](skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md) for authoring reference (syntax patterns, component guidelines, common scenarios).
 
 ## Documentation
 
@@ -728,7 +748,16 @@ Where:
 
 ## Roadmap
 
-### v3.3.23 (Current Release) ✅
+### v3.3.24 (Current Release) ✅
+**docs: README updated with latest skill count (13) and diagram generation changes**
+
+- Updated "What's Included" list: 9 → 13 skills (added traceability, onboarding, icepanel-sync, definition-record)
+- Rewrote Diagram Generation section: documents 4 standard diagrams (Logical View ASCII, C4 L1, C4 L2, Detailed View) + ZenUML data flow diagrams
+- Added architecture-type adaptation note, theme selection enforcement, semicolon prohibition, Mermaid v11.4.1 target
+- Supporting Skills table expanded with traceability, definition-record, onboarding, icepanel-sync
+- New Quality Gates section highlighting peer-review, traceability, and compliance-review
+
+### v3.3.23 (Previous Release) ✅
 **fix: diagram theme selection skipped + semicolon parse error in labels**
 
 - Theme selection (light/dark) during diagram generation was silently defaulting to light instead of asking the user — made the prompt mandatory with "MUST ask, do NOT default silently"
