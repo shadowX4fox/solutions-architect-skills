@@ -94,10 +94,11 @@ This project follows a four-phase documentation approach:
    - Use the `architecture-docs` skill to create ARCHITECTURE.md
    - Translates business requirements into technical architecture
    - Defines components, integrations, and technical decisions
-   - **Prerequisite Gate**: When no PO Spec exists, the user chooses from three options:
-     (1) run the full `/skill architecture-readiness` elicitation, (2) provide business
-     context inline (evaluated against the PO Spec scoring rubric with gap interviews),
-     or (3) skip with `SKIP PO SPEC` (warning recorded). Gate applies only to new
+   - **Prerequisite Gate**: When no PO Spec exists, the user chooses from four options:
+     (1) run the full `/skill architecture-readiness` elicitation, (2) async intake
+     from a file (scores and generates gap report), (3) provide business context inline
+     (evaluated against the PO Spec scoring rubric with gap interviews), or (4) skip
+     with `SKIP PO SPEC` (warning recorded). Gate applies only to new
      document creation, not editing existing documents.
 
 3. **Compliance Documentation Phase** (Compliance Team)

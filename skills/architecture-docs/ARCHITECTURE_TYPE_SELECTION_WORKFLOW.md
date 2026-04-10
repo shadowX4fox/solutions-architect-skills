@@ -479,6 +479,8 @@ When creating the ARCHITECTURE.md, add an HTML comment metadata tag at the begin
 
 Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs/` structure.
 
+> **CRITICAL**: Steps 4a–4g (C4 component structure) below are MANDATORY for ALL PO Spec paths (Option 1, 2, 3, or 4). The C4 system folder structure MUST be created regardless of how business context was provided. Do NOT skip system identification (4a–4c) or create flat component files without system subfolders.
+
 **ADR Context Block consistency**: Reference the ADR Context Block (from Step 0.5) when writing each section. As decisions are made during section creation, update the corresponding ADR candidate from `PENDING` to `DECIDED` with the decision summary and rationale. This ensures:
 - **Section 3 (Principles)**: Trade-offs align with ADR candidates — each principle's Implementation/Trade-offs should reference relevant pending or decided ADRs
 - **Section 4 (Architecture Layers)**: References ADR for architecture pattern (decided at Step 2)
@@ -637,6 +639,16 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      ```
    - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
    - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+
+   **4d-VERIFY. Structural Validation (before guardian sync)**
+
+   Before invoking the guardian, verify the C4 folder structure:
+   - [ ] At least one system folder exists: `docs/components/<system-name>/`
+   - [ ] Each system folder contains at least one `NN-*.md` component file
+   - [ ] A system descriptor file exists for each system folder: `docs/components/<system-name>.md`
+   - [ ] No component files exist at `docs/components/` root (only system descriptors and README.md belong there)
+
+   If any check fails, go back to Step 4d and create the missing structure. Do NOT invoke the guardian on a broken layout.
 
    **4e. Create README.md Component Index — DELEGATE TO GUARDIAN**
 

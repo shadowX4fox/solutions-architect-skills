@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.20-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.21-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.20` in the list.
+You should see `solutions-architect-skills v3.3.21` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,18 @@ Where:
 
 ## Roadmap
 
-### v3.3.20 (Current Release) ✅
+### v3.3.21 (Current Release) ✅
+**fix: C4 component folder structure missing when using inline PO Spec (option 3)**
+
+- Fixed CLAUDE.md PO Spec gate: listed 3 options but workflow has 4 — numbering mismatch caused "option 2" confusion (inline vs async intake)
+- Added CRITICAL reinforcement note at Step 5 entry: C4 Steps 4a-4g are MANDATORY for all PO Spec paths — no skipping system identification or flat file creation
+- Added Step 4d-VERIFY structural validation gate before guardian invocation: verifies system folders, component files, and descriptor files exist
+- Prevents flat `docs/components/` layout bypassing the required C4 system subfolder structure
+- Added missing `triggers:` to architecture-component-guardian (was relying on description-only matching)
+- 11 trigger phrases for guardian: `migrate components to C4`, `sync components`, `add component`, etc.
+- Added component migration exclusion to architecture-docs "Do NOT activate" list
+
+### v3.3.20 (Previous Release) ✅
 **fix: C4 metadata missing from Section 5 template layers/tiers — all architecture types**
 
 - All Section 5 templates now include `**Type:** {C4 type}`, `**C4 Level:** Container (L2)`, `**Deploys as:**`, `**Communicates via:**` in every layer/tier template, not just Layer 1

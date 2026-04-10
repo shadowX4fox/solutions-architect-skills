@@ -1,6 +1,18 @@
 ---
 name: architecture-component-guardian
-description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when adding, removing, or updating components, syncing the index, or migrating flat components to C4 multi-system structure.
+description: Use this skill to create or update docs/components/README.md — the only sanctioned way to modify the component index table. Invoke when adding, removing, or updating components, syncing the index, or migrating flat components to C4 multi-system structure. This is the ONLY skill for C4 component migration — do not use architecture-docs for component migration.
+triggers:
+  - migrate components
+  - migrate components to C4
+  - C4 migration
+  - component migration
+  - sync components
+  - sync component index
+  - add component
+  - remove component
+  - update component
+  - component guardian
+  - component index
 ---
 
 # Architecture Component Guardian Skill

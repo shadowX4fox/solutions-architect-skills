@@ -90,6 +90,7 @@ This skill automatically activates when users ask questions about documented arc
 
 **Do NOT activate for** (redirect to the correct skill):
 - Requirements deviation checks, requirements traceability, or PO Spec coverage analysis → use `architecture-traceability` skill
+- Component migration to C4, component index sync, add/remove/update components → use `architecture-component-guardian` skill
 - Peer review or architecture quality assessment → use `architecture-peer-review` skill
 - Compliance contract generation → use `architecture-compliance` skill
 - Component index maintenance → use `architecture-component-guardian` skill
