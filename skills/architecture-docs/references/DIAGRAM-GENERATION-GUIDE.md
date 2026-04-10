@@ -583,6 +583,7 @@ Applies to: Diagram 1 (ASCII Logical View) and Diagram 4 (Detailed View) — the
 - Do not use HTML tags (`<b>`, `<i>`, `<sup>`) in labels
 - Do not use emoji characters in node labels (rendering varies)
 - Do not use `|` pipe characters inside node label text (breaks parsing) — use `/` instead
+- Do not use `;` (semicolons) in node labels or edge labels — semicolons terminate statements and cause parse errors. Use `,` (comma) instead
 - Do not connect subgraph IDs as link endpoints (`L1 --> L2` fails) — connect nodes only
 
 ### C4 Diagrams — Diagrams 2 and 3 (C4Context / C4Container)
@@ -620,6 +621,7 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 - Do not use `graph TB` or `flowchart` syntax inside sequence diagrams
 - Do not use HTML tags in participant names or messages
 - Do not use emoji characters in labels (rendering varies)
+- Do not use `;` (semicolons) in message labels — semicolons terminate statements in Mermaid/ZenUML and cause parse errors. Use `,` (comma) instead (e.g., "Replace skeletons with cards, hide null sections")
 - Do not nest `alt` blocks more than 2 levels deep (readability degrades)
 
 ---
@@ -632,13 +634,15 @@ Mermaid diagrams render differently on light vs. dark backgrounds. Before genera
 
 **When**: Run once per session, before generating any diagrams. Reuse the result for all diagrams in the same session.
 
-**How**: Check `docs/03-architecture-layers.md` for `<!-- DIAGRAM_THEME: light|dark -->`. If present, use that value. If absent, ask the user:
+**How**: Check `docs/03-architecture-layers.md` for `<!-- DIAGRAM_THEME: light|dark -->`. If present, use that value. **If absent, you MUST ask the user — do NOT default silently:**
 
 ```
-Do you use a light or dark theme in your editor/viewer? (Default: light)
+Do you use a light or dark theme in your editor/viewer?
+  1. Light (white/light background)
+  2. Dark (dark/black background)
 ```
 
-Store the answer as `<!-- DIAGRAM_THEME: light -->` or `<!-- DIAGRAM_THEME: dark -->` in `docs/03-architecture-layers.md`, immediately after the `<!-- ARCHITECTURE_TYPE: ... -->` comment.
+Wait for user response. Store the answer as `<!-- DIAGRAM_THEME: light -->` or `<!-- DIAGRAM_THEME: dark -->` in `docs/03-architecture-layers.md`, immediately after the `<!-- ARCHITECTURE_TYPE: ... -->` comment. Do NOT proceed to diagram generation until the user has answered.
 
 ### Theme Application by Diagram Type
 

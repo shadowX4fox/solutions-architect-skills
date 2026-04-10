@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.22-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.23-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -104,7 +104,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.22` in the list.
+You should see `solutions-architect-skills v3.3.23` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -728,7 +728,14 @@ Where:
 
 ## Roadmap
 
-### v3.3.22 (Current Release) ✅
+### v3.3.23 (Current Release) ✅
+**fix: diagram theme selection skipped + semicolon parse error in labels**
+
+- Theme selection (light/dark) during diagram generation was silently defaulting to light instead of asking the user — made the prompt mandatory with "MUST ask, do NOT default silently"
+- Added semicolon prohibition to Mermaid compatibility rules — `;` in message/node/edge labels terminates statements causing parse errors; use `,` instead
+- Applied to both topology diagrams (graph TB) and data flow diagrams (sequence) sections
+
+### v3.3.22 (Previous Release) ✅
 **fix: architecture-docs must delegate all component structural operations to guardian**
 
 - Added Component Operations Delegation Rule to architecture-docs SKILL.md
