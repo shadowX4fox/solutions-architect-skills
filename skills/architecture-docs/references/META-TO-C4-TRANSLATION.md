@@ -405,7 +405,23 @@ The orchestrator is the **most connected Container** at C2 — it is the hub of 
 
 **Why it's wrong**: META enforces top-down communication through layers. Skipping layers undermines the decoupling the architecture is designed to provide.
 
-**Fix**: If a BFF needs data from Layer 5, it should call through Layer 3 or Layer 4. If a simple read-through is needed, a thin passthrough service in Layer 4 makes the path explicit. Exception: direct reads for simple reference data may be allowed if the bank's META governance permits it — document this as an explicit architectural decision.
+**Fix**: If a BFF needs data from Layer 5, it should call through Layer 3 or Layer 4. If a simple read-through is needed, a thin passthrough service in Layer 4 makes the path explicit.
+
+**Exceptions (both require an explicit architectural decision / ADR):**
+
+1. **Reference data reads**: direct reads for simple reference data may be allowed if the bank's META governance permits it.
+2. **WebSocket / real-time push (L1 ↔ L4)**: when Layer 1 (Channels) establishes a persistent WebSocket connection to a Layer 4 business service for real-time push (market data, live alerts, streaming telemetry, trading events), the L1 → L4 direct connection is allowed. L2 (UX) and L3 (Scenarios) do not participate in the real-time stream because each hop would add serialization latency that defeats the use case. The WebSocket gateway at L1 handles backpressure; L4 owns the event stream.
+
+   **Security requirement (mandatory)** — because this path bypasses the L2/L3 governance plane, the L4 service exposing the WebSocket endpoint MUST implement the full channel security stack that L2/L3 would normally provide:
+   - **WSS/TLS 1.2+** — no cleartext `ws://`
+   - **Token-based authentication on the upgrade handshake** (OAuth2/JWT), re-validated on reconnect — not only on the originating HTTP session
+   - **Per-message authorization** — validate the subscriber is entitled to each topic/event, not just "connected"
+   - **Origin / CORS checks** — reject connections from untrusted origins
+   - **Rate limiting + backpressure** — per-connection frame caps, subscription quotas, idle-timeouts
+   - **Audit logging** — connect/disconnect/subscribe events with user + channel identity
+   - **Input validation** on any client→server frame — treat the L1 channel as untrusted
+
+   These controls must be documented in the Layer 4 component file's security section and referenced from Section 9 (Security Architecture).
 
 ---
 

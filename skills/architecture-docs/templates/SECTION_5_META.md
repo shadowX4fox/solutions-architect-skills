@@ -43,6 +43,7 @@ For each component in your system, document using the template below. **Group co
 
 **Dependencies**:
 - Depends on: [Layer 2 (UX) components]
+- Depends on (real-time push only): [Layer 4 business services via WebSocket — only when persistent push is required (market data, live alerts, streaming telemetry); the L4 service MUST enforce WSS/TLS 1.2+, token auth on upgrade + reconnect, per-message authorization, origin checks, rate limiting, audit logging, and input validation — document in L4 component file Section 9 and capture in ADR]
 - Depended by: [End users, external clients]
 
 **Configuration**:
@@ -178,7 +179,7 @@ For each component in your system, document using the template below. **Group co
 
 **Dependencies**:
 - Depends on: [Layer 5 (Domain), Layer 6 (Core), and external systems]
-- Depended by: [Layer 2 (UX) and Layer 3 (Business Scenarios) components]
+- Depended by: [Layer 2 (UX) and Layer 3 (Business Scenarios) components; Layer 1 (Channels) via WebSocket real-time push only — requires full security stack on this service (see ADR)]
 
 **Configuration**:
 - Config param 1: [Description, default]

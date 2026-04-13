@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.25-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.3.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -106,7 +106,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.25` in the list.
+You should see `solutions-architect-skills v3.3.26` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -748,7 +748,15 @@ Where:
 
 ## Roadmap
 
-### v3.3.25 (Current Release) ✅
+### v3.3.26 (Current Release) ✅
+**feat: META WebSocket L1 → L4 exception + mandatory security requirements**
+
+- Documented that L1 (Channels) MAY connect directly to L4 (Business) via WebSocket for real-time push (market data, live alerts, streaming telemetry, trading events) — the standard top-down rule is preserved for all request/response traffic
+- Mandatory security stack required on the L4 endpoint when accepting direct WebSocket connections: WSS/TLS 1.2+, token auth re-validated on reconnect, per-message authorization, origin checks, rate limiting, audit logging, input validation on all inbound frames
+- Updated: `META-TO-C4-TRANSLATION.md` (Anti-Pattern 6 extended with two explicit exceptions), `SECTION_5_META.md` (Layer 1 + Layer 4 Dependencies blocks), `META-ARCHITECTURE.md` (Layer 1 Key Rules)
+- Exception must be captured as an ADR and security controls documented in the L4 component file Section 9
+
+### v3.3.25 (Previous Release) ✅
 **fix: Pre-Write Validation control prevents Mermaid parse errors**
 
 - Added Pre-Write Validation section to DIAGRAM-GENERATION-GUIDE.md with 6-row forbidden pattern checklist (HTML tags, semicolons, emoji, pipe, quotes, subgraph arrows)

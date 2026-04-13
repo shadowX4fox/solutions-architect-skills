@@ -96,6 +96,7 @@ Each layer scales independently based on its traffic patterns:
 - Each channel has its own authentication flow adapted to the device (biometric for mobile, certificate for ATM, MFA for web)
 - Channel-specific data formatting (currency, date, locale) happens here
 - Channels are independently deployable — a mobile app release does not require a web release
+- Real-time push exception: a channel MAY open a persistent WebSocket directly to a Layer 4 business service when routing through L2/L3 would add unacceptable latency (market data, live alerts, streaming telemetry). The L4 endpoint MUST carry the full channel security stack normally provided by L2/L3 — WSS/TLS 1.2+, token auth re-validated on reconnect, per-message authorization, origin checks, rate limiting, audit logging, and input validation on every inbound frame. This exception must be documented as an explicit ADR; it does not waive the top-down rule for request/response traffic.
 
 ### Layer 2 — Experiencia (Experience / Microfrontends)
 
