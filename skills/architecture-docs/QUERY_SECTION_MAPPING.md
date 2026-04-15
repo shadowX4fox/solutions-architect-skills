@@ -40,7 +40,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "How many users/transactions does the system support?"
 - "What's the system availability SLA?"
 
-**Typical line range**: Lines 1-80
 
 **Subsections to check**:
 - Business Value
@@ -68,7 +67,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What are the design constraints?"
 - "What are the primary user scenarios?"
 
-**Typical line range**: Lines 81-200
 
 **Subsections to check**:
 - 2.1 Problem Statement
@@ -96,7 +94,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What are the core architectural values?"
 - "Why was [principle X] chosen?"
 
-**Typical line range**: Lines 201-400
 
 **Required principles** (in order):
 1. Separation of Concerns
@@ -137,7 +134,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What's the deployment model?"
 - "What regions are used?"
 
-**Typical line range**: Lines 401-600
 
 **Architecture Type Variations**:
 - **Microservices (Recommended)**: Service mesh, API Gateway, microservices catalog, cloud-native patterns
@@ -172,7 +168,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "How do components communicate?"
 - "What services are in the system?"
 
-**Typical line range**: Lines 601-850
 
 **Subsections to check**:
 - Component subsections (### 5.1, 5.2, etc.)
@@ -205,7 +200,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What's the flow for [use case]?"
 - "How is data synchronized between [A] and [B]?"
 
-**Typical line range**: Lines 851-1000
 
 **Note**: This section is **optional** for simple systems. If omitted, sections are renumbered (7→6, 8→7, etc.)
 
@@ -237,7 +231,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What integration patterns do you use?"
 - "How do you communicate with [external system]?"
 
-**Typical line range**: Lines 1001-1150
 
 **Subsections to check**:
 - External system integrations (subsection per integration)
@@ -268,7 +261,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What version of [technology] do you use?"
 - "What frameworks are you using?"
 
-**Typical line range**: Lines 1151-1300
 
 **Common subsections**:
 - Languages (e.g., Java 17, Python 3.11)
@@ -309,7 +301,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What's the security architecture?"
 - "How do you detect security threats?"
 
-**Typical line range**: Lines 1301-1550
 
 **Subsections to check**:
 - Authentication & Authorization
@@ -343,7 +334,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What's the capacity planning approach?"
 - "How do you ensure high availability?"
 
-**Typical line range**: Lines 1551-1750
 
 **Subsections to check**:
 - Performance requirements (latency, TPS)
@@ -380,7 +370,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "How do you troubleshoot issues?"
 - "What's the disaster recovery plan?"
 
-**Typical line range**: Lines 1751-1950
 
 **Subsections to check**:
 - Monitoring and observability
@@ -412,7 +401,6 @@ When users ask questions about the architecture, this guide helps identify which
 - "What's the rationale for [architectural decision]?"
 - "What key decisions were made?"
 
-**Typical line range**: Lines 1951-end
 
 **Subsections to check**:
 - ADR entries (each ADR has: Title, Status, Context, Decision, Consequences)
@@ -537,7 +525,7 @@ Would you like me to dive deeper into:
 **Strategy**: ARCHITECTURE.md typically doesn't track change history. Suggest:
 - Check version control system (git log)
 - Review Section 12 (ADRs) for recent decisions
-- Check "Index Last Updated" date in Document Index
+- Check CHANGELOG.md (`docs/CHANGELOG.md`) for Added/Changed/Superseded entries per release
 
 ---
 
@@ -588,13 +576,13 @@ User Question
 - ✅ Start with the most specific section first
 - ✅ Load additional sections if the first doesn't fully answer the question
 - ✅ Consider cross-section queries for complex questions
-- ✅ Check Document Index for actual section line ranges (don't assume)
-- ✅ Use minimal buffers (±10-20 lines) for efficiency
+- ✅ Resolve Section N → file path using the canonical S1–S12 mapping in ARCHITECTURE_DOCUMENTATION_GUIDE.md before reading
+- ✅ Read the target `docs/NN-*.md` file in full — no offset/limit needed (files are 50–400 lines)
 - ✅ Synthesize multi-section answers clearly
 
 **DON'T:**
 - ❌ Load all sections for broad questions (start with Section 1, then drill down)
-- ❌ Assume section line ranges without checking Document Index
+- ❌ Assume file prefix number equals section number (e.g., Section 9 ≠ `docs/09-*`; it is `docs/07-security-architecture.md`)
 - ❌ Mix documented content with assumptions
 - ❌ Skip citations when answering from ARCHITECTURE.md
 - ❌ Load full document when 1-2 sections suffice
@@ -606,40 +594,34 @@ User Question
 **User Question**: "What authentication method do we use and how is it deployed?"
 
 **Step 1: Classify Query**
-- Primary topic: Authentication → Section 9
-- Secondary topic: Deployment → Section 4
+- Primary topic: Authentication → S9 (Security Architecture)
+- Secondary topic: Deployment → S4 (Architecture Layers)
 
-**Step 2: Load Document Index**
-```
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-```
+**Step 2: Resolve S-prefix to file paths**
 
-**Result**:
-- Section 9: Lines 1301-1550
-- Section 4: Lines 401-600
+Using the canonical S1–S12 → file mapping (see ARCHITECTURE_DOCUMENTATION_GUIDE.md):
+- S9 → `docs/07-security-architecture.md`  (file prefix 07, NOT 09)
+- S4 → `docs/03-architecture-layers.md`
 
-**Step 3: Load Section 9 (Primary)**
+**Step 3: Read the primary file in full**
 ```
-buffer = 20
-offset = 1301 - 20 - 1 = 1280
-limit = (1550 - 1301) + 40 = 249 + 40 = 289
-Read(file_path="ARCHITECTURE.md", offset=1280, limit=289)
+Read(file_path="docs/07-security-architecture.md")
 ```
 
-**Step 4: Search for Authentication Details**
-- Found: OAuth 2.0, JWT tokens, MFA (lines 1343-1367)
+No offset/limit — files are 50–400 lines and designed to be read whole.
 
-**Step 5: Load Section 4 (Secondary)**
+**Step 4: Extract authentication details**
+- Found under `## Authentication & Authorization`: OAuth 2.0, JWT tokens, MFA for admins
+
+**Step 5: Read the secondary file in full**
 ```
-offset = 401 - 20 - 1 = 380
-limit = (600 - 401) + 40 = 199 + 40 = 239
-Read(file_path="ARCHITECTURE.md", offset=380, limit=239)
+Read(file_path="docs/03-architecture-layers.md")
 ```
 
-**Step 6: Search for Deployment Details**
-- Found: AWS deployment, ECS containers (lines 450-475)
+**Step 6: Extract deployment details**
+- Found under `## Cloud Infrastructure`: AWS ECS containers, auto-scaling groups
 
-**Step 7: Synthesize Answer with Citations**
+**Step 7: Synthesize answer with file-path citations**
 ```
 The system uses OAuth 2.0 for authentication with JWT tokens for API access.
 Multi-factor authentication (MFA) is required for administrative users.
@@ -648,9 +630,11 @@ The authentication service is deployed as a containerized microservice on AWS EC
 with auto-scaling enabled for high availability.
 
 **Sources**:
-- ARCHITECTURE.md Section 9 (Security Architecture → Authentication), lines 1343-1367
-- ARCHITECTURE.md Section 4 (Architecture Layers → Cloud Deployment), lines 450-475
+- [Authentication & Authorization](docs/07-security-architecture.md#authentication--authorization)
+- [Cloud Infrastructure](docs/03-architecture-layers.md#cloud-infrastructure)
 ```
+
+**Why no offsets?** Each `docs/NN-*.md` file is bounded to ~400 lines (see ARCHITECTURE_DOCUMENTATION_GUIDE.md). Reading in full is cheaper than computing offsets, and the file path + header anchor is the canonical citation format.
 
 ---
 

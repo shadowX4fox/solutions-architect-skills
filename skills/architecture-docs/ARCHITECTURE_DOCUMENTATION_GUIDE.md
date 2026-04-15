@@ -223,23 +223,9 @@ For the full dependency map, loading procedure, and citation format table, see t
 **Architect**: [Name or Team]
 **Supersedes**: — (or: v0.9.0)
 
-## Document Index
-
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines [START]-[END]
-- [Section 2: System Overview](#2-system-overview) → Lines [START]-[END]
-- [Section 3: Architecture Principles](#3-architecture-principles) → Lines [START]-[END]
-- [Section 4: Architecture Layers](#4-architecture-layers) → Lines [START]-[END]
-- [Section 5: Component Details](#5-component-details) → Lines [START]-[END]
-- [Section 6: Data Flow Patterns](#6-data-flow-patterns) → Lines [START]-[END]
-- [Section 7: Integration Points](#7-integration-points) → Lines [START]-[END]
-- [Section 8: Technology Stack](#8-technology-stack) → Lines [START]-[END]
-- [Section 9: Security Architecture](#9-security-architecture) → Lines [START]-[END]
-- [Section 10: Scalability & Performance](#10-scalability--performance) → Lines [START]-[END]
-- [Section 11: Operational Considerations](#11-operational-considerations) → Lines [START]-[END]
-- [Section 12: Architecture Decision Records (ADRs)](#12-architecture-decision-records-adrs) → Lines [START]-[END]
-
-**Index Last Updated:** YYYY-MM-DD
+<!-- Navigation index lives in ARCHITECTURE.md at the project root (see
+     RESTRUCTURING_GUIDE.md → "ARCHITECTURE.md Navigation Index Template").
+     This file (docs/01-system-overview.md) contains Sections 1+2 only. -->
 
 ---
 
@@ -281,13 +267,13 @@ For the full dependency map, loading procedure, and citation format table, see t
 - **Value Proposition 3**: [Impact statement]
 ```
 
-**Instructions for Creating the Index:**
+**Maintaining the Navigation Index:**
 
-1. **Initial Creation**: Use placeholder line ranges [START]-[END] when creating a new document
-2. **After Writing**: Once the document is complete, use `grep -n "^## [0-9]" ARCHITECTURE.md` to find actual line numbers
-3. **Update Ranges**: Replace placeholders with actual line ranges
-4. **Maintenance**: Update the index whenever making significant section changes
-5. **Update Date**: Change "Index Last Updated" to the current date after updates
+1. **Initial Creation**: Create `ARCHITECTURE.md` at the project root using the Navigation Index Template (see RESTRUCTURING_GUIDE.md → "ARCHITECTURE.md Navigation Index Template").
+2. **When Adding a Section File**: Add a new row to the Documentation table in `ARCHITECTURE.md` with the S-prefix, title, file link, and one-line description.
+3. **When Renaming or Removing a File**: Update the matching row (or remove it) in `ARCHITECTURE.md`. Do not leave dangling links.
+4. **ADR Table**: Add a row to the Architecture Decision Records table when a new ADR is accepted; let `architecture-definition-record` manage status changes.
+5. **No line numbers required**: The multi-file structure reads each `docs/NN-*.md` file in full (50–400 lines), so line ranges are not tracked or maintained.
 
 ---
 
@@ -360,21 +346,21 @@ This architecture is driven by the following key factors:
 - **Threshold**: >50% = High Impact, ≤50% = Low Impact
 - **Current Assessment**: [HIGH / LOW] Impact
 - **Justification**: [Specific percentage or business value metric from Section 1 Executive Summary]
-- **Example**: "System delivers 70% cost reduction (Section 1, line 52)" → HIGH
+- **Example**: "System delivers 70% cost reduction (see [Key Metrics](01-system-overview.md#key-metrics))" → HIGH
 
 #### Scale
 **Description**: Estimated number of customers impacted
 - **Threshold**: >100K = High, ≤100K = Low
 - **Current Assessment**: [HIGH / LOW] Impact
 - **Justification**: [Specific customer/transaction volume from Section 2.3 Use Cases]
-- **Example**: "System impacts 500,000 customers/day (Section 2.3, line 141)" → HIGH
+- **Example**: "System impacts 500,000 customers/day (see [Primary Use Cases](01-system-overview.md#primary-use-cases))" → HIGH
 
 #### Impacts
 **Description**: Implementation complexity across configuration, development, and applications
 - **Threshold**: >5 = High, ≤5 = Low
 - **Current Assessment**: [HIGH / LOW] Impact
 - **Justification**: [Component count from Section 5 + Technology count from Section 8]
-- **Example**: "System requires 8 components/technologies (Section 5: 5, Section 8: 3)" → HIGH
+- **Example**: "System requires 8 components/technologies (see [Components](components/README.md) + [Technology Stack](06-technology-stack.md))" → HIGH
 
 **Last Calculated**: YYYY-MM-DD
 **Calculation Method**: [Automatic / Manual Override]

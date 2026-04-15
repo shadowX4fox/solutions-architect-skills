@@ -258,7 +258,7 @@ Runs immediately after the Post-Write Alignment Audit passes. Detects downstream
 
 **Run when**: The edit changed substantive content — metrics, technology names, component names, architectural patterns, constraints, requirements, or interface definitions.
 
-**Skip silently when**: The edit was cosmetic — typo fixes, formatting, grammar, markdown structure, comment updates, `<!-- TODO -->` markers, source attribution links, or Document Index line numbers. Heuristic: if the diff contains only whitespace/punctuation/link/formatting changes with no word-level changes to technical terms, skip entirely.
+**Skip silently when**: The edit was cosmetic — typo fixes, formatting, grammar, markdown structure, comment updates, `<!-- TODO -->` markers, or source attribution links. Heuristic: if the diff contains only whitespace/punctuation/link/formatting changes with no word-level changes to technical terms, skip entirely.
 
 **Anti-recursion rule**: Propagation updates (Phase 3 edits) do NOT re-trigger Step 5.5.
 
@@ -573,57 +573,26 @@ See `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` for full workflow details.
 
 ---
 
-## Automatic Index Updates
+## Navigation Index Updates
 
-**CRITICAL**: After ANY edit that significantly changes section line numbers (>10 lines), automatically update the Document Index.
+**When to update the navigation index in `ARCHITECTURE.md`:**
 
-### When to Update
+- ✅ When a new `docs/NN-*.md` file is added
+- ✅ When a `docs/NN-*.md` file is renamed or removed
+- ✅ When a new ADR is accepted (add row to the ADR table)
+- ✅ When a component is added/removed/renamed (delegate to `architecture-component-guardian` for `docs/components/README.md`)
 
-**Update if:**
-- ✅ Added/removed content shifting section boundaries (>10 lines)
-- ✅ Modified section headers or structure
-- ✅ User requests: "update the index"
+**Do NOT update for:**
+- ❌ Content edits within existing `docs/NN-*.md` files (no line ranges to maintain)
+- ❌ Typo or formatting fixes
+- ❌ Metric value updates inside a file
 
-**Skip if:**
-- ❌ Minor edits (<10 lines)
-- ❌ Only metadata changes
-- ❌ Typo fixes
+**Workflow**:
+1. Check `ls docs/*.md` against the Documentation table in `ARCHITECTURE.md`
+2. Add/remove rows as needed — each row has S-prefix, title, file link, one-line description
+3. Report changes to user
 
-### Workflow Overview
-
-**Quick Steps:**
-1. **Detect**: Run `grep -n "^## [0-9]" ARCHITECTURE.md` to find section boundaries
-2. **Calculate**: Parse output to determine line ranges (Section_Start to Next_Section_Start - 1)
-3. **Update**: Edit Document Index (typically lines 5-21) with new ranges
-4. **Timestamp**: Update "Index Last Updated" to current date
-5. **Report**: Inform user which sections changed
-
-**Example:**
-```bash
-# After adding content to Section 8, it grew from 906-980 to 912-996
-grep -n "^## [0-9]" ARCHITECTURE.md
-# Parse: Section 8 now at line 912, Section 9 at 998
-# Calculate: Section 8 = 912-997, Section 9 = 998-1243
-# Update index and report to user
-```
-
-### Detailed Algorithm
-
-For complete line range calculation algorithm, step-by-step examples, verification checklist, and edge cases:
-→ **METRIC_CALCULATIONS.md** § Automatic Index Updates
-
-### Best Practices
-
-**DO:**
-- ✅ Update after significant edits
-- ✅ Use grep for accuracy (don't guess)
-- ✅ Update timestamp
-- ✅ Report changes to user
-
-**DON'T:**
-- ❌ Update for tiny changes
-- ❌ Skip timestamp update
-- ❌ Change index format
+The navigation index has **no line numbers** — each row links directly to a `docs/NN-*.md` file that is read in full when needed.
 
 ---
 

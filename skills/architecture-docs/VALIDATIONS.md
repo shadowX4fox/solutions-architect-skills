@@ -300,15 +300,17 @@ When creating or updating ARCHITECTURE.md, verify:
 
 ✅ **Data Flow Patterns (Section 6) may be omitted for simple systems**
 - If omitted, renumber subsequent sections (7→6, 8→7, etc.)
-- Document Index must reflect 11-section structure
+- Navigation index in `ARCHITECTURE.md` must reflect the 11-file structure (`docs/04-data-flow-patterns.md` removed)
 
 ### Verification Command
 
-Use this bash command to check section headers:
+List the section files present in `docs/`:
 
 ```bash
-grep -n "^## [0-9]" ARCHITECTURE.md
+ls docs/*.md
 ```
+
+Verify each file is linked from the Documentation table in `ARCHITECTURE.md`.
 
 **Expected Output** (12-section structure):
 ```
@@ -397,7 +399,7 @@ grep -n "^## [0-9]" ARCHITECTURE.md
   - S10 (Scalability & Performance) → S9
   - S11 (Operational Considerations) → S10
   - S12 (Architecture Decision Records) → S11
-- **Update Document Index** to reflect 11-section structure
+- **Update the navigation index** in `ARCHITECTURE.md` to reflect the 11-file structure
 - **Note**: All section cross-references must be updated
 - **IMPORTANT**: `docs/NN-name.md` **file names do NOT change** when sections are renumbered. `docs/05-integration-points.md` stays `05-*` regardless of whether it is internally numbered S6 or S7. This is why internal section numbers and file prefix numbers are independent — never assume they align.
 
@@ -416,25 +418,25 @@ grep -n "^## [0-9]" ARCHITECTURE.md
 - Change `## 8. Technology Stack` to `## 7. Technology Stack`
 - Continue through Section 12 → Section 11
 
-**Step 3**: Update Document Index
+**Step 3**: Update the navigation index in `ARCHITECTURE.md`
+
+Remove the Data Flow Patterns row (or `docs/04-data-flow-patterns.md` if the file itself was deleted). Keep all other rows as they are — **file prefix numbers do not change** when internal section numbers are renumbered (e.g., `docs/05-integration-points.md` stays `05-*` regardless of whether it is internally numbered S6 or S7).
+
+Example navigation table after Data Flow omission:
+
 ```markdown
-## Document Index
-
-**Quick Navigation:**
-- [Section 1: Executive Summary](#1-executive-summary) → Lines 25-53
-- [Section 2: System Overview](#2-system-overview) → Lines 54-146
-- [Section 3: Architecture Principles](#3-architecture-principles) → Lines 147-300
-- [Section 4: Architecture Layers](#4-architecture-layers) → Lines 301-455
-- [Section 5: Component Details](#5-component-details) → Lines 456-675
-- [Section 6: Integration Points](#6-integration-points) → Lines 676-850
-  <!-- Note: Data Flow Patterns omitted, sections renumbered -->
-- [Section 7: Technology Stack](#7-technology-stack) → Lines 851-997
-- [Section 8: Security Architecture](#8-security-architecture) → Lines 998-1243
-- [Section 9: Scalability & Performance](#9-scalability--performance) → Lines 1244-1416
-- [Section 10: Operational Considerations](#10-operational-considerations) → Lines 1417-1622
-- [Section 11: Architecture Decision Records (ADRs)](#11-architecture-decision-records-adrs) → Lines 1623-end
-
-**Index Last Updated:** 2025-01-29
+| # | Title | File | Description |
+|---|-------|------|-------------|
+| S1+S2 | Executive Summary + System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | System purpose, key metrics, use cases |
+| S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | 9 core principles |
+| S4 | Architecture Layers | [docs/03-architecture-layers.md](docs/03-architecture-layers.md) | System topology and layer definitions |
+| S5 | Component Details | [docs/components/README.md](docs/components/README.md) | Component index and per-component files |
+| S6 | Integration Points | [docs/05-integration-points.md](docs/05-integration-points.md) | External integrations and protocols |
+| S7 | Technology Stack | [docs/06-technology-stack.md](docs/06-technology-stack.md) | Languages, frameworks, databases |
+| S8 | Security Architecture | [docs/07-security-architecture.md](docs/07-security-architecture.md) | Auth, encryption, controls |
+| S9 | Scalability & Performance | [docs/08-scalability-and-performance.md](docs/08-scalability-and-performance.md) | SLOs, capacity, scaling strategy |
+| S10 | Operational Considerations | [docs/09-operational-considerations.md](docs/09-operational-considerations.md) | Monitoring, deployment, DR |
+| S11 | Architecture Decision Records | [adr/](adr/) | All ADR files with status |
 ```
 
 **Step 4**: Update all internal cross-references
@@ -561,9 +563,8 @@ Content Quality:
 ☐ Security controls documented in Section 9
 
 Structure:
-☐ Document Index exists and is accurate
-☐ "Index Last Updated" date is current
-☐ Subsection numbering consistent (2.1, 2.2, 2.3)
+☐ Navigation index in `ARCHITECTURE.md` lists every `docs/NN-*.md` file (no dangling links, no missing rows)
+☐ Subsection numbering consistent (2.1, 2.2, 2.3) within each file
 ☐ No duplicate section numbers
 
 Cross-References:
@@ -1421,7 +1422,7 @@ Common Errors:
 - ✅ Validate structure during document creation
 - ✅ Run verification commands (grep) to check sections
 - ✅ Use validation checklist before finalizing
-- ✅ Update Document Index after structural changes
+- ✅ Update the navigation index in `ARCHITECTURE.md` when adding/removing docs/ files
 - ✅ Enforce strict section names and order
 - ✅ Ensure all 9 principles are documented
 - ✅ Include system-specific implementation details
@@ -1435,7 +1436,7 @@ Common Errors:
 - ❌ Use generic placeholder text
 - ❌ Include Decouple Through Events unless async provides clear benefits
 - ❌ Add custom principles beyond standard 9-10
-- ❌ Forget to update Document Index after changes
+- ❌ Forget to update the navigation index when a docs/ file is added or renamed
 
 ---
 
@@ -1451,13 +1452,14 @@ Common Errors:
 **Validation Workflow**:
 
 ```
-1. Run section header check:
-   grep -n "^## [0-9]" ARCHITECTURE.md
+1. List docs/ files:
+   ls docs/*.md
 
-2. Verify all 12 sections present and in order
+2. Verify each expected file is present (11 or 12, depending on whether Data Flow is included)
+   and the navigation index in ARCHITECTURE.md links every file
 
-3. Check Section 3 has all 9 required principles:
-   grep -n "^### 3\.[1-9]" ARCHITECTURE.md
+3. Check docs/02-architecture-principles.md has all 9 required principles:
+   grep -n "^### [0-9]" docs/02-architecture-principles.md
 
 4. Validate each principle has required subsections:
    - Description
@@ -1466,7 +1468,7 @@ Common Errors:
 
 5. Run completeness checklist
 
-6. Update Document Index if needed
+6. Update the navigation index in ARCHITECTURE.md if any docs/ files were added/renamed/removed
 
 7. Report validation results to user
 ```

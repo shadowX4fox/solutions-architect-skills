@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -106,7 +106,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.4.0` in the list.
+You should see `solutions-architect-skills v3.4.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -748,7 +748,22 @@ Where:
 
 ## Roadmap
 
-### v3.4.0 (Current Release) ✅
+### v3.4.1 (Current Release) ✅
+**docs: remove obsolete monolithic ARCHITECTURE.md leftovers from architecture-docs skill**
+
+Full cleanup of "old Document Index + line ranges" pattern that predated the multi-file `docs/NN-*.md` migration:
+
+- **ARCHITECTURE_DOCUMENTATION_GUIDE.md**: Removed old `→ Lines [START]-[END]` index template; rewrote Instructions for Creating the Index for multi-file structure; 3 Design Drivers examples use file-path + section-anchor citations
+- **QUERY_SECTION_MAPPING.md**: Deleted 12 `Typical line range: Lines NNN-MMM` entries; rewrote Example Query Mapping Workflow to read `docs/NN-*.md` files in full (no `offset`/`limit`); updated 4 best-practice bullets
+- **METRIC_CALCULATIONS.md**: Rewrote entire file — removed Section 1 (Automatic Index Updates); Section 2 (Metric Consistency) now reads `docs/01-system-overview.md` + scans `docs/` instead of using line offsets
+- **DESIGN_DRIVER_CALCULATIONS.md**: Replaced "load Document Index + offset" blocks with direct file reads; 4 justification examples use file-path citations; sequential loading strategy rewritten for multi-file
+- **REVIEW_AUDIT_WORKFLOW.md**: LOW.5 "Document Index Maintenance" rewritten as "Navigation Index Maintenance"; observations use file paths; 3 line-range warnings updated
+- **VALIDATIONS.md**: Section Renumbering Workflow Step 3 rewritten with multi-file navigation table; `grep -n "^## [0-9]" ARCHITECTURE.md` replaced with `ls docs/*.md`; 4 checklist/best-practice entries updated
+- **SKILL.md**: "Automatic Index Updates" section rewritten as "Navigation Index Updates" (no line ranges — just add/remove rows when files change)
+- **ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md**: 2 Document Index references updated to the multi-file Documentation table format
+- **examples/ARCHITECTURE_example_3tier.md**: Added prominent HISTORICAL warning at top marking the monolithic format as obsolete
+
+### v3.4.0 (Previous Release) ✅
 **feat: architecture versioning — release baselines, per-component versions, git tag, archive snapshots**
 
 Complete 5-phase versioning system across the architecture docs cycle:

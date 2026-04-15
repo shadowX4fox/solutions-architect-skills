@@ -26,7 +26,7 @@ Verify structural integrity and compliance with architecture documentation stand
 - All 12 required sections present and correctly ordered
 - Section numbering consistent (1-12)
 - Section names match standard naming exactly (case-sensitive)
-- Document Index present with accurate line range references
+- Navigation index in `ARCHITECTURE.md` lists every `docs/NN-*.md` file (no dangling links, no missing sections)
 
 **Standard Section Names**:
 1. Executive Summary
@@ -186,7 +186,7 @@ Verify structural integrity and compliance with architecture documentation stand
 - ❌ Architecture Type HTML comment missing at document top
 
 ### Warnings:
-- ⚠️ Document Index line ranges may be outdated (last update: 3 months ago)
+- ⚠️ Navigation index in ARCHITECTURE.md may be missing rows for files in docs/ (verify every docs/NN-*.md is linked)
 - ⚠️ Section 3.2 trade-offs include vague statement "More complexity"
 
 ### Action Required:
@@ -205,7 +205,7 @@ Fix all ❌ Failed Checks before proceeding to Phase 2 (Content Improvement)
 All structural validation checks passed. Proceeding to Phase 2: Content Improvement.
 
 ### Warnings:
-- ⚠️ Document Index line ranges may be outdated (last update: 3 months ago)
+- ⚠️ Navigation index in ARCHITECTURE.md may be missing rows for files in docs/ (verify every docs/NN-*.md is linked)
 ```
 
 ---
@@ -279,7 +279,7 @@ Every Phase 2 recommendation in this workflow explicitly references the architec
 | **Trade-off Quality Standards** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §3, lines 280-286, 641-648 | HIGH.2 |
 | **Metrics Specification** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §1 (lines 213-243), §10 (lines 1351-1368) | HIGH.3 |
 | **Component Formatting** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, §5, lines 1010-1050 | MEDIUM.3 |
-| **Document Index Standard** | ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171 | LOW.5 |
+| **Navigation Index Standard** | ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Document Index & Navigation" | LOW.5 |
 
 ---
 
@@ -430,7 +430,7 @@ Key performance metrics are either missing from Executive Summary or inconsisten
      - [ ] Includes Write TPS (average and peak)
      - [ ] Includes measurement period context ("measured over last X days")
      - [ ] Matches values in Section 10 (Scalability & Performance)
-   - Location: Section 1, lines 34-40
+   - Location: `docs/01-system-overview.md` → `## Key Metrics`
 ```
 
 ---
@@ -564,7 +564,7 @@ Technology versions, documentation links, or tool references are outdated or poi
    - Current: "Node.js 14, Express.js 4"
    - Impact: Misleading for new engineers, Node.js 14 has security vulnerabilities
    - Recommendation: Update to current LTS version: "Node.js 20 LTS, Express.js 4"
-   - Location: Section 8, line 612
+   - Location: `docs/06-technology-stack.md` → Core Runtime table
 ```
 
 ---
@@ -686,43 +686,39 @@ Duplicate information across sections that could be consolidated for easier main
 
 **Example Issue**:
 ```markdown
-4. **Redundancy Reduction - Database Configuration** (Sections 5.3 and 8)
-   - Observation: Connection pool settings documented in both Section 5.3 (OrderRepository) and Section 8 (Database Configuration)
+4. **Redundancy Reduction - Database Configuration** (Components and Technology Stack)
+   - Observation: Connection pool settings documented in both the OrderRepository component file and `docs/06-technology-stack.md` → Database Configuration
    - Current:
-     - Section 5.3: "DB_CONNECTION_POOL_SIZE: Max connections (default: 20)"
-     - Section 8: "Connection pool: 20 connections per instance"
-   - Recommendation: Document once in Section 8, reference from Section 5.3:
-     - Section 5.3: "Connection pool: See Section 8 (Database Configuration)"
+     - `docs/components/03-order-repository.md`: "DB_CONNECTION_POOL_SIZE: Max connections (default: 20)"
+     - `docs/06-technology-stack.md`: "Connection pool: 20 connections per instance"
+   - Recommendation: Document once in `docs/06-technology-stack.md`, reference from the component file:
+     - `docs/components/03-order-repository.md`: "Connection pool: see [Database Configuration](../06-technology-stack.md#database-configuration)"
    - Impact: Single source of truth, easier to update
-   - Locations: Section 5.3 (line 383), Section 8 (line 625)
+   - Locations: `docs/components/03-order-repository.md` and `docs/06-technology-stack.md` → Database Configuration
 ```
 
 ---
 
-### LOW.5: Document Index Maintenance
+### LOW.5: Navigation Index Maintenance
 
 **What It Is**:
-Document Index line ranges may be outdated or inaccurate after content additions/deletions.
+The navigation index in `ARCHITECTURE.md` (at project root) may be missing rows for `docs/NN-*.md` files that were added, or may contain dangling links to files that were renamed/removed.
 
-**Best Practice Reference**: ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171
+**Best Practice Reference**: ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Document Index & Navigation" section
 
 **Standard Requirement**:
-- Every ARCHITECTURE.md must include Document Index before Section 1
-- Index must list all 12 sections with accurate line number ranges
-- Update after significant section changes (>10 lines added/removed)
+- `ARCHITECTURE.md` at project root is a navigation index (~130 lines) listing every `docs/NN-*.md` file with its S-prefix, title, and one-line description
+- Every file in `docs/` must have a matching row in the index; no dangling links
+- The ADR table in `ARCHITECTURE.md` lists every `adr/ADR-*.md` file with status
 
 **Example Issue**:
 ```markdown
-5. **Outdated Document Index** (lines 11-23)
-   - Observation: Document Index shows "Section 5: Component Details → Lines 351-550" but Section 5 actually starts at line 420
-   - Best Practice: ARCHITECTURE_DOCUMENTATION_GUIDE.md, lines 83-171 (Document Index standard)
-   - Current: Index line ranges haven't been updated in 3 months (30+ lines added to Section 4)
-   - Recommendation: Update Document Index line ranges to reflect current content:
-     - Verify each section's actual start and end lines
-     - Update index entries for all sections affected by recent changes
-     - Consider adding "Index Last Updated" timestamp
-   - Impact: Improves navigation, enables context-efficient editing, prevents confusion
-   - Location: Document Index, lines 11-23
+5. **Missing Navigation Index Entry** (ARCHITECTURE.md)
+   - Observation: `docs/10-references.md` exists but is not listed in the Documentation table of `ARCHITECTURE.md`
+   - Best Practice: ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Document Index & Navigation"
+   - Recommendation: Add a row to the Documentation table linking to `docs/10-references.md`
+   - Impact: Improves navigation, ensures discoverability, prevents orphan docs
+   - Location: `ARCHITECTURE.md` → Documentation table
 ```
 
 ---
@@ -828,7 +824,7 @@ Combine Phase 1 and Phase 2 results into single comprehensive report.
 All structural validation checks passed. Proceeding to Phase 2: Content Improvement.
 
 ### Warnings:
-- ⚠️ Document Index line ranges may be outdated (last update: 90 days ago)
+- ⚠️ Navigation index in ARCHITECTURE.md may be missing rows for files in docs/ (verify every docs/NN-*.md is linked)
 - ⚠️ Section 3.2 (High Availability) trade-off includes vague statement "More complexity"
 
 ---

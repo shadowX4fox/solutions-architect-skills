@@ -2,11 +2,25 @@
 
 <!-- ARCHITECTURE_TYPE: 3-TIER -->
 
+> ⚠️ **HISTORICAL EXAMPLE — DO NOT COPY AS A TEMPLATE**
+>
+> This file is a **monolithic ARCHITECTURE.md** example that predates the multi-file `docs/` migration. It is retained for historical reference and 3-Tier content illustration only.
+>
+> **For new architectures**, use the multi-file structure:
+> - `ARCHITECTURE.md` at project root is a navigation index (~130 lines)
+> - Section content lives in `docs/NN-*.md` files
+> - Components live in `docs/components/**/*.md`
+> - ADRs live in `adr/ADR-NNN-*.md`
+>
+> See `RESTRUCTURING_GUIDE.md` for the current template and `ARCHITECTURE_DOCUMENTATION_GUIDE.md` for content guidelines.
+>
+> The monolithic Document Index with line ranges below is **obsolete** — in the multi-file structure, the navigation index lists file paths without line numbers.
+
 > **Document Version**: 1.0
 > **Last Updated**: 2025-01-29
 > **Architecture Type**: 3-Tier Architecture
 
-## Document Index
+## Document Index (HISTORICAL — monolithic format, not used in multi-file structure)
 
 **Quick Navigation:**
 - [Section 1: Executive Summary](#1-executive-summary) → Lines 25-65

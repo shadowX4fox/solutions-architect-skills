@@ -52,15 +52,9 @@ This document provides detailed implementation algorithms for Design Drivers cal
 
 ### Calculation Logic
 
-**Step 1**: Read Section 1 Executive Summary (lines determined from Document Index)
-```bash
-# Load Document Index first to get Section 1 line range
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-# Parse index: Section 1 is lines 25-54
-
-# Load Section 1 with context buffer
-Read(file_path="ARCHITECTURE.md", offset=20, limit=40)
-# Reads lines 20-60 (includes ±5 line buffer)
+**Step 1**: Read `docs/01-system-overview.md` in full (Section 1 + Section 2; files are 100–300 lines)
+```
+Read(file_path="docs/01-system-overview.md")
 ```
 
 **Step 2**: Locate Business Value subsection
@@ -84,12 +78,10 @@ percentages = []
 for match in matches:
     percentage = int(match.group(1))
     context = match.group(2)
-    line_offset = section1_text[:match.start()].count('\n')
-    line_number = section1_start_line + line_offset
     percentages.append({
         'value': percentage,
         'context': context,
-        'line': line_number
+        'source': 'docs/01-system-overview.md#key-metrics'
     })
 ```
 
@@ -110,23 +102,23 @@ impact = 'HIGH' if max_metric['value'] > 50 else 'LOW'
 # Pseudo-code
 return {
     'impact': impact,
-    'justification': f"System delivers {max_metric['value']}% {max_metric['context']} (Section 1, line {max_metric['line']})",
+    'justification': f"System delivers {max_metric['value']}% {max_metric['context']} (see [Key Metrics](01-system-overview.md#key-metrics))",
     'percentage': max_metric['value'],
-    'line': max_metric['line']
+    'source': max_metric['source']
 }
 ```
 
 ### Example
 
-**Input**: Section 1 contains "70% cost reduction" at line 52
+**Input**: `docs/01-system-overview.md` contains "70% cost reduction" under `## Key Metrics`
 
 **Output**:
 ```json
 {
   "impact": "HIGH",
-  "justification": "System delivers 70% cost reduction (Section 1, line 52)",
+  "justification": "System delivers 70% cost reduction (see [Key Metrics](01-system-overview.md#key-metrics))",
   "percentage": 70,
-  "line": 52
+  "source": "docs/01-system-overview.md#key-metrics"
 }
 ```
 
@@ -178,15 +170,9 @@ return {
 
 ### Calculation Logic
 
-**Step 1**: Read Section 2.3 Use Cases (lines determined from Document Index)
-```bash
-# Load Document Index to get Section 2.3 line range
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-# Parse index: Section 2 is lines 54-146, estimate 2.3 at ~100-165
-
-# Load Section 2.3 with context buffer
-Read(file_path="ARCHITECTURE.md", offset=95, limit=75)
-# Reads lines 95-170 (includes buffer)
+**Step 1**: Read `docs/01-system-overview.md` in full (contains Sections 1+2 including 2.3 Primary Use Cases)
+```
+Read(file_path="docs/01-system-overview.md")
 ```
 
 **Step 2**: Extract all volume metrics from Success Metrics
@@ -202,12 +188,10 @@ for match in matches:
     volume_str = match.group(1).replace(',', '')
     volume = int(volume_str)
     context = match.group(0)
-    line_offset = section2_3_text[:match.start()].count('\n')
-    line_number = section2_3_start_line + line_offset
     volumes.append({
         'value': volume,
         'context': context,
-        'line': line_number
+        'source': 'docs/01-system-overview.md#primary-use-cases'
     })
 ```
 
@@ -238,15 +222,15 @@ return {
 
 ### Example
 
-**Input**: Section 2.3 contains "500,000+ reminders per day" at line 141
+**Input**: `docs/01-system-overview.md` contains "500,000+ reminders per day" under `## Primary Use Cases`
 
 **Output**:
 ```json
 {
   "impact": "HIGH",
-  "justification": "System impacts 500,000 customers/day (Section 2.3, line 141)",
+  "justification": "System impacts 500,000 customers/day (see [Primary Use Cases](01-system-overview.md#primary-use-cases))",
   "volume": 500000,
-  "line": 141
+  "source": "docs/01-system-overview.md#primary-use-cases"
 }
 ```
 
@@ -307,37 +291,23 @@ return {
 
 ### Calculation Logic
 
-**Step 1**: Read Section 5 Component Details
-```bash
-# Load Document Index to get Section 5 line range
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-# Parse index: Section 5 is lines 456-675
-
-# Load Section 5 with context buffer
-Read(file_path="ARCHITECTURE.md", offset=451, limit=230)
-# Reads lines 451-681 (includes buffer)
+**Step 1**: Read `docs/components/README.md` (component index)
+```
+Read(file_path="docs/components/README.md")
 ```
 
-**Step 2**: Count component subsection headers
+**Step 2**: Count components in the 5-column table (rows after the header/separator)
 ```python
-# Pseudo-code
-component_pattern = r'^###\s+\d+\.\d+\s+.+$'
-component_matches = re.findall(component_pattern, section5_text, re.MULTILINE)
-component_count = len(component_matches)
-
-# Example matches:
-# "### 5.1 Job Scheduler Service"
-# "### 5.2 Job Executor Service"
-# "### 5.3 PostgreSQL Database"
+# Pseudo-code — count data rows in the Components table
+# (exclude header row and `|---|---|...` separator row)
+component_count = count_data_rows(components_readme_text)
 ```
 
-**Step 3**: Read Section 8 Technology Stack
-```bash
-# Parse index: Section 8 is lines 912-998
+Alternative: glob count `docs/components/**/*.md` (excluding `README.md` and system descriptor files without `NN-` prefix).
 
-# Load Section 8 with context buffer
-Read(file_path="ARCHITECTURE.md", offset=907, limit=96)
-# Reads lines 907-1003
+**Step 3**: Read `docs/06-technology-stack.md` in full
+```
+Read(file_path="docs/06-technology-stack.md")
 ```
 
 **Step 4**: Count technology table rows
@@ -435,61 +405,33 @@ return {
 
 ---
 
-## Sequential Loading Strategy
+## File Loading Strategy
 
-**Goal**: Minimize context usage by loading sections one at a time
-
-**Context Reduction**: 75-80% vs. full document load
+**Goal**: Read only the files needed — each `docs/NN-*.md` is 50–400 lines, so reading in full is cheap
 
 ### Loading Order
 
-1. **Document Index** (lines 1-50): Parse to get exact section ranges
-2. **Section 1** (lines ~25-54): Extract Value Delivery metrics
-3. **Section 2.3** (lines ~100-165): Extract Scale metrics
-4. **Section 5** (lines ~456-675): Count components
-5. **Section 8** (lines ~912-998): Count technologies
+1. **`docs/01-system-overview.md`**: Extract Value Delivery (from `## Key Metrics`) and Scale (from `## Primary Use Cases`) metrics
+2. **`docs/components/README.md`**: Count components in the 5-column table
+3. **`docs/06-technology-stack.md`**: Count technology table rows
 
-### Context Optimization
+### Per-File Loading
 
-**Per-Section Loading**:
-```bash
-# Load one section at a time (not all simultaneously)
-# Example sequence:
+```
+# Step 1: System overview (covers Value Delivery + Scale)
+Read(file_path="docs/01-system-overview.md")
+# Process: Extract percentages AND use case volumes in one pass
 
-# Step 1: Index
-Read(file_path="ARCHITECTURE.md", offset=1, limit=50)
-# Process: Extract section line ranges
+# Step 2: Component index
+Read(file_path="docs/components/README.md")
+# Process: Count data rows in the 5-column table
 
-# Step 2: Section 1
-Read(file_path="ARCHITECTURE.md", offset=20, limit=40)
-# Process: Extract percentages, clear from memory
-
-# Step 3: Section 2.3
-Read(file_path="ARCHITECTURE.md", offset=95, limit=75)
-# Process: Extract volumes, clear from memory
-
-# Step 4: Section 5
-Read(file_path="ARCHITECTURE.md", offset=451, limit=230)
-# Process: Count components, clear from memory
-
-# Step 5: Section 8
-Read(file_path="ARCHITECTURE.md", offset=907, limit=96)
-# Process: Count technologies, clear from memory
+# Step 3: Technology stack
+Read(file_path="docs/06-technology-stack.md")
+# Process: Count technology table rows
 ```
 
-**Context Buffer Guidelines**:
-- Add ±5-10 lines buffer to each section for context preservation
-- Load sections sequentially (one at a time), not simultaneously
-- Extract metrics immediately after loading each section
-- Clear temporary data before loading next section
-
-**Performance Comparison**:
-
-| Approach | Lines Loaded | Percentage |
-|----------|-------------|------------|
-| Full Document Load | 2,000+ | 100% |
-| Sequential Loading | ~400-500 | 20-25% |
-| **Savings** | **~1,500-1,600** | **75-80%** |
+No offset/limit — each file fits comfortably in context.
 
 ---
 
@@ -555,24 +497,16 @@ Design Drivers calculation should run AFTER metric consistency check:
 3. Design Drivers calculation runs (uses updated metrics)
 4. Ensures Design Drivers reflect current metric values
 
-### Document Index Integration
-
-Design Drivers insertion may shift line numbers:
-- Section 2.2.1 insertion adds ~20-25 lines
-- Section 2.3 and subsequent sections shift down
-- Automatically trigger Document Index update if Section 2 grows >10 lines
-- Update index before final completion report
-
 ### Architecture Review Integration
 
 When user requests "architecture review", offer comprehensive checklist:
 ```
 Architecture Review Checklist:
-☐ Metric consistency check (Section 1 vs document)
-☐ Design Drivers calculation (Section 2.2.1)
+☐ Metric consistency check (Executive Summary vs other docs)
+☐ Design Drivers calculation (Section 2.2.1 in docs/01-system-overview.md)
 ☐ Architecture Principles validation (9 required)
-☐ Document Index accuracy (line ranges)
-☐ ADR references up to date (Section 12)
+☐ Navigation index up to date (ARCHITECTURE.md links all docs/NN-*.md files)
+☐ ADR references up to date (Section 12 table + adr/ files)
 ```
 
 ---
@@ -586,7 +520,7 @@ Architecture Review Checklist:
 - ✅ Document assumptions in justifications
 - ✅ Update source sections before calculating
 - ✅ Review calculation report carefully before applying
-- ✅ Load sections sequentially for context efficiency
+- ✅ Read only the `docs/NN-*.md` files needed for each driver
 - ✅ Flag edge cases for user review
 
 ### DON'T:
@@ -596,7 +530,7 @@ Architecture Review Checklist:
 - ❌ Skip user review (always present findings first)
 - ❌ Forget to update "Last Calculated" date
 - ❌ Calculate with stale data
-- ❌ Load entire document unnecessarily
+- ❌ Load every `docs/NN-*.md` file when only 2–3 are needed
 - ❌ Auto-apply changes without user approval
 
 ---
@@ -606,26 +540,26 @@ Architecture Review Checklist:
 **Scenario**: Task Scheduling System architecture review
 
 **Input Data**:
-- Section 1: "70% cost reduction" (line 52)
-- Section 2.3: "500,000+ reminders per day" (line 141)
-- Section 5: 5 component subsections
-- Section 8: 8 technology table rows (3 after header subtraction)
+- `docs/01-system-overview.md` → `## Key Metrics`: "70% cost reduction"
+- `docs/01-system-overview.md` → `## Primary Use Cases`: "500,000+ reminders per day"
+- `docs/components/` → 5 component files
+- `docs/06-technology-stack.md` → 8 technology table rows (3 after header subtraction)
 
 **Calculation Results**:
 ```
 Value Delivery: HIGH (70% > 50%)
-Justification: "System delivers 70% cost reduction (Section 1, line 52)"
+Justification: "System delivers 70% cost reduction (see [Key Metrics](01-system-overview.md#key-metrics))"
 
 Scale: HIGH (500,000 > 100,000)
-Justification: "System impacts 500,000 customers/day (Section 2.3, line 141)"
+Justification: "System impacts 500,000 customers/day (see [Primary Use Cases](01-system-overview.md#primary-use-cases))"
 
 Impacts: HIGH (8 > 5)
-Justification: "System requires 8 components/technologies (Section 5: 5, Section 8: 3)"
+Justification: "System requires 8 components/technologies (see [Components](components/README.md) + [Technology Stack](06-technology-stack.md))"
 
 Overall: 3/3 HIGH - Strong business justification for architecture complexity
 ```
 
-**Output Format** (for Section 2.2.1):
+**Output Format** (for Section 2.2.1 in `docs/01-system-overview.md`):
 ```markdown
 ### 2.2.1 Design Drivers
 
@@ -635,13 +569,13 @@ This architecture is driven by the following key factors:
 **Description**: Effectiveness of change in customer experience
 - **Threshold**: >50% = High Impact, ≤50% = Low Impact
 - **Current Assessment**: HIGH Impact
-- **Justification**: System delivers 70% cost reduction (Section 1, line 52)
+- **Justification**: System delivers 70% cost reduction (see [Key Metrics](01-system-overview.md#key-metrics))
 
 #### Scale
 **Description**: Estimated number of customers impacted
 - **Threshold**: >100K = High, ≤100K = Low
 - **Current Assessment**: HIGH Impact
-- **Justification**: System impacts 500,000 customers/day (Section 2.3, line 141)
+- **Justification**: System impacts 500,000 customers/day (see [Primary Use Cases](01-system-overview.md#primary-use-cases))
 
 #### Impacts
 **Description**: Implementation complexity across configuration, development, and applications

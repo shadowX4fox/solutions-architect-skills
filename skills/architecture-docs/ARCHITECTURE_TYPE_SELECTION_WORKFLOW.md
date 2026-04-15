@@ -711,8 +711,15 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    **Architect**: [Name or Team from Step 4 metadata]
    **Supersedes**: —
 
-   ## Document Index
-   ...
+   ## Documentation
+
+   | # | Title | File | Description |
+   |---|-------|------|-------------|
+   | S1+S2 | Executive Summary + System Overview | [docs/01-system-overview.md](docs/01-system-overview.md) | ... |
+   | S3 | Architecture Principles | [docs/02-architecture-principles.md](docs/02-architecture-principles.md) | ... |
+   | ... | ... | ... | ... |
+
+   (See RESTRUCTURING_GUIDE.md for the full Navigation Index Template.)
    ```
 
    New architectures start at **v1.0.0** with **Status: Draft**. The `Released` date and `Supersedes` fields are populated later by the Release Architecture Version workflow.
@@ -983,10 +990,9 @@ If user requests to change architecture type of an existing ARCHITECTURE.md:
 
 3. **If user confirms:**
    - Load new type templates
-   - Replace Section 4 content
-   - Replace Section 5 content
-   - Update metadata comment
-   - Update Document Index
+   - Replace Section 4 content (`docs/03-architecture-layers.md`)
+   - Replace Section 5 content (`docs/components/**/*.md` — delegate structural changes to `architecture-component-guardian`)
+   - Update the `<!-- ARCHITECTURE_TYPE: -->` metadata comment
    - Report changes to user
 
 4. **If user declines:**
