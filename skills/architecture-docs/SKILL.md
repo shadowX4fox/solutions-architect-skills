@@ -1,10 +1,6 @@
 ---
 name: architecture-docs
-description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating diagrams from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions
-triggers:
-  - architecture documentation
-  - create architecture
-  - ARCHITECTURE.md
+description: Use this skill when creating, updating, or maintaining ARCHITECTURE.md files, when users ask about "my architecture documentation" or "architecture", when generating diagrams from architecture documentation, when validating/checking/auditing architecture (including BIAN alignment, META layers, standards compliance), when releasing / publishing / tagging / freezing / finalizing an architecture version (Draft → Released lifecycle, git tag `architecture-v{version}`, archive snapshot), when bumping the architecture version (semver MAJOR/MINOR/PATCH), or when answering questions about documented components, data structures, integrations, security, performance, deployment, technology stack, or architectural decisions. Use this skill — NOT `architecture-docs-export` (which only produces Word .docx files) — when the user says "release my architecture", "release architecture", "publish architecture", "ship architecture", "tag architecture version", "freeze architecture", "bump architecture version", or "finalize architecture".
 ---
 
 # Architecture Documentation Skill

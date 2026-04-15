@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,16 @@ Where:
 
 ## Roadmap
 
-### v3.4.2 (Current Release) ✅
+### v3.4.3 (Current Release) ✅
+**fix: architecture-docs skill routes correctly for release/publish/tag phrasing**
+
+Fixed skill-router mis-routing where "release my architecture" (and related phrasing) fell through to `architecture-docs-export` instead of the correct `architecture-docs` skill (which owns Workflow 10 — architecture version release lifecycle).
+
+- **Root cause**: `architecture-docs/SKILL.md` used an unsupported `triggers:` frontmatter block (flagged by VS Code). The Claude Code router matches against the `description:` field, which did not mention release, publish, tag, freeze, bump, or finalize.
+- **Fix**: Removed the unsupported `triggers:` block and extended `description:` to explicitly cover the Draft → Released lifecycle (git tag `architecture-v{version}`, archive snapshot, semver bump) and added a disambiguation clause directing the router away from `architecture-docs-export` for release-intent phrases.
+- **Result**: "release my architecture", "publish architecture", "tag architecture version", "freeze architecture", "bump architecture version", "ship architecture", "finalize architecture" now route to `architecture-docs` → Workflow 10.
+
+### v3.4.2 (Previous Release) ✅
 **feat: mandatory Description field (≤120 chars) added to all component templates**
 
 All four architecture type templates and the component creation workflow now include a dedicated one-line `**Description:**` field positioned immediately after `**Communicates via:**`:
