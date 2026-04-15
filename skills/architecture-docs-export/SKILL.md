@@ -6,21 +6,13 @@ description: >
   Solution Architecture mode synthesizes an Executive Summary from docs/01-system-overview.md,
   the component index, and the compliance manifest (if present), then exports individual ADR docs.
   Handoff mode exports selected component development handoffs from docs/handoffs/.
-triggers:
-  - export architecture
-  - export to word
-  - export to docx
-  - generate word document
-  - generate docx
-  - export handoff
-  - export component handoff
-  - export dev handoff
-  - export dev handoffs
-  - export compliance
-  - export compliance contract
-  - export compliance to word
-  - convert to word
-  - download as word
+  IMPORTANT — this skill ONLY produces Word .docx files. It does NOT handle releasing,
+  publishing, tagging, freezing, bumping, or finalizing an architecture version. For the
+  Draft → Released lifecycle (git tag architecture-v{version}, archive snapshot, semver bump),
+  use the `architecture-docs` skill (Workflow 10) instead. Do NOT invoke this skill when the
+  user says "release my architecture", "release architecture", "publish architecture",
+  "ship architecture", "tag architecture version", "freeze architecture",
+  "bump architecture version", or "finalize architecture" — those route to `architecture-docs`.
 ---
 
 # Architecture Doc Export Skill

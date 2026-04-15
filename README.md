@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,17 @@ Where:
 
 ## Roadmap
 
-### v3.4.3 (Current Release) ✅
+### v3.4.4 (Current Release) ✅
+**fix: bidirectional routing disambiguation — architecture-docs-export no longer captures release/publish/tag intent**
+
+Adds a negative disclaimer to `architecture-docs-export/SKILL.md` to complement the v3.4.3 positive-routing fix in `architecture-docs/SKILL.md`. The one-sided fix wasn't sufficient — the export skill's semantic proximity to "produce final output" still caused it to win on "release my architecture". Bidirectional disambiguation makes the routing unambiguous from both sides.
+
+- **`architecture-docs-export/SKILL.md`**: Extended `description:` with explicit NOT-clause covering release/publish/tag/freeze/bump/finalize intent, listing each mis-routed phrase and redirecting to `architecture-docs` Workflow 10. Removed unsupported `triggers:` block (was flagged by VS Code in v3.4.3 diagnostic).
+- **`architecture-docs/SKILL.md`** (v3.4.3): Already contains positive routing for all release-intent phrases.
+
+> **Note**: SKILL.md description changes take effect in **new Claude Code sessions only** — the router caches descriptions at session start. After updating, open a fresh Claude Code window before testing.
+
+### v3.4.3 (Previous Release) ✅
 **fix: architecture-docs skill routes correctly for release/publish/tag phrasing**
 
 Fixed skill-router mis-routing where "release my architecture" (and related phrasing) fell through to `architecture-docs-export` instead of the correct `architecture-docs` skill (which owns Workflow 10 — architecture version release lifecycle).
