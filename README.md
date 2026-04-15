@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,20 @@ Where:
 
 ## Roadmap
 
-### v3.4.1 (Current Release) ✅
+### v3.4.2 (Current Release) ✅
+**feat: mandatory Description field (≤120 chars) added to all component templates**
+
+All four architecture type templates and the component creation workflow now include a dedicated one-line `**Description:**` field positioned immediately after `**Communicates via:**`:
+
+- **SECTION_5_META.md**: Description field added to all 6 layer templates (L1–L6) and the Mobile Banking App example
+- **SECTION_5_3TIER.md**: Description field added to all 3 tier templates and 3 example components (User API Controller, User Service, User Repository)
+- **SECTION_5_MICROSERVICES.md**: Description field added to both the microservice and infrastructure templates, and the Order Service example
+- **SECTION_5_BIAN.md**: Description field added to all 5 layer templates and 2 example components (Mobile Banking App, Payment Order)
+- **ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md**: Creation block updated with `**Description:**` field + enforcement note: mandatory, ≤120 characters, longer prose belongs in **Purpose**
+
+The field provides a structured, length-bounded tagline that downstream tooling (dev handoffs, IcePanel sync, peer review) can consume without re-parsing the free-form Purpose paragraph. Component Guardian index schema is unchanged (5-column fixed table; description lives in the component file only).
+
+### v3.4.1 (Previous Release) ✅
 **docs: remove obsolete monolithic ARCHITECTURE.md leftovers from architecture-docs skill**
 
 Full cleanup of "old Document Index + line ranges" pattern that predated the multi-file `docs/NN-*.md` migration:

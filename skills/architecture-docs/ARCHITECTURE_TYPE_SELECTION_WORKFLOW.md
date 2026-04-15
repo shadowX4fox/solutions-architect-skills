@@ -636,6 +636,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      **C4 Level:** Container (L2)
      **Deploys as:** <Docker container | serverless function | managed service | VM>
      **Communicates via:** <HTTPS | gRPC | AMQP | TCP | ...>
+     **Description:** <one-line tagline, MAXIMUM 120 characters — must fit on one line>
 
      **Component Version:** 1.0.0
      **Architecture Version:** 1.0.0
@@ -643,6 +644,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      ```
    - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
    - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+   - **Description field**: mandatory; write a one-line tagline (≤120 characters) summarizing what this component does. Longer prose belongs in the **Purpose** section.
    - **Version fields**: all new components start at `Component Version: 1.0.0` with `Architecture Version` matching the parent architecture version (initially `1.0.0`). `Last Updated` = today's date in ISO format.
 
    **4d-VERIFY. Structural Validation (before guardian sync)**

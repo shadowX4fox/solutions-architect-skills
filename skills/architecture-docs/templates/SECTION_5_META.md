@@ -25,6 +25,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -78,6 +79,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -127,6 +129,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -176,6 +179,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -236,6 +240,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -388,6 +393,7 @@ This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper
 **C4 Level:** Container (L2)
 **Deploys as:** {VM | on-premise | managed service}
 **Communicates via:** {TCP | HTTPS | MQ | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -443,6 +449,7 @@ This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper
 **C4 Level:** Container (L2)
 **Deploys as:** serverless function
 **Communicates via:** HTTPS
+**Description:** React Native app providing retail banking (accounts, transfers, payments) for iOS and Android customers.
 
 **Purpose**:
 Provide retail banking services to customers via iOS and Android mobile devices.

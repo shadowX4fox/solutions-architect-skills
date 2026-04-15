@@ -25,6 +25,7 @@ For each microservice, use this comprehensive template:
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -263,6 +264,7 @@ Document each infrastructure component supporting the microservices:
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -295,6 +297,7 @@ Document each infrastructure component supporting the microservices:
 **C4 Level:** Container (L2)
 **Deploys as:** Docker container
 **Communicates via:** HTTPS
+**Description:** Order lifecycle management service handling creation, validation, inventory coordination, and fulfillment tracking.
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0

@@ -27,6 +27,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -87,6 +88,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -149,6 +151,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -289,6 +292,7 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -538,6 +542,7 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 **C4 Level:** Container (L2)
 **Deploys as:** {VM | on-premise | managed service}
 **Communicates via:** {TCP | HTTPS | MQ | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -603,6 +608,7 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 **C4 Level:** Container (L2)
 **Deploys as:** serverless function
 **Communicates via:** HTTPS
+**Description:** React Native mobile banking app for retail customers: account management, payments, and transfers on iOS/Android.
 
 **Purpose**:
 Provide retail customers with mobile access to banking services on iOS and Android, offering account management, payments, and financial services through a native mobile experience.
@@ -731,6 +737,7 @@ Provide retail customers with mobile access to banking services on iOS and Andro
 **C4 Level:** Container (L2)
 **Deploys as:** Docker container
 **Communicates via:** HTTPS
+**Description:** BIAN V12.0 Payment Order service domain managing payment lifecycle from initiation through execution coordination.
 **Team Owner**: Payments Team
 
 **Purpose**:

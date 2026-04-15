@@ -23,6 +23,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -80,6 +81,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -133,6 +135,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {managed service | Docker container | VM}
 **Communicates via:** {TCP | HTTPS | AMQP | ...}
+**Description:** [≤120 chars — one-line tagline summarizing what this component does]
 
 **Component Version:** 1.0.0
 **Architecture Version:** 1.0.0
@@ -194,6 +197,7 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** Docker container
 **Communicates via:** HTTPS
+**Description:** REST API controller exposing user account CRUD endpoints with JWT authentication and JSON schema validation.
 
 **Purpose**:
 Expose REST endpoints for user account management (create, read, update, delete).
@@ -245,6 +249,7 @@ Expose REST endpoints for user account management (create, read, update, delete)
 **C4 Level:** Container (L2)
 **Deploys as:** Docker container
 **Communicates via:** HTTPS
+**Description:** Business logic service for user lifecycle: registration, password hashing, email verification, and role assignment.
 
 **Purpose**:
 Implement business logic for user account lifecycle and profile management.
@@ -301,6 +306,7 @@ Implement business logic for user account lifecycle and profile management.
 **C4 Level:** Container (L2)
 **Deploys as:** managed service
 **Communicates via:** TCP
+**Description:** PostgreSQL data access layer providing CRUD operations and connection pooling for User entity persistence.
 
 **Purpose**:
 Provide data access layer for User entity persistence to PostgreSQL database.
