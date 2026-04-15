@@ -81,6 +81,51 @@ This project maintains architecture documentation using standardized templates a
 - **Use the architecture-docs skill** when working with architecture documentation
 - **Primary template**: ARCHITECTURE_DOCUMENTATION_GUIDE.md
 - **Architectural decisions**: Use ADR_GUIDE.md for decision records
+- **Architecture versioning**: Every `ARCHITECTURE.md` carries a semantic version (see "Architecture Versioning" section below)
+
+### Architecture Versioning
+
+Every architecture carries a **semantic version** (MAJOR.MINOR.PATCH) that is the canonical reference for all downstream artifacts. Versioning has two levels:
+
+**1. Whole-architecture version** (in `ARCHITECTURE.md` header):
+```markdown
+<!-- ARCHITECTURE_VERSION: 1.2.0 -->
+<!-- ARCHITECTURE_STATUS: Released -->
+<!-- ARCHITECTURE_RELEASED: 2026-04-08 -->
+
+**Version**: 1.2.0
+**Status**: Draft | Released | Deprecated
+**Released**: YYYY-MM-DD
+**Architect**: [Name or Team]
+**Supersedes**: v1.1.0
+```
+
+**2. Per-component version** (in each `docs/components/**/*.md` file, after the C4 metadata block):
+```markdown
+**Component Version:** 1.3.0
+**Architecture Version:** 1.2.0
+**Last Updated:** 2026-04-08
+```
+
+**Semver rules**:
+- **MAJOR**: Breaking structural changes (new system, architecture type change, major ADR superseded)
+- **MINOR**: New components, new sections, new integrations, new ADRs accepted
+- **PATCH**: Corrections, clarifications, metric/typo fixes
+
+**Lifecycle**:
+1. New architecture → `v1.0.0` / Status: `Draft`
+2. First release → Status: `Released` + `Released: YYYY-MM-DD` + git tag `architecture-v1.0.0`
+3. Change → bump version per semver rules → re-release
+4. All released versions recorded in `docs/CHANGELOG.md` (Keep a Changelog format)
+
+**Git tag convention**: `architecture-v{version}` (e.g., `architecture-v1.2.0`). Namespaced with `architecture-` prefix to distinguish from plugin/app version tags. The git tag MUST reflect the doc version when the project is under git version control.
+
+**Archive snapshots** (`archive/v{version}/`): Immutable filesystem snapshot of a released version (copy of ARCHITECTURE.md + docs/ + adr/ + RELEASE_NOTES.md + .immutable marker).
+- **Non-git projects**: archive is created automatically on every release (it's the only snapshot mechanism when git history is unavailable)
+- **Git projects**: archive is optional — the git tag is the primary mechanism. Users can opt into the archive for regulated industries, audit compliance, or when consumers need a filesystem-level baseline without git
+- Files inside `archive/v{version}/` MUST NOT be edited after creation — corrections require a new PATCH release
+
+**Downstream reference**: Compliance contracts, handoff documents, and traceability reports include `Architecture Version: v{version}` in their metadata, making artifacts traceable to a specific architecture baseline.
 
 ### Architecture Documentation Workflow
 

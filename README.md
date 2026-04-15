@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.3.26-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -106,7 +106,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.3.26` in the list.
+You should see `solutions-architect-skills v3.4.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -748,7 +748,39 @@ Where:
 
 ## Roadmap
 
-### v3.3.26 (Current Release) ✅
+### v3.4.0 (Current Release) ✅
+**feat: architecture versioning — release baselines, per-component versions, git tag, archive snapshots**
+
+Complete 5-phase versioning system across the architecture docs cycle:
+
+**Phase 1 — Metadata blocks**:
+- `ARCHITECTURE.md` header now carries `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` + Status/Released/Architect/Supersedes fields
+- Every `docs/components/**/*.md` file has `Component Version` + `Architecture Version` + `Last Updated` after the C4 metadata block
+- Updated all 4 Section 5 templates (3-Tier, BIAN, META, Microservices)
+
+**Phase 2 — CHANGELOG**:
+- `docs/CHANGELOG.md` auto-created at initial architecture creation with `[1.0.0] - Draft` entry (Keep a Changelog format)
+
+**Phase 3 — Release Workflow (Workflow 10)**:
+- New `RELEASE_WORKFLOW.md` with 8-step procedure: read version → detect changes → ask bump type → generate changelog → update all metadata → create annotated git tag → archive snapshot → report
+- Semver rules: MAJOR (breaking structural), MINOR (new components/ADRs), PATCH (clarifications)
+- Git tag convention: `architecture-v{version}` (namespaced). Refuses to tag on dirty working tree or existing tag
+- Version Drift Detection on every skill invocation (doc version vs latest git tag)
+
+**Phase 4 — Downstream integration**:
+- All 10 compliance contract templates include `Architecture Version: [ARCHITECTURE_VERSION]` (compliance-generator resolves the placeholder)
+- Dev handoff Section 0 Metadata now has `Architecture Version` + `Component Version` rows
+- Traceability report header + completion message include the Architecture Version
+- Component Guardian auto-updates `Last Updated` on every edit and suggests version bumps (MAJOR/MINOR/PATCH) based on change type
+
+**Phase 5 — Archive snapshots**:
+- Immutable `archive/v{version}/` snapshot of ARCHITECTURE.md + docs/ + adr/ + RELEASE_NOTES.md + `.immutable` marker
+- **Non-git projects**: archive is created automatically (primary snapshot mechanism)
+- **Git projects**: archive is opt-in for regulated industries / audit compliance (git tag is primary)
+
+**Backward compatible**: Architectures without version metadata still work — downstream artifacts use `unversioned` as the value.
+
+### v3.3.26 (Previous Release) ✅
 **feat: META WebSocket L1 → L4 exception + mandatory security requirements**
 
 - Documented that L1 (Channels) MAY connect directly to L4 (Business) via WebSocket for real-time push (market data, live alerts, streaming telemetry, trading events) — the standard top-down rule is preserved for all request/response traffic

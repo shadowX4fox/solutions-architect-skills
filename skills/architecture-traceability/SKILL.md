@@ -90,6 +90,11 @@ Build the `arch_files` list:
 
 Only include files that exist. If no `ARCHITECTURE.md` found, abort with: *"No ARCHITECTURE.md found. Use `/skill architecture-docs` to create one first."*
 
+**Also extract the Architecture Version** from `ARCHITECTURE.md`:
+- Look for `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` comment at the top of the file
+- If present, use that value for the report header
+- If absent (architecture predates versioning), use literal `unversioned`
+
 ---
 
 ### Step 3 — Parse Use Cases from PO Spec
@@ -187,6 +192,7 @@ Write `TRACEABILITY_REPORT.md` at the project root using this format:
 
 **PO Spec**: [filename]
 **Architecture**: ARCHITECTURE.md
+**Architecture Version**: [ARCHITECTURE_VERSION from `<!-- ARCHITECTURE_VERSION: -->` comment, or "unversioned"]
 **Date**: YYYY-MM-DD
 
 ## Summary
@@ -250,7 +256,7 @@ Show summary to the user:
 ```
 Traceability report generated.
 
-PO Spec: [filename] → Architecture: ARCHITECTURE.md
+PO Spec: [filename] → Architecture: ARCHITECTURE.md v[ARCHITECTURE_VERSION]
 Coverage: N% (N/N requirements covered)
   ✅ N covered · ⚠️ N partial · ❌ N gaps
 

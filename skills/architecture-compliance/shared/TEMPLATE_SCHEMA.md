@@ -12,13 +12,15 @@ Use this as the authoritative reference when creating or modifying templates.
 
 **Project**: [PROJECT_NAME]
 **Generation Date**: [GENERATION_DATE]
+**Architecture Version**: [ARCHITECTURE_VERSION]
 **Source**: ARCHITECTURE.md (Sections N, N, N)
 **Version**: 2.0
 ```
 
 Rules:
 - H1 title must be `# Compliance Contract: {Domain Name}`
-- Version must be `2.0` (not 1.0)
+- Version must be `2.0` (not 1.0) — this is the contract **template** version
+- `Architecture Version` is the source architecture's version (from `<!-- ARCHITECTURE_VERSION: -->` in ARCHITECTURE.md) — enables traceability to a specific architecture baseline
 - Source sections should list the primary ARCHITECTURE.md sections used
 
 ---

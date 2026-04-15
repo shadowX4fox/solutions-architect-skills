@@ -209,9 +209,19 @@ For the full dependency map, loading procedure, and citation format table, see t
 
 **Complete Template (Including Index):**
 ```markdown
+<!-- ARCHITECTURE_VERSION: 1.0.0 -->
+<!-- ARCHITECTURE_STATUS: Draft -->
+<!-- ARCHITECTURE_RELEASED: YYYY-MM-DD -->
+
 # [System Name] - [Tagline]
 
 > [One-paragraph mission statement]
+
+**Version**: 1.0.0
+**Status**: Draft | Released | Deprecated
+**Released**: YYYY-MM-DD (leave empty while Status: Draft)
+**Architect**: [Name or Team]
+**Supersedes**: — (or: v0.9.0)
 
 ## Document Index
 
@@ -278,6 +288,52 @@ For the full dependency map, loading procedure, and citation format table, see t
 3. **Update Ranges**: Replace placeholders with actual line ranges
 4. **Maintenance**: Update the index whenever making significant section changes
 5. **Update Date**: Change "Index Last Updated" to the current date after updates
+
+---
+
+### Architecture Versioning
+
+Every `ARCHITECTURE.md` carries a **semantic version** (MAJOR.MINOR.PATCH) in the header metadata block. This version is the canonical reference for all downstream artifacts (compliance contracts, handoffs, traceability reports).
+
+**Metadata block format**:
+
+```markdown
+<!-- ARCHITECTURE_VERSION: 1.2.0 -->
+<!-- ARCHITECTURE_STATUS: Released -->
+<!-- ARCHITECTURE_RELEASED: 2026-04-08 -->
+
+# [System Name] - [Tagline]
+
+> [One-paragraph mission statement]
+
+**Version**: 1.2.0
+**Status**: Released
+**Released**: 2026-04-08
+**Architect**: Platform Architecture Team
+**Supersedes**: v1.1.0
+```
+
+**Semver rules for architecture docs**:
+- **MAJOR** (1.0.0 → 2.0.0): Breaking structural changes — new system added, architecture type changed, core principles changed, major ADR superseded
+- **MINOR** (1.0.0 → 1.1.0): New components, new sections, new integrations, new ADRs accepted
+- **PATCH** (1.0.0 → 1.0.1): Corrections, clarifications, metric updates, typo fixes
+
+**Status values**:
+- `Draft` — work in progress; not yet ready for compliance or handoff consumers
+- `Released` — frozen baseline; compliance contracts and handoffs should reference this version
+- `Deprecated` — superseded by a newer version; retained for historical reference
+
+**Lifecycle**:
+1. **Initial creation** → `v1.0.0` / Status: `Draft` (no `Released` date)
+2. **First release** → Status: `Released` + `Released: YYYY-MM-DD`
+3. **Minor update** → bump to `v1.1.0`, re-release
+4. **Breaking change** → bump to `v2.0.0`, set `Supersedes: v1.X.X`
+
+**Per-component versions** (in `docs/components/**/*.md`): Each component file carries its own `Component Version` alongside the parent `Architecture Version`. See Section 5 for the component header template.
+
+**CHANGELOG**: All released versions are documented in `docs/CHANGELOG.md` with Added / Changed / Deprecated / Superseded sections (Keep a Changelog format).
+
+**Git tag (when repo is under version control)**: Each released version MUST be tagged as `architecture-v{version}` (e.g., `architecture-v1.2.0`). The tag is namespaced to distinguish from plugin/app version tags.
 
 ---
 

@@ -2,6 +2,7 @@
 
 **Project**: [PROJECT_NAME]
 **Generation Date**: [GENERATION_DATE]
+**Architecture Version**: [ARCHITECTURE_VERSION]
 **Source**: ARCHITECTURE.md (Sections 5, 6, 7, 9)
 **Version**: 2.0
 

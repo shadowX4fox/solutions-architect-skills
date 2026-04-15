@@ -25,6 +25,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 <!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Package/directory path or repository]
@@ -75,6 +79,10 @@ For each component in your system, document using the template below. **Group co
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
+
 **Purpose**:
 [1-2 sentence description of what this component does]
 
@@ -120,6 +128,10 @@ For each component in your system, document using the template below. **Group co
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
+
 **Purpose**:
 [1-2 sentence description of what this component does]
 
@@ -164,6 +176,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description of what this component does]
@@ -220,6 +236,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description aligned with BIAN V12.0 service domain definition]
@@ -368,6 +388,10 @@ This traceability ensures alignment with BIAN V12.0 hierarchy and enables proper
 **C4 Level:** Container (L2)
 **Deploys as:** {VM | on-premise | managed service}
 **Communicates via:** {TCP | HTTPS | MQ | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description of core system]

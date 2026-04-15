@@ -12,6 +12,8 @@
 | Component Number | [COMPONENT_NUMBER] |
 | Handoff Version | 1.0 |
 | Generated | [GENERATION_DATE] |
+| Architecture Version | [ARCHITECTURE_VERSION] |
+| Component Version | [COMPONENT_VERSION] |
 | Status | Ready |
 | Architect | [ARCHITECT_NAME or NOT DOCUMENTED] |
 | Source Component Doc | [docs/components/NN-component-name.md](../components/[COMPONENT_FILE]) |

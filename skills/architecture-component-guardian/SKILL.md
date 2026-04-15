@@ -240,9 +240,9 @@ Offer to rename the file automatically.
 | Argument | Action |
 |----------|--------|
 | `sync` | Rebuild table from current files, no other change |
-| `add component <description>` | Resolve target system folder, create the new component file, then sync (see Step 3a below) |
+| `add component <description>` | Resolve target system folder, create the new component file (with `Component Version: 1.0.0`, `Architecture Version` from ARCHITECTURE.md, `Last Updated: today`), then sync (see Step 3a below) |
 | `remove component <name>` | Confirm deletion of component file, then sync |
-| `update component <name>` | Edit the relevant component file fields, then sync |
+| `update component <name>` | Edit the relevant component file fields, update `**Last Updated:**` to today, suggest a `**Component Version:**` bump (see "Component Version Management" below), then sync |
 | `migrate` | Run the full C4 multi-system migration workflow (Phases M1–M8). Converts flat `docs/components/` to system-subfolder structure with canonical C4 metadata and updates all cross-references. See "Migrate Workflow" section below. |
 
 **When creating a new component file** (`add`): always convert the component name to lowercase kebab-case for the filename. Examples: "Payment Service" → `NN-payment-service.md`, "CRM Domain Service" → `NN-crm-domain-service.md`, "Redis Cache" → `NN-redis-cache.md`. The display name in the `# Heading` inside the file keeps its natural casing (e.g., `# Payment Service`).
@@ -344,6 +344,44 @@ Before finishing, confirm:
 - [ ] No component appears twice
 - [ ] Breadcrumb is `[Architecture](../../ARCHITECTURE.md) > Components`
 - [ ] Sections appear in order: Components table → Key Relationships → Related Documentation
+
+---
+
+## Component Version Management
+
+Each component file carries three version-related fields directly below the C4 metadata block:
+
+```markdown
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
+```
+
+The guardian manages these fields on every `add` and `update` action:
+
+### On `add component`
+
+- **Component Version**: start at `1.0.0`
+- **Architecture Version**: copy the current value from `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` in `ARCHITECTURE.md`. If the comment is absent, use `unversioned` (the parent architecture predates versioning).
+- **Last Updated**: today's date in ISO format (`YYYY-MM-DD`)
+
+### On `update component`
+
+- **Component Version**: evaluate what changed and suggest a bump:
+  - **MAJOR (X+1.0.0)**: Breaking API change (endpoint removed/renamed, schema incompatible), technology replaced, responsibility boundary shifted
+  - **MINOR (X.Y+1.0)**: New endpoint, new responsibility, new dependency, new configuration option
+  - **PATCH (X.Y.Z+1)**: Documentation clarifications, metric updates, typo fixes
+  - Present the suggestion to the user: `Suggest bumping Component Version {old} → {new} ({bump-type}). Confirm or override?`
+- **Architecture Version**: leave unchanged (only bumps during a full architecture release via Workflow 10 of `architecture-docs`)
+- **Last Updated**: always update to today's date
+
+### On `sync`
+
+- `sync` is read-only for component files — it does NOT modify version fields. It only rebuilds `docs/components/README.md` from the current file state.
+
+### On architecture release (Workflow 10 of architecture-docs)
+
+- The release workflow updates `**Architecture Version:**` in every component file to match the new architecture version. Component Version is NOT bumped during release.
 
 ---
 

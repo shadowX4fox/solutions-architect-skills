@@ -26,6 +26,10 @@ For each microservice, use this comprehensive template:
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
+
 **Bounded Context**: [Domain/business capability this service owns]
 <!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
@@ -260,6 +264,10 @@ Document each infrastructure component supporting the microservices:
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
 
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
+
 **Purpose**: [What this component provides]
 
 **Responsibilities**:
@@ -287,6 +295,11 @@ Document each infrastructure component supporting the microservices:
 **C4 Level:** Container (L2)
 **Deploys as:** Docker container
 **Communicates via:** HTTPS
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** 2026-04-08
+
 **Team Owner**: Orders Team
 
 **Purpose**:

@@ -70,6 +70,7 @@ You are operating in **TEMPLATE PRESERVATION MODE**.
 **What you CAN do**:
 - Replace `[PROJECT_NAME]` with the actual project name
 - Replace `[GENERATION_DATE]` with the current date
+- Replace `[ARCHITECTURE_VERSION]` with the value from `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` in ARCHITECTURE.md (or literal "unversioned" if the comment is absent)
 - Replace `[VALIDATION_EVALUATOR]` with "Claude Code (Automated Validation Engine)"
 - Replace `[APPROVAL_AUTHORITY]` with the approval authority from config
 - Replace `[Compliant/Non-Compliant/Not Applicable/Unknown]` with actual status
@@ -262,6 +263,7 @@ Replace Document Control placeholders with default values:
 Replace the following placeholders with exact values:
 - `[PROJECT_NAME]` → Project name from ARCHITECTURE.md H1
 - `[GENERATION_DATE]` → Current date (YYYY-MM-DD)
+- `[ARCHITECTURE_VERSION]` → Architecture version from `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` comment in ARCHITECTURE.md. If the comment is absent (architecture predates versioning), use literal "unversioned" so the contract still generates.
 - `[VALUE or "Not specified"]` → Extracted value OR literal string "Not specified"
 
 **Rules:**

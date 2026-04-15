@@ -636,9 +636,14 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      **C4 Level:** Container (L2)
      **Deploys as:** <Docker container | serverless function | managed service | VM>
      **Communicates via:** <HTTPS | gRPC | AMQP | TCP | ...>
+
+     **Component Version:** 1.0.0
+     **Architecture Version:** 1.0.0
+     **Last Updated:** <today ISO date>
      ```
    - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
    - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+   - **Version fields**: all new components start at `Component Version: 1.0.0` with `Architecture Version` matching the parent architecture version (initially `1.0.0`). `Last Updated` = today's date in ISO format.
 
    **4d-VERIFY. Structural Validation (before guardian sync)**
 
@@ -689,7 +694,47 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 
    > **HARD GATE**: Do NOT proceed to Step 5 (ARCHITECTURE.md index) until at least one component file exists in `docs/components/`. If no components were identified, ask the user to define at least the primary containers before continuing.
 
-5. Write `ARCHITECTURE.md` as the navigation index using the template from RESTRUCTURING_GUIDE.md
+5. Write `ARCHITECTURE.md` as the navigation index using the template from RESTRUCTURING_GUIDE.md. **Include architecture version metadata** at the very top of the file:
+
+   ```markdown
+   <!-- ARCHITECTURE_VERSION: 1.0.0 -->
+   <!-- ARCHITECTURE_STATUS: Draft -->
+   <!-- ARCHITECTURE_RELEASED: -->
+
+   # [System Name] - [Tagline]
+
+   > [One-paragraph mission statement]
+
+   **Version**: 1.0.0
+   **Status**: Draft
+   **Released**: — (set when Status transitions to Released)
+   **Architect**: [Name or Team from Step 4 metadata]
+   **Supersedes**: —
+
+   ## Document Index
+   ...
+   ```
+
+   New architectures start at **v1.0.0** with **Status: Draft**. The `Released` date and `Supersedes` fields are populated later by the Release Architecture Version workflow.
+
+5.5. Create `docs/CHANGELOG.md` with the initial entry:
+
+   ```markdown
+   # Architecture Changelog
+
+   All notable changes to this architecture are documented here.
+   Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+   This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+   ## [1.0.0] - YYYY-MM-DD (Draft)
+
+   ### Added
+   - Initial architecture: [brief summary from PO Spec / user input]
+   - [N] systems, [M] components (see `docs/components/README.md`)
+   - [K] Architecture Decision Records (see `adr/`)
+   - Architecture type: [META | BIAN | 3-Tier | N-Layer | Microservices]
+   ```
+
 6. Add the `<!-- ARCHITECTURE_TYPE: TYPE -->` metadata comment at the top of `docs/03-architecture-layers.md`
 
 > **Note — Context Anchor on Subsequent Edits**: The sequential creation order (S1 → S2 → S3 → ... → S11) inherently satisfies the context anchor during initial documentation creation, since each section is written with prior sections fresh in context. However, the **Foundational Context Anchor Protocol MUST be followed for all subsequent edits** to any downstream section (S4–S11), as the original creation context will no longer be available.

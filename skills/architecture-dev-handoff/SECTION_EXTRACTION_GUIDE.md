@@ -27,6 +27,8 @@ is extracted, and defines the extraction rules for each field.
 | Component Name | `docs/components/NN-*.md` | First `# Heading` |
 | Component Number | Filename prefix `NN-` | Format as `5.N` (e.g., `01` → `5.1`) |
 | Generation Date | System date | ISO format `YYYY-MM-DD` |
+| Architecture Version | `ARCHITECTURE.md` | Value of `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` comment; if absent, `unversioned` |
+| Component Version | `docs/components/NN-*.md` | `**Component Version:**` field; if absent, `1.0.0` |
 | Architect | `ARCHITECTURE.md` | Author field or document metadata; if absent, `Not specified` |
 | Source Component Doc | Filename | Relative link `../components/NN-name.md` |
 

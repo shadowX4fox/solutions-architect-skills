@@ -58,6 +58,23 @@ Automatically activate when:
   - "Add diagrams to my architecture"
   - "Update my architecture diagrams"
   - "Refresh / regenerate diagrams to reflect recent changes"
+- **User asks to release, freeze, or tag an architecture version** (triggers Workflow 10)
+  - "Release architecture version"
+  - "Bump architecture to v1.2.0"
+  - "Freeze architecture baseline"
+  - "Tag architecture version"
+
+### Version Drift Detection (informational, every invocation)
+
+On any invocation of this skill, if `ARCHITECTURE.md` contains a `<!-- ARCHITECTURE_VERSION: -->` comment AND the project is under git:
+
+1. Read the doc version from the comment
+2. Run `git tag -l 'architecture-v*' --sort=-version:refname | head -1` to get the latest `architecture-v*` tag
+3. If doc version > latest tag: emit `ℹ️ Architecture v{doc} is not tagged in git. Run Workflow 10 (Release Architecture Version) to publish a tag.`
+4. If doc version < latest tag: emit `⚠️ Architecture tag architecture-v{tag} exists in git but the doc shows v{doc}. Possible regression — verify before committing.`
+5. If doc version == latest tag: silent (no message)
+
+Drift detection is **informational only** — it does not block other workflows. See `RELEASE_WORKFLOW.md` → "Drift Detection" for full details.
 
 ### Query Pattern Triggers
 
@@ -139,8 +156,20 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 2. Jump directly to **Workflow 9, Step 1**
 3. Do NOT ask which workflow - proceed automatically
 
+#### Workflow 10: Release Architecture Version
+**Triggers:**
+- Keywords: "release architecture", "release architecture version", "bump architecture version", "freeze architecture", "tag architecture version"
+- Lifecycle: "publish architecture", "ship architecture", "finalize architecture", "architecture release"
+- Semver: "bump architecture to major/minor/patch", "architecture v1.1.0"
+
+**Action when detected:**
+1. Confirm: "I'll run the Release Architecture Version workflow."
+2. Read `RELEASE_WORKFLOW.md` for the full procedure
+3. Jump directly to **Workflow 10, Step 1** (Read Current Version)
+4. Do NOT ask which workflow — proceed automatically
+
 #### Other Workflows
-If the user's request matches other documented workflows (1-9), follow their respective trigger patterns.
+If the user's request matches other documented workflows (1-10), follow their respective trigger patterns.
 
 **Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check), then Step 0.5 (ADR pre-identification) establishes the **ADR Context Block** — a list of ADR candidates derived from PO Spec analysis that is maintained through all creation steps for decision consistency. See ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md for the full flow.
 
@@ -680,4 +709,20 @@ Full workflow and reference details are in `RESTRUCTURING_GUIDE.md` (Read it whe
 **Quick summary**: Covers migrating a monolithic ARCHITECTURE.md to the multi-file docs/ structure (6 steps: analyze, propose target layout, extract files, rewrite ARCHITECTURE.md as navigation index, update external references, verify), plus optional enhancements and reference document inventory.
 
 **When to invoke**: When user mentions "migrate", "restructure", "split", "reorganize", or "convert" with "architecture" or "ARCHITECTURE.md", or when the file is "too large" or "hard to navigate".
+
+---
+
+## Workflow 10: Release Architecture Version
+
+Full workflow and reference details are in `RELEASE_WORKFLOW.md` (Read it when this workflow is needed).
+
+**Quick summary**: Formal release of a new architecture version. Bumps the semver version, generates a `docs/CHANGELOG.md` entry from detected changes (new/modified components, accepted/superseded ADRs, section edits), updates version metadata across `ARCHITECTURE.md` and all component files, and creates an annotated git tag `architecture-v{version}` on HEAD (when repo is under git, working tree is clean). If the project is NOT under git, creates an immutable archive snapshot at `archive/v{version}/` as the baseline mechanism; git projects can opt into the archive for audit compliance.
+
+**When to invoke**: When user asks to "release architecture", "release architecture version", "bump architecture version", "freeze architecture", "tag architecture version", or transitions an architecture from Draft to Released status.
+
+**Preconditions**:
+- `ARCHITECTURE.md` exists with `<!-- ARCHITECTURE_VERSION: -->` metadata block
+- If repo is under git: working tree must be clean, `architecture-v{new-version}` tag must not already exist
+
+**Drift detection** (informational, on every architecture-docs invocation): if doc version ≠ latest `architecture-v*` git tag, emit a one-line warning. Does not block other workflows. See `RELEASE_WORKFLOW.md` → "Drift Detection" for details.
 

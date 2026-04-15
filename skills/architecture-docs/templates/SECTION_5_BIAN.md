@@ -27,6 +27,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 <!-- context7: use resolve-library-id + get-library-docs for each technology listed above to surface config patterns and version-specific features. Present as advisory Technology Context Brief only — do not auto-fill. -->
 **Version**: [Version number]
 **Location**: [Package/directory path or repository]
@@ -83,6 +87,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description of what this business scenario orchestrates]
@@ -141,6 +149,10 @@ For each component in your system, document using the template below. **Group co
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description of what this business capability manages]
@@ -277,6 +289,10 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 **C4 Level:** Container (L2)
 **Deploys as:** {Docker container | serverless function | managed service | VM}
 **Communicates via:** {HTTPS | gRPC | AMQP | TCP | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 **Team Owner**: [Team responsible for this service domain]
 
 **Purpose**:
@@ -522,6 +538,10 @@ Document all behavior qualifiers defined in BIAN V12.0 for this service domain:
 **C4 Level:** Container (L2)
 **Deploys as:** {VM | on-premise | managed service}
 **Communicates via:** {TCP | HTTPS | MQ | ...}
+
+**Component Version:** 1.0.0
+**Architecture Version:** 1.0.0
+**Last Updated:** YYYY-MM-DD
 
 **Purpose**:
 [1-2 sentence description of core system and its role]
