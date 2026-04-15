@@ -179,11 +179,37 @@ See docs/CHANGELOG.md for full details."
 
 The tag message includes the changelog entry verbatim (without the `## [version] - date` heading line).
 
-**7.4 Report** (do NOT push automatically):
+**7.4 Push the tag to origin**:
+
+Confirm a remote named `origin` exists:
+```bash
+git remote get-url origin 2>/dev/null
+```
+
+If a remote exists, push the tag:
+```bash
+git push origin architecture-v{new-version}
+```
+
+Report:
+```
+✅ Created and pushed git tag `architecture-v{new-version}` → origin
+```
+
+**If no remote is configured** (e.g., local-only repo), skip the push and report:
 ```
 ✅ Created local git tag `architecture-v{new-version}` on HEAD
-   Run `git push origin architecture-v{new-version}` to publish it.
+   No `origin` remote configured — tag exists locally only. Configure a remote
+   and run `git push origin architecture-v{new-version}` when ready.
 ```
+
+**If the push fails** (network error, auth failure, non-fast-forward, etc.):
+```
+⚠️  Created local git tag `architecture-v{new-version}` on HEAD, but push to origin failed:
+    {error message}
+    Resolve the issue and run `git push origin architecture-v{new-version}` manually.
+```
+Do NOT delete the local tag on push failure — the release is still valid locally and can be published later.
 
 ### Step 7.5 — Archive Snapshot (git-aware)
 

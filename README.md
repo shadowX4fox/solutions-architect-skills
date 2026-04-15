@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,14 @@ Where:
 
 ## Roadmap
 
-### v3.4.6 (Current Release) ✅
+### v3.4.7 (Current Release) ✅
+**fix: architecture release workflow pushes git tag to origin automatically**
+
+After `git tag -a architecture-v{version}` is created, the workflow now immediately pushes the tag to `origin`. Graceful fallbacks: reports (but does not fail) when no remote is configured, and preserves the local tag on push failure with a manual-push hint.
+
+- **`skills/architecture-docs/RELEASE_WORKFLOW.md`**: Step 7.4 rewritten — checks for `origin` remote, pushes the tag, handles no-remote and push-failure cases without deleting the local tag.
+
+### v3.4.6 (Previous Release) ✅
 **feat: ADR institutional/user scope with reserved numbering (001–100 / 101+)**
 
 Introduces a first-class `**Scope**` field (`Institutional` | `User`) to all ADRs, with the number range encoding the scope: ADR-001–100 are reserved for organization-wide institutional decisions (Architecture Team), and ADR-101+ are used for project-local user decisions.
