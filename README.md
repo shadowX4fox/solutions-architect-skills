@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.4.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,17 @@ Where:
 
 ## Roadmap
 
-### v3.4.4 (Current Release) ✅
+### v3.4.6 (Current Release) ✅
+**feat: ADR institutional/user scope with reserved numbering (001–100 / 101+)**
+
+Introduces a first-class `**Scope**` field (`Institutional` | `User`) to all ADRs, with the number range encoding the scope: ADR-001–100 are reserved for organization-wide institutional decisions (Architecture Team), and ADR-101+ are used for project-local user decisions.
+
+- **`skills/architecture-definition-record/SKILL.md`**: Workflow 2 Step 2.1 rewritten as a scope-aware partitioned next-number lookup — asks scope first, then scans existing ADR headers to compute the correct next number in the institutional (001–100) or user (101+) range. Overflow of the institutional range is blocked with a reclassify/supersede/cancel prompt. Workflow 1 updated to extract or infer scope from the ARCHITECTURE.md Section 12 table (Case A: explicit Scope column; Case B: number-range inference with user confirmation). Workflow 5 audit output updated with a Scope column and institutional-range utilization line.
+- **`skills/architecture-definition-record/adr/ADR-000-template.md`**: Added `**Scope**: Institutional | User` header field; updated File Naming Convention block with the 001–100 / 101+ partition and annotated examples.
+- **`skills/architecture-definition-record/ADR_GUIDE.md`**: New "ADR Scope" subsection explaining the two scope types, their number ranges, and why scope is encoded in the number. Added `**Scope**` to the template block.
+- **`CLAUDE.md`**: Added ADR Scope and numbering partition paragraph to the Architecture Definition Record skill section.
+
+### v3.4.4 (Previous Release) ✅
 **fix: bidirectional routing disambiguation — architecture-docs-export no longer captures release/publish/tag intent**
 
 Adds a negative disclaimer to `architecture-docs-export/SKILL.md` to complement the v3.4.3 positive-routing fix in `architecture-docs/SKILL.md`. The one-sided fix wasn't sufficient — the export skill's semantic proximity to "produce final output" still caused it to win on "release my architecture". Bidirectional disambiguation makes the routing unambiguous from both sides.

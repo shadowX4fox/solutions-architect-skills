@@ -27,6 +27,24 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 
 ---
 
+## ADR Scope
+
+Every ADR carries a **Scope** field that determines which number range it occupies:
+
+| Scope | Number Range | Who Authors It | Coverage |
+|-------|-------------|----------------|----------|
+| **Institutional** | 001–100 | Architecture Team | Organization-wide; applies to all projects |
+| **User / Project** | 101+ | Project team | Local to a single project/product |
+
+**Institutional ADRs** capture organization-wide standards that are reused across projects — mandatory security baselines (e.g., mTLS for all internal traffic), approved cloud regions, logging standards, required authentication protocols. They are owned by the Architecture Team and approved through a formal governance process. Numbers 001–100 are reserved exclusively for this scope.
+
+**User / Project ADRs** capture decisions local to one product — chosen database engine, preferred message broker, caching strategy, API style. Numbers 101 and above are used for this scope.
+
+> **Why encode scope in the number?**
+> The number range is the fastest human signal. An architect reading a citation like `per [ADR-005]` immediately knows it is an org-wide standard, while `per [ADR-143]` is project-local — without opening the file.
+
+---
+
 ## ADR Template
 
 Use this template for all architectural decisions:
@@ -35,6 +53,7 @@ Use this template for all architectural decisions:
 # ADR-XXX: [Decision Title]
 
 **Status**: Proposed | Accepted | Deprecated | Superseded
+**Scope**: Institutional | User
 **Date**: YYYY-MM-DD
 **Authors**: [Names or team]
 **Related**: [Links to related ADRs]

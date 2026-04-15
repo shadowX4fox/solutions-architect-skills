@@ -1,6 +1,7 @@
 # ADR-XXX: [Short Decision Title]
 
 **Status**: Proposed | Accepted | Deprecated | Superseded by ADR-XXX
+**Scope**: Institutional | User
 **Date**: YYYY-MM-DD
 **Authors**: [Author names or team name]
 **Related**: [Links to related ADRs, e.g., ADR-001, ADR-005]
@@ -430,13 +431,16 @@ Don't create an ADR for:
 
 ### File Naming Convention
 
-- Format: `ADR-XXX-brief-title.md`
-- XXX: Zero-padded number (001, 002, ..., 099, 100)
+- Format: `ADR-NNN-brief-title.md`
+- NNN: Zero-padded number — range encodes scope:
+  - **Institutional scope** → 001–100 (reserved for Architecture Team / org-wide decisions)
+  - **User / Project scope** → 101+ (team-level decisions within a single project)
 - brief-title: Lowercase, hyphen-separated
 - Examples:
-  - `ADR-001-monorepo-structure.md`
-  - `ADR-015-postgresql-database.md`
-  - `ADR-042-event-sourcing-pattern.md`
+  - `ADR-001-mandatory-mtls-internal.md`       ← Institutional
+  - `ADR-042-encryption-at-rest-policy.md`     ← Institutional
+  - `ADR-101-postgresql-primary-database.md`   ← User/Project
+  - `ADR-115-event-sourcing-pattern.md`        ← User/Project
 
 ### Cross-Referencing
 

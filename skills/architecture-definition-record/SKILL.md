@@ -138,6 +138,7 @@ For each line matching `^\| \[ADR-`:
 2. Extract file path (e.g., `adr/ADR-001-name.md`)
 3. Extract slug from file path (or generate from title)
 4. Extract title, status, date, impact
+5. Extract Scope if a Scope column is present (see scope handling below)
 
 **Regex:**
 ```
@@ -145,6 +146,41 @@ For each line matching `^\| \[ADR-`:
 ```
 
 **Validate**: Check for duplicate ADR numbers — warn and halt if found.
+
+**Scope handling — two cases:**
+
+**Case A — Section 12 table has an explicit `Scope` column:**
+
+Extract the Scope value from each row (`Institutional` or `User`). Validate that:
+- Institutional rows use numbers 001–100
+- User rows use numbers 101+
+
+If mismatched (e.g., a "User" row with number 042), warn before generating:
+```
+⚠️  ADR-042 is labeled "User" but uses an institutional number (001–100).
+    Options:
+      1. [Reclassify to Institutional] — keep number 042, set Scope=Institutional
+      2. [Renumber]                    — assign next available User slot (ADR-{next_user})
+      3. [Keep as-is]                  — not recommended (breaks scope partition)
+```
+
+**Case B — Section 12 table has no `Scope` column (legacy / existing projects):**
+
+Infer scope from the ADR number range: 001–100 → Institutional, 101+ → User.
+
+Before writing any files, present an inferred-scope confirmation:
+```
+═══════════════════════════════════════════════════════════
+INFERRED SCOPES (no Scope column in ARCHITECTURE.md Section 12)
+═══════════════════════════════════════════════════════════
+  ADR-001  [Title]   → Institutional  (number in range 001–100)
+  ADR-002  [Title]   → Institutional  (number in range 001–100)
+  ADR-101  [Title]   → User           (number ≥ 101)
+═══════════════════════════════════════════════════════════
+Proceed with these inferred scopes?  [all / specify overrides (e.g. 001=User) / cancel]
+```
+
+User can override individual ADRs before generation proceeds.
 
 **If empty table:**
 ```
@@ -202,6 +238,7 @@ Always also read `ARCHITECTURE.md` (navigation index) and `docs/02-architecture-
 | Template Section | How to populate |
 |---|---|
 | **Header metadata** | ADR number, title from table, status, date, authors: "Architecture Team" |
+| **`**Scope**` field** | Case A: from the Scope column in Section 12 table; Case B: from inferred range (confirmed by user in Step 1.3) |
 | **Context → Problem Statement** | Infer from ADR title + relevant docs — why did this decision need to be made? What gap or requirement prompted it? |
 | **Context → Functional Requirements** | Extract from the relevant docs/ section — what the system must do that drives this decision |
 | **Context → Non-Functional Requirements** | From S3 (principles) + S10 (scalability) + S9 (security) as applicable |
@@ -253,15 +290,54 @@ Next steps:
 
 **Objective**: Guided interview → writes a complete `adr/ADR-XXX-title.md`.
 
-#### Step 2.1: Determine Next ADR Number
+#### Step 2.1: Determine Scope and Next ADR Number
 
-```bash
-ls adr/ADR-*.md 2>/dev/null | grep -oP 'ADR-\K\d+' | sort -n | tail -1
+**Step 2.1a — Ask scope** (default = User/Project):
+
+```
+Is this an Institutional or User/Project ADR?
+
+  1. [User / Project]  (default) — decision local to this project → numbered 101+
+  2. [Institutional]             — organization-wide Architecture Team decision → numbered 001–100
 ```
 
-Next number = max + 1 (zero-padded to 3 digits). If no ADRs exist, start at `001`.
+If the user does not explicitly choose, default to **User / Project**.
+
+**Step 2.1b — Compute next number for the chosen scope**:
+
+For each existing `adr/ADR-*.md` file, read its `**Scope**` header line. Partition into:
+- `institutional_numbers` = numbers from files with `**Scope**: Institutional`
+- `user_numbers` = numbers from files with `**Scope**: User`, **plus** legacy ADR files with no `**Scope**` field whose number is ≥ 101 (legacy files with no scope field and number ≤ 100 are treated as institutional by default)
+
+**For Institutional scope:**
+```
+next = max(n for n in institutional_numbers where n ≤ 100) + 1
+```
+- If no institutional ADRs exist → `next = 1`
+- If `next > 100` (range full) → **abort** with:
+  ```
+  ⚠️  Institutional ADR range (001–100) is full ({count} institutional ADRs).
+
+  Options:
+    1. Supersede an existing institutional ADR (use Workflow 4)
+    2. Reclassify this decision as User/Project (next User slot: ADR-{user_next})
+    3. Cancel
+  ```
+
+**For User/Project scope:**
+```
+next = max(n for n in user_numbers where n ≥ 101) + 1
+```
+- If no user ADRs exist → `next = 101`
+
+**Step 2.1c — Collision guard**: if a file named `adr/ADR-{NNN}-*.md` already exists for the computed `next` (edge case from manual renames), increment until a free slot is found and report:
+```
+ℹ️  ADR-{computed} already exists. Next available {scope} number: ADR-{actual}.
+```
 
 #### Step 2.2: Gather Decision Information
+
+> **Note**: Carry the scope selected in Step 2.1a forward — it will be written as the `**Scope**` field in the ADR header.
 
 Ask the user (can be answered in one message or iteratively):
 
@@ -308,7 +384,7 @@ Read(file_path="$PLUGIN_DIR/skills/architecture-definition-record/adr/ADR-000-te
 TEMPLATE LOAD FAILURE: Could not load ADR-000-template.md. ADR generation aborted.
 ```
 
-Populate all sections from the interview answers. Leave Implementation Plan and Success Metrics as optional stubs unless user provided that information.
+Populate all sections from the interview answers. Fill the `**Scope**` header field with the value from Step 2.1a (`Institutional` or `User`). Leave Implementation Plan and Success Metrics as optional stubs unless user provided that information.
 
 #### Step 2.5: Write File
 
@@ -628,19 +704,27 @@ For each file: extract number, title (from H1), status, date from file header.
 
 ```
 ADR Inventory — {project}
-─────────────────────────────────────────────────────────────
- #   Title                               Status       Date
-─────────────────────────────────────────────────────────────
- 001 Technology Stack Selection          ✅ Accepted   2024-01-15
- 002 Database Choice                     ✅ Accepted   2024-01-20
- 003 API Protocol                        🚧 Proposed   2024-02-01
- 004 Auth Strategy                       🔄 Superseded 2024-02-10
-─────────────────────────────────────────────────────────────
- 4 total | 2 Accepted | 1 Proposed | 1 Superseded
+──────────────────────────────────────────────────────────────────────────
+ #   Title                            Scope          Status       Date
+──────────────────────────────────────────────────────────────────────────
+ 001 Technology Stack Selection       Institutional  ✅ Accepted   2024-01-15
+ 002 Database Policy                  Institutional  ✅ Accepted   2024-01-20
+ 101 PostgreSQL Primary DB            User           ✅ Accepted   2024-02-01
+ 102 Auth Strategy                    User           🔄 Superseded 2024-02-10
+──────────────────────────────────────────────────────────────────────────
+ 4 total | 2 Institutional (001–100: 2/100 used) | 2 User/Project (101+)
+         | 3 Accepted | 1 Superseded
 
 ⚠️  Gaps detected:
- - ADR-003 is still Proposed (not yet accepted)
+ - ADR-102 is Superseded — check that a superseding ADR exists
  - Consider reviewing: ADRs older than 6 months (ADR-001, ADR-002)
+```
+
+For ADRs missing a `**Scope**` field (legacy files), display scope as `Legacy` and note at the bottom:
+```
+ℹ️  {N} legacy ADR(s) have no Scope field. Numbers ≤100 are treated as Institutional,
+    numbers ≥101 are treated as User. Add "**Scope**: Institutional | User" to those
+    files to make the classification explicit.
 ```
 
 ---

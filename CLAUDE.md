@@ -423,6 +423,12 @@ The skill has five workflows:
 
 **ADR file convention**: `adr/ADR-NNN-brief-title.md` — zero-padded, lowercase, hyphen-separated. Template and guide are in `skills/architecture-definition-record/`.
 
+**ADR Scope and numbering partition**: Every ADR carries a `**Scope**` metadata field (`Institutional` or `User`) and the number range encodes that scope:
+- **ADR-001 … ADR-100** — reserved for **Institutional** ADRs (organization-wide Architecture Team decisions, e.g., mandatory mTLS, approved cloud regions, logging standards)
+- **ADR-101+** — **User / Project** ADRs (decisions local to a single project, e.g., database choice, message broker, caching strategy)
+
+When creating an ADR (Workflow 2), the skill asks for scope and computes the next available number in the appropriate range. The institutional range is hard-capped at 100 — overflow is blocked and requires superseding an existing institutional ADR or reclassifying the new decision as User scope.
+
 ---
 
 ### Using the Architecture Onboarding Skill
