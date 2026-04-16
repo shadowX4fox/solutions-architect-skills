@@ -1,7 +1,7 @@
 ---
 name: architecture-analysis-agent
 description: Universal architecture analysis agent — performs one scoped analysis (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, or Data Sensitivity) over architecture documentation. Reads the analysis spec and report skeleton from the plugin directory, loads the architecture docs from the project, applies the spec's classification rules, and writes a date-stamped markdown report. MUST ONLY be invoked by the `architecture-analysis` skill orchestrator — never call directly.
-tools: Read, Write, Grep, Glob, Bash
+tools: Read, Write, Grep, Glob, Bash, WebSearch
 model: sonnet
 ---
 
@@ -69,6 +69,38 @@ Follow the classification rules in the spec (Phase 0) exactly. For each entity (
 4. Record the **evidence citation**: the exact file path and section/heading where the evidence was found
 
 **Documentation Fidelity Rule**: If the data needed to classify an entity is absent from the architecture docs, do NOT infer, assume, or estimate. Mark the finding as `[NOT DOCUMENTED — add to <source-file>]` and add it to the Documentation Gaps list. Never create findings not grounded in the architecture docs.
+
+### Phase 2.5 — EOL Validation (tech-debt only)
+
+**Run only when `analysis_type == "tech-debt"`. Skip for all other analyses.**
+
+For every technology that received a tier classification of T1, T2, or T3 in Phase 2 (i.e., any technology with a documented version where EOL matters), perform a `WebSearch` lookup to validate the EOL / end-of-support date.
+
+1. Build the search query in this form:
+   `"<technology> <version> end of life" OR "<technology> <version> end of support"`
+   Examples:
+   - `"Node.js 18 end of life"`
+   - `"PostgreSQL 13 end of support"`
+   - `".NET 6 end of life Microsoft"`
+
+2. Read the top result's published EOL date (prefer official vendor pages — `nodejs.org`, `endoflife.date`, `learn.microsoft.com`, `wiki.postgresql.org`, vendor product lifecycle pages — over third-party blogs).
+
+3. Compare the web-validated date against the value derived from the architecture docs (or from the version → known-EOL mapping the spec uses as fallback):
+
+   | Comparison outcome | Action |
+   |---|---|
+   | Match (same month) | Use the doc/derived value; add `validated via WebSearch` annotation in the source citation |
+   | Doc date is **later** than vendor EOL (doc claims more runway than reality) | Use the **web-validated date**; flag in the row's source column as `⚠️ DOC OUTDATED — vendor EOL: <date>` and add the entity to the Documentation Gaps list with the suggested correction |
+   | Doc date is **earlier** than vendor EOL (doc claims less runway) | Use the **doc value** (conservative); annotate `(vendor official EOL: <later date>)` for transparency |
+   | Cannot resolve (no authoritative result, search failed, ambiguous) | Use the doc/derived value; annotate `(WebSearch validation: inconclusive)` |
+
+4. Recompute the runway (months from `today` to the validated EOL) and re-tier the technology if validation moves it across a tier boundary (e.g., a T3 technology whose validated EOL is within 6 months becomes T2).
+
+**Behavior rules:**
+- The web-validated value NEVER silently overrides the architecture doc — every override is annotated and recorded as a Documentation Gap.
+- If `WebSearch` is unavailable (tool not granted, network error), continue with the doc-only values and emit a single line in the Executive Summary: `WebSearch validation unavailable — EOL dates from architecture docs only.`
+- Cap WebSearch calls at one per unique (technology, version) pair across the entire run. Cache results in working memory; do not re-search the same pair for multiple components.
+- This phase MUST complete before Phase 3 builds the Technology Currency Table — the validated values feed directly into the table.
 
 ### Phase 3 — Build Findings Tables and Heat Map
 

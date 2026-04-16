@@ -322,5 +322,8 @@ Add to your project's `.claude/settings.json`:
 "Write(analysis/*)",
 "Read(analysis/*)",
 "Bash(mkdir *)",
-"Agent(solutions-architect-skills:architecture-analysis-agent)"
+"Agent(solutions-architect-skills:architecture-analysis-agent)",
+"WebSearch"
 ```
+
+**`WebSearch` is required for the Tech Debt / EOL analysis.** The agent uses it to validate documented EOL dates against vendor product-lifecycle pages (`endoflife.date`, `learn.microsoft.com/lifecycle`, `nodejs.org`, etc.) — see `analyses/TECH_DEBT.md` § "EOL Validation Protocol". Other analyses (SPOF, Blast Radius, Bottleneck, Cost, STRIDE, Vendor Lock-in, Latency Budget, Coupling, Data Sensitivity) do not call WebSearch. If `WebSearch` is omitted, the Tech Debt analysis still completes but produces a `WebSearch unavailable` notice and may report stale EOL data.

@@ -386,8 +386,11 @@ The skill includes:
 "Write(analysis/*)",
 "Read(analysis/*)",
 "Bash(mkdir *)",
-"Agent(solutions-architect-skills:architecture-analysis-agent)"
+"Agent(solutions-architect-skills:architecture-analysis-agent)",
+"WebSearch"
 ```
+
+`WebSearch` is required for the Tech Debt / EOL analysis — the agent validates documented EOL dates against vendor product-lifecycle sources. Other analyses do not use WebSearch.
 
 ---
 

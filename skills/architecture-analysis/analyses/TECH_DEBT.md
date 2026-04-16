@@ -56,12 +56,18 @@ The architecture doc mentions the technology but **does not document the version
 For each T1–T5 technology, produce one row:
 
 ```
-Tier | Technology | Documented Version | EOL / End-of-Support Date | Runway (months) | Component(s) using it | Source
+Tier | Technology | Documented Version | EOL / End-of-Support Date | Runway (months) | Component(s) using it | Source | Validation
 ```
 
-- `EOL / End-of-Support Date` = from architecture docs. If the docs cite a date, use it. If the docs only name a version (e.g., "Node.js 18"), use the known EOL for that version — and note in the table footnote that this was derived from the version number.
-- `Runway` = months from analysis date to EOL. Negative = already EOL (T1).
+- `EOL / End-of-Support Date` = the **WebSearch-validated** date (per the EOL Validation Protocol below). If validation could not be performed, fall back to the architecture-doc value or the version → known-EOL mapping.
+- `Runway` = months from analysis date to the validated EOL. Negative = already EOL (T1).
 - `Source` = the doc file and section where the technology is mentioned.
+- `Validation` = one of:
+  - `✅ web-validated` — search confirmed the doc/derived value within ±1 month
+  - `⚠️ corrected via WebSearch — was: <doc value>` — vendor EOL is earlier than doc claimed; the table now shows the vendor value
+  - `ℹ️ doc value (vendor: <later date>)` — vendor EOL is later than the doc; doc value retained as conservative
+  - `⏵ WebSearch inconclusive` — search returned no authoritative result; doc/derived value retained
+  - `⏵ WebSearch unavailable` — tool not granted or network error; doc/derived value only
 
 Sort by Runway ascending (most urgent first).
 
@@ -123,8 +129,8 @@ Plot T1-xx / T2-xx / T3-xx IDs at their coordinates.
 
 ## Report Sections (in order)
 
-1. **Executive Summary** — count by tier (T1/T2/T3/T5), highest-risk finding, overall currency verdict
-2. **Technology Currency Table** — full table sorted by runway ascending
+1. **Executive Summary** — count by tier (T1/T2/T3/T5), highest-risk finding, overall currency verdict; include WebSearch validation status (`N/M validated, K corrected, J inconclusive`) or the "WebSearch unavailable" notice
+2. **Technology Currency Table** — full table sorted by runway ascending (includes `Validation` column)
 3. **EOL Hotlist** — T1 and T2 items only, high-visibility format
 4. **Deprecated SDK / Library Scan** — table of doc-flagged deprecated items
 5. **Architectural Debt** — pending ADR replacements table
@@ -144,6 +150,57 @@ Plot T1-xx / T2-xx / T3-xx IDs at their coordinates.
 | Deprecation / legacy flags | Keyword scan across all docs | ADRs citing "deprecated", "legacy" |
 | ADR status | `adr/ADR-*.md` — Status field | ARCHITECTURE.md Section 12 ADR table |
 | Replacement plans | ADRs referencing the deprecated tech | `docs/09-operational-considerations.md` roadmap |
-| EOL dates | Architecture docs (authoritative); version → known EOL mapping as secondary | Agent may use WebSearch to look up current EOL for a version if suspicious, per Documentation Fidelity Rule |
+| EOL dates | **`WebSearch` (mandatory)** — official vendor lifecycle pages, `endoflife.date`, vendor product lifecycle docs | Architecture docs (authoritative for the *fact* that the technology is in use); version → known EOL mapping as ultimate fallback when WebSearch is unavailable |
 
-**WebSearch note**: The `WebSearch` permission is available. If a documented version's EOL date seems inconsistent with known release history (e.g., docs say "Node.js 20 EOL: 2022"), the agent MAY search for the official EOL to verify — but MUST report the architecture-doc value and note the discrepancy. Never replace the documented value with the web-sourced value.
+---
+
+## EOL Validation Protocol (Mandatory)
+
+For this analysis, **`WebSearch` is REQUIRED** to validate EOL / end-of-support dates for every technology that lands in tiers T1, T2, or T3 in Phase 2 of the agent workflow.
+
+### Why mandatory
+
+EOL dates documented in `docs/06-technology-stack.md` or per-component files are frequently stale:
+- Vendors push EOL forward (e.g., extended support contracts)
+- Vendors pull EOL backward (e.g., security incidents, accelerated deprecation)
+- The doc may have been written months ago and never refreshed
+- The doc may cite a version but not an EOL date — and the version → EOL mapping in the agent's knowledge can be out of date
+
+Acting on stale EOL data produces **misleading risk reports** — either false alarms (paged about a "critical EOL" that's been extended) or, worse, missed criticals (planning a 12-month migration for a runtime that's already unsupported).
+
+### Procedure
+
+For every (technology, version) pair classified as T1, T2, or T3:
+
+1. **Search**: query of the form `"<technology> <version> end of life"` or `"<technology> <version> end of support"`.
+2. **Prefer authoritative sources** in this order:
+   - Official vendor product lifecycle pages (`learn.microsoft.com/lifecycle`, `nodejs.org/en/about/previous-releases`, `wiki.postgresql.org/wiki/PostgreSQL_Release_Support_Policy`, `kubernetes.io/releases/`, `endoflife.date`)
+   - Vendor security advisories or release-notes pages
+   - Reputable third-party trackers (`endoflife.date` is acceptable as a primary source)
+   - Discard blog posts older than 12 months
+3. **Read the published EOL date** for the documented major version.
+4. **Apply the comparison matrix** from the agent's Phase 2.5 — match / corrected / vendor-later / inconclusive / unavailable — and record the outcome in the `Validation` column of the Technology Currency Table.
+5. **Re-tier** if validation moves the technology across a tier boundary (e.g., a T3 tech with a vendor-confirmed EOL within 6 months becomes T2; a T1 doc claim that the vendor refutes with a still-supported version drops to T4).
+
+### Caching and budget
+
+- Cache results in working memory: one search per unique (technology, version) pair across the entire run, even if multiple components share the technology.
+- This bounds the number of WebSearch calls to the count of distinct stack entries — typically 5–15 for a normal architecture.
+
+### Documentation Gap creation
+
+Every override (architect-doc value differs from the WebSearch-validated value) MUST be added to the Documentation Gaps section as:
+
+```
+- [ ] Update `docs/06-technology-stack.md` (or `<source-file>`): <technology> <version> EOL is <vendor date>, not <doc date> (verified <today>, source: <vendor URL>)
+```
+
+This converts the validation artifact into actionable doc maintenance work.
+
+### Behavior when WebSearch is unavailable
+
+If the `WebSearch` tool is not granted or returns errors for every call:
+- Continue the analysis using doc-only / version-mapping values
+- Annotate every row's `Validation` column as `⏵ WebSearch unavailable`
+- Add a single line to the Executive Summary: `⚠️ WebSearch validation unavailable — EOL dates derived from architecture docs only. Re-run with WebSearch permission for higher accuracy.`
+- Do not abort — the analysis still has value as a doc-grounded baseline.
