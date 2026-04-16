@@ -342,7 +342,8 @@ Replace the following placeholders with exact values:
 
 Before writing output, verify:
 - [ ] All agent-owned placeholders replaced — no `[PLACEHOLDER]` text remains except:
-  - The 6 pipeline-owned placeholders from Step 4.0: `[NEXT_REVIEW_DATE]`, `[DOCUMENT_STATUS]`, `[VALIDATION_SCORE]`, `[VALIDATION_STATUS]`, `[VALIDATION_DATE]`, `[REVIEW_ACTOR]` — these MUST remain as-is
+  - The 6 Document Control pipeline-owned placeholders (Step 4.0): `[NEXT_REVIEW_DATE]`, `[DOCUMENT_STATUS]`, `[VALIDATION_SCORE]`, `[VALIDATION_STATUS]`, `[VALIDATION_DATE]`, `[REVIEW_ACTOR]` — these MUST remain as-is
+  - `[PIPELINE_POPULATED]` in the Questions & Gaps Register (Step 4.8) — MUST remain as-is
   - Legitimate "Not specified" or "Not documented" where data was absent
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
@@ -368,6 +369,45 @@ The validator agent (invoked by the orchestrator) is the **sole source of truth*
 - `[RECOMMENDATIONS_LIST]` → numbered list from `validation_recommendations`, or `"None"` if empty
 
 If no `VALIDATION_RESULT` was provided in the prompt, set status to `⚠️ **PENDING**` and all counts to 0.
+
+**Step 4.7: Populate Data Extracted Successfully Section**
+
+The `## Data Extracted Successfully` section contains a placeholder and an instructional example that MUST be replaced with the actual Compliant data you extracted from ARCHITECTURE.md.
+
+**How to fill it:**
+
+1. Scan the Compliance Summary table you produced in PHASE 4 for all rows whose Status column = "Compliant"
+2. For each Compliant row, build one bullet line:
+   ```
+   - {Code} - {Requirement text}: {brief value found} (Source: {source section, e.g. docs/07-security-architecture.md})
+   ```
+3. Replace the template placeholder block:
+   ```
+   [List of all data points marked as "Compliant" with source references]
+   
+   Example format:
+   - {prefix}1 - [Data Point]: [Value] (Source: ARCHITECTURE.md Section X, lines Y-Z)
+   ```
+   With the actual bullet list. Remove both the `[List of...]` placeholder AND the `Example format:` line AND the example bullet — they are instructional text, not content.
+
+4. If NO requirements are Compliant, replace the block with:
+   ```
+   No requirements were found to be Compliant in this review cycle. Address the items in the Questions & Gaps Register below.
+   ```
+
+**Rules:**
+- Use only data you actually extracted in PHASE 3 — do NOT fabricate values
+- "Brief value found" = the key piece of evidence (e.g., a section name, a technology, a metric — not a paragraph)
+- Source must match the `docs/NN-name.md` file path where the evidence was found
+- If a Compliant item had no specific source beyond the architecture doc, write `(Source: ARCHITECTURE.md)`
+
+**Step 4.8: Questions & Gaps Register (Pipeline-Owned — DO NOT MODIFY)**
+
+The `## Questions & Gaps Register` section is entirely populated by the post-generation pipeline. Its placeholder row contains `[PIPELINE_POPULATED]`.
+
+**DO NOT replace or remove `[PIPELINE_POPULATED]`** — the pipeline's `questions-register-populator.ts` replaces the entire section after scoring. Any modification here will break the pipeline's replacement logic.
+
+This section is also exempt from the Step 4.5 "all placeholders replaced" check, alongside the 6 Document Control placeholders.
 
 ### PHASE 4 Examples: Correct vs Incorrect Replacements
 

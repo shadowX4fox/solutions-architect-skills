@@ -763,7 +763,7 @@ bun [plugin_dir]/skills/architecture-compliance/utils/post-generation-pipeline.t
 After the pipeline runs, scan each generated contract for unfilled pipeline-owned placeholders. Use Grep tool for each contract file:
 
 ```
-pattern: \[(NEXT_REVIEW_DATE|DOCUMENT_STATUS|VALIDATION_SCORE|VALIDATION_STATUS|VALIDATION_DATE|REVIEW_ACTOR)\]
+pattern: \[(NEXT_REVIEW_DATE|DOCUMENT_STATUS|VALIDATION_SCORE|VALIDATION_STATUS|VALIDATION_DATE|REVIEW_ACTOR|PIPELINE_POPULATED)\]|^\[List of all data points
 file: [contract_path]
 output_mode: content
 ```
@@ -772,7 +772,7 @@ If ANY unfilled placeholder is found in a contract:
 
 ```
 ⚠️  Pipeline placeholder replacement incomplete in [filename]:
-    Still unfilled: [list of found placeholder names]
+    Still unfilled: [list of found placeholder names or sections]
 
     This usually means the post-generation pipeline did not run, ran before the
     contract was written, or failed silently. Re-run manually:
