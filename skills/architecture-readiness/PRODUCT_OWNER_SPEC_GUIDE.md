@@ -1928,7 +1928,7 @@ Your PO Spec will be evaluated on a **0-10 scale** using a weighted scoring meth
 
 1. **Use Cases (2.5 points)**: Ensure your use cases capture the full scope and complexity of the desired architecture, with primary flows, alternative flows, edge cases, and success metrics
 2. **Business Constraints (2.0 points)**: Document all constraints - budget breakdown, hard deadlines, compliance requirements, integration constraints, operational constraints
-3. **Business Objectives (1.5 points)**: Define at least 3 measurable business goals with specific targets, timeframes, and ROI expectations
+3. **Business Objectives (1.5 points)**: Define measurable business goals with specific targets, timeframes, and ROI expectations (goal count signals scope)
 
 **For detailed evaluation criteria**, see: [PO_SPEC_SCORING_GUIDE.md](PO_SPEC_SCORING_GUIDE.md)
 
@@ -1941,7 +1941,7 @@ Before submitting to architecture team, verify:
 - [ ] Budget constraints specified with breakdown
 - [ ] Timeline constraints with hard deadlines and reasoning
 - [ ] Regulatory/compliance requirements documented
-- [ ] At least 3 measurable business objectives with targets
+- [ ] Measurable business objectives with quantified targets
 - [ ] ROI expectations calculated
 
 **Important Sections (Medium Weight):**
@@ -1951,7 +1951,7 @@ Before submitting to architecture team, verify:
 
 **Supporting Sections (Lower Weight):**
 - [ ] At least 2 user personas defined
-- [ ] At least 5 user stories with acceptance criteria
+- [ ] User stories with acceptance criteria covering primary flows
 
 If you've checked all items in "Critical Sections" and most of "Important Sections," your PO Spec likely scores ≥7.5/10 and is ready for architecture team review.
 
@@ -2026,6 +2026,6 @@ If you've checked all items in "Critical Sections" and most of "Important Sectio
 
 ---
 
-**Document Version**: 1.0.0
-**Last Updated**: 2025-01-25
+**Document Version**: 1.1.0
+**Last Updated**: 2026-04-16
 **Maintained By**: Product Team

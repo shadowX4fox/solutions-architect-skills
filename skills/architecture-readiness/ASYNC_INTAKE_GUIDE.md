@@ -61,7 +61,7 @@ For each section, assign a completeness percentage using the thresholds from `PO
 Apply section weights and compute:
 
 ```
-Total Score = SUM(Section Completeness% × Section Weight) / 10
+Total Score = SUM((Section Completeness % / 100) × Section Weight)
 ```
 
 Example: Use Cases at 50% → 0.50 × 2.5 = 1.25 points out of a possible 2.5.

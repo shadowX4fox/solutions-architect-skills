@@ -35,14 +35,14 @@ When prompted, provide:
 
 The skill will guide you through the 8-section template:
 
-1. **Business Context** - Why this project exists
-2. **User Personas** - Who are the users
-3. **Use Cases** - What users need to do
-4. **User Stories** - Specific requirements (As a... I want... So that...)
-5. **Success Criteria** - How to measure success
-6. **Constraints & Assumptions** - Limitations and dependencies
-7. **Risks** - Potential issues
-8. **Next Steps** - Handoff to architecture team
+1. **Business Context** - Why this project exists and the problem being solved
+2. **Stakeholders & Users** - Who are affected by and who will use the system
+3. **Business Objectives** - Measurable goals, ROI expectations, and success criteria
+4. **Use Cases** - What users need to do (primary flows, alternatives, edge cases)
+5. **User Stories** - Specific requirements (As a... I want... So that...)
+6. **UX Requirements** - Performance expectations, usability, accessibility standards
+7. **Business Constraints** - Budget, timeline, compliance, and integration limitations
+8. **Success Metrics & KPIs** - How to measure success post-launch
 
 #### Step 3: Review Readiness Score
 

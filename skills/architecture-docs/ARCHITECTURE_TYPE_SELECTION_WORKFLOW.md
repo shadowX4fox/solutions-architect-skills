@@ -138,15 +138,7 @@ Wait for user input.
 
 - Load `skills/architecture-readiness/PO_SPEC_SCORING_GUIDE.md`
 - Map the user's input to the 8 PO Spec sections
-- Score each section using the weighted rubric:
-  - Section 4: Use Cases (weight 2.5) — HIGH priority
-  - Section 7: Business Constraints (weight 2.0) — HIGH priority
-  - Section 3: Business Objectives (weight 1.5) — HIGH priority
-  - Section 1: Business Context (weight 1.0)
-  - Section 6: UX Requirements (weight 1.0)
-  - Section 8: Success Metrics (weight 1.0)
-  - Section 2: Stakeholders & Users (weight 0.5)
-  - Section 5: User Stories (weight 0.5)
+- Score each section using the weighted rubric defined in `skills/architecture-readiness/PO_SPEC_SCORING_GUIDE.md` § "Section Weights" (8 sections, weighted 0–10, ≥7.5 = ready — update that file if weights ever change)
 - Display the evaluation results:
   ```
   📊 Business Context Evaluation (scored against PO Spec rubric)

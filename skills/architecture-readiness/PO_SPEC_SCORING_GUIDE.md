@@ -111,15 +111,15 @@ For each section, evaluate completeness using the criteria below, then assign a 
 
 | Criteria | Points | Evaluation Question |
 |----------|--------|---------------------|
-| Measurable Goals | 30% | Are at least 3 business goals defined with specific metrics and targets? |
+| Measurable Goals | 30% | How many business goals are defined with specific metrics and targets? (Goal count signals scope, not a hard minimum) |
 | Success Criteria | 25% | Is MoSCoW prioritization applied (Must/Should/Could/Won't achieve)? |
 | ROI Expectations | 25% | Are investment, expected returns, and payback period calculated? |
 | Timeline & Milestones | 20% | Are launch timeline and key milestones defined? |
 
 **Completeness Scoring:**
 - **100%**: All criteria fully addressed with quantified targets and timelines
-- **75%**: 3+ goals with targets, ROI calculated, success criteria defined
-- **50%**: 2-3 goals with targets, partial ROI or success criteria
+- **75%**: Multiple goals with targets, ROI calculated, success criteria defined
+- **50%**: A few goals with targets, partial ROI or success criteria
 - **25%**: Goals listed but lack specific metrics or targets
 - **0%**: Section missing or only has vague objectives
 
@@ -172,16 +172,16 @@ For each section, evaluate completeness using the criteria below, then assign a 
 
 | Criteria | Points | Evaluation Question |
 |----------|--------|---------------------|
-| Number of Stories | 30% | Are at least 5 user stories defined? |
+| Number of Stories | 30% | Are user stories defined to cover the primary use case flows? (Story count reflects use-case coverage, not a hard minimum) |
 | Story Format | 30% | Do stories follow "As a [user], I want [goal], so that [benefit]" format? |
 | Acceptance Criteria | 30% | Does each story have clear acceptance criteria? |
 | Prioritization | 10% | Is MoSCoW prioritization applied to stories? |
 
 **Completeness Scoring:**
-- **100%**: 5+ stories in proper format with acceptance criteria and prioritization
-- **75%**: 5+ stories with acceptance criteria, most prioritized
-- **50%**: 3-5 stories with basic acceptance criteria
-- **25%**: 1-3 stories or stories lack acceptance criteria
+- **100%**: Stories cover all primary use case flows in proper format with acceptance criteria and prioritization
+- **75%**: Stories cover most use case flows with acceptance criteria, most prioritized
+- **50%**: Stories cover some use case flows with basic acceptance criteria
+- **25%**: Minimal story coverage or stories lack acceptance criteria
 - **0%**: Section missing or stories are too vague
 
 **Example - 70% Complete:**
@@ -420,7 +420,7 @@ When a PO Spec scores below threshold (< 7.5/10), provide actionable feedback us
 **Section 3: Business Objectives** (Completeness: 60%, Weight: 1.5, Score: 0.9/1.5)
 - **Partially Addressed**: 2 business goals defined with targets
 - **Needs Enhancement**:
-  - Add 1-2 more measurable goals (minimum 3 required)
+  - Consider adding more measurable goals to capture the full business intent
   - Calculate ROI: investment, expected returns, payback period
   - Add MoSCoW success criteria (Must/Should/Could/Won't achieve)
   - Define timeline milestones for Phases 1-3
@@ -492,16 +492,8 @@ When a PO Spec scores below threshold (< 7.5/10), provide actionable feedback us
 6. If score <7.5: Return to Product Owner with gap analysis feedback, request revisions
 
 **Skill Usage:**
-```
-/skill architecture-readiness evaluate [PO_SPEC_FILE]
-```
 
-This command will:
-- Read the specified PO Spec document
-- Evaluate each of the 8 sections against criteria
-- Calculate weighted score
-- Provide score interpretation and feedback
-- Recommend next steps (Approved / Revisions Required / Not Ready)
+Invoke the skill with "score" or "evaluate" intent (e.g., "evaluate my PO Spec" or "score this document") and provide the PO Spec content or file path. The skill will evaluate each of the 8 sections against the criteria in this guide, calculate the weighted score, and recommend next steps.
 
 ---
 
@@ -536,6 +528,6 @@ Minimum "Ready" Score: 7.5/10
 
 ---
 
-**Document Version**: 1.0.0
-**Last Updated**: 2025-01-25
+**Document Version**: 1.1.0
+**Last Updated**: 2026-04-16
 **Maintained By**: Architecture Team

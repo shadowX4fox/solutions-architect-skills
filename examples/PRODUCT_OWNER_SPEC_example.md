@@ -5,20 +5,20 @@
 **Date:** 2025-01-15
 **Product Owner:** Sarah Chen
 **Status:** Ready for Architecture Team Handoff
-**Readiness Score:** 8.5/10
+**Readiness Score:** 8.3/10
 
 ---
 
 ## Table of Contents
 
 1. [Business Context](#1-business-context)
-2. [User Personas](#2-user-personas)
-3. [Use Cases](#3-use-cases)
-4. [User Stories](#4-user-stories)
-5. [Success Criteria](#5-success-criteria)
-6. [Constraints & Assumptions](#6-constraints--assumptions)
-7. [Risks](#7-risks)
-8. [Next Steps](#8-next-steps)
+2. [Stakeholders & Users](#2-stakeholders--users)
+3. [Business Objectives](#3-business-objectives)
+4. [Use Cases](#4-use-cases)
+5. [User Stories](#5-user-stories)
+6. [UX Requirements](#6-ux-requirements)
+7. [Business Constraints](#7-business-constraints)
+8. [Success Metrics & KPIs](#8-success-metrics--kpis)
 
 ---
 
@@ -74,7 +74,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-## 2. User Personas
+## 2. Stakeholders & Users
 
 ### 2.1 Primary Persona: DevOps Engineer (Maya)
 
@@ -156,9 +156,58 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-## 3. Use Cases
+## 3. Business Objectives
 
-### 3.1 UC-001: Schedule Recurring Database Backup
+### 3.1 Measurable Goals
+
+1. **Reduce DevOps Overhead by 60%:** Eliminate manual cron configuration, cutting DevOps time spent on job management from 12 hrs/week to ≤4.8 hrs/week within 6 months of full rollout.
+2. **Achieve 99.5% Job Execution Reliability:** Improve from the current 97.3% baseline to ≥99.5% average over any rolling 30-day period within 3 months of go-live.
+3. **Reduce Configuration Drift to <1%:** Centralized configuration management will eliminate the current 23% configuration drift rate; target <1% variance across environments by end of Q3 2025.
+4. **Achieve ROI Within 18 Months:** Platform investment of $80,000 (development + infrastructure Year 1) is projected to return $240,000 in annual labor savings, yielding a 3.0x ROI within 18 months of launch.
+
+### 3.2 MoSCoW Success Criteria
+
+| Priority | Goal | Threshold |
+|----------|------|-----------|
+| **Must Have** | ≥60% reduction in DevOps overhead (hrs/week) by Month 6 | Mandatory for business case |
+| **Must Have** | ≥99.5% job execution reliability over 30-day period | SLA commitment to engineering leadership |
+| **Must Have** | Configuration drift <1% across all environments | Compliance and audit requirement |
+| **Should Have** | 3.0x ROI achieved within 18 months post-launch | Validates investment decision |
+| **Should Have** | 80% of existing cron jobs migrated to platform within 6 months | Realizes full operational savings |
+| **Could Have** | NPS ≥40 from internal users by Quarter 2 | Indicator of long-term adoption health |
+| **Won't Have (v1.0)** | Workflow orchestration ROI measured independently | Deferred to v2.0 roadmap |
+
+### 3.3 ROI Calculation
+
+| Item | Value |
+|------|-------|
+| Development budget | $350,000 |
+| Year 1 infrastructure | $24,000 ($2,000/month) |
+| **Total Year 1 Investment** | **$374,000** |
+| Labor savings (8 hrs/week × $75/hr × 52 weeks × 4 engineers) | $124,800/year |
+| Incident response time savings (MTTR 8h → 30min × avg 3/week × $150/hr) | $52,650/year |
+| Configuration drift remediation savings | $18,000/year |
+| **Total Annual Savings** | **$195,450/year** |
+| **Payback Period** | ~23 months |
+| **3-Year ROI** | ~57% net return on investment |
+
+> Note: Payback period drops to ~18 months when factoring $50,000 contingency buffer not consumed during development.
+
+### 3.4 Timeline & Milestones
+
+| Milestone | Target Date | Success Criterion |
+|-----------|-------------|-------------------|
+| Architecture design complete | February 2025 | ARCHITECTURE.md approved by security team |
+| MVP development complete | April 2025 (Q2) | All P0 user stories implemented and tested |
+| Beta launch (30 users) | May 2025 | Beta NPS ≥30, <10 critical bugs |
+| Full rollout (450 users) | July 2025 (Q3) | ≥300 MAU within 30 days of launch |
+| ROI checkpoint | January 2026 | ≥60% overhead reduction confirmed by time tracking |
+
+---
+
+## 4. Use Cases
+
+### 4.1 UC-001: Schedule Recurring Database Backup
 
 **Actor:** DevOps Engineer (Maya)
 
@@ -193,7 +242,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - 95% of users complete job creation in <5 minutes
 - <1% validation error rate after UI improvements
 
-### 3.2 UC-002: Monitor Job Execution
+### 4.2 UC-002: Monitor Job Execution
 
 **Actor:** DevOps Engineer (Maya)
 
@@ -229,7 +278,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - 90% of job failures are identified via dashboard (vs. external alerts)
 - Average time to identify failed job: <2 minutes
 
-### 3.3 UC-003: Respond to Job Failure
+### 4.3 UC-003: Respond to Job Failure
 
 **Actor:** DevOps Engineer (Maya)
 
@@ -269,7 +318,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - Mean Time to Resolution (MTTR) for job failures: <30 minutes
 - 80% of failures resolved with single configuration update
 
-### 3.4 UC-004: Create Job via API
+### 4.4 UC-004: Create Job via API
 
 **Actor:** Data Engineer (Rajesh)
 
@@ -323,7 +372,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - 100% of API requests return within <500ms
 - API documentation is clear enough for 90% self-service adoption
 
-### 3.5 UC-005: Review Job Execution History
+### 4.5 UC-005: Review Job Execution History
 
 **Actor:** Team Lead (Chris)
 
@@ -362,9 +411,9 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-## 4. User Stories
+## 5. User Stories
 
-### 4.1 Job Creation and Configuration
+### 5.1 Job Creation and Configuration
 
 **US-001:** As a DevOps engineer, I want to create a scheduled job through a web UI so that I can automate recurring tasks without SSH access to servers.
 
@@ -414,7 +463,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-### 4.2 Job Execution and Monitoring
+### 5.2 Job Execution and Monitoring
 
 **US-005:** As a DevOps engineer, I want to view real-time job execution logs so that I can debug failures immediately.
 
@@ -479,7 +528,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-### 4.3 Access Control and Security
+### 5.3 Access Control and Security
 
 **US-010:** As a security administrator, I want to implement role-based access control so that users can only manage their own jobs (or team jobs based on role).
 
@@ -517,7 +566,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-### 4.4 Operational Excellence
+### 5.4 Operational Excellence
 
 **US-013:** As a DevOps engineer, I want to version control job configurations so that I can rollback to previous configurations if needed.
 
@@ -555,91 +604,58 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-## 5. Success Criteria
+## 6. UX Requirements
 
-### 5.1 Business Success Metrics
+### 6.1 Performance Targets
 
-**Operational Efficiency:**
-- **Target:** Reduce DevOps time spent on job management from 12 hrs/week to <4 hrs/week (67% reduction)
-- **Measurement:** Weekly time tracking surveys for 3 months post-launch
-- **Success Threshold:** ≥60% reduction by Month 3
+| Interaction | Target | Threshold |
+|-------------|--------|-----------|
+| Dashboard initial load | <2 seconds (p95) | <3 seconds |
+| Job status updates (polling) | <500ms round-trip | <1 second |
+| Job creation form submission | <1 second response | <2 seconds |
+| Execution log page load (up to 1 MB) | <2 seconds | <4 seconds |
+| API response time (CRUD) | <500ms (p95) | <750ms |
+| Notification delivery (email/Slack) | ≤60 seconds from failure | ≤90 seconds |
 
-**Reliability:**
-- **Target:** Achieve 99.9% job execution reliability (vs. current 97.3%)
-- **Measurement:** (Successful executions / Total executions) * 100, tracked daily
-- **Success Threshold:** ≥99.5% average over 30-day period
+### 6.2 Accessibility Requirements
 
-**Time-to-Market:**
-- **Target:** Enable new job deployment in <5 minutes (vs. current 2-3 hours)
-- **Measurement:** Average time from job creation to first successful execution
-- **Success Threshold:** 90% of jobs deployed in <5 minutes
+- **Standard:** WCAG 2.1 Level AA compliance across all web UI pages
+- **Keyboard navigation:** All primary workflows (job creation, monitoring, manual trigger) must be fully keyboard-navigable
+- **Screen reader compatibility:** ARIA labels on all form inputs, status indicators, and interactive controls
+- **Color contrast:** Minimum 4.5:1 contrast ratio for normal text; 3:1 for large text and UI components
+- **Status indicators:** Color-coded job status (green/yellow/red/gray) must include text labels or icons — color alone is not sufficient
+- **Focus management:** Focus must return to a logical element after modal dialogs close
 
-**Cost Savings:**
-- **Target:** Reduce operational overhead costs by $120,000 annually
-- **Calculation:** (12 hrs/week - 4 hrs/week) * $75/hr * 52 weeks = $31,200 per engineer * 4 engineers = $124,800
-- **Success Threshold:** ≥$100,000 annual savings verified by finance
+### 6.3 Cross-Browser & Device Support
 
-### 5.2 User Adoption Metrics
+**Supported Browsers (latest 2 major versions):**
+- Google Chrome (Windows, macOS)
+- Mozilla Firefox (Windows, macOS)
+- Apple Safari (macOS, iOS)
+- Microsoft Edge (Windows)
 
-**Platform Adoption:**
-- **Target:** 80% of scheduled jobs migrated to platform within 6 months
-- **Measurement:** (Jobs in platform / Total scheduled jobs) * 100
-- **Success Threshold:** ≥70% by Month 6
+**Mobile & Responsive Design:**
+- Monitoring views (job dashboard, execution status) must be responsive and usable on mobile devices (≥375px viewport width)
+- Job creation and configuration forms are desktop-primary; mobile layout must remain functional (no horizontal scroll)
+- Touch targets for interactive elements must be ≥44×44px on mobile
 
-**Active Users:**
-- **Target:** 350+ monthly active users (MAU) from 450 target users
-- **Measurement:** Unique users creating/editing/monitoring jobs per month
-- **Success Threshold:** ≥300 MAU by Month 3
+**Not Required (v1.0):**
+- Native mobile application (iOS/Android)
+- Internet Explorer support
 
-**Self-Service Adoption:**
-- **Target:** 85% of job creation done without DevOps team support
-- **Measurement:** Tickets to DevOps team for job creation assistance
-- **Success Threshold:** <15% of job creations require support tickets
+### 6.4 Usability Requirements
 
-### 5.3 Technical Performance Metrics
-
-**Platform Availability:**
-- **Target:** 99.9% uptime (8.76 hours downtime per year)
-- **Measurement:** Uptime monitoring via Datadog
-- **Success Threshold:** ≥99.5% measured monthly
-
-**Job Execution Latency:**
-- **Target:** Jobs start execution within 10 seconds of scheduled time
-- **Measurement:** (Actual start time - Scheduled time) for 95th percentile
-- **Success Threshold:** ≥90% of jobs start within 10 seconds
-
-**API Performance:**
-- **Target:** API response time <500ms for 95th percentile
-- **Measurement:** API gateway metrics
-- **Success Threshold:** 95th percentile <750ms
-
-**Notification Delivery:**
-- **Target:** Failure notifications delivered within 60 seconds
-- **Measurement:** (Notification sent time - Job failure time)
-- **Success Threshold:** ≥90% of notifications sent within 60 seconds
-
-### 5.4 User Satisfaction Metrics
-
-**Net Promoter Score (NPS):**
-- **Target:** NPS ≥40 from internal users
-- **Measurement:** Quarterly NPS survey
-- **Success Threshold:** NPS ≥30 by Quarter 2
-
-**User Satisfaction (CSAT):**
-- **Target:** CSAT ≥4.0/5.0
-- **Measurement:** In-app feedback survey after key workflows (job creation, failure resolution)
-- **Success Threshold:** CSAT ≥3.5/5.0 with ≥100 responses
-
-**Feature Request Adoption:**
-- **Target:** 70% of requested features in roadmap prioritization
-- **Measurement:** Feature requests submitted via feedback form analyzed quarterly
-- **Success Threshold:** Top 10 feature requests addressed in v2.0 roadmap
+- **Onboarding:** First-time users should complete their first job creation without documentation in <5 minutes (validated in beta with 30 users)
+- **Error messages:** All form validation errors must include: what went wrong, why it matters, and how to fix it — no generic "Invalid input" messages
+- **Cron expression helper:** Visual picker with common presets (hourly, daily, weekly, monthly) plus preview of next 5 execution times
+- **Confirmation patterns:** Destructive actions (delete job, disable job) require a confirmation dialog with job name included
+- **Empty states:** All list views (My Jobs, Execution History, Team Dashboard) must display actionable empty-state messages — no blank pages
 
 ---
 
-## 6. Constraints & Assumptions
+## 7. Business Constraints
 
-### 6.1 Technical Constraints
+### 7.1 Technical Constraints
 
 **Infrastructure:**
 - Must deploy on existing Azure Kubernetes Service (AKS) cluster (no new cloud providers)
@@ -663,7 +679,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - Job scripts must run in containerized environment (Docker-compatible)
 - Web UI must support Chrome 90+, Firefox 88+, Safari 14+ (last 2 years of browsers)
 
-### 6.2 Organizational Constraints
+### 7.2 Organizational Constraints
 
 **Timeline:**
 - MVP launch target: Q2 2025 (4 months from project kickoff)
@@ -684,7 +700,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - Must complete SOC 2 compliance checklist (audit logging, encryption, access control)
 - Must document disaster recovery procedures (RTO: 4 hours, RPO: 1 hour)
 
-### 6.3 Assumptions
+### 7.3 Assumptions
 
 **User Behavior:**
 - Assumption: Users prefer web UI over CLI for job management (80%+ web UI adoption)
@@ -716,11 +732,9 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 - Validation: Survey of 50 DevOps engineers showed 92% prefer email/Slack
 - Risk: If other channels needed (PagerDuty, Microsoft Teams), can add in v2.0
 
----
+### 7.4 Risk Factors
 
-## 7. Risks
-
-### 7.1 Technical Risks
+#### Technical Risks
 
 **RISK-001: Job Execution Failures at Scale**
 - **Description:** Platform may experience performance degradation or failures when executing 450+ concurrent jobs
@@ -761,7 +775,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
   - Cost monitoring dashboard to track storage growth
 - **Contingency:** Reduce retention to 30 days or charge teams for excessive log storage
 
-### 7.2 Adoption Risks
+#### Adoption Risks
 
 **RISK-005: User Resistance to Migration**
 - **Description:** DevOps engineers may resist migrating from familiar cron-based workflows to new platform
@@ -784,7 +798,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
   - Office hours (2x per week) during first month post-launch
 - **Contingency:** Dedicated support engineer for first 3 months post-launch
 
-### 7.3 Business Risks
+#### Business Risks
 
 **RISK-007: Competing Priorities Delay Launch**
 - **Description:** Development team pulled to other high-priority initiatives, delaying MVP launch
@@ -816,7 +830,7 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
   - Contingency buffer: $50,000 (14% of budget)
 - **Contingency:** Defer P2 features (version control, metrics API) to v2.0 if budget threatened
 
-### 7.4 Operational Risks
+#### Operational Risks
 
 **RISK-010: Disaster Recovery Insufficient**
 - **Description:** Platform outage exceeds RTO (4 hours) or data loss exceeds RPO (1 hour) during incident
@@ -840,118 +854,116 @@ Build a centralized **Job Scheduling Platform** that enables internal teams to:
 
 ---
 
-## 8. Next Steps
+## 8. Success Metrics & KPIs
 
-### 8.1 Architecture Team Handoff
+### 8.1 Business Success Metrics
 
-This Product Owner Specification is now **ready for Architecture Team handoff** (Readiness Score: 8.5/10).
+**Operational Efficiency:**
+- **Target:** Reduce DevOps time spent on job management from 12 hrs/week to <4 hrs/week (67% reduction)
+- **Measurement:** Weekly time tracking surveys for 3 months post-launch
+- **Success Threshold:** ≥60% reduction by Month 3
 
-**Architecture team should:**
-1. Review this PO Spec thoroughly and clarify any ambiguities with Product Owner
-2. Create `ARCHITECTURE.md` document using the `architecture-docs` skill
-3. Design technical architecture addressing:
-   - Job scheduling engine design (cron expression parsing, job queue management)
-   - Job execution runtime (containerization, isolation, resource limits)
-   - Database schema (jobs, executions, audit logs, users/roles)
-   - API design (REST endpoints for CRUD operations, authentication/authorization)
-   - Notification service integration (email, Slack)
-   - Secrets management integration (Azure Key Vault)
-   - Monitoring and observability (metrics, logging, alerting)
-4. Document Architecture Decision Records (ADRs) for key decisions:
-   - ADR-001: Job execution runtime (Kubernetes Jobs vs. custom worker pool)
-   - ADR-002: Database choice (PostgreSQL justification)
-   - ADR-003: Notification delivery pattern (async queue vs. sync)
-   - ADR-004: Secrets storage (Azure Key Vault vs. encrypted DB)
-5. Define non-functional requirements:
-   - Performance targets (API latency, job start latency, concurrent execution capacity)
-   - Scalability strategy (horizontal scaling, database read replicas)
-   - Security controls (RBAC model, encryption at rest/in transit, audit logging)
-   - Disaster recovery (RTO: 4 hours, RPO: 1 hour)
+**Reliability:**
+- **Target:** Achieve 99.9% job execution reliability (vs. current 97.3%)
+- **Measurement:** (Successful executions / Total executions) * 100, tracked daily
+- **Success Threshold:** ≥99.5% average over 30-day period
 
-### 8.2 Development Roadmap (High-Level)
+**Time-to-Market:**
+- **Target:** Enable new job deployment in <5 minutes (vs. current 2-3 hours)
+- **Measurement:** Average time from job creation to first successful execution
+- **Success Threshold:** 90% of jobs deployed in <5 minutes
 
-**Phase 1: MVP Development (Months 1-3)**
-- Core job scheduling engine
-- Web UI for job creation and monitoring
-- Basic notification system (email)
-- Role-based access control
-- PostgreSQL database schema and migrations
+**Cost Savings:**
+- **Target:** Reduce operational overhead costs by $120,000 annually
+- **Calculation:** (12 hrs/week - 4 hrs/week) * $75/hr * 52 weeks = $31,200 per engineer * 4 engineers = $124,800
+- **Success Threshold:** ≥$100,000 annual savings verified by finance
 
-**Phase 2: Beta Testing (Month 4)**
-- Beta deployment with 30 internal users
-- User acceptance testing (UAT)
-- Performance testing under load
-- Security review and SOC 2 compliance validation
-- Bug fixes and UX refinements
+### 8.2 User Adoption Metrics
 
-**Phase 3: Full Rollout (Months 5-6)**
-- Production deployment to all 450 users
-- Migration assistance for existing cron jobs
-- Training workshops and documentation
-- Post-launch support and monitoring
-- Incident response and on-call coverage
+**Platform Adoption:**
+- **Target:** 80% of scheduled jobs migrated to platform within 6 months
+- **Measurement:** (Jobs in platform / Total scheduled jobs) * 100
+- **Success Threshold:** ≥70% by Month 6
 
-**Phase 4: v2.0 Planning (Month 7+)**
-- Workflow orchestration (job dependencies)
-- Advanced analytics and reporting
-- Additional notification channels (PagerDuty, Microsoft Teams)
-- Custom job types beyond Python/shell
-- Multi-tenant support for external users
+**Active Users:**
+- **Target:** 350+ monthly active users (MAU) from 450 target users
+- **Measurement:** Unique users creating/editing/monitoring jobs per month
+- **Success Threshold:** ≥300 MAU by Month 3
 
-### 8.3 Stakeholder Engagement
+**Self-Service Adoption:**
+- **Target:** 85% of job creation done without DevOps team support
+- **Measurement:** Tickets to DevOps team for job creation assistance
+- **Success Threshold:** <15% of job creations require support tickets
 
-**Weekly Check-ins:**
-- Product Owner + Architecture Team sync (Tuesdays 10am)
-- Development team standup (Daily 9am)
+### 8.3 Technical Performance Metrics
 
-**Monthly Reviews:**
-- Steering committee review with VP Engineering (Last Friday of month)
-- User feedback sessions with DevOps team leads (2nd Wednesday of month)
+**Platform Availability:**
+- **Target:** 99.9% uptime (8.76 hours downtime per year)
+- **Measurement:** Uptime monitoring via Datadog
+- **Success Threshold:** ≥99.5% measured monthly
 
-**Quarterly Reviews:**
-- Executive business review (present ROI metrics, adoption, roadmap)
+**Job Execution Latency:**
+- **Target:** Jobs start execution within 10 seconds of scheduled time
+- **Measurement:** (Actual start time - Scheduled time) for 95th percentile
+- **Success Threshold:** ≥90% of jobs start within 10 seconds
 
-### 8.4 Success Criteria Review
+**API Performance:**
+- **Target:** API response time <500ms for 95th percentile
+- **Measurement:** API gateway metrics
+- **Success Threshold:** 95th percentile <750ms
 
-**After Architecture Phase:**
-- ARCHITECTURE.md completed and reviewed by security team
-- Technical feasibility confirmed (no blocking risks identified)
-- Development estimates validated (can meet Q2 2025 MVP target)
+**Notification Delivery:**
+- **Target:** Failure notifications delivered within 60 seconds
+- **Measurement:** (Notification sent time - Job failure time)
+- **Success Threshold:** ≥90% of notifications sent within 60 seconds
 
-**After Beta Launch:**
-- 80% of beta users rate platform ≥4/5 (CSAT)
-- <10 critical bugs identified during beta testing
-- Performance targets met (99.5% uptime, <500ms API latency)
+### 8.4 User Satisfaction Metrics
 
-**After Full Rollout:**
-- 70% of target users (315 of 450) actively using platform within 3 months
-- 60% reduction in DevOps operational overhead achieved
-- 99.5% job execution reliability sustained for 30 days
+**Net Promoter Score (NPS):**
+- **Target:** NPS ≥40 from internal users
+- **Measurement:** Quarterly NPS survey
+- **Success Threshold:** NPS ≥30 by Quarter 2
+
+**User Satisfaction (CSAT):**
+- **Target:** CSAT ≥4.0/5.0
+- **Measurement:** In-app feedback survey after key workflows (job creation, failure resolution)
+- **Success Threshold:** CSAT ≥3.5/5.0 with ≥100 responses
+
+**Feature Request Adoption:**
+- **Target:** 70% of requested features in roadmap prioritization
+- **Measurement:** Feature requests submitted via feedback form analyzed quarterly
+- **Success Threshold:** Top 10 feature requests addressed in v2.0 roadmap
+
+---
+
+This Product Owner Specification is **ready for Architecture Team handoff** (Readiness Score: 8.3/10 — see Appendix A). The architecture team should review this document, clarify any ambiguities with the Product Owner, and proceed with creating `ARCHITECTURE.md` using the `architecture-docs` skill. Key ADRs to document include: job execution runtime (Kubernetes Jobs vs. custom worker pool), database choice (PostgreSQL justification), notification delivery pattern (async queue vs. sync), and secrets storage (Azure Key Vault vs. encrypted DB). Development is planned across four phases: MVP (Months 1–3), Beta Testing (Month 4), Full Rollout (Months 5–6), and v2.0 Planning (Month 7+).
 
 ---
 
 ## Appendix A: Scoring Methodology
 
-This Product Owner Specification was evaluated using a weighted scoring system (0-10 scale):
+This Product Owner Specification was evaluated using the canonical 8-section weighted scoring system (0-10 scale). **Total Score = Σ (Completeness % × Weight)**
 
-| Section | Weight | Score | Weighted Score | Rationale |
-|---------|--------|-------|----------------|-----------|
-| Business Context | 20% | 9.0 | 1.80 | Clear problem statement, business drivers, scope definition. Minor gap: No competitive analysis. |
-| User Personas | 15% | 8.5 | 1.28 | Detailed personas with goals, pain points, acceptance criteria. Could add more tertiary personas. |
-| Use Cases | 15% | 8.0 | 1.20 | 5 comprehensive use cases covering core workflows. Missing edge cases (e.g., bulk job import). |
-| User Stories | 15% | 8.5 | 1.28 | 15 user stories covering all roles with clear acceptance criteria. Some P2 stories could be more detailed. |
-| Success Criteria | 15% | 9.0 | 1.35 | Quantitative metrics for business, adoption, technical, and UX. Well-defined thresholds. |
-| Constraints & Assumptions | 10% | 8.0 | 0.80 | Technical, organizational, and assumption constraints documented. Could add more validation methods. |
-| Risks | 10% | 8.5 | 0.85 | 11 risks across technical, adoption, business, operational domains with mitigation strategies. |
-| **TOTAL** | **100%** | **-** | **8.48** | **Rounded to 8.5/10** |
+| Section | Weight (pts) | Completeness % | Weighted Score | Rationale |
+|---------|-------------|----------------|----------------|-----------|
+| 1. Business Context | 1.0 | 90% | 0.90 | Clear problem statement, business drivers, and scope. Strategic alignment explicit. Minor gap: no competitive analysis (build vs. buy justification). |
+| 2. Stakeholders & Users | 0.5 | 85% | 0.43 | Three detailed personas with goals, pain points, and acceptance criteria. Minor gap: no explicit impact analysis section; Finance/Security personas mentioned in context but not as full profiles. |
+| 3. Business Objectives | 1.5 | 75% | 1.13 | Measurable goals, MoSCoW success criteria, ROI calculation, and timeline milestones added. Slight gap: payback period is a projection with a stated assumption caveat; ROI realized only if adoption targets met. |
+| 4. Use Cases | 2.5 | 85% | 2.13 | 5 comprehensive use cases with actors, flows, postconditions, alternative flows, and success metrics. Gap: missing bulk job import / job cloning edge cases; some alternative flows could be expanded. |
+| 5. User Stories | 0.5 | 85% | 0.43 | 15 user stories across 4 epics with acceptance criteria and MoSCoW prioritization. Gap: "So that [benefit]" clause missing from several stories; some P2 acceptance criteria light on detail. |
+| 6. UX Requirements | 1.0 | 70% | 0.70 | Performance targets, WCAG 2.1 AA accessibility, browser/device matrix, and usability principles defined. Gap: no task-completion-rate targets or learnability benchmarks; cross-platform consistency for mobile partially detailed. |
+| 7. Business Constraints | 2.0 | 85% | 1.70 | Technical, organizational, assumptions, and risk factors documented across four sub-sections. Gap: operational constraints (support model, on-call rotation after rollout) implicit in roadmap but not in a discrete operational constraints block. |
+| 8. Success Metrics & KPIs | 1.0 | 90% | 0.90 | Business, adoption, technical, and satisfaction KPIs defined with baselines, targets, thresholds, and measurement methods. Gap: reporting cadence and dashboard ownership not explicitly assigned. |
+| **TOTAL** | **10.0** | | **8.32** | **Rounded to 8.3/10** |
 
 **Readiness Threshold:** ≥7.5 → **READY FOR ARCHITECTURE TEAM HANDOFF** ✅
 
 **Recommendations for improvement (optional):**
 - Add competitive analysis (existing tools like Jenkins, Airflow) to justify build vs. buy decision
-- Include wire frames or UI mockups for core workflows (job creation, monitoring dashboard)
-- Expand tertiary personas (e.g., Finance team for cost tracking, Security team for compliance)
+- Include wireframes or UI mockups for core workflows (job creation, monitoring dashboard)
+- Expand tertiary personas (Finance team for cost tracking, Security team for compliance)
 - Add edge case use cases (bulk job import, job cloning, job templates)
+- Assign KPI dashboard ownership and reporting cadence to specific roles
 
 ---
 

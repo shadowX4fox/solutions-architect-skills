@@ -875,19 +875,12 @@ Benefits:
 
 **A:** Common reasons:
 
-1. **Missing Success Criteria** (Weight: 15%)
-   - Add quantitative metrics
-   - Define acceptance criteria
+1. **Weak Use Cases (Section 4, highest weight: 2.5 pts)** — ensure primary flows, alternative flows, edge cases, and success metrics are documented; use case count should reflect the full architectural complexity
+2. **Missing Business Constraints (Section 7, weight: 2.0 pts)** — document all budget, timeline, compliance, and integration constraints
+3. **Thin Business Objectives (Section 3, weight: 1.5 pts)** — define measurable goals with quantified targets and ROI expectations
+4. **Gaps in Medium-weight sections (Sections 1, 6, 8 — 1.0 pt each)** — Business Context, UX Requirements, and Success Metrics each contribute 1 point; partial coverage here commonly pushes scores below 7.5
 
-2. **Incomplete User Stories** (Weight: 20%)
-   - Add more Priority 1 stories
-   - Use proper format: "As a..., I want..., so that..."
-
-3. **Vague Business Context** (Weight: 20%)
-   - Quantify problem statement
-   - Document current vs desired state
-
-Review scoring in `PO_SPEC_SCORING_GUIDE.md` for details.
+For the full weighted rubric, section weights, and tier descriptors see `skills/architecture-readiness/PO_SPEC_SCORING_GUIDE.md` (canonical rubric).
 
 ---
 

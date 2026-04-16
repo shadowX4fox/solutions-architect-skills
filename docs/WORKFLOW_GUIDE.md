@@ -119,18 +119,19 @@ Operations team spends 20 hours/week managing cron jobs.
 - Compliance requirement: audit trail for all job executions
 ```
 
-##### 2. User Personas
-**Purpose:** Who will use the system
+##### 2. Stakeholders & Users
+**Purpose:** Who will use the system and who is affected by it
 
 **What to document:**
 - Primary users (roles, responsibilities, technical level)
 - Secondary users
 - Administrators
 - Stakeholders
+- User personas (demographics, goals, pain points)
 
 **Example:**
 ```markdown
-## 2. User Personas
+## 2. Stakeholders & Users
 
 ### Primary: DevOps Engineer
 - **Role:** Manages batch jobs for applications
@@ -294,17 +295,17 @@ Operations team spends 20 hours/week managing cron jobs.
 
 The skill calculates a weighted score based on section completeness:
 
-| Section | Weight | Points |
-|---------|--------|--------|
-| Business Context | 20% | 0-2.0 |
-| User Personas | 10% | 0-1.0 |
-| Use Cases | 15% | 0-1.5 |
-| User Stories | 20% | 0-2.0 |
-| Success Criteria | 15% | 0-1.5 |
-| Constraints | 10% | 0-1.0 |
-| Risks | 5% | 0-0.5 |
-| Next Steps | 5% | 0-0.5 |
-| **Total** | **100%** | **0-10** |
+| Section | Weight (pts) | Priority |
+|---------|-------------|----------|
+| 4. Use Cases | 2.5 | HIGH |
+| 7. Business Constraints | 2.0 | HIGH |
+| 3. Business Objectives | 1.5 | HIGH |
+| 1. Business Context | 1.0 | MEDIUM |
+| 6. UX Requirements | 1.0 | MEDIUM |
+| 8. Success Metrics & KPIs | 1.0 | MEDIUM |
+| 2. Stakeholders & Users | 0.5 | LOW |
+| 5. User Stories | 0.5 | LOW |
+| **Total** | **10.0** | |
 
 **Interpretation:**
 - **9.0-10.0:** Excellent - Ready for architecture
