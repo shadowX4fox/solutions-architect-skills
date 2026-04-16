@@ -43,6 +43,137 @@ Read `ARCHITECTURE.md` and extract:
 If any of these comments are missing, abort with:
 > ⚠️ Architecture version metadata missing. This architecture predates the versioning convention. Run the migration to add version metadata before releasing.
 
+### Step 1.5 — Tag/Version Sync Check (Recovery Path)
+
+**Run when**: Step 1 detected `<!-- ARCHITECTURE_STATUS: Released -->` AND the repo is under git (`git rev-parse --is-inside-work-tree` succeeds).
+**Skip when**: Status is `Draft` (no tag is expected yet) or the repo is not under git.
+
+This step detects the most common release-failure mode: the architecture doc was bumped and committed, but the `architecture-v{version}` tag was never created (or never pushed) — leaving the project in a "claims released, not actually published" state. Without this check, the Re-release edge case below would abort the workflow with a misleading "already released" message.
+
+**1.5a — Check local tag presence**:
+
+```bash
+git rev-parse --verify architecture-v{current-version} 2>/dev/null
+```
+
+**1.5b — Check remote tag presence** (only if a remote named `origin` exists):
+
+```bash
+git ls-remote --tags origin "refs/tags/architecture-v{current-version}" 2>/dev/null
+```
+
+**1.5c — Classify and route**:
+
+| Local tag | Remote tag | Action |
+|-----------|-----------|--------|
+| Present | Present (or no remote) | Sync OK → continue to Step 2 (normal flow — user is releasing a NEW version on top of current) |
+| Present | Missing | **Push-only recovery** → execute Step 1.5f directly (push existing local tag). Skip Steps 2–7, skip 7.5 (archive). |
+| Missing | Present | Fetch the tag locally (`git fetch origin tag architecture-v{current-version}`) → then continue to Step 2 (normal flow) |
+| Missing | Missing | **Tag-and-push recovery** → confirm with user (1.5d), then create annotated tag (1.5e) and push (1.5f). Skip Steps 2–6, skip 7.5 (archive — already produced on the original release attempt or was deliberately skipped). |
+
+**1.5d — Recovery confirmation prompt** (only for "Tag-and-push recovery" — Missing/Missing case):
+
+```
+⚠️  Architecture v{current-version} is marked Released in ARCHITECTURE.md (released {released-date}),
+    but the git tag `architecture-v{current-version}` is missing locally and on origin.
+
+    This usually means a previous release run created the commit and metadata
+    but the tag step did not complete (clean-tree precondition failed, push failed,
+    or the workflow was interrupted).
+
+    HEAD commit: {short-sha} — {commit-subject}
+    {if HEAD subject does not match a release commit for this version, add:
+     "⚠️  HEAD does not appear to be the v{current-version} release commit.
+      The tag will be created at HEAD (current state). If you want the tag on
+      a different commit, abort and run `git tag` manually."}
+
+    Recovery will:
+      1. Create annotated tag `architecture-v{current-version}` at HEAD
+      2. Push the tag to origin
+      3. NOT modify any files, NOT bump version, NOT generate changelog
+
+    Proceed?
+      1. Yes — recover and push (recommended)
+      2. Abort — I'll fix this manually
+```
+
+For "Push-only recovery" (Present/Missing case), proceed without prompting and emit:
+
+```
+ℹ️  Local tag `architecture-v{current-version}` exists but is not on origin.
+    Pushing now…
+```
+
+**1.5e — Create annotated tag** (Tag-and-push recovery only):
+
+Reconstruct the tag message from `docs/CHANGELOG.md` if a `## [{current-version}] - ...` entry exists; otherwise use a generic recovery message:
+
+```bash
+git tag -a architecture-v{current-version} -m "Architecture v{current-version} — Released {released-date}
+
+{CHANGELOG body for [{current-version}], if available}
+
+(Tag created via Workflow 10 recovery on {today}; original release commit metadata preserved in {short-sha}.)"
+```
+
+**1.5f — Push the tag (mandatory in recovery mode)**:
+
+Recovery mode is incomplete without publishing. Confirm a remote named `origin` exists:
+
+```bash
+git remote get-url origin 2>/dev/null
+```
+
+**If a remote exists**, push:
+
+```bash
+git push origin architecture-v{current-version}
+```
+
+Possible outcomes:
+
+- **Push succeeds** → emit:
+  ```
+  ✅ Pushed `architecture-v{current-version}` → origin
+  ```
+
+- **Push fails** (network, auth, non-fast-forward, etc.) — retry up to twice, then escalate:
+  ```
+  ⚠️  Push of `architecture-v{current-version}` to origin failed:
+      {error message}
+
+      Recovery is incomplete — the tag exists locally but is not on origin.
+      Diagnose the failure (auth, network, branch protection rules), then run:
+        git push origin architecture-v{current-version}
+
+      Do NOT delete the local tag — it is the only copy of the recovered baseline.
+  ```
+  Do NOT proceed to Step 8 with a "success" report when push has failed. Surface the failure clearly so the user knows publication is pending.
+
+**If no remote is configured** (local-only repo) — recovery still completes locally, but emit a prominent warning:
+```
+⚠️  No `origin` remote configured. Local tag `architecture-v{current-version}` created
+    but cannot be published. Configure a remote and run:
+      git push origin architecture-v{current-version}
+    This must be done before downstream consumers can pull the architecture baseline.
+```
+
+**1.5g — Recovery exit**: After 1.5f completes (push succeeded, push failed, or no-remote), skip directly to Step 8 (Report) with a recovery-specific report:
+
+```
+{✅ if push succeeded, ⚠️ if push failed/no-remote} Architecture v{current-version} tag recovery {complete | partial}
+
+Recovered:
+  - Git tag: architecture-v{current-version} on {short-sha}
+    [push status: pushed to origin | local only — push failed/pending | local only — no remote]
+
+No version bump performed (recovery mode — doc was already at v{current-version} Released).
+```
+
+**Important**: Recovery mode does NOT bump the version, does NOT modify any files, does NOT generate a CHANGELOG entry, does NOT update component metadata. It only creates and publishes the missing tag.
+
+---
+
 ### Step 2 — Detect Changes Since Last Release
 
 Gather changes since the previous release date:
@@ -313,8 +444,10 @@ Drift detection is **informational only** — it does not block other workflows.
 
 ### Re-release (same version)
 
-If the user asks to release the same version that's already Released (e.g., v1.2.0 → v1.2.0), abort:
-> ⚠️ Architecture v1.2.0 is already Released ({release-date}). To make changes, bump the version first.
+Step 1.5 (Tag/Version Sync Check) runs before this edge case is reached. If Step 1.5 detected a missing tag (locally, on origin, or both), the recovery path is taken — see Step 1.5. The Re-release abort below does NOT apply during recovery.
+
+If Step 1.5 confirmed the tag is present locally and on origin (or no remote is configured) — meaning the architecture is genuinely fully published — and the user explicitly requests to re-release the same version (e.g., v1.2.0 → v1.2.0), abort:
+> ⚠️ Architecture v1.2.0 is already Released ({release-date}) and `architecture-v1.2.0` is published. To make changes, bump the version first.
 
 ### Deprecating an architecture
 
