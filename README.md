@@ -748,7 +748,23 @@ Where:
 
 ## Roadmap
 
-### v3.5.0 (Current Release) ✅
+### v3.5.1 (Current Release) ✅
+**feat: architecture-analysis — 5 additional analyses (Vendor Lock-in, Latency Budget, Tech Debt, Coupling, Data Sensitivity)**
+
+Extends the `architecture-analysis` skill from 5 to 10 analyses. The dispatcher menu grows to 11 options (10 individual + "All ten"), with grouped sections for HIGH-priority and Strategic/sustainability analyses. Range selection (e.g., "6-10") and group selection ("all") are supported. All ten analyses spawn in a single message via parallel `Task()` calls.
+
+**New analyses:**
+- **Vendor Lock-in** — L1 (locked) / L2 (lock-prone) / L3 (portable) classification per component/capability, per-vendor concentration table (≥60% flag), exit cost ranking (proprietary surface × replacement effort × data export feasibility), lock severity × strategic importance heat map
+- **Latency Budget** — per-flow p95 SLO decomposition into hops, Within Budget / Tight / Over Budget / Untracked classification per hop, ASCII Gantt-style budget bars, tail-latency variance flag (p99/p95 > 3×), Hops Over Budget summary table
+- **Tech Debt / EOL** — T1 (EOL now) / T2 (EOL ≤6mo) / T3 (deprecated) / T4 (current) / T5 (unknown) currency tiers, EOL Hotlist table, deprecated SDK scan, ADR architectural debt table (Superseded ADRs whose replacement is not yet implemented), severity × effort heat map
+- **Coupling** — per-component fan-in (Ca), fan-out (Ce), instability (I = Ce/(Ca+Ce)) metrics, K1 critical hubs (fan-in ≥5) / K2 volatile leaves (fan-out ≥5) / K3 god objects (both) / K4 cyclical dependencies with Mermaid cycle subgraphs, ASCII fan-in/fan-out distribution histograms
+- **Data Sensitivity** — S1–S4 data classification per store/queue/cache, G1–G5 gap classification (unencrypted transit, at-rest, retention breach, cross-boundary leakage, undocumented), sensitive data flow Mermaid sequence diagrams for top-3 S1 flows, compliance cross-reference to `compliance-docs/SECURITY_*.md` and `DATA_AI_*.md`
+
+**Files added:** `analyses/VENDOR_LOCKIN.md`, `analyses/LATENCY_BUDGET.md`, `analyses/TECH_DEBT.md`, `analyses/COUPLING.md`, `analyses/DATA_SENSITIVITY.md`
+
+**Files modified:** `SKILL.md` (menu + map), `agents/architecture-analysis-agent.md` (enum), `CLAUDE.md` (10-analysis section)
+
+### v3.5.0 (Previous Release) ✅
 **feat: architecture-analysis skill — 5 HIGH-priority risk analyses (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE)**
 
 New `architecture-analysis` skill delivering a risk and design-characteristics dashboard for architects. Five analyses can be run individually or all five in parallel, each producing a date-stamped report in `analysis/` with structured findings, heat maps, and prioritized remediation recommendations. Every finding is grounded in architecture documentation with source citations; missing data is flagged as `[NOT DOCUMENTED]` rather than estimated.

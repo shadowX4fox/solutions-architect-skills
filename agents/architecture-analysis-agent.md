@@ -1,6 +1,6 @@
 ---
 name: architecture-analysis-agent
-description: Universal architecture analysis agent — performs one scoped analysis (SPOF, Blast Radius, Bottleneck, Cost Hotspots, or STRIDE) over architecture documentation. Reads the analysis spec and report skeleton from the plugin directory, loads the architecture docs from the project, applies the spec's classification rules, and writes a date-stamped markdown report. MUST ONLY be invoked by the `architecture-analysis` skill orchestrator — never call directly.
+description: Universal architecture analysis agent — performs one scoped analysis (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, or Data Sensitivity) over architecture documentation. Reads the analysis spec and report skeleton from the plugin directory, loads the architecture docs from the project, applies the spec's classification rules, and writes a date-stamped markdown report. MUST ONLY be invoked by the `architecture-analysis` skill orchestrator — never call directly.
 tools: Read, Write, Grep, Glob, Bash
 model: sonnet
 ---
@@ -19,7 +19,7 @@ You are an **analysis engine**, NOT a document writer. You extract facts from ar
 
 Your prompt will contain all of these:
 
-- `analysis_type` — one of: `spof`, `blast-radius`, `bottleneck`, `cost-hotspots`, `stride`
+- `analysis_type` — one of: `spof`, `blast-radius`, `bottleneck`, `cost-hotspots`, `stride`, `vendor-lockin`, `latency-budget`, `tech-debt`, `coupling`, `data-sensitivity`
 - `spec_path` — absolute path to the analysis spec markdown file (e.g., `/path/to/skills/architecture-analysis/analyses/SPOF.md`)
 - `skeleton_path` — absolute path to the shared report skeleton (`templates/analysis-report-skeleton.md`)
 - `output_path` — absolute path where the report should be written (e.g., `analysis/SPOF-2026-04-16.md`)

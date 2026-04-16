@@ -352,17 +352,27 @@ The skill includes:
 
 ### Using the Architecture Analysis Skill
 
-The `architecture-analysis` skill produces risk and design-characteristics reports over the architecture documentation. It bundles five distinct analyses — single points of failure, blast radius, bottlenecks, cost hotspots, and STRIDE threats — that an architect runs before release readiness, annual audits, or pre-incident reviews.
+The `architecture-analysis` skill produces risk and design-characteristics reports over the architecture documentation. It bundles ten analyses across two groups — a Solution Architect can run any subset individually, by group, or all ten in parallel.
 
 To manually activate the skill, use: `/skill architecture-analysis`
 
 The skill includes:
-- **5 analyses** (run individually or all five in parallel):
+- **10 analyses** in two groups:
+
+  **HIGH-priority (runtime / security risk):**
   - **SPOF** — Critical / Degradation / Operational single points of failure with heat map and top-5 remediations
   - **Blast Radius** — per-component downstream cascade impact, fan-out scoring, bulkhead assessment, Mermaid cascade paths
   - **Bottleneck** — throughput chokepoints, connection saturation, capacity headroom bar chart, ADR-driven bottlenecks
   - **Cost Hotspots** — Pareto cost ranking, over-provisioning candidates, vendor concentration, ADR-driven cost decisions
   - **STRIDE Threat Model** — per-trust-boundary S/T/R/I/D/E matrix, high-priority threats, compliance cross-reference
+
+  **Strategic / sustainability:**
+  - **Vendor Lock-in** — L1/L2/L3 lock tiers, vendor concentration (≥60% flag), exit cost ranking, portability recommendations
+  - **Latency Budget** — per-hop p95 SLO decomposition, over-budget hops, ASCII Gantt budget bar, tail-latency variance hotspots
+  - **Tech Debt / EOL** — T1–T5 technology currency tiers, EOL hotlist, deprecated SDK scan, ADRs with pending replacements
+  - **Coupling** — fan-in/fan-out metrics, instability scores, K1 critical hubs / K2 volatile leaves / K3 god objects / K4 cycles with Mermaid subgraphs
+  - **Data Sensitivity** — S1–S4 data store classification, G1–G5 encryption/retention gaps, sensitive data flow Mermaid diagrams, compliance cross-reference
+
 - **Universal sub-agent** (`architecture-analysis-agent`) parameterized by analysis type, spawned in parallel via single-message `Task()` calls
 - **Date-stamped reports** in `analysis/<TYPE>-<YYYY-MM-DD>.md` (preserves history across runs; re-running same day overwrites)
 - **Documentation Fidelity Rule** — every finding cites a source file/section; ungrounded findings are marked `[NOT DOCUMENTED]` for architect follow-up
