@@ -758,6 +758,32 @@ bun [plugin_dir]/skills/architecture-compliance/utils/post-generation-pipeline.t
 
 ### Phase 5: Verify and Report
 
+**Step 5.0: Verify Unfilled Placeholders**
+
+After the pipeline runs, scan each generated contract for unfilled pipeline-owned placeholders. Use Grep tool for each contract file:
+
+```
+pattern: \[(NEXT_REVIEW_DATE|DOCUMENT_STATUS|VALIDATION_SCORE|VALIDATION_STATUS|VALIDATION_DATE|REVIEW_ACTOR)\]
+file: [contract_path]
+output_mode: content
+```
+
+If ANY unfilled placeholder is found in a contract:
+
+```
+⚠️  Pipeline placeholder replacement incomplete in [filename]:
+    Still unfilled: [list of found placeholder names]
+
+    This usually means the post-generation pipeline did not run, ran before the
+    contract was written, or failed silently. Re-run manually:
+
+    bun [plugin_dir]/skills/architecture-compliance/utils/post-generation-pipeline.ts \
+      --compliance-docs-dir [compliance_docs_dir] \
+      --project "[PROJECT_NAME]"
+```
+
+Do NOT report success for a contract that has unfilled placeholders — report the specific fields that are still `[PLACEHOLDER]` text.
+
 **Step 5.1: Verify Manifest**
 
 Check that `COMPLIANCE_MANIFEST.md` exists in the compliance-docs directory:

@@ -251,12 +251,15 @@ Replace Document Control placeholders with default values:
 - `[VALIDATION_EVALUATOR]` → `"Claude Code (Automated Validation Engine)"`
 - `[APPROVAL_AUTHORITY]` → value from `domain.approval_authority` in config
 
-**DO NOT REPLACE these validation placeholders** — they are populated by the post-generation pipeline:
-- `[DOCUMENT_STATUS]` — leave as-is for the post-generation pipeline
-- `[VALIDATION_SCORE]` — leave as-is for the post-generation pipeline
-- `[VALIDATION_STATUS]` — leave as-is for the post-generation pipeline
-- `[VALIDATION_DATE]` — leave as-is for the post-generation pipeline
-- `[REVIEW_ACTOR]` — leave as-is for the post-generation pipeline
+**DO NOT REPLACE these validation placeholders** — they are populated by the post-generation pipeline after compliance scoring. Leave them exactly as written in the template; the pipeline's `field-updater.ts` replaces them with computed values:
+- `[NEXT_REVIEW_DATE]` — leave as-is (pipeline computes: Last Review Date + 6 months)
+- `[DOCUMENT_STATUS]` — leave as-is (pipeline sets: Approved / In Review / Draft / Rejected)
+- `[VALIDATION_SCORE]` — leave as-is (pipeline sets: calculated score like 7.8)
+- `[VALIDATION_STATUS]` — leave as-is (pipeline sets: PASS / CONDITIONAL / FAIL)
+- `[VALIDATION_DATE]` — leave as-is (pipeline sets: current date at pipeline run time)
+- `[REVIEW_ACTOR]` — leave as-is (pipeline sets: System / Architecture Team / N/A)
+
+**IMPORTANT**: Do NOT replace these 6 placeholders with any value — not "Not specified", not "N/A", not "Draft", not a computed date. Any substitution here breaks the pipeline's replacement logic.
 
 **Step 4.1: Replace Simple Placeholders**
 
@@ -338,7 +341,9 @@ Replace the following placeholders with exact values:
 **Step 4.5: Final Format Check**
 
 Before writing output, verify:
-- [ ] All placeholders replaced (no `[PLACEHOLDER]` text remains except legitimate "Not specified")
+- [ ] All agent-owned placeholders replaced — no `[PLACEHOLDER]` text remains except:
+  - The 6 pipeline-owned placeholders from Step 4.0: `[NEXT_REVIEW_DATE]`, `[DOCUMENT_STATUS]`, `[VALIDATION_SCORE]`, `[VALIDATION_STATUS]`, `[VALIDATION_DATE]`, `[REVIEW_ACTOR]` — these MUST remain as-is
+  - Legitimate "Not specified" or "Not documented" where data was absent
 - [ ] All tables use pipe format `| X | Y |`
 - [ ] All status values are one of: Compliant, Non-Compliant, Not Applicable, Unknown
 - [ ] Source references follow format: `docs/NN-name.md` or `"Not documented"`
