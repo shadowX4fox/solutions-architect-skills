@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.4.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -748,7 +748,27 @@ Where:
 
 ## Roadmap
 
-### v3.4.7 (Current Release) ✅
+### v3.5.0 (Current Release) ✅
+**feat: architecture-analysis skill — 5 HIGH-priority risk analyses (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE)**
+
+New `architecture-analysis` skill delivering a risk and design-characteristics dashboard for architects. Five analyses can be run individually or all five in parallel, each producing a date-stamped report in `analysis/` with structured findings, heat maps, and prioritized remediation recommendations. Every finding is grounded in architecture documentation with source citations; missing data is flagged as `[NOT DOCUMENTED]` rather than estimated.
+
+**Analyses:**
+- **SPOF** — Critical (full outage) / Degradation (partial-silent) / Operational SPOFs + ASCII heat map + top-5 remediations. Modeled after the worked Notification Inbox Platform v1.2.0 example.
+- **Blast Radius** — per-component fan-out and cascade severity, bulkhead vs. cascading classification, Mermaid cascade paths for top-3 worst scenarios, SPOF cross-reference (`⚡ SPOF+Blast` flag for maximum risk concentration)
+- **Bottleneck** — throughput chokepoints (B1–B4 tiers), HPA and connection-pool saturation risk, ASCII capacity headroom bar chart, ADR-driven bottleneck tracking
+- **Cost Hotspots** — Pareto cost ranking (80% concentration rule), over-provisioning candidates, vendor concentration summary, ADR cost decision table, right-sizing recommendations with trade-off analysis
+- **STRIDE** — trust boundary inventory, per-boundary 6-category threat matrix, High-Priority Threats table, compliance cross-reference with security contract gaps
+
+**Files added:**
+- `skills/architecture-analysis/SKILL.md` — dispatcher, BLOCKING menu, parallel Task() orchestration
+- `skills/architecture-analysis/analyses/` — 5 analysis spec files (SPOF, BLAST_RADIUS, BOTTLENECK, COST_HOTSPOTS, STRIDE)
+- `skills/architecture-analysis/templates/analysis-report-skeleton.md` — shared report structure
+- `agents/architecture-analysis-agent.md` — universal analysis agent (parameterized by analysis_type)
+- `CLAUDE.md` — new "Using the Architecture Analysis Skill" section
+- `.claude/settings.json.example` — added `architecture-analysis-agent` + `Write/Read(analysis/*)` permissions
+
+### v3.4.7 (Previous Release) ✅
 **fix: architecture release workflow pushes git tag to origin automatically**
 
 After `git tag -a architecture-v{version}` is created, the workflow now immediately pushes the tag to `origin`. Graceful fallbacks: reports (but does not fail) when no remote is configured, and preserves the local tag on push failure with a manual-push hint.

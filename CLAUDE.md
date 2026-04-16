@@ -350,6 +350,37 @@ The skill includes:
 "Read(compliance-docs/*)"
 ```
 
+### Using the Architecture Analysis Skill
+
+The `architecture-analysis` skill produces risk and design-characteristics reports over the architecture documentation. It bundles five distinct analyses — single points of failure, blast radius, bottlenecks, cost hotspots, and STRIDE threats — that an architect runs before release readiness, annual audits, or pre-incident reviews.
+
+To manually activate the skill, use: `/skill architecture-analysis`
+
+The skill includes:
+- **5 analyses** (run individually or all five in parallel):
+  - **SPOF** — Critical / Degradation / Operational single points of failure with heat map and top-5 remediations
+  - **Blast Radius** — per-component downstream cascade impact, fan-out scoring, bulkhead assessment, Mermaid cascade paths
+  - **Bottleneck** — throughput chokepoints, connection saturation, capacity headroom bar chart, ADR-driven bottlenecks
+  - **Cost Hotspots** — Pareto cost ranking, over-provisioning candidates, vendor concentration, ADR-driven cost decisions
+  - **STRIDE Threat Model** — per-trust-boundary S/T/R/I/D/E matrix, high-priority threats, compliance cross-reference
+- **Universal sub-agent** (`architecture-analysis-agent`) parameterized by analysis type, spawned in parallel via single-message `Task()` calls
+- **Date-stamped reports** in `analysis/<TYPE>-<YYYY-MM-DD>.md` (preserves history across runs; re-running same day overwrites)
+- **Documentation Fidelity Rule** — every finding cites a source file/section; ungrounded findings are marked `[NOT DOCUMENTED]` for architect follow-up
+- **SPOF × Blast Radius cross-reference** — components that are both a SPOF and a high blast-radius node are flagged `⚡ SPOF+Blast` (maximum risk concentration)
+
+**When to use**: Before a release readiness review, during an annual architecture audit, after a major architectural change (new component, ADR superseded, Redis removed, etc.), or pre-incident risk assessment.
+
+**Permissions required** (add to project `.claude/settings.json`):
+
+```json
+"Write(analysis/*)",
+"Read(analysis/*)",
+"Bash(mkdir *)",
+"Agent(solutions-architect-skills:architecture-analysis-agent)"
+```
+
+---
+
 ### Using the Architecture Dev Handoff Skill
 
 The `architecture-dev-handoff` skill generates per-component **Component Development Handoff** documents — scoped to **C4 Level 2 (Container) components only** — that give development teams everything needed to implement a component without reading the full ARCHITECTURE.md suite. C4 Level 1 (System) descriptors are excluded; they describe system boundaries, not implementable units.

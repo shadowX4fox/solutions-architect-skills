@@ -44,6 +44,9 @@
       "Agent(solutions-architect-skills:security-validator)",
       "Agent(solutions-architect-skills:sre-validator)",
       "Agent(solutions-architect-skills:peer-review-category-agent)",
+      "Agent(solutions-architect-skills:architecture-analysis-agent)",
+      "Write(analysis/*)",
+      "Read(analysis/*)",
       "WebSearch"
     ]
   },
