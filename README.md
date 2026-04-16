@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.5.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -36,7 +36,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **13 Integrated Skills**
+- **14 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance (with diagram generation)
   - `architecture-component-guardian`: Single owner of `docs/components/README.md` index + C4 migration
@@ -45,6 +45,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - `architecture-compliance-review`: Compliance portfolio health review + gap explorer playground
   - `architecture-peer-review`: Interactive peer review with playground tool + JSON persistence
   - `architecture-traceability`: PO Spec use cases vs architecture coverage report (markdown, portable)
+  - `architecture-analysis`: 10-analysis risk & design-characteristics dashboard (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity)
   - `architecture-dev-handoff`: Component development handoffs (C4 L2 only) with deliverable assets
   - `architecture-docs-export`: On-demand Word (.docx) export for architecture docs and handoffs
   - `architecture-blueprint`: Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
@@ -106,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.4.1` in the list.
+You should see `solutions-architect-skills v3.5.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -222,6 +223,7 @@ Exports architecture documents to professional Word (.docx) files: SA executive 
 |-------|-------------|
 | `/skill architecture-peer-review` | After ARCHITECTURE.md is complete — interactive quality review with approve/reject/fix workflow (JSON persistence for fast regeneration) |
 | `/skill architecture-traceability` | Check if architecture covers all PO Spec requirements — generates portable markdown report |
+| `/skill architecture-analysis` | Risk and design-characteristics dashboard — 10 analyses (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity) run individually or all-ten in parallel |
 | `/skill architecture-blueprint` | When organizational blueprint forms (datos de iniciativa) are required |
 | `/skill architecture-compliance-review` | After compliance contracts are generated — explore gaps across all 10 contracts |
 | `/skill architecture-component-guardian` | Adding, removing, updating components, or migrating flat components to C4 multi-system structure |
@@ -482,6 +484,44 @@ Use `/skill architecture-compliance-review` after contracts are generated to und
 - **Gap extraction**: Reads every contract's compliance summary table and extracts Non-Compliant and Unknown requirements
 - **Concept clustering**: Groups gaps across contracts by underlying ARCHITECTURE.md concept (load testing, DR/RTO, IAM, observability, etc.) ranked by cross-contract impact
 - **Interactive HTML playground** — portfolio health panel + concept cluster gap explorer
+
+### Architecture Analysis (Risk & Design Dashboard)
+
+Use `/skill architecture-analysis` to run risk and design-characteristics analyses over the architecture documentation — the kind of assessments that come out of a release-readiness review, pre-incident audit, or annual architecture review.
+
+**10 analyses** across two groups, each producing a date-stamped report in `analysis/`. Run individually, by group (1–5 or 6–10), or all ten in parallel via a single-message parallel spawn.
+
+#### HIGH-priority (runtime / security risk)
+
+| # | Analysis | Key output | Invocation |
+|---|----------|-----------|-----------|
+| 1 | **SPOF** — Single Points of Failure | Critical (C) / Degradation (D) / Operational (O) tables + ASCII heat map (Impact × Likelihood) + Top-5 remediations | `/skill architecture-analysis` → `1` |
+| 2 | **Blast Radius** — Downstream cascade impact | S1–S4+Isolated severity tiers, fan-out depth (direct+indirect), cascade vs. bulkhead vs. fail-open, Mermaid cascade path flowcharts for top-3 worst scenarios, ⚡ SPOF+Blast cross-reference | `2` |
+| 3 | **Bottleneck** — Throughput chokepoints | B1–B4 tier model (B1=critical chokepoint), capacity metrics table (Max RPS / HPA / connection pool / queue depth), ASCII capacity headroom bar chart, ADR-driven bottleneck tracking | `3` |
+| 4 | **Cost Hotspots** — Cost concentration | Q1–Q4 cost quality tiers, Pareto 80% rule, over-provisioning candidates, vendor concentration (≥60% flag), normalization to USD/month, ADR cost decision table | `4` |
+| 5 | **STRIDE** — Security threats per trust boundary | Trust boundary inventory (TB-xx), per-boundary S/T/R/I/D/E matrix, High-Priority Threats table, compliance cross-reference with `compliance-docs/SECURITY_*.md` | `5` |
+
+#### Strategic / sustainability
+
+| # | Analysis | Key output | Invocation |
+|---|----------|-----------|-----------|
+| 6 | **Vendor Lock-in** — Portability risk | L1 (locked) / L2 (lock-prone) / L3 (portable) tiers, per-vendor concentration table (≥60% flag), exit cost ranking (proprietary surface × replacement effort × data export), heat map (lock severity × strategic importance) | `6` |
+| 7 | **Latency Budget** — Per-hop SLO decomposition | Per-flow p95 decomposition into hops (Within / Tight / Over Budget / Untracked), ASCII Gantt-style budget bars per flow, Hops Over Budget summary, tail-latency variance flag (p99/p95 > 3×) | `7` |
+| 8 | **Tech Debt / EOL** — Technology currency | T1 (EOL now) / T2 (EOL ≤6mo) / T3 (deprecated) / T4 (current) / T5 (unknown) tiers, EOL Hotlist, deprecated SDK keyword scan, ADR architectural debt table (superseded ADRs whose replacement is not implemented), heat map (severity × effort) | `8` |
+| 9 | **Coupling** — Fan-in/fan-out, cycles | Fan-in (Ca) / Fan-out (Ce) / Instability (I = Ce/(Ca+Ce)) per component, K1 critical hubs (fan-in ≥5) / K2 volatile leaves (fan-out ≥5) / K3 god objects (both) / K4 cycles with Mermaid subgraphs, ASCII distribution histograms | `9` |
+| 10 | **Data Sensitivity** — PII flow & encryption gaps | S1–S4 data classification per store/queue/cache, G1 (unencrypted transit) / G2 (unencrypted at rest) / G3 (retention breach) / G4 (cross-boundary leakage) / G5 (undocumented) gaps, Mermaid sequence diagrams for top-3 S1 flows, compliance cross-reference | `10` |
+
+**Key principles:**
+- **Documentation Fidelity Rule** — every finding cites the source file and section; ungrounded findings are marked `[NOT DOCUMENTED — add to <source-file>]` rather than estimated
+- **Parallel spawn** — all selected agents issue in a single message (no serial bottleneck)
+- **Date-stamped output** — `analysis/<TYPE>-<YYYY-MM-DD>.md`; re-running same day overwrites, new day preserves history
+
+**Output location:** `analysis/` at project root
+
+**Permissions required** (add to `.claude/settings.json`):
+```json
+"Write(analysis/*)", "Read(analysis/*)", "Bash(mkdir *)", "Agent(solutions-architect-skills:architecture-analysis-agent)"
+```
 
 ### Phase 4: Development Handoff & Export
 
@@ -748,7 +788,12 @@ Where:
 
 ## Roadmap
 
-### v3.5.1 (Current Release) ✅
+### v3.5.2 (Current Release) ✅
+**docs: architecture-analysis full README documentation — 14-skill count, analysis tables, features section**
+
+Complete README documentation for the `architecture-analysis` skill: version badge corrected to 3.5.1/3.5.2, skills count updated from 13 to 14, `architecture-analysis` added to the skills list with a 10-analysis summary, added to the Supporting Skills table, installation verification line updated, and a full Architecture Analysis features section added between Phase 3 Compliance and Phase 4 Dev Handoff documenting all 10 analyses (both groups) with per-analysis output tables, key principles, output location, and required permissions.
+
+### v3.5.1 (Previous Release) ✅
 **feat: architecture-analysis — 5 additional analyses (Vendor Lock-in, Latency Budget, Tech Debt, Coupling, Data Sensitivity)**
 
 Extends the `architecture-analysis` skill from 5 to 10 analyses. The dispatcher menu grows to 11 options (10 individual + "All ten"), with grouped sections for HIGH-priority and Strategic/sustainability analyses. Range selection (e.g., "6-10") and group selection ("all") are supported. All ten analyses spawn in a single message via parallel `Task()` calls.
