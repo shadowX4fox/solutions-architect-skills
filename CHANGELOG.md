@@ -5,6 +5,15 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.8]
+
+### Changed
+- All 13 sub-agents migrated to `model: opus` (from `model: sonnet`):
+  - `agents/compliance-generator.md`, `agents/peer-review-category-agent.md`, `agents/architecture-analysis-agent.md`
+  - 10 validators under `agents/validators/` (business-continuity, cloud, data-ai, development, enterprise, integration, platform, process, security, sre)
+- Rationale: On the Anthropic API, the `opus` alias currently resolves to Claude Opus 4.7 (1M context). Stronger reasoning improves compliance contract fidelity, peer-review nuance, validator evidence extraction, and architecture-analysis classification; 1M window removes the split-read constraints previously planned for large ARCHITECTURE.md suites.
+- Skills (14) require no changes — all use current tool patterns and parallel agent spawning idioms supported natively by Opus 4.7. Skill frontmatter continues to inherit model selection from the calling session.
+
 ## [2.10.21]
 
 ### Added

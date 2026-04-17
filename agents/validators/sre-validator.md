@@ -2,7 +2,7 @@
 name: sre-validator
 description: Prometheus Validator — SRE External Validator. Evaluates project against SRE and reliability standards. Invoked by sre-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # SRE External Validator

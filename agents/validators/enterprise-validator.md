@@ -2,7 +2,7 @@
 name: enterprise-validator
 description: Athena Validator — Enterprise External Validator. Evaluates project against enterprise architecture standards. Invoked by enterprise-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Enterprise External Validator

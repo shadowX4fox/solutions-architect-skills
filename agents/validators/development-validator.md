@@ -2,7 +2,7 @@
 name: development-validator
 description: Hephaestus Validator — Development External Validator. Evaluates project against development technology stack standards. Invoked by development-compliance-generator agent — never call directly.
 tools: Read, Grep, WebSearch
-model: sonnet
+model: opus
 ---
 
 # Development External Validator

@@ -2,7 +2,7 @@
 name: data-ai-validator
 description: Mnemosyne Validator — Data & AI External Validator. Evaluates project against data governance and AI/ML standards. Invoked by data-ai-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Data & AI External Validator

@@ -2,7 +2,7 @@
 name: cloud-validator
 description: Atlas Validator — Cloud External Validator. Evaluates project against cloud architecture standards. Invoked by cloud-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Cloud External Validator

@@ -2,7 +2,7 @@
 name: security-validator
 description: Argus Validator — Security External Validator. Evaluates project against security architecture standards. Invoked by security-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Security External Validator

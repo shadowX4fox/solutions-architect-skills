@@ -2,7 +2,7 @@
 name: business-continuity-validator
 description: Aegis Validator — Business Continuity External Validator. Evaluates project against business continuity and disaster recovery standards. Invoked by business-continuity-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Business Continuity External Validator

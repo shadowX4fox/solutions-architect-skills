@@ -2,7 +2,7 @@
 name: process-validator
 description: Hermes Validator — Process External Validator. Evaluates project against process transformation and automation standards. Invoked by process-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Process External Validator

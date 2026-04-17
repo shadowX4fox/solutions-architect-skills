@@ -2,7 +2,7 @@
 name: integration-validator
 description: Iris Validator — Integration External Validator. Evaluates project against integration architecture standards. Invoked by integration-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Integration External Validator

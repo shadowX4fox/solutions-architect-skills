@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.5.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.5.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.5.1` in the list.
+You should see `solutions-architect-skills v3.5.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,20 @@ Where:
 
 ## Roadmap
 
-### v3.5.2 (Current Release) ✅
+### v3.5.8 (Current Release) ✅
+**chore: all 13 sub-agents migrated to `model: opus` (Claude Opus 4.7)**
+
+All sub-agent files under `agents/` switched from `model: sonnet` to `model: opus`. On the Anthropic API the `opus` alias currently resolves to Claude Opus 4.7 (1M context window).
+
+**Agents migrated (13 total):**
+- `agents/compliance-generator.md`, `agents/peer-review-category-agent.md`, `agents/architecture-analysis-agent.md`
+- 10 domain validators under `agents/validators/` — business-continuity, cloud, data-ai, development, enterprise, integration, platform, process, security, sre
+
+**Rationale:** Stronger reasoning improves compliance contract fidelity (template preservation + placeholder extraction), peer-review nuance across 13 category checks, validator evidence extraction with Grep-based citation, and architecture-analysis classification across the 10 risk/design lenses. The 1M context window removes split-read constraints previously planned for large ARCHITECTURE.md suites.
+
+**Skills unchanged (14 total):** All skill orchestration patterns (parallel agent spawning, template-filling, structured output blocks) are natively supported by Opus 4.7. Skill frontmatter continues to inherit model selection from the calling session — no SKILL.md changes.
+
+### v3.5.2 (Previous Release) ✅
 **docs: architecture-analysis full README documentation — 14-skill count, analysis tables, features section**
 
 Complete README documentation for the `architecture-analysis` skill: version badge corrected to 3.5.1/3.5.2, skills count updated from 13 to 14, `architecture-analysis` added to the skills list with a 10-analysis summary, added to the Supporting Skills table, installation verification line updated, and a full Architecture Analysis features section added between Phase 3 Compliance and Phase 4 Dev Handoff documenting all 10 analyses (both groups) with per-analysis output tables, key principles, output location, and required permissions.

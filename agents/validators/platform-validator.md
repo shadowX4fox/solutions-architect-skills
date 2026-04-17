@@ -2,7 +2,7 @@
 name: platform-validator
 description: Vulcan Validator — Platform External Validator. Evaluates project against platform and infrastructure standards. Invoked by platform-compliance-generator agent — never call directly.
 tools: Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Platform External Validator

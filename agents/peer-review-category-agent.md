@@ -2,7 +2,7 @@
 name: peer-review-category-agent
 description: Universal peer review category agent — evaluates one category's checks against architecture documentation. Receives category code, checks table, and file paths to read. Returns CATEGORY_REVIEW_RESULT JSON block with findings. MUST ONLY be invoked by the `architecture-peer-review` skill orchestrator — never call directly.
 tools: Read, Grep, Glob
-model: sonnet
+model: opus
 ---
 
 # Peer Review Category Agent

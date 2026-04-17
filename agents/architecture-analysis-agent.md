@@ -2,7 +2,7 @@
 name: architecture-analysis-agent
 description: Universal architecture analysis agent — performs one scoped analysis (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, or Data Sensitivity) over architecture documentation. Reads the analysis spec and report skeleton from the plugin directory, loads the architecture docs from the project, applies the spec's classification rules, and writes a date-stamped markdown report. MUST ONLY be invoked by the `architecture-analysis` skill orchestrator — never call directly.
 tools: Read, Write, Grep, Glob, Bash, WebSearch
-model: sonnet
+model: opus
 ---
 
 # Architecture Analysis Agent

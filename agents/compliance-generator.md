@@ -2,7 +2,7 @@
 name: compliance-generator
 description: Universal Compliance Contract Generator — generates any of the 10 compliance contracts from ARCHITECTURE.md. Receives contract_type in prompt to determine which domain config and template to use. MUST ONLY be invoked by the `architecture-compliance` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
-model: sonnet
+model: opus
 ---
 
 # Compliance Contract Generator
