@@ -31,6 +31,10 @@ This skill is **manually activated** when users request compliance document gene
 - "Create all compliance contracts"
 - `/skill architecture-compliance all`
 - `/skill architecture-compliance SRE,Cloud,Security` (comma-separated list for subset)
+- `/skill architecture-compliance eco all` (model preset first, contract selector second)
+- `/skill architecture-compliance balanced SRE,Security` (balanced preset on a subset)
+- `/skill architecture-compliance critical-opus all` (Opus retained only for high-stakes validators)
+- `/skill architecture-compliance max all` (legacy — Opus for all, most expensive)
 
 **NOT Activated For:**
 - Automatic triggers when ARCHITECTURE.md changes
@@ -106,6 +110,39 @@ This skill generates compliance documents from ARCHITECTURE.md, producing 10 sep
 ---
 
 ## Version History & Recent Improvements
+
+### v2.3.0 - Model Preset Selection (2026-04-18)
+
+**Summary**: Introduced four model presets (`eco`, `balanced`, `critical-opus`, `max`) so users can trade cost against reasoning depth when spawning validator and generator sub-agents. Agent frontmatter remains unchanged (Opus fallback); the skill orchestrator now passes `model:` per Task() call using a resolver keyed on `(contract_type, role, preset)`.
+
+**Changes:**
+
+1. **New Activation Arguments**
+   - `/skill architecture-compliance <preset> [selector]` — preset keyword parsed as the first token in Phase 1 Step 1.1
+   - Supported presets: `eco`, `balanced` (default), `critical-opus`, `max`
+
+2. **New Step 1.5: Determine Model Preset**
+   - Added AskUserQuestion flow when preset not supplied inline
+   - Declined / dismissed answers fall back to `balanced`
+
+3. **Per-Validator Model Matrix**
+   - `critical-opus` retains Opus only for Security / SRE / Data & AI / Development validators (reasoning-nuance or WebSearch synthesis)
+   - All other validators drop to Haiku under `critical-opus`, Sonnet under `balanced`, Haiku under `eco`
+   - Generator runs on Sonnet for every preset except `max`
+
+4. **Phase 3 Task() Calls**
+   - Step 3.3 (validators) and Step 3.4 (generator) now include an explicit `model:` parameter
+   - Single-contract and all-10-parallel examples updated to show the parameter
+
+**Impact:**
+- **~90% savings** on full runs with `eco`, **~75%** with `balanced`, **~60%** with `critical-opus` (relative to all-Opus baseline)
+- **No frontmatter churn** — the 11 agent files under `agents/` are untouched; the override is purely orchestration-level
+- **Reversible** — users can still run `max` for the prior behavior
+
+**Files Modified:**
+- `/skills/architecture-compliance/SKILL.md`
+
+---
 
 ### v2.2.0 - Unified Agent-Based Workflow (2025-12-31)
 
@@ -287,6 +324,50 @@ To support flexible contract selection and validation, the following aliases and
 | IT Infrastructure | infrastructure, platforms, it | infrastructure, platform, database, compute, capacity |
 | Enterprise Architecture | enterprise, ea, strategic | enterprise, strategic, modularity, governance, alignment |
 | Integration Architecture | integration, api, middleware | integration, api, messaging, event, microservices |
+
+## Model Preset Selection
+
+Compliance generation spawns up to 20 sub-agents per full run (10 validators + 10 generators). Running every agent on Opus is expensive and usually unnecessary — validators perform mechanical pattern-match classification (Read + Grep → PASS/FAIL/N/A/UNKNOWN), which smaller models handle reliably.
+
+The skill exposes four presets. Each Task() call passes the preset-selected model as the `model:` parameter, overriding the agent's frontmatter default.
+
+### Presets
+
+| Preset | Validators | Generator | Relative cost vs. `max` |
+|--------|-----------|-----------|------------------------|
+| `eco` | Haiku × 10 | Sonnet | ~10% |
+| `balanced` (default) | Sonnet × 10 | Sonnet | ~25% |
+| `critical-opus` | Opus for Security / SRE / Data-AI / Development; Haiku for the other 6 | Sonnet | ~40% |
+| `max` | Opus × 10 | Opus | 100% (legacy) |
+
+### Per-Validator Model Matrix
+
+The `critical-opus` column is the only preset that varies per validator. The four validators that stay on Opus are the ones where reasoning nuance materially affects the outcome (security-posture wording, SLO/error-budget math, PII classification, EOL date synthesis via WebSearch).
+
+| Contract | Validator | `eco` | `balanced` | `critical-opus` | `max` |
+|----------|-----------|-------|------------|-----------------|-------|
+| Business Continuity | Aegis | haiku | sonnet | haiku | opus |
+| SRE Architecture | Prometheus | haiku | sonnet | **opus** | opus |
+| Cloud Architecture | Atlas | haiku | sonnet | haiku | opus |
+| Data & AI Architecture | Mnemosyne | haiku | sonnet | **opus** | opus |
+| Development Architecture | Hephaestus | haiku | sonnet | **opus** | opus |
+| Process Transformation | Hermes | haiku | sonnet | haiku | opus |
+| Security Architecture | Argus | haiku | sonnet | **opus** | opus |
+| Platform & IT Infrastructure | Vulcan | haiku | sonnet | haiku | opus |
+| Enterprise Architecture | Athena | haiku | sonnet | haiku | opus |
+| Integration Architecture | Iris | haiku | sonnet | haiku | opus |
+| Generator (all 10 contract types) | compliance-generator | sonnet | sonnet | sonnet | opus |
+
+### Tradeoffs
+
+- `eco` — Haiku occasionally miscategorizes edge-case wording (UNKNOWN vs. FAIL); worst case is one or two items off per 15-item contract. Safe for internal drafts or repeated iteration runs.
+- `balanced` — recommended default. Sonnet matches Opus on the structured classification workload at ~4–5× lower cost.
+- `critical-opus` — pick when audit evidence quality on security / reliability / data / stack-currency is non-negotiable (regulated industries, pre-release review).
+- `max` — prior behavior; keep only when you need maximum reasoning and cost is not a constraint.
+
+Preset resolution order: CLI argument > AskUserQuestion prompt > `balanced` default. See Step 1.5 for runtime resolution.
+
+---
 
 ## Files in This Skill
 
@@ -483,17 +564,22 @@ Parse user request to determine which contracts to generate:
 **Parsing Logic:**
 ```
 1. Normalize input: lowercase, trim whitespace, remove punctuation
-2. Check for "all" keyword (in patterns like "all compliance", "all my", "all contracts")
+2. Check for preset keyword as the FIRST token (eco | balanced | critical-opus | max)
+   - If found → model_preset = matched value; strip the token; continue parsing the remainder
+   - If not found → model_preset = UNRESOLVED (handled in Step 1.5)
+3. Check for "all" keyword (in patterns like "all compliance", "all my", "all contracts")
    - If found → selected_contracts = ALL_10_CONTRACT_TYPES
-3. Check for delimiter patterns (comma, "and", "or")
+4. Check for delimiter patterns (comma, "and", "or")
    - If found → split input, parse each token as contract name
    - Use alias matching for each token (see lines 173-188)
    - selected_contracts = [matched contract types]
-4. Otherwise → single contract mode
+5. Otherwise → single contract mode
    - Use exact or fuzzy matching (existing logic, lines 410-431)
    - selected_contracts = [single contract type]
 
-Output: selected_contracts = array of 1-10 contract types
+Output:
+- selected_contracts = array of 1-10 contract types
+- model_preset = one of {eco, balanced, critical-opus, max, UNRESOLVED}
 ```
 
 **Step 1.2: Locate ARCHITECTURE.md**
@@ -518,6 +604,47 @@ Check for:
 If ambiguous, ask:
 - "Which compliance documents would you like to generate?"
   Options: All 11, Specific contract(s), By category (security, cloud, etc.)
+```
+
+**Step 1.5: Determine Model Preset**
+
+If `model_preset == UNRESOLVED` from Step 1.1, ask the user before spawning agents. Use AskUserQuestion with the following prompt:
+
+```
+AskUserQuestion:
+  question: "Compliance generation can spawn up to 20 sub-agents. Pick a model preset to control cost vs. depth:"
+  multiSelect: false
+  options:
+    - label: "Balanced (Sonnet, ~75% cheaper than Opus)"
+      description: "Sonnet for all validators and generator. Recommended default — matches Opus on structured classification."
+    - label: "Eco (Haiku validators, ~90% cheaper)"
+      description: "Maximum savings. Haiku may miscategorize edge-case wording (UNKNOWN vs. FAIL). Safe for drafts."
+    - label: "Critical-Opus (Opus only for Security/SRE/Data-AI/Dev, ~60% cheaper)"
+      description: "Retains Opus on the four validators where reasoning nuance materially affects audit evidence. Haiku elsewhere."
+    - label: "Max (Opus everywhere, legacy)"
+      description: "Prior behavior. Most expensive. Pick only when cost is not a constraint."
+```
+
+Map the selected label to the preset id (`balanced`, `eco`, `critical-opus`, `max`). If the user declines to answer, default to `balanced`.
+
+Store the resolved preset as `model_preset` for use in Phase 3.
+
+**Model resolution helper** (referenced by Step 3.3 and 3.4):
+
+```
+function resolve_model(contract_type, role, model_preset):
+  if model_preset == "max":
+    return "opus"
+  if role == "generator":
+    return "sonnet"                          # sonnet for all presets except max
+  if model_preset == "balanced":
+    return "sonnet"
+  if model_preset == "eco":
+    return "haiku"
+  if model_preset == "critical-opus":
+    if contract_type in {"security", "sre", "data-ai", "development"}:
+      return "opus"
+    return "haiku"
 ```
 
 ### Phase 2: Configuration
@@ -665,6 +792,8 @@ architecture_file: [absolute path to ARCHITECTURE.md]
 plugin_dir: [plugin_dir resolved in Step 3.1]
 ```
 
+**Model selection per validator**: for each validator Task() call, set the `model:` parameter using `resolve_model(contract_type, "validator", model_preset)` from Step 1.5. Example: `Task(subagent_type="...", model="sonnet", prompt="...")`. If `model_preset` is not set, default to `sonnet`.
+
 Each validator returns a `VALIDATION_RESULT:` block. **Collect and store all results** before proceeding to Step 3.4.
 
 **Step 3.4: Spawn Generators (with validation results)**
@@ -684,51 +813,59 @@ VALIDATION_RESULT:
 [paste the full VALIDATION_RESULT block returned by the validator for this contract type]
 ```
 
+**Model selection for generators**: for every generator Task() call, set the `model:` parameter using `resolve_model(contract_type, "generator", model_preset)` from Step 1.5. This resolves to `sonnet` for eco/balanced/critical-opus, or `opus` for max. Example: `Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", prompt="...")`.
+
 Invoke all selected generators in a **single message** (parallel).
 
-**Single contract example:**
+**Single contract example** (preset = `balanced`):
 ```python
-# Step 1: Spawn validator
+# Step 1: Spawn validator (resolve_model("development", "validator", "balanced") → "sonnet")
 validator_result = Task(
     subagent_type="solutions-architect-skills:development-validator",
+    model="sonnet",
     prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]",
     description="Hephaestus — Development Architecture Validator"
 )
 
-# Step 2: Spawn universal generator with contract_type and validation result
+# Step 2: Spawn universal generator (resolve_model("development", "generator", "balanced") → "sonnet")
 Task(
     subagent_type="solutions-architect-skills:compliance-generator",
+    model="sonnet",
     prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n" + validator_result,
     description="CC-004 — Development Architecture"
 )
 ```
 
-**All 10 contracts — Step 1 (validators, single message, all parallel):**
+Swap `model="sonnet"` per the matrix in "Model Preset Selection" — e.g., for preset `critical-opus` the Hephaestus validator above becomes `model="opus"` because Development is in the critical set.
+
+**All 10 contracts — Step 1 (validators, single message, all parallel). Example below shows preset = `critical-opus`: Opus on Security/SRE/Data-AI/Development, Haiku on the other 6. For `balanced` use `model="sonnet"` everywhere; for `eco` use `model="haiku"` everywhere; for `max` use `model="opus"` everywhere.**
+
 ```python
-Task(subagent_type="solutions-architect-skills:business-continuity-validator", description="Aegis — Business Continuity Validator", prompt="Validate Business Continuity compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:sre-validator", description="Prometheus — SRE Architecture Validator", prompt="Validate SRE Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:cloud-validator", description="Atlas — Cloud Architecture Validator", prompt="Validate Cloud Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:data-ai-validator", description="Mnemosyne — Data & AI Architecture Validator", prompt="Validate Data & AI Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:development-validator", description="Hephaestus — Development Architecture Validator", prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:process-validator", description="Hermes — Process Transformation Validator", prompt="Validate Process Transformation compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:security-validator", description="Argus — Security Architecture Validator", prompt="Validate Security Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:platform-validator", description="Vulcan — Platform & IT Infrastructure Validator", prompt="Validate Platform & IT Infrastructure compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:enterprise-validator", description="Athena — Enterprise Architecture Validator", prompt="Validate Enterprise Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:integration-validator", description="Iris — Integration Architecture Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="solutions-architect-skills:business-continuity-validator", model="haiku", description="Aegis — Business Continuity Validator", prompt="Validate Business Continuity compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:sre-validator", model="opus", description="Prometheus — SRE Architecture Validator", prompt="Validate SRE Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:cloud-validator", model="haiku", description="Atlas — Cloud Architecture Validator", prompt="Validate Cloud Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:data-ai-validator", model="opus", description="Mnemosyne — Data & AI Architecture Validator", prompt="Validate Data & AI Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:development-validator", model="opus", description="Hephaestus — Development Architecture Validator", prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:process-validator", model="haiku", description="Hermes — Process Transformation Validator", prompt="Validate Process Transformation compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:security-validator", model="opus", description="Argus — Security Architecture Validator", prompt="Validate Security Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:platform-validator", model="haiku", description="Vulcan — Platform & IT Infrastructure Validator", prompt="Validate Platform & IT Infrastructure compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:enterprise-validator", model="haiku", description="Athena — Enterprise Architecture Validator", prompt="Validate Enterprise Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="solutions-architect-skills:integration-validator", model="haiku", description="Iris — Integration Architecture Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 ```
 
-**All 10 contracts — Step 2 (universal generator × 10, single message, all parallel):**
+**All 10 contracts — Step 2 (universal generator × 10, single message, all parallel). Generator model is the same for every contract within a preset: `sonnet` for eco/balanced/critical-opus, `opus` for max. Example below shows preset ≠ `max` (generator on Sonnet).**
+
 ```python
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-001 — Business Continuity", prompt="Generate compliance contract.\ncontract_type: business-continuity\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-010 — SRE", prompt="Generate compliance contract.\ncontract_type: sre\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-002 — Cloud", prompt="Generate compliance contract.\ncontract_type: cloud\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-003 — Data & AI", prompt="Generate compliance contract.\ncontract_type: data-ai\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-004 — Development", prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-008 — Process", prompt="Generate compliance contract.\ncontract_type: process\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-009 — Security", prompt="Generate compliance contract.\ncontract_type: security\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-007 — Platform", prompt="Generate compliance contract.\ncontract_type: platform\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-005 — Enterprise", prompt="Generate compliance contract.\ncontract_type: enterprise\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", description="CC-006 — Integration", prompt="Generate compliance contract.\ncontract_type: integration\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-001 — Business Continuity", prompt="Generate compliance contract.\ncontract_type: business-continuity\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-010 — SRE", prompt="Generate compliance contract.\ncontract_type: sre\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-002 — Cloud", prompt="Generate compliance contract.\ncontract_type: cloud\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-003 — Data & AI", prompt="Generate compliance contract.\ncontract_type: data-ai\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-004 — Development", prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-008 — Process", prompt="Generate compliance contract.\ncontract_type: process\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-009 — Security", prompt="Generate compliance contract.\ncontract_type: security\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-007 — Platform", prompt="Generate compliance contract.\ncontract_type: platform\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-005 — Enterprise", prompt="Generate compliance contract.\ncontract_type: enterprise\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
+Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-006 — Integration", prompt="Generate compliance contract.\ncontract_type: integration\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
 ```
 
 **Step 3.5: Collect Results**

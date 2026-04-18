@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.5.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.5.8` in the list.
+You should see `solutions-architect-skills v3.6.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,26 @@ Where:
 
 ## Roadmap
 
-### v3.5.8 (Current Release) ✅
+### v3.6.0 (Current Release) ✅
+**feat: model preset selection for compliance contract generation (eco / balanced / critical-opus / max)**
+
+The `architecture-compliance` skill now exposes four model presets controlling which Claude model each validator and the generator run on. Users can cut full-run token cost by up to ~90% versus the prior all-Opus baseline, while preserving reasoning depth on the audit-sensitive validators.
+
+**Presets:**
+- `eco` — Haiku × 10 validators + Sonnet generator (~90% cheaper)
+- `balanced` (default) — Sonnet × 10 validators + Sonnet generator (~75% cheaper)
+- `critical-opus` — Opus retained only for Security / SRE / Data & AI / Development validators; Haiku elsewhere; Sonnet generator (~60% cheaper)
+- `max` — prior behavior (Opus × 10 + Opus generator)
+
+**Invocation:** `/skill architecture-compliance <preset> <selector>` (e.g., `balanced all`, `eco SRE,Cloud,Security`, `critical-opus all`). When preset is omitted, the skill prompts via AskUserQuestion and defaults to `balanced`.
+
+**Rationale:** Validators perform mechanical Read + Grep classification (PASS/FAIL/N/A/UNKNOWN) — Sonnet matches Opus at ~5× lower cost. The four validators kept on Opus in `critical-opus` are the ones where reasoning nuance materially affects audit evidence: security-posture wording (Argus), SLO / error-budget math (Prometheus), PII classification (Mnemosyne), EOL date synthesis via WebSearch (Hephaestus).
+
+**Backward compatible:** Agent frontmatter unchanged (Opus fallback). The override is applied per-Task() call at the skill-orchestration layer — no sub-agent or pipeline code change needed.
+
+**Smoke tested:** Full validator → generator → post-gen pipeline cycle on `balanced` preset against a real architecture produces valid contracts with all pipeline fields populated; Sonnet validator is measurably more rigorous on UNKNOWN classifications than Opus.
+
+### v3.5.8 (Previous Release) ✅
 **chore: all 13 sub-agents migrated to `model: opus` (Claude Opus 4.7)**
 
 All sub-agent files under `agents/` switched from `model: sonnet` to `model: opus`. On the Anthropic API the `opus` alias currently resolves to Claude Opus 4.7 (1M context window).
