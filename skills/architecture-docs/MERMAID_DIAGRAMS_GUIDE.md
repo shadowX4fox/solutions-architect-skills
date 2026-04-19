@@ -908,7 +908,7 @@ class DomainServiceX domain
 
 ### Recommended Skill Enhancement
 
-**Skill Name**: `solutions-architect-skills:architecture-docs`
+**Skill Name**: `sa-skills:architecture-docs`
 
 **New Capabilities to Add**:
 

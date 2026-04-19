@@ -656,7 +656,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
    Invoke: `/skill architecture-component-guardian` with action `sync`
 
    The guardian will scan all component files created in Steps 4d and generate `docs/components/README.md` with the correct format:
-   - Line 1: `<!-- managed by solutions-architect-skills:architecture-component-guardian — do not edit manually -->` (em dash, not double hyphen)
+   - Line 1: `<!-- managed by sa-skills:architecture-component-guardian — do not edit manually -->` (em dash, not double hyphen)
    - Title: `# Component Details` (fixed — not "Component Index" or project-specific)
    - Intro paragraph: prose summary of the component structure
    - Grouped tables with `### [<System Name>](<system-name>.md)` headers (all architectures)

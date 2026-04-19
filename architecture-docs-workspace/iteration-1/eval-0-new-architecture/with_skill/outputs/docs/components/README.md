@@ -1,4 +1,4 @@
-<!-- managed by solutions-architect-skills:architecture-component-guardian -- do not edit manually -->
+<!-- managed by sa-skills:architecture-component-guardian -- do not edit manually -->
 
 [Architecture](../../ARCHITECTURE.md) > Components
 

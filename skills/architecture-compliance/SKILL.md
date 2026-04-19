@@ -776,16 +776,16 @@ Invoke validators for the selected contracts in **batches of 2 per message** (st
 
 | Contract Type | Validator | Subagent Type |
 |---------------|-----------|---------------|
-| Business Continuity | Aegis Validator | `solutions-architect-skills:business-continuity-validator` |
-| SRE Architecture | Prometheus Validator | `solutions-architect-skills:sre-validator` |
-| Cloud Architecture | Atlas Validator | `solutions-architect-skills:cloud-validator` |
-| Data & AI Architecture | Mnemosyne Validator | `solutions-architect-skills:data-ai-validator` |
-| Development Architecture | Hephaestus Validator | `solutions-architect-skills:development-validator` |
-| Process Transformation | Hermes Validator | `solutions-architect-skills:process-validator` |
-| Security Architecture | Argus Validator | `solutions-architect-skills:security-validator` |
-| Platform & IT Infrastructure | Vulcan Validator | `solutions-architect-skills:platform-validator` |
-| Enterprise Architecture | Athena Validator | `solutions-architect-skills:enterprise-validator` |
-| Integration Architecture | Iris Validator | `solutions-architect-skills:integration-validator` |
+| Business Continuity | Aegis Validator | `sa-skills:business-continuity-validator` |
+| SRE Architecture | Prometheus Validator | `sa-skills:sre-validator` |
+| Cloud Architecture | Atlas Validator | `sa-skills:cloud-validator` |
+| Data & AI Architecture | Mnemosyne Validator | `sa-skills:data-ai-validator` |
+| Development Architecture | Hephaestus Validator | `sa-skills:development-validator` |
+| Process Transformation | Hermes Validator | `sa-skills:process-validator` |
+| Security Architecture | Argus Validator | `sa-skills:security-validator` |
+| Platform & IT Infrastructure | Vulcan Validator | `sa-skills:platform-validator` |
+| Enterprise Architecture | Athena Validator | `sa-skills:enterprise-validator` |
+| Integration Architecture | Iris Validator | `sa-skills:integration-validator` |
 
 **Validator prompt template:**
 ```
@@ -802,7 +802,7 @@ Each validator returns a `VALIDATION_RESULT:` block. **Collect and store all res
 
 After all validators complete, invoke generators for the selected contracts. **Include the validator's VALIDATION_RESULT in each generator's prompt.**
 
-All generators use the **single universal agent** `solutions-architect-skills:compliance-generator`. The `contract_type` parameter determines which config and template to use.
+All generators use the **single universal agent** `sa-skills:compliance-generator`. The `contract_type` parameter determines which config and template to use.
 
 **Generator prompt template** (includes contract_type and validation result):
 ```
@@ -815,7 +815,7 @@ VALIDATION_RESULT:
 [paste the full VALIDATION_RESULT block returned by the validator for this contract type]
 ```
 
-**Model selection for generators**: for every generator Task() call, set the `model:` parameter using `resolve_model(contract_type, "generator", model_preset)` from Step 1.5. This resolves to `sonnet` for eco/balanced/critical-opus, or `opus` for max. Example: `Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", prompt="...")`.
+**Model selection for generators**: for every generator Task() call, set the `model:` parameter using `resolve_model(contract_type, "generator", model_preset)` from Step 1.5. This resolves to `sonnet` for eco/balanced/critical-opus, or `opus` for max. Example: `Task(subagent_type="sa-skills:compliance-generator", model="sonnet", prompt="...")`.
 
 Invoke generators in **batches of 2 per message** (strict parallel barrier).
 
@@ -825,7 +825,7 @@ Invoke generators in **batches of 2 per message** (strict parallel barrier).
 ```python
 # Step 1: Spawn validator (resolve_model("development", "validator", "balanced") → "sonnet")
 validator_result = Task(
-    subagent_type="solutions-architect-skills:development-validator",
+    subagent_type="sa-skills:development-validator",
     model="sonnet",
     prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]",
     description="Hephaestus — Development Architecture Validator"
@@ -833,7 +833,7 @@ validator_result = Task(
 
 # Step 2: Spawn universal generator (resolve_model("development", "generator", "balanced") → "sonnet")
 Task(
-    subagent_type="solutions-architect-skills:compliance-generator",
+    subagent_type="sa-skills:compliance-generator",
     model="sonnet",
     prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n" + validator_result,
     description="CC-004 — Development Architecture"
@@ -846,64 +846,64 @@ Swap `model="sonnet"` per the matrix in "Model Preset Selection" — e.g., for p
 
 ```python
 # Batch 1 of 5 — dispatch in one message, wait for both to return
-Task(subagent_type="solutions-architect-skills:business-continuity-validator", model="haiku", description="Aegis — Business Continuity Validator", prompt="Validate Business Continuity compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:sre-validator", model="opus", description="Prometheus — SRE Architecture Validator", prompt="Validate SRE Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="sa-skills:business-continuity-validator", model="haiku", description="Aegis — Business Continuity Validator", prompt="Validate Business Continuity compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="sa-skills:sre-validator", model="opus", description="Prometheus — SRE Architecture Validator", prompt="Validate SRE Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 
 # [BARRIER — wait for both batch-1 results]
 
 # Batch 2 of 5
-Task(subagent_type="solutions-architect-skills:cloud-validator", model="haiku", description="Atlas — Cloud Architecture Validator", prompt="Validate Cloud Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:data-ai-validator", model="opus", description="Mnemosyne — Data & AI Architecture Validator", prompt="Validate Data & AI Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="sa-skills:cloud-validator", model="haiku", description="Atlas — Cloud Architecture Validator", prompt="Validate Cloud Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="sa-skills:data-ai-validator", model="opus", description="Mnemosyne — Data & AI Architecture Validator", prompt="Validate Data & AI Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 
 # [BARRIER]
 
 # Batch 3 of 5
-Task(subagent_type="solutions-architect-skills:development-validator", model="opus", description="Hephaestus — Development Architecture Validator", prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:process-validator", model="haiku", description="Hermes — Process Transformation Validator", prompt="Validate Process Transformation compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="sa-skills:development-validator", model="opus", description="Hephaestus — Development Architecture Validator", prompt="Validate Development Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="sa-skills:process-validator", model="haiku", description="Hermes — Process Transformation Validator", prompt="Validate Process Transformation compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 
 # [BARRIER]
 
 # Batch 4 of 5
-Task(subagent_type="solutions-architect-skills:security-validator", model="opus", description="Argus — Security Architecture Validator", prompt="Validate Security Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:platform-validator", model="haiku", description="Vulcan — Platform & IT Infrastructure Validator", prompt="Validate Platform & IT Infrastructure compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="sa-skills:security-validator", model="opus", description="Argus — Security Architecture Validator", prompt="Validate Security Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="sa-skills:platform-validator", model="haiku", description="Vulcan — Platform & IT Infrastructure Validator", prompt="Validate Platform & IT Infrastructure compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 
 # [BARRIER]
 
 # Batch 5 of 5
-Task(subagent_type="solutions-architect-skills:enterprise-validator", model="haiku", description="Athena — Enterprise Architecture Validator", prompt="Validate Enterprise Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
-Task(subagent_type="solutions-architect-skills:integration-validator", model="haiku", description="Iris — Integration Architecture Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
+Task(subagent_type="sa-skills:enterprise-validator", model="haiku", description="Athena — Enterprise Architecture Validator", prompt="Validate Enterprise Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]"),
+Task(subagent_type="sa-skills:integration-validator", model="haiku", description="Iris — Integration Architecture Validator", prompt="Validate Integration Architecture compliance.\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]")
 ```
 
 **All 10 contracts — Step 2 (universal generator × 10, batched 2 at a time — 5 sequential batches). Generator model is the same for every contract within a preset: `sonnet` for eco/balanced/critical-opus, `opus` for max. Example below shows preset ≠ `max` (generator on Sonnet).**
 
 ```python
 # Batch 1 of 5 — dispatch in one message, wait for both to return
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-001 — Business Continuity", prompt="Generate compliance contract.\ncontract_type: business-continuity\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-010 — SRE", prompt="Generate compliance contract.\ncontract_type: sre\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]")
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-001 — Business Continuity", prompt="Generate compliance contract.\ncontract_type: business-continuity\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[BC_VALIDATION_RESULT]"),
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-010 — SRE", prompt="Generate compliance contract.\ncontract_type: sre\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SRE_VALIDATION_RESULT]")
 
 # [BARRIER — wait for both batch-1 results]
 
 # Batch 2 of 5
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-002 — Cloud", prompt="Generate compliance contract.\ncontract_type: cloud\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-003 — Data & AI", prompt="Generate compliance contract.\ncontract_type: data-ai\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]")
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-002 — Cloud", prompt="Generate compliance contract.\ncontract_type: cloud\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[CLOUD_VALIDATION_RESULT]"),
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-003 — Data & AI", prompt="Generate compliance contract.\ncontract_type: data-ai\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DATA_AI_VALIDATION_RESULT]")
 
 # [BARRIER]
 
 # Batch 3 of 5
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-004 — Development", prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-008 — Process", prompt="Generate compliance contract.\ncontract_type: process\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]")
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-004 — Development", prompt="Generate compliance contract.\ncontract_type: development\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[DEV_VALIDATION_RESULT]"),
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-008 — Process", prompt="Generate compliance contract.\ncontract_type: process\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PROCESS_VALIDATION_RESULT]")
 
 # [BARRIER]
 
 # Batch 4 of 5
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-009 — Security", prompt="Generate compliance contract.\ncontract_type: security\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-007 — Platform", prompt="Generate compliance contract.\ncontract_type: platform\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]")
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-009 — Security", prompt="Generate compliance contract.\ncontract_type: security\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[SECURITY_VALIDATION_RESULT]"),
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-007 — Platform", prompt="Generate compliance contract.\ncontract_type: platform\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[PLATFORM_VALIDATION_RESULT]")
 
 # [BARRIER]
 
 # Batch 5 of 5
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-005 — Enterprise", prompt="Generate compliance contract.\ncontract_type: enterprise\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
-Task(subagent_type="solutions-architect-skills:compliance-generator", model="sonnet", description="CC-006 — Integration", prompt="Generate compliance contract.\ncontract_type: integration\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-005 — Enterprise", prompt="Generate compliance contract.\ncontract_type: enterprise\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[ENTERPRISE_VALIDATION_RESULT]"),
+Task(subagent_type="sa-skills:compliance-generator", model="sonnet", description="CC-006 — Integration", prompt="Generate compliance contract.\ncontract_type: integration\narchitecture_file: ./ARCHITECTURE.md\nplugin_dir: [plugin_dir]\n\n[INTEGRATION_VALIDATION_RESULT]")
 ```
 
 **Step 3.5: Collect Results**

@@ -296,7 +296,7 @@ Following the v3.6.1 batching pattern for high-fanout sub-agent work.
 
 **Step 5.2: Spawn one batch per message**
 
-For each batch, send ONE message containing two (or one for the tail batch) `Task()` tool-use blocks in parallel. Each Task invokes `solutions-architect-skills:handoff-generator` with a prompt that provides:
+For each batch, send ONE message containing two (or one for the tail batch) `Task()` tool-use blocks in parallel. Each Task invokes `sa-skills:handoff-generator` with a prompt that provides:
 
 - `payload_path`: absolute path to the component's payload file
 - `output_handoff_path`: absolute path `<project>/handoffs/NN-<slug>-handoff.md`
@@ -322,7 +322,7 @@ Wait for each batch to complete before spawning the next. This keeps total paral
 Write or update the managed index file. Format:
 
 ```
-Line 1:  <!-- managed by solutions-architect-skills:architecture-dev-handoff — do not edit manually -->
+Line 1:  <!-- managed by sa-skills:architecture-dev-handoff — do not edit manually -->
 Line 2:  [Architecture](../ARCHITECTURE.md) > Development Handoffs
 Line 3:  (blank)
 Line 4:  # Component Development Handoffs
@@ -408,7 +408,7 @@ Add to project `.claude/settings.json`:
 "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
 "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
 "Bash(bun *)",
-"Agent(solutions-architect-skills:handoff-generator)"
+"Agent(sa-skills:handoff-generator)"
 ```
 
 Directory creation (`/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.

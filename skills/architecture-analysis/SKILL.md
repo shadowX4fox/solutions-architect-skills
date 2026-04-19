@@ -218,7 +218,7 @@ Issue Task() calls in **batches of 2 per message** (strict parallel barrier).
 Each call:
 
 ```
-subagent_type: solutions-architect-skills:architecture-analysis-agent
+subagent_type: sa-skills:architecture-analysis-agent
 
 Prompt:
 analysis_type: <type>
@@ -333,7 +333,7 @@ Add to your project's `.claude/settings.json`:
 "Write(analysis/*)",
 "Read(analysis/*)",
 "Bash(mkdir *)",
-"Agent(solutions-architect-skills:architecture-analysis-agent)",
+"Agent(sa-skills:architecture-analysis-agent)",
 "WebSearch"
 ```
 

@@ -147,7 +147,7 @@ Spawn one `peer-review-category-agent` per active category. Issue Task() calls i
 
 **Batching rule**: dispatch exactly **2 Task() calls per message**. After sending a batch, wait for BOTH `CATEGORY_REVIEW_RESULT:` blocks to return before sending the next batch. Do not start batch N+1 until every Task() in batch N has returned. If any category agent in a batch fails, record the failure and continue with the next batch (do not retry inline; failures are collected and reported at the end). This caps peak parallelism at 2 and gives the orchestrator a chance to observe early failures before dispatching the remaining batches. For Light (3 categories) this is 2 batches (2+1); Medium (7) is 4 batches (2+2+2+1); Hard (13) is 7 batches (2×6 + 1).
 
-All agents use: `solutions-architect-skills:peer-review-category-agent`
+All agents use: `sa-skills:peer-review-category-agent`
 
 **Agent prompt template:**
 ```

@@ -2,7 +2,7 @@
 description: Release architecture version (architecture-docs Workflow 10 — Draft→Released, CHANGELOG, architecture-v{version} git tag)
 ---
 
-Invoke the `solutions-architect-skills:architecture-docs` skill with args `release my architecture`.
+Invoke the `sa-skills:architecture-docs` skill with args `release my architecture`.
 
 The skill's Workflow 10 (`RELEASE_WORKFLOW.md`) is the single authoritative handler for the Draft → Released lifecycle, CHANGELOG generation, per-component Architecture Version updates, the annotated `architecture-v{version}` git tag, and the optional `archive/v{version}/` snapshot.
 

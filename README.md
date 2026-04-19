@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.8.4` in the list.
+You should see `sa-skills v3.8.5` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -520,7 +520,7 @@ Use `/skill architecture-analysis` to run risk and design-characteristics analys
 
 **Permissions required** (add to `.claude/settings.json`):
 ```json
-"Write(analysis/*)", "Read(analysis/*)", "Bash(mkdir *)", "Agent(solutions-architect-skills:architecture-analysis-agent)"
+"Write(analysis/*)", "Read(analysis/*)", "Bash(mkdir *)", "Agent(sa-skills:architecture-analysis-agent)"
 ```
 
 ### Phase 4: Development Handoff & Export
@@ -788,7 +788,24 @@ Where:
 
 ## Roadmap
 
-### v3.8.4 (Current Release) ✅
+### v3.8.5 (Current Release) ✅
+**refactor: rename plugin namespace from `solutions-architect-skills` to `sa-skills`**
+
+The fully-qualified skill invocation `solutions-architect-skills:<skill>` (e.g., `solutions-architect-skills:architecture-docs`) was long enough to be cumbersome in prompts, routing tables, and permission grants. This release shortens the plugin namespace to `sa-skills`, so invocations become `sa-skills:architecture-docs`, `sa-skills:architecture-compliance`, etc. No skills are added, removed, or reorganized — only the namespace prefix changes.
+
+**Changes:**
+- `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json` — plugin `name` field updated to `sa-skills`.
+- All 20 files carrying qualified skill invocations (`CLAUDE.md`, `README.md`, `CHANGELOG.md`, `commands/release-architecture.md`, every `SKILL.md` that references sibling skills, `docs/INSTALLATION.md`, `docs/WORKFLOW_GUIDE.md`, `docs/MIGRATION.md`, `.claude/settings.json`, `.claude/settings.json.example`) rewritten from `solutions-architect-skills:X` to `sa-skills:X`.
+- GitHub repo URLs, the repo folder name, the marketplace name (`shadowx4fox-solution-architect-marketplace`), and historical release artifacts are unchanged.
+
+**Migration:**
+- Existing project `.claude/settings.json` entries that grant `Agent(solutions-architect-skills:<name>)` must be updated to `Agent(sa-skills:<name>)`. The new `.claude/settings.json.example` reflects the rename; copy/merge it.
+- Marketplace-installed plugin caches: after pulling this release, reinstall via `/plugin install sa-skills@shadowx4fox-solution-architect-marketplace` so Claude Code re-keys the plugin under the new name.
+- Any saved prompt templates, CLAUDE.md trigger tables, or custom hooks that reference `solutions-architect-skills:` should be updated to `sa-skills:`.
+
+**Known limitation:** the `plugin_dir` Glob probes (used by `architecture-dev-handoff` and `architecture-docs-export` to resolve the plugin install path) still look for `**/solutions-architect-skills/`. Dev-mode (local clone) installs still work because the repo folder name is unchanged; marketplace installs fall back to the staging path (`/tmp/handoff-plugin-refs/`) when the Glob misses. A follow-up release will update the probe to match both names.
+
+### v3.8.4 (Previous Release) ✅
 **refactor: scope architecture-dev-handoff to architecture docs only; move output to `handoffs/` at project root**
 
 The dev-handoff skill previously sliced rows from `compliance-docs/SECURITY_*.md`, `SRE_*.md`, and `DEVELOPMENT_*.md` contracts into per-component payloads, which landed as "Compliance Gaps to Address" / "SRE Compliance Gaps" / "Development Compliance Gaps" subsections inside Sections 6, 9, and 11 of the handoff. This mixed compliance audit output into a document meant purely for implementation. Handoffs now draw **only** from `ARCHITECTURE.md`, `docs/`, and `adr/`. The output directory also moves from `docs/handoffs/` to `handoffs/` at the project root — `docs/` is the authored-architecture source, `handoffs/` is derived artifacts; keeping them separate prevents accidental coupling.
@@ -1221,7 +1238,7 @@ Complete 5-phase versioning system across the architecture docs cycle:
 - Peer review skill now fans out all active categories in a single parallel message (3 agents for Light, 7 for Medium, 13 for Hard)
 - Dramatic speed improvement: Light ~40s (was ~2 min), Medium ~90s (was ~5 min), Hard ~2-3 min (was ~10 min)
 - Added Step 5.2 (merge + renumber): collects all `CATEGORY_REVIEW_RESULT` blocks, merges findings, renumbers IDs globally, handles per-agent failures gracefully
-- Added `Agent(solutions-architect-skills:peer-review-category-agent)` to `.claude/settings.json.example` and CLAUDE.md permissions
+- Added `Agent(sa-skills:peer-review-category-agent)` to `.claude/settings.json.example` and CLAUDE.md permissions
 
 ### v3.3.3 (Previous Release) ✅
 **fix: peer review playground layout for large finding counts**

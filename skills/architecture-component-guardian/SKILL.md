@@ -129,7 +129,7 @@ skill), compliance generation, presentation creation, or **component development
 The generated `docs/components/README.md` MUST follow this exact structure:
 
 ```
-Line 1:  <!-- managed by solutions-architect-skills:architecture-component-guardian — do not edit manually -->
+Line 1:  <!-- managed by sa-skills:architecture-component-guardian — do not edit manually -->
 Line 2:  [Architecture](../../ARCHITECTURE.md) > Components
 Line 3:  (blank)
 Line 4:  # Component Details

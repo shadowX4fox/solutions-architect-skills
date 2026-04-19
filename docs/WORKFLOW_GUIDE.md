@@ -1197,8 +1197,8 @@ Next Steps:
   • Add Section 10.1 (Monitoring and Observability)
   • Add Section 5.2 (Integration Patterns)
 - Regenerate failed contracts individually:
-  /solutions-architect-skills:architecture-compliance sre_architecture
-  /solutions-architect-skills:architecture-compliance integration
+  /sa-skills:architecture-compliance sre_architecture
+  /sa-skills:architecture-compliance integration
 
 ═══════════════════════════════════════════════════════════════
 ```
@@ -1209,13 +1209,13 @@ Parallel agent mode activates automatically when you request 4+ contracts:
 
 ```bash
 # Automatically uses parallel agents (all 10 contracts)
-/solutions-architect-skills:architecture-compliance all
+/sa-skills:architecture-compliance all
 
 # Or manually request
 "Generate all my compliance contracts"
 
 # Works with any request ≥ 4 contracts
-/solutions-architect-skills:architecture-compliance sre cloud security data
+/sa-skills:architecture-compliance sre cloud security data
 ```
 
 **Benefits:**

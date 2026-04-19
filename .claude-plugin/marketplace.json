@@ -6,10 +6,10 @@
   },
   "plugins": [
     {
-      "name": "solutions-architect-skills",
+      "name": "sa-skills",
       "source": "./",
       "description": "Professional architecture documentation workflow: Business requirements, technical architecture, and compliance documentation (10 specialized agents)",
-      "version": "3.8.4",
+      "version": "3.8.5",
       "author": {
         "name": "shadowX4fox"
       }

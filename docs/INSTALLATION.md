@@ -99,7 +99,7 @@ Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silentl
 - `Bash(cat:*)`, `Bash(cp:*)`, `Bash(grep:*)`, `Bash(python3:*)` — safety-net rules that prevent prompts if the model improvises file operations
 - `Read(//tmp/*)`, `Write(//tmp/*)` — agents expand templates to `/tmp/` then read them back. Note: `//` prefix is required for absolute paths — `/tmp/*` would be interpreted as relative to the project root
 - `Write(compliance-docs/*)` — agents write generated compliance contracts directly to `compliance-docs/` in your project root
-- `Agent(solutions-architect-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
+- `Agent(sa-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 > **Important**: Two permission format rules:
 > 1. Use `Bash(command *)` with a **space** (e.g. `Bash(bun *)`). The `*` wildcard matches across `/` path separators so absolute paths work. The `:*` colon syntax is legacy/deprecated.
@@ -123,16 +123,16 @@ Create or update `.claude/settings.json` in your project root:
       "Read(//tmp/*)",
       "Write(//tmp/*)",
       "Write(compliance-docs/*)",
-      "Agent(solutions-architect-skills:business-continuity-compliance-generator)",
-      "Agent(solutions-architect-skills:sre-compliance-generator)",
-      "Agent(solutions-architect-skills:cloud-compliance-generator)",
-      "Agent(solutions-architect-skills:data-ai-compliance-generator)",
-      "Agent(solutions-architect-skills:development-compliance-generator)",
-      "Agent(solutions-architect-skills:process-compliance-generator)",
-      "Agent(solutions-architect-skills:security-compliance-generator)",
-      "Agent(solutions-architect-skills:platform-compliance-generator)",
-      "Agent(solutions-architect-skills:enterprise-compliance-generator)",
-      "Agent(solutions-architect-skills:integration-compliance-generator)"
+      "Agent(sa-skills:business-continuity-compliance-generator)",
+      "Agent(sa-skills:sre-compliance-generator)",
+      "Agent(sa-skills:cloud-compliance-generator)",
+      "Agent(sa-skills:data-ai-compliance-generator)",
+      "Agent(sa-skills:development-compliance-generator)",
+      "Agent(sa-skills:process-compliance-generator)",
+      "Agent(sa-skills:security-compliance-generator)",
+      "Agent(sa-skills:platform-compliance-generator)",
+      "Agent(sa-skills:enterprise-compliance-generator)",
+      "Agent(sa-skills:integration-compliance-generator)"
     ]
   }
 }

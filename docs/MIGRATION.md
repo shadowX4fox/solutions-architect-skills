@@ -100,7 +100,7 @@ If you were invoking the agent directly (not common):
 **v1.9.0 (Old):**
 ```python
 Task(
-    subagent_type="solutions-architect-skills:compliance-generator",
+    subagent_type="sa-skills:compliance-generator",
     prompt="Generate SRE Architecture contract from ./ARCHITECTURE.md",
     contract_type="sre_architecture"  # Required parameter
 )
@@ -109,7 +109,7 @@ Task(
 **v2.0.0 (New):**
 ```python
 Task(
-    subagent_type="solutions-architect-skills:sre-compliance-generator",
+    subagent_type="sa-skills:sre-compliance-generator",
     prompt="Generate SRE Architecture compliance contract from ./ARCHITECTURE.md"
     # No contract_type parameter needed - pre-configured in agent
 )
@@ -265,7 +265,7 @@ If you were using the skill (recommended approach):
 ```python
 # Direct invocation of specialized agent
 Task(
-    subagent_type="solutions-architect-skills:cloud-compliance-generator",
+    subagent_type="sa-skills:cloud-compliance-generator",
     prompt="Generate Cloud Architecture compliance contract from ./ARCHITECTURE.md",
     description="Generate Cloud compliance"
 )
@@ -285,8 +285,8 @@ Task(
 
 **Solution:**
 ```diff
-- subagent_type="solutions-architect-skills:compliance-generator"
-+ subagent_type="solutions-architect-skills:cloud-compliance-generator"
+- subagent_type="sa-skills:compliance-generator"
++ subagent_type="sa-skills:cloud-compliance-generator"
 ```
 
 Or use skill invocation instead: `/skill architecture-compliance Cloud`
@@ -298,7 +298,7 @@ Or use skill invocation instead: `/skill architecture-compliance Cloud`
 **Solution:**
 ```diff
 Task(
-    subagent_type="solutions-architect-skills:sre-compliance-generator",
+    subagent_type="sa-skills:sre-compliance-generator",
     prompt="Generate SRE Architecture contract",
 -   contract_type="sre_architecture"  # Remove this
 )

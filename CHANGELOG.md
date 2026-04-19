@@ -309,7 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `post-generation-pipeline.ts`: single Bun call that scans compliance-docs, calculates validation scores, updates contract fields, and writes `COMPLIANCE_MANIFEST.md`
 - `resolve-includes.ts` `--strip-internal` flag: strips `BEGIN_INTERNAL_INSTRUCTIONS` blocks during template expansion
-- 10 `Agent(solutions-architect-skills:*-compliance-generator)` permissions in `settings.json`
+- 10 `Agent(sa-skills:*-compliance-generator)` permissions in `settings.json`
 
 ### Changed
 - `SKILL.md` reduced from 2,863 → 701 lines; `plugin_dir` passed as input parameter to all 10 compliance agents instead of running `find && cd`

@@ -118,7 +118,7 @@ Read `docs/01-system-overview.md`'s H1; kebab-case it for the output filename. P
 
 ### Step A.4 — Spawn the sub-agent
 
-Invoke `solutions-architect-skills:docs-export-generator` with a prompt providing:
+Invoke `sa-skills:docs-export-generator` with a prompt providing:
 
 - `job_type: solution-architecture`
 - `plugin_dir: <absolute path from Step 0>`
@@ -175,7 +175,7 @@ Convert user input to the list of absolute paths.
 
 ### Step B.3 — Spawn the sub-agent
 
-Invoke `solutions-architect-skills:docs-export-generator` with:
+Invoke `sa-skills:docs-export-generator` with:
 
 - `job_type: handoff`
 - `plugin_dir: <absolute path>`
@@ -228,7 +228,7 @@ For each selected contract, derive `domain_slug` from the filename prefix (e.g.,
 
 ### Step C.3 — Spawn the sub-agent
 
-Invoke `solutions-architect-skills:docs-export-generator` with:
+Invoke `sa-skills:docs-export-generator` with:
 
 - `job_type: compliance`
 - `plugin_dir: <absolute path>`
@@ -313,7 +313,7 @@ Add to project `.claude/settings.json`:
 "Bash(rm *)",
 "Write(exports/*)",
 "Read(exports/*)",
-"Agent(solutions-architect-skills:docs-export-generator)"
+"Agent(sa-skills:docs-export-generator)"
 ```
 
 `Bash(rm *)` is used by the sub-agent to clean up the temporary `sa-executive-summary.md`.
