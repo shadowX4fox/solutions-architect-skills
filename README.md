@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.8.1` in the list.
+You should see `solutions-architect-skills v3.8.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,19 @@ Where:
 
 ## Roadmap
 
-### v3.8.1 (Current Release) ✅
+### v3.8.2 (Current Release) ✅
+**fix: architecture-dev-handoff plugin_dir resolution + sub-agent read-permission safety net**
+
+Sub-agents spawned by `architecture-dev-handoff` were failing their first Read of `HANDOFF_TEMPLATE.md` when `plugin_dir` resolved to the cache install path (`~/.claude/plugins/cache/…`) but the example permission grant only covered the marketplaces manifest path. The workaround — manually staging reference files to `/tmp/handoff-plugin-refs/` — now runs automatically when needed.
+
+**Changes:**
+- `skills/architecture-dev-handoff/SKILL.md` — added **Step 0 — Resolve Plugin Directory** (Glob → marketplace fallback → readability probe → `/tmp/handoff-plugin-refs/` staging fallback). The orchestrator now verifies sub-agent read permissions on the main thread before spawning, and mirrors the 4 reference files (`HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `ASSET_GENERATION_GUIDE.md`, `assets/_index.md`) to `/tmp` when the installed path is not permitted.
+- `agents/handoff-generator.md` — `plugin_dir` is now always supplied by the orchestrator; the ambiguous Glob fallback that could silently resolve to the cache path was removed.
+- `.claude/settings.json.example` — added `Read(~/.claude/plugins/cache/…/**)`, broadened the marketplaces grant to `**`, and added scoped `/tmp/handoff-payloads/*` + `/tmp/handoff-plugin-refs/*` read/write grants.
+
+**No behavior change for skills that already resolved `plugin_dir` via their own Step 0** (`architecture-analysis`, `architecture-docs-export`).
+
+### v3.8.1 (Previous Release) ✅
 **fix: sync marketplace.json + CLAUDE.md cleanup — catch-up release for v3.7.0 / v3.8.0**
 
 Catch-up release. `plugin.json` was bumped to v3.8.0 in prior commits but `marketplace.json` and `package.json` remained at v3.6.1, so `/plugin update` never served the newer versions. This release re-synchronizes all three version files and backfills README roadmap entries for v3.7.0 and v3.8.0.

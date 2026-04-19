@@ -22,7 +22,7 @@ The skill orchestrator passes these in the prompt text — read them from the pr
 - `payload_path`: Absolute path to the per-component payload file (e.g., `/tmp/handoff-payloads/inbox-hub.md`). Contains the component file content + all sliced architecture context in the format defined by `PAYLOAD_SCHEMA.md`.
 - `output_handoff_path`: Absolute path where the handoff document must be written (e.g., `/path/to/project/docs/handoffs/04-inbox-hub-handoff.md`).
 - `output_assets_dir`: Absolute path to the asset directory for this component (e.g., `/path/to/project/docs/handoffs/assets/04-inbox-hub/`). Create if missing.
-- `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (for reading templates and asset guides). If not provided, resolve via Glob `**/skills/architecture-dev-handoff/SKILL.md`.
+- `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (for reading templates and asset guides). ALWAYS provided by the orchestrator after its Step 0 readability probe — it will be either the resolved install path (marketplaces or cache) or `/tmp/handoff-plugin-refs` when the installed path is not in this sub-agent's permission allow-list. Do NOT re-resolve it via Glob; if the prompt is missing `plugin_dir`, abort with `PAYLOAD LOAD FAILURE: plugin_dir not provided by orchestrator`.
 - `component_slug`: The component's kebab-case slug (e.g., `inbox-hub`). Used in output filenames.
 - `component_index_position`: The `NN-` prefix from the component filename (e.g., `04`). Used as `5.N` in the handoff metadata.
 

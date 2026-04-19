@@ -116,6 +116,51 @@ All handoff documents must trace data back to architecture docs.
 
 ## Orchestration Workflow
 
+### Step 0 — Resolve Plugin Directory
+
+Before any workflow, resolve the absolute path to the plugin installation so sub-agents can read the handoff template, section-extraction guide, asset-generation guide, and asset index.
+
+**Step 0a — Glob (dev/local mode)**:
+
+Glob for: `**/solutions-architect-skills/skills/architecture-dev-handoff/SKILL.md`
+
+If found, strip `/skills/architecture-dev-handoff/SKILL.md` from the result to get `plugin_dir`.
+
+**Step 0b — Marketplace fallback**:
+
+If Glob returns nothing, set:
+```
+plugin_dir = ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace
+```
+
+**Step 0c — Readability probe + /tmp staging fallback** (permission safety net):
+
+Sub-agents must be able to `Read` four files under `plugin_dir`:
+- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`
+- `skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md`
+- `skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`
+- `skills/architecture-dev-handoff/assets/_index.md`
+
+If the resolved `plugin_dir` points to a path not covered by project `.claude/settings.json` permissions (most commonly `~/.claude/plugins/cache/.../<version>/` when the grant is scoped to `~/.claude/plugins/marketplaces/`), the sub-agent's first Read will be permission-blocked and the handoff will abort.
+
+To guarantee readability regardless of how the plugin was installed:
+
+1. On the main thread, attempt to Read `plugin_dir/skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`.
+2. If the Read succeeds, keep `plugin_dir` as-is and pass it to sub-agents.
+3. If the Read fails with a permission error, stage the four reference files to `/tmp/handoff-plugin-refs/`:
+   ```bash
+   mkdir -p /tmp/handoff-plugin-refs/skills/architecture-dev-handoff/assets
+   ```
+   Then Read each of the four files from the original `plugin_dir` (main-thread permissions are typically broader than sub-agent permissions) and Write each verbatim to the mirrored path under `/tmp/handoff-plugin-refs/`. Set `plugin_dir = /tmp/handoff-plugin-refs` and pass that to sub-agents.
+4. If the main-thread Read also fails, abort with:
+   ```
+   ❌ Cannot read plugin reference files at [original plugin_dir].
+      Add this to .claude/settings.json allow list and retry:
+      "Read(~/.claude/plugins/cache/**)"
+   ```
+
+Store the final `plugin_dir` (either original or `/tmp/handoff-plugin-refs`) for use in all sub-agent spawn prompts.
+
 ### Phase 1: Initialization
 
 **Step 1.1: Locate ARCHITECTURE.md**
@@ -260,7 +305,7 @@ For each batch, send ONE message containing two (or one for the tail batch) `Tas
 - `payload_path`: absolute path to the component's payload file
 - `output_handoff_path`: absolute path `<project>/docs/handoffs/NN-<slug>-handoff.md`
 - `output_assets_dir`: absolute path `<project>/docs/handoffs/assets/NN-<slug>/`
-- `plugin_dir`: absolute path to this plugin's root
+- `plugin_dir`: absolute path resolved in Step 0 (either the installed plugin root or `/tmp/handoff-plugin-refs` if staging fallback triggered) — required, never omit
 - `component_slug`, `component_index_position`
 - `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
 
@@ -362,8 +407,14 @@ Add to project `.claude/settings.json`:
 "Read(docs/handoffs/*)",
 "Write(/tmp/handoff-payloads/*)",
 "Read(/tmp/handoff-payloads/*)",
+"Write(/tmp/handoff-plugin-refs/*)",
+"Read(/tmp/handoff-plugin-refs/*)",
+"Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
+"Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
 "Bash(mkdir *)",
 "Agent(solutions-architect-skills:handoff-generator)"
 ```
 
-`Bash(mkdir *)` is used to create `/tmp/handoff-payloads/` and `docs/handoffs/assets/NN-<slug>/` directories.
+`Bash(mkdir *)` is used to create `/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `docs/handoffs/assets/NN-<slug>/` directories.
+
+**Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability and falls back to `/tmp/handoff-plugin-refs/` if neither matches, but granting both removes the fallback path and keeps sub-agent Reads fast.
