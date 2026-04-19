@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.8.2` in the list.
+You should see `solutions-architect-skills v3.8.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,19 @@ Where:
 
 ## Roadmap
 
-### v3.8.2 (Current Release) ✅
+### v3.8.3 (Current Release) ✅
+**fix: architecture-dev-handoff routes mkdir/date through a bun helper to eliminate permission prompts**
+
+The `architecture-dev-handoff` orchestrator was prompting users for `Bash(mkdir -p /tmp/handoff-payloads && date +%Y-%m-%d)` on every run. Even though `Bash(mkdir *)` and `Bash(date *)` were granted individually, the chained-with-`&&` form was treated as a new pattern by the permission matcher. This release routes both calls through a single bun helper covered by the project-wide `Bash(bun *)` grant.
+
+**Changes:**
+- `skills/architecture-dev-handoff/utils/prepare-payload-dir.ts` — **NEW** bun helper that recursively `mkdir`s the path argument and prints today's date in one call. Reuses `getLocalDateString()` from `architecture-compliance/utils/date-utils.ts` so the date logic stays single-source.
+- `skills/architecture-dev-handoff/SKILL.md` — Step 0c (`/tmp/handoff-plugin-refs/` staging) and Phase 4.5 (payload write + `generation_date` capture) now invoke the bun helper. Permissions block reduced to `Bash(bun *)`.
+- `agents/handoff-generator.md` — sub-agent reads `generation_date` from payload frontmatter instead of shelling out to `date`; asset directory creation goes through the bun helper. `mkdir` and `date` are now in the FORBIDDEN list.
+
+**No behavior change** for any other skill — only the dev-handoff workflow's bash surface changed.
+
+### v3.8.2 (Previous Release) ✅
 **fix: architecture-dev-handoff plugin_dir resolution + sub-agent read-permission safety net**
 
 Sub-agents spawned by `architecture-dev-handoff` were failing their first Read of `HANDOFF_TEMPLATE.md` when `plugin_dir` resolved to the cache install path (`~/.claude/plugins/cache/…`) but the example permission grant only covered the marketplaces manifest path. The workaround — manually staging reference files to `/tmp/handoff-plugin-refs/` — now runs automatically when needed.
@@ -800,7 +812,7 @@ Sub-agents spawned by `architecture-dev-handoff` were failing their first Read o
 
 **No behavior change for skills that already resolved `plugin_dir` via their own Step 0** (`architecture-analysis`, `architecture-docs-export`).
 
-### v3.8.1 (Previous Release) ✅
+### v3.8.1 ✅
 **fix: sync marketplace.json + CLAUDE.md cleanup — catch-up release for v3.7.0 / v3.8.0**
 
 Catch-up release. `plugin.json` was bumped to v3.8.0 in prior commits but `marketplace.json` and `package.json` remained at v3.6.1, so `/plugin update` never served the newer versions. This release re-synchronizes all three version files and backfills README roadmap entries for v3.7.0 and v3.8.0.

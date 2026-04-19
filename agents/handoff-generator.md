@@ -93,7 +93,7 @@ Replace each `[PLACEHOLDER]` in `template_content` using data from the payload. 
 5. NEVER invent values that are not in the payload.
 
 **Per-section guidance**:
-- **Section 0 — Metadata**: use payload frontmatter + today's date (from Bash `date +%Y-%m-%d`).
+- **Section 0 — Metadata**: use payload frontmatter — the orchestrator already captured today's date via `prepare-payload-dir.ts` and wrote it as `generation_date:` in the payload YAML. Consume that value directly; do NOT re-run `date` or shell out for the timestamp.
 - **Section 1 — Component Overview**: from `## Component File` section of payload.
 - **Section 2 — Scope and Boundaries**: from `## Component File` (scope) + `## Integrations` (upstream consumers / downstream dependencies).
 - **Section 3 — API Contract**: from `## Component File` (Endpoints/Routes) + `## Integrations` (versioning).
@@ -129,8 +129,9 @@ For each `asset_type` in the payload frontmatter's `asset_types` list, generate 
 
 **Create the asset directory first** if it does not exist:
 ```bash
-mkdir -p [output_assets_dir]
+bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts [output_assets_dir]
 ```
+(The helper recursively `mkdir`s the path; its stdout — today's date — is unused here, since the metadata date already came from the payload frontmatter.)
 
 For each asset, populate ONLY values present in the payload. Use `# TODO: [NOT DOCUMENTED — add to <source-file>]` for any value required by the spec but absent from the payload. After generating each asset, perform a completeness check: every item in the payload relevant to this asset type must appear in the asset, and every asset entry must trace to a payload item.
 
@@ -181,10 +182,11 @@ HANDOFF_RESULT:
 ## Tool Discipline
 
 **ALLOWED Bash commands**:
-1. `mkdir -p [output_assets_dir]` (create the asset directory)
-2. `date +%Y-%m-%d` (get current date)
+1. `bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts [output_assets_dir]` (create the asset directory; covered by the project-wide `Bash(bun *)` permission grant)
 
 **FORBIDDEN** — do NOT use Bash for:
+- ❌ `mkdir`, `mkdir -p` directly — use the bun helper above
+- ❌ `date`, `date +%Y-%m-%d` — read `generation_date` from the payload frontmatter instead
 - ❌ `python3`, `python`, `node`, or any scripting language
 - ❌ `cat`, `cp`, `mv`, `sed`, `awk`, or any file manipulation
 - ❌ `grep`, `rg`, `find`, or any search command

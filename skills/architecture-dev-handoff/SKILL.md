@@ -149,9 +149,9 @@ To guarantee readability regardless of how the plugin was installed:
 2. If the Read succeeds, keep `plugin_dir` as-is and pass it to sub-agents.
 3. If the Read fails with a permission error, stage the four reference files to `/tmp/handoff-plugin-refs/`:
    ```bash
-   mkdir -p /tmp/handoff-plugin-refs/skills/architecture-dev-handoff/assets
+   bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts /tmp/handoff-plugin-refs/skills/architecture-dev-handoff/assets
    ```
-   Then Read each of the four files from the original `plugin_dir` (main-thread permissions are typically broader than sub-agent permissions) and Write each verbatim to the mirrored path under `/tmp/handoff-plugin-refs/`. Set `plugin_dir = /tmp/handoff-plugin-refs` and pass that to sub-agents.
+   (The helper recursively `mkdir`s the path and prints today's date — discard the date here; you only need the directory.) Then Read each of the four files from the original `plugin_dir` (main-thread permissions are typically broader than sub-agent permissions) and Write each verbatim to the mirrored path under `/tmp/handoff-plugin-refs/`. Set `plugin_dir = /tmp/handoff-plugin-refs` and pass that to sub-agents.
 4. If the main-thread Read also fails, abort with:
    ```
    ❌ Cannot read plugin reference files at [original plugin_dir].
@@ -282,6 +282,12 @@ For each of SECURITY / SRE / DEVELOPMENT compliance contracts, extract rows from
 
 **Step 4.5: Write the payload file**
 
+Before writing the first payload of the run, ensure the output directory exists and capture today's date in one bun call:
+```bash
+generation_date=$(bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts /tmp/handoff-payloads)
+```
+The helper recursively `mkdir`s `/tmp/handoff-payloads/` and prints `YYYY-MM-DD` to stdout — capture that into `generation_date` for every payload's YAML frontmatter. Run this once per orchestration; subsequent payloads in the same run reuse the captured value.
+
 ```
 Write: /tmp/handoff-payloads/<component-slug>.md
 ```
@@ -289,8 +295,6 @@ Write: /tmp/handoff-payloads/<component-slug>.md
 Format per `PAYLOAD_SCHEMA.md`:
 - YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path)
 - Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs / Compliance Gaps
-
-Create `/tmp/handoff-payloads/` first if needed (`mkdir -p`).
 
 ### Phase 5: Spawn sub-agents in 2-parallel batches
 
@@ -411,10 +415,10 @@ Add to project `.claude/settings.json`:
 "Read(/tmp/handoff-plugin-refs/*)",
 "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
 "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
-"Bash(mkdir *)",
+"Bash(bun *)",
 "Agent(solutions-architect-skills:handoff-generator)"
 ```
 
-`Bash(mkdir *)` is used to create `/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `docs/handoffs/assets/NN-<slug>/` directories.
+Directory creation (`/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `docs/handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
 
 **Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability and falls back to `/tmp/handoff-plugin-refs/` if neither matches, but granting both removes the fallback path and keeps sub-agent Reads fast.

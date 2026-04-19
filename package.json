@@ -1,6 +1,6 @@
 {
   "name": "solutions-architect-skills",
-  "version": "3.8.2",
+  "version": "3.8.3",
   "description": "Claude Code plugin for architecture documentation and compliance generation",
   "type": "module",
   "workspaces": ["tools/docgen"],
