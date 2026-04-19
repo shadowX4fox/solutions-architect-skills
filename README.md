@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.8.5` in the list.
+You should see `sa-skills v3.8.6` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,21 @@ Where:
 
 ## Roadmap
 
-### v3.8.5 (Current Release) ✅
+### v3.8.6 (Current Release) ✅
+**fix: `plugin_dir` Glob probes now match both `sa-skills/` (marketplace install) and `solutions-architect-skills/` (dev clone)**
+
+v3.8.5 renamed the plugin namespace but left five skills' Step 0 "Resolve Plugin Directory" probes hardcoded to `**/solutions-architect-skills/...`. On marketplace installs the cached plugin folder is now `~/.claude/plugins/cache/<marketplace>/plugins/sa-skills/`, so the Glob missed — orchestrators fell through to the marketplace or `/tmp/handoff-plugin-refs/` fallback on every run. Each probe now uses brace expansion to accept either folder name.
+
+**Changes:**
+- `skills/architecture-docs-export/SKILL.md` — Glob updated (locates `tools/docgen/generate-doc.js`).
+- `skills/architecture-dev-handoff/SKILL.md` — Glob updated (locates `SKILL.md`).
+- `skills/architecture-analysis/SKILL.md` — Glob updated (locates `SKILL.md`).
+- `skills/architecture-icepanel-sync/SKILL.md` — Glob updated (locates `ICEPANEL_IMPORT_REFERENCE.md`).
+- `skills/architecture-blueprint/SKILL.md` — Glob updated (locates `BUSINESS_TEMPLATE_EN.md`).
+
+**Unchanged:** `skills/architecture-compliance/utils/resolve-plugin-dir.ts` was always folder-name-agnostic (uses `path.resolve` relative to its own location), so no TS changes were needed. Marketplace-fallback paths still reference the marketplace directory (`shadowx4fox-solution-architect-marketplace`), which is unaffected by the plugin rename.
+
+### v3.8.5 (Previous Release) ✅
 **refactor: rename plugin namespace from `solutions-architect-skills` to `sa-skills`**
 
 The fully-qualified skill invocation `solutions-architect-skills:<skill>` (e.g., `solutions-architect-skills:architecture-docs`) was long enough to be cumbersome in prompts, routing tables, and permission grants. This release shortens the plugin namespace to `sa-skills`, so invocations become `sa-skills:architecture-docs`, `sa-skills:architecture-compliance`, etc. No skills are added, removed, or reorganized — only the namespace prefix changes.

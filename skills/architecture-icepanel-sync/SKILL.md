@@ -51,9 +51,9 @@ Detect which workflow the user wants based on their request:
 
 **Step A — Glob (dev/local mode)**:
 
-Glob for: `**/solutions-architect-skills/skills/architecture-icepanel-sync/ICEPANEL_IMPORT_REFERENCE.md`
+Glob for: `**/{sa-skills,solutions-architect-skills}/skills/architecture-icepanel-sync/ICEPANEL_IMPORT_REFERENCE.md`
 
-If found, strip `/skills/architecture-icepanel-sync/ICEPANEL_IMPORT_REFERENCE.md` from the result to get `plugin_dir`.
+The brace expansion matches both marketplace installs (`sa-skills/` in `~/.claude/plugins/cache/...`) and local dev clones (historical repo folder `solutions-architect-skills/`). If found, strip `/skills/architecture-icepanel-sync/ICEPANEL_IMPORT_REFERENCE.md` from the result to get `plugin_dir`.
 
 **Step B — Marketplace fallback**:
 

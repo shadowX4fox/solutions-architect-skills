@@ -69,9 +69,9 @@ Before spawning the sub-agent, the orchestrator MUST resolve the absolute path t
 
 **Step 0a — Glob (dev/local mode)**:
 
-Glob for: `**/solutions-architect-skills/tools/docgen/generate-doc.js`
+Glob for: `**/{sa-skills,solutions-architect-skills}/tools/docgen/generate-doc.js`
 
-If found, strip `/tools/docgen/generate-doc.js` from the result to get `plugin_dir`.
+The brace expansion matches both marketplace installs (`sa-skills/` in `~/.claude/plugins/cache/...`) and local dev clones (historical repo folder `solutions-architect-skills/`). If found, strip `/tools/docgen/generate-doc.js` from the result to get `plugin_dir`.
 
 **Step 0b — Marketplace fallback**:
 

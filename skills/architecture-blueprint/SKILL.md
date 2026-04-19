@@ -54,9 +54,9 @@ Resolve `$plugin_dir` to locate the templates:
 
 **Step A — Development mode** (glob):
 ```
-Glob: **/solutions-architect-skills/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md
+Glob: **/{sa-skills,solutions-architect-skills}/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md
 ```
-If found, strip `/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md` to get `plugin_dir`.
+The brace expansion matches both marketplace installs (`sa-skills/` in `~/.claude/plugins/cache/...`) and local dev clones (historical repo folder `solutions-architect-skills/`). If found, strip `/skills/architecture-blueprint/BUSINESS_TEMPLATE_EN.md` to get `plugin_dir`.
 
 **Step B — Marketplace fallback**:
 ```bash
