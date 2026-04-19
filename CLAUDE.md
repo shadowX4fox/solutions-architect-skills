@@ -535,27 +535,35 @@ The `architecture-docs-export` skill exports architecture documents and componen
 
 To manually activate the skill, use: `/skill architecture-docs-export`
 
-The skill has two export modes:
+The skill has three export modes:
 
 | Mode | What it exports | Output |
 |------|----------------|--------|
-| **Solution Architecture** | Executive Summary synthesized from `docs/01-system-overview.md` + component index + compliance manifest (if present), plus one `.docx` per ADR | `exports/SA-<name>.docx` + `exports/ADR-NNN-<title>.docx` per ADR |
+| **Solution Architecture** | Executive Summary assembled verbatim from `docs/01-system-overview.md` + `docs/02-architecture-principles.md` + component index + compliance manifest (if present), plus one `.docx` per ADR | `exports/SA-<name>.docx` + `exports/ADR-NNN-<title>.docx` per ADR |
 | **Dev Handoff** | Selected component handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
+| **Compliance Contract** | Selected contract(s) from `compliance-docs/` | `exports/CC-<domain>-<project>.docx` per contract |
+
+**Orchestrator + sub-agent architecture** (as of v3.8.0): The skill runs as a lightweight orchestrator. Per-export work (file reads, markdown composition, docgen invocation) happens inside the `docs-export-generator` sub-agent, pinned to `model: sonnet`. Export is a zero-synthesis, high-frequency task — Sonnet is the right fit and the sub-agent wrap prevents cost drift when teams run frequent exports on Opus-configured main contexts.
 
 **Document styling**:
 - Corporate blue (`#1F4E79`) — SA executive summary
 - Amber/Gold (`#8B6914`) — Architecture Decision Records (ADRs)
 - Teal (`#0D7377`) — component handoffs (development phase deliverables)
+- Purple (`#7B2D8E`) — compliance contracts (Questions & Gaps Register editable in Word)
 
 **Output location**: `exports/` at project root (auto-created).
 
-**When to use**: When you need a Word-format executive summary of the architecture (with component overview and compliance status), individual ADR deliverables, or component handoff documents.
+**When to use**: When you need a Word-format executive summary of the architecture (with component overview and compliance status), individual ADR deliverables, component handoff documents, or compliance contracts for stakeholder review.
 
 **Permissions required** (add to project `.claude/settings.json`):
 
 ```json
-"Bash(bun run tools/docgen/generate-doc.js *)",
-"Write(exports/*)"
+"Bash(bun *)",
+"Bash(mkdir *)",
+"Bash(rm *)",
+"Write(exports/*)",
+"Read(exports/*)",
+"Agent(solutions-architect-skills:docs-export-generator)"
 ```
 
 ---

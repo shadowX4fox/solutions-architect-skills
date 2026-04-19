@@ -15,21 +15,41 @@ description: >
   "bump architecture version", or "finalize architecture" — those route to `architecture-docs`.
 ---
 
-# Architecture Doc Export Skill
+# Architecture Doc Export Skill — Orchestrator
 
 Exports architecture documents to professional Word files on demand.
 
-> **On-demand only** — this skill never runs automatically after document generation.
-> Invoke it explicitly when you are ready to produce deliverable Word files.
+> **On-demand only** — this skill never runs automatically after document generation. Invoke it explicitly when you are ready to produce deliverable Word files.
 
-> **Runtime: Bun only — never Node.** All generator calls MUST use `bun run $plugin_dir/tools/docgen/generate-doc.js` (absolute path resolved in Step 0). Never use `node` or a relative path under any circumstances.
-> If `bun run` appears to hang or produces no output:
+---
+
+## Architecture — Orchestrator + Sub-Agent (v3.8.0)
+
+As of v3.8.0, this skill is an **orchestrator**. The actual export work (file reads, markdown composition, `bun run tools/docgen/generate-doc.js` invocations) runs inside the `docs-export-generator` sub-agent, pinned to `model: sonnet`.
+
+**Why**: Export is a high-frequency, zero-synthesis task — pure verbatim extraction + docgen orchestration. Running it on Opus (the default for most Claude Code sessions) wastes token budget. The sub-agent pins Sonnet deterministically, so cost per run does not depend on whoever invokes it. Teams that batch-export ADRs, handoffs, and compliance contracts weekly/monthly see immediate savings.
+
+**Orchestrator responsibilities** (main context):
+- User interaction: listing ADRs / handoffs / compliance contracts, parsing selection ("all", numbers, ranges)
+- Plugin directory resolution
+- Compliance contract metadata extraction (score + status from Document Control table) for user-facing display
+- Spawning the sub-agent with the full job spec
+
+**Sub-agent responsibilities** (`agents/docs-export-generator.md`):
+- Read source files verbatim
+- Compose the executive summary markdown (SA mode)
+- Call docgen per output
+- Clean up temp files
+- Report a structured `EXPORT_RESULT:` block back
+
+---
+
+> **Runtime: Bun only — never Node.** All generator calls inside the sub-agent use `bun run $plugin_dir/tools/docgen/generate-doc.js` (absolute path). If `bun run` hangs:
 > 1. Ensure the `docx` package is installed: `cd $plugin_dir/tools/docgen && bun install`
 > 2. Confirm `plugin_dir` was resolved correctly in Step 0 — re-run the Glob if unsure
-> 3. Run **foreground** (not in background) to capture output immediately
-> Do NOT attempt `node generate-doc.js` as an alternative — it is not an authorized runtime.
+> 3. Never fall back to `node` — it is not an authorized runtime
 
-> **Documentation Fidelity**: All executive summary content MUST be extracted verbatim from source files. Do not paraphrase, summarize in your own words, embellish, or generate content not present in the source documents. If a required section or heading exists in the source file but is empty, write `[NOT DOCUMENTED — add content to <source-file>]`. Compliance statistics must be computed strictly from manifest table values — do not estimate or round.
+> **Documentation Fidelity**: All executive summary content is extracted verbatim from source files. No paraphrasing, no embellishment. If a required section exists in the source but is empty, the sub-agent writes `[NOT DOCUMENTED — add content to <source-file>]`. Compliance statistics are computed strictly from manifest table values.
 
 ---
 
@@ -37,23 +57,23 @@ Exports architecture documents to professional Word files on demand.
 
 | Export Mode | Input Sources | Output |
 |-------------|--------------|--------|
-| Solution Architecture | `docs/01-system-overview.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
+| Solution Architecture | `docs/01-system-overview.md` + `docs/02-architecture-principles.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
 | Component Handoff | Selected handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
 | Compliance Contract | Selected contract(s) from `compliance-docs/` | `exports/CC-<domain>-<project>.docx` per contract; Questions & Gaps Register cells are highlighted for stakeholder editing |
 
 ---
 
-## Step 0 — Resolve Plugin Directory
+## Step 0 — Resolve Plugin Directory (orchestrator)
 
-Before running any export workflow, resolve the absolute path to the plugin installation. The generator is bundled inside the plugin — never at the user's project root.
+Before spawning the sub-agent, the orchestrator MUST resolve the absolute path to the plugin installation and pass it in the spawn prompt.
 
-**Step A — Glob (dev/local mode)**:
+**Step 0a — Glob (dev/local mode)**:
 
 Glob for: `**/solutions-architect-skills/tools/docgen/generate-doc.js`
 
 If found, strip `/tools/docgen/generate-doc.js` from the result to get `plugin_dir`.
 
-**Step B — Marketplace fallback**:
+**Step 0b — Marketplace fallback**:
 
 If Glob returns nothing, run:
 
@@ -61,12 +81,12 @@ If Glob returns nothing, run:
 plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-compliance/utils/resolve-plugin-dir.ts)
 ```
 
-If both steps fail, stop and report:
+If both fail:
 ```
 ❌ Cannot locate plugin directory. Ensure the plugin is installed correctly.
 ```
 
-All subsequent `bun run` calls MUST use `$plugin_dir/tools/docgen/generate-doc.js`.
+`plugin_dir` is passed to the sub-agent in the spawn prompt — the sub-agent does NOT re-resolve it.
 
 ---
 
@@ -74,124 +94,43 @@ All subsequent `bun run` calls MUST use `$plugin_dir/tools/docgen/generate-doc.j
 
 **Trigger phrases**: "export architecture", "export to Word", "export solution architecture"
 
-### Step A.1 — Gather Source Files
+### Step A.1 — Validate prerequisites (orchestrator)
 
-Read these files:
-
-| File | Required | Purpose |
-|------|----------|---------|
-| `docs/01-system-overview.md` | ✅ Yes | Executive Summary + System Overview sections |
-| `docs/02-architecture-principles.md` | ✅ Yes | Architecture principles that drove the design |
-| `docs/components/README.md` | ✅ Yes | Component index table (5-column: #, Component, File, Type, Technology) — may have system group headers |
-| `compliance-docs/COMPLIANCE_MANIFEST.md` | ⬜ Optional | Compliance summary table and scores |
-
-If `docs/01-system-overview.md` is not found:
-
+Confirm `docs/01-system-overview.md` exists. If not:
 ```
 ❌ docs/01-system-overview.md not found.
    Generate architecture documentation first with /skill architecture-docs.
 ```
 
-### Step A.2 — Compose the Executive Summary
+### Step A.2 — Discover ADRs (orchestrator)
 
-Build a temporary markdown document (`sa-executive-summary.md`) with the following structure:
-
----
-
-```markdown
-# <Solution Name> — Executive Summary
-
-<!-- source: docs/01-system-overview.md -->
-## Executive Summary
-<Extract the content under the "Executive Summary" heading from docs/01-system-overview.md
- through (but not including) the "System Overview" heading>
-
-## System Overview
-<Extract the content under the "System Overview" heading from docs/01-system-overview.md
- through end of file (or the next H1/H2 boundary)>
-
-<!-- source: docs/02-architecture-principles.md -->
-## Architecture Principles
-<Extract the full content from docs/02-architecture-principles.md — all principles with their
- Description, Implementation, and Trade-offs subsections, verbatim>
-
-<!-- source: docs/components/README.md -->
-## Architecture Components
-<Paste the Markdown table from docs/components/README.md (the 5-column # / Component / File / Type / Technology table — include system group headers if present, skip the managed-by comment, breadcrumb, and prose)>
-
-<!-- source: compliance-docs/COMPLIANCE_MANIFEST.md — only if file exists -->
-## Compliance Summary
-**Overall**: <Total Contracts> contracts · Average Score: <X.X>/10 · Average Completeness: <N>%
-
-<Paste the "Generated Documents" table from COMPLIANCE_MANIFEST.md (Contract Type / Filename / Score / Status / Completeness / Generated)>
-
-**Status breakdown**: Approved: N · In Review: N · Draft: N · Rejected: N
-
-## Architecture Decision Records
-<Build a Markdown table from the ADR files found in Step A.4 search:>
-| # | Title | Status | File |
-|---|-------|--------|------|
-| ADR-001 | <title from H1> | <status from frontmatter or NOT DOCUMENTED> | ADR-001-<slug>.md |
-...
-```
-
----
-
-**Extraction fidelity rules**:
-1. Extract content **verbatim** from source files — do not paraphrase, rewrite, or add commentary
-2. If a heading exists but has no content beneath it, write: `[NOT DOCUMENTED — add content to <source-file>]`
-3. Compliance statistics (score, completeness, status counts) must be **computed from the manifest table** — do not estimate
-4. The component table must be pasted exactly as it appears in `docs/components/README.md` — do not reformat, remove columns, or alter system group headers
-5. Do not add sections, content, or data not present in the source files
-
-Use the `# Title` from `docs/01-system-overview.md` as the solution name (kebab-case it for the output filename).
-
-### Step A.3 — Export Executive Summary to Word
-
-Validate the output directory exists:
-```bash
-bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
-```
-If output is empty (directory does not exist), create it:
-```bash
-mkdir exports
-```
-
-```bash
-# MUST use bun — never node
-bun run $plugin_dir/tools/docgen/generate-doc.js \
-  --type    solution-architecture \
-  --input   sa-executive-summary.md \
-  --output  exports/SA-<solution-name>.docx \
-  --author  "Solution Architecture" \
-  --version "1.0" \
-  --status  "Draft"
-```
-
-### Step A.4 — Find and Export Individual ADRs
-
-Scan for ADR files in these locations (in order):
+Scan for ADR files in these locations, in order:
 - `adr/ADR-*.md`
 - `docs/adr/ADR-*.md`
 - `docs/decisions/ADR-*.md`
 - `ADR-*.md` in project root
 
-For each ADR found:
+Collect absolute paths. If zero ADRs found, still proceed — the executive summary will have an empty ADR table.
 
-```bash
-# MUST use bun — never node
-bun run $plugin_dir/tools/docgen/generate-doc.js \
-  --type    adr \
-  --input   <path-to-ADR-NNN-name.md> \
-  --output  exports/ADR-NNN-<name>.docx \
-  --author  "Solution Architecture" \
-  --version "1.0" \
-  --status  "Draft"
-```
+### Step A.3 — Determine solution slug (orchestrator)
 
-### Step A.5 — Clean Up and Report
+Read `docs/01-system-overview.md`'s H1; kebab-case it for the output filename. Pass as `solution_name_slug`.
 
-Delete the temporary markdown file (`sa-executive-summary.md`), then report:
+### Step A.4 — Spawn the sub-agent
+
+Invoke `solutions-architect-skills:docs-export-generator` with a prompt providing:
+
+- `job_type: solution-architecture`
+- `plugin_dir: <absolute path from Step 0>`
+- `project_dir: <CWD>`
+- `solution_name_slug: <from Step A.3>`
+- `items: <JSON array of absolute ADR file paths from Step A.2>`
+
+Wait for the sub-agent's `EXPORT_RESULT:` block, then report to user.
+
+### Step A.5 — Report (orchestrator)
+
+Parse the sub-agent's `EXPORT_RESULT:` block and display:
 
 ```
 ✅ Solution Architecture Export Complete
@@ -202,23 +141,76 @@ Delete the temporary markdown file (`sa-executive-summary.md`), then report:
    ...
 ```
 
+If `status: PARTIAL` or `FAILED`, list the failures from the result block.
+
+---
+
+## Workflow B — Export Component Handoff
+
+**Trigger phrases**: "export handoff", "export dev handoff", "export <component-name> to Word"
+
+### Step B.1 — List available handoffs (orchestrator)
+
+Glob `docs/handoffs/*-handoff.md`. If none found:
+```
+❌ No handoff documents found in docs/handoffs/.
+   Generate them first with /skill architecture-dev-handoff.
+```
+
+Otherwise display numbered list:
+```
+Available component handoffs:
+
+  1. 01-payment-api-handoff.md        Payment API
+  2. 02-user-service-handoff.md       User Service
+  3. 03-audit-db-handoff.md           Audit Database
+
+Which component(s) to export?
+  Enter numbers (e.g. 1, 3), ranges (e.g. 1-3), or "all"
+```
+
+### Step B.2 — Parse selection (orchestrator)
+
+Convert user input to the list of absolute paths.
+
+### Step B.3 — Spawn the sub-agent
+
+Invoke `solutions-architect-skills:docs-export-generator` with:
+
+- `job_type: handoff`
+- `plugin_dir: <absolute path>`
+- `project_dir: <CWD>`
+- `items: <JSON array of absolute handoff file paths>`
+
+### Step B.4 — Report (orchestrator)
+
+```
+✅ Handoff Export Complete
+   exports/HANDOFF-payment-api.docx    (Payment API)
+   exports/HANDOFF-user-service.docx   (User Service)
+```
+
 ---
 
 ## Workflow C — Export Compliance Contracts
 
 **Trigger phrases**: "export compliance", "export compliance contract", "export compliance to Word"
 
-### Step C.1 — List Available Contracts
+### Step C.1 — List available contracts (orchestrator)
 
-Check `compliance-docs/` for contract files (pattern: `*.md`, excluding `COMPLIANCE_MANIFEST.md`). If none found:
-
+Glob `compliance-docs/*.md` (excluding `COMPLIANCE_MANIFEST.md`). If none:
 ```
 ❌ No compliance contracts found in compliance-docs/.
    Generate them first with /skill architecture-compliance.
 ```
 
-If contracts exist, display a numbered list with their scores extracted from the Document Control table (`| Status |` row):
+For each contract, read the Document Control table and extract:
+- Score (from `[VALIDATION_SCORE]` or the populated score field)
+- Document status (from `| Status |` row)
+- Approval authority (from the Approval Authority field)
+- Generation date (from `**Generation Date**`)
 
+Display:
 ```
 Available compliance contracts:
 
@@ -230,42 +222,21 @@ Which contract(s) to export?
   Enter numbers (e.g. 1, 3), ranges (e.g. 1-3), or "all"
 ```
 
-### Step C.2 — Extract Score and Metadata
+### Step C.2 — Parse selection + derive slugs (orchestrator)
 
-For each selected contract:
+For each selected contract, derive `domain_slug` from the filename prefix (e.g., `SRE_ARCHITECTURE` → `sre-architecture`). Read the project name for `project_slug`.
 
-1. Read the contract file
-2. Extract `**Generation Date**` from the header
-3. Extract `| Status |` from the Document Control table to get document_status
-4. Extract `[VALIDATION_SCORE]` or the actual score from the Document Control table
+### Step C.3 — Spawn the sub-agent
 
-### Step C.3 — Export Selected Contracts
+Invoke `solutions-architect-skills:docs-export-generator` with:
 
-Validate the output directory exists:
-```bash
-bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
-```
-If output is empty (directory does not exist), create it:
-```bash
-mkdir exports
-```
+- `job_type: compliance`
+- `plugin_dir: <absolute path>`
+- `project_dir: <CWD>`
+- `project_slug: <kebab-case project name>`
+- `items: <JSON array of {path, domain_slug, score, document_status, approval_authority} objects>`
 
-For each selected contract, derive a domain slug from the filename prefix (e.g. `SRE_ARCHITECTURE` → `sre-architecture`):
-
-```bash
-# MUST use bun — never node
-bun run $plugin_dir/tools/docgen/generate-doc.js \
-  --type              compliance \
-  --input             compliance-docs/<CONTRACT_FILENAME>.md \
-  --output            exports/CC-<domain-slug>-<project-slug>.docx \
-  --score             "<score>/10" \
-  --approval-authority "<approval_authority from contract>" \
-  --status            "<document_status from contract>" \
-  --author            "Compliance Team" \
-  --version           "2.0"
-```
-
-### Step C.4 — Report
+### Step C.4 — Report (orchestrator)
 
 ```
 ✅ Compliance Export Complete
@@ -279,66 +250,6 @@ bun run $plugin_dir/tools/docgen/generate-doc.js \
 
 ---
 
-## Workflow B — Export Component Handoff
-
-**Trigger phrases**: "export handoff", "export dev handoff", "export <component-name> to Word"
-
-### Step B.1 — List Available Handoffs
-
-Check `docs/handoffs/` for handoff documents (pattern: `*-handoff.md`). If none found:
-
-```
-❌ No handoff documents found in docs/handoffs/.
-   Generate them first with /skill architecture-dev-handoff.
-```
-
-If handoffs exist, display a numbered list:
-
-```
-Available component handoffs:
-
-  1. 01-payment-api-handoff.md        Payment API
-  2. 02-user-service-handoff.md       User Service
-  3. 03-audit-db-handoff.md           Audit Database
-
-Which component(s) to export?
-  Enter numbers (e.g. 1, 3), ranges (e.g. 1-3), or "all"
-```
-
-### Step B.2 — Export Selected Components
-
-Validate the output directory exists:
-```bash
-bun $plugin_dir/skills/architecture-compliance/utils/check-dir.ts exports
-```
-If output is empty (directory does not exist), create it:
-```bash
-mkdir exports
-```
-
-For each selected handoff:
-
-```bash
-# MUST use bun — never node
-bun run $plugin_dir/tools/docgen/generate-doc.js \
-  --type    handoff \
-  --input   docs/handoffs/<NN>-<component>-handoff.md \
-  --output  exports/HANDOFF-<component>.docx \
-  --author  "Solution Architecture" \
-  --version "1.0" \
-  --status  "Draft"
-```
-
-### Step B.3 — Report
-
-```
-✅ Handoff Export Complete
-   exports/HANDOFF-payment-api.docx    (Payment API)
-   exports/HANDOFF-user-service.docx   (User Service)
-```
-
----
-
 ## Document Styling
 
 | Document | Type Code | Color | Purpose |
@@ -348,15 +259,15 @@ bun run $plugin_dir/tools/docgen/generate-doc.js \
 | Component handoffs | `HANDOFF` | Teal `#0D7377` | Dev team deliverables |
 | Compliance contracts | `CC` | Purple `#7B2D8E` | Compliance adherence contracts with editable Questions & Gaps Register |
 
-Each document type has a distinct color. Compliance contracts use purple to distinguish them from all other types. The Questions & Gaps Register table in compliance exports has:
-- Yellow-highlighted cells for **Owner**, **Action Required**, and **Priority** (editable by stakeholders in Word)
+Compliance exports' Questions & Gaps Register has:
+- Yellow-highlighted cells for **Owner**, **Action Required**, and **Priority** (editable in Word)
 - Status-conditional coloring in the Compliance Summary table: green=Compliant, red=Non-Compliant, gray=Not Applicable, yellow=Unknown
 
 ---
 
 ## Output Location
 
-All exports land in `exports/` at the project root (validated via `check-dir.ts`, created if missing).
+All exports land in `exports/` at the project root.
 
 ```
 exports/
@@ -366,27 +277,43 @@ exports/
 ├── HANDOFF-payment-api.docx
 ├── HANDOFF-user-service.docx
 ├── CC-sre-architecture-project.docx     ← Compliance Contract (Questions & Gaps editable)
-└── CC-cloud-architecture-project.docx  ← Compliance Contract
+└── CC-cloud-architecture-project.docx
 ```
 
 ---
 
 ## Dependency Check
 
-If you see a `Cannot find module 'docx'` error:
+If you see a `Cannot find module 'docx'` error from the sub-agent's report:
 
 ```bash
 cd tools/docgen && bun install
 ```
 
-Only needed once.
+Only needed once per plugin install.
 
 ---
 
 ## Prerequisites
 
 - `docs/01-system-overview.md` and `docs/components/README.md` created by `/skill architecture-docs`
-- ADR files created by `/skill architecture-definition-record` (for ADR creation/management)
-- Compliance manifest created by `/skill architecture-compliance` (also needed for Workflow A compliance section)
-- Component handoffs created by `/skill architecture-dev-handoff`
-- Compliance contracts (Workflow C): created by `/skill architecture-compliance`; the `## Questions & Gaps Register` section must be present (generated by post-generation pipeline)
+- ADR files created by `/skill architecture-definition-record`
+- Compliance manifest created by `/skill architecture-compliance` (optional for Workflow A; required for Workflow C)
+- Component handoffs created by `/skill architecture-dev-handoff` (required for Workflow B)
+
+---
+
+## Permissions required
+
+Add to project `.claude/settings.json`:
+
+```json
+"Bash(bun *)",
+"Bash(mkdir *)",
+"Bash(rm *)",
+"Write(exports/*)",
+"Read(exports/*)",
+"Agent(solutions-architect-skills:docs-export-generator)"
+```
+
+`Bash(rm *)` is used by the sub-agent to clean up the temporary `sa-executive-summary.md`.
