@@ -136,7 +136,7 @@
 
 ## Section 6 — Security Requirements
 
-> Source: `docs/07-security-architecture.md` + `compliance-docs/` (security contract, if present)
+> Source: `docs/07-security-architecture.md`
 
 ### Authentication
 
@@ -366,7 +366,7 @@ Assets generated alongside this handoff document, scaffolded from architecture d
 |-------|------|-------------|
 [ASSETS_TABLE_ROWS or "| — | — | No assets generated for this component type. |"]
 
-> Assets are located in `docs/handoffs/assets/[COMPONENT_FOLDER]/`
+> Assets are located in `handoffs/assets/[COMPONENT_FOLDER]/`
 >
 > Fields marked `# TODO:` require developer input. Fields populated from architecture docs are pre-filled.
 

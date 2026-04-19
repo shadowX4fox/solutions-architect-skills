@@ -123,7 +123,7 @@ All items in this step are **optional** — the skill works with just `ARCHITECT
 - Limit to first 15 components to avoid node overload on large projects
 - Status: `"present"` if file exists, `"not-created"` otherwise
 
-**Handoffs** (`docs/handoffs/` directory):
+**Handoffs** (`handoffs/` directory):
 - If exists: scan each handoff file's "Business Context" field for UC references
 - Used to build use case → component `served-by` edges
 
@@ -137,7 +137,7 @@ All items in this step are **optional** — the skill works with just `ARCHITECT
 - Limit to 10 use cases maximum.
 
 **Use Case → Component mapping** (from handoff docs):
-- If `docs/handoffs/` exists: scan each handoff file for the "Business Context" field (typically line ~30). Extract use case references (e.g., "UC 1", "UC 2", "Use Case 1") and map them to component IDs.
+- If `handoffs/` exists: scan each handoff file for the "Business Context" field (typically line ~30). Extract use case references (e.g., "UC 1", "UC 2", "Use Case 1") and map them to component IDs.
 - If handoffs don't exist: infer mapping from component descriptions and use case names (best-effort keyword matching).
 
 ---

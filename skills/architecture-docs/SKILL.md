@@ -274,7 +274,7 @@ Runs immediately after the Post-Write Alignment Audit passes. Detects downstream
 | S11 (Operations) | `docs/09-operational-considerations.md` | *(leaf)* |
 | S12 (ADRs) | `ARCHITECTURE.md` (navigation table) | `adr/` directory → delegate to `/skill architecture-definition-record`, Refs (`docs/10-references.md`) |
 
-**Cross-cutting** (always scanned regardless of table): `docs/components/`, `docs/handoffs/`, `docs/10-references.md`
+**Cross-cutting** (always scanned regardless of table): `docs/components/`, `handoffs/`, `docs/10-references.md`
 
 ##### References file (`docs/10-references.md`) propagation
 
@@ -314,13 +314,13 @@ This rule runs **instead of** the standard Phase 1–3 propagation for S12 chang
 
 **1b. Structural dependency scan** — Look up the edited section in the reverse dependency table above. Collect all downstream section files.
 
-**1c. Cross-reference scan** — Grep across `docs/`, `docs/components/`, `docs/handoffs/` for explicit references to the edited filename (links, section anchors, `(see [...](...))`).
+**1c. Cross-reference scan** — Grep across `docs/`, `docs/components/`, `handoffs/` for explicit references to the edited filename (links, section anchors, `(see [...](...))`).
 
 ```bash
-grep -rl "{edited_filename}" docs/ docs/components/ docs/handoffs/ 2>/dev/null
+grep -rl "{edited_filename}" docs/ docs/components/ handoffs/ 2>/dev/null
 ```
 
-**1d. Handoff scan** — For each fact-delta keyword (component names, technology names, pattern names), grep `docs/handoffs/` for matching terms.
+**1d. Handoff scan** — For each fact-delta keyword (component names, technology names, pattern names), grep `handoffs/` for matching terms.
 
 **1e. Merge and deduplicate** — Combine results from 1b+1c+1d. Remove duplicates and remove the edited file itself.
 
@@ -344,7 +344,7 @@ Changes detected:
 [ ] 3. docs/components/03-payment-service.md — uses {changed_component}; integration details may be stale
 
 ─── Handoff Docs ─────────────────────────────────────────
-[ ] 4. docs/handoffs/03-payment-service-handoff.md — Section 4 references {old_tech}
+[ ] 4. handoffs/03-payment-service-handoff.md — Section 4 references {old_tech}
 
 ─── No Updates Required ──────────────────────────────────
 ℹ️  docs/04-data-flow-patterns.md — no references to changed content
@@ -366,7 +366,7 @@ For each approved `docs/*.md` or `docs/components/*.md` file:
 5. Run the 5-check Post-Write Alignment Audit on the updated file
 6. Mark as `[x]`
 
-For approved `docs/handoffs/*.md` files: Read, locate affected passages, update following the dev-handoff Documentation Fidelity Policy. Mark as `[x]`.
+For approved `handoffs/*.md` files: Read, locate affected passages, update following the dev-handoff Documentation Fidelity Policy. Mark as `[x]`.
 
 If user selected `skip`: Add `<!-- PROPAGATION PENDING: upstream {edited_file} changed ({date}) — downstream not yet updated -->` comment at the top of the edited file.
 
@@ -375,7 +375,7 @@ If user selected `skip`: Add `<!-- PROPAGATION PENDING: upstream {edited_file} c
 When the edited file is `docs/components/*.md` (not a section file):
 - Cascade through S5's row in the table (S6, S7, S8, S9, S10, S11)
 - Additionally grep for the **component name** (not just filename) across all `docs/` files
-- Always include the matching `docs/handoffs/{component}-handoff.md` if it exists
+- Always include the matching `handoffs/{component}-handoff.md` if it exists
 - If `docs/components/README.md` needs updating, delegate to the `architecture-component-guardian` skill
 
 #### Phase 4: Propagation Report
@@ -406,9 +406,9 @@ Failed (require manual review):
 #### Phase 5: Asset Regeneration Advisory
 
 **Runs after**: Phase 4 report is displayed.
-**Also runs when**: User selected `skip` in Phase 2 and handoff files exist in `docs/handoffs/` — in this case, note that handoff text was also not updated.
+**Also runs when**: User selected `skip` in Phase 2 and handoff files exist in `handoffs/` — in this case, note that handoff text was also not updated.
 
-**Skip silently when**: No `docs/handoffs/*.md` files appeared in the Phase 3 update list (completed, deselected, or failed) AND propagation was not skipped.
+**Skip silently when**: No `handoffs/*.md` files appeared in the Phase 3 update list (completed, deselected, or failed) AND propagation was not skipped.
 
 **Step 5a — Detect asset-impacting changes**: Scan the fact-deltas from Phase 1a for asset-impact keywords (case-insensitive):
 
@@ -425,7 +425,7 @@ Failed (require manual review):
 
 If no keywords match → skip this phase silently.
 
-**Step 5b — Identify affected components**: For each `docs/handoffs/*-handoff.md` file that was touched in Phase 3 (or would have been if propagation was skipped/deselected), check whether `docs/handoffs/assets/NN-<component-name>/` exists and contains any of the matched asset types. Exclude components with no asset directory or no matching asset files on disk.
+**Step 5b — Identify affected components**: For each `handoffs/*-handoff.md` file that was touched in Phase 3 (or would have been if propagation was skipped/deselected), check whether `handoffs/assets/NN-<component-name>/` exists and contains any of the matched asset types. Exclude components with no asset directory or no matching asset files on disk.
 
 If zero components remain after filtering → skip silently.
 

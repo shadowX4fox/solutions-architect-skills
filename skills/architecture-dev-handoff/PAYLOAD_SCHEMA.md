@@ -2,7 +2,7 @@
 
 This document defines the contract between the `architecture-dev-handoff` skill orchestrator (main context) and the `handoff-generator` sub-agent (isolated context).
 
-The orchestrator builds one payload file per selected component and writes it to `/tmp/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/`, `adr/`, or `compliance-docs/` directories.
+The orchestrator builds one payload file per selected component and writes it to `/tmp/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/` or `adr/` directories.
 
 ## Why a payload-based contract
 
@@ -116,21 +116,6 @@ For each ADR in adr/*.md whose body matches the component name, its technology, 
 
 If no ADRs match, write:
 No ADRs in adr/ reference this component, its technology, or its domain.
-
-## Compliance Gaps
-
-Present only if `compliance-docs/` exists in the project. Include rows from the Compliance Summary tables of the three contracts below where Status = Non-Compliant or Unknown AND the requirement mentions this component, its technology, or a cross-cutting concern that applies to it.
-
-### SECURITY_ARCHITECTURE
-<rows>
-
-### SRE_ARCHITECTURE
-<rows>
-
-### DEVELOPMENT_ARCHITECTURE
-<rows>
-
-If no compliance contracts exist in the project, omit this section entirely.
 ```
 
 ## Orchestrator construction rules
@@ -144,7 +129,6 @@ If no compliance contracts exist in the project, omit this section entirely.
    - `docs/08-scalability-and-performance.md`
    - `docs/09-operational-considerations.md`
    - all files in `adr/`
-   - `compliance-docs/SECURITY_ARCHITECTURE_*.md`, `SRE_ARCHITECTURE_*.md`, `DEVELOPMENT_ARCHITECTURE_*.md` (if present)
 
 2. **Slice each shared doc per component** using grep/regex matching on the component's name, its `Type` field, and the technology names listed in its `**Technology:**` field.
 
@@ -155,7 +139,7 @@ If no compliance contracts exist in the project, omit this section entirely.
 ## Sub-agent consumption rules
 
 1. **Read the payload file in full, once.** The payload is the sub-agent's sole architecture source.
-2. **Do NOT re-read** any file under `docs/`, `adr/`, or `compliance-docs/`. If the sub-agent needs information not in the payload, treat it as `[NOT DOCUMENTED]`.
+2. **Do NOT re-read** any file under `docs/` or `adr/`. If the sub-agent needs information not in the payload, treat it as `[NOT DOCUMENTED]`.
 3. **Allowed plugin-internal reads** — `HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `assets/_index.md`, and the line-ranged slice of `ASSET_GENERATION_GUIDE.md` for matched asset types.
 4. **Forbidden broad reads** — never read the full `ASSET_GENERATION_GUIDE.md`; always use the line range from `assets/_index.md`.
 
@@ -219,17 +203,6 @@ Flow: User login — Gatekeeper writes session to cache with 30min TTL. See docs
 
 - ADR-042 — Redis as session store — Accepted — adr/ADR-042-redis-session-store.md
   <excerpt>
-
-## Compliance Gaps
-
-### SECURITY_ARCHITECTURE
-- LSC-3 (Non-Compliant): TLS not enforced on internal Redis connections — remediation required
-
-### SRE_ARCHITECTURE
-(none)
-
-### DEVELOPMENT_ARCHITECTURE
-(none)
 ```
 
 ---

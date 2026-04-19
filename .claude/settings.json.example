@@ -54,12 +54,12 @@
       "Read(exports/*)",
       "Write(analysis/*)",
       "Read(analysis/*)",
-      "Write(docs/handoffs/*)",
-      "Read(docs/handoffs/*)",
-      "Write(/tmp/handoff-payloads/*)",
-      "Read(/tmp/handoff-payloads/*)",
-      "Write(/tmp/handoff-plugin-refs/*)",
-      "Read(/tmp/handoff-plugin-refs/*)",
+      "Write(handoffs/*)",
+      "Read(handoffs/*)",
+      "Write(//tmp/handoff-payloads/*)",
+      "Read(//tmp/handoff-payloads/*)",
+      "Write(//tmp/handoff-plugin-refs/*)",
+      "Read(//tmp/handoff-plugin-refs/*)",
       "WebSearch"
     ]
   },

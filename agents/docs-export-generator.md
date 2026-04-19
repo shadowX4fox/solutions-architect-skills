@@ -26,7 +26,7 @@ The orchestrator passes these in the prompt text — parse them verbatim:
 - `project_slug`: kebab-case project slug (required for `compliance`; optional otherwise)
 - `items`: JSON array of export targets, per job type:
   - `solution-architecture` → list of absolute paths to ADR files (e.g., `["/.../adr/ADR-001-xxx.md", ...]`)
-  - `handoff` → list of absolute paths to handoff files (e.g., `["/.../docs/handoffs/01-payment-api-handoff.md", ...]`)
+  - `handoff` → list of absolute paths to handoff files (e.g., `["/.../handoffs/01-payment-api-handoff.md", ...]`)
   - `compliance` → list of compliance contract metadata objects: `{"path": "...", "domain_slug": "sre-architecture", "score": "7.69/10", "document_status": "In Review", "approval_authority": "..."}`
 
 ## Workflow

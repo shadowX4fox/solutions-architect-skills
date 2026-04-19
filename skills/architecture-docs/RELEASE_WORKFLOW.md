@@ -374,7 +374,7 @@ An **immutable archive snapshot** freezes the released version as a read-only co
    This archive is a frozen snapshot of architecture v{version} released on {date}.
    Do NOT edit files inside this directory — corrections are a new release.
    ```
-5. **Do NOT copy**: `compliance-docs/`, `docs/handoffs/`, `exports/` — these are downstream artifacts that are regenerated against the archive on demand, not part of the baseline itself.
+5. **Do NOT copy**: `compliance-docs/`, `handoffs/`, `exports/` — these are downstream artifacts that are regenerated against the archive on demand, not part of the baseline itself.
 
 **Post-snapshot verification**:
 - Verify `archive/v{new-version}/ARCHITECTURE.md` is present and has `**Status**: Released` in its header

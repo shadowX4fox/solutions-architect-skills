@@ -120,7 +120,7 @@ The 3-Tier C4 translation says: backend code (tiers 2+3) deploys as ONE containe
 
 **Do NOT invoke for**: questions about individual components (use `architecture-docs`
 skill), compliance generation, presentation creation, or **component development handoffs**
-(use `architecture-dev-handoff` skill — it manages `docs/handoffs/` independently).
+(use `architecture-dev-handoff` skill — it manages `handoffs/` independently).
 
 ---
 
@@ -207,7 +207,7 @@ Use brackets around the technology with version: `[Spring Boot 3.2]`, `[PostgreS
 | Component relationships | `## Key Relationships` section of this README |
 | Scaling details | `docs/08-scalability-and-performance.md` |
 | Extra index columns beyond 5 | **Not permitted** — update this skill's format spec first |
-| Development handoff docs | `docs/handoffs/NN-*-handoff.md` — managed by `architecture-dev-handoff` skill |
+| Development handoff docs | `handoffs/NN-*-handoff.md` — managed by `architecture-dev-handoff` skill |
 
 ---
 
@@ -490,7 +490,7 @@ Present Phase 3 summary with all fixes applied.
 
 **M5.1 Build search patterns**: From the MOVE MANIFEST, generate search patterns for each moved file across all possible relative path forms.
 
-**M5.2 Scan ALL markdown files** in: `docs/`, `adr/`, `docs/handoffs/`, `compliance-docs/`, `ARCHITECTURE.md`
+**M5.2 Scan ALL markdown files** in: `docs/`, `adr/`, `handoffs/`, `compliance-docs/`, `ARCHITECTURE.md`
 
 **M5.3 For each reference found**, classify:
 - **Markdown link** `[text](path)` → compute new relative path → update automatically

@@ -13,7 +13,7 @@ Values the development team must supply are marked with `# TODO: <description>` 
 
 **CRITICAL — Asset Fidelity Rule**: Generated assets must be an **exact representation** of the architecture documentation. Every value must come verbatim from the docs. Do not use fallback/default values — if a value is not documented, write `# TODO: [NOT DOCUMENTED]` instead. Do not add fields, endpoints, or resources beyond what is documented. Do not omit documented values.
 
-**Output location**: `docs/handoffs/assets/NN-<component-name>/`
+**Output location**: `handoffs/assets/NN-<component-name>/`
 
 **Naming**: asset filenames are fixed per type (see table below).
 

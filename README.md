@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.8.3` in the list.
+You should see `solutions-architect-skills v3.8.4` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -199,7 +199,7 @@ Generates 10 compliance contracts from `ARCHITECTURE.md` into `/compliance-docs/
 /skill architecture-dev-handoff
 ```
 
-Generates per-component handoff documents with deliverable assets into `docs/handoffs/`. Produces a 16-section guide per component (API contract, data model, security, observability, acceptance criteria, etc.) plus type-specific assets (OpenAPI specs, DDL scripts, K8s manifests, and more).
+Generates per-component handoff documents with deliverable assets into `handoffs/`. Produces a 16-section guide per component (API contract, data model, security, observability, acceptance criteria, etc.) plus type-specific assets (OpenAPI specs, DDL scripts, K8s manifests, and more).
 
 **Phase 4.5 — Word Export (optional)**
 
@@ -546,9 +546,9 @@ Use `/skill architecture-dev-handoff` when handing off a component to the develo
 
 - **Gap detection** — fields not found in architecture docs are marked `[NOT DOCUMENTED]` and listed in Section 15 as a remediation checklist
 - **Compliance enrichment** — if `compliance-docs/` exists, security/SRE/development contract gaps are surfaced in relevant sections
-- **Managed index** at `docs/handoffs/README.md` — 6-column table tracking all handoff docs
+- **Managed index** at `handoffs/README.md` — 6-column table tracking all handoff docs
 
-**Output location:** `docs/handoffs/NN-<component-name>-handoff.md` + `docs/handoffs/assets/NN-<component-name>/`
+**Output location:** `handoffs/NN-<component-name>-handoff.md` + `handoffs/assets/NN-<component-name>/`
 
 #### Doc Export
 
@@ -557,7 +557,7 @@ Use `/skill architecture-docs-export` when professional Word deliverables are ne
 | Mode | What it exports | Output |
 |------|----------------|--------|
 | **Solution Architecture** | Executive Summary synthesized from `docs/01-system-overview.md` + component index + compliance manifest (if present), plus one `.docx` per ADR | `exports/SA-<name>.docx` + `exports/ADR-NNN-<title>.docx` |
-| **Dev Handoff** | Selected component handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` |
+| **Dev Handoff** | Selected component handoff(s) from `handoffs/` | `exports/HANDOFF-<component>.docx` |
 
 **Document styling**: Corporate blue (`#1F4E79`) for SA, Amber/Gold (`#8B6914`) for ADRs, Teal (`#0D7377`) for handoffs.
 
@@ -788,7 +788,21 @@ Where:
 
 ## Roadmap
 
-### v3.8.3 (Current Release) ✅
+### v3.8.4 (Current Release) ✅
+**refactor: scope architecture-dev-handoff to architecture docs only; move output to `handoffs/` at project root**
+
+The dev-handoff skill previously sliced rows from `compliance-docs/SECURITY_*.md`, `SRE_*.md`, and `DEVELOPMENT_*.md` contracts into per-component payloads, which landed as "Compliance Gaps to Address" / "SRE Compliance Gaps" / "Development Compliance Gaps" subsections inside Sections 6, 9, and 11 of the handoff. This mixed compliance audit output into a document meant purely for implementation. Handoffs now draw **only** from `ARCHITECTURE.md`, `docs/`, and `adr/`. The output directory also moves from `docs/handoffs/` to `handoffs/` at the project root — `docs/` is the authored-architecture source, `handoffs/` is derived artifacts; keeping them separate prevents accidental coupling.
+
+**Changes:**
+- `skills/architecture-dev-handoff/` — removed Step 4.4 (slice compliance contracts), the `## Compliance Gaps` payload section, and Section 6/9/11 compliance-enrichment blocks from `SECTION_EXTRACTION_GUIDE.md`. Source comment on Section 6 template no longer mentions `compliance-docs/`. ADRs remain a source (Section 13 and Section 11 prohibited-tech scan unchanged).
+- `agents/handoff-generator.md` — per-section guidance for Sections 6/9/11 no longer references `## Compliance Gaps`.
+- Output-path migration — all references to `docs/handoffs/` updated to `handoffs/` across `SKILL.md`, `HANDOFF_TEMPLATE.md`, `ASSET_GENERATION_GUIDE.md`, `PAYLOAD_SCHEMA.md`, `handoff-generator.md`, and `.claude/settings.json.example` (permissions now `Write(handoffs/*)` / `Read(handoffs/*)`). Managed-index breadcrumb is now `../ARCHITECTURE.md` (one level up instead of two).
+- Downstream consumers synced — `architecture-docs-export` (Handoff mode Glob + error message), `docs-export-generator.md`, `architecture-docs` (cross-reference scan + Phase 5 asset advisory), `architecture-definition-record` (ADR propagation grep + phase 5 advisory), `architecture-component-guardian` (C4 migration table — relative path recomputed since `handoffs/` is now at root depth), `architecture-onboarding` (handoffs section scan), and `README.md`.
+- `skills/architecture-docs/RELEASE_WORKFLOW.md` — archive snapshot exclusion list updated to `handoffs/`.
+
+**Migration note:** existing projects with a populated `docs/handoffs/` folder should `git mv docs/handoffs handoffs` after pulling this release and update the `Write(docs/handoffs/*)` / `Read(docs/handoffs/*)` entries in their project `.claude/settings.json` to `Write(handoffs/*)` / `Read(handoffs/*)`.
+
+### v3.8.3 (Previous Release) ✅
 **fix: architecture-dev-handoff routes mkdir/date through a bun helper to eliminate permission prompts**
 
 The `architecture-dev-handoff` orchestrator was prompting users for `Bash(mkdir -p /tmp/handoff-payloads && date +%Y-%m-%d)` on every run. Even though `Bash(mkdir *)` and `Bash(date *)` were granted individually, the chained-with-`&&` form was treated as a new pattern by the permission matcher. This release routes both calls through a single bun helper covered by the project-wide `Bash(bun *)` grant.
@@ -1545,7 +1559,7 @@ Complete 5-phase versioning system across the architecture docs cycle:
 **feat: asset regeneration advisory in downstream propagation workflows**
 
 - Added **Phase 5: Asset Regeneration Advisory** after Phase 4 Propagation Report in both `architecture-docs` (Step 5.5) and `architecture-definition-record` (Workflows 3 & 4)
-- After propagation completes, scans fact-deltas for asset-impact keywords (API, database, Redis, deployment, Kafka, Avro, Protobuf, cron) and cross-references against actual asset files in `docs/handoffs/assets/`
+- After propagation completes, scans fact-deltas for asset-impact keywords (API, database, Redis, deployment, Kafka, Avro, Protobuf, cron) and cross-references against actual asset files in `handoffs/assets/`
 - When stale assets are detected, displays advisory listing affected components and asset types, then asks the user whether to re-run `/skill architecture-dev-handoff`
 - Skips silently when no handoffs were affected or no asset-impact keywords match; also fires on propagation skip to warn that both text and assets may be stale
 
@@ -1565,7 +1579,7 @@ Complete 5-phase versioning system across the architecture docs cycle:
 - Added Step 5.5 to the architecture-docs editing workflow: Downstream Documentation Propagation
 - Embedded reverse dependency table mapping each section to its structurally-dependent downstream files
 - 4-phase propagation: fact-delta extraction → user-approval checklist → tier-ordered Context Anchor updates → completion report
-- Cross-cutting scan always covers `docs/components/` and `docs/handoffs/` regardless of section tier
+- Cross-cutting scan always covers `docs/components/` and `handoffs/` regardless of section tier
 - Cosmetic edit heuristic skips propagation silently for formatting/typo changes
 - Anti-recursion rule: propagation edits do not re-trigger propagation
 - Component file edits cascade through S5's full dependency row + always include matching handoff doc
@@ -1573,7 +1587,7 @@ Complete 5-phase versioning system across the architecture docs cycle:
 ### v2.12.6 (Previous Release) ✅
 **feat: ADR change propagation — downstream documentation impact tracking and execution**
 
-When an ADR is updated (status change) or superseded (Workflow 3/4), the `architecture-definition-record` skill now runs a 4-phase Documentation Impact Propagation step. Phase 1 (Impact Discovery): greps all `docs/`, `docs/components/`, and `docs/handoffs/` for explicit ADR citations, applies a keyword-to-file topic mapping table to find conceptually-affected files without explicit citations, and extracts concrete fact changes from the ADR content. Phase 2 (Checklist): presents a "Documentation Updates Required" checklist grouped by file type (Architecture Docs / Component Files / Handoff Docs) — each entry states what needs updating and why; user approves all or deselects items for manual handling. Phase 3 (Execute): applies each approved update following the architecture-docs Context Anchor Protocol (load foundation + section-specific parents + changed ADR, update citations and derived facts, run 5-check Post-Write Audit); handoff updates follow the dev-handoff Documentation Fidelity Policy. If user skips, adds `<!-- PROPAGATION PENDING -->` marker to the ADR file. Phase 4 (Report): completion report with `[x]` completed / `[ ]` deselected / `⚠️` failed items. For supersede: also migrates `per [ADR-old]` citations to `per [ADR-new]` across all docs and updates ARCHITECTURE.md Section 12 table. Integration table and Success Criteria updated.
+When an ADR is updated (status change) or superseded (Workflow 3/4), the `architecture-definition-record` skill now runs a 4-phase Documentation Impact Propagation step. Phase 1 (Impact Discovery): greps all `docs/`, `docs/components/`, and `handoffs/` for explicit ADR citations, applies a keyword-to-file topic mapping table to find conceptually-affected files without explicit citations, and extracts concrete fact changes from the ADR content. Phase 2 (Checklist): presents a "Documentation Updates Required" checklist grouped by file type (Architecture Docs / Component Files / Handoff Docs) — each entry states what needs updating and why; user approves all or deselects items for manual handling. Phase 3 (Execute): applies each approved update following the architecture-docs Context Anchor Protocol (load foundation + section-specific parents + changed ADR, update citations and derived facts, run 5-check Post-Write Audit); handoff updates follow the dev-handoff Documentation Fidelity Policy. If user skips, adds `<!-- PROPAGATION PENDING -->` marker to the ADR file. Phase 4 (Report): completion report with `[x]` completed / `[ ]` deselected / `⚠️` failed items. For supersede: also migrates `per [ADR-old]` citations to `per [ADR-new]` across all docs and updates ARCHITECTURE.md Section 12 table. Integration table and Success Criteria updated.
 
 ### v2.12.5 (Previous Release) ✅
 **feat: focus mode filters sidebar to connected nodes for scoped knowledge cycling and learning prompts**

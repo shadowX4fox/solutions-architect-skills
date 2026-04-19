@@ -63,14 +63,14 @@ This skill generates **Component Development Handoff** documents — one per com
 
 **Scope:** C4 Level 2 (Container) components only. C4 Level 1 (System) descriptors are excluded — they describe system boundaries, not implementable units.
 
-**Output location:** `docs/handoffs/` directory
+**Output location:** `handoffs/` directory at the project root
 
 **Per-component output** (all names use **lowercase kebab-case** — no spaces, no uppercase, no underscores):
-- `docs/handoffs/NN-<component-name>-handoff.md` — 16-section handoff document
-- `docs/handoffs/assets/NN-<component-name>/` — scaffolded deliverable assets (OpenAPI spec, DDL, Kubernetes manifests, etc.)
-- `docs/handoffs/README.md` — managed index updated after each generation
+- `handoffs/NN-<component-name>-handoff.md` — 16-section handoff document
+- `handoffs/assets/NN-<component-name>/` — scaffolded deliverable assets (OpenAPI spec, DDL, Kubernetes manifests, etc.)
+- `handoffs/README.md` — managed index updated after each generation
 
-The `<component-name>` slug is derived from the component file name in `docs/components/` (e.g., `docs/components/03-payment-service.md` → `docs/handoffs/03-payment-service-handoff.md`).
+The `<component-name>` slug is derived from the component file name in `docs/components/` (e.g., `docs/components/03-payment-service.md` → `handoffs/03-payment-service-handoff.md`).
 
 ---
 
@@ -181,9 +181,6 @@ Check for:
 - `docs/components/README.md` exists (if not, suggest running architecture-component-guardian sync first)
 - Note: multi-system architectures use `docs/components/<system-name>/NN-*.md` with grouped tables in README.md
 
-Warn (do not block) if:
-- `compliance-docs/` is absent (skill works without it — security/SRE/development enrichment is skipped in payloads)
-
 **Step 1.3: Load Component Index**
 
 Read `docs/components/README.md` for the component table (5-column: #, Component, File, Type, Technology). If the table has system group headers (`### System Name`), parse all groups. If README absent, scan `docs/components/*.md` and `docs/components/**/*.md`.
@@ -244,7 +241,6 @@ Read: docs/07-security-architecture.md
 Read: docs/08-scalability-and-performance.md
 Read: docs/09-operational-considerations.md
 Read: every file in adr/ (use Glob adr/*.md then Read each)
-Read: compliance-docs/SECURITY_ARCHITECTURE_*.md, SRE_ARCHITECTURE_*.md, DEVELOPMENT_ARCHITECTURE_*.md (IF exist)
 ```
 
 If any of these files are missing, note the gap but continue — sub-agents will emit `[NOT DOCUMENTED]` markers for any section that would have sourced from them.
@@ -276,11 +272,7 @@ Retain the surrounding rows / bullets / table entries / paragraph blocks that ma
 
 For each ADR file, check if its body references the component name, its technology, its domain keywords, or a pattern used by it. Include matching ADRs with a body excerpt (≤30 lines, focused on the relevant paragraphs).
 
-**Step 4.4: Slice compliance contracts (if present)**
-
-For each of SECURITY / SRE / DEVELOPMENT compliance contracts, extract rows from the Compliance Summary table where Status = Non-Compliant OR Unknown AND the requirement references this component, its technology, or a cross-cutting concern applicable to it.
-
-**Step 4.5: Write the payload file**
+**Step 4.4: Write the payload file**
 
 Before writing the first payload of the run, ensure the output directory exists and capture today's date in one bun call:
 ```bash
@@ -294,7 +286,7 @@ Write: /tmp/handoff-payloads/<component-slug>.md
 
 Format per `PAYLOAD_SCHEMA.md`:
 - YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path)
-- Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs / Compliance Gaps
+- Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs
 
 ### Phase 5: Spawn sub-agents in 2-parallel batches
 
@@ -307,8 +299,8 @@ Following the v3.6.1 batching pattern for high-fanout sub-agent work.
 For each batch, send ONE message containing two (or one for the tail batch) `Task()` tool-use blocks in parallel. Each Task invokes `solutions-architect-skills:handoff-generator` with a prompt that provides:
 
 - `payload_path`: absolute path to the component's payload file
-- `output_handoff_path`: absolute path `<project>/docs/handoffs/NN-<slug>-handoff.md`
-- `output_assets_dir`: absolute path `<project>/docs/handoffs/assets/NN-<slug>/`
+- `output_handoff_path`: absolute path `<project>/handoffs/NN-<slug>-handoff.md`
+- `output_assets_dir`: absolute path `<project>/handoffs/assets/NN-<slug>/`
 - `plugin_dir`: absolute path resolved in Step 0 (either the installed plugin root or `/tmp/handoff-plugin-refs` if staging fallback triggered) — required, never omit
 - `component_slug`, `component_index_position`
 - `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
@@ -325,13 +317,13 @@ Wait for each batch to complete before spawning the next. This keeps total paral
 
 ### Phase 6: Update index and report
 
-**Step 6.1: Create/Update `docs/handoffs/README.md`**
+**Step 6.1: Create/Update `handoffs/README.md`**
 
 Write or update the managed index file. Format:
 
 ```
 Line 1:  <!-- managed by solutions-architect-skills:architecture-dev-handoff — do not edit manually -->
-Line 2:  [Architecture](../../ARCHITECTURE.md) > Development Handoffs
+Line 2:  [Architecture](../ARCHITECTURE.md) > Development Handoffs
 Line 3:  (blank)
 Line 4:  # Component Development Handoffs
 Line 5:  (blank)
@@ -362,7 +354,7 @@ Line 12: | 5.1 | ... | ... | ... | ... | ... |
 
 **Step 6.2: Update ARCHITECTURE.md Navigation**
 
-If `ARCHITECTURE.md` does not already include a link to `docs/handoffs/README.md`, add one under the Component Details section or at the end of the navigation table.
+If `ARCHITECTURE.md` does not already include a link to `handoffs/README.md`, add one under the Component Details section or at the end of the navigation table.
 
 ### Phase 7: Report
 
@@ -372,7 +364,7 @@ Print the aggregated report:
 Handoff generation complete
 
 Generated: [N] component handoff(s)  ([K] failed)
-Location: docs/handoffs/
+Location: handoffs/
 
 Components:
   ✓ [Component Name] — NN-name-handoff.md
@@ -407,8 +399,8 @@ Sub-agent batches: [B] (2-parallel)
 Add to project `.claude/settings.json`:
 
 ```json
-"Write(docs/handoffs/*)",
-"Read(docs/handoffs/*)",
+"Write(handoffs/*)",
+"Read(handoffs/*)",
 "Write(/tmp/handoff-payloads/*)",
 "Read(/tmp/handoff-payloads/*)",
 "Write(/tmp/handoff-plugin-refs/*)",
@@ -419,6 +411,6 @@ Add to project `.claude/settings.json`:
 "Agent(solutions-architect-skills:handoff-generator)"
 ```
 
-Directory creation (`/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `docs/handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
+Directory creation (`/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
 
 **Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability and falls back to `/tmp/handoff-plugin-refs/` if neither matches, but granting both removes the fallback path and keeps sub-agent Reads fast.

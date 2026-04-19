@@ -5,7 +5,7 @@ description: >
   Exports are never automatic — invoke explicitly when ready to produce deliverables.
   Solution Architecture mode synthesizes an Executive Summary from docs/01-system-overview.md,
   the component index, and the compliance manifest (if present), then exports individual ADR docs.
-  Handoff mode exports selected component development handoffs from docs/handoffs/.
+  Handoff mode exports selected component development handoffs from handoffs/.
   IMPORTANT — this skill ONLY produces Word .docx files. It does NOT handle releasing,
   publishing, tagging, freezing, bumping, or finalizing an architecture version. For the
   Draft → Released lifecycle (git tag architecture-v{version}, archive snapshot, semver bump),
@@ -58,7 +58,7 @@ As of v3.8.0, this skill is an **orchestrator**. The actual export work (file re
 | Export Mode | Input Sources | Output |
 |-------------|--------------|--------|
 | Solution Architecture | `docs/01-system-overview.md` + `docs/02-architecture-principles.md` + `docs/components/README.md` + `compliance-docs/COMPLIANCE_MANIFEST.md` (optional) | `exports/SA-<name>.docx` (executive summary) + `exports/ADR-NNN-<title>.docx` per ADR |
-| Component Handoff | Selected handoff(s) from `docs/handoffs/` | `exports/HANDOFF-<component>.docx` per component |
+| Component Handoff | Selected handoff(s) from `handoffs/` | `exports/HANDOFF-<component>.docx` per component |
 | Compliance Contract | Selected contract(s) from `compliance-docs/` | `exports/CC-<domain>-<project>.docx` per contract; Questions & Gaps Register cells are highlighted for stakeholder editing |
 
 ---
@@ -151,9 +151,9 @@ If `status: PARTIAL` or `FAILED`, list the failures from the result block.
 
 ### Step B.1 — List available handoffs (orchestrator)
 
-Glob `docs/handoffs/*-handoff.md`. If none found:
+Glob `handoffs/*-handoff.md`. If none found:
 ```
-❌ No handoff documents found in docs/handoffs/.
+❌ No handoff documents found in handoffs/.
    Generate them first with /skill architecture-dev-handoff.
 ```
 

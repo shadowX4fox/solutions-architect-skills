@@ -79,7 +79,7 @@ When files move from `docs/components/NN-name.md` to `docs/components/system-nam
 |--------------|-------------|-------------|
 | `docs/*.md` | `components/XX-name.md` | `components/system-name/XX-name.md` |
 | `adr/*.md` | `../docs/components/XX-name.md` | `../docs/components/system-name/XX-name.md` |
-| `docs/handoffs/*.md` | `../components/XX-name.md` | `../components/system-name/XX-name.md` |
+| `handoffs/*.md` | `../docs/components/XX-name.md` | `../docs/components/system-name/XX-name.md` |
 | `compliance-docs/*.md` | `docs/components/XX-name.md` | `docs/components/system-name/XX-name.md` |
 
 ### Cross-system component references

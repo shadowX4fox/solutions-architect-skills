@@ -447,7 +447,7 @@ grep -l "**Status**" adr/ADR-*.md | xargs grep -H "^\*\*Status\*\*"
 
 **1a. Citation scan** — find all files that explicitly reference this ADR:
 ```bash
-grep -rl "ADR-{NNN}" docs/ docs/components/ docs/handoffs/ 2>/dev/null
+grep -rl "ADR-{NNN}" docs/ docs/components/ handoffs/ 2>/dev/null
 ```
 
 **1b. Topic scan** — extract keywords from the ADR title and Context section. Match against the topic-to-file mapping table to find conceptually-affected files even without explicit citations:
@@ -465,9 +465,9 @@ grep -rl "ADR-{NNN}" docs/ docs/components/ docs/handoffs/ 2>/dev/null
 
 Add any matched files not already in the citation list.
 
-**1c. Handoff scan** — scan `docs/handoffs/` for references to this ADR; also include handoffs for components that match the ADR topic:
+**1c. Handoff scan** — scan `handoffs/` for references to this ADR; also include handoffs for components that match the ADR topic:
 ```bash
-grep -rl "ADR-{NNN}" docs/handoffs/ 2>/dev/null
+grep -rl "ADR-{NNN}" handoffs/ 2>/dev/null
 ```
 
 **1d. Fact-change extraction** — read the ADR and produce a concrete bullet list of what changed. For a status-only change:
@@ -498,8 +498,8 @@ Fact changes:
 ─── Component Files (docs/components/) ───────────────────
 3. [ ] docs/components/08-confluent-kafka.md — {what needs updating}
 
-─── Handoff Docs (docs/handoffs/) ────────────────────────
-4. [ ] docs/handoffs/08-confluent-kafka-handoff.md — {what needs updating}
+─── Handoff Docs (handoffs/) ────────────────────────
+4. [ ] handoffs/08-confluent-kafka-handoff.md — {what needs updating}
 
 ─── No Updates Required ──────────────────────────────────
 ℹ️  docs/07-security-architecture.md — references ADR-{NNN} but content is status-independent
@@ -516,7 +516,7 @@ Approve all updates? ('all' / comma-separated numbers to deselect / 'skip')
 
 ##### Phase 3: Execute Updates
 
-For each approved item, apply the change following the architecture-docs Context Anchor Protocol. **Never modify `docs/` or `docs/handoffs/` without loading the required context first.**
+For each approved item, apply the change following the architecture-docs Context Anchor Protocol. **Never modify `docs/` or `handoffs/` without loading the required context first.**
 
 **For `docs/*.md`, `docs/components/*.md`, and `docs/components/**/*.md`:**
 1. Load Context Anchor — universal foundation (`docs/01-system-overview.md` + `docs/02-architecture-principles.md`) + section-specific parents per the dependency tier table + the changed ADR
@@ -529,7 +529,7 @@ For each approved item, apply the change following the architecture-docs Context
 5. Run the 5-check Post-Write Alignment Audit (Checks A–E from architecture-docs)
 6. Mark `[x]` in the checklist
 
-**For `docs/handoffs/*.md`:**
+**For `handoffs/*.md`:**
 1. Read the handoff file
 2. Locate ADR references (typically Section 13 "ADRs Referenced") and any content derived from the ADR decision
 3. Update following the handoff Documentation Fidelity Policy: only change what the ADR changed; preserve all other content
@@ -553,7 +553,7 @@ Change: {old_status} → {new_status}
 Documentation updates completed:
 [x] docs/04-data-flow-patterns.md — retention figures updated
 [x] docs/components/08-confluent-kafka.md — retention figures updated
-[x] docs/handoffs/08-confluent-kafka-handoff.md — acceptance criteria updated
+[x] handoffs/08-confluent-kafka-handoff.md — acceptance criteria updated
 
 Deselected (manual update required):
 [ ] docs/09-operational-considerations.md — DR runbook: confirm two-phase recovery procedure
@@ -569,9 +569,9 @@ Pending markers added:
 ##### Phase 5: Asset Regeneration Advisory
 
 **Runs after**: Phase 4 report is displayed.
-**Also runs when**: User selected `skip` in Phase 2 and handoff files exist in `docs/handoffs/` — in this case, note that handoff text was also not updated.
+**Also runs when**: User selected `skip` in Phase 2 and handoff files exist in `handoffs/` — in this case, note that handoff text was also not updated.
 
-**Skip silently when**: No `docs/handoffs/*.md` files appeared in the Phase 3 update list (completed, deselected, or failed) AND propagation was not skipped.
+**Skip silently when**: No `handoffs/*.md` files appeared in the Phase 3 update list (completed, deselected, or failed) AND propagation was not skipped.
 
 **Step 5a — Detect asset-impacting changes**: Scan the fact-deltas from Phase 1d for asset-impact keywords (case-insensitive):
 
@@ -588,7 +588,7 @@ Pending markers added:
 
 If no keywords match → skip this phase silently.
 
-**Step 5b — Identify affected components**: For each `docs/handoffs/*-handoff.md` file that was touched in Phase 3 (or would have been if propagation was skipped/deselected), check whether `docs/handoffs/assets/NN-<component-name>/` exists and contains any of the matched asset types. Exclude components with no asset directory or no matching asset files on disk.
+**Step 5b — Identify affected components**: For each `handoffs/*-handoff.md` file that was touched in Phase 3 (or would have been if propagation was skipped/deselected), check whether `handoffs/assets/NN-<component-name>/` exists and contains any of the matched asset types. Exclude components with no asset directory or no matching asset files on disk.
 
 If zero components remain after filtering → skip silently.
 
@@ -657,7 +657,7 @@ Add a `**Superseded Date**: {today}` field after the status line. Write the file
 Run the same 4-phase Documentation Impact Propagation as Workflow 3 Step 3.3, with these supersede-specific adjustments:
 
 **Phase 1 adjustments:**
-- Step 1a: grep for BOTH `ADR-{old}` and `ADR-{new}` across all `docs/`, `docs/components/`, `docs/handoffs/`
+- Step 1a: grep for BOTH `ADR-{old}` and `ADR-{new}` across all `docs/`, `docs/components/`, `handoffs/`
 - Step 1d: compare the old ADR's Decision section with the new ADR's Decision section to produce concrete fact deltas (what changed, what was added, what was removed)
 
 **Phase 2 adjustments:**

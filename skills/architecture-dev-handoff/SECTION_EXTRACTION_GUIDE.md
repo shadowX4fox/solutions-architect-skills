@@ -112,9 +112,6 @@ is extracted, and defines the extraction rules for each field.
 | Input Validation | `docs/07-security-architecture.md` | `docs/components/NN-*.md` | Validation rules for data entering this component |
 | Sensitive Data Handling | `docs/07-security-architecture.md` | `docs/components/NN-*.md` | PII/sensitive field handling policies |
 
-**Compliance enrichment** (if `compliance-docs/` exists):
-- Read `compliance-docs/SECURITY_ARCHITECTURE_*.md` → extract rows from the Compliance Summary table where Status = `Non-Compliant` or `Unknown` AND the requirement relates to this component → add to Section 6 as **"Compliance Gaps to Address"**.
-
 ---
 
 ## Section 7 — Performance Targets
@@ -155,9 +152,6 @@ is extracted, and defines the extraction rules for each field.
 | Alert Conditions | `docs/09-operational-considerations.md` | `docs/components/NN-*.md` | Alerting rules that reference this component |
 | Dashboard Requirements | `docs/09-operational-considerations.md` | — | Dashboard specifications for this component |
 
-**Compliance enrichment** (if `compliance-docs/` exists):
-- Read `compliance-docs/SRE_ARCHITECTURE_*.md` → extract observability-related Non-Compliant/Unknown rows → add as **"SRE Compliance Gaps"** in Section 9.
-
 ---
 
 ## Section 10 — Error Handling and Resilience
@@ -181,9 +175,6 @@ is extracted, and defines the extraction rules for each field.
 | Coding Standards | `docs/06-technology-stack.md` | — | Coding standards or style guide references |
 
 **ADR scanning rule**: Scan all files in `adr/` for mentions of this component's name, its technology, or its domain. Include any ADR that has implementation implications for the development team.
-
-**Compliance enrichment** (if `compliance-docs/` exists):
-- Read `compliance-docs/DEVELOPMENT_ARCHITECTURE_*.md` → extract technology/tooling Non-Compliant/Unknown rows → add as **"Development Compliance Gaps"** in Section 11.
 
 ---
 

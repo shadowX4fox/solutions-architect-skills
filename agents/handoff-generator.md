@@ -20,8 +20,8 @@ Generate ONE Component Development Handoff document (16 sections) plus any deliv
 The skill orchestrator passes these in the prompt text — read them from the prompt verbatim:
 
 - `payload_path`: Absolute path to the per-component payload file (e.g., `/tmp/handoff-payloads/inbox-hub.md`). Contains the component file content + all sliced architecture context in the format defined by `PAYLOAD_SCHEMA.md`.
-- `output_handoff_path`: Absolute path where the handoff document must be written (e.g., `/path/to/project/docs/handoffs/04-inbox-hub-handoff.md`).
-- `output_assets_dir`: Absolute path to the asset directory for this component (e.g., `/path/to/project/docs/handoffs/assets/04-inbox-hub/`). Create if missing.
+- `output_handoff_path`: Absolute path where the handoff document must be written (e.g., `/path/to/project/handoffs/04-inbox-hub-handoff.md`).
+- `output_assets_dir`: Absolute path to the asset directory for this component (e.g., `/path/to/project/handoffs/assets/04-inbox-hub/`). Create if missing.
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (for reading templates and asset guides). ALWAYS provided by the orchestrator after its Step 0 readability probe — it will be either the resolved install path (marketplaces or cache) or `/tmp/handoff-plugin-refs` when the installed path is not in this sub-agent's permission allow-list. Do NOT re-resolve it via Glob; if the prompt is missing `plugin_dir`, abort with `PAYLOAD LOAD FAILURE: plugin_dir not provided by orchestrator`.
 - `component_slug`: The component's kebab-case slug (e.g., `inbox-hub`). Used in output filenames.
 - `component_index_position`: The `NN-` prefix from the component filename (e.g., `04`). Used as `5.N` in the handoff metadata.
@@ -35,7 +35,7 @@ The skill orchestrator passes these in the prompt text — read them from the pr
 Read file: [payload_path]
 ```
 
-The payload is a markdown document with YAML frontmatter (metadata) and named sections (Component File, Integrations, Flows, Security, Perf, Ops, ADRs, Compliance Gaps). See `[plugin_dir]/skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` for the contract.
+The payload is a markdown document with YAML frontmatter (metadata) and named sections (Component File, Integrations, Flows, Security, Perf, Ops, ADRs). See `[plugin_dir]/skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` for the contract.
 
 **Step 0.2**: Extract from the payload frontmatter:
 - `component_slug`, `component_file`, `component_type`, `component_index_position`, `asset_types`, `architecture_version`
@@ -99,12 +99,12 @@ Replace each `[PLACEHOLDER]` in `template_content` using data from the payload. 
 - **Section 3 — API Contract**: from `## Component File` (Endpoints/Routes) + `## Integrations` (versioning).
 - **Section 4 — Data Model**: from `## Component File` (Schema/Tables) + `## Flows`.
 - **Section 5 — Integration Requirements**: from `## Integrations` + `## Flows`.
-- **Section 6 — Security Requirements**: from `## Security Requirements` + `## Compliance Gaps` (security rows).
+- **Section 6 — Security Requirements**: from `## Security Requirements`.
 - **Section 7 — Performance Targets**: from `## Perf Targets`.
 - **Section 8 — Configuration and Environment**: from `## Ops Config` + `## Component File` (Env Vars).
-- **Section 9 — Observability**: from `## Ops Config` + `## Compliance Gaps` (SRE rows).
+- **Section 9 — Observability**: from `## Ops Config`.
 - **Section 10 — Error Handling and Resilience**: from `## Component File` (Failure Modes) + `## Perf Targets` (resilience).
-- **Section 11 — Technology Constraints**: from `## Component File` (Technology) + `## Relevant ADRs` + `## Compliance Gaps` (development rows).
+- **Section 11 — Technology Constraints**: from `## Component File` (Technology) + `## Relevant ADRs`.
 - **Section 12 — Acceptance Criteria**: synthesize ONLY from values already placed in Sections 1, 3, 6, 7, 9, 10. Every criterion must cite a section reference; do NOT introduce new values.
 - **Section 13 — Relevant ADRs**: from `## Relevant ADRs`.
 - **Section 14 — Deliverable Assets**: populate after Phase 3 asset generation completes.
