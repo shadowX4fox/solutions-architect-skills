@@ -211,7 +211,11 @@ For each selected analysis, determine:
 mkdir -p analysis
 ```
 
-**Issue all Task() calls in a single message** so the harness runs them concurrently. Each call:
+Issue Task() calls in **batches of 2 per message** (strict parallel barrier).
+
+**Batching rule**: dispatch exactly **2 Task() calls per message**. After sending a batch, wait for BOTH agents to write their output files before sending the next batch. Do not start batch N+1 until every Task() in batch N has returned. If any analysis agent in a batch fails, record the failure and continue with the next batch (do not retry inline; failures are collected and reported at the end). This caps peak parallelism at 2 and gives the orchestrator a chance to observe early failures before dispatching the remaining batches. For all 10 analyses this is 5 batches; when the user picks a subset, round up (e.g., 3 = 2 batches of 2+1).
+
+Each call:
 
 ```
 subagent_type: solutions-architect-skills:architecture-analysis-agent
@@ -232,7 +236,7 @@ FILES:
 
 Set each `description` to `"<Analysis Name> analysis"` (e.g., `"SPOF analysis"`).
 
-**[BARRIER — wait for all agents to complete before Step 4]**
+**[BARRIER — wait for the current batch to complete before dispatching the next batch, and wait for the final batch before proceeding to Step 4]**
 
 ---
 
@@ -274,6 +278,13 @@ Next steps:
   • Export to Word: /skill architecture-docs-export  (select Compliance Contract mode
     on any analysis .md file)
 ═══════════════════════════════════════════════════════════
+```
+
+**After printing the completion summary above, always append the following user-visible context-reclaim hint** (verbatim, as the final lines of the skill's output):
+
+```
+💡 Tip: all analysis reports are written to `analysis/`. To reclaim context from the analysis-agent responses before your next task, run:
+    /compact
 ```
 
 ---

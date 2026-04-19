@@ -143,7 +143,9 @@ Store the result as `doc_files` — an ordered list of **absolute file paths**.
 
 ### Step 5 — Perform Review (Parallel Category Agents)
 
-Spawn one `peer-review-category-agent` per active category. **Issue all Task() calls in a single message** so the harness runs them concurrently.
+Spawn one `peer-review-category-agent` per active category. Issue Task() calls in **batches of 2 per message** (strict parallel barrier).
+
+**Batching rule**: dispatch exactly **2 Task() calls per message**. After sending a batch, wait for BOTH `CATEGORY_REVIEW_RESULT:` blocks to return before sending the next batch. Do not start batch N+1 until every Task() in batch N has returned. If any category agent in a batch fails, record the failure and continue with the next batch (do not retry inline; failures are collected and reported at the end). This caps peak parallelism at 2 and gives the orchestrator a chance to observe early failures before dispatching the remaining batches. For Light (3 categories) this is 2 batches (2+1); Medium (7) is 4 batches (2+2+2+1); Hard (13) is 7 batches (2×6 + 1).
 
 All agents use: `solutions-architect-skills:peer-review-category-agent`
 
@@ -166,7 +168,7 @@ FILES:
 
 Pass all file paths from `doc_files` in every agent prompt. Agents read only what they need.
 
-For each active category (from Step 3), issue one Task() call substituting that category's `code`, `name`, `weight`, and the chosen `depth_level`. Set `description` to `"CODE — Name"`. **Issue all calls in a single message** so the harness runs them concurrently.
+For each active category (from Step 3), issue one Task() call substituting that category's `code`, `name`, `weight`, and the chosen `depth_level`. Set `description` to `"CODE — Name"`. Group categories into pairs in the order they appear in the Scoring Weights table and dispatch each pair in its own message; if there's an odd category left over, it goes in a final 1-agent batch.
 
 - **Light**: 3 agents — STRUCT, NAMING, SECTIONS
 - **Medium**: 7 agents — Light + COHERENCE, TECH, INTEG, METRICS
@@ -174,7 +176,7 @@ For each active category (from Step 3), issue one Task() call substituting that 
 
 All category codes, names, weights, and depth assignments are in the **Scoring Weights table** in `PEER_REVIEW_CRITERIA.md`.
 
-**[BARRIER — wait for all agents to complete]**
+**[BARRIER — wait for the current batch to complete before dispatching the next batch, and wait for the final batch before proceeding to Step 5.2]**
 
 ---
 
@@ -282,6 +284,13 @@ Overall Score: <score>/10 — <rating>
 
 ## Findings (<N> total)
 ...
+```
+
+**After the playground opens (or the fallback report prints), always append the following user-visible context-reclaim hint** (verbatim, as the final lines of the skill's output):
+
+```
+💡 Tip: findings are saved to `architecture-peer-review-<date>.json` and the playground HTML. To reclaim context from the category-agent responses before your next task, run:
+    /compact
 ```
 
 ---

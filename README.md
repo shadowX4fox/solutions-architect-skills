@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.6.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.6.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.6.0` in the list.
+You should see `solutions-architect-skills v3.6.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,24 @@ Where:
 
 ## Roadmap
 
-### v3.6.0 (Current Release) ✅
+### v3.6.1 (Current Release) ✅
+**perf: batch high-fanout sub-agents to 2-parallel + post-run `/compact` hint**
+
+Three fan-out skills previously dispatched 10–13 sub-agent Task() calls in a single message — `architecture-compliance` (10 validators + 10 generators), `architecture-peer-review` (up to 13 category agents), `architecture-analysis` (up to 10 analyses). This release caps peak parallelism at **2** across all three skills via strict batching barriers, and emits a user-visible `/compact` hint after the final report.
+
+**Changes:**
+- `architecture-compliance` Step 3.3 (validators) and Step 3.4 (generators) — strict 2-agent batches with `[BARRIER]` between each; 10 contracts = 5 sequential batches
+- `architecture-peer-review` Step 5 — 2-agent batches (Light=2 batches, Medium=4, Hard=7)
+- `architecture-analysis` Step 3 — 2-agent batches (10 analyses = 5 batches)
+- All three skills now append a `💡 Tip: ... /compact` hint to their final completion output so users can reclaim context after document propagation
+
+**Rationale:** Spawning 10+ parallel sub-agents concentrates cost, makes early-abort impossible, and holds all responses in the orchestrator context simultaneously. Batches of 2 reduce peak concurrent return volume (~80% drop during the return window) and allow the orchestrator to observe failures before dispatching remaining batches. The `/compact` hint addresses context-window inflation after fan-out completes.
+
+**Tradeoff:** Wall-clock slows by ~5× on 10-wide fanouts (5 sequential batches vs 1). Total sub-agent work is unchanged; the reduction is in orchestrator context pressure and early-failure observability.
+
+**No API/contract changes.** Pure SKILL.md orchestration edits — no TypeScript, pipeline, or agent-definition changes. Backward compatible.
+
+### v3.6.0 (Previous Release) ✅
 **feat: model preset selection for compliance contract generation (eco / balanced / critical-opus / max)**
 
 The `architecture-compliance` skill now exposes four model presets controlling which Claude model each validator and the generator run on. Users can cut full-run token cost by up to ~90% versus the prior all-Opus baseline, while preserving reasoning depth on the audit-sensitive validators.
