@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.8.6` in the list.
+You should see `sa-skills v3.8.7` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,23 @@ Where:
 
 ## Roadmap
 
-### v3.8.6 (Current Release) ✅
+### v3.8.7 (Current Release) ✅
+**feat: `/setup` slash command installs the plugin's required permissions into the project**
+
+New plugin-level `/setup` command bootstraps a project's `.claude/settings.json` by merging the plugin's bundled `settings.json.example` into it. Non-destructive — existing user entries (custom permissions, enabled plugins, marketplaces, `model`/`theme`/`hooks`/custom keys) are preserved; only missing entries are added. Useful when installing the plugin into a new project, or when recovering a project after the v3.8.5 namespace rename introduced new `Agent(sa-skills:*)` grants that weren't in older settings.
+
+**Changes:**
+- `commands/setup.md` — NEW slash command that resolves `plugin_dir` (marketplace install, cache install, or dev clone — same `{sa-skills,solutions-architect-skills}` brace expansion as v3.8.6), then invokes the merge helper.
+- `scripts/setup-permissions.ts` — NEW bun helper. Reads the example and the user's settings JSON, strips `//`-prefixed comment keys from the example, and merges three top-level sections: `permissions.allow` (array union, deduplicated), `enabledPlugins` (object merge, user wins on key conflict), `extraKnownMarketplaces` (same). Creates `.claude/` if missing. Writes with 2-space indent + trailing newline. Prints a structured summary (added / already-present counts, full list of new grants, and a warning if legacy `solutions-architect-skills:*` grants are still present).
+
+**Usage:**
+```bash
+/setup
+```
+
+The helper runs through the `Bash(bun *)` permission. First-time users will see one Claude Code permission prompt when the script runs; approve once and the prompt does not repeat. Re-running `/setup` on an already-configured project is idempotent (0 added / N already present).
+
+### v3.8.6 (Previous Release) ✅
 **fix: `plugin_dir` Glob probes now match both `sa-skills/` (marketplace install) and `solutions-architect-skills/` (dev clone)**
 
 v3.8.5 renamed the plugin namespace but left five skills' Step 0 "Resolve Plugin Directory" probes hardcoded to `**/solutions-architect-skills/...`. On marketplace installs the cached plugin folder is now `~/.claude/plugins/cache/<marketplace>/plugins/sa-skills/`, so the Glob missed — orchestrators fell through to the marketplace or `/tmp/handoff-plugin-refs/` fallback on every run. Each probe now uses brace expansion to accept either folder name.
