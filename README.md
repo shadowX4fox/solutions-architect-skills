@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.6.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `solutions-architect-skills v3.6.1` in the list.
+You should see `solutions-architect-skills v3.8.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,31 @@ Where:
 
 ## Roadmap
 
-### v3.6.1 (Current Release) ✅
+### v3.8.1 (Current Release) ✅
+**fix: sync marketplace.json + CLAUDE.md cleanup — catch-up release for v3.7.0 / v3.8.0**
+
+Catch-up release. `plugin.json` was bumped to v3.8.0 in prior commits but `marketplace.json` and `package.json` remained at v3.6.1, so `/plugin update` never served the newer versions. This release re-synchronizes all three version files and backfills README roadmap entries for v3.7.0 and v3.8.0.
+
+**Changes:**
+- `.claude-plugin/marketplace.json` and `package.json` re-synced to match `.claude-plugin/plugin.json`
+- `CLAUDE.md` trimmed from 621 → 168 lines (73% reduction): removed per-skill walkthroughs duplicated from each `SKILL.md`, fixed stale skill count (8 → 14), removed references to non-existent `bun run build:agents` script and `scripts/build-agents.ts` file, corrected `context7` tool name `get-library-docs` → `query-docs`, and corrected compliance-agent description ("10 generators" → "1 universal generator")
+- Git tag `v3.8.1` created to re-establish tag sequence after v3.6.1
+
+**No skill / agent behavior changes.** Documentation and packaging hygiene only.
+
+### v3.8.0 (Previous Release) ✅
+**perf: wrap architecture-docs-export in sonnet sub-agent to pin token cost**
+
+`architecture-docs-export` now runs as a lightweight orchestrator that spawns a `docs-export-generator` sub-agent pinned to `model: sonnet` for the actual file reads, markdown composition, and `docgen` invocation. Export is a zero-synthesis, high-frequency task — Sonnet is the right fit, and the sub-agent wrap prevents cost drift when teams run frequent exports on Opus-configured main contexts.
+
+### v3.7.0 (Previous Release) ✅
+**feat: dev-handoff sub-agent orchestration + release-phrase auto-routing**
+
+Two-part release:
+- `architecture-dev-handoff` refactored to orchestrator + `handoff-generator` sub-agent (model: Sonnet 4.6) with 2-parallel batching. Main context stays flat even for 10+ component runs: orchestrator reads shared architecture docs once, slices per-component payloads to `/tmp/handoff-payloads/<slug>.md`, sub-agents consume their slice + template + asset guide (~25–40 KB context each).
+- Release-phrase auto-routing: `/release-architecture` slash command added at `commands/release-architecture.md` — deterministic fallback that invokes `architecture-docs` Workflow 10 directly, bypassing phrase matching. Trigger Routing table in CLAUDE.md updated with the full release phrase set.
+
+### v3.6.1 (Previous Release) ✅
 **perf: batch high-fanout sub-agents to 2-parallel + post-run `/compact` hint**
 
 Three fan-out skills previously dispatched 10–13 sub-agent Task() calls in a single message — `architecture-compliance` (10 validators + 10 generators), `architecture-peer-review` (up to 13 category agents), `architecture-analysis` (up to 10 analyses). This release caps peak parallelism at **2** across all three skills via strict batching barriers, and emits a user-visible `/compact` hint after the final report.
