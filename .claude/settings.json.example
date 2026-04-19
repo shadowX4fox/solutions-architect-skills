@@ -45,8 +45,11 @@
       "Agent(solutions-architect-skills:sre-validator)",
       "Agent(solutions-architect-skills:peer-review-category-agent)",
       "Agent(solutions-architect-skills:architecture-analysis-agent)",
+      "Agent(solutions-architect-skills:handoff-generator)",
       "Write(analysis/*)",
       "Read(analysis/*)",
+      "Write(docs/handoffs/*)",
+      "Read(docs/handoffs/*)",
       "WebSearch"
     ]
   },

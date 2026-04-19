@@ -29,6 +29,33 @@ bun install
 bash scripts/build-release.sh
 ```
 
+## Trigger Routing — Exact Phrases
+
+When the user types any of these phrases, the correct FIRST action is to invoke the listed skill (not plan, not ask, not explore). These rules override plan-mode's default "Explore → Plan → ExitPlanMode" flow: skill invocation is a read-only context load that is legal inside plan mode, and the skill's own workflow handles clarification, state detection, and change scoping.
+
+| User phrase (any of) | Invoke | Workflow |
+|----------------------|--------|----------|
+| `release my architecture` · `release architecture` · `release architecture version` · `publish architecture` · `ship architecture` · `tag architecture version` · `freeze architecture` · `bump architecture version` · `finalize architecture` | `solutions-architect-skills:architecture-docs` | Workflow 10 — `RELEASE_WORKFLOW.md` (Draft → Released, CHANGELOG, `architecture-v{version}` git tag) |
+| `generate my architecture diagrams` · `create architecture diagrams` · `add diagrams to my architecture` · `update diagrams` | `solutions-architect-skills:architecture-docs` | Workflow 8 — diagram generation (Logical ASCII + C4 L1 + C4 L2 + Detailed + per-flow sequence) |
+| `migrate my architecture` · `restructure architecture` · `split ARCHITECTURE.md` | `solutions-architect-skills:architecture-docs` | Workflow 9 — multi-file `docs/` layout migration |
+| `review my architecture` · `peer-review architecture` · `architecture quality review` | `solutions-architect-skills:architecture-peer-review` | Full peer review with HTML playground |
+| `generate compliance contracts` · `generate compliance documentation` · `compliance contracts` | `solutions-architect-skills:architecture-compliance` | 10 compliance contracts (Contratos de Adherencia) |
+| `check compliance health` · `compliance portfolio review` · `concept gaps across contracts` | `solutions-architect-skills:architecture-compliance-review` | Portfolio gap explorer playground |
+| `check requirements coverage` · `traceability report` · `PO spec coverage` · `deviation check` | `solutions-architect-skills:architecture-traceability` | `TRACEABILITY_REPORT.md` |
+| `generate dev handoff` · `component handoff for <X>` · `implementation handoff` | `solutions-architect-skills:architecture-dev-handoff` | Per-component 16-section handoff + scaffolded assets |
+| `add component <X>` · `remove component <X>` · `sync component index` · `migrate to C4` | `solutions-architect-skills:architecture-component-guardian` | `docs/components/README.md` (only sanctioned writer) |
+| `export architecture to Word` · `export handoff to Word` · `generate .docx` | `solutions-architect-skills:architecture-docs-export` | `.docx` export only |
+| `run architecture analysis` · `SPOF analysis` · `blast radius analysis` · `STRIDE threat model` · `cost hotspot analysis` · `tech debt analysis` · `all analyses` | `solutions-architect-skills:architecture-analysis` | Risk & sustainability analysis reports in `analysis/` |
+| `onboard to architecture` · `architecture concept map` · `new team member onboarding` | `solutions-architect-skills:architecture-onboarding` | Canvas concept-map playground |
+| `PO spec` · `elicit requirements` · `business context intake` · `evaluate PO spec` | `solutions-architect-skills:architecture-readiness` | Requirements elicitation + scoring |
+| `create ADR` · `update ADR status` · `supersede ADR` · `list ADRs` | `solutions-architect-skills:architecture-definition-record` | ADR CRUD (only sanctioned writer for `adr/`) |
+| `generate business blueprint` · `datos de iniciativa` · `application blueprint` | `solutions-architect-skills:architecture-blueprint` | Organizational blueprint templates |
+| `sync to IcePanel` · `IcePanel drift check` · `C4 model sync` | `solutions-architect-skills:architecture-icepanel-sync` | C4 import YAML + drift report |
+
+**CRITICAL — release vs export are different skills**: "release my architecture" is the Draft → Released lifecycle (`architecture-docs` Workflow 10 — bumps version, writes CHANGELOG, creates `architecture-v{version}` git tag). "export my architecture" is `.docx` generation (`architecture-docs-export`). These MUST NOT be confused. If a user's phrasing is ambiguous, default to `architecture-docs` for release phrasing and `architecture-docs-export` for "word", "docx", "deliverable", "executive summary document" phrasing.
+
+**Deterministic slash-command fallback**: `/release-architecture` is a plugin slash command that invokes the architecture-docs skill directly — bypassing phrasing matching entirely. Use it when phrase-based routing is unreliable.
+
 ## Plugin Structure
 
 This repository follows the Claude Code plugin structure:
@@ -415,6 +442,8 @@ The skill includes:
 - **Compliance enrichment** — if `compliance-docs/` exists, security/SRE/development contract gaps are surfaced in relevant sections
 - **Managed index** at `docs/handoffs/README.md` — 6-column table tracking all handoff docs
 
+**Orchestrator + sub-agent architecture** (as of v3.7.0): The skill runs as a lightweight orchestrator on the main thread. Per-component generation happens inside isolated `handoff-generator` sub-agent contexts (model: Sonnet 4.6), one spawn per component, batched 2-parallel. The orchestrator reads shared architecture docs (`01`, `04`, `05`, `06`, `07`, `08`, `09`, `adr/`, compliance contracts) **exactly once** and slices them per component into payload files at `/tmp/handoff-payloads/<slug>.md`. Sub-agents consume their payload + template + section-extraction guide + the line-ranged slice of the asset guide — their context stays at ~25–40 KB regardless of project size. Main context stays flat even for 10+ component runs.
+
 **Output location**: `docs/handoffs/NN-<component-name>-handoff.md` + `docs/handoffs/assets/NN-<component-name>/`
 
 **When to use**: After ARCHITECTURE.md and `docs/components/` are complete (Phase 2), when handing off a component to the development team for implementation, or when generating implementation specs for one or more components.
@@ -423,7 +452,11 @@ The skill includes:
 
 ```json
 "Write(docs/handoffs/*)",
-"Read(docs/handoffs/*)"
+"Read(docs/handoffs/*)",
+"Write(/tmp/handoff-payloads/*)",
+"Read(/tmp/handoff-payloads/*)",
+"Bash(mkdir *)",
+"Agent(solutions-architect-skills:handoff-generator)"
 ```
 
 ### Using the Architecture Blueprint Skill

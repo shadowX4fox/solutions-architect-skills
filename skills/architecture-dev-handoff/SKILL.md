@@ -16,11 +16,11 @@ triggers:
   - prepare component for development
 ---
 
-# Architecture Dev Handoff Skill
+# Architecture Dev Handoff Skill — Orchestrator
 
 ## When This Skill is Invoked
 
-This skill is **manually activated** when users request component handoff document generation. It is NOT automatically triggered.
+Manually activated when users request component handoff document generation. It is NOT automatically triggered.
 
 **Activation Triggers:**
 - "Generate handoff for [component name]"
@@ -40,6 +40,20 @@ This skill is **manually activated** when users request component handoff docume
 - Compliance generation (use `architecture-compliance` skill)
 - Component index maintenance (use `architecture-component-guardian` skill)
 - Peer review (use `architecture-peer-review` skill)
+
+---
+
+## Architecture — Orchestrator + Sub-Agent
+
+As of v3.7.0, this skill is an **orchestrator**. Per-component generation runs in isolated sub-agent contexts via `agents/handoff-generator.md` (model: sonnet). The orchestrator stays in main context; sub-agents do the heavy per-component reads.
+
+- **Main context budget**: ~80–120 KB per invocation, flat regardless of how many components are selected.
+- **Sub-agent budget**: ~25–40 KB per spawn (per-component payload + handoff template + section-extraction guide + ranged slice of asset guide).
+- **Parallelism**: sub-agents spawn in batches of 2 (per v3.6.1 high-fanout batching pattern), one message per batch.
+
+Why this matters: previous versions re-read 7 shared architecture files plus the full `adr/` directory once per component. For a 10-component run that was ~750–2,750 KB of redundant reads. The orchestrator now reads them **exactly once** and slices per component into payload files that sub-agents consume.
+
+See `PAYLOAD_SCHEMA.md` for the orchestrator → sub-agent contract.
 
 ---
 
@@ -71,6 +85,8 @@ The `<component-name>` slug is derived from the component file name in `docs/com
 4. ✅ **GAP DETECTION** — if data is not found in architecture docs, write `[NOT DOCUMENTED]` and add entry to Section 15 (Open Questions)
 5. ❌ **NEVER invent** values not stated in the architecture documentation
 
+These rules apply to both the orchestrator (payload construction) and the sub-agent (template filling).
+
 ---
 
 ## Strict Source Traceability Policy
@@ -98,172 +114,169 @@ All handoff documents must trace data back to architecture docs.
 
 ---
 
-## Generation Workflow
+## Orchestration Workflow
 
 ### Phase 1: Initialization
 
 **Step 1.1: Locate ARCHITECTURE.md**
-```
+
 Search order:
 1. Current directory
 2. Parent directory
-3. /docs subdirectory
+3. `/docs` subdirectory
 4. Ask user for location
-```
+
+Extract the project name (first H1), architect (metadata), and `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` comment value.
 
 **Step 1.2: Validate Prerequisites**
-```
+
 Check for:
-- ARCHITECTURE.md exists (navigation index)
-- docs/components/ directory exists with at least one NN-*.md file (may be in system subfolders for multi-system architectures)
-- docs/components/README.md exists (if not, suggest running architecture-component-guardian sync first)
+- `ARCHITECTURE.md` exists (navigation index)
+- `docs/components/` directory exists with at least one `NN-*.md` file (may be in system subfolders for multi-system architectures)
+- `docs/components/README.md` exists (if not, suggest running architecture-component-guardian sync first)
 - Note: multi-system architectures use `docs/components/<system-name>/NN-*.md` with grouped tables in README.md
 
 Warn (do not block) if:
-- compliance-docs/ is absent (skill works without it, but security/SRE enrichment is skipped)
-```
+- `compliance-docs/` is absent (skill works without it — security/SRE/development enrichment is skipped in payloads)
 
 **Step 1.3: Load Component Index**
-```
-Read docs/components/README.md to get the component table (5-column: #, Component, File, Type, Technology).
-If the table has system group headers (### System Name), parse all groups.
-If README.md absent, scan docs/components/*.md and docs/components/**/*.md (including system subfolders).
+
+Read `docs/components/README.md` for the component table (5-column: #, Component, File, Type, Technology). If the table has system group headers (`### System Name`), parse all groups. If README absent, scan `docs/components/*.md` and `docs/components/**/*.md`.
 
 Filter out non-L2 files using BOTH checks (either match excludes the file):
-  1. File naming heuristic: exclude files without an NN- prefix that match a subfolder name
-     (e.g., `payment-system.md`) — these are C4 L1 system descriptors.
-  2. Metadata check: for every candidate file, read the first 15 lines and check for
-     `**C4 Level:**`. If the value is anything other than `Container (L2)`, exclude the file.
-     Files with `**C4 Level:** System (L1)` are system overviews, not handoff targets.
+1. File naming heuristic: exclude files without an `NN-` prefix that match a subfolder name (e.g., `payment-system.md`) — these are C4 L1 system descriptors.
+2. Metadata check: for every candidate file, read the first 15 lines and check for `**C4 Level:**`. If the value is anything other than `Container (L2)`, exclude the file.
 
-Only files that pass both checks (NN- prefix AND C4 Level = Container L2) enter the component list.
-Present the component list to the user (grouped by system if multi-system).
-```
+Only files that pass both checks enter the component list. Present the component list (grouped by system if multi-system).
 
 ### Phase 2: Component Selection
 
-**Step 2.1: Component Selection**
-```
-ALWAYS show the component index and ask:
-"Which component(s) would you like to generate a handoff for?
-  (Enter a number, component name, comma-separated list, or 'all')"
+**Step 2.1: Ask user which components**
 
-Exception: If the user explicitly named specific component(s) in their original
-request (e.g., "generate handoff for payment-api"), skip the prompt and use those.
+Show the component index and ask:
+> "Which component(s) would you like to generate a handoff for?
+>   (Enter a number, component name, comma-separated list, or 'all')"
+
+Exception: if the user explicitly named specific component(s) in their original request (e.g., "generate handoff for payment-api"), skip the prompt and use those.
 
 Selection modes:
-1. "all"               → process every component in the index
-2. Number (e.g. "3")   → process that component by index position
-3. Component name      → process that single component
-4. Comma-separated     → process that subset (e.g. "1, 3" or "payment-api, auth-service")
-```
+1. `all` → process every component in the index
+2. Number (e.g., `3`) → process that component by index position
+3. Component name → process that single component
+4. Comma-separated → process that subset (e.g., `1, 3` or `payment-api, auth-service`)
 
 **C4 Level Validation Gate** (applied to every selected component before proceeding):
 
-For each selected component file, read its `**C4 Level:**` metadata field.
-- If `**C4 Level:** Container (L2)` → proceed.
-- If `**C4 Level:** System (L1)` or any non-L2 value → reject with message:
-  "⚠ Skipping [Component Name] — C4 Level is [value], not Container (L2).
-   Dev handoff documents are only generated for C4 L2 (Container) components.
-   System-level (L1) files describe system boundaries, not implementable units."
-- If `**C4 Level:**` field is missing → warn but proceed:
-  "⚠ [Component Name] has no C4 Level metadata. Proceeding as L2 (Container).
-   Consider adding `**C4 Level:** Container (L2)` to [file path]."
+For each selected component file, read its `**C4 Level:**` metadata field:
+- `Container (L2)` → proceed
+- `System (L1)` or any non-L2 value → reject: "⚠ Skipping [Component Name] — C4 Level is [value], not Container (L2). Dev handoff documents are only generated for C4 L2 (Container) components."
+- Missing field → warn but proceed: "⚠ [Component Name] has no C4 Level metadata. Proceeding as L2 (Container). Consider adding `**C4 Level:** Container (L2)` to [file path]."
 
-If all selected components are rejected, report the rejections and stop (do not proceed to Phase 3).
+If all selected components are rejected, report and stop.
 
 **Step 2.2: Dependency-Based Ordering (batch only)**
 
-When multiple components are selected (including "all"), sort them by dependency count **ascending** — components with the fewest dependencies are generated first, components with the most dependencies last.
+When multiple components are selected, sort by dependency count **ascending** (least dependencies first). Components with fewer dependencies provide foundational context; generating them first means heavily-dependent components have upstream handoffs available for cross-reference.
+
+1. For each selected component, read its component file
+2. Count inter-component dependencies (`**Dependencies:**`, `**Depends On:**`, integration references to other selected components)
+3. Sort ascending; ties broken by index position
+
+Skip for single-component generation.
+
+### Phase 3: Build the shared context bundle (ONCE)
+
+**The core change in v3.7.0.** Read every shared architecture file exactly once on the main thread, regardless of how many components are selected.
+
+**Step 3.1: Read shared docs**
 
 ```
-1. For each selected component, read its component file (path from README.md File column — may be `docs/components/NN-<component>.md` or `docs/components/<system>/NN-<component>.md`)
-2. Count the number of inter-component dependencies (look for **Dependencies:**,
-   **Depends On:**, or integration references to other selected components)
-3. Sort ascending by dependency count (least → most)
-4. Ties are broken by index position (lower number first)
+Read: docs/01-system-overview.md
+Read: docs/04-data-flow-patterns.md
+Read: docs/05-integration-points.md
+Read: docs/06-technology-stack.md
+Read: docs/07-security-architecture.md
+Read: docs/08-scalability-and-performance.md
+Read: docs/09-operational-considerations.md
+Read: every file in adr/ (use Glob adr/*.md then Read each)
+Read: compliance-docs/SECURITY_ARCHITECTURE_*.md, SRE_ARCHITECTURE_*.md, DEVELOPMENT_ARCHITECTURE_*.md (IF exist)
 ```
 
-**Why**: Components with fewer dependencies provide foundational context. Generating them first ensures that when a heavily-dependent component is processed, its upstream handoffs already exist and can be cross-referenced for consistency.
+If any of these files are missing, note the gap but continue — sub-agents will emit `[NOT DOCUMENTED]` markers for any section that would have sourced from them.
 
-Skip this step for single-component generation.
+**Step 3.2: Pre-cache context7 spec docs (optional, shared across components)**
 
-### Phase 3: Per-Component Generation
+If the context7 MCP tool is available and one or more selected components produce asset types, call `resolve-library-id` once per unique asset spec (OpenAPI, AsyncAPI, Kubernetes, the database engine for DDL, Avro, Protobuf, Redis). Cache the resolved library IDs and fetched docs for the duration of this orchestration run. These caches are passed to sub-agents via a path hint in the spawn prompt — sub-agents do not re-fetch.
 
-For each selected component (in dependency order when batch), execute Steps 3.1–3.5 sequentially:
+Skip silently if context7 is unavailable.
 
-**Step 3.1: Read Source Files**
+### Phase 4: Slice the bundle per component, write payloads
 
-Read all architecture docs relevant to this component. Consult `SECTION_EXTRACTION_GUIDE.md` for which files to read per handoff section. Always read:
-- `docs/components/NN-<component>.md` (primary source)
-- `ARCHITECTURE.md` (project name, navigation)
-- Any file referenced by the section mapping for this component's type
+For each selected component (in dependency order when batch):
 
-Read opportunistically: if a file was already read for a previous component, reuse cached content.
+**Step 4.1: Detect component type and asset types**
 
-**Step 3.2: Detect Component Type(s)**
+From the component file's `**Type:**` field, determine `component_type` and `asset_types` per the table in `PAYLOAD_SCHEMA.md`.
 
-From the component file's `**Type:**` field, determine which asset types to generate:
+**Step 4.2: Slice each shared doc for this component**
 
-| Type Keyword(s) | Asset(s) |
-|-----------------|---------|
-| API, REST, GraphQL, gRPC, Service | `openapi.yaml` |
-| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB | `ddl.sql` |
-| Redis, Cache, ElastiCache, Memcached, Valkey | `redis-key-schema.md` |
-| Kubernetes, K8s, Deployment, Pod, Service (k8s) | `deployment.yaml` |
-| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ | `asyncapi.yaml` |
-| Kafka component AND doc/integration mentions `Avro` or `Schema Registry` | `schema.avsc` |
-| Kafka component AND doc/integration mentions `Protobuf` or `proto` | `schema.proto` |
-| Kafka component AND serialization format NOT specified | `schema.avsc` + `schema.proto` (dev picks one) |
-| CronJob, Cron, Scheduled, Batch | `cronjob.yaml` |
+Grep each shared doc for:
+- The component's display name
+- The component's `**Type:**` value (match by keyword)
+- The technologies listed in the component's `**Technology:**` field
 
-A component may match multiple types and thus generate multiple assets.
+Retain the surrounding rows / bullets / table entries / paragraph blocks that match. Preserve original formatting — do NOT reformat, summarize, or collapse.
 
-**Step 3.3: Fill Handoff Template**
+**Step 4.3: Slice the ADR directory**
 
-Load `HANDOFF_TEMPLATE.md` and replace all `[PLACEHOLDER]` tokens using data extracted from the architecture docs. Follow `SECTION_EXTRACTION_GUIDE.md` for the extraction rules per section.
+For each ADR file, check if its body references the component name, its technology, its domain keywords, or a pattern used by it. Include matching ADRs with a body excerpt (≤30 lines, focused on the relevant paragraphs).
 
-For any section where source data is absent:
-- Replace placeholder with `[NOT DOCUMENTED — add to <source-file>]`
-- Add an entry to Section 15 (Open Questions & Assumptions)
+**Step 4.4: Slice compliance contracts (if present)**
 
-**Step 3.3b: Spec Documentation Lookup (context7)**
+For each of SECURITY / SRE / DEVELOPMENT compliance contracts, extract rows from the Compliance Summary table where Status = Non-Compliant OR Unknown AND the requirement references this component, its technology, or a cross-cutting concern applicable to it.
 
-Before generating assets, fetch current specification documentation for each unique asset type detected in Step 3.2. This ensures generated scaffolds use correct, current syntax.
+**Step 4.5: Write the payload file**
 
-**Prerequisite**: The context7 MCP tool must be available (`resolve-library-id` and `get-library-docs` functions). If not available, skip this step silently — assets are generated using the built-in scaffold templates as-is.
+```
+Write: /tmp/handoff-payloads/<component-slug>.md
+```
 
-**Procedure**:
-1. For each unique asset type detected across all selected components, call `resolve-library-id` once:
-   - `openapi.yaml` → resolve `openapi`
-   - `asyncapi.yaml` → resolve `asyncapi`
-   - `deployment.yaml` or `cronjob.yaml` → resolve `kubernetes`
-   - `ddl.sql` → resolve the database engine from the component's Technology field (e.g., `postgresql`, `mysql`, `mongodb`)
-   - `schema.avsc` → resolve `apache-avro`
-   - `schema.proto` → resolve `protobuf`
-   - `redis-key-schema.md` → resolve `redis`
-2. For each resolved library ID, call `get-library-docs` with a topic hint scoped to the relevant spec version and structures (see `ASSET_GENERATION_GUIDE.md` → "Spec Documentation Integration" table for topic hints).
-3. Cache the resolved library ID and fetched docs for the duration of this generation session — do not re-fetch for subsequent components requiring the same spec.
+Format per `PAYLOAD_SCHEMA.md`:
+- YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path)
+- Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs / Compliance Gaps
 
-**Usage constraint**: Fetched spec docs inform **syntax and structure only** — never data values. The Asset Fidelity Rule (all values from architecture docs) applies unchanged. If the spec requires a field absent from architecture docs, mark it `# TODO: [NOT DOCUMENTED — required by <spec> <version>]`.
+Create `/tmp/handoff-payloads/` first if needed (`mkdir -p`).
 
-**Step 3.4: Generate Deliverable Assets**
+### Phase 5: Spawn sub-agents in 2-parallel batches
 
-For each asset type detected in Step 3.2, generate the corresponding artifact file following `ASSET_GENERATION_GUIDE.md`.
+**Step 5.1: Partition components into batches of 2**
 
-Assets MUST exactly match the architecture documentation. Populate ONLY values explicitly stated in the docs — no defaults, no inferred values. For any value not found in the docs, use `# TODO: [NOT DOCUMENTED — add to <source-file>]`. After generating each asset, perform a completeness check: every documented item must appear in the asset, and every asset entry must trace to a documented item.
+Following the v3.6.1 batching pattern for high-fanout sub-agent work.
 
-Write assets to `docs/handoffs/assets/NN-<component-name>/`.
+**Step 5.2: Spawn one batch per message**
 
-**Step 3.5: Write Handoff Document**
+For each batch, send ONE message containing two (or one for the tail batch) `Task()` tool-use blocks in parallel. Each Task invokes `solutions-architect-skills:handoff-generator` with a prompt that provides:
 
-Write the filled handoff document to `docs/handoffs/NN-<component-name>-handoff.md`.
+- `payload_path`: absolute path to the component's payload file
+- `output_handoff_path`: absolute path `<project>/docs/handoffs/NN-<slug>-handoff.md`
+- `output_assets_dir`: absolute path `<project>/docs/handoffs/assets/NN-<slug>/`
+- `plugin_dir`: absolute path to this plugin's root
+- `component_slug`, `component_index_position`
+- `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
 
-### Phase 4: Index Generation
+**Step 5.3: Collect sub-agent results**
 
-After all components are processed:
+Each sub-agent returns a `HANDOFF_RESULT:` block with status, file paths, asset list, `[NOT DOCUMENTED]` count, and validation notes. Aggregate across all sub-agents for the final report.
 
-**Step 4.1: Create/Update `docs/handoffs/README.md`**
+If a sub-agent returns `status: PAYLOAD_FAILED` or `status: VALIDATION_FAILED`, DO NOT abort — continue with the remaining components. Report failures at the end.
+
+**Step 5.4: Run batches sequentially**
+
+Wait for each batch to complete before spawning the next. This keeps total parallel sub-agent count ≤ 2 at any instant.
+
+### Phase 6: Update index and report
+
+**Step 6.1: Create/Update `docs/handoffs/README.md`**
 
 Write or update the managed index file. Format:
 
@@ -289,29 +302,27 @@ Line 12: | 5.1 | ... | ... | ... | ... | ... |
 
 **Table schema — exactly 6 columns:**
 
-| # | Component | Handoff File | Status | Assets | Generated |
-|---|-----------|-------------|--------|--------|-----------|
-
 | Column | Source |
 |--------|--------|
 | `#` | Filename prefix `NN-` → formatted as `5.N` |
 | `Component` | First `# Heading` in the component file |
 | `Handoff File` | `[NN-name-handoff.md](NN-name-handoff.md)` relative link |
-| `Status` | `Ready` (freshly generated) or `Outdated` (component file newer than handoff) |
+| `Status` | `Ready` (fresh) or `Outdated` (component file newer than handoff) |
 | `Assets` | Comma-separated list of generated asset filenames, or `—` if none |
-| `Generated` | ISO date the handoff was generated (`YYYY-MM-DD`) |
+| `Generated` | ISO date (`YYYY-MM-DD`) |
 
-**Step 4.2: Update ARCHITECTURE.md Navigation**
+**Step 6.2: Update ARCHITECTURE.md Navigation**
 
 If `ARCHITECTURE.md` does not already include a link to `docs/handoffs/README.md`, add one under the Component Details section or at the end of the navigation table.
 
-### Phase 5: Report
+### Phase 7: Report
 
-Report results to the user:
+Print the aggregated report:
+
 ```
 Handoff generation complete
 
-Generated: [N] component handoff(s)
+Generated: [N] component handoff(s)  ([K] failed)
 Location: docs/handoffs/
 
 Components:
@@ -321,13 +332,38 @@ Components:
   ✓ [Component Name] — NN-name-handoff.md
       Assets: deployment.yaml
       Gaps recorded: 0
+  ✗ [Component Name] — VALIDATION_FAILED: [notes]
+
+Main-context reads (shared docs): [N]
+Sub-agent batches: [B] (2-parallel)
+
+💡 Generated N handoffs. Run `/compact` to trim main context now if continuing.
 ```
 
 ---
 
 ## Files in This Skill
 
-- **SKILL.md**: This file — activation triggers and generation workflow
-- **HANDOFF_TEMPLATE.md**: 16-section template with `[PLACEHOLDER]` tokens
-- **SECTION_EXTRACTION_GUIDE.md**: Maps each handoff section to source architecture doc files and extraction rules
-- **ASSET_GENERATION_GUIDE.md**: Rules and scaffold templates for per-type deliverable assets
+- **SKILL.md** — this file (orchestrator workflow)
+- **HANDOFF_TEMPLATE.md** — 16-section template with `[PLACEHOLDER]` tokens (consumed by the sub-agent)
+- **SECTION_EXTRACTION_GUIDE.md** — extraction rules per handoff section (consumed by the sub-agent)
+- **PAYLOAD_SCHEMA.md** — contract between orchestrator and sub-agent
+- **assets/_index.md** — asset-type → line-range map for `ASSET_GENERATION_GUIDE.md`
+- **ASSET_GENERATION_GUIDE.md** — per-asset scaffold templates and rules (consumed by the sub-agent via line-range slices)
+
+---
+
+## Permissions required
+
+Add to project `.claude/settings.json`:
+
+```json
+"Write(docs/handoffs/*)",
+"Read(docs/handoffs/*)",
+"Write(/tmp/handoff-payloads/*)",
+"Read(/tmp/handoff-payloads/*)",
+"Bash(mkdir *)",
+"Agent(solutions-architect-skills:handoff-generator)"
+```
+
+`Bash(mkdir *)` is used to create `/tmp/handoff-payloads/` and `docs/handoffs/assets/NN-<slug>/` directories.
