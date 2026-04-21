@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.8.7` in the list.
+You should see `sa-skills v3.8.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,17 @@ Where:
 
 ## Roadmap
 
-### v3.8.7 (Current Release) ✅
+### v3.8.8 (Current Release) ✅
+**fix: theme-agnostic colors in Blast Radius cascade diagrams**
+
+The `sa-skills:architecture-analysis` Blast Radius report includes a Mermaid `flowchart TD` in the "Cascade Paths — Top 3 Worst Scenarios" section with red nodes for cascading failures and green nodes for contained failures. The previous palette used bare `fill:#ff6b6b` (cascading) and `fill:#95e795` (contained) inline styles, leaving Mermaid to pick the default stroke and text color from the host theme — which flipped between light and dark and produced low-contrast labels in whichever mode the renderer happened to choose.
+
+**Changes:**
+- `skills/architecture-analysis/analyses/BLAST_RADIUS.md` — Replaced the two inline `style X fill:#…` statements with Mermaid `classDef cascading` and `classDef contained` declarations. New palette: `#e57373` fill / `#c62828` stroke for cascading; `#81c784` fill / `#2e7d32` stroke for contained. Both classDefs pin `color:#000` so labels stay readable regardless of the theme the Mermaid renderer picks, and set `stroke-width:2px` for a consistent outline. The example diagram now applies the classes via `:::cascading` / `:::contained` node selectors instead of post-hoc `style` lines.
+
+No agent or runtime changes — the `architecture-analysis-agent` reads the spec verbatim during Phase 5 report rendering, so the new palette propagates automatically on the next Blast Radius run. Other analyses (SPOF, Bottleneck, Cost Hotspots, STRIDE, Coupling, Data Sensitivity, Latency Budget, Tech Debt, Vendor Lock-in) are ASCII-only and unaffected.
+
+### v3.8.7 (Previous Release) ✅
 **feat: `/setup` slash command installs the plugin's required permissions into the project**
 
 New plugin-level `/setup` command bootstraps a project's `.claude/settings.json` by merging the plugin's bundled `settings.json.example` into it. Non-destructive — existing user entries (custom permissions, enabled plugins, marketplaces, `model`/`theme`/`hooks`/custom keys) are preserved; only missing entries are added. Useful when installing the plugin into a new project, or when recovering a project after the v3.8.5 namespace rename introduced new `Agent(sa-skills:*)` grants that weren't in older settings.
@@ -804,7 +814,7 @@ New plugin-level `/setup` command bootstraps a project's `.claude/settings.json`
 
 The helper runs through the `Bash(bun *)` permission. First-time users will see one Claude Code permission prompt when the script runs; approve once and the prompt does not repeat. Re-running `/setup` on an already-configured project is idempotent (0 added / N already present).
 
-### v3.8.6 (Previous Release) ✅
+### v3.8.6 ✅
 **fix: `plugin_dir` Glob probes now match both `sa-skills/` (marketplace install) and `solutions-architect-skills/` (dev clone)**
 
 v3.8.5 renamed the plugin namespace but left five skills' Step 0 "Resolve Plugin Directory" probes hardcoded to `**/solutions-architect-skills/...`. On marketplace installs the cached plugin folder is now `~/.claude/plugins/cache/<marketplace>/plugins/sa-skills/`, so the Glob missed — orchestrators fell through to the marketplace or `/tmp/handoff-plugin-refs/` fallback on every run. Each probe now uses brace expansion to accept either folder name.

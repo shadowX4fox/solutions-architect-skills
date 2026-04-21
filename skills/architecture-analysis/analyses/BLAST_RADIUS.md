@@ -81,12 +81,14 @@ Evaluate whether a bulkhead pattern (timeout, circuit breaker, queue, or retry w
 
    ```mermaid
    flowchart TD
-     A[Component A fails] --> B[Consumer B — cascading]
-     B --> C[Consumer C — cascading]
-     B --> D[Consumer D — fail-open, contained]
-     A --> E[Consumer E — bulkhead, contained]
+     A[Component A fails] --> B[Consumer B — cascading]:::cascading
+     B --> C[Consumer C — cascading]:::cascading
+     B --> D[Consumer D — fail-open, contained]:::contained
+     A --> E[Consumer E — bulkhead, contained]:::contained
+     classDef cascading fill:#e57373,stroke:#c62828,color:#000,stroke-width:2px
+     classDef contained fill:#81c784,stroke:#2e7d32,color:#000,stroke-width:2px
    ```
-   Use red (`style X fill:#ff6b6b`) for cascading nodes, green (`style X fill:#95e795`) for contained.
+   Apply `:::cascading` to nodes whose failure propagates (no bulkhead / fail-closed consumers) and `:::contained` to nodes whose failure is absorbed (bulkhead, fail-open, circuit breaker). The `classDef` palette is theme-agnostic — the explicit `color:#000` keeps labels readable in both light and dark Mermaid renderers.
 
 5. **MTTR Estimate by Component** — if `docs/09-operational-considerations.md` or ADRs document RTO/MTTR, surface them per component. If not documented, mark `[NOT DOCUMENTED]`.
 
