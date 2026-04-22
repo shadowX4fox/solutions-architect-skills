@@ -139,38 +139,38 @@ Architecture Analysis — choose analyses to run:
 ═══════════════════════════════════════════════════════════
 
   HIGH-priority (runtime / security risk):
-   1. SPOF             (Single Points of Failure)        ~60s · 1 agent
+   1. SPOF             (Single Points of Failure)        1 agent
       Critical, Degradation, and Operational failure modes with Heat Map
 
-   2. Blast Radius     (Downstream cascade impact)       ~60s · 1 agent
+   2. Blast Radius     (Downstream cascade impact)       1 agent
       Per-component fan-out, cascade severity, bulkhead assessment
 
-   3. Bottleneck       (Throughput chokepoints)          ~60s · 1 agent
+   3. Bottleneck       (Throughput chokepoints)          1 agent
       Serial chokepoints, connection saturation, capacity headroom
 
-   4. Cost Hotspots    (Cost concentration)              ~60s · 1 agent
+   4. Cost Hotspots    (Cost concentration)              1 agent
       Pareto cost ranking, over-provisioning candidates, vendor lock-in cost
 
-   5. STRIDE           (Security threats per boundary)   ~90s · 1 agent
+   5. STRIDE           (Security threats per boundary)   1 agent
       Per-trust-boundary STRIDE matrix, high-priority threats
 
   Strategic / sustainability:
-   6. Vendor Lock-in   (Portability risk, exit cost)     ~60s · 1 agent
+   6. Vendor Lock-in   (Portability risk, exit cost)     1 agent
       L1/L2/L3 lock tiers, vendor concentration, exit cost ranking
 
-   7. Latency Budget   (Per-hop SLO decomposition)       ~75s · 1 agent
+   7. Latency Budget   (Per-hop SLO decomposition)       1 agent
       Per-flow budget breakdown, over-budget hops, tail-latency variance
 
-   8. Tech Debt / EOL  (Currency, deprecated tech)       ~75s · 1 agent
+   8. Tech Debt / EOL  (Currency, deprecated tech)       1 agent
       EOL hotlist, deprecated SDKs, unimplemented ADR replacements
 
-   9. Coupling         (Fan-in/fan-out, cycles)          ~60s · 1 agent
+   9. Coupling         (Fan-in/fan-out, cycles)          1 agent
       Critical hubs, volatile leaves, god objects, cyclical dependencies
 
-  10. Data Sensitivity (PII flow, encryption gaps)       ~75s · 1 agent
+  10. Data Sensitivity (PII flow, encryption gaps)       1 agent
       Data inventory, encryption/retention gaps, sensitive flow map
 
-  11. All ten (parallel)                                  ~90s · 10 agents
+  11. All ten (parallel)                                  10 agents
 
 ═══════════════════════════════════════════════════════════
 Selection (e.g. "1", "1,3,5", "6-10", or "all"):

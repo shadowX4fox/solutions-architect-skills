@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.8.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.8.8` in the list.
+You should see `sa-skills v3.8.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,17 @@ Where:
 
 ## Roadmap
 
-### v3.8.8 (Current Release) ✅
+### v3.8.9 (Current Release) ✅
+**refactor: remove time estimates from analysis menu**
+
+The `sa-skills:architecture-analysis` skill displays a blocking menu of the 10 available analyses when the user invokes it. Each row previously carried a per-analysis wall-clock estimate (`~60s`, `~75s`, or `~90s`) intended to help users pick a subset. In practice those numbers never reflected real runtime — actual durations depend on architecture size, number of selected analyses, model latency, and tool-call overhead, so the estimates drifted from reality and led users to false expectations (particularly the `~90s` "All ten (parallel)" row, which rarely completed in that window).
+
+**Changes:**
+- `skills/architecture-analysis/SKILL.md` — Removed the `~60s` / `~75s` / `~90s` prefix from all 11 rows of the Step 2 analysis picker (10 individual analyses + "All ten (parallel)"). Kept the `1 agent` / `10 agents` parallelism column since it accurately reflects the number of sub-agents spawned. Labels now read e.g. `1. SPOF (Single Points of Failure) 1 agent` instead of `~60s · 1 agent`.
+
+No behavior change — analysis parsing, agent dispatch, spec paths, and output filenames are untouched. Users still select analyses by the same single-number / comma / range / `all` syntax, and the menu still blocks until they choose.
+
+### v3.8.8 (Previous Release) ✅
 **fix: theme-agnostic colors in Blast Radius cascade diagrams**
 
 The `sa-skills:architecture-analysis` Blast Radius report includes a Mermaid `flowchart TD` in the "Cascade Paths — Top 3 Worst Scenarios" section with red nodes for cascading failures and green nodes for contained failures. The previous palette used bare `fill:#ff6b6b` (cascading) and `fill:#95e795` (contained) inline styles, leaving Mermaid to pick the default stroke and text color from the host theme — which flipped between light and dark and produced low-contrast labels in whichever mode the renderer happened to choose.
