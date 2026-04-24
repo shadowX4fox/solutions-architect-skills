@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.9.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.9.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.9.0` in the list.
+You should see `sa-skills v3.9.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,15 @@ Where:
 
 ## Roadmap
 
-### v3.9.0 (Current Release) ✅
+### v3.9.1 (Current Release) ✅
+**fix: CLAUDE.md pointer block treats `ARCHITECTURE.md` as the entry point**
+
+The v3.9.0 block body described `ARCHITECTURE.md` as an optional "single-file form" alternative to `docs/`. That was incorrect — per `skills/architecture-docs/SKILL.md:185,196-197`, **every** architecture has `ARCHITECTURE.md` at the project root as the navigation index (~130 lines) and `docs/` as a sibling holding the section files. There is no "single-file vs multi-file" choice today; the multi-file layout with `ARCHITECTURE.md` as the entry point is the only form.
+
+**Changes:**
+- `scripts/setup-claude-md.ts` — Rewrote the first two bullets of the managed block. `ARCHITECTURE.md` is now listed first and described as "the **entry point** … always start here". The `docs/` bullet drops the conditional language and adds the resolve-via-navigation-table guidance. Existing installations pick up the new wording automatically on the next `/setup` run (the block is replaced in place via its markers).
+
+### v3.9.0 (Previous Release) ✅
 **feat: `/setup` now writes a project CLAUDE.md architecture pointer block**
 
 `/setup` previously only merged `permissions.allow`, `enabledPlugins`, and `extraKnownMarketplaces` into `.claude/settings.json`. It told Claude *what it could do* but not *where the architecture context lived* in the user's project. Running `/setup` now also drops a marker-delimited block into the project's `./CLAUDE.md` that points Claude at the canonical architecture surface: `docs/` (split layout or `ARCHITECTURE.md`), `docs/components/` (C4 Level 2 descriptors), `adr/` (Architecture Decision Records), and `handoffs/` (Component Development Handoffs).

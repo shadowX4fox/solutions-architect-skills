@@ -26,7 +26,8 @@ const blockBody = `## Architecture Documentation (sa-skills)
 
 This project uses the [sa-skills](https://github.com/shadowX4fox/solutions-architect-skills) plugin for architecture documentation. When answering architecture questions, reading this project's context, or generating architecture-adjacent content, treat the following as authoritative sources:
 
-- **\`docs/\`** — the architecture split into section files (\`docs/01-system-overview.md\`, \`docs/02-context.md\`, \`docs/03-architecture-layers.md\`, …). If the project uses the single-file form instead, the equivalent is **\`ARCHITECTURE.md\`** at the project root or \`docs/ARCHITECTURE.md\`.
+- **\`ARCHITECTURE.md\`** (project root) — the **entry point**. A navigation index (~130 lines) that lists every architecture section and its file under \`docs/\`. Always start here.
+- **\`docs/\`** — the architecture split into section files (\`docs/01-system-overview.md\`, \`docs/02-context.md\`, \`docs/03-architecture-layers.md\`, …). Resolve a section by reading the navigation table in \`ARCHITECTURE.md\`, then opening the referenced \`docs/NN-name.md\`.
 - **\`docs/components/\`** — per-component descriptors (C4 Level 2). \`docs/components/README.md\` is the component index.
 - **\`adr/\`** — Architecture Decision Records. Read the relevant ADR before proposing changes that touch a recorded decision.
 - **\`handoffs/\`** — Component Development Handoffs (implementation specs for dev teams).
