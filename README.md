@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.8.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.9.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.8.9` in the list.
+You should see `sa-skills v3.9.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,18 @@ Where:
 
 ## Roadmap
 
-### v3.8.9 (Current Release) ✅
+### v3.9.0 (Current Release) ✅
+**feat: `/setup` now writes a project CLAUDE.md architecture pointer block**
+
+`/setup` previously only merged `permissions.allow`, `enabledPlugins`, and `extraKnownMarketplaces` into `.claude/settings.json`. It told Claude *what it could do* but not *where the architecture context lived* in the user's project. Running `/setup` now also drops a marker-delimited block into the project's `./CLAUDE.md` that points Claude at the canonical architecture surface: `docs/` (split layout or `ARCHITECTURE.md`), `docs/components/` (C4 Level 2 descriptors), `adr/` (Architecture Decision Records), and `handoffs/` (Component Development Handoffs).
+
+**Changes:**
+- `scripts/setup-claude-md.ts` — NEW Bun helper. Resolves `$project_cwd/CLAUDE.md` and writes a block delimited by `<!-- sa-skills:architecture-pointer:begin -->` / `<!-- sa-skills:architecture-pointer:end -->`. Four branches: **Created** (no file), **Appended** (file exists, no markers), **Updated** (markers present, content differs), **Unchanged** (markers present, content identical). Only content between the markers is ever written — surrounding user content is preserved byte-for-byte. Exits non-zero only on I/O errors or malformed marker order.
+- `commands/setup.md` — Renamed Step 4 to "Report permissions merge"; added Step 5 "Generate CLAUDE.md architecture pointer" (invokes the new helper against the project CWD with failure isolated from the permissions merge); added Step 6 "Final reminder" so the "Restart Claude Code" line appears last. Extended Notes with an idempotency bullet covering the managed block.
+
+Non-destructive and idempotent: re-running `/setup` on a configured project reports `0 added / N already present` for permissions and `Unchanged` for the CLAUDE.md block. Users can add their own content above, below, or around the managed block — the helper only rewrites what's between the markers.
+
+### v3.8.9 (Previous Release) ✅
 **refactor: remove time estimates from analysis menu**
 
 The `sa-skills:architecture-analysis` skill displays a blocking menu of the 10 available analyses when the user invokes it. Each row previously carried a per-analysis wall-clock estimate (`~60s`, `~75s`, or `~90s`) intended to help users pick a subset. In practice those numbers never reflected real runtime — actual durations depend on architecture size, number of selected analyses, model latency, and tool-call overhead, so the estimates drifted from reality and led users to false expectations (particularly the `~90s` "All ten (parallel)" row, which rarely completed in that window).
