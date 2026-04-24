@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.9.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.10.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.9.1` in the list.
+You should see `sa-skills v3.10.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,18 @@ Where:
 
 ## Roadmap
 
-### v3.9.1 (Current Release) ✅
+### v3.10.0 (Current Release) ✅
+**feat: `/setup` merges sa-skills baseline entries into `.gitignore`**
+
+`/setup` now also ensures the project's `.gitignore` contains the three baseline entries every sa-skills project should ignore: `exports/` (Word `.docx` deliverables produced by `architecture-docs-export`), `/tmp/` (local scratch output), and `CLAUDE.md` (the per-project Claude instructions file managed by Step 5). Before this release, new users routinely committed generated `exports/*.docx` artifacts and machine-specific `CLAUDE.md` content into their repos.
+
+**Changes:**
+- `scripts/setup-gitignore.ts` — NEW Bun helper. Line-exact append-only merge: for each managed entry, checks if any non-comment line in `.gitignore` matches (trimmed, with leading-slash normalization so `/tmp/` and `tmp/` both count). Missing entries are appended under a single `# sa-skills` header (not duplicated on re-runs). Three outcomes: **Created** (no `.gitignore`), **Appended** (missing entries added), **Unchanged** (all three already present). User entries are never reordered or removed.
+- `commands/setup.md` — new Step 6 invokes the helper; Step 7 is now the final Restart reminder. Notes extended with a `.gitignore` idempotency bullet.
+
+End-to-end idempotency: a re-run on a fully-configured project now reports `0 added / N already present` for permissions, `Unchanged` for the CLAUDE.md block, and `Unchanged` for `.gitignore`.
+
+### v3.9.1 (Previous Release) ✅
 **fix: CLAUDE.md pointer block treats `ARCHITECTURE.md` as the entry point**
 
 The v3.9.0 block body described `ARCHITECTURE.md` as an optional "single-file form" alternative to `docs/`. That was incorrect — per `skills/architecture-docs/SKILL.md:185,196-197`, **every** architecture has `ARCHITECTURE.md` at the project root as the navigation index (~130 lines) and `docs/` as a sibling holding the section files. There is no "single-file vs multi-file" choice today; the multi-file layout with `ARCHITECTURE.md` as the entry point is the only form.

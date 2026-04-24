@@ -76,7 +76,30 @@ The helper writes a marker-delimited block into `$project_cwd/CLAUDE.md` that te
 
 Display the helper's stdout verbatim. If it exits non-zero, print the stderr verbatim and note that `.claude/settings.json` was still updated successfully — Step 3 and Step 5 are independent.
 
-## Step 6 — Final reminder
+## Step 6 — Merge sa-skills entries into `.gitignore`
+
+Execute:
+
+```bash
+bun "$plugin_dir/scripts/setup-gitignore.ts" "$project_cwd"
+```
+
+The helper ensures `$project_cwd/.gitignore` contains the sa-skills baseline entries:
+
+- `exports/` — generated Word `.docx` deliverables (`architecture-docs-export` output)
+- `/tmp/` — local scratch output
+- `CLAUDE.md` — the per-project Claude Code instructions file (managed by Step 5)
+
+Behavior:
+
+- If `.gitignore` does not exist → creates it with a `# sa-skills` header + the three entries.
+- If it exists and the entries are missing → appends them under a `# sa-skills` header (only if the header is not already there).
+- Existing entries (exact line match, ignoring comments and leading slash normalization) are counted under "already present" and left alone.
+- User's existing `.gitignore` entries are never reordered or removed.
+
+Display the helper's stdout verbatim. If it exits non-zero, print the stderr verbatim — the earlier steps remain successful and independent.
+
+## Step 7 — Final reminder
 
 Print:
 
@@ -89,5 +112,6 @@ Restart Claude Code (or press Ctrl+R) to reload settings.
 
 - This command does not delete or overwrite any existing user entry. If a permission grant is already present, it is counted under "already present" and left as-is.
 - The CLAUDE.md block is idempotent — re-running `/setup` replaces only the content between the `sa-skills:architecture-pointer` markers. Content above, below, or between other user sections is preserved byte-for-byte.
-- The command is idempotent end-to-end — re-running it on an already-configured project reports 0 added / N already present for permissions and `Unchanged` for the CLAUDE.md block.
+- The `.gitignore` merge is append-only and line-exact. Existing entries are never rewritten; re-runs report `Unchanged` once all three sa-skills entries are present.
+- The command is idempotent end-to-end — re-running it on an already-configured project reports 0 added / N already present for permissions, `Unchanged` for the CLAUDE.md block, and `Unchanged` for `.gitignore`.
 - Required permission for the command itself: `Bash(bun *)`. First-time users will see a single Claude Code permission prompt when the helper runs; approve once and the prompt does not repeat.
