@@ -19,6 +19,23 @@ An architecture release is a formal transition of the `ARCHITECTURE.md` from `Dr
 
 ---
 
+## Release Channels
+
+Releases publish through one of two channels. Pick at invocation time via argument; the workflow detects the argument in Step 6.5.
+
+| Channel | When to use | How to invoke |
+|---------|-------------|---------------|
+| **PR (default)** | Normal releases — let CI, required reviewers, and branch-protection rules gate the release before it lands on `main`. | `release my architecture` (no flag); or `/release-architecture`; or any trigger phrase without `--direct`. |
+| **Direct** | Local-only repos, emergency hotfixes, or workflows with no PR review layer. | Append `--direct`: `release my architecture --direct`; or `/release-architecture --direct`. |
+
+In **PR mode** the workflow itself creates a `release/architecture-v{version}` branch, commits the metadata edits on it, tags the commit, pushes branch and tag, and prints host-agnostic instructions for opening the pull request. The user never needs to commit manually. Tag timing is **before-PR** — the tag lives on the release-branch commit, so downstream consumers can fetch `architecture-v{version}` as soon as the branch is pushed (the PR gates what lands on `main`, not the tag). If the PR is later squash-merged, the tag stays on the pre-squash commit; Step 8 reports the one-liner to move it onto the merge commit if desired.
+
+In **Direct mode** the workflow preserves the classic flow: Step 7 preconditions require a clean working tree (the user commits the metadata changes themselves between Step 6 and Step 7), then the tag is created on `HEAD` and pushed.
+
+**Recovery (Step 1.5)** runs in direct mode regardless of channel choice — it tags an already-committed release that lacks a tag, so no PR is needed.
+
+---
+
 ## Semver Rules for Architecture Docs
 
 | Bump | When to use | Examples |
@@ -272,7 +289,80 @@ Only include sections (Added / Changed / Deprecated / Superseded) that have item
 
 **6.3 Verify `docs/CHANGELOG.md`** contains the new entry at the top.
 
+### Step 6.5 — Detect Release Channel
+
+Parse the original invocation arguments to select the channel:
+
+- If the arguments contain the token `--direct` → `{release_channel} = direct`.
+- Else → `{release_channel} = pr` (default).
+
+`--pr` is accepted as an explicit no-op (same as omitting it). Any other token is passed through untouched — do not guess.
+
+**Fallback when no remote is configured**: if `{release_channel} = pr` but `git remote get-url origin` fails (local-only repo), override silently to `direct` and emit:
+
+```
+ℹ️  No `origin` remote configured — falling back to direct mode (PR mode requires a remote).
+```
+
+The variable `{release_channel}` drives the routing in Step 7 (and determines whether Step 7.5 runs before or after branching).
+
+### Step 7.5 — Archive Snapshot (git-aware)
+
+**Runs before Step 7 in both channels.** In PR mode the archive directory lands in the release-branch commit so reviewers see the frozen snapshot; in direct mode the archive is created alongside the other uncommitted metadata edits and is staged with them by the user.
+
+An **immutable archive snapshot** freezes the released version as a read-only copy under `archive/v{version}/`. The behavior depends on whether the project is under git:
+
+**If repo is NOT under git** (detected in Step 7.1):
+- Archive is the **only** snapshot mechanism → **create automatically, do NOT prompt**
+- This is the canonical way to preserve a point-in-time record when git history is unavailable
+
+**If repo IS under git**:
+- The git tag from Step 7 IS the primary snapshot mechanism (`git checkout architecture-v{version}` retrieves the exact baseline)
+- Archive is **optional** → prompt the user:
+  ```
+  Also create an immutable archive snapshot at archive/v{version}/?
+  (Recommended for regulated industries, audit compliance, or when consumers need a filesystem-level baseline without using git)
+    1. Yes, create archive
+    2. No, skip (git tag is sufficient)
+  ```
+- If user declines, continue to Step 7.
+
+**Snapshot procedure** (when creating archive):
+
+1. Create directory: `archive/v{new-version}/`
+2. Copy these directories/files into it (preserve structure):
+   - `ARCHITECTURE.md`
+   - `docs/` (entire tree including `components/`, `CHANGELOG.md`)
+   - `adr/` (entire tree)
+3. Write `archive/v{new-version}/RELEASE_NOTES.md` containing the CHANGELOG entry for this version verbatim (copied from `docs/CHANGELOG.md` section `## [{version}] - {date}`)
+4. Write `archive/v{new-version}/.immutable` marker file with content:
+   ```
+   This archive is a frozen snapshot of architecture v{version} released on {date}.
+   Do NOT edit files inside this directory — corrections are a new release.
+   ```
+5. **Do NOT copy**: `compliance-docs/`, `handoffs/`, `exports/` — these are downstream artifacts that are regenerated against the archive on demand, not part of the baseline itself.
+
+**Post-snapshot verification**:
+- Verify `archive/v{new-version}/ARCHITECTURE.md` is present and has `**Status**: Released` in its header
+- Verify `archive/v{new-version}/docs/CHANGELOG.md` contains the `## [{version}]` entry
+- Report file count: `Archive created: archive/v{new-version}/ ({N} files, {M} KB)`
+
+**Immutability convention**:
+- Archived files MUST NOT be edited after creation. Corrections to a released version require a new PATCH release.
+- Tools and skills reading from `archive/v{version}/` treat the content as read-only. This is convention, not enforcement (filesystem permissions are NOT changed).
+
+---
+
 ### Step 7 — Git Tag (MANDATORY when repo is under git)
+
+Route on `{release_channel}` from Step 6.5:
+
+- `direct` → **Step 7 (Direct mode)** below.
+- `pr` → **Step 7 (PR mode)** below.
+
+---
+
+### Step 7 (Direct mode) — Git Tag on HEAD
 
 **7.1 Detect git**:
 ```bash
@@ -291,6 +381,8 @@ If output is non-empty, abort with:
 >   git add -A
 >   git commit -m "Architecture v{new-version} — Released {today}"
 > Then re-run the release workflow.
+>
+> Alternative: re-run with `--pr` (or omit `--direct`) to have the workflow branch, commit, tag, and push for you on `release/architecture-v{new-version}` — no manual commit needed.
 
 **Tag does not already exist**:
 ```bash
@@ -342,55 +434,142 @@ Report:
 ```
 Do NOT delete the local tag on push failure — the release is still valid locally and can be published later.
 
-### Step 7.5 — Archive Snapshot (git-aware)
+---
 
-An **immutable archive snapshot** freezes the released version as a read-only copy under `archive/v{version}/`. The behavior depends on whether the project is under git:
+### Step 7 (PR mode) — Release Branch, Commit, Tag, and PR Instructions
 
-**If repo is NOT under git** (detected in Step 7.1):
-- Archive is the **only** snapshot mechanism → **create automatically, do NOT prompt**
-- This is the canonical way to preserve a point-in-time record when git history is unavailable
+**7-PR.1 Detect git and remote**:
+```bash
+git rev-parse --is-inside-work-tree
+git remote get-url origin 2>/dev/null
+```
 
-**If repo IS under git**:
-- The git tag from Step 7 IS the primary snapshot mechanism (`git checkout architecture-v{version}` retrieves the exact baseline)
-- Archive is **optional** → prompt the user:
-  ```
-  Also create an immutable archive snapshot at archive/v{version}/?
-  (Recommended for regulated industries, audit compliance, or when consumers need a filesystem-level baseline without using git)
-    1. Yes, create archive
-    2. No, skip (git tag is sufficient)
-  ```
-- If user declines, skip to Step 8
+Both must succeed. If either fails, follow the Step 6.5 fallback (override to direct mode with the `ℹ️` message) — the workflow does NOT reach this point when that fallback fires.
 
-**Snapshot procedure** (when creating archive):
+**7-PR.2 Verify target branch does not exist on origin**:
+```bash
+git ls-remote --exit-code --heads origin "release/architecture-v{new-version}"
+```
 
-1. Create directory: `archive/v{new-version}/`
-2. Copy these directories/files into it (preserve structure):
-   - `ARCHITECTURE.md`
-   - `docs/` (entire tree including `components/`, `CHANGELOG.md`)
-   - `adr/` (entire tree)
-3. Write `archive/v{new-version}/RELEASE_NOTES.md` containing the CHANGELOG entry for this version verbatim (copied from `docs/CHANGELOG.md` section `## [{version}] - {date}`)
-4. Write `archive/v{new-version}/.immutable` marker file with content:
-   ```
-   This archive is a frozen snapshot of architecture v{version} released on {date}.
-   Do NOT edit files inside this directory — corrections are a new release.
-   ```
-5. **Do NOT copy**: `compliance-docs/`, `handoffs/`, `exports/` — these are downstream artifacts that are regenerated against the archive on demand, not part of the baseline itself.
+If the command succeeds (exit 0, branch present), abort:
+> ⚠️ Remote branch `release/architecture-v{new-version}` already exists on origin. Either delete it (`git push origin --delete release/architecture-v{new-version}`) or bump to a different version.
 
-**Post-snapshot verification**:
-- Verify `archive/v{new-version}/ARCHITECTURE.md` is present and has `**Status**: Released` in its header
-- Verify `archive/v{new-version}/docs/CHANGELOG.md` contains the `## [{version}]` entry
-- Report file count: `Archive created: archive/v{new-version}/ ({N} files, {M} KB)`
+**7-PR.3 Create the release branch** off the user's current branch:
+```bash
+git checkout -b release/architecture-v{new-version}
+```
 
-**Immutability convention**:
-- Archived files MUST NOT be edited after creation. Corrections to a released version require a new PATCH release.
-- Tools and skills reading from `archive/v{version}/` treat the content as read-only. This is convention, not enforcement (filesystem permissions are NOT changed).
+The user's originating branch (typically `main`) is remembered implicitly — it is the merge target of the PR.
+
+**7-PR.4 Stage release artifacts**:
+```bash
+git add ARCHITECTURE.md docs/CHANGELOG.md docs/components/
+```
+
+Plus `git add archive/v{new-version}/` if Step 7.5 created an archive.
+
+Use explicit paths — never `git add -A` — so unrelated dirty files in the working tree are not included. If the user had uncommitted work in-flight elsewhere, it stays on the feature branch.
+
+**7-PR.5 Commit** with the standard release message:
+```bash
+git commit -m "Architecture v{new-version} — Released {today}
+
+{CHANGELOG body for [{new-version}], verbatim, without the heading line}
+
+See docs/CHANGELOG.md for the full entry."
+```
+
+Never `--amend`, never `--no-verify`. If a pre-commit hook fails, surface the error and stop — do NOT retry with bypass flags.
+
+**7-PR.6 Create annotated tag** (same message format as direct Step 7.3):
+```bash
+git tag -a architecture-v{new-version} -m "Architecture v{new-version} — Released {today}
+
+{CHANGELOG entry body — Added / Changed / Deprecated / Superseded sections}
+
+See docs/CHANGELOG.md for full details."
+```
+
+**7-PR.7 Push branch and tag** — in this order:
+```bash
+git push -u origin release/architecture-v{new-version}
+git push origin architecture-v{new-version}
+```
+
+Retry the tag push up to twice on transient failure (matches Step 1.5f semantics). If either push fails definitively:
+```
+⚠️  PR-mode release incomplete: {branch or tag} push failed:
+    {error message}
+
+    Branch: release/architecture-v{new-version}  [pushed: yes|no]
+    Tag:    architecture-v{new-version}          [pushed: yes|no]
+
+    Diagnose the failure (auth, network, branch protection, non-fast-forward),
+    then re-push manually:
+      git push -u origin release/architecture-v{new-version}
+      git push origin architecture-v{new-version}
+
+    Do NOT delete the local branch or tag — they are the only copy of the release.
+```
+
+Do NOT proceed to Step 8 with a "success" report when either push has failed.
+
+**7-PR.8 Print PR instructions** — detect origin host and emit appropriate guidance.
+
+Read origin URL: `git remote get-url origin`.
+
+If the URL matches a GitHub pattern (`github.com[:/]<owner>/<repo>(\.git)?`), extract `{owner}` and `{repo}` and emit:
+
+```
+✅ Release branch and tag pushed
+
+Branch: release/architecture-v{new-version}  →  origin
+Tag:    architecture-v{new-version}           →  origin
+
+Open the pull request:
+  https://github.com/{owner}/{repo}/compare/main...release/architecture-v{new-version}?expand=1
+
+Suggested PR title:
+  Architecture v{new-version} — Released {today}
+
+Suggested PR body: copy the CHANGELOG entry (without the `## [version] - date` heading line)
+from docs/CHANGELOG.md, or use the tag annotation as-is:
+  git show architecture-v{new-version}
+
+The tag is already pushed and independent of the PR merge. Downstream consumers
+can fetch it immediately. The PR gates what lands on `main`.
+```
+
+For any other origin URL (GitLab, Bitbucket, Azure DevOps, self-hosted, SSH-only, etc.) emit the generic variant:
+
+```
+✅ Release branch and tag pushed
+
+Branch: release/architecture-v{new-version}  →  origin
+Tag:    architecture-v{new-version}           →  origin
+Origin: {origin-url}
+
+Open a pull request (or merge request) from `release/architecture-v{new-version}`
+into your default branch via your git host's web UI. Use this as the PR body:
+
+  git show architecture-v{new-version}
+
+The tag is already pushed and independent of the PR merge. Downstream consumers
+can fetch it immediately. The PR gates what lands on your default branch.
+```
+
+Detection is best-effort. If URL parsing is ambiguous (e.g., a GitHub Enterprise URL or a custom SSH host), fall through to the generic variant rather than guessing — the user can always see the origin URL printed in the block.
 
 ---
 
 ### Step 8 — Report to User
 
+The report shape depends on the channel selected in Step 6.5.
+
+**Step 8 (Direct mode)**:
+
 ```
-✅ Architecture v{new-version} released
+✅ Architecture v{new-version} released (direct mode)
 
 Changes since v{previous}:
   - Added: {count} components, {count} ADRs
@@ -402,7 +581,7 @@ Updated files:
   - ARCHITECTURE.md (version block + metadata)
   - docs/CHANGELOG.md (new entry)
   - {count} component files (Architecture Version updated)
-  - Git tag: architecture-v{new-version} (local only — push to publish)
+  - Git tag: architecture-v{new-version} (pushed to origin | local only — no remote)
     [or "⚠️ Not a git repo — no tag created" if applicable]
   - Archive snapshot: archive/v{new-version}/ ({N} files)
     [present when created in Step 7.5; omitted when skipped]
@@ -411,6 +590,43 @@ Updated files:
   - Compliance contracts: regenerate with `/skill architecture-compliance` if needed
   - Component handoffs: regenerate with `/skill architecture-dev-handoff` if components changed
   - Traceability report: regenerate with `/skill architecture-traceability`
+```
+
+**Step 8 (PR mode)** — appended after the Step 7-PR.8 instructions block:
+
+```
+Architecture v{new-version} — release branch ready for review
+
+Changes since v{previous}:
+  - Added: {count} components, {count} ADRs
+  - Changed: {count} components, {count} sections
+  - Deprecated: {count}
+  - Superseded ADRs: {count}
+
+Release artifacts (committed on release/architecture-v{new-version}):
+  - ARCHITECTURE.md (version block + metadata)
+  - docs/CHANGELOG.md (new entry)
+  - {count} component files (Architecture Version updated)
+  - Archive snapshot: archive/v{new-version}/ ({N} files)
+    [present when created in Step 7.5; omitted when skipped]
+
+Published to origin:
+  - Branch: release/architecture-v{new-version}
+  - Tag:    architecture-v{new-version}
+
+After the PR is merged:
+  - The tag already exists on the release-branch commit and does NOT move automatically.
+  - If your team prefers the tag on the merge commit (e.g., squash-merge history),
+    move it manually after merge:
+      git checkout main && git pull
+      git tag -f architecture-v{new-version} HEAD
+      git push --force origin architecture-v{new-version}
+    Otherwise leave the tag where it is — it is still fetchable and semantically valid.
+
+⚠️ Downstream artifacts may now be stale (regenerate after the PR merges):
+  - Compliance contracts: `/skill architecture-compliance`
+  - Component handoffs: `/skill architecture-dev-handoff`
+  - Traceability report: `/skill architecture-traceability`
 ```
 
 ---
@@ -464,4 +680,8 @@ To deprecate a released version (e.g., when starting a full rewrite):
 - **Component Version vs Architecture Version**: Architecture Version always bumps on release. Component Version is bumped separately by the architecture-component-guardian when individual components change, NOT by this workflow.
 - **CHANGELOG is append-only**: Never delete or modify old entries. Corrections to old entries should be a PATCH release with a Changelog note.
 - **Git tag message is the canonical release record**: The tag's annotation is a snapshot of the changelog entry at release time, preserved in git history forever.
-- **No automatic push**: The workflow creates local tags only. The user is responsible for pushing with `git push origin architecture-v{version}`. This prevents accidental publication of release tags from local testing.
+- **Push behavior by channel**:
+  - **Direct mode** (Step 7): the workflow pushes the tag to `origin` automatically in Step 7.4. Local-only if no remote is configured.
+  - **PR mode** (Step 7-PR): the workflow pushes both the release branch and the tag automatically in Step 7-PR.7. PR mode requires a remote — Step 6.5 falls back to direct mode if `origin` is not configured.
+  - In both channels, tag push is a definite step — failure surfaces an error and stops the workflow. The workflow never silently swallows a push failure.
+- **Standard git only**: PR mode uses `git push` + host-detection to print PR instructions. It does NOT depend on `gh`, `glab`, or any other host-specific CLI. If detection misclassifies a URL (GitHub Enterprise, custom SSH host), the generic variant is safe to follow on any web UI.

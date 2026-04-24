@@ -32,7 +32,7 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 
 | User phrase (any of) | Invoke | Workflow |
 |----------------------|--------|----------|
-| `release my architecture` · `release architecture` · `release architecture version` · `publish architecture` · `ship architecture` · `tag architecture version` · `freeze architecture` · `bump architecture version` · `finalize architecture` | `sa-skills:architecture-docs` | Workflow 10 — `RELEASE_WORKFLOW.md` (Draft → Released, CHANGELOG, `architecture-v{version}` git tag) |
+| `release my architecture` · `release architecture` · `release architecture version` · `publish architecture` · `ship architecture` · `tag architecture version` · `freeze architecture` · `bump architecture version` · `finalize architecture` | `sa-skills:architecture-docs` | Workflow 10 — `RELEASE_WORKFLOW.md` (Draft → Released, CHANGELOG, `architecture-v{version}` git tag). PR by default (workflow creates `release/architecture-v{version}` branch, commits, tags, pushes, prints host-agnostic PR instructions). Append `--direct` to commit to the current branch instead. |
 | `generate my architecture diagrams` · `create architecture diagrams` · `add diagrams to my architecture` · `update diagrams` | `sa-skills:architecture-docs` | Workflow 8 — diagram generation |
 | `migrate my architecture` · `restructure architecture` · `split ARCHITECTURE.md` | `sa-skills:architecture-docs` | Workflow 9 — multi-file `docs/` layout migration |
 | `review my architecture` · `peer-review architecture` · `architecture quality review` | `sa-skills:architecture-peer-review` | Full peer review with HTML playground |

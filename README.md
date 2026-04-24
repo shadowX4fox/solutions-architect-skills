@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.10.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.10.1` in the list.
+You should see `sa-skills v3.11.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,21 @@ Where:
 
 ## Roadmap
 
-### v3.10.1 (Current Release) ✅
+### v3.11.0 (Current Release) ✅
+**feat: architecture release workflow defaults to PR flow, `--direct` opts out**
+
+The architecture release workflow (`architecture-docs` Workflow 10 — triggered by "release my architecture", "bump architecture version", `/release-architecture`, etc.) now creates a **pull request** by default so CI, required reviewers, and branch-protection rules can gate the release before it lands on `main`. The previous direct-to-current-branch behavior is preserved behind a `--direct` flag for local-only repos, emergency hotfixes, and projects without a PR review layer.
+
+In PR mode the workflow itself does the branching and committing — the user never has to commit manually between Step 6 (metadata edits) and Step 7 (tag). The workflow creates `release/architecture-v{version}`, commits ARCHITECTURE.md + docs/CHANGELOG.md + every docs/components/**/*.md (and archive/v{version}/ if the snapshot step ran), tags the commit with `architecture-v{version}`, pushes branch + tag to origin, and prints host-agnostic PR instructions (GitHub compare URL if origin matches `github.com`, generic prose for GitLab / Bitbucket / Azure DevOps / self-hosted). PR mode uses **standard git commands only** — no `gh`, `glab`, or host-specific CLI dependency.
+
+Tag timing is **before-PR** — the tag lives on the release-branch commit so downstream consumers can fetch `architecture-v{version}` immediately. The PR gates what lands on `main`, not the tag. Step 8's PR-mode report includes the one-liner to move the tag onto the squash/merge commit if desired (`git tag -f … && git push --force`), otherwise the tag stays on the pre-squash commit — still fetchable, still semantically valid.
+
+**Changes:**
+- `skills/architecture-docs/RELEASE_WORKFLOW.md` — Added a "Release Channels" prelude explaining PR vs `--direct`. New Step 6.5 detects the channel from invocation arguments (default PR; silent fallback to direct when no `origin` remote exists). Step 7.5 (Archive Snapshot) moved before Step 7 so the archive is part of the PR commit in PR mode. Step 7 split into parallel **Direct** (current behavior, unchanged apart from the precondition message mentioning the PR alternative) and **PR** (new 8-substep branch/commit/tag/push/instructions flow) sections. Step 8 report gets a PR-mode variant. Implementation Notes updated to reflect dual-mode push behavior and the standard-git-only constraint. Recovery path (Step 1.5) is unchanged and runs in direct mode regardless of channel choice.
+- `commands/release-architecture.md` — Documents `--direct` / `--pr` argument passthrough and the eight-step Workflow 10 skeleton including the new Step 6.5 and dual-mode Step 7.
+- `CLAUDE.md` — Trigger routing table row for "release my architecture" updated to note the PR default and `--direct` opt-out.
+
+### v3.10.1 (Previous Release) ✅
 **fix: `.gitignore` helper warns when `CLAUDE.md` is already tracked by git**
 
 Adding `CLAUDE.md` to `.gitignore` has no effect if the file is already tracked — git keeps tracking it until the user runs `git rm --cached CLAUDE.md`. Since v3.10.0 added `CLAUDE.md` to the baseline `.gitignore` entries, users with an existing checked-in `CLAUDE.md` would have silently continued to track it despite seeing `+ CLAUDE.md` in the `/setup` output.
