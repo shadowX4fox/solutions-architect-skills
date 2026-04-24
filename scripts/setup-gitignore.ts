@@ -9,6 +9,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
+import { spawnSync } from "child_process";
 
 const [projectCwd] = process.argv.slice(2);
 
@@ -66,4 +67,24 @@ console.log(
 );
 if (missing.length > 0) {
   for (const e of missing) console.log(`     + ${e}`);
+}
+
+// If CLAUDE.md was newly added to .gitignore but is already tracked by git,
+// .gitignore has no effect on it — warn the user how to untrack.
+if (missing.includes("CLAUDE.md")) {
+  const tracked = spawnSync(
+    "git",
+    ["-C", projectCwd, "ls-files", "--error-unmatch", "CLAUDE.md"],
+    { stdio: "ignore" }
+  );
+  if (tracked.status === 0) {
+    console.log("");
+    console.log(
+      "⚠️  CLAUDE.md is already tracked by git. .gitignore will not untrack it."
+    );
+    console.log(
+      "   To stop tracking it while keeping the file on disk, run:"
+    );
+    console.log(`     git rm --cached CLAUDE.md`);
+  }
 }

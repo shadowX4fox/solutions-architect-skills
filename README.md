@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.10.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.10.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.10.0` in the list.
+You should see `sa-skills v3.10.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,15 @@ Where:
 
 ## Roadmap
 
-### v3.10.0 (Current Release) ✅
+### v3.10.1 (Current Release) ✅
+**fix: `.gitignore` helper warns when `CLAUDE.md` is already tracked by git**
+
+Adding `CLAUDE.md` to `.gitignore` has no effect if the file is already tracked — git keeps tracking it until the user runs `git rm --cached CLAUDE.md`. Since v3.10.0 added `CLAUDE.md` to the baseline `.gitignore` entries, users with an existing checked-in `CLAUDE.md` would have silently continued to track it despite seeing `+ CLAUDE.md` in the `/setup` output.
+
+**Changes:**
+- `scripts/setup-gitignore.ts` — After a successful write, if `CLAUDE.md` was among the newly-added entries, run `git -C <project_cwd> ls-files --error-unmatch CLAUDE.md` to check tracking status. If the file is tracked, print a warning block showing the exact `git rm --cached CLAUDE.md` command. The check is conditional on `CLAUDE.md` being in the `missing` set — `Unchanged` re-runs don't re-warn. In non-git directories the check exits non-zero and the warning is silently skipped.
+
+### v3.10.0 (Previous Release) ✅
 **feat: `/setup` merges sa-skills baseline entries into `.gitignore`**
 
 `/setup` now also ensures the project's `.gitignore` contains the three baseline entries every sa-skills project should ignore: `exports/` (Word `.docx` deliverables produced by `architecture-docs-export`), `/tmp/` (local scratch output), and `CLAUDE.md` (the per-project Claude instructions file managed by Step 5). Before this release, new users routinely committed generated `exports/*.docx` artifacts and machine-specific `CLAUDE.md` content into their repos.
