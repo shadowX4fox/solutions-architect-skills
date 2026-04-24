@@ -22,12 +22,13 @@ component_slug: inbox-hub
 component_file: docs/components/notification-inbox-platform/04-inbox-hub.md
 component_type: api-service
 component_index_position: "04"
-asset_types: [openapi, deployment]
+asset_types: [openapi, deployment, c4-descriptor]
 architecture_version: "2.9.1"
 architecture_md_path: /abs/path/to/ARCHITECTURE.md
 project_name: Notification Inbox
 architect: shadowX4fox
 generation_date: "2026-04-18"
+doc_language: en
 ---
 ```
 
@@ -45,22 +46,24 @@ Field reference:
 | `project_name` | yes | first H1 in `ARCHITECTURE.md` |
 | `architect` | no | from `ARCHITECTURE.md` metadata; `Not specified` if absent |
 | `generation_date` | yes | ISO date (YYYY-MM-DD) from `date +%Y-%m-%d` |
+| `doc_language` | yes | `en` or `es` — set once per session by the orchestrator from architecture-doc language detection (see SKILL.md). Default `en` when ambiguous. Drives template-variant selection for the `c4-descriptor` asset. |
 
 ### Component type → asset type mapping
 
-The orchestrator uses the component's `**Type:**` field from its doc to determine both `component_type` and `asset_types`.
+The orchestrator uses the component's `**Type:**` field from its doc to determine both `component_type` and `asset_types`. Every non-skip component also gets `c4-descriptor` appended to its `asset_types` (it is always-on except for the skip list).
 
 | `**Type:**` keyword match | `component_type` | `asset_types` |
 |----------------------------|------------------|---------------|
-| API, REST, GraphQL, gRPC, Service | `api-service` | `[openapi]` |
-| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB | `database` | `[ddl]` |
-| Redis, Cache, ElastiCache, Memcached, Valkey | `cache` | `[redis]` |
-| Kubernetes, K8s, Deployment, Pod | `k8s-workload` | `[deployment]` |
-| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ | `message-consumer` or `message-producer` | `[asyncapi]` + `[avro]` or `[protobuf]` if serialization format documented |
-| CronJob, Cron, Scheduled, Batch | `scheduled-job` | `[cronjob]` |
-| (combined — e.g., API service deployed on K8s with a DB) | compound (e.g., `api-service`) | multiple entries (e.g., `[openapi, deployment, ddl]`) |
+| API, REST, GraphQL, gRPC, Service | `api-service` | `[openapi, c4-descriptor]` |
+| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB | `database` | `[ddl, c4-descriptor]` |
+| Redis, Cache, ElastiCache, Memcached, Valkey | `cache` | `[redis, c4-descriptor]` |
+| Kubernetes, K8s, Deployment, Pod | `k8s-workload` | `[deployment, c4-descriptor]` |
+| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ | `message-consumer` or `message-producer` | `[asyncapi, c4-descriptor]` + `[avro]` or `[protobuf]` if serialization format documented |
+| CronJob, Cron, Scheduled, Batch | `scheduled-job` | `[cronjob, c4-descriptor]` |
+| (combined — e.g., API service deployed on K8s with a DB) | compound (e.g., `api-service`) | multiple entries (e.g., `[openapi, deployment, ddl, c4-descriptor]`) |
+| Library, SDK, Utility, Config, Documentation | `skip` | `[]` (no assets; no `c4-descriptor` either) |
 
-A component may match multiple types; `asset_types` is a union.
+A component may match multiple types; `asset_types` is a union. `c4-descriptor` is deduplicated like any other token.
 
 ### Body sections (required in this order)
 
@@ -157,12 +160,13 @@ component_slug: session-cache
 component_file: docs/components/api-platform/03-session-cache.md
 component_type: cache
 component_index_position: "03"
-asset_types: [redis]
+asset_types: [redis, c4-descriptor]
 architecture_version: "1.2.0"
 architecture_md_path: /home/me/proj/ARCHITECTURE.md
 project_name: API Platform
 architect: alice
 generation_date: "2026-04-18"
+doc_language: en
 ---
 
 ## Component File

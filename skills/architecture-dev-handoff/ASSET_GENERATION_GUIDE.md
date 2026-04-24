@@ -78,10 +78,11 @@ Read the component's `**Type:**` field (and the component doc body) to determine
 | Kafka component AND `Protobuf` / `proto` / `gRPC serialization` mentioned in those files | `schema.proto` |
 | Kafka component AND serialization format NOT documented | `schema.avsc` + `schema.proto` (generate both; note in §14 that dev team must pick one and discard the other) |
 | Type contains: `CronJob`, `Cron`, `Scheduled Job`, `Batch`, `Job` | `cronjob.yaml` |
+| Always generated (except for the skip-list types below) | `c4-descriptor.md` |
 
 A component can match multiple conditions and generate multiple assets.
 
-**When to skip**: If the component type is `Library`, `SDK`, `Utility`, `Config`, or `Documentation`, generate no assets and write `—` in the handoff's Section 14 table.
+**When to skip**: If the component type is `Library`, `SDK`, `Utility`, `Config`, or `Documentation`, generate no assets (including no `c4-descriptor.md`) and write `—` in the handoff's Section 14 table.
 
 ---
 
@@ -854,6 +855,182 @@ Defines application behavior when the Redis instance is unavailable (network par
 **Post-generation check**: Verify 1:1 correspondence — every documented key pattern appears in the Key Patterns table, every documented TTL is listed in the TTL Strategy, eviction policy and memory limits match the docs exactly, and no undocumented key patterns or configuration values have been added.
 
 **context7 validation** (if available): Fetch Redis documentation. Verify eviction policy names match current Redis naming (`allkeys-lru`, `volatile-lru`, `allkeys-lfu`, `volatile-lfu`, `volatile-ttl`, `volatile-random`, `allkeys-random`, `noeviction`), data structure names are correct (`STRING`, `HASH`, `SET`, `SORTED SET`, `LIST`, `STREAM`, `JSON`), and deployment mode terminology matches the Redis version documented. Do NOT add key patterns or configuration values not derived from architecture docs.
+
+---
+
+## Asset 8: C4 Component Descriptor (`c4-descriptor.md`)
+
+**Trigger**: Every C4 L2 component except the skip-list types (`Library`, `SDK`, `Utility`, `Config`, `Documentation`). This asset is a human-readable operational one-pager — the single page you hand to SRE, infra, or network teams when a component lands in production.
+
+**Language variant selection**: Read the payload frontmatter `doc_language` field (set by the orchestrator from `ARCHITECTURE.md` language detection). `en` → English template. `es` → Spanish template. Any other value → default to English.
+
+**Source data map** (every field traces back to one architecture source — Asset Fidelity Rule applies):
+
+| Descriptor field | Primary source | Fallback |
+|------------------|----------------|----------|
+| Component name, number | Component file filename + `# Heading` | — |
+| Type | `**Type:**` field in component file | — |
+| Technology | `**Technology:**` in component file | `docs/06-technology-stack.md` |
+| Architecture Version | `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` in `ARCHITECTURE.md` | — |
+| Component Version | `**Component Version:**` in component file | — |
+| Purpose (prose) | Handoff §1 (Component Overview) | Component file Overview |
+| Hostname / IP / OS / Domain / Middleware | Payload `## Ops Config` section (sourced from `docs/09-operational-considerations.md`) | Component file body |
+| Upstream consumers | Handoff §2.3 | Payload `## Integrations` |
+| Downstream dependencies | Handoff §2.4 | Payload `## Integrations` |
+| Data ownership | Handoff §4 (Data Model) | `docs/05-data-model.md` |
+| ADR references | Handoff §13 | `adr/*.md` front-matter |
+| TPS sustained/peak | Handoff §7 / Payload `## Perf Targets` | `docs/07-performance-targets.md` |
+| CPU cores | Handoff §8 (Configuration) / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Memory (RAM GB) | Handoff §8 / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Storage (GB) | Handoff §4 (sizing) / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Latency P99 | Handoff §7 | — |
+| Availability target | Handoff §7 (SLOs) | — |
+| Health check | Handoff §9 (Observability) | — |
+| Escalation owner | Component file `**Team Owner:**` | — |
+
+**Fidelity policy for operational fields** (hostname, IP, OS, domain, middleware): most projects do not yet capture these in architecture docs. Write `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` (EN) or `[NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]` (ES) rather than inferring. The marker doubles as the reviewer's checklist.
+
+### Scaffold Template — English (`doc_language: en`)
+
+````markdown
+# [COMPONENT_NAME] ([HOSTNAME or NOT DOCUMENTED])
+
+**Component**: [NN]. [Name]
+**Type**: [Type]
+**Technology**: [Technology]
+**Architecture Version**: v[X.Y.Z]
+**Component Version**: v[X.Y.Z]
+**Generated**: [YYYY-MM-DD]
+
+## Description
+
+**Purpose**: [1–3 sentences from handoff §1 or component Overview]
+
+**Infrastructure**:
+- **Hostname**: `[VALUE or NOT DOCUMENTED — add to docs/09-operational-considerations.md]`
+- **IP Address**: `[VALUE or NOT DOCUMENTED — add to docs/09-operational-considerations.md]`
+- **Operating System**: `[VALUE or NOT DOCUMENTED — add to docs/09-operational-considerations.md]`
+- **Domain**: `[VALUE or NOT DOCUMENTED — add to docs/09-operational-considerations.md]`
+- **Middleware / Runtime Stack**:
+  - [Stack entry — e.g., IIS]
+    - [Sub-entry — e.g., ASP.NET]
+    - [Sub-entry — e.g., .NET Framework 4.8]
+  - [Stack entry 2 if present]
+
+## Responsibilities
+
+[Prose from handoff §1 / component Overview — 1–3 sentences describing the business-facing purpose and why this component exists]
+
+**Upstream consumers**: [Comma-separated list from §2.3, or NOT DOCUMENTED]
+**Downstream dependencies**: [From §2.4, or NOT DOCUMENTED]
+**Data ownership**: [Entities/tables from §4, or NOT DOCUMENTED]
+
+## Technical Decisions
+
+**Architecture Decision Records**:
+- [ADR-NNN — title] → `adr/ADR-NNN-<slug>.md`
+- [ADR-MMM — title] → `adr/ADR-MMM-<slug>.md`
+
+(Omit the list entirely if no ADRs apply; write `— No applicable ADRs` instead.)
+
+**Resource allocation**:
+
+| Resource | Target | Source |
+|----------|--------|--------|
+| TPS (sustained) | [VALUE] | §7 Performance Targets |
+| TPS (peak) | [VALUE] | §7 |
+| CPU cores | [VALUE] | §8 Configuration |
+| Memory RAM (GB) | [VALUE] | §8 |
+| Storage (GB) | [VALUE] | §4 / §8 |
+| Latency P99 (ms) | [VALUE] | §7 |
+
+**Availability target**: [SLO / uptime% from §7, or NOT DOCUMENTED]
+**Health check endpoint**: [URL/path from §9, or NOT DOCUMENTED]
+**Escalation owner**: [Team from component file `**Team Owner:**`, or NOT DOCUMENTED]
+
+---
+
+> **Editing note**: This file is regenerated on every handoff run.
+> `[NOT DOCUMENTED]` markers are the canonical signal for "add this to architecture docs".
+> Fill the value in the referenced architecture source file, then re-run the handoff — do NOT edit this file directly (your changes will be overwritten).
+````
+
+### Scaffold Template — Spanish (`doc_language: es`)
+
+````markdown
+# [COMPONENT_NAME] ([HOSTNAME or NO DOCUMENTADO])
+
+**Componente**: [NN]. [Name]
+**Tipo**: [Type]
+**Tecnología**: [Technology]
+**Versión de arquitectura**: v[X.Y.Z]
+**Versión del componente**: v[X.Y.Z]
+**Generado**: [YYYY-MM-DD]
+
+## Descripción
+
+**Propósito**: [1–3 oraciones desde §1 del handoff o el Overview del componente]
+
+**Infraestructura**:
+- **Hostname**: `[VALOR o NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]`
+- **Dirección IP**: `[VALOR o NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]`
+- **Sistema Operativo (SO)**: `[VALOR o NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]`
+- **Dominio**: `[VALOR o NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]`
+- **Pila de ejecución (middleware)**:
+  - [Entrada — ej., IIS]
+    - [Sub-entrada — ej., ASP.NET]
+    - [Sub-entrada — ej., .NET Framework 4.8]
+  - [Entrada 2 si aplica]
+
+## Responsabilidades
+
+[Prosa desde §1 del handoff / Overview del componente — 1–3 oraciones describiendo el propósito de negocio y por qué existe este componente]
+
+**Consumidores upstream**: [Lista separada por comas desde §2.3, o NO DOCUMENTADO]
+**Dependencias downstream**: [Desde §2.4, o NO DOCUMENTADO]
+**Propiedad de datos**: [Entidades/tablas desde §4, o NO DOCUMENTADO]
+
+## Decisiones técnicas
+
+**Registros de decisiones de arquitectura (ADRs)**:
+- [ADR-NNN — título] → `adr/ADR-NNN-<slug>.md`
+- [ADR-MMM — título] → `adr/ADR-MMM-<slug>.md`
+
+(Omita la lista por completo si no aplican ADRs; escriba `— Sin ADRs aplicables` en su lugar.)
+
+**Asignación de recursos**:
+
+| Recurso | Objetivo | Fuente |
+|---------|----------|--------|
+| TPS (sostenido) | [VALOR] | §7 Performance Targets |
+| TPS (pico) | [VALOR] | §7 |
+| Núcleos CPU | [VALOR] | §8 Configuration |
+| Memoria RAM (GB) | [VALOR] | §8 |
+| Almacenamiento (GB) | [VALOR] | §4 / §8 |
+| Latencia P99 (ms) | [VALOR] | §7 |
+
+**Objetivo de disponibilidad**: [SLO / % uptime desde §7, o NO DOCUMENTADO]
+**Endpoint de health check**: [URL/ruta desde §9, o NO DOCUMENTADO]
+**Responsable de escalamiento**: [Equipo desde `**Team Owner:**` del archivo de componente, o NO DOCUMENTADO]
+
+---
+
+> **Nota de edición**: Este archivo se regenera en cada ejecución del handoff.
+> Los marcadores `[NO DOCUMENTADO]` son la señal canónica para "agregar esto a la documentación de arquitectura".
+> Complete el valor en el archivo fuente de arquitectura referenciado, luego vuelva a ejecutar el handoff — NO edite este archivo directamente (sus cambios se sobrescribirán).
+````
+
+**Filling instructions**:
+1. Select the template variant by payload `doc_language` (default `en` if missing or not `es`).
+2. For each `[VALUE]` token, look up the value using the Source data map above — check the primary source first, then the fallback.
+3. If a value is not in any source, write `[NOT DOCUMENTED — add to <file>]` / `[NO DOCUMENTADO — agregar a <file>]` with the specific file that should own the gap.
+4. For Middleware / Runtime Stack: preserve the nesting depth from the source (sub-bullets indent two spaces). If the source is prose ("runs IIS with ASP.NET on .NET Framework 4.8"), split into a nested list as shown in the example.
+5. For the ADR list: populate from handoff §13. If §13 is empty or shows `—`, render `— No applicable ADRs` / `— Sin ADRs aplicables` and do NOT invent decisions.
+6. Never localize component names, hostnames, technology names, or ADR IDs — those stay verbatim regardless of language variant.
+
+**Post-generation check**: Verify the file has exactly three top-level headings (`## Description` / `## Responsibilities` / `## Technical Decisions` or the Spanish equivalents). Verify every `[NOT DOCUMENTED]` marker names a specific source file (no bare `[NOT DOCUMENTED]` without a file hint). Verify the `Generated` date matches the handoff generation date.
+
+**context7 validation**: not applicable — this asset is free-form markdown, not a typed schema.
 
 ---
 

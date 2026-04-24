@@ -228,6 +228,33 @@ If no assets were generated (component type matched no asset rules), write:
 | — | — | No assets generated for this component type. |
 ```
 
+### Asset 8 — C4 Component Descriptor extraction fields
+
+The `c4-descriptor.md` asset aggregates data that is already extracted for other sections, plus operational fields that most architectures have not yet captured. Extraction sources, in priority order:
+
+| Descriptor field | Primary source | Fallback | Marker when missing |
+|------------------|----------------|----------|---------------------|
+| Purpose prose | Handoff §1 (Overview) | Component file `## Overview` body | — (always derivable) |
+| Hostname | Payload `## Ops Config` (from `docs/09-operational-considerations.md`) | Component file body mentioning hostname / VM name | `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` |
+| IP Address | Payload `## Ops Config` | — | `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` |
+| Operating System | Payload `## Ops Config` | Component file `**OS:**` or `**Runtime:**` | `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` |
+| Domain | Payload `## Ops Config` | — | `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` |
+| Middleware / Runtime Stack | Component file `**Technology:**` + `docs/06-technology-stack.md` entry | Payload `## Ops Config` | `[NOT DOCUMENTED — add to docs/06-technology-stack.md]` |
+| Upstream consumers | Handoff §2.3 | Payload `## Integrations` (source-side rows) | `[NOT DOCUMENTED — add to docs/05-integration-points.md]` |
+| Downstream dependencies | Handoff §2.4 | Payload `## Integrations` (target-side rows) | `[NOT DOCUMENTED — add to docs/05-integration-points.md]` |
+| Data ownership | Handoff §4 (Data Model) | `docs/05-data-model.md` | `[NOT DOCUMENTED — add to docs/05-data-model.md]` |
+| ADR refs | Handoff §13 (already extracted) | — | Write `— No applicable ADRs` / `— Sin ADRs aplicables` |
+| TPS sustained/peak | Handoff §7 | Payload `## Perf Targets` | `[NOT DOCUMENTED — add to docs/07-performance-targets.md]` |
+| CPU cores | Handoff §8 (Configuration) | Payload `## Ops Config` | `[NOT DOCUMENTED — add to docs/08-scalability-and-performance.md]` |
+| Memory (RAM GB) | Handoff §8 | Payload `## Ops Config` | `[NOT DOCUMENTED — add to docs/08-scalability-and-performance.md]` |
+| Storage (GB) | Handoff §4 (sizing) | Payload `## Ops Config` | `[NOT DOCUMENTED — add to docs/05-data-model.md]` |
+| Latency P99 | Handoff §7 | — | `[NOT DOCUMENTED — add to docs/07-performance-targets.md]` |
+| Availability target | Handoff §7 (SLOs) | — | `[NOT DOCUMENTED — add to docs/07-performance-targets.md]` |
+| Health check endpoint | Handoff §9 (Observability) | — | `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` |
+| Escalation owner | Component file `**Team Owner:**` | `docs/components/README.md` team column | `[NOT DOCUMENTED — add Team Owner to docs/components/<path>.md]` |
+
+**Language-variant note**: the marker text localizes with the template variant. Spanish variant uses `[NO DOCUMENTADO — agregar a <file>]`. Everything else (field values, file paths) stays verbatim.
+
 ---
 
 ## Section 15 — Open Questions and Assumptions

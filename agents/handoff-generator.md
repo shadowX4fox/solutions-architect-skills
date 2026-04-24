@@ -38,9 +38,9 @@ Read file: [payload_path]
 The payload is a markdown document with YAML frontmatter (metadata) and named sections (Component File, Integrations, Flows, Security, Perf, Ops, ADRs). See `[plugin_dir]/skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` for the contract.
 
 **Step 0.2**: Extract from the payload frontmatter:
-- `component_slug`, `component_file`, `component_type`, `component_index_position`, `asset_types`, `architecture_version`
+- `component_slug`, `component_file`, `component_type`, `component_index_position`, `asset_types`, `architecture_version`, `doc_language`
 
-Store these for use throughout the workflow.
+Store these for use throughout the workflow. If `doc_language` is missing or not one of `en` / `es`, default to `en` without warning.
 
 **Gate check**: If the payload file cannot be read, or the frontmatter is missing required fields, abort with:
 ```
@@ -70,7 +70,7 @@ Read the asset index:
 Read file: [plugin_dir]/skills/architecture-dev-handoff/assets/_index.md
 ```
 
-The index maps each `asset_type` from the payload frontmatter (e.g., `openapi`, `ddl`, `deployment`, `asyncapi`, `cronjob`, `avro`, `protobuf`, `redis`) to a specific line range of `ASSET_GENERATION_GUIDE.md`.
+The index maps each `asset_type` from the payload frontmatter (e.g., `openapi`, `ddl`, `deployment`, `asyncapi`, `cronjob`, `avro`, `protobuf`, `redis`, `c4-descriptor`) to a specific line range of `ASSET_GENERATION_GUIDE.md`.
 
 For each `asset_type` in the payload's `asset_types` list, read ONLY that section's line range from `ASSET_GENERATION_GUIDE.md`:
 ```
@@ -79,7 +79,13 @@ Read file: [plugin_dir]/skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.m
   limit: [end_line - start_line for this asset_type from _index.md]
 ```
 
-Do NOT read the entire `ASSET_GENERATION_GUIDE.md` — only the asset sections relevant to this component's types. Also read the shared policy section (Overview + Asset Detection Rules, lines 1–87) once.
+Do NOT read the entire `ASSET_GENERATION_GUIDE.md` — only the asset sections relevant to this component's types. Also read the shared policy section (Overview + Asset Detection Rules, lines 1–88) once.
+
+**`c4-descriptor` specifics**: the section contains two scaffold templates (English and Spanish). Select the variant by the payload's `doc_language` field:
+- `doc_language: en` → use the template under the "Scaffold Template — English" heading.
+- `doc_language: es` → use the template under the "Scaffold Template — Spanish" heading.
+
+Never translate values (component names, technology names, hostnames, ADR IDs, `[VALUE]` sources). The `[NOT DOCUMENTED]` marker localizes to `[NO DOCUMENTADO]` in the Spanish variant; all other structural text follows the template as-is.
 
 ### PHASE 2 — Fill the handoff template
 
@@ -126,6 +132,7 @@ For each `asset_type` in the payload frontmatter's `asset_types` list, generate 
 | `avro` | `schema.avsc` |
 | `protobuf` | `schema.proto` |
 | `redis` | `redis-key-schema.md` |
+| `c4-descriptor` | `c4-descriptor.md` (EN or ES template — select by payload `doc_language`) |
 
 **Create the asset directory first** if it does not exist:
 ```bash

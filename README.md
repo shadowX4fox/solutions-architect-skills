@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.11.0` in the list.
+You should see `sa-skills v3.12.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,26 @@ Where:
 
 ## Roadmap
 
-### v3.11.0 (Current Release) ✅
+### v3.12.0 (Current Release) ✅
+**feat: new Asset 8 — `c4-descriptor.md` operational one-pager per component, EN/ES**
+
+`architecture-dev-handoff` now generates an eighth asset alongside the existing OpenAPI / DDL / Kubernetes / AsyncAPI / CronJob / Avro / Protobuf / Redis bundle: a **C4 Component Descriptor** (`handoffs/assets/NN-<slug>/c4-descriptor.md`). It's the consolidated operational one-pager dev teams hand to SRE, infra, and network partners when a component ships — three sections (Description / Responsibilities / Technical Decisions) with infrastructure metadata (hostname, IP, OS, domain, middleware stack), dependency rollup, ADR references, and resource allocation (TPS sustained/peak, CPU cores, RAM GB, storage GB, latency P99, availability SLO). The descriptor is always-on for every non-skip component — no opt-out flag. Skip-list types (`Library`, `SDK`, `Utility`, `Config`, `Documentation`) get nothing, matching the existing asset skip rule.
+
+The template ships in two language variants. The orchestrator detects the architecture-doc language once per run (via explicit `<!-- LANGUAGE: es -->` marker → Spanish section-heading inference → English default) and stamps the payload with `doc_language: en | es`. The sub-agent selects the matching template variant at asset-generation time. Values (component names, technology names, hostnames, ADR IDs) stay verbatim regardless of variant; only structural labels and the `[NOT DOCUMENTED]` / `[NO DOCUMENTADO]` markers localize. The EN/ES split mirrors the pattern already established by `architecture-blueprint`.
+
+Asset Fidelity Rule applies identically to the new asset — zero invention. Fields not present in architecture docs get `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` (or the specific source file per the section-extraction map) rather than inferred or defaulted values. Most projects today don't capture hostname / IP / OS / domain in their architecture, so first-generation descriptors are mostly markers pointing at the right file to fill in — which is the point: the descriptor doubles as a discovery checklist for operational-metadata gaps.
+
+**Changes:**
+- `skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md` — +177 lines. New "Always generated (except skip-list)" row in the Asset Detection Rules table; new Asset 8 section with source-data map, EN + ES scaffold templates, filling instructions, post-generation checks. Existing assets shifted +1 line due to the detection row addition.
+- `skills/architecture-dev-handoff/assets/_index.md` — new `c4-descriptor` line-range entry (861-1036); updated shared policy range (1-88) and After-Asset-Generation range (1037-1050); all pre-existing ranges updated for the +1 shift; maintenance grep updated to include `^## After Asset`.
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — added `doc_language` required frontmatter field; appended `c4-descriptor` to every non-skip component-type's `asset_types` default; added an explicit skip row documenting the `Library`/`SDK`/`Utility`/`Config`/`Documentation` exclusion.
+- `skills/architecture-dev-handoff/SKILL.md` — new Step 3.3 "Detect architecture-doc language" run once per orchestration; Step 4.1 augmented to append `c4-descriptor` to `asset_types`; Step 4.4 frontmatter contract now includes `doc_language`.
+- `skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md` — new "Asset 8 — C4 Component Descriptor extraction fields" table mapping each descriptor field to its primary source / fallback / missing-marker file hint.
+- `agents/handoff-generator.md` — Phase 0 extracts `doc_language`; Phase 1.3 gains the language-variant selection rule; Phase 3 asset-file table includes `c4-descriptor`.
+
+Runtime behavior is strictly additive. Existing handoff runs get one extra file per component; nothing in the 16-section handoff template changes.
+
+### v3.11.0 (Previous Release) ✅
 **feat: architecture release workflow defaults to PR flow, `--direct` opts out**
 
 The architecture release workflow (`architecture-docs` Workflow 10 — triggered by "release my architecture", "bump architecture version", `/release-architecture`, etc.) now creates a **pull request** by default so CI, required reviewers, and branch-protection rules can gate the release before it lands on `main`. The previous direct-to-current-branch behavior is preserved behind a `--direct` flag for local-only repos, emergency hotfixes, and projects without a PR review layer.

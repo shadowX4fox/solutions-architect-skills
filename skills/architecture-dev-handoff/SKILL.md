@@ -251,13 +251,25 @@ If the context7 MCP tool is available and one or more selected components produc
 
 Skip silently if context7 is unavailable.
 
+**Step 3.3: Detect architecture-doc language**
+
+Set once per run — propagated to every per-component payload as the `doc_language` frontmatter field. Drives the template-variant selection for the `c4-descriptor` asset (English vs Spanish).
+
+Detection order (stop at the first match):
+
+1. **Explicit marker** — grep `ARCHITECTURE.md` for `<!-- LANGUAGE: es -->` or `<!-- LANGUAGE: en -->`. If found, use that value.
+2. **Section-heading inference** — scan `ARCHITECTURE.md` and `docs/01-system-overview.md` for Spanish section headers that commonly appear in the canonical layout (`## Contexto`, `## Descripción`, `## Visión general`, `## Componentes`, `## Decisiones arquitectónicas`). If **two or more** distinct Spanish headings appear, set `es`. Otherwise set `en`.
+3. **Default** — `en`.
+
+Store the result in a session variable `{doc_language}` and write it into every payload's frontmatter in Step 4.4. Detection runs exactly once per orchestration — do NOT re-detect per component.
+
 ### Phase 4: Slice the bundle per component, write payloads
 
 For each selected component (in dependency order when batch):
 
 **Step 4.1: Detect component type and asset types**
 
-From the component file's `**Type:**` field, determine `component_type` and `asset_types` per the table in `PAYLOAD_SCHEMA.md`.
+From the component file's `**Type:**` field, determine `component_type` and `asset_types` per the table in `PAYLOAD_SCHEMA.md`. Append `c4-descriptor` to `asset_types` for every non-skip component (dedupe). Skip-list types (`Library`, `SDK`, `Utility`, `Config`, `Documentation`) get `asset_types: []` and never receive a `c4-descriptor`.
 
 **Step 4.2: Slice each shared doc for this component**
 
@@ -285,7 +297,7 @@ Write: /tmp/handoff-payloads/<component-slug>.md
 ```
 
 Format per `PAYLOAD_SCHEMA.md`:
-- YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path)
+- YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path, doc_language)
 - Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs
 
 ### Phase 5: Spawn sub-agents in 2-parallel batches
