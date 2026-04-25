@@ -273,6 +273,47 @@ For each selected component, gather the following from its file header (15–30 
 
 Pack these into a YAML list to embed in the spawn prompt body. The context-builder does NOT re-read these files for metadata extraction — it consumes the orchestrator's pre-extracted list directly. Step 3.4 keeps the orchestrator's pre-3 work consistent with what it already does for component selection.
 
+**Step 3.4a: Per-component explorer fan-out (v3.14.4+)**
+
+Spawn `sa-skills:architecture-explorer` once per selected component, in parallel batches of `parallelism` (the Step 1.0 value, default 4, capped at 8). Each invocation classifies the project's architecture corpus *for that component specifically*, returning an `EXPLORE_RESULT` allowlist that the context-builder will use to skip irrelevant ADRs.
+
+For each component, send one `Task()` with this prompt body:
+
+```
+Task(sa-skills:architecture-explorer)
+prompt:
+  task_type: handoff-component
+  config_path: <plugin_dir>/agents/configs/explorer/handoff-component.json
+  project_root: <project_root>
+  plugin_dir: <plugin_dir>
+  plugin_version: <plugin version from .claude-plugin/plugin.json>
+  extra_terms:
+    - <component.slug>
+    - <component.type>     # e.g. api-service, database, k8s-workload
+    - <each entry from component.technology[]>
+  force: <true if Phase 1.0 force is true, else false>
+```
+
+The explorer's `handoff-component.json` config marks all 7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md` as `required_sections[]`, so they always appear in `EXPLORE_RESULT.relevant_files[]` regardless of score (false-negative safeguard). The variable members are ADRs that scored above `score_threshold: 0.20` and any cross-referenced component files. The `extra_terms` (component slug, type, technologies) are appended to `relevance_keywords.boost[]` at runtime with weight 4 — they differentiate one component's ADR allowlist from another's.
+
+Collect each `EXPLORE_RESULT` into a per-component map:
+
+```yaml
+explore_results:
+  <slug-1>:
+    relevant_files: [<repo-rel paths from EXPLORE_RESULT.relevant_files[].path>]
+    cache_hit: <true|false>
+    explorer_status: <OK|PARTIAL|FAILED>
+  <slug-2>:
+    ...
+```
+
+If any explorer call returns `FAILED`, log a warning and synthesize a degraded `relevant_files[]` from the config's `required_sections[]` only (the 9 always-relevant entries) for that component. The context-builder will run in legacy mode for those slugs by intersecting against `adr_index` instead of trusting the empty allowlist.
+
+If every explorer call returns `FAILED`, omit `explore_results` from the context-builder spawn prompt entirely — the builder will fall back to the v3.13.0 legacy path.
+
+This phase is the dev-handoff analog of the per-skill explorer integrations rolling out across v3.14.x. On a cache hit (no doc-tree changes since the last run), every explorer call costs zero Haiku tokens — the cached `EXPLORE_RESULT` is returned verbatim.
+
 **Step 3.5: Spawn `sa-skills:handoff-context-builder`** (single Task call, NOT batched)
 
 Send ONE message containing one `Task()` invocation:
@@ -301,7 +342,16 @@ prompt:
       component_index_position: "NN"
     - slug: …
       …
+  explore_results:                                    # v3.14.4+ — from Step 3.4a
+    <slug-1>:
+      relevant_files: [<repo-rel paths>]
+      cache_hit: <true|false>
+      explorer_status: <OK|PARTIAL|FAILED>
+    <slug-2>:
+      ...
 ```
+
+(Omit the `explore_results` key entirely if Step 3.4a reported every component's explorer call `FAILED` — the builder falls back to the v3.13.0 legacy path that does its own ADR indexing.)
 
 Wait for the `CONTEXT_RESULT:` block. The context-builder returns:
 

@@ -5,6 +5,72 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.4]
+
+### Added — `architecture-explorer` integration for `architecture-dev-handoff` (per-component ADR allowlists)
+
+**Symptom (cost): the dev-handoff flow was paying for ADR classification on Sonnet.** The Sonnet `handoff-context-builder` indexed every ADR (first-30-line read × N), then full-read the matched subset per component. On a project with 38 ADRs and 8 components, that's ~38 indexing reads + ~50 full reads on Sonnet — even though only 4–9 ADRs are typically relevant per component.
+
+**Root cause: missing wiring.** The infrastructure to fix this had been in place since v3.14.0 — the universal `architecture-explorer` agent (Haiku tier) and its `agents/configs/explorer/handoff-component.json` config — but the dev-handoff orchestration never invoked the explorer; it kept doing its own Sonnet-tier classification.
+
+**Fix (single PR, three files):**
+
+#### `agents/builders/architecture-explorer.md`
+
+Extended `extra_terms` support to `task_family: handoff` (was previously `question` and `adr` only). Per-component fan-out can now pass `[<slug>, <type>, ...<technology>]` as runtime boost terms with weight 4 to differentiate one component's classification from another's on the same shared corpus.
+
+#### `agents/builders/handoff-context-builder.md`
+
+New `explore_results` input parameter — a YAML map of `{ <slug>: { relevant_files: [], cache_hit: bool, explorer_status } }`. Workflow phases revised:
+
+- **PHASE 1 (read shared docs)**: when `explore_results` is present, reads only files in the **union** of every component's `relevant_files[]`. The 9 always-included files (7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md`) are guaranteed by the config's `required_sections[]`. ADRs read here are deferred to PHASE 3.3 (full content needed only when slicing per-component).
+- **PHASE 2 (ADR indexing pass)**: skipped entirely when `explore_results` is present — the explorer already classified ADR relevance. Sonnet first-30-line scan disappears.
+- **PHASE 3.3 (per-component ADR lookup)**: takes the per-component ADR allowlist directly from `explore_results[<slug>].relevant_files[]` filtered to `adr/*.md`. Full-Read each, excerpt at the explorer's `matched_sections[]`, format under `## Relevant ADRs`.
+- **CONTEXT_RESULT contract**: preserved exactly. `handoff-generator` requires no changes.
+- **Legacy fallback**: when `explore_results` is absent (every explorer call returned `FAILED`), runs the v3.13.0 indexing pass as before. Fail-open by design.
+
+Agent version 1.0.0 → 1.1.0.
+
+#### `skills/architecture-dev-handoff/SKILL.md` Phase 3
+
+New **Step 3.4a**: per-component explorer fan-out, parallelism-batched (uses the same default-4, capped-at-8 setting as the existing handoff fan-out). Each invocation:
+
+```yaml
+task_type: handoff-component
+config_path: <plugin_dir>/agents/configs/explorer/handoff-component.json
+extra_terms:
+  - <component.slug>
+  - <component.type>
+  - <each entry from component.technology[]>
+```
+
+Collects per-component `EXPLORE_RESULT.relevant_files[]` into a map keyed by slug. Step 3.5 (the existing context-builder spawn) is extended to include the `explore_results` map in its prompt body.
+
+If any explorer call returns `FAILED`, that component's allowlist falls back to the config's `required_sections[]` only (the 9 always-relevant entries) and the context-builder runs the legacy indexing pass for it. If every explorer call fails, the `explore_results` key is omitted entirely — the v3.13.0 path runs as before.
+
+#### Concrete savings (38 ADRs, 8 components — a real-world shape)
+
+- **Sonnet tokens**: ~10K saved on the indexing pass (the 38×30-line scan disappears). Per-component ADR full-reads drop ~20–30% as the explorer's `score_threshold: 0.20` filters genuinely irrelevant ADRs before Sonnet sees them.
+- **Haiku tokens**: ~200 per component for classification — effectively free vs Sonnet equivalents.
+- **Cache hits**: zero Haiku tokens on repeat runs (cache-keyed by candidate-file mtimes + plugin version + config mtime).
+- **Wall-clock**: builder phase ~2m → ~45s on the same input (estimated; depends on doc-tree size).
+
+#### Required-section safeguard (false-negative protection)
+
+`handoff-component.json` declares `ARCHITECTURE.md`, `docs/01-system-overview.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md`, `docs/07-security-architecture.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md`, and `docs/components/README.md` as `required_sections[]`. Every component's `relevant_files[]` includes them regardless of score. The runtime parser (`skills/architecture-explorer/utils/parse-explore-result.ts`) rejects any `EXPLORE_RESULT` that omits a required entry, falling back to the legacy path. Payload coverage stays lossless.
+
+#### Verification
+
+- `bun run typecheck` clean.
+- `bun test` passes (478/478, no test changes).
+- The `handoff-component.json` config (shipped in v3.14.0) needed no changes — already correctly shaped for the new flow.
+
+#### Migration
+
+No user action required. Re-running any handoff after upgrading to v3.14.4 picks up the new flow automatically. The v3.13.0 manifest format and CONTEXT_RESULT contract are preserved; existing handoff files remain valid.
+
+**Roadmap shift**: per-skill compliance integration was previously slated for v3.14.4 → v3.14.5. Analysis / peer-review / docs / ADR follow at v3.14.6 / v3.14.7 / v3.14.8 / v3.14.9. The original v3.14.0 plan reserved v3.14.7 for this dev-handoff work — bringing it forward kept the user's active pain (visible cost on every handoff) on the critical path.
+
 ## [3.14.3]
 
 ### Fixed — `enabledPlugins` key aligned with marketplace plugin name + auto-migration of legacy entries

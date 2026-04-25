@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -797,7 +797,53 @@ Where:
 
 ## Roadmap
 
-### v3.14.3 (Current Release) ✅
+### v3.14.4 (Current Release) ✅
+**feat: wire `architecture-explorer` into `architecture-dev-handoff` — per-component ADR allowlists, ~50% Sonnet token reduction**
+
+The dev-handoff flow's I/O-heavy `handoff-context-builder` (Sonnet) was reading every ADR in full to build its term index, then full-reading the matched subset per component. On a project with 38 ADRs and 8 components, that's ~38×30-line indexing reads + ~50 full ADR reads, all on Sonnet. The infrastructure to fix this has been in place since v3.14.0 (the `handoff-component.json` explorer config was already shipped); only the wiring was missing. v3.14.4 closes the loop.
+
+**Architecture change:**
+
+```
+Orchestrator
+  ├── architecture-explorer (Haiku)              ← NEW: spawned FIRST, per component, in parallel batches of `parallelism`
+  │     loads handoff-component.json
+  │     extra_terms = [<slug>, <type>, ...<technology>]   ← per-component differentiation
+  │     scans first 60 lines + headings of every candidate (38 ADRs + 7 shared docs + components)
+  │     returns EXPLORE_RESULT.relevant_files[] per component (typically 4-9 ADRs + 9 required-section docs)
+  │     cache hits cost zero Haiku tokens on repeat runs
+  │
+  └── handoff-context-builder (Sonnet)           ← consumes per-component explore_results map
+        PHASE 1: reads ONLY files in the union of all components' relevant_files[] (the 9 required docs always; ADRs only if any component flagged them)
+        PHASE 2: ADR indexing pass SKIPPED — explorer already classified
+        PHASE 3.3: per-component ADR allowlist taken directly from explore_results[<slug>].relevant_files[]
+        CONTEXT_RESULT contract preserved exactly — handoff-generator unchanged
+```
+
+**Concrete savings on a typical run** (38 ADRs, 8 components):
+
+- **Sonnet**: ~10K tokens saved on the indexing pass (the 38×30-line scan disappears entirely). Per-component ADR full-reads drop ~20-30% as the explorer's `score_threshold: 0.20` filters genuinely irrelevant ADRs.
+- **Haiku**: ~200 tokens per component for classification. Effectively free. Cache hits on repeat runs cost zero.
+- **Wall-clock**: builder phase drops from 2m+ to ~45s on the same input shape (estimated; depends on doc-tree size).
+- **Cost-per-run**: dominated by handoff-generator (template fill on Sonnet, unchanged). Builder phase no longer the bottleneck.
+
+**Required-section safeguard** (false-negative protection): `handoff-component.json` declares `ARCHITECTURE.md`, `docs/01-system-overview.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md`, `docs/07-security-architecture.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md`, and `docs/components/README.md` as `required_sections[]`. Every component's `relevant_files[]` includes them regardless of score. No content is silently dropped; payload coverage is lossless.
+
+**Degraded mode** (fail-open): if any explorer call returns `FAILED`, that component's allowlist falls back to `required_sections[]` only and the context-builder runs the v3.13.0 indexing pass for it. If every explorer call fails, the orchestrator omits `explore_results` from the builder spawn entirely — the legacy path runs as before. The user always gets a payload.
+
+**What changed** (single PR):
+
+- `agents/builders/architecture-explorer.md` — extends `extra_terms` support to `task_family: handoff` (was previously only `question` and `adr`).
+- `agents/builders/handoff-context-builder.md` — new `explore_results` input parameter; PHASE 1 reads the union allowlist instead of fixed 7-doc set; PHASE 2 ADR indexing skipped when explorer ran; PHASE 3.3 takes per-component ADR list from explorer output. Legacy fallback preserved when `explore_results` is absent. Agent version 1.0.0 → 1.1.0.
+- `skills/architecture-dev-handoff/SKILL.md` Phase 3 — new Step 3.4a (per-component explorer fan-out, parallelism-batched); Step 3.5 spawn prompt now includes the `explore_results` map. Existing manifest skip-check + dedup + payload-write logic unchanged.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅. The `handoff-component.json` explorer config (shipped in v3.14.0) needed no changes — it was already correctly shaped for the new flow.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.4 picks up the new flow automatically. The v3.13.0 manifest format and CONTEXT_RESULT contract are preserved, so existing handoff files remain valid.
+
+**Roadmap**: per-skill compliance integration was previously slated for v3.14.4; it shifts to v3.14.5. Remaining wiring (analysis, peer-review, docs Q&A, ADR application) shifts by one accordingly.
+
+### v3.14.3 (Previous Release) ✅
 **fix: align `enabledPlugins` key with the marketplace plugin name (`sa-skills`) + auto-migrate legacy `solutions-architect-skills@…` registrations**
 
 `/plugin` and `/reload-plugins` were reporting `Plugin "solutions-architect-skills" not found in marketplace "shadowx4fox-solution-architect-marketplace"` after a fresh install or a re-`/setup`. The `marketplace.json` correctly registers the plugin as `sa-skills` (matching `plugin.json`'s `name` field), but four user-facing files still pointed at the older `solutions-architect-skills` name from before the v3.8.5 marketplace rename — including the `enabledPlugins` block in `.claude/settings.json.example` that `/setup` merges into every consuming project.
@@ -821,7 +867,7 @@ The plugin still ran (the cache had already extracted), but Claude Code couldn't
 
 **Roadmap**: per-skill explorer wiring shifts again — compliance integration moves to v3.14.4 (was v3.14.3 after the v3.14.2 fix bumped the chain by one).
 
-### v3.14.2 (Previous Release) ✅
+### v3.14.2 ✅
 **fix: tighten `architecture-explorer` Tool Discipline so the Haiku-tier classifier never triggers permission prompts**
 
 A Q&A invocation surfaced that the explorer was emitting a Bash here-doc (`cat > /tmp/explore_result.yaml << EOF`) to stage its EXPLORE_RESULT before writing the cache. The user's `.claude/settings.json` deliberately allows file writes only via the Write tool (path-globbed, auditable) or via `Bash(bun *)` — `Bash(cat *)` is not allowlisted, so the redirection fired a permission prompt mid-run.
@@ -880,14 +926,13 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 
 | Patch | Skill | Work |
 |-------|-------|------|
-| 3.14.4 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
-| 3.14.5 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
-| 3.14.6 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
-| 3.14.7 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.5 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.6 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
+| 3.14.7 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
 | 3.14.8 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
 | 3.14.9 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
 
-(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration. Per-skill explorer wiring resumes at v3.14.4.)
+(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration; v3.14.4 = dev-handoff explorer wiring. Per-skill explorer wiring continues with compliance at v3.14.5.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 

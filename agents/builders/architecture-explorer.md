@@ -28,7 +28,7 @@ The orchestrator passes these in the prompt text. Treat them as authoritative.
 - `project_root` — absolute path to the project's root directory (where `ARCHITECTURE.md` lives).
 - `plugin_dir` — absolute path used to invoke `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts`.
 - `plugin_version` — e.g. `3.14.0`. Mixed into `inputs_hash` so plugin upgrades invalidate the cache.
-- `extra_terms` (optional) — for `task_family: question` and `task_family: adr`, a YAML list of free-form terms (the user's question keywords or proposed ADR's tech/component names) appended to `relevance_keywords.boost` at runtime with weight 4.
+- `extra_terms` (optional) — a YAML list of free-form terms appended to `relevance_keywords.boost` at runtime with weight 4. Supported for `task_family: question` (the user's question keywords), `task_family: adr` (the proposed ADR's tech/component names), and `task_family: handoff` (the component's slug + display name + each technology + type keyword, used to differentiate per-component classification on a single shared corpus).
 - `force` (optional, default `false`) — when `true`, ignore the cache and run a fresh classification.
 
 ## Workflow
