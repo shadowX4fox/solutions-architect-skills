@@ -1,0 +1,56 @@
+{
+  "task_type": "adr-application",
+  "task_family": "adr",
+  "downstream_agent": "main",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "adr/*.md"
+    },
+    {
+      "file": "docs/components/**/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "ADR",
+        "weight": 5
+      },
+      {
+        "term": "decision",
+        "weight": 3
+      },
+      {
+        "term": "supersedes",
+        "weight": 4
+      },
+      {
+        "term": "superseded by",
+        "weight": 4
+      }
+    ],
+    "negative": []
+  },
+  "gap_markers": [],
+  "score_threshold": 0.2,
+  "output_format": "v1",
+  "notes": "Used by architecture-definition-record skill when creating or superseding ADRs. The orchestrator passes the proposed decision's tech/component terms via extra_terms; explorer adds them as weight-4 boosts so prior ADRs touching the same area are included in relevant_files for cross-referencing."
+}

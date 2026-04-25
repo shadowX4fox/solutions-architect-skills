@@ -5,6 +5,58 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0]
+
+### Added — Universal `architecture-explorer` Haiku-tier doc classifier (infrastructure)
+
+Front-door classifier for every doc-consuming workflow in the plugin. Treats ARCHITECTURE.md, `docs/`, `adr/`, and `docs/components/**` as a universe and answers one question per file: *is this relevant to the current task?* Reads only the first 60 lines + headings of each candidate (sampling, not synthesis), so classification stays cheap on Haiku while keeping the user's main session (typically Opus) and downstream synthesis agents (Sonnet/Opus validators, generators, reviewers) off the redundant-read treadmill.
+
+**Why this matters**: a 10-contract compliance run today does ~1.8 MB of redundant Opus reads (10 validators + 10 generators each open the full doc suite). A 10-analysis run does ~1.5–2 MB. The explorer outputs an `EXPLORE_RESULT` allowlist (`relevant_files[]`, typically 4–9 files instead of 20+) that downstream agents will honor in v3.14.x patches — token budget on the synthesis tier drops by ≥30% per skill once integrations land.
+
+**Always-on by design**: there is no `--no-explorer` opt-out. The false-negative safeguard is at the config level — every `agents/configs/explorer/<task_type>.json` declares `required_sections[]` that bypass scoring. The runtime parser (`skills/architecture-explorer/utils/parse-explore-result.ts`) rejects any `EXPLORE_RESULT` whose `relevant_files[]` is missing a `required_sections[]` entry, falling back to degraded mode (use the required list directly, skip the explorer call) so a malformed agent response never strips load-bearing files.
+
+#### New files
+
+- **Agent** — `agents/builders/architecture-explorer.md` (model: haiku). Universal Haiku-tier classifier; reads `agents/configs/explorer/<task_type>.json`, expands `candidate_files[]`, scores against `relevance_keywords.boost[]` + anchor hints, detects gaps via `gap_markers[]`, returns `EXPLORE_RESULT` block. Cache-keyed by candidate-file mtimes + plugin version + config mtime.
+- **Configs** — `agents/configs/explorer/` (36 task-typed JSON configs):
+  - 10 compliance: `compliance-{sre,security,cloud,business-continuity,cloud,data-and-ai,development,enterprise,integration,platform,process}.json`. SRE / security / cloud are hand-tuned; the other 7 are auto-derived from existing `agents/configs/<contract>.json` `phase3.required_files` + `data_points`.
+  - 10 analysis: `analysis-{spof,blast-radius,bottleneck,cost-hotspots,stride,vendor-lockin,latency-budget,tech-debt,coupling,data-sensitivity}.json`.
+  - 13 peer-review: `peer-review-{struct,naming,sections,coherence,tech,integ,metrics,scale,security,perf,ops,adr,tradeoff}.json` (one per category in `skills/architecture-peer-review/PEER_REVIEW_CRITERIA.md`).
+  - 3 special: `handoff-component.json` (per-component classification feeding handoff-slicer when v3.14.x splits the builder), `architecture-question.json` (free-form Q&A; relevance keywords injected at runtime from question terms), `adr-application.json` (ADR creation/supersession context).
+  - `_schema.json` — JSON Schema validating every config.
+- **TypeScript utilities** — `skills/architecture-explorer/utils/`:
+  - `explore-cache.ts` — `/tmp/architecture-explorer/<project_hash>/<task_type>.json` cache read/write + `inputs_hash` computation (mtimes + plugin version + config mtime) + zero-dependency glob expansion.
+  - `parse-explore-result.ts` — extracts and validates the `EXPLORE_RESULT` YAML block emitted by the agent; enforces required-sections coverage; ships its own minimal YAML subset parser (no external deps).
+  - `validate-config.ts` — runtime schema validation for `agents/configs/explorer/*.json`.
+  - `explore-cli.ts` — Bun CLI invoked by the explorer agent (subcommands: `inputs-hash`, `check-cache`, `expand-candidates`, `write-cache`, `read-cache`, `project-hash`).
+- **Auto-derivation script** — `tools/derive-explorer-configs.ts`. One-shot Bun script that projects from existing source-of-truth (`agents/configs/<contract>.json` `phase3.data_points` patterns; analysis vocabulary mappings; peer-review category checks) into 33 explorer configs. Skips existing configs by default; pass `--force` to overwrite.
+- **Explorer-Friendly Headers** — new `## Explorer-Friendly Headers` section in `skills/architecture-docs/ARCHITECTURE_DOCUMENTATION_GUIDE.md` documents an `<!-- EXPLORER_HEADER ... -->` block (5–10 lines after the H1) that newly-created `docs/NN-*.md` and `docs/components/**/*.md` files must include. Lists key_concepts, technologies, components, scope, and related ADRs in the first 60 lines so the explorer's body sample lands on dense, classifier-relevant metadata. Backwards-compatible — legacy docs without the header still work, the explorer falls back to body+heading scoring. `ARCHITECTURE.md` (project root) is exempt; the explorer reads it in full as the navigation index.
+- **`/setup` permissions update** — `.claude/settings.json.example` extended with three new entries: `Agent(sa-skills:architecture-explorer)`, `Write(//tmp/architecture-explorer/**)`, `Read(//tmp/architecture-explorer/**)`. Existing projects re-running `/setup` after upgrading get these appended non-destructively (the `setup-permissions.ts` helper does an array union and counts pre-existing entries under "already present"). Comment headers in the example file updated to mention the explorer + headers CLIs and the per-project cache. New `## v3.14.0 — what's new in this setup` section in `commands/setup.md` documents what re-running adds.
+- **`architecture-explorer-headers` skill + slash command** — new `skills/architecture-explorer-headers/` skill with `/regenerate-explorer-headers` slash command for backfilling EXPLORER_HEADER blocks into legacy docs. Workflow: Phase 1 inventory (Bun CLI walks `docs/` + `docs/components/`, excludes `ARCHITECTURE.md` and `README.md`, returns JSON of `{path, has_header, h1, byte_size}`) → Phase 2 plan-and-confirm → Phase 3 model-generated header inserted via Edit tool right after the H1 → Phase 4 report. Supports `--dry-run` (no writes), `--force` (overwrite existing), and `<path-glob>` (restrict scope). TypeScript module `header-detector.ts` exports `listDocFiles`, `hasExplorerHeader`, `findInsertionPoint`, `parseHeader`, `validateHeader`, `insertHeader`, `removeHeader`, `buildHeader`. Bun CLI `header-cli.ts` (subcommands: `list`, `validate`, `has-header`). 30 unit tests covering detection, insertion (idempotent + force semantics), removal, parsing round-trip, validation (doc files require key_concepts+technologies+scope; component files additionally require component_self), and the fs walker (excludes ARCHITECTURE.md, recurses components/, does not recurse other docs/ subdirs).
+- **Tests** — `skills/architecture-explorer/utils/explore-cache.test.ts` (cache round-trip, mtime invalidation, plugin-upgrade invalidation, project-hash collision-resistance, glob expansion), `parse-explore-result.test.ts` (happy path, malformed YAML, missing required fields, false-negative safeguard rejection), `validate-config.test.ts` (every shipped config passes the schema; targeted error cases). Total: 45 tests across 3 files.
+
+#### Documentation
+
+- `CLAUDE.md` — Plugin Structure section now lists `agents/configs/explorer/` and `architecture-explorer.md`; new "Architecture-explorer (v3.14.0)" paragraph in Code Architecture explaining the contract; TypeScript utilities section split into compliance + explorer subsections.
+- This `CHANGELOG.md` entry.
+
+#### Per-skill integration roadmap (v3.14.x patches)
+
+| Patch | Skill | Work |
+|-------|-------|------|
+| 3.14.1 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator.md` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.2 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent.md` to honor `relevant_files[]` |
+| 3.14.3 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent.md` |
+| 3.14.4 | `architecture-dev-handoff` | Refactor `handoff-context-builder.md` → `handoff-slicer.md` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.5 | `architecture-docs` | Q&A workflows route through explorer with runtime keyword injection (`architecture-question.json`) |
+| 3.14.6 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+
+Each patch ships independently — no patch depends on a later patch. `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
+
+#### Verification
+
+`bun run typecheck` ✅ · `bun test skills/architecture-explorer/` (45/45 pass) ✅ · 36/36 explorer configs validate against `_schema.json` ✅ · auto-derivation script runs cleanly (`bun run tools/derive-explorer-configs.ts`) ✅
+
 ## [3.13.1]
 
 ### Changed

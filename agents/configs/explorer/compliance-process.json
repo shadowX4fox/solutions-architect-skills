@@ -1,0 +1,216 @@
+{
+  "task_type": "compliance-process",
+  "task_family": "compliance",
+  "downstream_agent": "sa-skills:compliance-generator",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Automation solutions",
+        "Process improvement",
+        "Capability reuse",
+        "License consumption efficiency"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "automation ROI",
+        "weight": 3
+      },
+      {
+        "term": "return on investment",
+        "weight": 3
+      },
+      {
+        "term": "cost savings",
+        "weight": 3
+      },
+      {
+        "term": "efficiency gain",
+        "weight": 3
+      },
+      {
+        "term": "hours saved",
+        "weight": 3
+      },
+      {
+        "term": "time savings",
+        "weight": 3
+      },
+      {
+        "term": "manual hours",
+        "weight": 3
+      },
+      {
+        "term": "productivity gain",
+        "weight": 3
+      },
+      {
+        "term": "RPA",
+        "weight": 3
+      },
+      {
+        "term": "robotic process",
+        "weight": 3
+      },
+      {
+        "term": "UiPath",
+        "weight": 3
+      },
+      {
+        "term": "Automation Anywhere",
+        "weight": 3
+      },
+      {
+        "term": "Power Automate",
+        "weight": 3
+      },
+      {
+        "term": "workflow automation",
+        "weight": 3
+      },
+      {
+        "term": "reusable",
+        "weight": 3
+      },
+      {
+        "term": "shared service",
+        "weight": 3
+      },
+      {
+        "term": "capability reuse",
+        "weight": 3
+      },
+      {
+        "term": "component library",
+        "weight": 3
+      },
+      {
+        "term": "license",
+        "weight": 3
+      },
+      {
+        "term": "concurrent user",
+        "weight": 3
+      },
+      {
+        "term": "named user",
+        "weight": 3
+      },
+      {
+        "term": "license optimization",
+        "weight": 3
+      },
+      {
+        "term": "process improvement",
+        "weight": 3
+      },
+      {
+        "term": "process optimization",
+        "weight": 3
+      },
+      {
+        "term": "lean",
+        "weight": 3
+      },
+      {
+        "term": "Six Sigma",
+        "weight": 3
+      },
+      {
+        "term": "Automation ROI (positive within 12 months)",
+        "weight": 4
+      },
+      {
+        "term": "Hours saved by automation",
+        "weight": 4
+      },
+      {
+        "term": "Reusable capabilities and shared services",
+        "weight": 4
+      },
+      {
+        "term": "Process efficiency gains",
+        "weight": 4
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy",
+      "user research"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "missing_automation_roi",
+      "absent_pattern": "(automation ROI|return on investment|cost savings|efficiency gain)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_hours_saved",
+      "absent_pattern": "(hours saved|time savings|manual hours|productivity gain)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_automation_tools",
+      "absent_pattern": "(RPA|robotic process|UiPath|Automation Anywhere|Power Automate|workflow automation)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_reusable_capabilities",
+      "absent_pattern": "(reusable|shared service|capability reuse|component library)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_license_optimization",
+      "absent_pattern": "(license|concurrent user|named user|license optimization)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_process_improvement",
+      "absent_pattern": "(process improvement|process optimization|lean|Six Sigma)",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from agents/configs/process.json. Boost terms extracted from phase3.data_points patterns + key_data_points. Gap markers project blocker-tier data_points to absent_pattern checks. Hand-tune via --force after editing this file directly."
+}

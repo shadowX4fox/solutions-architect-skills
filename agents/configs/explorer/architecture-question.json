@@ -1,0 +1,60 @@
+{
+  "task_type": "architecture-question",
+  "task_family": "question",
+  "downstream_agent": "main",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/07-security-architecture.md"
+    },
+    {
+      "file": "docs/08-scalability-and-performance.md"
+    },
+    {
+      "file": "docs/09-operational-considerations.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    },
+    {
+      "file": "docs/components/**/*.md"
+    },
+    {
+      "file": "adr/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [],
+    "negative": []
+  },
+  "gap_markers": [],
+  "score_threshold": 0.2,
+  "output_format": "v1",
+  "notes": "Free-form architecture Q&A. Boost keywords are injected at runtime from extra_terms (the user's question keywords) — that's why the static boost list is empty. The skill orchestrator passes question terms; the explorer adds them as weight-4 boosts before classifying."
+}

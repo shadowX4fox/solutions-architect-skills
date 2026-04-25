@@ -1,0 +1,103 @@
+{
+  "task_type": "analysis-cost-hotspots",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/09-operational-considerations.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Cost",
+        "Pricing",
+        "Cloud"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Cost",
+        "Pricing",
+        "Cloud"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "cost",
+        "weight": 4
+      },
+      {
+        "term": "FinOps",
+        "weight": 5
+      },
+      {
+        "term": "reserved instance",
+        "weight": 3
+      },
+      {
+        "term": "spot instance",
+        "weight": 3
+      },
+      {
+        "term": "right-sizing",
+        "weight": 3
+      },
+      {
+        "term": "egress",
+        "weight": 4
+      },
+      {
+        "term": "storage class",
+        "weight": 2
+      },
+      {
+        "term": "cold storage",
+        "weight": 2
+      },
+      {
+        "term": "GPU",
+        "weight": 2
+      },
+      {
+        "term": "expensive",
+        "weight": 2
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_cost_section",
+      "absent_pattern": "cost|pricing|spend",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-cost-hotspots. Boost terms tuned per analysis vocabulary."
+}

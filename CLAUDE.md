@@ -48,6 +48,7 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 | `create ADR` · `update ADR status` · `supersede ADR` · `list ADRs` | `sa-skills:architecture-definition-record` | ADR CRUD (only sanctioned writer for `adr/`) |
 | `generate business blueprint` · `datos de iniciativa` · `application blueprint` | `sa-skills:architecture-blueprint` | Organizational blueprint templates |
 | `sync to IcePanel` · `IcePanel drift check` · `C4 model sync` | `sa-skills:architecture-icepanel-sync` | C4 import YAML + drift report |
+| `regenerate explorer headers` · `add explorer headers` · `backfill explorer headers` | `sa-skills:architecture-explorer-headers` | Backfill `<!-- EXPLORER_HEADER -->` blocks into legacy `docs/NN-*.md` and `docs/components/**/*.md`. Slash-command alias: `/regenerate-explorer-headers` (with optional `--force`, `--dry-run`, or `<path-glob>`). |
 
 **CRITICAL — release vs export are different skills**: "release my architecture" is the Draft → Released lifecycle (`architecture-docs` Workflow 10 — bumps version, writes CHANGELOG, creates `architecture-v{version}` git tag). "export my architecture" is `.docx` generation (`architecture-docs-export`). These MUST NOT be confused. If phrasing is ambiguous, default to `architecture-docs` for release phrasing and `architecture-docs-export` for "word", "docx", "deliverable", "executive summary document" phrasing.
 
@@ -59,11 +60,12 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 - `package.json` — Root Bun workspace config (workspace: `tools/docgen`)
 - `agents/` — Sub-agents consumed by the Agent tool, organized by role:
   - `agents/generators/` — content producers (`compliance-generator.md`, `handoff-generator.md`, `docs-export-generator.md`)
-  - `agents/builders/` — input assemblers for generators (`handoff-context-builder.md`)
+  - `agents/builders/` — input assemblers for generators (`architecture-explorer.md`, `handoff-context-builder.md`)
   - `agents/reviewers/` — quality evaluators (`peer-review-category-agent.md`, `architecture-analysis-agent.md`)
   - `agents/validators/` — 10 domain validators (one per compliance contract)
   - `agents/configs/` — 10 domain JSON configs consumed by `compliance-generator.md` at runtime
-  The two `handoff-*` agents are pinned to `model: sonnet` to keep the I/O-heavy work off the user's main-session model (typically Opus).
+  - `agents/configs/explorer/` — 36 task-typed JSON configs consumed by `architecture-explorer.md` at runtime (10 compliance + 10 analysis + 13 peer-review + handoff-component + architecture-question + adr-application; plus `_schema.json`)
+  The `handoff-*` agents are pinned to `model: sonnet`; `architecture-explorer` is pinned to `model: haiku` (lightweight relevance classification). All keep I/O-heavy work off the user's main-session model (typically Opus).
 - `skills/` — 14 skill directories (each containing `SKILL.md` + supporting files)
 - `tools/docgen/` — Standalone `generate-doc.js` for Word/.docx generation; own `package.json` under the Bun workspace
 - `scripts/build-release.sh` — Packages a release ZIP with SHA256 checksum
@@ -73,7 +75,9 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 
 **Skills**: Each skill is a directory under `skills/` containing a `SKILL.md` frontmatter file plus supporting Markdown guides, templates, and JSON schemas. Skills are pure Markdown — no compiled code — except `architecture-compliance`, which includes TypeScript utilities.
 
-**TypeScript utilities** live exclusively in `skills/architecture-compliance/utils/`:
+**TypeScript utilities** live in `skills/architecture-compliance/utils/` and `skills/architecture-explorer/utils/`:
+
+`skills/architecture-compliance/utils/`:
 - `validators.ts` — compliance table/section validation
 - `post-generation-pipeline.ts` — runs after each contract is generated
 - `manifest-generator.ts` — writes `COMPLIANCE_MANIFEST.md`
@@ -81,9 +85,17 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 - `resolve-plugin-dir.ts` — resolves plugin cache path at runtime (the skill runs from arbitrary project directories)
 - CLI wrappers (`*-cli.ts`) — thin Bun entrypoints
 
+`skills/architecture-explorer/utils/` (v3.14.0):
+- `explore-cache.ts` — `/tmp/architecture-explorer/` cache read/write + inputs-hash + glob expansion
+- `parse-explore-result.ts` — validates `EXPLORE_RESULT` blocks emitted by the explorer agent; rejects results that omit `required_sections[]` files (false-negative safeguard)
+- `validate-config.ts` — JSON Schema validation for explorer configs
+- `explore-cli.ts` — Bun CLI invoked by the explorer agent (subcommands: `inputs-hash`, `check-cache`, `expand-candidates`, `write-cache`, `read-cache`, `project-hash`)
+
 **Agents vs. Skills**: `agents/` holds sub-agents spawned by skills via the Agent tool. They are **not** skills and NEVER to be invoked directly from user-facing prompts.
 
 **Compliance agent architecture**: A single universal `agents/generators/compliance-generator.md` handles all 10 contract types, reading its domain config at runtime from `agents/configs/{contract_type}.json` (template filename, section mappings, grep patterns, requirement codes). Domain-specific validation is handled by 10 separate validator agents in `agents/validators/`.
+
+**Architecture-explorer (v3.14.0)**: A single universal `agents/builders/architecture-explorer.md` (model: haiku) is the front-door classifier for every doc-consuming workflow. It reads a task-typed config from `agents/configs/explorer/<task_type>.json` (e.g. `compliance-sre`, `analysis-spof`, `peer-review-STRUCT`, `handoff-component`, `architecture-question`, `adr-application`), expands its `candidate_files[]` glob, scans header + first 60 lines + section headings of each candidate, and returns an `EXPLORE_RESULT` block declaring which files are relevant to the downstream task. `required_sections[]` from the config bypass scoring (false-negative safeguard). Cache-keyed by candidate-file mtimes + plugin version + config mtime; cache lives at `/tmp/architecture-explorer/<project_hash>/<task_type>.json`. TypeScript utilities at `skills/architecture-explorer/utils/` (`explore-cache.ts`, `parse-explore-result.ts`, `validate-config.ts`, plus `explore-cli.ts` Bun CLI). Per-skill integrations land incrementally in v3.14.x patches — see `docs/CHANGELOG.md` for the rollout schedule.
 
 **Versioning**: Canonical version lives in `.claude-plugin/plugin.json`. Commits follow `feat: <description> v<semver>`; the `/release` skill bumps, commits, and pushes.
 

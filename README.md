@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.13.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -28,7 +28,7 @@ This project is distributed as a **Claude Code Plugin** via the **shadowX4fox Ma
 
 - **Marketplace**: A catalog of available plugins ([Learn more](https://docs.anthropic.com/claude/docs/claude-code-plugins))
 - **Plugin**: This repository, installable from the marketplace
-- **Skills**: Thirteen specialized skills within the plugin
+- **Skills**: Fifteen specialized skills within the plugin
 
 For detailed information about Claude Code's plugin system, see the [official Claude Code documentation](https://docs.anthropic.com/claude/docs/claude-code).
 
@@ -36,7 +36,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 ### What's Included
 
-- **14 Integrated Skills**
+- **15 Integrated Skills**
   - `architecture-readiness`: Requirements Elicitation + Product Owner Specifications
   - `architecture-docs`: ARCHITECTURE.md creation and maintenance (with diagram generation)
   - `architecture-component-guardian`: Single owner of `docs/components/README.md` index + C4 migration
@@ -51,6 +51,15 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - `architecture-blueprint`: Business & Application blueprint files (datos de iniciativa) from ARCHITECTURE.md
   - `architecture-onboarding`: Interactive concept map playground for new team members
   - `architecture-icepanel-sync` (beta): Sync C4 model to IcePanel via import YAML or REST API
+  - `architecture-explorer-headers` (v3.14.0): Backfill `<!-- EXPLORER_HEADER -->` blocks into legacy docs so the universal `architecture-explorer` agent can classify them accurately. Slash command: `/regenerate-explorer-headers` (with `--dry-run`, `--force`, scope glob)
+
+- **Universal `architecture-explorer` Agent (v3.14.0)**
+  - Haiku-tier doc classifier — front door for every doc-consuming workflow (compliance, analysis, peer-review, dev-handoff, free-form Q&A, ADR application)
+  - Reads task-specific configs from `agents/configs/explorer/<task_type>.json` (36 ship in v3.14.0: 10 compliance + 10 analysis + 13 peer-review + 3 special)
+  - Samples first 60 lines + headings of each candidate file (`ARCHITECTURE.md` is read in full as the navigation index) and returns an `EXPLORE_RESULT` allowlist of relevant files plus detected gaps
+  - Per-project `/tmp/architecture-explorer/<project_hash>/` cache keyed by candidate-file mtimes + plugin version + config mtime — repeat runs cost zero Haiku tokens
+  - Always-on by design: false-negatives prevented at the config level via `required_sections[]` (the runtime parser rejects any result that omits them, falling back to degraded mode)
+  - `<!-- EXPLORER_HEADER -->` blocks in `docs/NN-*.md` and `docs/components/**/*.md` files (5–10 lines after the H1, listing key concepts, technologies, components, scope, related ADRs) maximize classification accuracy. Backwards-compatible — legacy docs without the header still work via fallback scoring
 
 - **C4 Model Integration (IcePanel)**
   - Components follow C4 Level 2 (Container diagram) rules — every component must be a separately deployable unit (App or Store)
@@ -788,7 +797,41 @@ Where:
 
 ## Roadmap
 
-### v3.13.1 (Current Release) ✅
+### v3.14.0 (Current Release) ✅
+**feat: universal `architecture-explorer` Haiku classifier + 36 task-typed configs + `architecture-explorer-headers` skill**
+
+The plugin's biggest cost driver pre-v3.14.0 was redundant doc reads: a 10-contract compliance run hit `ARCHITECTURE.md` + `docs/01–09` + `adr/*` ~20 times (10 validators + 10 generators × full read), ~1.8 MB of duplicate Opus traffic. The 10-analysis dashboard repeated the pattern (~1.5–2 MB). Peer-review at Hard depth, the same.
+
+v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: haiku, `agents/builders/architecture-explorer.md`) as the canonical front door for every doc-consuming workflow. It reads a task-typed JSON config, samples the first 60 lines + headings of each candidate file (with `ARCHITECTURE.md` read in full as the navigation index), and returns an `EXPLORE_RESULT` allowlist that downstream synthesis agents will honor in v3.14.x patches. Cache hits cost zero Haiku tokens.
+
+**Architecture changes:**
+- **New universal sub-agent** — `agents/builders/architecture-explorer.md` (Haiku). Always-on by design: there is no `--no-explorer` opt-out. The false-negative safeguard is at the config level — every config declares `required_sections[]` that bypass scoring; the runtime parser (`skills/architecture-explorer/utils/parse-explore-result.ts`) rejects any result that omits a required entry, falling back to degraded mode.
+- **36 task-typed configs** at `agents/configs/explorer/`: 10 compliance (sre / security / cloud hand-tuned, 7 auto-derived from the existing `agents/configs/<contract>.json` `phase3.data_points`), 10 analysis (spof / blast-radius / bottleneck / cost-hotspots / stride / vendor-lockin / latency-budget / tech-debt / coupling / data-sensitivity), 13 peer-review (one per category in `PEER_REVIEW_CRITERIA.md`), 3 special (`handoff-component`, `architecture-question`, `adr-application`), plus `_schema.json` validating every entry.
+- **TypeScript utilities** at `skills/architecture-explorer/utils/`: `explore-cache.ts` (cache + glob expansion + inputs-hash), `parse-explore-result.ts` (validates `EXPLORE_RESULT` blocks, ships its own minimal YAML subset parser — zero deps), `validate-config.ts` (runtime schema validation), `explore-cli.ts` (Bun CLI: `inputs-hash`, `check-cache`, `expand-candidates`, `write-cache`, `read-cache`, `project-hash`).
+- **Auto-derivation script** `tools/derive-explorer-configs.ts` projects from existing source-of-truth into 33 of the 36 configs in one pass; `--force` flag re-derives.
+- **Explorer-Friendly Headers** — new `## Explorer-Friendly Headers` section in `skills/architecture-docs/ARCHITECTURE_DOCUMENTATION_GUIDE.md` documents an `<!-- EXPLORER_HEADER ... -->` block (5–10 lines after the H1, listing `key_concepts`, `technologies`, `components`/`component_self`, `scope`, `related_adrs`) that newly-created `docs/NN-*.md` and `docs/components/**/*.md` files should include. Backwards-compatible: legacy docs without the header still work via fallback scoring.
+- **New `architecture-explorer-headers` skill** at `skills/architecture-explorer-headers/`. Backfills EXPLORER_HEADER blocks into legacy docs. Slash command `/regenerate-explorer-headers` (with `--dry-run`, `--force`, `<path-glob>`). Bun module + CLI (`header-detector.ts`, `header-cli.ts`) provide `listDocFiles`, `hasExplorerHeader`, `findInsertionPoint`, `parseHeader`, `validateHeader`, `insertHeader`, `removeHeader`, `buildHeader`. Skill orchestrator generates the header content from each doc's actual body, inserts via Edit, validates, and reverts on failure.
+- **Setup integration** — `.claude/settings.json.example` extended with `Agent(sa-skills:architecture-explorer)` + `Read/Write(//tmp/architecture-explorer/**)`. Re-running `/setup` after upgrading appends them non-destructively (existing entries counted under "already present"). Generated CLAUDE.md (via `setup-claude-md.ts`) now includes a `### Routing doc reads through architecture-explorer (v3.14.0+)` subsection telling the user's session to invoke `sa-skills:architecture-explorer` (with `task_type: architecture-question`) before bulk-reading docs for free-form questions.
+- **CLAUDE.md trigger routing** — new entries for `regenerate explorer headers` / `add explorer headers` / `backfill explorer headers` route to `sa-skills:architecture-explorer-headers`.
+
+**Per-skill integration (deferred to v3.14.x patches):**
+
+| Patch | Skill | Work |
+|-------|-------|------|
+| 3.14.1 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.2 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
+| 3.14.3 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
+| 3.14.4 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.5 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
+| 3.14.6 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+
+Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
+
+**Behavior changes**: none for existing flows — explorer is callable but no skill invokes it yet (per-skill wiring is the v3.14.x work). The `architecture-explorer-headers` skill is opt-in via slash command.
+
+**Verification**: `bun run typecheck` ✅, `bun test` (465/465 pass — 78 new explorer + headers tests added on top of the 387 pre-existing) ✅, `bun run bundle:check` (both bundles in sync) ✅, 36/36 configs validate against `_schema.json` ✅, `tools/derive-explorer-configs.ts` runs cleanly ✅, `/setup` smoke test confirms idempotent CLAUDE.md generation with the new explorer subsection ✅.
+
+### v3.13.1 (Previous Release) ✅
 **chore: reorganize `agents/` by role — generators / builders / reviewers / validators / configs**
 
 The `agents/` directory grew to 6 top-level `.md` files + a misleadingly-named `agents/base/configs/` JSON folder + an `agents/validators/` folder over the v3.5–v3.13 series. v3.13.1 groups every agent and config under a role-based subdirectory so discovery is one folder away from "what does this agent do?":

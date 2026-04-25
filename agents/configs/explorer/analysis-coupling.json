@@ -1,0 +1,99 @@
+{
+  "task_type": "analysis-coupling",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Integration",
+        "Dependency",
+        "API"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Integration",
+        "Dependency",
+        "API"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "coupling",
+        "weight": 5
+      },
+      {
+        "term": "dependency",
+        "weight": 4
+      },
+      {
+        "term": "fan-in",
+        "weight": 4
+      },
+      {
+        "term": "fan-out",
+        "weight": 4
+      },
+      {
+        "term": "cycle",
+        "weight": 4
+      },
+      {
+        "term": "shared database",
+        "weight": 4
+      },
+      {
+        "term": "bounded context",
+        "weight": 3
+      },
+      {
+        "term": "interface",
+        "weight": 3
+      },
+      {
+        "term": "contract",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_integration_section",
+      "absent_pattern": "integration|dependency",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-coupling. Boost terms tuned per analysis vocabulary."
+}

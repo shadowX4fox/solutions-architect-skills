@@ -1,0 +1,105 @@
+{
+  "task_type": "analysis-latency-budget",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    },
+    {
+      "file": "docs/08-scalability-and-performance.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Latency",
+        "p95",
+        "p99",
+        "SLO"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Latency",
+        "p95",
+        "p99",
+        "SLO"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "p50",
+        "weight": 3
+      },
+      {
+        "term": "p95",
+        "weight": 5
+      },
+      {
+        "term": "p99",
+        "weight": 5
+      },
+      {
+        "term": "latency",
+        "weight": 5
+      },
+      {
+        "term": "budget",
+        "weight": 4
+      },
+      {
+        "term": "hop",
+        "weight": 3
+      },
+      {
+        "term": "round trip",
+        "weight": 3
+      },
+      {
+        "term": "RTT",
+        "weight": 3
+      },
+      {
+        "term": "timeout",
+        "weight": 3
+      },
+      {
+        "term": "deadline",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_p95",
+      "absent_pattern": "p95|p99",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-latency-budget. Boost terms tuned per analysis vocabulary."
+}

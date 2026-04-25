@@ -1,0 +1,228 @@
+{
+  "task_type": "compliance-business-continuity",
+  "task_family": "compliance",
+  "downstream_agent": "sa-skills:compliance-generator",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "docs/02-architecture-principles.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/08-scalability-and-performance.md"
+    },
+    {
+      "file": "docs/09-operational-considerations.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Business continuity planning",
+        "Disaster recovery automation",
+        "Backup and restoration procedures",
+        "Critical process impact"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "RTO:s",
+        "weight": 3
+      },
+      {
+        "term": "(0-9",
+        "weight": 3
+      },
+      {
+        "term": "minute",
+        "weight": 3
+      },
+      {
+        "term": "day",
+        "weight": 3
+      },
+      {
+        "term": "min",
+        "weight": 3
+      },
+      {
+        "term": "RPO:s",
+        "weight": 3
+      },
+      {
+        "term": "disaster recovery",
+        "weight": 3
+      },
+      {
+        "term": "DR procedure",
+        "weight": 3
+      },
+      {
+        "term": "DR plan",
+        "weight": 3
+      },
+      {
+        "term": "failover",
+        "weight": 3
+      },
+      {
+        "term": "recovery plan",
+        "weight": 3
+      },
+      {
+        "term": "backup",
+        "weight": 3
+      },
+      {
+        "term": "snapshot",
+        "weight": 3
+      },
+      {
+        "term": "replication",
+        "weight": 3
+      },
+      {
+        "term": "incremental backup",
+        "weight": 3
+      },
+      {
+        "term": "full backup",
+        "weight": 3
+      },
+      {
+        "term": "retention",
+        "weight": 3
+      },
+      {
+        "term": "backup retention",
+        "weight": 3
+      },
+      {
+        "term": "retention period",
+        "weight": 3
+      },
+      {
+        "term": "backup schedule",
+        "weight": 3
+      },
+      {
+        "term": "geographic",
+        "weight": 3
+      },
+      {
+        "term": "geo- redundan",
+        "weight": 3
+      },
+      {
+        "term": "multi- region",
+        "weight": 3
+      },
+      {
+        "term": "cross- region",
+        "weight": 3
+      },
+      {
+        "term": "multi- datacenter",
+        "weight": 3
+      },
+      {
+        "term": "high availability",
+        "weight": 3
+      },
+      {
+        "term": "active- active",
+        "weight": 3
+      },
+      {
+        "term": "active- passive",
+        "weight": 3
+      },
+      {
+        "term": "load balanc",
+        "weight": 3
+      },
+      {
+        "term": "single point of failure",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy",
+      "user research"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "missing_rto_detection",
+      "absent_pattern": "RTO[:\\s]+([0-9]+)\\s*(hour|minute|day|hr|min)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_rpo_detection",
+      "absent_pattern": "RPO[:\\s]+([0-9]+)\\s*(hour|minute|day|hr|min)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_disaster_recovery",
+      "absent_pattern": "(disaster recovery|DR procedure|DR plan|failover|recovery plan)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_backup_strategy",
+      "absent_pattern": "(backup|snapshot|replication|incremental backup|full backup)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_retention_policy",
+      "absent_pattern": "(retention|backup retention|retention period|backup schedule)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_geographic_redundancy",
+      "absent_pattern": "(geographic|geo[- ]redundan|multi[- ]region|cross[- ]region|multi[- ]datacenter)",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from agents/configs/bc.json. Boost terms extracted from phase3.data_points patterns + key_data_points. Gap markers project blocker-tier data_points to absent_pattern checks. Hand-tune via --force after editing this file directly."
+}

@@ -15,10 +15,10 @@
   },
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
-  "// BASH": "bun (template expansion, utils), date (contract timestamps), mkdir (compliance-docs dir)",
-  "// FILE ACCESS": "Read/Write /tmp/* (template processing), Read/Write compliance-docs/* (contract output)",
+  "// BASH": "bun (template expansion, utils, explorer cache CLI, header detector CLI), date (contract timestamps), mkdir (compliance-docs dir)",
+  "// FILE ACCESS": "Read/Write /tmp/* (template processing), Read/Write //tmp/architecture-explorer/** (explorer cache, v3.14.0+), Read/Write compliance-docs/* (contract output)",
   "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
-  "// AGENTS": "10 generators (CC-001 to CC-010) + 10 validators spawned by orchestrator",
+  "// AGENTS": "10 compliance generators + 10 validators + universal architecture-explorer (Haiku classifier, v3.14.0) + 2 reviewers + handoff agents + docs export",
   "// WEBSEARCH": "Validators use WebSearch for EOL (end-of-life) technology version checks",
   "permissions": {
     "allow": [
@@ -49,6 +49,7 @@
       "Agent(sa-skills:architecture-analysis-agent)",
       "Agent(sa-skills:handoff-generator)",
       "Agent(sa-skills:handoff-context-builder)",
+      "Agent(sa-skills:architecture-explorer)",
       "Agent(sa-skills:docs-export-generator)",
       "Bash(rm *)",
       "Write(exports/*)",
@@ -61,6 +62,8 @@
       "Read(handoffs/.manifest.json)",
       "Write(//tmp/handoff-payloads/*)",
       "Read(//tmp/handoff-payloads/*)",
+      "Write(//tmp/architecture-explorer/**)",
+      "Read(//tmp/architecture-explorer/**)",
       "WebSearch"
     ]
   },

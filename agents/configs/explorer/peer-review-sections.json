@@ -1,0 +1,55 @@
+{
+  "task_type": "peer-review-sections",
+  "task_family": "peer-review",
+  "downstream_agent": "sa-skills:peer-review-category-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/components/**/*.md"
+    },
+    {
+      "file": "adr/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "section",
+        "weight": 3
+      },
+      {
+        "term": "overview",
+        "weight": 2
+      },
+      {
+        "term": "coverage",
+        "weight": 3
+      }
+    ],
+    "negative": []
+  },
+  "gap_markers": [],
+  "score_threshold": 0.25,
+  "output_format": "v1",
+  "notes": "Auto-derived from skills/architecture-peer-review/PEER_REVIEW_CRITERIA.md category SECTIONS. Lower threshold (0.25) since peer-review categories overlap and broad inclusion is preferred."
+}

@@ -1,0 +1,120 @@
+{
+  "task_type": "analysis-data-sensitivity",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/07-security-architecture.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "PII",
+        "Encryption",
+        "Data Classification"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "PII",
+        "Encryption",
+        "Data Classification"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "PII",
+        "weight": 5
+      },
+      {
+        "term": "personal data",
+        "weight": 5
+      },
+      {
+        "term": "GDPR",
+        "weight": 5
+      },
+      {
+        "term": "HIPAA",
+        "weight": 5
+      },
+      {
+        "term": "PCI",
+        "weight": 5
+      },
+      {
+        "term": "data classification",
+        "weight": 5
+      },
+      {
+        "term": "sensitive",
+        "weight": 4
+      },
+      {
+        "term": "encryption at rest",
+        "weight": 4
+      },
+      {
+        "term": "encryption in transit",
+        "weight": 4
+      },
+      {
+        "term": "pseudonymization",
+        "weight": 4
+      },
+      {
+        "term": "anonymization",
+        "weight": 4
+      },
+      {
+        "term": "audit log",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_data_classification",
+      "absent_pattern": "data classification|PII|sensitive",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "no_encryption",
+      "absent_pattern": "encryption",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-data-sensitivity. Boost terms tuned per analysis vocabulary."
+}

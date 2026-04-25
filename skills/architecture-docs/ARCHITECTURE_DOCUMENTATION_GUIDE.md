@@ -124,6 +124,78 @@ S12.   Architecture Decision Records (ADRs)→ adr/ directory (separate files pe
 
 ---
 
+## Explorer-Friendly Headers (v3.14.0)
+
+Every newly-created or edited `docs/NN-*.md` section file and `docs/components/**/*.md` component file MUST include an **Explorer Header** — a 5–10 line block placed immediately after the H1 title that surfaces the doc's key concepts, terms, technologies, and component names.
+
+### Why
+
+The plugin's `architecture-explorer` agent (Haiku-tier classifier, `agents/builders/architecture-explorer.md`) reads only the first 60 lines + section headings of each candidate file when deciding whether the file is relevant to a downstream task (compliance, analysis, peer-review, handoff, Q&A, ADR application). If the load-bearing terms only appear deep in the body, the explorer can miss them and route the file to `irrelevant_files[]` — costing the downstream agent a documentation gap. A short, dense header in the first 60 lines maximizes the explorer's classification accuracy.
+
+`ARCHITECTURE.md` at the project root is exempt — it is a navigation index, read in full, no header needed.
+
+### Format
+
+Place the header between the H1 and the first regular section. Use this exact frontmatter-style fence so it is easy for the explorer to find and ignore the body of the doc when scoring:
+
+```markdown
+# Section 8: Scalability & Performance
+
+<!-- EXPLORER_HEADER
+key_concepts: SLO, SLI, MTTR, error budget, HPA, auto-scaling, p95, p99
+technologies: Prometheus, Grafana, Datadog
+components: api-gateway, payment-service, inbox-hub
+scope: Service-level objectives, horizontal pod autoscaling, latency budgets
+related_adrs: ADR-014, ADR-022
+-->
+
+> One-paragraph summary of what this doc covers, written for a reader who needs to decide in 30 seconds whether to read the full doc.
+
+## 8.1 Service Level Objectives
+...
+```
+
+Field guidance:
+
+- **key_concepts** — comma-separated list of 5–15 domain terms a downstream synthesis agent would search for. Pull from the doc's actual content. Match the vocabulary in `agents/configs/explorer/<task_type>.json` `relevance_keywords.boost[]` where applicable.
+- **technologies** — concrete tools/products named in the doc (Prometheus, AWS, Kubernetes, Spring Boot, etc.). Skip generic terms like "database" or "API".
+- **components** — kebab-case component names referenced in the doc, matching `docs/components/<NN>-<slug>.md` filenames.
+- **scope** — one short sentence (≤120 chars) explaining what the doc covers and what it explicitly does NOT cover.
+- **related_adrs** — ADR identifiers (ADR-NNN) whose decisions are reflected in this doc. Helps the explorer's ADR intersection logic.
+
+The trailing `>` blockquote is the **30-second summary** — a human-readable distillation that complements the machine-readable header. It is also surfaced to the explorer (it lives within the first 60 lines) and to humans skimming the doc.
+
+### What goes in `docs/components/NN-<slug>.md`
+
+Component files follow the same rule with one variation — the `components` field is replaced by `component_self`:
+
+```markdown
+# Payment Service
+
+<!-- EXPLORER_HEADER
+key_concepts: PCI compliance, idempotency, refund, chargeback, settlement
+technologies: Spring Boot 3.3, PostgreSQL 16, Stripe API
+component_self: payment-service
+component_type: api-service
+related_adrs: ADR-018, ADR-031
+-->
+
+> Payment Service ingests authorization requests from the order-checkout flow, calls the Stripe API for capture/refund/void operations, and persists ledger entries with idempotency guarantees.
+
+## Component Metadata
+...
+```
+
+### Maintenance
+
+When you edit a doc, update the EXPLORER_HEADER if the change adds/removes a key concept, technology, or component reference. Stale headers are worse than missing ones — they actively mislead the classifier. The header is part of the doc's source-of-truth, not a derived index.
+
+### Backwards compatibility
+
+Legacy docs without an EXPLORER_HEADER continue to work — the explorer falls back to scoring against headings + body sample. There is no breaking change. The header simply boosts classification accuracy for new and updated docs going forward.
+
+---
+
 ## Document Index & Navigation
 
 **Purpose**: `ARCHITECTURE.md` serves as the navigation index — a short (~130 lines) table linking to all `docs/NN-name.md` section files. This replaces the old line-number-based Document Index.

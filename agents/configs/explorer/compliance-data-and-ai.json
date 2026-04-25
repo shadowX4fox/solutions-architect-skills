@@ -1,0 +1,219 @@
+{
+  "task_type": "compliance-data-and-ai",
+  "task_family": "compliance",
+  "downstream_agent": "sa-skills:compliance-generator",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    },
+    {
+      "file": "docs/05-integration-points.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/08-scalability-and-performance.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Data management and governance",
+        "Analytics and AI/ML model lifecycle",
+        "Data quality and validation",
+        "Regulatory compliance"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md"
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "data quality",
+        "weight": 3
+      },
+      {
+        "term": "data validation",
+        "weight": 3
+      },
+      {
+        "term": "data cleansing",
+        "weight": 3
+      },
+      {
+        "term": "data accuracy",
+        "weight": 3
+      },
+      {
+        "term": "data completeness",
+        "weight": 3
+      },
+      {
+        "term": "data lineage",
+        "weight": 3
+      },
+      {
+        "term": "data provenance",
+        "weight": 3
+      },
+      {
+        "term": "data flow",
+        "weight": 3
+      },
+      {
+        "term": "data traceability",
+        "weight": 3
+      },
+      {
+        "term": "PII",
+        "weight": 3
+      },
+      {
+        "term": "personally identifiable",
+        "weight": 3
+      },
+      {
+        "term": "data masking",
+        "weight": 3
+      },
+      {
+        "term": "data anonymization",
+        "weight": 3
+      },
+      {
+        "term": "pseudonymization",
+        "weight": 3
+      },
+      {
+        "term": "ML model",
+        "weight": 3
+      },
+      {
+        "term": "machine learning",
+        "weight": 3
+      },
+      {
+        "term": "model training",
+        "weight": 3
+      },
+      {
+        "term": "model deployment",
+        "weight": 3
+      },
+      {
+        "term": "model monitoring",
+        "weight": 3
+      },
+      {
+        "term": "re-training",
+        "weight": 3
+      },
+      {
+        "term": "retention policy",
+        "weight": 3
+      },
+      {
+        "term": "data retention",
+        "weight": 3
+      },
+      {
+        "term": "retention period",
+        "weight": 3
+      },
+      {
+        "term": "data lifecycle",
+        "weight": 3
+      },
+      {
+        "term": "data volume",
+        "weight": 3
+      },
+      {
+        "term": "scalability",
+        "weight": 3
+      },
+      {
+        "term": "3x growth",
+        "weight": 3
+      },
+      {
+        "term": "data growth",
+        "weight": 3
+      },
+      {
+        "term": "scaling",
+        "weight": 3
+      },
+      {
+        "term": "GDPR",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy",
+      "user research"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "missing_data_quality",
+      "absent_pattern": "(data quality|data validation|data cleansing|data accuracy|data completeness)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_data_lineage",
+      "absent_pattern": "(data lineage|data provenance|data flow|data traceability)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_pii_protection",
+      "absent_pattern": "(PII|personally identifiable|data masking|data anonymization|pseudonymization)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_ml_model_governance",
+      "absent_pattern": "(ML model|machine learning|model training|model deployment|model monitoring|re-training)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_data_retention",
+      "absent_pattern": "(retention policy|data retention|retention period|data lifecycle)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_data_scalability",
+      "absent_pattern": "(data volume|scalability|3x growth|data growth|scaling)",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from agents/configs/data_ai.json. Boost terms extracted from phase3.data_points patterns + key_data_points. Gap markers project blocker-tier data_points to absent_pattern checks. Hand-tune via --force after editing this file directly."
+}

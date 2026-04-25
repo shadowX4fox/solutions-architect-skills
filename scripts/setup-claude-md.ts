@@ -26,13 +26,25 @@ const blockBody = `## Architecture Documentation (sa-skills)
 
 This project uses the [sa-skills](https://github.com/shadowX4fox/solutions-architect-skills) plugin for architecture documentation. When answering architecture questions, reading this project's context, or generating architecture-adjacent content, treat the following as authoritative sources:
 
-- **\`ARCHITECTURE.md\`** (project root) — the **entry point**. A navigation index (~130 lines) that lists every architecture section and its file under \`docs/\`. Always start here.
+- **\`ARCHITECTURE.md\`** (project root) — the **entry point**. A navigation index (~130 lines) that lists every architecture section and its file under \`docs/\`. Always start here. (The plugin's \`architecture-explorer\` reads this file in full; you should too.)
 - **\`docs/\`** — the architecture split into section files (\`docs/01-system-overview.md\`, \`docs/02-context.md\`, \`docs/03-architecture-layers.md\`, …). Resolve a section by reading the navigation table in \`ARCHITECTURE.md\`, then opening the referenced \`docs/NN-name.md\`.
 - **\`docs/components/\`** — per-component descriptors (C4 Level 2). \`docs/components/README.md\` is the component index.
 - **\`adr/\`** — Architecture Decision Records. Read the relevant ADR before proposing changes that touch a recorded decision.
 - **\`handoffs/\`** — Component Development Handoffs (implementation specs for dev teams).
 
 When referencing an architecture section, quote its **internal section number** (e.g., "Section 7"), not the file prefix number.
+
+### Routing doc reads through \`architecture-explorer\` (v3.14.0+)
+
+The plugin ships a universal \`sa-skills:architecture-explorer\` sub-agent (Haiku-tier classifier) that is the canonical front door for **any** workflow that consumes more than two architecture files. It reads \`agents/configs/explorer/<task_type>.json\`, scans the first 60 lines + headings of every candidate doc (with \`ARCHITECTURE.md\` read in full as the navigation index), and returns an \`EXPLORE_RESULT\` allowlist of relevant files plus detected gaps. Cache hits cost zero Haiku tokens.
+
+**When to use it:**
+
+- **Compliance / analysis / peer-review / dev-handoff / ADR creation** — the corresponding sa-skills skill invokes the explorer automatically. You don't need to call it directly; just trust the skill's flow.
+- **Free-form architecture Q&A** — when the user asks "what does our architecture say about X?" or "how does Y work?", prefer spawning \`sa-skills:architecture-explorer\` with \`task_type: architecture-question\` (config: \`agents/configs/explorer/architecture-question.json\`) and the user's question terms passed as \`extra_terms\`. Read only the files listed in \`EXPLORE_RESULT.relevant_files[]\`. Avoid bulk-reading the whole \`docs/\` tree by hand — that's the redundant-read pattern the explorer was designed to eliminate.
+- **Bulk doc work spanning ≥3 files** — same pattern. The explorer keeps your context window flat regardless of project size.
+
+**EXPLORER_HEADER blocks** — each \`docs/NN-*.md\` and \`docs/components/**/*.md\` file should carry a 5–10 line \`<!-- EXPLORER_HEADER ... -->\` block right after the H1 listing key concepts, technologies, components, scope, and related ADRs. These are what the classifier scores against in the first 60 lines. If your docs predate v3.14.0 or look stale, run \`/regenerate-explorer-headers\` (or \`--dry-run\` first) to backfill them. \`ARCHITECTURE.md\` is exempt — it's a navigation index, no header needed.
 
 To bootstrap or update these documents, invoke the appropriate sa-skills skill (see the plugin's \`docs/WORKFLOW_GUIDE.md\`).`;
 

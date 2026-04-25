@@ -1,0 +1,104 @@
+{
+  "task_type": "analysis-bottleneck",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/08-scalability-and-performance.md"
+    },
+    {
+      "file": "docs/04-data-flow-patterns.md"
+    },
+    {
+      "file": "docs/components/README.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Throughput",
+        "TPS",
+        "Latency",
+        "Capacity"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Throughput",
+        "TPS",
+        "Latency",
+        "Capacity"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "TPS",
+        "weight": 5
+      },
+      {
+        "term": "throughput",
+        "weight": 4
+      },
+      {
+        "term": "bottleneck",
+        "weight": 5
+      },
+      {
+        "term": "queue",
+        "weight": 3
+      },
+      {
+        "term": "backlog",
+        "weight": 3
+      },
+      {
+        "term": "rate limit",
+        "weight": 3
+      },
+      {
+        "term": "capacity",
+        "weight": 3
+      },
+      {
+        "term": "concurrent",
+        "weight": 2
+      },
+      {
+        "term": "batch size",
+        "weight": 2
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "missing_tps",
+      "absent_pattern": "TPS|throughput",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-bottleneck. Boost terms tuned per analysis vocabulary."
+}

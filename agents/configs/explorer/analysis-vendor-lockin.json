@@ -1,0 +1,103 @@
+{
+  "task_type": "analysis-vendor-lockin",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Provider",
+        "Cloud",
+        "Vendor"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Provider",
+        "Cloud",
+        "Vendor"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "vendor lock-in",
+        "weight": 5
+      },
+      {
+        "term": "proprietary",
+        "weight": 4
+      },
+      {
+        "term": "managed service",
+        "weight": 3
+      },
+      {
+        "term": "SaaS",
+        "weight": 3
+      },
+      {
+        "term": "AWS",
+        "weight": 2
+      },
+      {
+        "term": "Azure",
+        "weight": 2
+      },
+      {
+        "term": "GCP",
+        "weight": 2
+      },
+      {
+        "term": "portable",
+        "weight": 4
+      },
+      {
+        "term": "open source",
+        "weight": 3
+      },
+      {
+        "term": "egress fee",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_exit_strategy",
+      "absent_pattern": "exit|migration|portability",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-vendor-lockin. Boost terms tuned per analysis vocabulary."
+}

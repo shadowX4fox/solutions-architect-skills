@@ -115,3 +115,14 @@ Restart Claude Code (or press Ctrl+R) to reload settings.
 - The `.gitignore` merge is append-only and line-exact. Existing entries are never rewritten; re-runs report `Unchanged` once all three sa-skills entries are present.
 - The command is idempotent end-to-end — re-running it on an already-configured project reports 0 added / N already present for permissions, `Unchanged` for the CLAUDE.md block, and `Unchanged` for `.gitignore`.
 - Required permission for the command itself: `Bash(bun *)`. First-time users will see a single Claude Code permission prompt when the helper runs; approve once and the prompt does not repeat.
+
+## v3.14.0 — what's new in this setup
+
+Existing projects re-running `/setup` after upgrading to v3.14.0 will see two new permissions added:
+
+- `Agent(sa-skills:architecture-explorer)` — the universal Haiku-tier doc classifier (front door for compliance / analysis / peer-review / handoff / Q&A / ADR workflows). Pre-existing `Agent(sa-skills:*)` grants are preserved; the new line is appended.
+- `Write(//tmp/architecture-explorer/**)` and `Read(//tmp/architecture-explorer/**)` — the explorer's per-project cache (sha256-keyed by candidate-file mtimes + plugin version + config mtime). Cache hits cost zero Haiku tokens.
+
+No marketplace re-registration is needed. The new `architecture-explorer-headers` skill (and its `/regenerate-explorer-headers` slash command) inherit existing `Bash(bun *)` and `Read/Write` doc-tree permissions — no extra grants required to run them.
+
+If a project's `settings.json` was committed with the v3.13.x permissions list and you want the upgrade visible in version control, run `/setup` and then commit the resulting two-line addition to `permissions.allow`.

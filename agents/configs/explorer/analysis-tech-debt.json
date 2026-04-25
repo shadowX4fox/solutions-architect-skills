@@ -1,0 +1,99 @@
+{
+  "task_type": "analysis-tech-debt",
+  "task_family": "analysis",
+  "downstream_agent": "sa-skills:architecture-analysis-agent",
+  "required_sections": [
+    {
+      "file": "ARCHITECTURE.md"
+    },
+    {
+      "file": "docs/06-technology-stack.md"
+    },
+    {
+      "file": "docs/03-architecture-layers.md"
+    }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md"
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": [
+        "Version",
+        "EOL",
+        "Deprecated"
+      ]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": [
+        "Version",
+        "EOL",
+        "Deprecated"
+      ]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      {
+        "term": "EOL",
+        "weight": 5
+      },
+      {
+        "term": "end of life",
+        "weight": 5
+      },
+      {
+        "term": "deprecated",
+        "weight": 5
+      },
+      {
+        "term": "legacy",
+        "weight": 4
+      },
+      {
+        "term": "technical debt",
+        "weight": 4
+      },
+      {
+        "term": "upgrade",
+        "weight": 3
+      },
+      {
+        "term": "migration",
+        "weight": 3
+      },
+      {
+        "term": "unsupported",
+        "weight": 4
+      },
+      {
+        "term": "CVE",
+        "weight": 3
+      }
+    ],
+    "negative": [
+      "pricing",
+      "marketing copy"
+    ]
+  },
+  "gap_markers": [
+    {
+      "name": "no_versions",
+      "absent_pattern": "version|v[0-9]+",
+      "case_insensitive": true,
+      "severity": "high"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Auto-derived from architecture-analysis spec for analysis-tech-debt. Boost terms tuned per analysis vocabulary."
+}

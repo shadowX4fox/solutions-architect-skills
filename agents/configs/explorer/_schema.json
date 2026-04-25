@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/shadowX4fox/solutions-architect-skills/agents/configs/explorer/_schema.json",
+  "title": "Architecture Explorer Config",
+  "description": "Schema for agents/configs/explorer/<task_type>.json files consumed by agents/builders/architecture-explorer.md",
+  "type": "object",
+  "required": [
+    "task_type",
+    "task_family",
+    "downstream_agent",
+    "required_sections",
+    "optional_sections",
+    "candidate_files",
+    "relevance_keywords",
+    "score_threshold",
+    "output_format"
+  ],
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Namespaced id, e.g. compliance-sre, analysis-spof, peer-review-STRUCT (lowercased), handoff-component, architecture-question, adr-application."
+    },
+    "task_family": {
+      "type": "string",
+      "enum": ["compliance", "analysis", "peer-review", "handoff", "question", "adr"]
+    },
+    "downstream_agent": {
+      "type": "string",
+      "description": "subagent_type that will consume the EXPLORE_RESULT, or 'main' if the orchestrator's main session consumes it directly."
+    },
+    "required_sections": {
+      "type": "array",
+      "description": "Files always marked relevant regardless of keyword score. False-negative safeguard. MUST list every file the downstream agent absolutely cannot operate without.",
+      "items": {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Repo-relative path (may include glob patterns like docs/components/**/*.md)."
+          },
+          "anchor_hint": {
+            "type": ["string", "null"],
+            "description": "Optional heading hint for matched_sections reporting."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "optional_sections": {
+      "type": "array",
+      "description": "Files scored against relevance_keywords. Included in relevant_files[] only if score >= score_threshold (or anchor_hint matches a heading).",
+      "items": {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "anchor_hints": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Headings whose presence boosts the score by +0.20."
+          },
+          "include_when": {
+            "type": "string",
+            "enum": ["any_of_keywords", "all_of_keywords", "anchor_only"],
+            "default": "any_of_keywords"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "candidate_files": {
+      "type": "array",
+      "description": "Glob patterns expanded relative to project_root. The universe of files the explorer scans.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "relevance_keywords": {
+      "type": "object",
+      "required": ["boost"],
+      "properties": {
+        "must": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Reserved for future use — if any 'must' term is absent, file is irrelevant. Currently informational only."
+        },
+        "boost": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["term", "weight"],
+            "properties": {
+              "term": { "type": "string", "minLength": 1 },
+              "weight": { "type": "number", "minimum": 1, "maximum": 5 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "negative": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Terms that, if dominant, push the file to irrelevant_files[]."
+        }
+      },
+      "additionalProperties": false
+    },
+    "gap_markers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "severity"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "absent_pattern": {
+            "type": "string",
+            "description": "Regex (POSIX). Gap is emitted when pattern is NOT found in the file."
+          },
+          "present_pattern": {
+            "type": "string",
+            "description": "Regex (POSIX). Gap is emitted when pattern IS found (anti-pattern detection)."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["blocker", "high", "medium", "desired"]
+          },
+          "case_insensitive": {
+            "type": "boolean",
+            "description": "When true, regex is compiled with the 'i' flag. Mirrors agents/configs/<contract>.json data_points convention."
+          }
+        },
+        "oneOf": [
+          { "required": ["absent_pattern"] },
+          { "required": ["present_pattern"] }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "score_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Default 0.30. Lower values err toward inclusion (recommended)."
+    },
+    "max_irrelevant_files": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Optional cap on irrelevant_files[] length to keep result block compact. Null = no cap."
+    },
+    "output_format": {
+      "type": "string",
+      "enum": ["v1"],
+      "description": "EXPLORE_RESULT schema version this config targets."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form authoring notes — not used at runtime."
+    }
+  },
+  "additionalProperties": false
+}

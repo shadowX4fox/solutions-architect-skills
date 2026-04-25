@@ -1,0 +1,123 @@
+{
+  "task_type": "compliance-security",
+  "task_family": "compliance",
+  "downstream_agent": "sa-skills:compliance-generator",
+  "required_sections": [
+    { "file": "ARCHITECTURE.md" },
+    { "file": "docs/03-architecture-layers.md" },
+    { "file": "docs/05-integration-points.md" },
+    { "file": "docs/07-security-architecture.md" },
+    { "file": "docs/09-operational-considerations.md" },
+    { "file": "docs/components/README.md" }
+  ],
+  "optional_sections": [
+    {
+      "file": "docs/01-system-overview.md",
+      "anchor_hints": ["Trust Boundaries", "External Actors"]
+    },
+    {
+      "file": "docs/06-technology-stack.md",
+      "anchor_hints": ["Authentication", "Identity", "TLS"]
+    },
+    {
+      "file": "adr/*.md",
+      "anchor_hints": ["security", "authentication", "encryption", "mTLS", "secrets", "vault"]
+    },
+    {
+      "file": "docs/components/**/*.md",
+      "anchor_hints": ["Security", "Authentication", "Authorization", "API"]
+    }
+  ],
+  "candidate_files": [
+    "ARCHITECTURE.md",
+    "docs/*.md",
+    "docs/components/README.md",
+    "docs/components/**/*.md",
+    "adr/*.md"
+  ],
+  "relevance_keywords": {
+    "boost": [
+      { "term": "OAuth", "weight": 4 },
+      { "term": "OIDC", "weight": 4 },
+      { "term": "OpenID Connect", "weight": 4 },
+      { "term": "SAML", "weight": 3 },
+      { "term": "JWT", "weight": 3 },
+      { "term": "API key", "weight": 2 },
+      { "term": "bearer token", "weight": 2 },
+      { "term": "TLS", "weight": 4 },
+      { "term": "mTLS", "weight": 5 },
+      { "term": "mutual TLS", "weight": 5 },
+      { "term": "SSL", "weight": 2 },
+      { "term": "HTTPS", "weight": 2 },
+      { "term": "encryption at rest", "weight": 5 },
+      { "term": "encryption in transit", "weight": 5 },
+      { "term": "AES-256", "weight": 4 },
+      { "term": "AES", "weight": 2 },
+      { "term": "MFA", "weight": 4 },
+      { "term": "multi-factor", "weight": 4 },
+      { "term": "SSO", "weight": 3 },
+      { "term": "service mesh", "weight": 3 },
+      { "term": "Istio", "weight": 2 },
+      { "term": "Linkerd", "weight": 2 },
+      { "term": "secrets management", "weight": 5 },
+      { "term": "vault", "weight": 4 },
+      { "term": "KMS", "weight": 4 },
+      { "term": "key management", "weight": 4 },
+      { "term": "secrets rotation", "weight": 4 },
+      { "term": "vulnerability", "weight": 4 },
+      { "term": "CVE", "weight": 3 },
+      { "term": "penetration test", "weight": 3 },
+      { "term": "security scan", "weight": 3 },
+      { "term": "SIEM", "weight": 3 },
+      { "term": "audit log", "weight": 4 },
+      { "term": "WAF", "weight": 3 },
+      { "term": "zero trust", "weight": 3 },
+      { "term": "trust boundary", "weight": 3 },
+      { "term": "RBAC", "weight": 3 },
+      { "term": "ABAC", "weight": 3 },
+      { "term": "IAM", "weight": 3 }
+    ],
+    "negative": ["billing strategy", "marketing copy", "branding"]
+  },
+  "gap_markers": [
+    {
+      "name": "missing_encryption_in_transit",
+      "absent_pattern": "(TLS|HTTPS|encryption in transit)",
+      "case_insensitive": true,
+      "severity": "blocker"
+    },
+    {
+      "name": "missing_encryption_at_rest",
+      "absent_pattern": "(encryption at rest|AES|encrypted storage)",
+      "case_insensitive": true,
+      "severity": "blocker"
+    },
+    {
+      "name": "missing_authentication",
+      "absent_pattern": "(authentication|OAuth|JWT|SAML|OpenID|MFA)",
+      "case_insensitive": true,
+      "severity": "blocker"
+    },
+    {
+      "name": "missing_secrets_management",
+      "absent_pattern": "(secrets management|vault|KMS|key management)",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "missing_vulnerability_sla",
+      "absent_pattern": "(vulnerability.{0,40}(SLA|days|hours|hr|critical|high))",
+      "case_insensitive": true,
+      "severity": "high"
+    },
+    {
+      "name": "plaintext_secret_present",
+      "present_pattern": "(password|api[_-]?key|secret)\\s*[:=]\\s*['\"][^'\"]+['\"]",
+      "case_insensitive": true,
+      "severity": "blocker"
+    }
+  ],
+  "score_threshold": 0.3,
+  "output_format": "v1",
+  "notes": "Hand-tuned exemplar for Security compliance (LAS1-LAS8). Argus persona — zero-trust mindset. Required sections include all five primary security-relevant docs. mTLS/encryption keywords carry maximum weight. plaintext_secret_present is a present-pattern anti-marker that triggers a blocker gap if literal credentials appear in any candidate file."
+}
