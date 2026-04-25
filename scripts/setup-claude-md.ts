@@ -44,6 +44,26 @@ The plugin ships a universal \`sa-skills:architecture-explorer\` sub-agent (Haik
 - **Free-form architecture Q&A** — when the user asks "what does our architecture say about X?" or "how does Y work?", prefer spawning \`sa-skills:architecture-explorer\` with \`task_type: architecture-question\` (config: \`agents/configs/explorer/architecture-question.json\`) and the user's question terms passed as \`extra_terms\`. Read only the files listed in \`EXPLORE_RESULT.relevant_files[]\`. Avoid bulk-reading the whole \`docs/\` tree by hand — that's the redundant-read pattern the explorer was designed to eliminate.
 - **Bulk doc work spanning ≥3 files** — same pattern. The explorer keeps your context window flat regardless of project size.
 
+#### When to (re-)trigger \`architecture-explorer\` — cache-aware decision tree
+
+Once the explorer has run in a conversation, the resulting \`EXPLORE_RESULT\` allowlist and the files it pointed to are still in context — re-running it on every follow-up turn is wasteful. But silently skipping it can lead to stale or wrongly-scoped answers when the user's question shifts. Use this decision tree before answering any architecture Q&A:
+
+1. **No prior \`EXPLORE_RESULT\` for \`task_type: architecture-question\` in this conversation** → spawn the explorer. Always.
+2. **Prior \`EXPLORE_RESULT\` exists, new question is the same scope or a narrower subset of the prior allowlist** (e.g. "give me a brief version", focused follow-up on a topic whose files are already loaded) → skip the explorer, answer from already-loaded files.
+3. **Prior \`EXPLORE_RESULT\` exists, new question is adjacent or shifted scope** (different \`extra_terms\` would matter — e.g. prior ran on "summary"; new question is about a specific ADR, compliance contract, or component handoff) → re-trigger the explorer with fresh \`extra_terms\`.
+4. **Prior \`EXPLORE_RESULT\` exists, new question references files outside the prior allowlist** (e.g. \`compliance-docs/\`, \`analysis/\`, \`adr/\` deep-dive after a \`docs/\` summary) → re-trigger the explorer.
+5. **In doubt about scope match** → trigger. The Haiku-tier explorer is cheap insurance against giving an answer grounded in the wrong slice of the docs.
+
+**Honest self-check**: if you are about to read a file that the prior \`EXPLORE_RESULT.relevant_files[]\` did not list, that is an automatic re-trigger.
+
+**Permanent exceptions** (never trigger the explorer):
+
+- Another sa-skills skill is already running (compliance, analysis, peer-review, dev-handoff, ADR creation, etc.) — it invokes the explorer itself; do not double-call.
+- The user names a single specific file path to read.
+- The question is about a fact already stated in the current conversation, not a doc lookup.
+
+**Why this matters**: the explorer is the canonical front door for any workflow that consumes more than two architecture files. The cache-aware variant of that rule preserves the context-window-flat property on follow-up turns while still re-running classification when the question shifts — i.e. exactly when the prior allowlist is no longer a safe answer.
+
 **EXPLORER_HEADER blocks** — each \`docs/NN-*.md\` and \`docs/components/**/*.md\` file should carry a 5–10 line \`<!-- EXPLORER_HEADER ... -->\` block right after the H1 listing key concepts, technologies, components, scope, and related ADRs. These are what the classifier scores against in the first 60 lines. If your docs predate v3.14.0 or look stale, run \`/regenerate-explorer-headers\` (or \`--dry-run\` first) to backfill them. \`ARCHITECTURE.md\` is exempt — it's a navigation index, no header needed.
 
 ### Session edit tracker — keep EXPLORER_HEADERs honest (v3.14.1+)
