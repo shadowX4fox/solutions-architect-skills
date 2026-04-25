@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.13.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.13.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.13.0` in the list.
+You should see `sa-skills v3.13.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -416,7 +416,7 @@ The system uses a **two-phase parallel execution** model: validators run first (
   ┌─────────────────────────────────────────────────────┐
   │         compliance-generator (universal)             │
   │                                                      │
-  │  Reads config: agents/base/configs/{type}.json       │
+  │  Reads config: agents/configs/{type}.json            │
   │  Loads template: cc-NNN-{type}.template.md           │
   │  Parses VALIDATION_RESULT from prompt                │
   │  Fills template placeholders                         │
@@ -788,7 +788,46 @@ Where:
 
 ## Roadmap
 
-### v3.13.0 (Current Release) ✅
+### v3.13.1 (Current Release) ✅
+**chore: reorganize `agents/` by role — generators / builders / reviewers / validators / configs**
+
+The `agents/` directory grew to 6 top-level `.md` files + a misleadingly-named `agents/base/configs/` JSON folder + an `agents/validators/` folder over the v3.5–v3.13 series. v3.13.1 groups every agent and config under a role-based subdirectory so discovery is one folder away from "what does this agent do?":
+
+```
+agents/
+├── builders/        handoff-context-builder.md          (assembles input for generators)
+├── configs/         10 domain JSON files                (was agents/base/configs/)
+├── generators/      compliance-generator.md             (produces content)
+│                    docs-export-generator.md
+│                    handoff-generator.md
+├── reviewers/       architecture-analysis-agent.md      (evaluates quality)
+│                    peer-review-category-agent.md
+└── validators/      10 domain validator agents          (unchanged location)
+```
+
+The `base/` parent directory is gone (it only ever held configs and the name suggested base classes).
+
+**Behavior changes**: none. Agent invocation in Claude Code uses the `name:` frontmatter (`sa-skills:<name>`), and the plugin scans `agents/**/*.md` regardless of subdirectory — no spawn paths break.
+
+**Path changes** (transparent to skill orchestrators, but visible in `git log` and any external fork):
+- `agents/handoff-generator.md` → `agents/generators/handoff-generator.md`
+- `agents/handoff-context-builder.md` → `agents/builders/handoff-context-builder.md`
+- `agents/compliance-generator.md` → `agents/generators/compliance-generator.md`
+- `agents/docs-export-generator.md` → `agents/generators/docs-export-generator.md`
+- `agents/architecture-analysis-agent.md` → `agents/reviewers/architecture-analysis-agent.md`
+- `agents/peer-review-category-agent.md` → `agents/reviewers/peer-review-category-agent.md`
+- `agents/base/configs/*.json` → `agents/configs/*.json`
+
+All 16 moves use `git mv` so file history is preserved.
+
+**Coordinated reference updates** (33 files modified):
+- Runtime path consumers — `compliance-generator.md` and the 10 `validators/*-validator.md` files now Read configs from `[plugin_dir]/agents/configs/`. `tools/bundle-handoff-agent.ts` (the v3.13.0 multi-agent bundler) now targets `agents/generators/handoff-generator.md` and `agents/builders/handoff-context-builder.md`. `tools/bundle-handoff-agent.test.ts` assertions updated to match. `scripts/build-release.sh` error-message paths updated.
+- Documentation — `CLAUDE.md` "Plugin Structure" section rewritten to enumerate the five subdirectories. SKILL.md path mentions in `architecture-dev-handoff`, `architecture-docs-export`, `architecture-peer-review` updated. `PAYLOAD_SCHEMA.md` `Consumers:` footer updated and re-bundled into `handoff-context-builder.md`.
+- Historical CHANGELOG and README roadmap entries (v3.5.x → v3.13.0) intentionally left untouched — they accurately document past file paths at those release points.
+
+**Verification**: `bun run typecheck` ✅, `bun run bundle:check` (both bundles in sync) ✅, 353/353 tests pass ✅, `bash scripts/build-release.sh` smoke-test ✅.
+
+### v3.13.0 (Previous Release) ✅
 **perf: dev-handoff token + wall-clock overhaul + new `handoff-context-builder` Sonnet sub-agent**
 
 `architecture-dev-handoff` was instrumented on a captured 8-component run (~481K tokens / ~50 min wall-clock) and ten leaks were fixed in this release. Targets: ~70% token reduction on full runs, ~80% on minor-architecture-bump runs, ~40–50% wall-clock cut.

@@ -5,6 +5,24 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.1]
+
+### Changed
+- **Reorganized `agents/` by role**: `agents/generators/` (compliance-generator, docs-export-generator, handoff-generator), `agents/builders/` (handoff-context-builder), `agents/reviewers/` (architecture-analysis-agent, peer-review-category-agent), `agents/validators/` (10 domain validators, unchanged location), `agents/configs/` (10 domain JSON configs, was `agents/base/configs/`). The misleading `agents/base/` parent directory is gone.
+- All 16 file moves use `git mv` so per-file history is preserved.
+
+### Updated (coordinated path references — 33 files total)
+- Runtime: `agents/generators/compliance-generator.md` and `agents/validators/*-validator.md` (×10) read configs from `[plugin_dir]/agents/configs/` instead of `[plugin_dir]/agents/base/configs/`. `tools/bundle-handoff-agent.ts` + its test target the new agent paths. `scripts/build-release.sh` error messages updated.
+- Documentation: `CLAUDE.md` Plugin Structure section rewritten. SKILL.md path mentions in `architecture-dev-handoff`, `architecture-docs-export`, `architecture-peer-review` updated. `PAYLOAD_SCHEMA.md` `Consumers:` footer updated and re-bundled into `handoff-context-builder.md`.
+
+### Not changed
+- Agent invocation: Claude Code resolves agents by `name:` frontmatter (`sa-skills:<name>`), so subdirectory location does not affect spawn. No skill needs to change which agent it calls.
+- Behavior: pure refactor. Zero functional changes vs v3.13.0.
+- Historical CHANGELOG and README roadmap entries (v3.5.x → v3.13.0): intentionally left intact — they accurately document file paths at those release points.
+
+### Verification
+`bun run typecheck` ✅ · `bun run bundle:check` (both bundles in sync) ✅ · 353/353 tests pass ✅ · `bash scripts/build-release.sh` smoke-test ✅
+
 ## [3.13.0]
 
 ### Performance — `architecture-dev-handoff` token + wall-clock overhaul

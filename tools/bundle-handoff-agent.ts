@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Bundles static reference files into the architecture-dev-handoff sub-agents
- * (`agents/handoff-generator.md`, `agents/handoff-context-builder.md`) between
- * BEGIN_BUNDLE/END_BUNDLE markers. Bundled content lives in the sub-agent
- * system prompt and is API-prompt-cached across all spawns within the
- * orchestration window — saving ~300K tokens per 8-component run vs. fresh
- * per-spawn Reads.
+ * (`agents/generators/handoff-generator.md`, `agents/builders/handoff-context-builder.md`)
+ * between BEGIN_BUNDLE/END_BUNDLE markers. Bundled content lives in the
+ * sub-agent system prompt and is API-prompt-cached across all spawns within
+ * the orchestration window — saving ~300K tokens per 8-component run vs.
+ * fresh per-spawn Reads.
  *
  * Usage:
  *   bun tools/bundle-handoff-agent.ts            # writes both agent files in place
@@ -25,7 +25,7 @@ type BundleTarget = { agent: string; sources: BundleSource[] };
 
 const BUNDLE_TARGETS: BundleTarget[] = [
   {
-    agent: join(REPO_ROOT, "agents/handoff-generator.md"),
+    agent: join(REPO_ROOT, "agents/generators/handoff-generator.md"),
     sources: [
       { marker: "HANDOFF_TEMPLATE.md", path: join(SKILL_DIR, "HANDOFF_TEMPLATE.md") },
       { marker: "SECTION_EXTRACTION_GUIDE.md", path: join(SKILL_DIR, "SECTION_EXTRACTION_GUIDE.md") },
@@ -34,7 +34,7 @@ const BUNDLE_TARGETS: BundleTarget[] = [
     ],
   },
   {
-    agent: join(REPO_ROOT, "agents/handoff-context-builder.md"),
+    agent: join(REPO_ROOT, "agents/builders/handoff-context-builder.md"),
     sources: [
       { marker: "PAYLOAD_SCHEMA.md", path: join(SKILL_DIR, "PAYLOAD_SCHEMA.md") },
     ],

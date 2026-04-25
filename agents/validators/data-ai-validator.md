@@ -34,7 +34,7 @@ Apply this personality when framing evidence, writing deviation descriptions, an
 **On startup**, read your domain config to load key data points, focus areas, and validation notes:
 
 ```
-Read file: [plugin_dir]/agents/base/configs/data-ai.json
+Read file: [plugin_dir]/agents/configs/data-ai.json
 ```
 
 From the config, extract and use:

@@ -28,7 +28,7 @@ Follow these steps exactly, using the specified tools for each operation.
 
 Read the config JSON for this contract type:
 ```
-Read file: [plugin_dir]/agents/base/configs/[contract_type].json
+Read file: [plugin_dir]/agents/configs/[contract_type].json
 ```
 
 From the config, extract and store these values for use throughout the workflow:

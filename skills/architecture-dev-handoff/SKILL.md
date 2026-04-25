@@ -45,7 +45,7 @@ Manually activated when users request component handoff document generation. It 
 
 ## Architecture — Orchestrator + Sub-Agent
 
-As of v3.7.0, this skill is an **orchestrator**. Per-component generation runs in isolated sub-agent contexts via `agents/handoff-generator.md` (model: sonnet). The orchestrator stays in main context; sub-agents do the heavy per-component reads.
+As of v3.7.0, this skill is an **orchestrator**. Per-component generation runs in isolated sub-agent contexts via `agents/generators/handoff-generator.md` (model: sonnet) and `agents/builders/handoff-context-builder.md` (model: sonnet, added in v3.13.0). The orchestrator stays in main context; sub-agents do the heavy per-component reads.
 
 - **Main context budget**: ~80–120 KB per invocation, flat regardless of how many components are selected.
 - **Sub-agent budget**: ~25–40 KB per spawn (per-component payload + handoff template + section-extraction guide + ranged slice of asset guide).
@@ -135,7 +135,7 @@ plugin_dir = ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marke
 
 **Step 0c — (removed in v3.13.0)**
 
-Earlier versions mirrored four reference files (`HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `ASSET_GENERATION_GUIDE.md`, `assets/_index.md`) to `/tmp/handoff-plugin-refs/` so sub-agents could Read them despite permission scoping. As of v3.13.0 those references are bundled directly into `agents/handoff-generator.md` (sub-agent system prompt). Sub-agents no longer Read any plugin file at runtime, so the staging fallback is dead overhead and has been removed.
+Earlier versions mirrored four reference files (`HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `ASSET_GENERATION_GUIDE.md`, `assets/_index.md`) to `/tmp/handoff-plugin-refs/` so sub-agents could Read them despite permission scoping. As of v3.13.0 those references are bundled directly into `agents/generators/handoff-generator.md` (sub-agent system prompt). Sub-agents no longer Read any plugin file at runtime, so the staging fallback is dead overhead and has been removed.
 
 `plugin_dir` is still resolved in Steps 0a/0b — the orchestrator uses it to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/{prepare-payload-dir,manifest}.ts`. If a bun helper invocation fails with a permission error, check that `Bash(bun *)` is granted in project settings.
 
@@ -465,4 +465,4 @@ Add to project `.claude/settings.json`:
 
 Directory creation (`/tmp/handoff-payloads/` and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
 
-**Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability under both. (Sub-agents no longer Read plugin files at runtime as of v3.13.0 — references are bundled into `agents/handoff-generator.md` — but the orchestrator still needs to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/*.ts` helpers, which require the bun binary to load files from `plugin_dir`.)
+**Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability under both. (Sub-agents no longer Read plugin files at runtime as of v3.13.0 — references are bundled into `agents/generators/handoff-generator.md` and `agents/builders/handoff-context-builder.md` — but the orchestrator still needs to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/*.ts` helpers, which require the bun binary to load files from `plugin_dir`.)

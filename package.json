@@ -1,6 +1,6 @@
 {
   "name": "sa-skills",
-  "version": "3.13.0",
+  "version": "3.13.1",
   "description": "Claude Code plugin for architecture documentation and compliance generation",
   "type": "module",
   "workspaces": ["tools/docgen"],

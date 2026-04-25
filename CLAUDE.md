@@ -57,7 +57,13 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 
 - `.claude-plugin/` — Plugin manifest (`plugin.json`, **authoritative version**) and marketplace registry (`marketplace.json`)
 - `package.json` — Root Bun workspace config (workspace: `tools/docgen`)
-- `agents/` — Sub-agents consumed by the Agent tool. Single universal `compliance-generator.md` + 5 specialized agents (`handoff-generator`, `handoff-context-builder`, `docs-export-generator`, `peer-review-category-agent`, `architecture-analysis-agent`); domain configs in `agents/base/configs/`; validators in `agents/validators/`. The two `handoff-*` agents are pinned to `model: sonnet` to keep the I/O-heavy work off the user's main-session model (typically Opus).
+- `agents/` — Sub-agents consumed by the Agent tool, organized by role:
+  - `agents/generators/` — content producers (`compliance-generator.md`, `handoff-generator.md`, `docs-export-generator.md`)
+  - `agents/builders/` — input assemblers for generators (`handoff-context-builder.md`)
+  - `agents/reviewers/` — quality evaluators (`peer-review-category-agent.md`, `architecture-analysis-agent.md`)
+  - `agents/validators/` — 10 domain validators (one per compliance contract)
+  - `agents/configs/` — 10 domain JSON configs consumed by `compliance-generator.md` at runtime
+  The two `handoff-*` agents are pinned to `model: sonnet` to keep the I/O-heavy work off the user's main-session model (typically Opus).
 - `skills/` — 14 skill directories (each containing `SKILL.md` + supporting files)
 - `tools/docgen/` — Standalone `generate-doc.js` for Word/.docx generation; own `package.json` under the Bun workspace
 - `scripts/build-release.sh` — Packages a release ZIP with SHA256 checksum
@@ -77,7 +83,7 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 
 **Agents vs. Skills**: `agents/` holds sub-agents spawned by skills via the Agent tool. They are **not** skills and NEVER to be invoked directly from user-facing prompts.
 
-**Compliance agent architecture**: A single universal `agents/compliance-generator.md` handles all 10 contract types, reading its domain config at runtime from `agents/base/configs/{contract_type}.json` (template filename, section mappings, grep patterns, requirement codes). Domain-specific validation is handled by 10 separate validator agents in `agents/validators/`.
+**Compliance agent architecture**: A single universal `agents/generators/compliance-generator.md` handles all 10 contract types, reading its domain config at runtime from `agents/configs/{contract_type}.json` (template filename, section mappings, grep patterns, requirement codes). Domain-specific validation is handled by 10 separate validator agents in `agents/validators/`.
 
 **Versioning**: Canonical version lives in `.claude-plugin/plugin.json`. Commits follow `feat: <description> v<semver>`; the `/release` skill bumps, commits, and pushes.
 

@@ -35,7 +35,7 @@ As of v3.8.0, this skill is an **orchestrator**. The actual export work (file re
 - Compliance contract metadata extraction (score + status from Document Control table) for user-facing display
 - Spawning the sub-agent with the full job spec
 
-**Sub-agent responsibilities** (`agents/docs-export-generator.md`):
+**Sub-agent responsibilities** (`agents/generators/docs-export-generator.md`):
 - Read source files verbatim
 - Compose the executive summary markdown (SA mode)
 - Call docgen per output

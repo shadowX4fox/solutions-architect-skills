@@ -277,4 +277,4 @@ Flow: User login — Gatekeeper writes session to cache with 30min TTL. See docs
 
 **Manifest schema_version field**: `"2"` (Item 7 manifest invalidates entries created against `"1"`, forcing one-time full regen on upgrade.)
 
-**Consumers**: `skills/architecture-dev-handoff/SKILL.md`, `agents/handoff-generator.md`
+**Consumers**: `skills/architecture-dev-handoff/SKILL.md`, `agents/generators/handoff-generator.md`, `agents/builders/handoff-context-builder.md`

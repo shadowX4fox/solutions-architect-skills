@@ -44,7 +44,7 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 | `SKILL.md` | This file — entry point and workflow |
 | `PEER_REVIEW_CRITERIA.md` | All review checks organized by depth level and category (82 checks across 13 categories) |
 | `PLAYGROUND_TEMPLATE.md` | Custom playground template for the interactive review HTML file |
-| `agents/peer-review-category-agent.md` | Universal category reviewer sub-agent — evaluates one category's checks in parallel |
+| `agents/reviewers/peer-review-category-agent.md` | Universal category reviewer sub-agent — evaluates one category's checks in parallel |
 
 ---
 
