@@ -5,6 +5,31 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.2]
+
+### Fixed — `architecture-explorer` Tool Discipline tightened to eliminate spurious permission prompts
+
+**Symptom**: Q&A workflows that routed through the `architecture-explorer` Haiku-tier classifier triggered a Claude Code permission prompt mid-run when the agent staged its EXPLORE_RESULT YAML to `/tmp/explore_result.yaml` via a Bash here-doc (`cat > /tmp/explore_result.yaml << 'EOF'`). The prompt fired because `Bash(cat *)` is not allowlisted in `.claude/settings.json.example` — the project's permission model deliberately routes file writes through the Write tool (path-globbed, auditable) or through `Bash(bun *)`, never through Bash redirection.
+
+**Root cause** (prompt design, not code or permission misconfiguration):
+
+1. The `agents/builders/architecture-explorer.md` "FORBIDDEN" list banned `cat`, `head`, `tail`, `grep`, `find`, `sed`, `awk` "for reading" — leaving the model an opening to use them for *writing* via redirection.
+2. The cache-write step said "use the CLI **or** the Write tool — the CLI accepts either," which named two paths but never marked them as the only legal forms. The Haiku model invented a third (heredoc).
+3. The workflow implicitly suggested staging the YAML to a temp file before emitting it; in fact the EXPLORE_RESULT block was always meant to be emitted inline as the agent's final response.
+
+**Fix** (single-file, prompt-only):
+
+- **Reframed FORBIDDEN list**: bans are now unconditional and apply for any purpose (read, write, pipe, redirect). Explicit examples added for redirected forms (`cat > file`, `cat >> file`, `tee file`, `command > file`, here-doc).
+- **New WRITES discipline block**: names exactly two legal write surfaces — `bun explore-cli.ts write-cache` (under existing `Bash(bun *)`) or the Write tool at the cache path (under existing `Write(//tmp/architecture-explorer/**)`). No third path is permitted.
+- **Removed implied scratch-file staging**: the EXPLORE_RESULT YAML is emitted inline in the agent's final response. There is no `/tmp/explore_result.yaml` intermediate.
+- **Added why-strict footnote** explaining the project's permission model so future maintainers don't loosen the lock.
+
+**Behavior change**: every architecture-explorer invocation (cache miss or cache hit) runs silently end-to-end with the v3.14.0 baseline `.claude/settings.json` permissions. No prompt at any stage.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅. No CLI changes (`explore-cli.ts write-cache` already exists since v3.14.0); no permission changes (loosening `Bash(cat *)` would create a write-anywhere primitive — explicitly rejected); no test changes.
+
+**Roadmap shift**: per-skill explorer wiring previously slated for v3.14.2 → v3.14.7 moves to v3.14.3 → v3.14.8. Compliance integration is now the v3.14.3 release.
+
 ## [3.14.1]
 
 ### Added — Session-scoped EXPLORER_HEADER edit tracker + batch refresh

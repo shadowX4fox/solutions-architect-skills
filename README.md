@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -797,7 +797,27 @@ Where:
 
 ## Roadmap
 
-### v3.14.1 (Current Release) ✅
+### v3.14.2 (Current Release) ✅
+**fix: tighten `architecture-explorer` Tool Discipline so the Haiku-tier classifier never triggers permission prompts**
+
+A Q&A invocation surfaced that the explorer was emitting a Bash here-doc (`cat > /tmp/explore_result.yaml << EOF`) to stage its EXPLORE_RESULT before writing the cache. The user's `.claude/settings.json` deliberately allows file writes only via the Write tool (path-globbed, auditable) or via `Bash(bun *)` — `Bash(cat *)` is not allowlisted, so the redirection fired a permission prompt mid-run.
+
+The Haiku model wasn't malicious or buggy — the prompt was. v3.14.1's Tool Discipline section banned `cat`, `head`, `tail`, `grep`, `find`, `sed`, `awk` "for reading," which left the model an opening to use them for *writing* via redirection. The cache-write step also offered "use the Write tool — the CLI accepts either" without making *those two* the only legal forms.
+
+**What v3.14.2 changes**:
+
+- **Reframed FORBIDDEN list** in `agents/builders/architecture-explorer.md`: bans are now unconditional (any purpose, including via redirect) and call out the redirected forms (`cat > file`, `tee`, here-doc, `>`, `>>`) explicitly.
+- **New WRITES discipline block** names exactly two legal write surfaces: `bun … explore-cli.ts write-cache` (under `Bash(bun *)`) or the Write tool at the cache path. No third path is permitted.
+- **Removed implied scratch-file staging**: the EXPLORE_RESULT YAML is emitted inline as the agent's final response. There is no `/tmp/explore_result.yaml` intermediate — the YAML in the agent's reasoning is the YAML the orchestrator parses.
+- **Why-this-is-strict footnote** explains the permission model so future maintainers understand the lock isn't arbitrary.
+
+**Behavior change**: Q&A workflows that route through the explorer now run silently end-to-end. The cache write goes via `bun … write-cache` (allowlisted) or the Write tool (allowlisted); no permission prompt at any stage of a fresh classification or a cache hit.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅. No code or test changes — pure agent-prompt rewrite.
+
+**Migration**: re-run `/setup` is **not required** — this fix lives entirely in the plugin agent file and takes effect on the next architecture-explorer invocation after the user picks up the new plugin version. The roadmap shifts: compliance integration moves from v3.14.2 → v3.14.3.
+
+### v3.14.1 (Previous Release) ✅
 **feat: session-scoped EXPLORER_HEADER edit tracker + `/regenerate-explorer-headers --session` batch refresh**
 
 The v3.14.0 release introduced `<!-- EXPLORER_HEADER ... -->` blocks that the `architecture-explorer` agent samples in the first 60 lines of every doc to classify relevance. Bodies drift faster than headers: rename a component, swap a database, add an ADR reference — the body is updated, the header silently lies, and downstream classification quietly degrades. v3.14.1 closes that feedback loop with a **batch model** (per-edit autofix was deliberately rejected; per-doc work added complexity without clear wins).
@@ -815,7 +835,7 @@ The v3.14.0 release introduced `<!-- EXPLORER_HEADER ... -->` blocks that the `a
 
 **Migration**: re-run `/setup` to merge the new hook block into your project's `.claude/settings.json`. Existing v3.14.0 installs receive the hook addition under "Hooks: added 1" in the merge summary; the rest of the merge is a no-op (already present). The new CLAUDE.md subsection is appended idempotently via the existing managed-block markers.
 
-### v3.14.0 (Previous Release) ✅
+### v3.14.0 ✅
 **feat: universal `architecture-explorer` Haiku classifier + 36 task-typed configs + `architecture-explorer-headers` skill**
 
 The plugin's biggest cost driver pre-v3.14.0 was redundant doc reads: a 10-contract compliance run hit `ARCHITECTURE.md` + `docs/01–09` + `adr/*` ~20 times (10 validators + 10 generators × full read), ~1.8 MB of duplicate Opus traffic. The 10-analysis dashboard repeated the pattern (~1.5–2 MB). Peer-review at Hard depth, the same.
@@ -836,14 +856,14 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 
 | Patch | Skill | Work |
 |-------|-------|------|
-| 3.14.2 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
-| 3.14.3 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
-| 3.14.4 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
-| 3.14.5 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
-| 3.14.6 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
-| 3.14.7 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+| 3.14.3 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.4 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
+| 3.14.5 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
+| 3.14.6 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.7 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
+| 3.14.8 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
 
-(v3.14.1 was used for the session-edit tracker shipped above; the per-skill explorer wiring continues from v3.14.2.)
+(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix. Per-skill explorer wiring resumes at v3.14.3.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 

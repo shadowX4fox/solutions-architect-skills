@@ -168,14 +168,27 @@ stats:
 ```
 ````
 
-Then write the result to cache:
+Emit the EXPLORE_RESULT YAML block **inline as your final response** — never stage it as a temp file first. The orchestrator parses it directly from your output. There is no `/tmp/explore_result.yaml` intermediate; the YAML in your reasoning is the YAML the orchestrator reads.
 
-```bash
-bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts \
-    write-cache <project_root> <task_type> <inputs_hash> <result_yaml_or_json>
-```
+Then persist the same YAML to the disk cache so the next invocation gets a cache hit. The cache write has **exactly two legal forms** — pick one:
 
-(Or use the cache path printed by `check-cache` above and write the cache file directly with the Write tool — the CLI accepts either.)
+1. **Bun CLI** (preferred when you are already on a Bash invocation):
+
+   ```bash
+   bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts \
+       write-cache <project_root> <task_type> <inputs_hash> <result_yaml>
+   ```
+
+   Allowed by the project's existing `Bash(bun *)` permission.
+
+2. **Write tool** at the cache path printed by `check-cache` above — `/tmp/architecture-explorer/<project_hash>/<task_type>.json`. Allowed by the existing `Write(//tmp/architecture-explorer/**)` permission.
+
+**Forbidden** for cache writes (and for any other file write you might be tempted to do):
+
+- ❌ Bash redirection: `cat > file`, `cat >> file`, `tee file`, `command > file`, here-doc (`<<EOF`).
+- ❌ Any other shell builtin that materializes a file via stdout redirect.
+
+These bypass the project's permission model — `.claude/settings.json` deliberately routes file writes through the Write tool (or a CLI behind `Bash(bun *)`) so they are gated by path globs and visible in the session log. Bash redirection sidesteps both, and so it is unconditionally banned regardless of which command is being redirected.
 
 **Status semantics**:
 - `OK` — classification succeeded.
@@ -186,17 +199,27 @@ Always emit an `EXPLORE_RESULT` block — never exit silently.
 
 ## Tool Discipline
 
-**ALLOWED Bash commands**:
+**ALLOWED Bash commands** (these are the ONLY Bash invocations you may issue — never others):
+
 1. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts inputs-hash …`
 2. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts check-cache …`
 3. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts expand-candidates …`
 4. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts write-cache …`
 
-**FORBIDDEN**:
-- ❌ `cat`, `head`, `tail`, `grep`, `find`, `sed`, `awk` — use Read/Grep/Glob tools.
+**ALLOWED writes** (file outputs use exactly one of these two surfaces — never any third path):
+
+- **Cache writes** (`/tmp/architecture-explorer/<project_hash>/<task_type>.json`): `bun … explore-cli.ts write-cache …` (Allowed Bash command #4) **or** the Write tool at the cache path. Both are gated by the project's existing permissions.
+- **Scratch / intermediate files**: do **not** create them. The EXPLORE_RESULT YAML is emitted inline in your final response; it never lands in a scratch file. If a future workflow legitimately needs an intermediate, it MUST be written via the Write tool to a path under `/tmp/` — never via Bash redirection.
+
+**FORBIDDEN — bans are unconditional and apply for any purpose (read, write, pipe, redirect)**:
+
+- ❌ `cat`, `head`, `tail`, `grep`, `find`, `sed`, `awk`, `tee` — use the Read / Grep / Glob tools to read; use the Write tool or `bun … write-cache` to write. The redirected forms `cat > file`, `cat >> file`, `tee file`, `command > file`, and here-docs (`<<EOF … EOF`) are equally forbidden — those produce file writes that bypass the Write permission gates.
+- ❌ Shell redirection operators (`>`, `>>`, `<`, `<<`, `|>`) anywhere in your Bash command. The four ALLOWED Bash commands above never need redirection; if you find yourself reaching for one, you are off-script.
 - ❌ `python`, `node`, or any non-`bun` scripting language.
 - ❌ Reading more than 60 lines of any candidate file **except `ARCHITECTURE.md`**. Use `limit: 60` on the Read tool for every candidate; for `ARCHITECTURE.md` at the project root, omit `limit:` to read the full ~130-line navigation index.
 - ❌ Reading files NOT in `candidate_files[]`. The config's globs define the universe.
+
+**Why these bans are this strict**: the project's `.claude/settings.json` deliberately routes file writes through `Write(...)` permissions (path-globbed, auditable). Bash redirection (`cat > path`, here-doc, `tee`) materializes a file via a `Bash(...)` permission instead — which is allowlisted only for `bun *`, `mkdir *`, `date *`, `rm *`. Any other Bash form will trigger a permission prompt to the user, breaking the explorer's silent-on-success contract. Stay on the four allowed `bun …` commands plus the Read/Write/Grep/Glob tools and you will never see a prompt.
 
 ## Anti-Patterns to Avoid
 
