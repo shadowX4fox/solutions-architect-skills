@@ -5,6 +5,50 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.6]
+
+### Added — `architecture-explorer` integration for `architecture-analysis` (per-analysis FILES allowlists across all 10 analyses)
+
+**Problem**: the universal `architecture-analysis-agent` (Opus) was reading the orchestrator-prepared `doc_files` corpus in full for every one of the 10 analyses. The corpus is a single shared list (`ARCHITECTURE.md` + `docs/01–09` + `adr/*` + relevant component files), so a 10-analysis run reread the entire ~20+-file corpus 10 times — even though each analysis only consumes 5–10 of those files. The Haiku-tier `architecture-explorer` plus its 10 already-shipped `analysis-<type>.json` configs were designed exactly for that trim; this release wires them in.
+
+**Architecture change** — `architecture-analysis` Phase 3:
+
+- **NEW Step 2.5** — per-analysis `architecture-explorer` fan-out, parallelism-batched 4. For each selected analysis `A`, one `Task()` with:
+  ```yaml
+  task_type: analysis-<A>
+  config_path: <plugin_dir>/agents/configs/explorer/analysis-<A>.json
+  project_root: <dirname(architecture_file)>
+  plugin_dir: <plugin_dir>
+  plugin_version: <plugin version>
+  force: false
+  ```
+  Returns one `EXPLORE_RESULT.relevant_files[]` per analysis. Cache hits cost zero Haiku tokens.
+
+- **Step 3 (Spawn Analysis Agents) prompt** — `FILES:` is now sourced from the per-analysis `EXPLORE_RESULT.relevant_files[]` (Step 2.5 output) instead of the universal `doc_files` corpus from Step 1. Each analysis sees only the files the explorer judged relevant for its `task_type`, plus any `required_sections[]` from the explorer config (always-included, false-negative safeguard). The agent's contract is unchanged — it reads every path in FILES, in order — but the list is now ~5–10 paths per analysis instead of the full ~20+ corpus.
+
+**Modified files**:
+
+- `agents/reviewers/architecture-analysis-agent.md` — Input Parameters note that the `FILES:` list is now the per-analysis `EXPLORE_RESULT.relevant_files[]`.
+- `skills/architecture-analysis/SKILL.md` — new Step 2.5 (per-analysis explorer fan-out, parallelism-batched 4); Step 3 spawn prompt sources `FILES:` from the explorer's output with degraded fallback to `doc_files`.
+
+**Required-section safeguard** (false-negative protection): each `analysis-<type>.json` declares the analysis's must-have files as `required_sections[]`. Every analysis's `relevant_files[]` includes those files regardless of score. The runtime parser (`skills/architecture-explorer/utils/parse-explore-result.ts`) rejects any `EXPLORE_RESULT` that omits a required entry, falling back to degraded mode.
+
+**Degraded mode** (fail-open): if any explorer call returns `FAILED`, the orchestrator falls back to the universal `doc_files` corpus from Step 1 for that one analysis. The agent runs identically — just without the trim. The user always gets a report.
+
+**Cache behavior**: on repeat runs against unchanged docs, every explorer call returns `cache_hit: true` with zero Haiku tokens. The cached `EXPLORE_RESULT` flows into the analysis agent unchanged, so the only cost on a re-run is the synthesis tier (Opus) re-reading the same allowlist — same as today.
+
+**Concrete benefit**: cumulative across 10 analyses, roughly 50–60% reduction in input tokens for the analysis phase (~5–10 files per analysis instead of the full ~20+ corpus). Analysis dashboard wall-clock trims proportionally.
+
+**Verification**:
+
+- `bun run typecheck` clean.
+- `bun test` passes (478/478, no test changes).
+- The 10 `analysis-<type>.json` configs (shipped in v3.14.0) needed zero changes — already correctly shaped.
+
+**Migration**: no user action required. Re-running any analysis after upgrading to v3.14.6 picks up the new flow automatically. The report skeleton, Documentation Fidelity Rule, and EOL validation flow are all preserved; existing analysis reports on disk remain valid.
+
+**Roadmap**: peer-review explorer wiring is next at v3.14.7; docs Q&A v3.14.8; ADR application v3.14.9.
+
 ## [3.14.5]
 
 ### Added — `architecture-explorer` integration for `architecture-compliance` (per-contract relevance allowlists across all 10 contracts)

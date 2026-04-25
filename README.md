@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -797,7 +797,53 @@ Where:
 
 ## Roadmap
 
-### v3.14.5 (Current Release) ✅
+### v3.14.6 (Current Release) ✅
+**feat: wire `architecture-explorer` into `architecture-analysis` — per-analysis FILES allowlists across all 10 analyses**
+
+The analysis flow's universal `architecture-analysis-agent` (Opus) was reading the orchestrator-prepared `doc_files` corpus in full for every one of the 10 analyses. The corpus is a single shared list (`ARCHITECTURE.md` + `docs/01–09` + `adr/*` + relevant component files), so a 10-analysis run reread the entire ~20+-file corpus 10 times — even though each analysis only consumes 5–10 of those files (SPOF cares about deployment + topology; STRIDE cares about trust boundaries + data flows; Cost Hotspots cares about technology stack + scalability). The Haiku-tier `architecture-explorer` plus its 10 already-shipped `analysis-<type>.json` configs were designed exactly for that trim; v3.14.6 wires them in.
+
+**Architecture change:**
+
+```
+Orchestrator (architecture-analysis skill)
+  │
+  ├── Step 2.5 — architecture-explorer (Haiku)        ← NEW: per-analysis fan-out, parallelism-batched (default 4)
+  │     for each selected analysis A:
+  │       task_type: analysis-<A>
+  │       config_path: agents/configs/explorer/analysis-<A>.json
+  │     returns EXPLORE_RESULT.relevant_files[] per analysis
+  │     cache hits cost zero Haiku tokens
+  │
+  └── Step 3 — architecture-analysis-agent (Opus, parallel)
+        receives FILES = EXPLORE_RESULT.relevant_files[] for its analysis
+        reads only its trimmed allowlist (typically 5–10 files instead of 20+)
+        emits the date-stamped report per the existing skeleton (template-fill contract preserved exactly)
+```
+
+**Concrete savings on a typical 10-analysis run:**
+
+- **Opus tier**: each analysis agent reads ~5–10 files instead of the full ~20+ corpus. Cumulative across 10 analyses, roughly 50–60% reduction in input tokens for the analysis phase.
+- **Haiku tier**: ~200 tokens per analysis for classification. Effectively free vs Opus.
+- **Cache hits**: zero Haiku tokens on repeat runs. The cached `EXPLORE_RESULT` flows into each analysis agent unchanged.
+- **Wall-clock**: analysis dashboard runs trim noticeably; the dominant cost (Opus synthesis) shrinks proportional to the file-count reduction.
+
+**Required-section safeguard** (false-negative protection): each `analysis-<type>.json` declares the analysis's must-have files (e.g., SPOF requires `docs/03-architecture-layers.md` + `docs/09-operational-considerations.md`) as `required_sections[]`. Every analysis's `relevant_files[]` includes those files regardless of score. The runtime parser rejects any `EXPLORE_RESULT` that omits a required entry, falling back to degraded mode.
+
+**Degraded mode** (fail-open): if any explorer call returns `FAILED`, the orchestrator falls back to the universal `doc_files` corpus from Step 1 for that one analysis. The agent runs identically — just without the trim. The user always gets a report.
+
+**What changed** (single PR, scoped):
+
+- `agents/builders/architecture-explorer.md` — already accepts `task_family: analysis` (no changes needed; the v3.14.0 baseline works).
+- `agents/reviewers/architecture-analysis-agent.md` — Input Parameters note that the `FILES:` list is now the per-analysis `EXPLORE_RESULT.relevant_files[]` rather than the universal `doc_files`. The agent's contract is unchanged — it reads every path in FILES, in order — only the upstream selection narrowed.
+- `skills/architecture-analysis/SKILL.md` Phase 3 — new Step 2.5 (per-analysis explorer fan-out, parallelism-batched 4); Step 3 spawn prompt now sources `FILES:` from the explorer's output with degraded fallback to `doc_files`.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅. The 10 `analysis-<type>.json` explorer configs (shipped in v3.14.0) needed zero changes — already correctly shaped for the new flow.
+
+**Migration**: no user action required. Re-running any analysis after upgrading to v3.14.6 picks up the new flow automatically. The report skeleton, Documentation Fidelity Rule, and EOL validation flow are all preserved; existing analysis reports on disk remain valid.
+
+**Roadmap**: peer-review explorer wiring moves to v3.14.7; docs Q&A v3.14.8; ADR application v3.14.9.
+
+### v3.14.5 (Previous Release) ✅
 **feat: wire `architecture-explorer` into `architecture-compliance` — per-contract relevance allowlists across all 10 contracts**
 
 The compliance flow's 10 validators (one per contract domain) hard-coded their "Required Files" lists in their agent prompts; the universal compliance-generator pulled the same list from each domain's `agents/configs/<contract>.json` `phase3.required_files`. Both lists are correct but static — they can't adapt when, say, a project documents a security topic in `docs/06-technology-stack.md` instead of `docs/07-security-architecture.md`. The Haiku-tier `architecture-explorer` plus its 10 already-shipped `compliance-<domain>.json` configs were designed exactly for that adaptation; v3.14.5 wires them in.
@@ -849,7 +895,7 @@ Orchestrator (architecture-compliance skill)
 
 **Roadmap**: per-skill compliance integration was previously slated for v3.14.5 (compliance) — now done. Analysis integration moves to v3.14.6; remaining wiring (peer-review, docs Q&A, ADR application) follows.
 
-### v3.14.4 (Previous Release) ✅
+### v3.14.4 ✅
 **feat: wire `architecture-explorer` into `architecture-dev-handoff` — per-component ADR allowlists, ~50% Sonnet token reduction**
 
 The dev-handoff flow's I/O-heavy `handoff-context-builder` (Sonnet) was reading every ADR in full to build its term index, then full-reading the matched subset per component. On a project with 38 ADRs and 8 components, that's ~38×30-line indexing reads + ~50 full ADR reads, all on Sonnet. The infrastructure to fix this has been in place since v3.14.0 (the `handoff-component.json` explorer config was already shipped); only the wiring was missing. v3.14.4 closes the loop.
@@ -983,7 +1029,7 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 | 3.14.8 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
 | 3.14.9 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
 
-(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration; v3.14.4 = dev-handoff explorer wiring; v3.14.5 = compliance explorer wiring. Analysis integration is next at v3.14.6.)
+(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration; v3.14.4 = dev-handoff explorer wiring; v3.14.5 = compliance explorer wiring; v3.14.6 = analysis explorer wiring. Peer-review integration is next at v3.14.7.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 

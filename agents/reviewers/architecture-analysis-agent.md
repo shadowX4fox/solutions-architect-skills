@@ -24,7 +24,7 @@ Your prompt will contain all of these:
 - `skeleton_path` — absolute path to the shared report skeleton (`templates/analysis-report-skeleton.md`)
 - `output_path` — absolute path where the report should be written (e.g., `analysis/SPOF-2026-04-16.md`)
 - `today` — the current date in `YYYY-MM-DD` format
-- `FILES:` section — ordered list of absolute file paths to read (one per line)
+- `FILES:` section — ordered list of absolute file paths to read (one per line). **As of v3.14.6**, this list is the per-analysis `EXPLORE_RESULT.relevant_files[]` produced by the orchestrator's `architecture-explorer` fan-out (Haiku-tier classification against `agents/configs/explorer/analysis-<type>.json`). Read every path in FILES exactly as before — the agent contract is unchanged; only the file selection upstream is narrower than the v3.14.5 universal-corpus pass.
 
 ---
 
