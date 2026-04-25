@@ -68,6 +68,22 @@
     ]
   },
 
+  "// HOOKS — v3.14.1+: session-scoped editlog tracker": "Records every Write/Edit on a docs/**/*.md file into /tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog. The /regenerate-explorer-headers --session slash command consumes the log and clears it on success. Cost per edit: ~10 ms (bun startup + JSONL append). The hook never blocks the user's edit.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "if": "Write(docs/**/*.md) OR Edit(docs/**/*.md)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-explorer-headers/utils/header-cli.ts session-log add \"$TOOL_INPUT_FILE_PATH\""
+          }
+        ]
+      }
+    ]
+  },
+
   "// USAGE NOTES": [
     "1. Copy this file to your project: cp .claude/settings.json.example /path/to/your/project/.claude/settings.json",
     "2. Remove the comment fields (lines starting with '//')",

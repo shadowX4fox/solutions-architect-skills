@@ -2,10 +2,19 @@
 // scripts/setup-permissions.ts
 // Usage: bun scripts/setup-permissions.ts <example_path> <user_settings_path>
 //
-// Merges `permissions.allow`, `enabledPlugins`, and `extraKnownMarketplaces`
-// from the plugin's settings.json.example into the user's .claude/settings.json.
-// Non-destructive: existing user entries are preserved; only missing entries
-// are added. `//`-prefixed comment keys in the example are stripped.
+// Merges `permissions.allow`, `enabledPlugins`, `extraKnownMarketplaces`,
+// and `hooks` from the plugin's settings.json.example into the user's
+// .claude/settings.json. Non-destructive: existing user entries are
+// preserved; only missing entries are added. `//`-prefixed comment keys
+// in the example are stripped.
+//
+// Hook merging (v3.14.1+): the plugin's settings.json.example carries a
+// real `hooks.PostToolUse[Write|Edit]` block that records every doc
+// edit into the session editlog. The merge is idempotent: an existing
+// PostToolUse entry whose `hooks[].command` already contains the
+// substring `header-cli.ts session-log add` is recognized as already
+// present and skipped. Users may add unrelated hooks under the same
+// matcher; those are preserved verbatim.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
@@ -35,12 +44,24 @@ function stripComments(value: unknown): unknown {
   return value;
 }
 
+type HookCommand = { type?: string; command?: string; [k: string]: unknown };
+type HookEntry = {
+  matcher?: string;
+  if?: string;
+  hooks?: HookCommand[];
+  [k: string]: unknown;
+};
+type HooksBlock = { [event: string]: HookEntry[] | undefined };
+
 type Settings = {
   permissions?: { allow?: string[]; deny?: string[]; [k: string]: unknown };
   enabledPlugins?: Record<string, unknown>;
   extraKnownMarketplaces?: Record<string, unknown>;
+  hooks?: HooksBlock;
   [k: string]: unknown;
 };
+
+const SA_SKILLS_HOOK_MARKER = "header-cli.ts session-log add";
 
 let rawExample: unknown;
 try {
@@ -112,6 +133,70 @@ for (const [k, v] of Object.entries(exampleMarketplaces)) {
   }
 }
 
+// --- merge hooks (event-keyed, idempotent on sa-skills marker) ---
+function entryContainsSaSkillsCommand(entry: HookEntry): boolean {
+  return (entry.hooks ?? []).some(
+    (h) => typeof h.command === "string" && h.command.includes(SA_SKILLS_HOOK_MARKER),
+  );
+}
+
+function commandAlreadyPresent(entry: HookEntry, command: string): boolean {
+  return (entry.hooks ?? []).some((h) => h.command === command);
+}
+
+function entriesMatchByMatcher(a: HookEntry, b: HookEntry): boolean {
+  return (a.matcher ?? "") === (b.matcher ?? "") && (a.if ?? "") === (b.if ?? "");
+}
+
+const userHooks: HooksBlock = user.hooks ?? {};
+const exampleHooks: HooksBlock = example.hooks ?? {};
+const mergedHooks: HooksBlock = { ...userHooks };
+let hooksAdded = 0;
+let hooksKept = 0;
+
+for (const [event, exampleEntries] of Object.entries(exampleHooks)) {
+  if (!Array.isArray(exampleEntries)) continue;
+  const userEntries: HookEntry[] = Array.isArray(mergedHooks[event]) ? [...(mergedHooks[event] as HookEntry[])] : [];
+
+  for (const exampleEntry of exampleEntries) {
+    if (!entryContainsSaSkillsCommand(exampleEntry)) {
+      // Not an sa-skills hook entry — fall back to whole-entry merge.
+      const dup = userEntries.some((e) => JSON.stringify(e) === JSON.stringify(exampleEntry));
+      if (dup) {
+        hooksKept++;
+        continue;
+      }
+      userEntries.push(exampleEntry);
+      hooksAdded++;
+      continue;
+    }
+
+    // Sa-skills hook entry — try to merge into an existing matcher.
+    const target = userEntries.find((e) => entriesMatchByMatcher(e, exampleEntry));
+    if (target) {
+      target.hooks = target.hooks ?? [];
+      let entryAdded = false;
+      for (const cmd of exampleEntry.hooks ?? []) {
+        if (typeof cmd.command !== "string") continue;
+        if (commandAlreadyPresent(target, cmd.command)) continue;
+        if (cmd.command.includes(SA_SKILLS_HOOK_MARKER) &&
+            (target.hooks ?? []).some((h) => typeof h.command === "string" && h.command.includes(SA_SKILLS_HOOK_MARKER))) {
+          continue;
+        }
+        target.hooks.push(cmd);
+        entryAdded = true;
+      }
+      if (entryAdded) hooksAdded++;
+      else hooksKept++;
+    } else {
+      userEntries.push(exampleEntry);
+      hooksAdded++;
+    }
+  }
+
+  mergedHooks[event] = userEntries;
+}
+
 // --- assemble merged object, preserving user's other top-level keys ---
 const merged: Settings = { ...user };
 if (Object.keys(mergedMarketplaces).length > 0) {
@@ -119,6 +204,9 @@ if (Object.keys(mergedMarketplaces).length > 0) {
 }
 if (Object.keys(mergedPlugins).length > 0) {
   merged.enabledPlugins = mergedPlugins;
+}
+if (Object.keys(mergedHooks).length > 0) {
+  merged.hooks = mergedHooks;
 }
 merged.permissions = {
   ...(user.permissions ?? {}),
@@ -144,6 +232,9 @@ console.log(
 );
 console.log(
   `Plugins:      added ${pluginsAdded}  ·  already present ${pluginsKept}`
+);
+console.log(
+  `Hooks:        added ${hooksAdded}  ·  already present ${hooksKept}`
 );
 
 if (permissionsAdded.length > 0) {

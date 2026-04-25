@@ -39,6 +39,7 @@ NOT activated for:
 - `/regenerate-explorer-headers --force` — overwrite existing headers (default behaviour skips files that already have one).
 - `/regenerate-explorer-headers --dry-run` — list what would change, write nothing.
 - `/regenerate-explorer-headers <path-glob>` — restrict to a subset (e.g. `docs/components/payment-service/**`).
+- `/regenerate-explorer-headers --session` — **(v3.14.1+)** refresh only files edited in the current Claude session, as recorded by the PostToolUse `session-log add` tracker. Implies `--force` for those files. Clears the editlog on success; retains it on partial failure. Combine with `--dry-run` to preview without LLM calls or log mutation.
 
 ---
 
@@ -50,6 +51,26 @@ NOT activated for:
 2. **Confirm `project_root`**: the current working directory. Verify `ARCHITECTURE.md` exists at the root — if not, abort with `ARCHITECTURE.md not found at project root. This skill operates on architecture documentation.`
 
 ### Phase 1 — Inventory
+
+#### `--session` mode (v3.14.1+)
+
+If the user passed `--session`, run an alternate inventory instead of the disk scan:
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log list --project-root <project_root>
+```
+
+This prints deduped relative paths from `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog` — one path per line. If the output is empty, print `✓ Session editlog is empty — no headers to refresh, no action needed.` and stop. Otherwise, treat every listed path as `needs_header` with implicit `--force` semantics (the file may already have an out-of-date header), then proceed to Phase 2.
+
+After Phase 3 completes successfully, clear the editlog:
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log clear --project-root <project_root>
+```
+
+On `--dry-run` skip the clear. On partial failure (some files regenerated, some failed validation), leave the editlog intact so the next pre-flight warning persists and the user can re-run `--session` after fixing.
+
+#### Disk-scan mode (default)
 
 ```bash
 bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts list <project_root>
@@ -188,5 +209,5 @@ This skill needs the same `Read`, `Edit`, and `Bash([plugin_dir]/skills/architec
 
 ---
 
-**Skill Version**: 1.0.0 (v3.14.0 — initial release)
+**Skill Version**: 1.1.0 (v3.14.1 — adds `--session` mode + session editlog integration)
 **Specialization**: Backfill EXPLORER_HEADER blocks into legacy architecture docs

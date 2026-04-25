@@ -50,6 +50,28 @@ The output is an **interactive HTML playground** (via the `playground` plugin) w
 
 ## Workflow
 
+### Pre-flight: Session-Edit Check (v3.14.1+)
+
+Before Step 0, run the EXPLORER_HEADER session-edit pre-flight (identical across every doc-consuming sa-skills skill). It surfaces docs edited in the current Claude session whose EXPLORER_HEADERs have not yet been refreshed; stale headers degrade the architecture-explorer's classification of the same docs across category agents in Step 5.
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
+```
+
+- **Output `0`** → editlog is clean. Emit nothing in the preamble; proceed directly to Step 0.
+- **Output `N > 0`** → run `... session-log list --project-root <project_root>`, then emit a loud preamble before Step 0:
+
+  ```
+  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
+    Affected:
+      - <path-1>
+      - …
+    ACTION REQUIRED before this skill's results can be trusted:
+      → Run: /regenerate-explorer-headers --session
+  ```
+
+  Continue running the workflow (the warning is non-blocking). In the Step 6 scorecard's metadata block, set `headers_status: stale-edits-pending`. The interactive playground (Step 7) renders that flag as a banner so reviewers see it.
+
 ### Step 0 — Check for Existing Review Data (Fast Path)
 
 Before starting a full review, check if the user explicitly requested regeneration from existing data (e.g., "regenerate playground", "rebuild review playground", "reload peer review results").

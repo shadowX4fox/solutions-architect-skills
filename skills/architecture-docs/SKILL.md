@@ -117,6 +117,30 @@ This skill may **read** component files for context (editing sections, propagati
 
 ---
 
+## Pre-flight: Session-Edit Check (v3.14.1+, Q&A workflows only)
+
+**Apply only to free-form Q&A invocations** (the Query Pattern Triggers above). For editing workflows (Workflows 1–10) skip this pre-flight — those workflows are usually the *source* of edits and would warn about their own pending writes.
+
+When the skill is invoked for a Q&A query and the response will read more than two architecture files, run the EXPLORER_HEADER session-edit pre-flight before the architecture-explorer fan-out:
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
+```
+
+- **Output `0`** → editlog is clean. Emit nothing; proceed with the explorer fan-out.
+- **Output `N > 0`** → run `... session-log list --project-root <project_root>`, then emit a loud preamble before the answer:
+
+  ```
+  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
+    Affected:
+      - <path-1>
+      - …
+    The answer below may rely on docs whose EXPLORER_HEADERs no longer match the body.
+    To refresh first: /regenerate-explorer-headers --session
+  ```
+
+  Continue answering (the warning is non-blocking). Mention the freshness caveat once at the top of the answer; do not repeat it on every cited file.
+
 ## 🎯 AUTOMATIC WORKFLOW DETECTION
 
 **IMPORTANT**: Immediately upon skill invocation, analyze the user's request to detect their intent.

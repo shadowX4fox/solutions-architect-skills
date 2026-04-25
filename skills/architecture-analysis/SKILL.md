@@ -87,6 +87,31 @@ It bundles **ten focused analyses** across two groups, each driven by a dedicate
 
 ---
 
+## Pre-flight: Session-Edit Check (v3.14.1+)
+
+Before Step 0, run the EXPLORER_HEADER session-edit pre-flight (identical across every doc-consuming sa-skills skill). It surfaces docs edited in the current Claude session whose EXPLORER_HEADERs have not yet been refreshed; stale headers degrade the architecture-explorer's classification of the same docs in subsequent steps.
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
+```
+
+- **Output `0`** → editlog is clean. Emit nothing in the preamble; proceed directly to Step 0.
+- **Output `N > 0`** → run `... session-log list --project-root <project_root>` to fetch the deduped paths, then emit a loud preamble before Step 0:
+
+  ```
+  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
+    Affected:
+      - <path-1>
+      - <path-2>
+      - …
+    ACTION REQUIRED before this skill's results can be trusted:
+      → Run: /regenerate-explorer-headers --session
+  ```
+
+  Continue running the workflow (the warning is non-blocking). In the Step 4 final report, set the metadata flag `headers_status: stale-edits-pending` so downstream consumers can grep for runs that were based on partially-stale headers.
+
+(`plugin_dir` is the same value resolved by Step 0 below — for the pre-flight, prefer the cached value if Step 0 has already run; otherwise resolve it via the same Glob.)
+
 ## Step 0 — Resolve Plugin Directory
 
 Before any workflow, resolve the absolute path to the plugin installation so spec files can be loaded by the sub-agent.

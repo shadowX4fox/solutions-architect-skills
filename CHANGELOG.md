@@ -5,6 +5,62 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.1]
+
+### Added — Session-scoped EXPLORER_HEADER edit tracker + batch refresh
+
+Closes the v3.14.0 feedback gap: when bodies under `docs/**/*.md` get edited, their `<!-- EXPLORER_HEADER -->` blocks silently drift. The `architecture-explorer` agent classifies relevance off those headers, so drift quietly degrades downstream classification. v3.14.1 adopts a **batch model** — per-edit autofix was deliberately rejected; per-doc work added complexity without clear wins. Instead: track every edit in a session-scoped log, surface one TODO while the log is non-empty, and let one slash command refresh the whole batch with the LLM when the user is ready.
+
+#### New files
+
+- `skills/architecture-explorer-headers/utils/session-log.ts` — `appendEdit`, `readSessionEdits`, `clearSessionEdits`, `retainSessionEdits`, `sessionLogPath`. Storage `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog`, JSONL one-line-per-edit. ARCHITECTURE.md, docs/README.md, paths outside docs/** are silently dropped.
+- `skills/architecture-explorer-headers/utils/session-log.test.ts` — 13 tests (Bun): append + read happy path, dedup-on-read, exempt-path no-ops, malformed-line skipping, latest-first ordering, clear, retain, sessionLogPath sanitization.
+
+#### CLI
+
+- `header-cli.ts session-log {add | list | count | clear}` — all exit-0 on success, suitable for the hot PostToolUse hook path. `add` infers project root from the file's nearest `CLAUDE.md` / `ARCHITECTURE.md` / `.git` ancestor; `list` / `count` / `clear` accept an explicit `--project-root` flag.
+
+#### Hooks (default-on via `/setup`)
+
+- `.claude/settings.json.example` carries a real `hooks.PostToolUse[Write|Edit]` entry that calls the tracker on every doc edit. Per-edit cost ~10 ms (bun startup + JSONL append). Never blocks user edits, never invokes an LLM.
+- `scripts/setup-permissions.ts` extended to merge `hooks` into the user's `settings.json` with idempotent recognition of the sa-skills marker (`header-cli.ts session-log add`). Existing user hooks under any matcher are preserved verbatim. Re-running `/setup` reports the hook under "already present" once installed.
+- Merge summary now includes a fourth `Hooks: added X · already present Y` line.
+
+#### Slash command
+
+- `/regenerate-explorer-headers --session` (also exposed in the skill's Activation Forms): reads the editlog, runs LLM-driven regeneration only on the listed files (with implicit `--force` since they're already published), and clears the editlog on success. Combine with `--dry-run` to preview without LLM calls or log mutation. Partial failures retain the failing files in the log so a re-run picks them up.
+
+#### Orchestrator-managed TODO
+
+- `scripts/setup-claude-md.ts` extends the managed CLAUDE.md block with a new `### Session edit tracker — keep EXPLORER_HEADERs honest` subsection. Claude (the orchestrator in the user's main session) is instructed to keep one and only one task on the user-visible task list (`Regenerate EXPLORER_HEADERs for N session-edited docs (run /regenerate-explorer-headers --session)`) whenever the editlog is non-empty. Never auto-runs the slash command — surfaces the action; the user decides.
+
+#### Per-skill pre-flight
+
+`Pre-flight: Session-Edit Check` blocks added to:
+
+- `skills/architecture-compliance/SKILL.md` — before Phase 1.
+- `skills/architecture-analysis/SKILL.md` — before Step 0.
+- `skills/architecture-peer-review/SKILL.md` — before Step 0.
+- `skills/architecture-dev-handoff/SKILL.md` — before Step 0.
+- `skills/architecture-docs/SKILL.md` — Q&A workflows only (editing workflows are the *source* of edits).
+- `skills/architecture-definition-record/SKILL.md` — before context-gather Workflows 2 / 4.
+
+Each pre-flight runs `header-cli.ts session-log count`. On `0` it stays silent. On `N > 0` it emits a loud preamble naming affected files and the `/regenerate-explorer-headers --session` action, then continues running (non-blocking). The skill's final report metadata gains a `headers_status: stale-edits-pending` flag so downstream consumers can grep for runs based on partially-stale headers.
+
+#### Modified
+
+- `commands/regenerate-explorer-headers.md` — documents the `--session` flag and `--session --dry-run` combination.
+- `skills/architecture-explorer-headers/SKILL.md` — Phase 1 alternate `--session` mode that reads from the editlog instead of the disk inventory; Phase 4 reports cleared/retained editlog state. Skill version bumped 1.0.0 → 1.1.0.
+- `commands/setup.md` — documents the hook-merge whitelist addition and the new `### Optional: enable EXPLORER_HEADER staleness checks` companion section.
+- `CLAUDE.md` — trigger-routing row for `regenerate-explorer-headers` documents the new `--session` flag and adds matching trigger phrases.
+- `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json` — version 3.14.0 → 3.14.1.
+
+#### Verification
+
+- `bun run typecheck` clean.
+- `bun test` passes (478/478, 13 new `session-log` tests on top of 465 pre-existing).
+- `/setup` end-to-end smoke: fresh project creates settings + CLAUDE.md + .gitignore + hooks; idempotent re-run reports 0 added under every section; pre-existing user hooks under same matcher are preserved verbatim.
+
 ## [3.14.0]
 
 ### Added — Universal `architecture-explorer` Haiku-tier doc classifier (infrastructure)

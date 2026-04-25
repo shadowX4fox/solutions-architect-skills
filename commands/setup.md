@@ -41,13 +41,14 @@ bun "$plugin_dir/scripts/setup-permissions.ts" "$example_path" "$user_settings_p
 The helper:
 - Reads both JSON files.
 - Strips every `//`-prefixed comment key from the example (documentation-only keys).
-- Merges three top-level sections into the user file:
+- Merges four top-level sections into the user file:
   - `permissions.allow` — array union, deduplicated, user entries first, then any new entries from the example in their original order.
   - `enabledPlugins` — object-level merge; if a key already exists in the user file, the user's value wins.
   - `extraKnownMarketplaces` — same object-level merge.
-- Leaves every other user-specific top-level key (`model`, `theme`, `hooks`, custom keys) untouched.
+  - `hooks` — **(v3.14.1+)** event-keyed merge with idempotent recognition of the sa-skills marker `header-cli.ts session-log add`. Existing user hooks under any matcher are preserved verbatim; if the user already has a `Write|Edit` matcher with our session-log command in its `hooks[]` array, it is recognized as already present and not duplicated. If the user has a `Write|Edit` matcher with unrelated hooks, the sa-skills hook command is appended into the same matcher entry without disturbing the user's existing commands.
+- Leaves every other user-specific top-level key (`model`, `theme`, custom keys) untouched.
 - Writes the merged object back with 2-space indentation and a trailing newline.
-- Prints a structured summary to stdout.
+- Prints a structured summary to stdout (now four lines: Permissions / Marketplaces / Plugins / Hooks).
 
 If the helper exits non-zero, display the stderr verbatim and do NOT claim success — the user's `settings.json` has not been modified.
 
@@ -126,3 +127,14 @@ Existing projects re-running `/setup` after upgrading to v3.14.0 will see two ne
 No marketplace re-registration is needed. The new `architecture-explorer-headers` skill (and its `/regenerate-explorer-headers` slash command) inherit existing `Bash(bun *)` and `Read/Write` doc-tree permissions — no extra grants required to run them.
 
 If a project's `settings.json` was committed with the v3.13.x permissions list and you want the upgrade visible in version control, run `/setup` and then commit the resulting two-line addition to `permissions.allow`.
+
+## v3.14.1 — what's new in this setup
+
+Existing projects re-running `/setup` after upgrading to v3.14.1 will see one additional change:
+
+- `hooks.PostToolUse[Write|Edit]` — a session-scoped editlog tracker is merged into your `.claude/settings.json`. After every Write or Edit to any file under `docs/**/*.md`, the hook silently appends one JSONL line to `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog`. Cost per edit: ~10 ms (bun startup + JSONL append). The hook never blocks the user's edit and never invokes an LLM.
+- The Step 5 `CLAUDE.md` managed block grows a new subsection — *Session edit tracker — keep EXPLORER_HEADERs honest* — that instructs Claude (the orchestrator) to keep one and only one task on the user-visible task list (`Regenerate EXPLORER_HEADERs for N session-edited docs (run /regenerate-explorer-headers --session)`) whenever the editlog is non-empty. The orchestrator never auto-runs the slash command — the user decides when to spend the LLM-heavy refresh.
+
+Idempotency: re-running `/setup` is safe. The hook-merge logic in Step 3 detects the sa-skills marker `header-cli.ts session-log add` and refuses to duplicate the entry. Unrelated user hooks under the same `Write|Edit` matcher are preserved verbatim — only the sa-skills command is added.
+
+If you previously edited your `.claude/settings.json` to add other hooks under `PostToolUse`, those are kept as-is. If you'd rather opt out of the tracker entirely, delete the corresponding entry from `hooks.PostToolUse` after `/setup` runs; the rest of the plugin works without it (you'll lose the edit-tracking TODO and skill pre-flight warnings about session edits, but the explorer cache and slash commands continue to function).

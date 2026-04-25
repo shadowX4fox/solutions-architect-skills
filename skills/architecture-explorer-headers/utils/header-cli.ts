@@ -1,26 +1,77 @@
 #!/usr/bin/env bun
-/**
- * Bun CLI for the architecture-explorer-headers skill.
- *
- * Subcommands:
- *   list <project_root>
- *     Print JSON array describing every doc file under docs/ and
- *     docs/components/ (recursive), one entry per file with
- *     {path, has_header, h1, byte_size}. ARCHITECTURE.md is excluded
- *     by design — it is the project's navigation index, exempt from
- *     EXPLORER_HEADER requirements.
- *
- *   validate <file_abs_path>
- *     Validate the EXPLORER_HEADER inside a single file. Exit 0 if
- *     valid, 1 if invalid, 2 if file unreadable. Prints errors and
- *     warnings to stderr.
- *
- *   has-header <file_abs_path>
- *     Print "yes" or "no". Exit 0 either way (it's a yes/no probe,
- *     not a validation gate). Useful for test scripts.
- */
-import { existsSync, readFileSync } from "fs";
+// Bun CLI for the architecture-explorer-headers skill.
+//
+// Subcommands:
+//   list <project_root>
+//     Print JSON array describing every doc file under docs/ and
+//     docs/components/ (recursive), one entry per file with
+//     {path, has_header, h1, byte_size}. ARCHITECTURE.md is excluded
+//     by design — it is the project's navigation index, exempt from
+//     EXPLORER_HEADER requirements.
+//
+//   validate <file_abs_path>
+//     Validate the EXPLORER_HEADER inside a single file. Exit 0 if
+//     valid, 1 if invalid, 2 if file unreadable. Prints errors and
+//     warnings to stderr.
+//
+//   has-header <file_abs_path>
+//     Print "yes" or "no". Exit 0 either way (it's a yes/no probe,
+//     not a validation gate). Useful for test scripts.
+//
+//   session-log <add|list|count|clear> [args]
+//     Session-scoped editlog used by the PostToolUse hook to track
+//     which architecture docs were edited in the current Claude
+//     session. The /regenerate-explorer-headers --session slash
+//     command consumes the log and clears it on success.
+//
+//       session-log add <file_abs_path>
+//         Append one JSONL entry. Drops paths outside docs/, the
+//         ARCHITECTURE.md navigation index, and component-index
+//         README.md files. Exit 0 even on dropped paths so the hook
+//         never blocks the user's edit. Project root is inferred from
+//         the first ancestor of <file_abs_path> that contains a
+//         CLAUDE.md, ARCHITECTURE.md, or .git directory; otherwise the
+//         file's parent directory is used.
+//       session-log list [--project-root <dir>]
+//         Print deduped relative paths (latest-edit first), one per
+//         line, to stdout. Exit 0 even if the editlog is missing.
+//       session-log count [--project-root <dir>]
+//         Print the deduped count to stdout. Exit 0 always.
+//       session-log clear [--project-root <dir>]
+//         Truncate the editlog. Exit 0 even if missing.
+import { existsSync, readFileSync, statSync } from "fs";
+import { dirname, isAbsolute, resolve } from "path";
 import { hasExplorerHeader, listDocFiles, validateHeader } from "./header-detector";
+import {
+  appendEdit,
+  clearSessionEdits,
+  readSessionEdits,
+} from "./session-log";
+
+function inferProjectRoot(startPath: string): string {
+  const start = isAbsolute(startPath) ? startPath : resolve(startPath);
+  let cursor = existsSync(start) && statSync(start).isFile() ? dirname(start) : start;
+  while (true) {
+    if (
+      existsSync(resolve(cursor, "ARCHITECTURE.md")) ||
+      existsSync(resolve(cursor, "CLAUDE.md")) ||
+      existsSync(resolve(cursor, ".git"))
+    ) {
+      return cursor;
+    }
+    const parent = dirname(cursor);
+    if (parent === cursor) return existsSync(start) && statSync(start).isFile() ? dirname(start) : start;
+    cursor = parent;
+  }
+}
+
+function takeFlag(args: string[], name: string): string | undefined {
+  const idx = args.indexOf(name);
+  if (idx === -1) return undefined;
+  const value = args[idx + 1];
+  args.splice(idx, 2);
+  return value;
+}
 
 const [, , subcommand, ...rest] = process.argv;
 
@@ -65,8 +116,49 @@ switch (subcommand) {
     break;
   }
 
+  case "session-log": {
+    const [sub, ...sessionArgs] = rest;
+    switch (sub) {
+      case "add": {
+        const [filePath] = sessionArgs;
+        if (!filePath) {
+          // Hook may fire without a path (no-op tool). Exit 0 silently.
+          break;
+        }
+        const root = inferProjectRoot(filePath);
+        appendEdit(filePath, root);
+        break;
+      }
+      case "list": {
+        const args = [...sessionArgs];
+        const explicitRoot = takeFlag(args, "--project-root");
+        const root = explicitRoot ? resolve(explicitRoot) : inferProjectRoot(process.cwd());
+        const entries = readSessionEdits(root);
+        for (const e of entries) console.log(e.relativePath);
+        break;
+      }
+      case "count": {
+        const args = [...sessionArgs];
+        const explicitRoot = takeFlag(args, "--project-root");
+        const root = explicitRoot ? resolve(explicitRoot) : inferProjectRoot(process.cwd());
+        console.log(String(readSessionEdits(root).length));
+        break;
+      }
+      case "clear": {
+        const args = [...sessionArgs];
+        const explicitRoot = takeFlag(args, "--project-root");
+        const root = explicitRoot ? resolve(explicitRoot) : inferProjectRoot(process.cwd());
+        clearSessionEdits(root);
+        break;
+      }
+      default:
+        fail(`unknown session-log subcommand "${sub ?? ""}". Expected: add, list, count, clear.`);
+    }
+    break;
+  }
+
   default:
     fail(
-      `unknown subcommand "${subcommand ?? ""}". Expected one of: list, validate, has-header.`,
+      `unknown subcommand "${subcommand ?? ""}". Expected one of: list, validate, has-header, session-log.`,
     );
 }

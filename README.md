@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -797,7 +797,25 @@ Where:
 
 ## Roadmap
 
-### v3.14.0 (Current Release) ✅
+### v3.14.1 (Current Release) ✅
+**feat: session-scoped EXPLORER_HEADER edit tracker + `/regenerate-explorer-headers --session` batch refresh**
+
+The v3.14.0 release introduced `<!-- EXPLORER_HEADER ... -->` blocks that the `architecture-explorer` agent samples in the first 60 lines of every doc to classify relevance. Bodies drift faster than headers: rename a component, swap a database, add an ADR reference — the body is updated, the header silently lies, and downstream classification quietly degrades. v3.14.1 closes that feedback loop with a **batch model** (per-edit autofix was deliberately rejected; per-doc work added complexity without clear wins).
+
+**What ships:**
+
+- **Session edit tracker** — new utility `skills/architecture-explorer-headers/utils/session-log.ts` exposing `appendEdit`, `readSessionEdits`, `clearSessionEdits`, `retainSessionEdits`, `sessionLogPath`. Storage is `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog`, one JSONL line per Write/Edit on a `docs/**/*.md` file. `ARCHITECTURE.md`, `docs/README.md`, and paths outside `docs/**` are silently dropped (the tracker never blocks an edit). `$CLAUDE_SESSION_ID` keys per-session; falls back to a per-day token when absent.
+- **CLI subcommands** — `header-cli.ts` gains `session-log {add | list | count | clear}`, all exit-0 on success, suitable for a hot PostToolUse hook path. Project root is auto-inferred from the file's nearest `CLAUDE.md` / `ARCHITECTURE.md` / `.git` ancestor; explicit `--project-root` flag available where needed.
+- **PostToolUse hook (default-on via `/setup`)** — `.claude/settings.json.example` carries a new `hooks.PostToolUse[Write|Edit]` block that fires the tracker after every doc edit. Cost ~10 ms per edit (bun startup + JSONL append), no LLM, never blocks. `scripts/setup-permissions.ts` is extended to merge `hooks` into the user's settings.json with idempotent recognition of the sa-skills marker (`header-cli.ts session-log add`); existing user hooks under any matcher are preserved verbatim.
+- **`/regenerate-explorer-headers --session` flag** — the existing slash command (and its skill workflow) gains a `--session` mode that reads the editlog, runs LLM-driven regeneration only on the listed files (with implicit `--force` since they're already published), and clears the editlog on success. Combine with `--dry-run` to preview without LLM calls or log mutation. Partial failures retain the failing files in the log so a re-run picks them up.
+- **Orchestrator-managed TODO** — the user's project `CLAUDE.md` (managed by `scripts/setup-claude-md.ts`) gains a new `### Session edit tracker — keep EXPLORER_HEADERs honest` subsection that instructs Claude to keep one and only one task on the user-visible task list (`Regenerate EXPLORER_HEADERs for N session-edited docs (run /regenerate-explorer-headers --session)`) whenever the editlog is non-empty. The orchestrator never auto-runs the slash command — the user decides when to spend the LLM-heavy refresh.
+- **Per-skill pre-flight** — `Pre-flight: Session-Edit Check` blocks added to the workflow openings of `architecture-compliance`, `architecture-analysis`, `architecture-peer-review`, `architecture-dev-handoff`, `architecture-docs` (Q&A only), and `architecture-definition-record`. When the editlog is non-empty the skill emits a loud preamble naming the affected files and the `/regenerate-explorer-headers --session` action, then continues running (non-blocking) with a `headers_status: stale-edits-pending` flag in the final report's metadata so downstream consumers can grep.
+
+**Verification**: `bun run typecheck` ✅, `bun test` (478/478 pass — 13 new `session-log` tests on top of the 465 pre-existing) ✅, `/setup` end-to-end smoke (fresh project, idempotent re-run, hook-merge with pre-existing user hooks under same matcher) all green.
+
+**Migration**: re-run `/setup` to merge the new hook block into your project's `.claude/settings.json`. Existing v3.14.0 installs receive the hook addition under "Hooks: added 1" in the merge summary; the rest of the merge is a no-op (already present). The new CLAUDE.md subsection is appended idempotently via the existing managed-block markers.
+
+### v3.14.0 (Previous Release) ✅
 **feat: universal `architecture-explorer` Haiku classifier + 36 task-typed configs + `architecture-explorer-headers` skill**
 
 The plugin's biggest cost driver pre-v3.14.0 was redundant doc reads: a 10-contract compliance run hit `ARCHITECTURE.md` + `docs/01–09` + `adr/*` ~20 times (10 validators + 10 generators × full read), ~1.8 MB of duplicate Opus traffic. The 10-analysis dashboard repeated the pattern (~1.5–2 MB). Peer-review at Hard depth, the same.
@@ -818,12 +836,14 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 
 | Patch | Skill | Work |
 |-------|-------|------|
-| 3.14.1 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
-| 3.14.2 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
-| 3.14.3 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
-| 3.14.4 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
-| 3.14.5 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
-| 3.14.6 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+| 3.14.2 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.3 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
+| 3.14.4 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
+| 3.14.5 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.6 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
+| 3.14.7 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+
+(v3.14.1 was used for the session-edit tracker shipped above; the per-skill explorer wiring continues from v3.14.2.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 
@@ -831,7 +851,7 @@ Each patch ships independently — `architecture-explorer` is self-contained inf
 
 **Verification**: `bun run typecheck` ✅, `bun test` (465/465 pass — 78 new explorer + headers tests added on top of the 387 pre-existing) ✅, `bun run bundle:check` (both bundles in sync) ✅, 36/36 configs validate against `_schema.json` ✅, `tools/derive-explorer-configs.ts` runs cleanly ✅, `/setup` smoke test confirms idempotent CLAUDE.md generation with the new explorer subsection ✅.
 
-### v3.13.1 (Previous Release) ✅
+### v3.13.1 ✅
 **chore: reorganize `agents/` by role — generators / builders / reviewers / validators / configs**
 
 The `agents/` directory grew to 6 top-level `.md` files + a misleadingly-named `agents/base/configs/` JSON folder + an `agents/validators/` folder over the v3.5–v3.13 series. v3.13.1 groups every agent and config under a role-based subdirectory so discovery is one folder away from "what does this agent do?":

@@ -531,6 +531,29 @@ After displaying the contract list, ask:
 
 ## Generation Workflow
 
+### Pre-flight: Session-Edit Check (v3.14.1+)
+
+Before Phase 1, run the EXPLORER_HEADER session-edit pre-flight. This check is identical across every doc-consuming sa-skills skill (compliance, analysis, peer-review, dev-handoff, docs Q&A, definition-record). It surfaces docs that were edited in the current Claude session whose EXPLORER_HEADERs have not yet been refreshed; stale headers degrade the architecture-explorer's classification of the same docs in the steps that follow.
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
+```
+
+- **Output `0`** → editlog is clean. Emit nothing in the preamble; proceed directly to Phase 1.
+- **Output `N > 0`** → run `... session-log list --project-root <project_root>` to fetch the deduped paths, then emit a loud preamble before the Phase 1 banner:
+
+  ```
+  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
+    Affected:
+      - docs/01-system-overview.md
+      - docs/components/api-gateway.md
+      - …
+    ACTION REQUIRED before this skill's results can be trusted:
+      → Run: /regenerate-explorer-headers --session
+  ```
+
+  Continue running the workflow (the warning is non-blocking). In the Phase 5 final report, set the metadata flag `headers_status: stale-edits-pending` so downstream consumers (CI, peer reviewers, traceability) can grep for runs that were based on partially-stale headers.
+
 ### Phase 1: Initialization
 
 **Step 1.1: Detect User Intent**
