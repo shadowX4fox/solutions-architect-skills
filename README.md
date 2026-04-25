@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -797,7 +797,59 @@ Where:
 
 ## Roadmap
 
-### v3.14.4 (Current Release) ✅
+### v3.14.5 (Current Release) ✅
+**feat: wire `architecture-explorer` into `architecture-compliance` — per-contract relevance allowlists across all 10 contracts**
+
+The compliance flow's 10 validators (one per contract domain) hard-coded their "Required Files" lists in their agent prompts; the universal compliance-generator pulled the same list from each domain's `agents/configs/<contract>.json` `phase3.required_files`. Both lists are correct but static — they can't adapt when, say, a project documents a security topic in `docs/06-technology-stack.md` instead of `docs/07-security-architecture.md`. The Haiku-tier `architecture-explorer` plus its 10 already-shipped `compliance-<domain>.json` configs were designed exactly for that adaptation; v3.14.5 wires them in.
+
+**Architecture change:**
+
+```
+Orchestrator (architecture-compliance skill)
+  │
+  ├── Step 3.2.5 — architecture-explorer (Haiku)        ← NEW: per-contract fan-out, parallelism-batched (default 4)
+  │     for each selected contract C:
+  │       task_type: compliance-<C>
+  │       config_path: agents/configs/explorer/compliance-<C>.json
+  │     returns EXPLORE_RESULT.relevant_files[] per contract
+  │     cache hits cost zero Haiku tokens
+  │
+  ├── Step 3.3 — Validator (Sonnet|Haiku|Opus per preset)
+  │     receives EXPLORE_RESULT in prompt
+  │     reads relevant_files[] (or hardcoded fallback if explorer failed)
+  │     emits VALIDATION_RESULT
+  │
+  └── Step 3.4 — compliance-generator (universal, model per preset)
+        receives VALIDATION_RESULT + EXPLORE_RESULT
+        PHASE 3 Step 3.3 reads relevant_files[] (or phase3.required_files fallback)
+        emits the contract per the domain template (template-fill contract preserved exactly)
+```
+
+**Concrete savings on a typical 10-contract run:**
+
+- **Synthesis-tier reads**: each validator + generator now reads only the explorer's allowlist (typically 4–9 files per contract). Previously each pair read 5–8 hardcoded files plus ARCHITECTURE.md. The reduction is modest in *file count* but meaningful in *cross-domain reads*: when the explorer detects that, say, the Cloud contract's relevant set is `docs/02-context.md + docs/06-technology-stack.md` (because the project doesn't have a separate `docs/cloud-architecture.md`), the Cloud validator/generator reads exactly those files. Before, validators that hardcoded a file name now-not-present in the project would emit `[NOT DOCUMENTED]` for everything and the user would be forced to rename or duplicate docs to satisfy the validator.
+- **Haiku tier**: ~200 tokens per contract for classification. Effectively free vs Sonnet/Opus.
+- **Cache hits**: zero Haiku tokens on repeat runs. The cached `EXPLORE_RESULT` flows into the validator and generator unchanged.
+- **Cost-per-10-contract-run**: dominated by the synthesis tier (template fill on Sonnet/Opus, unchanged). Validators now see more accurate file lists, so `[NOT DOCUMENTED]` markers fire only where the architecture genuinely lacks coverage — fewer false-positive gaps in the contracts.
+
+**Required-section safeguard** (false-negative protection): each `compliance-<domain>.json` declares the validator's hardcoded file list as `required_sections[]`. Every contract's `relevant_files[]` includes those files regardless of score. The runtime parser rejects any `EXPLORE_RESULT` that omits a required entry, falling back to degraded mode.
+
+**Degraded mode** (fail-open): if any explorer call returns `FAILED`, the orchestrator omits the `EXPLORE_RESULT` block from that contract's validator and generator prompts. Both fall back to their hardcoded / `phase3.required_files` lists. The user always gets a contract.
+
+**What changed** (single PR, scoped):
+
+- `agents/builders/architecture-explorer.md` — already accepts `task_family: compliance` (no changes needed; the v3.14.0 baseline works).
+- `agents/generators/compliance-generator.md` — Input Parameters gain `EXPLORE_RESULT`; PHASE 3 Step 3.3 reads `relevant_files[]` when present, falls back to `phase3.required_files` when absent.
+- 10 validator agents (`agents/validators/*-validator.md`) — uniform additions: Input Parameters get `EXPLORE_RESULT`; the existing "### Required Files" hardcoded list is wrapped with a note marking it as the **fallback** when the explorer block is absent.
+- `skills/architecture-compliance/SKILL.md` Phase 3 — new Step 3.2.5 (per-contract explorer fan-out, parallelism-batched 4); Step 3.3 + Step 3.4 prompt templates updated to include the `EXPLORE_RESULT` block.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅. The 10 `compliance-<domain>.json` explorer configs (shipped in v3.14.0) needed zero changes — already correctly shaped for the new flow.
+
+**Migration**: no user action required. Re-running any compliance generation after upgrading to v3.14.5 picks up the new flow automatically. The contract templates, validation rubric, and `VALIDATION_RESULT` contract are all preserved; existing contracts on disk remain valid.
+
+**Roadmap**: per-skill compliance integration was previously slated for v3.14.5 (compliance) — now done. Analysis integration moves to v3.14.6; remaining wiring (peer-review, docs Q&A, ADR application) follows.
+
+### v3.14.4 (Previous Release) ✅
 **feat: wire `architecture-explorer` into `architecture-dev-handoff` — per-component ADR allowlists, ~50% Sonnet token reduction**
 
 The dev-handoff flow's I/O-heavy `handoff-context-builder` (Sonnet) was reading every ADR in full to build its term index, then full-reading the matched subset per component. On a project with 38 ADRs and 8 components, that's ~38×30-line indexing reads + ~50 full ADR reads, all on Sonnet. The infrastructure to fix this has been in place since v3.14.0 (the `handoff-component.json` explorer config was already shipped); only the wiring was missing. v3.14.4 closes the loop.
@@ -843,7 +895,7 @@ Orchestrator
 
 **Roadmap**: per-skill compliance integration was previously slated for v3.14.4; it shifts to v3.14.5. Remaining wiring (analysis, peer-review, docs Q&A, ADR application) shifts by one accordingly.
 
-### v3.14.3 (Previous Release) ✅
+### v3.14.3 ✅
 **fix: align `enabledPlugins` key with the marketplace plugin name (`sa-skills`) + auto-migrate legacy `solutions-architect-skills@…` registrations**
 
 `/plugin` and `/reload-plugins` were reporting `Plugin "solutions-architect-skills" not found in marketplace "shadowx4fox-solution-architect-marketplace"` after a fresh install or a re-`/setup`. The `marketplace.json` correctly registers the plugin as `sa-skills` (matching `plugin.json`'s `name` field), but four user-facing files still pointed at the older `solutions-architect-skills` name from before the v3.8.5 marketplace rename — including the `enabledPlugins` block in `.claude/settings.json.example` that `/setup` merges into every consuming project.
@@ -926,13 +978,12 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 
 | Patch | Skill | Work |
 |-------|-------|------|
-| 3.14.5 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
 | 3.14.6 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
 | 3.14.7 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
 | 3.14.8 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
 | 3.14.9 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
 
-(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration; v3.14.4 = dev-handoff explorer wiring. Per-skill explorer wiring continues with compliance at v3.14.5.)
+(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration; v3.14.4 = dev-handoff explorer wiring; v3.14.5 = compliance explorer wiring. Analysis integration is next at v3.14.6.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 

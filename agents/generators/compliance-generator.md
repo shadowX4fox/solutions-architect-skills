@@ -17,6 +17,7 @@ Generate a compliance contract from ARCHITECTURE.md using direct tool execution.
 - `contract_type`: The domain config name (e.g., `cloud`, `development`, `sre`). Determines which config JSON and template to use.
 - `architecture_file`: Path to ARCHITECTURE.md (default: ./ARCHITECTURE.md)
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory (provided by the skill orchestrator). If not provided, use Glob to find `**/skills/architecture-compliance/SKILL.md` and strip the `/skills/architecture-compliance/SKILL.md` suffix.
+- `EXPLORE_RESULT` (v3.14.5+, optional block in prompt): an `EXPLORE_RESULT` YAML block produced by `sa-skills:architecture-explorer` for `task_type: compliance-<contract_type>`, declaring which files are relevant for this domain. When present, replaces `phase3.required_files` from the domain config as the read set in PHASE 3 Step 3.3. When absent (degraded mode), Step 3.3 falls back to `phase3.required_files`.
 
 ## Workflow
 
@@ -180,7 +181,15 @@ Store as: generation_date
 
 **Step 3.3: Read Required Sections**
 
-Read each file listed in `phase3.required_files` from the config:
+**With `EXPLORE_RESULT` (v3.14.5+ default path)** — parse the `EXPLORE_RESULT` block from your input prompt and read only the files listed in `relevant_files[]`. The explorer's `compliance-<contract_type>.json` config marks every file in `phase3.required_files` as `required_sections[]`, so the explorer's allowlist is always a superset of the legacy required list (false-negative safe). For each path in `EXPLORE_RESULT.relevant_files`:
+
+```
+Read file: <path>
+```
+
+Skip any path under `adr/` here — those are full-Read in Step 3.6 only if a `data_points[]` grep matches; their first-60 sample (already done by the explorer) is enough for relevance. The explorer's `matched_sections[]` for each file lists the section anchors that scored — you can prefer those when extracting placeholder values.
+
+**Without `EXPLORE_RESULT` (degraded fallback)** — read each file listed in `phase3.required_files` from the config:
 
 For each entry in the array, use Read tool:
 ```

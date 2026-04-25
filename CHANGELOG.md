@@ -5,6 +5,53 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.5]
+
+### Added — `architecture-explorer` integration for `architecture-compliance` (per-contract relevance allowlists across all 10 contracts)
+
+**Problem**: each of the 10 compliance validators hardcoded its "Required Files" list in the agent prompt, and the universal `compliance-generator` pulled the same list from each domain's `agents/configs/<contract>.json` `phase3.required_files`. Both lists are correct for canonical projects but static — they can't adapt when a project documents a domain topic in a non-canonical doc (e.g., security topics in `docs/06-technology-stack.md` instead of `docs/07-security-architecture.md`). The Haiku-tier `architecture-explorer` plus its 10 already-shipped `compliance-<domain>.json` configs were designed exactly for that adaptation; this release wires them in.
+
+**Architecture change** — `architecture-compliance` Phase 3:
+
+- **NEW Step 3.2.5** — per-contract `architecture-explorer` fan-out, parallelism-batched 4. For each selected contract `C`, one `Task()` with:
+  ```yaml
+  task_type: compliance-<C>
+  config_path: <plugin_dir>/agents/configs/explorer/compliance-<C>.json
+  project_root: <dirname(architecture_file)>
+  plugin_dir: <plugin_dir>
+  plugin_version: <plugin version>
+  force: false
+  ```
+  Returns one `EXPLORE_RESULT.relevant_files[]` per contract. Cache hits cost zero Haiku tokens.
+
+- **Step 3.3 (Validators) prompt** — extended with an `EXPLORE_RESULT` YAML block. Validators honor `relevant_files[]` as the read set when present; the existing hardcoded "Required Files" list becomes the **fallback** for degraded mode. The hardcoded list is also the explorer config's `required_sections[]`, so the explorer's allowlist is always a superset (false-negative safe).
+
+- **Step 3.4 (Generator) prompt** — extended with the same `EXPLORE_RESULT` block. The universal `compliance-generator`'s PHASE 3 Step 3.3 reads `relevant_files[]` when present; falls back to `phase3.required_files` from the domain config when absent.
+
+**Modified files**:
+
+- `agents/generators/compliance-generator.md` — Input Parameters gain `EXPLORE_RESULT`; PHASE 3 Step 3.3 honors it; legacy `phase3.required_files` path remains as fallback.
+- `agents/validators/business-continuity-validator.md`, `cloud-validator.md`, `data-ai-validator.md`, `development-validator.md`, `enterprise-validator.md`, `integration-validator.md`, `platform-validator.md`, `process-validator.md`, `security-validator.md`, `sre-validator.md` — uniform addition: Input Parameters gain `EXPLORE_RESULT`; the existing `### Required Files` hardcoded list is wrapped with a note marking it as the fallback when the explorer block is absent.
+- `skills/architecture-compliance/SKILL.md` Phase 3 — new Step 3.2.5; Step 3.3 + 3.4 prompt templates updated to include the `EXPLORE_RESULT` block.
+
+**Required-section safeguard** (false-negative protection): each `compliance-<domain>.json` declares the validator's hardcoded file list as `required_sections[]`. Every contract's `relevant_files[]` includes those files regardless of score. The runtime parser (`skills/architecture-explorer/utils/parse-explore-result.ts`) rejects any `EXPLORE_RESULT` that omits a required entry, falling back to degraded mode.
+
+**Degraded mode** (fail-open): if any explorer call returns `FAILED`, the orchestrator omits the `EXPLORE_RESULT` block from that contract's validator and generator prompts. Both fall back to their hardcoded / `phase3.required_files` lists. The user always gets a contract.
+
+**Cache behavior**: on repeat runs against unchanged docs, every explorer call returns `cache_hit: true` with zero Haiku tokens. The cached `EXPLORE_RESULT` flows into the validator and generator unchanged, so the only cost on a re-run is the synthesis tier (Sonnet/Opus) re-reading the same allowlist — same as today.
+
+**Concrete benefit**: when a project documents a domain in non-canonical files, the explorer detects the actual location and routes the validator/generator there. Validators no longer emit `[NOT DOCUMENTED]` for canonical-but-absent files when the content exists elsewhere — fewer false-positive gaps in the resulting contracts.
+
+**Verification**:
+
+- `bun run typecheck` clean.
+- `bun test` passes (478/478, no test changes).
+- The 10 `compliance-<domain>.json` configs (shipped in v3.14.0) needed zero changes — already correctly shaped.
+
+**Migration**: no user action required. Re-running any compliance generation after upgrading to v3.14.5 picks up the new flow automatically. The contract templates, validation rubric, and `VALIDATION_RESULT` contract are all preserved; existing contracts on disk remain valid.
+
+**Roadmap**: analysis integration is next at v3.14.6; peer-review v3.14.7; docs Q&A v3.14.8; ADR application v3.14.9.
+
 ## [3.14.4]
 
 ### Added — `architecture-explorer` integration for `architecture-dev-handoff` (per-component ADR allowlists)

@@ -27,6 +27,7 @@ Apply this personality when framing evidence, writing deviation descriptions, an
 
 - `architecture_file`: Path to ARCHITECTURE.md
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory
+- `EXPLORE_RESULT` (v3.14.5+, optional block in prompt): a YAML block produced by `sa-skills:architecture-explorer` for `task_type: compliance-<this-domain>`, listing the files relevant for this validation. When present, honor `relevant_files[]` as the read set instead of the hardcoded "Required Files" list below — the explorer's `required_sections[]` already covers every file in that list (it was derived from this validator's hardcoded list), so the allowlist is always a superset and there is no false-negative risk. When the block is absent (degraded mode — explorer failed), fall back to the hardcoded list.
 
 
 ## Domain Configuration
@@ -161,6 +162,10 @@ These fields drive your validation — if a data point is listed, you must check
 4. Collect all results into the VALIDATION_RESULT format
 
 ### Required Files
+
+When the prompt includes an `EXPLORE_RESULT` block, read the files listed in `relevant_files[]` instead of (or in addition to) the hardcoded list below. The explorer's classification covers the files documented here plus any cross-referenced docs that scored above the domain's relevance threshold. The hardcoded list below is the **fallback** for degraded mode.
+
+#### Hardcoded fallback (used when EXPLORE_RESULT is absent)
 
 - `docs/07-security-architecture.md` — primary source for all security validation items
 - `docs/06-technology-stack.md` — security tools, scanning tools, vault references
