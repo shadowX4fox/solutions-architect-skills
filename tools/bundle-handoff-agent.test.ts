@@ -3,11 +3,12 @@
  *
  * Asserts every BUNDLE_TARGETS entry in tools/bundle-handoff-agent.ts is in
  * sync with its source files. Currently:
- *   - agents/generators/handoff-generator.md       ← HANDOFF_TEMPLATE.md,
- *                                                     SECTION_EXTRACTION_GUIDE.md,
- *                                                     assets/_index.md,
- *                                                     ASSET_GENERATION_GUIDE.md
- *   - agents/builders/handoff-context-builder.md   ← PAYLOAD_SCHEMA.md
+ *   - agents/generators/handoff-generator.md          ← HANDOFF_TEMPLATE.md,
+ *                                                       SECTION_EXTRACTION_GUIDE.md
+ *   - agents/generators/handoff-asset-generator.md    ← assets/_index.md,
+ *                                                       ASSET_GENERATION_GUIDE.md
+ *                                                       (split out in v3.14.7)
+ *   - agents/builders/handoff-context-builder.md      ← PAYLOAD_SCHEMA.md
  *
  * Run via `bun test`.
  *
@@ -34,9 +35,11 @@ describe("bundle-handoff-agent sync", () => {
       console.error(result.stderr);
     }
     expect(result.status).toBe(0);
-    // Both agent file paths must appear in the success report so the test
-    // fails loudly if a future BUNDLE_TARGETS entry is dropped accidentally.
+    // All three agent file paths must appear in the success report so the
+    // test fails loudly if a future BUNDLE_TARGETS entry is dropped
+    // accidentally.
     expect(result.stdout).toContain("agents/generators/handoff-generator.md");
+    expect(result.stdout).toContain("agents/generators/handoff-asset-generator.md");
     expect(result.stdout).toContain("agents/builders/handoff-context-builder.md");
   });
 });

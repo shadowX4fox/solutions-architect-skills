@@ -5,6 +5,48 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.7]
+
+### Added — Parallel asset generation in `architecture-dev-handoff` with per-tier model pinning
+
+**Problem**: a single `handoff-generator` (sonnet) sub-agent did two unrelated jobs back-to-back per component — fill the 16-section handoff document, then sequentially write every deliverable asset (OpenAPI, DDL, Kubernetes Deployment, AsyncAPI, CronJob, Avro/Protobuf, Redis key schema, C4 descriptor). For a component with 4 assets that meant 5 serial Writes inside one sonnet spawn even though the assets are independent. It also paid sonnet rates for the c4-descriptor — a free-form markdown one-pager that template-fills cleanly on haiku.
+
+**Architecture change** — Phase 5 of `architecture-dev-handoff/SKILL.md` is now a three-stage pipeline:
+
+- **Stage 5A** — handoff-document fan-out. `handoff-generator` (sonnet) now produces ONLY the 16-section handoff document. Section 14 (Deliverable Assets) is filled deterministically from the payload's `asset_types[]` array using a static filename map embedded in the agent's system prompt — no asset content is written here. Component-level batches sized by `--parallelism N` (default 4, capped 8) — unchanged from v3.14.6.
+- **Stage 5B — NEW** — asset fan-out. The orchestrator builds a flat queue of `(component, asset_type)` tuples for every REGEN component and partitions into batches of `--asset-parallelism N` (default 4, capped 8). Each batch dispatches up to N parallel `Task(sa-skills:handoff-asset-generator, model=…)` calls. The new `handoff-asset-generator` agent file has no `model:` frontmatter — the orchestrator passes `model:` per Task call using a frozen tier table:
+  - `code` tier → `sonnet`: `openapi`, `ddl`, `deployment`, `asyncapi`, `cronjob`, `avro`, `protobuf`, `redis`
+  - `descriptor` tier → `haiku`: `c4-descriptor`
+  Pattern modeled on `architecture-compliance/SKILL.md:863, 890`.
+- **Stage 5C — NEW** — gap merge. Each `ASSET_RESULT` block returns `gaps[]` for any `# TODO: [NOT DOCUMENTED]` markers the asset agent emitted. The orchestrator does ONE `Edit` per component on the handoff document to append asset-level gaps under Section 15 (preserving today's behavior where every gap is consolidated in one place).
+
+**New flag**:
+
+- `--asset-parallelism N` (default `4`, validation `1–8`, same warn-and-clamp behavior as `--parallelism`) — Stage 5B batch size. Independent of `--parallelism` because the two stages have different cost profiles (Stage 5B is a mix of sonnet and haiku, lighter per spawn than Stage 5A).
+
+**New agent file**: `agents/generators/handoff-asset-generator.md` — universal single-asset generator. Tools: `Read, Write` (no Bash, Grep, or Glob — orchestrator pre-creates output directories, references are bundled). Bundles `assets/_index.md` and the full `ASSET_GENERATION_GUIDE.md` (~1050 lines) inline in its system prompt so it never reads plugin files at runtime. Returns `ASSET_RESULT` block with `status`, `asset_path`, and structured `gaps[]`.
+
+**Modified files**:
+
+- `agents/generators/handoff-generator.md` — bundle dropped from ~1976 to ~820 lines (removed the `assets/_index.md` and `ASSET_GENERATION_GUIDE.md` BEGIN/END_BUNDLE blocks plus the c4-descriptor extraction-fields subsection). Mission rewritten to "produces only the 16-section handoff document". PHASE 3 (asset generation) deleted; old PHASE 4 → PHASE 3, old PHASE 5 → PHASE 4. `output_assets_dir` removed from input parameters. `HANDOFF_RESULT.assets[]` field removed (orchestrator now derives the asset list from the payload's `asset_types[]` and the Stage 5B `ASSET_RESULT` statuses). Tool budget updated to `1 Read + 1 Write + 1 Read = 3 calls/spawn`. Agent version bumped to 1.2.0.
+- `skills/architecture-dev-handoff/SKILL.md` — Phase 1 Step 1.0 adds `--asset-parallelism N` flag with full validation. Phase 5 fully restructured into 5A/5B/5C with new tier classification table. Phase 6 manifest update note clarifies the `assets` field source (orchestrator-computed from `asset_types[]` × Stage 5B success). Phase 7 report adds dedicated lines for handoff batches, asset batches (with sonnet/haiku counts), and gap-merge edits. Permissions block adds `Agent(sa-skills:handoff-asset-generator)`.
+- `.claude/settings.json.example` — adds `Agent(sa-skills:handoff-asset-generator)` next to the existing handoff agent grants so fresh project installs do not hit a permission prompt.
+- `CLAUDE.md` — dev-handoff trigger row mentions `--asset-parallelism N` alongside `--parallelism N` and `--force`.
+
+**No changes to**: `PAYLOAD_SCHEMA.md` (asset classification already lives in `asset_types[]`), `handoff-context-builder.md`, `assets/_index.md`, `ASSET_GENERATION_GUIDE.md`, or any TypeScript utility under `skills/architecture-dev-handoff/utils/`. The `manifest.json` schema is unchanged.
+
+**Concrete benefit**: for a 5-component run where each component has on average 3 assets (15 total assets), Stage 5A emits 5 sonnet handoff Tasks (4-parallel batched = 2 message rounds), Stage 5B emits 15 asset Tasks (4-parallel batched = 4 message rounds, with ~12 sonnet + ~5 haiku = ~5 haiku Tasks costing one fifth what they did before). Wall-clock for asset writing drops roughly 3× (4-way fan-out instead of in-spawn serialization). Cost on the descriptor-tier asset drops to haiku rates.
+
+**Verification**:
+
+- `bun run typecheck` clean (no TypeScript files touched).
+- `bun test` passes (no test changes; manifest schema unchanged).
+- The static asset → tier classification is inlined in SKILL.md Stage 5B Step 5B.1; no JSON config or runtime resolution needed.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.7 picks up the new flow automatically. Existing `handoffs/.manifest.json` files remain valid (the `assets` field semantics are unchanged — same comma-separated filename list). Generated asset content is unchanged for code-tier assets (sonnet still drives them) and may show stylistic variance only for `c4-descriptor.md` (now driven by haiku, but the template scaffold and Asset Fidelity Rule are unchanged).
+
+---
+
 ## [3.14.6]
 
 ### Added — `architecture-explorer` integration for `architecture-analysis` (per-analysis FILES allowlists across all 10 analyses)

@@ -138,3 +138,13 @@ Existing projects re-running `/setup` after upgrading to v3.14.1 will see one ad
 Idempotency: re-running `/setup` is safe. The hook-merge logic in Step 3 detects the sa-skills marker `header-cli.ts session-log add` and refuses to duplicate the entry. Unrelated user hooks under the same `Write|Edit` matcher are preserved verbatim — only the sa-skills command is added.
 
 If you previously edited your `.claude/settings.json` to add other hooks under `PostToolUse`, those are kept as-is. If you'd rather opt out of the tracker entirely, delete the corresponding entry from `hooks.PostToolUse` after `/setup` runs; the rest of the plugin works without it (you'll lose the edit-tracking TODO and skill pre-flight warnings about session edits, but the explorer cache and slash commands continue to function).
+
+## v3.14.7 — what's new in this setup
+
+Existing projects re-running `/setup` after upgrading to v3.14.7 will see one new permission added:
+
+- `Agent(sa-skills:handoff-asset-generator)` — the parallel asset generator for `architecture-dev-handoff`. Stage 5B of the dev-handoff workflow now fans out one Task per `(component, asset_type)` tuple to this agent, with model tier pinned per call (sonnet for code-style assets — OpenAPI, DDL, Kubernetes, AsyncAPI, CronJob, Avro, Protobuf, Redis; haiku for the descriptor-style `c4-descriptor.md`). Pre-existing `Agent(sa-skills:handoff-generator)` and `Agent(sa-skills:handoff-context-builder)` grants are preserved; the new line is appended.
+
+No other permission, hook, marketplace, or `.gitignore` change is needed for v3.14.7. If you skip running `/setup` after the upgrade, dev-handoff invocations will hit a one-time permission prompt for `Agent(sa-skills:handoff-asset-generator)` on the first run — approve once and it will not repeat.
+
+The new `--asset-parallelism N` flag (default 4, capped at 8) is parsed by the orchestrator and requires no permission changes.

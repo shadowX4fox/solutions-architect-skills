@@ -29,6 +29,11 @@ const BUNDLE_TARGETS: BundleTarget[] = [
     sources: [
       { marker: "HANDOFF_TEMPLATE.md", path: join(SKILL_DIR, "HANDOFF_TEMPLATE.md") },
       { marker: "SECTION_EXTRACTION_GUIDE.md", path: join(SKILL_DIR, "SECTION_EXTRACTION_GUIDE.md") },
+    ],
+  },
+  {
+    agent: join(REPO_ROOT, "agents/generators/handoff-asset-generator.md"),
+    sources: [
       { marker: "assets/_index.md", path: join(SKILL_DIR, "assets/_index.md") },
       { marker: "ASSET_GENERATION_GUIDE.md", path: join(SKILL_DIR, "ASSET_GENERATION_GUIDE.md") },
     ],

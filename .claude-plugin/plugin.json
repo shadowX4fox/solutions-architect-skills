@@ -1,6 +1,6 @@
 {
   "name": "sa-skills",
-  "version": "3.14.6",
+  "version": "3.14.7",
   "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (14 skills, 10 compliance agents, universal architecture-explorer for relevance classification, per-component asset generation)",
   "author": {
     "name": "shadowX4fox",

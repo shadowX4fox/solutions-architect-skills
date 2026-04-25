@@ -48,6 +48,7 @@
       "Agent(sa-skills:peer-review-category-agent)",
       "Agent(sa-skills:architecture-analysis-agent)",
       "Agent(sa-skills:handoff-generator)",
+      "Agent(sa-skills:handoff-asset-generator)",
       "Agent(sa-skills:handoff-context-builder)",
       "Agent(sa-skills:architecture-explorer)",
       "Agent(sa-skills:docs-export-generator)",
