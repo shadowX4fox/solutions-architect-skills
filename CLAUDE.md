@@ -39,7 +39,7 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 | `generate compliance contracts` · `generate compliance documentation` · `compliance contracts` | `sa-skills:architecture-compliance` | 10 compliance contracts (Contratos de Adherencia) |
 | `check compliance health` · `compliance portfolio review` · `concept gaps across contracts` | `sa-skills:architecture-compliance-review` | Portfolio gap explorer playground |
 | `check requirements coverage` · `traceability report` · `PO spec coverage` · `deviation check` | `sa-skills:architecture-traceability` | `TRACEABILITY_REPORT.md` |
-| `generate dev handoff` · `component handoff for <X>` · `implementation handoff` | `sa-skills:architecture-dev-handoff` | Per-component 16-section handoff + scaffolded assets |
+| `generate dev handoff` · `component handoff for <X>` · `implementation handoff` | `sa-skills:architecture-dev-handoff` | Per-component 16-section handoff + scaffolded assets. Optional flags (v3.13.0): `--parallelism N` (default 4, capped at 8) sets sub-agent batch size; `--force` regenerates all components, bypassing the `handoffs/.manifest.json` skip-if-unchanged check. |
 | `add component <X>` · `remove component <X>` · `sync component index` · `migrate to C4` | `sa-skills:architecture-component-guardian` | `docs/components/README.md` (only sanctioned writer) |
 | `export architecture to Word` · `export handoff to Word` · `generate .docx` | `sa-skills:architecture-docs-export` | `.docx` export only |
 | `run architecture analysis` · `SPOF analysis` · `blast radius analysis` · `STRIDE threat model` · `cost hotspot analysis` · `tech debt analysis` · `all analyses` | `sa-skills:architecture-analysis` | Risk & sustainability reports in `analysis/` |
@@ -57,7 +57,7 @@ When the user types any of these phrases, the correct FIRST action is to invoke 
 
 - `.claude-plugin/` — Plugin manifest (`plugin.json`, **authoritative version**) and marketplace registry (`marketplace.json`)
 - `package.json` — Root Bun workspace config (workspace: `tools/docgen`)
-- `agents/` — Sub-agents consumed by the Agent tool. Single universal `compliance-generator.md` + 4 specialized agents (`handoff-generator`, `docs-export-generator`, `peer-review-category-agent`, `architecture-analysis-agent`); domain configs in `agents/base/configs/`; validators in `agents/validators/`
+- `agents/` — Sub-agents consumed by the Agent tool. Single universal `compliance-generator.md` + 5 specialized agents (`handoff-generator`, `handoff-context-builder`, `docs-export-generator`, `peer-review-category-agent`, `architecture-analysis-agent`); domain configs in `agents/base/configs/`; validators in `agents/validators/`. The two `handoff-*` agents are pinned to `model: sonnet` to keep the I/O-heavy work off the user's main-session model (typically Opus).
 - `skills/` — 14 skill directories (each containing `SKILL.md` + supporting files)
 - `tools/docgen/` — Standalone `generate-doc.js` for Word/.docx generation; own `package.json` under the Bun workspace
 - `scripts/build-release.sh` — Packages a release ZIP with SHA256 checksum

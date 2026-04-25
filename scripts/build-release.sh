@@ -65,6 +65,15 @@ done
 echo "✅ All required files and directories present"
 echo ""
 
+# Verify the handoff-generator agent bundle is in sync with its source files
+echo "Verifying agents/handoff-generator.md bundle..."
+if ! bun tools/bundle-handoff-agent.ts --check; then
+    echo "❌ ERROR: agents/handoff-generator.md is out of sync."
+    echo "   Run: bun run bundle:handoff-agent && commit the result."
+    exit 1
+fi
+echo ""
+
 # Count files to include
 echo "Counting files..."
 SKILL_FILES=$(find skills -name "*.md" | wc -l)

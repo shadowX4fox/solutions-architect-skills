@@ -48,6 +48,7 @@
       "Agent(sa-skills:peer-review-category-agent)",
       "Agent(sa-skills:architecture-analysis-agent)",
       "Agent(sa-skills:handoff-generator)",
+      "Agent(sa-skills:handoff-context-builder)",
       "Agent(sa-skills:docs-export-generator)",
       "Bash(rm *)",
       "Write(exports/*)",
@@ -56,10 +57,10 @@
       "Read(analysis/*)",
       "Write(handoffs/*)",
       "Read(handoffs/*)",
+      "Write(handoffs/.manifest.json)",
+      "Read(handoffs/.manifest.json)",
       "Write(//tmp/handoff-payloads/*)",
       "Read(//tmp/handoff-payloads/*)",
-      "Write(//tmp/handoff-plugin-refs/*)",
-      "Read(//tmp/handoff-plugin-refs/*)",
       "WebSearch"
     ]
   },

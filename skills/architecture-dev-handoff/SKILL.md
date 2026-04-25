@@ -49,7 +49,7 @@ As of v3.7.0, this skill is an **orchestrator**. Per-component generation runs i
 
 - **Main context budget**: ~80–120 KB per invocation, flat regardless of how many components are selected.
 - **Sub-agent budget**: ~25–40 KB per spawn (per-component payload + handoff template + section-extraction guide + ranged slice of asset guide).
-- **Parallelism**: sub-agents spawn in batches of 2 (per v3.6.1 high-fanout batching pattern), one message per batch.
+- **Parallelism**: sub-agents spawn in batches of N (default 4, configurable via `--parallelism N`, capped at 8), one message per batch. Default raised from 2 in v3.13.0 — sub-agents are read-only on independent payloads, so 4-way fan-out cuts wall-clock by ~50% on 8-component runs without extra rate-limit risk on standard tiers.
 
 Why this matters: previous versions re-read 7 shared architecture files plus the full `adr/` directory once per component. For a 10-component run that was ~750–2,750 KB of redundant reads. The orchestrator now reads them **exactly once** and slices per component into payload files that sub-agents consume.
 
@@ -133,35 +133,24 @@ If Glob returns nothing, set:
 plugin_dir = ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace
 ```
 
-**Step 0c — Readability probe + /tmp staging fallback** (permission safety net):
+**Step 0c — (removed in v3.13.0)**
 
-Sub-agents must be able to `Read` four files under `plugin_dir`:
-- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`
-- `skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md`
-- `skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md`
-- `skills/architecture-dev-handoff/assets/_index.md`
+Earlier versions mirrored four reference files (`HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `ASSET_GENERATION_GUIDE.md`, `assets/_index.md`) to `/tmp/handoff-plugin-refs/` so sub-agents could Read them despite permission scoping. As of v3.13.0 those references are bundled directly into `agents/handoff-generator.md` (sub-agent system prompt). Sub-agents no longer Read any plugin file at runtime, so the staging fallback is dead overhead and has been removed.
 
-If the resolved `plugin_dir` points to a path not covered by project `.claude/settings.json` permissions (most commonly `~/.claude/plugins/cache/.../<version>/` when the grant is scoped to `~/.claude/plugins/marketplaces/`), the sub-agent's first Read will be permission-blocked and the handoff will abort.
-
-To guarantee readability regardless of how the plugin was installed:
-
-1. On the main thread, attempt to Read `plugin_dir/skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`.
-2. If the Read succeeds, keep `plugin_dir` as-is and pass it to sub-agents.
-3. If the Read fails with a permission error, stage the four reference files to `/tmp/handoff-plugin-refs/`:
-   ```bash
-   bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts /tmp/handoff-plugin-refs/skills/architecture-dev-handoff/assets
-   ```
-   (The helper recursively `mkdir`s the path and prints today's date — discard the date here; you only need the directory.) Then Read each of the four files from the original `plugin_dir` (main-thread permissions are typically broader than sub-agent permissions) and Write each verbatim to the mirrored path under `/tmp/handoff-plugin-refs/`. Set `plugin_dir = /tmp/handoff-plugin-refs` and pass that to sub-agents.
-4. If the main-thread Read also fails, abort with:
-   ```
-   ❌ Cannot read plugin reference files at [original plugin_dir].
-      Add this to .claude/settings.json allow list and retry:
-      "Read(~/.claude/plugins/cache/**)"
-   ```
-
-Store the final `plugin_dir` (either original or `/tmp/handoff-plugin-refs`) for use in all sub-agent spawn prompts.
+`plugin_dir` is still resolved in Steps 0a/0b — the orchestrator uses it to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/{prepare-payload-dir,manifest}.ts`. If a bun helper invocation fails with a permission error, check that `Bash(bun *)` is granted in project settings.
 
 ### Phase 1: Initialization
+
+**Step 1.0: Parse orchestrator flags**
+
+Inspect the user's invocation for flags. Default values apply when a flag is absent.
+
+| Flag | Default | Validation | Purpose |
+|------|---------|------------|---------|
+| `--parallelism N` | `4` | integer 1–8; on out-of-range value, warn (`⚠ --parallelism N out of range; clamping to <1\|8>`) and clamp | Phase 5 batch size |
+| `--force` | `false` | boolean (presence) | Bypass `handoffs/.manifest.json` skip-if-unchanged (see Phase 4.5 / Item 7) |
+
+Store the resolved values as `parallelism` and `force` for use throughout the workflow. If neither flag is present, behaviour matches today's defaults except `parallelism = 4` instead of `2`.
 
 **Step 1.1: Locate ARCHITECTURE.md**
 
@@ -216,44 +205,17 @@ For each selected component file, read its `**C4 Level:**` metadata field:
 
 If all selected components are rejected, report and stop.
 
-**Step 2.2: Dependency-Based Ordering (batch only)**
+**Step 2.2: Order selected components**
 
-When multiple components are selected, sort by dependency count **ascending** (least dependencies first). Components with fewer dependencies provide foundational context; generating them first means heavily-dependent components have upstream handoffs available for cross-reference.
+Sort by `component_index_position` ascending. (Earlier versions sorted by dependency count to provide upstream context for downstream handoffs, but sub-agents never read other handoff outputs — they read only their assigned payload + bundled references — so dependency ordering provides no information benefit and added N component-file Reads per orchestration. Sub-agents can fan out in any order.)
 
-1. For each selected component, read its component file
-2. Count inter-component dependencies (`**Dependencies:**`, `**Depends On:**`, integration references to other selected components)
-3. Sort ascending; ties broken by index position
+### Phase 3: Delegate shared-context build to `handoff-context-builder` sub-agent
 
-Skip for single-component generation.
+**The core change in v3.13.0.** All shared-doc Reads, ADR indexing, per-component slicing, payload writing, dedup, and manifest skip-checks happen inside a single Sonnet sub-agent. The orchestrator's main context (running on the user's session model — typically Opus) never loads the ~80–120 KB of shared docs + ADR corpus.
 
-### Phase 3: Build the shared context bundle (ONCE)
+**Step 3.1: Detect architecture-doc language** (kept on orchestrator — uses `ARCHITECTURE.md` already loaded in Phase 1)
 
-**The core change in v3.7.0.** Read every shared architecture file exactly once on the main thread, regardless of how many components are selected.
-
-**Step 3.1: Read shared docs**
-
-```
-Read: docs/01-system-overview.md
-Read: docs/04-data-flow-patterns.md
-Read: docs/05-integration-points.md
-Read: docs/06-technology-stack.md
-Read: docs/07-security-architecture.md
-Read: docs/08-scalability-and-performance.md
-Read: docs/09-operational-considerations.md
-Read: every file in adr/ (use Glob adr/*.md then Read each)
-```
-
-If any of these files are missing, note the gap but continue — sub-agents will emit `[NOT DOCUMENTED]` markers for any section that would have sourced from them.
-
-**Step 3.2: Pre-cache context7 spec docs (optional, shared across components)**
-
-If the context7 MCP tool is available and one or more selected components produce asset types, call `resolve-library-id` once per unique asset spec (OpenAPI, AsyncAPI, Kubernetes, the database engine for DDL, Avro, Protobuf, Redis). Cache the resolved library IDs and fetched docs for the duration of this orchestration run. These caches are passed to sub-agents via a path hint in the spawn prompt — sub-agents do not re-fetch.
-
-Skip silently if context7 is unavailable.
-
-**Step 3.3: Detect architecture-doc language**
-
-Set once per run — propagated to every per-component payload as the `doc_language` frontmatter field. Drives the template-variant selection for the `c4-descriptor` asset (English vs Spanish).
+Set once per run — propagated to the context-builder, which writes it into every payload's `doc_language` frontmatter field. Drives the template-variant selection for the `c4-descriptor` asset (English vs Spanish).
 
 Detection order (stop at the first match):
 
@@ -261,61 +223,113 @@ Detection order (stop at the first match):
 2. **Section-heading inference** — scan `ARCHITECTURE.md` and `docs/01-system-overview.md` for Spanish section headers that commonly appear in the canonical layout (`## Contexto`, `## Descripción`, `## Visión general`, `## Componentes`, `## Decisiones arquitectónicas`). If **two or more** distinct Spanish headings appear, set `es`. Otherwise set `en`.
 3. **Default** — `en`.
 
-Store the result in a session variable `{doc_language}` and write it into every payload's frontmatter in Step 4.4. Detection runs exactly once per orchestration — do NOT re-detect per component.
+(Spanish-heading detection requires a one-time Read of `docs/01-system-overview.md` on the orchestrator. Acceptable cost — one shared file, used only for the language marker check.)
 
-### Phase 4: Slice the bundle per component, write payloads
+**Step 3.2: Pre-cache context7 spec docs (optional, orchestrator-side)**
 
-For each selected component (in dependency order when batch):
+If the context7 MCP tool is available and one or more selected components produce asset types, call `resolve-library-id` once per unique asset spec (OpenAPI, AsyncAPI, Kubernetes, the database engine for DDL, Avro, Protobuf, Redis). Cache the resolved library IDs and fetched docs for the duration of this orchestration run. The orchestrator passes the cache path hint to handoff-generator sub-agents in Phase 5 — context-builder does not use context7.
 
-**Step 4.1: Detect component type and asset types**
+Skip silently if context7 is unavailable.
 
-From the component file's `**Type:**` field, determine `component_type` and `asset_types` per the table in `PAYLOAD_SCHEMA.md`. Append `c4-descriptor` to `asset_types` for every non-skip component (dedupe). Skip-list types (`Library`, `SDK`, `Utility`, `Config`, `Documentation`) get `asset_types: []` and never receive a `c4-descriptor`.
+**Step 3.3: Capture `generation_date` and prepare `/tmp/handoff-payloads/`**
 
-**Step 4.2: Slice each shared doc for this component**
-
-Grep each shared doc for:
-- The component's display name
-- The component's `**Type:**` value (match by keyword)
-- The technologies listed in the component's `**Technology:**` field
-
-Retain the surrounding rows / bullets / table entries / paragraph blocks that match. Preserve original formatting — do NOT reformat, summarize, or collapse.
-
-**Step 4.3: Slice the ADR directory**
-
-For each ADR file, check if its body references the component name, its technology, its domain keywords, or a pattern used by it. Include matching ADRs with a body excerpt (≤30 lines, focused on the relevant paragraphs).
-
-**Step 4.4: Write the payload file**
-
-Before writing the first payload of the run, ensure the output directory exists and capture today's date in one bun call:
 ```bash
 generation_date=$(bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts /tmp/handoff-payloads)
 ```
-The helper recursively `mkdir`s `/tmp/handoff-payloads/` and prints `YYYY-MM-DD` to stdout — capture that into `generation_date` for every payload's YAML frontmatter. Run this once per orchestration; subsequent payloads in the same run reuse the captured value.
+
+The helper `mkdir -p`s the payload directory and prints `YYYY-MM-DD`. Capture both for the context-builder spawn prompt.
+
+**Step 3.4: Compute per-component metadata for the spawn prompt**
+
+For each selected component, gather the following from its file header (15–30 line Read on the orchestrator — small, and necessary anyway for the C4 Level Validation Gate already done in Step 2.1):
+
+- `slug` (from filename)
+- `component_file` (repo-relative path)
+- `type` (from `**Type:**`)
+- `technology` (list, from `**Technology:**`)
+- `component_index_position` (`NN-` prefix)
+
+Pack these into a YAML list to embed in the spawn prompt body. The context-builder does NOT re-read these files for metadata extraction — it consumes the orchestrator's pre-extracted list directly. Step 3.4 keeps the orchestrator's pre-3 work consistent with what it already does for component selection.
+
+**Step 3.5: Spawn `sa-skills:handoff-context-builder`** (single Task call, NOT batched)
+
+Send ONE message containing one `Task()` invocation:
 
 ```
-Write: /tmp/handoff-payloads/<component-slug>.md
+Task(sa-skills:handoff-context-builder)
+prompt:
+  architecture_md_path: <abs path>
+  project_name: <from H1>
+  architect: <from metadata, or "Not specified">
+  architecture_version: <from <!-- ARCHITECTURE_VERSION: ... -->, or "unversioned">
+  doc_language: <en|es from Step 3.1>
+  generation_date: <YYYY-MM-DD from Step 3.3>
+  payload_dir: /tmp/handoff-payloads
+  manifest_path: <project>/handoffs/.manifest.json
+  template_version: <plugin version from .claude-plugin/plugin.json>
+  schema_version: "2"
+  force: <true|false from Step 1.0>
+  plugin_dir: <abs path>
+  handoffs_dir_abs: <project>/handoffs
+  components:
+    - slug: …
+      component_file: …
+      type: …
+      technology: [...]
+      component_index_position: "NN"
+    - slug: …
+      …
 ```
 
-Format per `PAYLOAD_SCHEMA.md`:
-- YAML frontmatter (component_slug, component_file, component_type, component_index_position, asset_types, architecture_version, project_name, architect, generation_date, architecture_md_path, doc_language)
-- Body sections in the prescribed order: Component File / Integrations / Flows / Security Requirements / Perf Targets / Ops Config / Relevant ADRs
+Wait for the `CONTEXT_RESULT:` block. The context-builder returns:
 
-### Phase 5: Spawn sub-agents in 2-parallel batches
+- `status` — `OK`, `PARTIAL`, or `FAILED`
+- `payload_dir`, `shared_refs_path` (optional)
+- `shared_docs_read`, `adrs_indexed`, `adrs_full_read` (for the Phase 7 report)
+- `parse_fallback_slugs` (components that fell back to `## Component File (raw)`)
+- `components[]` — per-component `{ slug, payload_path, payload_hash, decision (SKIP|REGEN|FAILED), reason, asset_types, doc_language, handoff_file_rel }`
 
-**Step 5.1: Partition components into batches of 2**
+Failure handling:
+- `status: FAILED` → abort the orchestration with the context-builder's reason.
+- `status: PARTIAL` → drop FAILED components, continue with the rest, surface them in Phase 7.
+- `status: OK` → all components have a SKIP or REGEN decision.
 
-Following the v3.6.1 batching pattern for high-fanout sub-agent work.
+Store the `components[]` list as `context_result` for use in Phase 4 and Phase 6.
+
+**Backward compat**: first run after upgrading from <v3.13.0 has no manifest → context-builder returns `decision: REGEN` for every component → manifest is created in Step 6.0. No surprises.
+
+**Recommended git policy**: commit `handoffs/.manifest.json` alongside the handoff files. Teammates pulling the branch then benefit from skip-if-unchanged on their own machines. The file is small (one JSON object per component) and changes deterministically with the handoffs. If a project explicitly does not want to track it, add `handoffs/.manifest.json` to `.gitignore`; the skill works either way (just regenerates everything on the first machine that doesn't have it locally).
+
+### Phase 4: Pre-create asset directories for REGEN components
+
+Filter `context_result.components` to entries where `decision == REGEN`. For each one, pre-create its asset output directory so the downstream `handoff-generator` sub-agent never needs Bash:
+
+```bash
+bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts <project>/handoffs/assets/NN-<slug>
+```
+
+(SKIP'd components keep their existing asset directories untouched. FAILED components are excluded.)
+
+### Phase 5: Spawn handoff-generator sub-agents in N-parallel batches
+
+**Step 5.0: Filter to REGEN components**
+
+Take `context_result.components` (from Phase 3.5) and keep only entries with `decision == REGEN`. SKIP'd components are not spawned — their existing handoff files and manifest entries remain valid.
+
+**Step 5.1: Partition REGEN components into batches of `parallelism`**
+
+Use the `parallelism` value resolved in Step 1.0 (default 4, capped at 8). The tail batch may be smaller than `parallelism` if `len(regen_components) % parallelism != 0`.
 
 **Step 5.2: Spawn one batch per message**
 
-For each batch, send ONE message containing two (or one for the tail batch) `Task()` tool-use blocks in parallel. Each Task invokes `sa-skills:handoff-generator` with a prompt that provides:
+For each batch, send ONE message containing up to `parallelism` `Task()` tool-use blocks in parallel. Each Task invokes `sa-skills:handoff-generator` with a prompt that provides (all values come from the matching `context_result.components[]` entry):
 
-- `payload_path`: absolute path to the component's payload file
-- `output_handoff_path`: absolute path `<project>/handoffs/NN-<slug>-handoff.md`
-- `output_assets_dir`: absolute path `<project>/handoffs/assets/NN-<slug>/`
-- `plugin_dir`: absolute path resolved in Step 0 (either the installed plugin root or `/tmp/handoff-plugin-refs` if staging fallback triggered) — required, never omit
+- `payload_path`: from `payload_path` (absolute path to the component's payload file)
+- `output_handoff_path`: absolute path `<project>/<handoff_file_rel>`
+- `output_assets_dir`: absolute path `<project>/handoffs/assets/NN-<slug>/` (pre-created in Phase 4)
 - `component_slug`, `component_index_position`
 - `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
+- (`plugin_dir` is no longer required as of v3.13.0 — sub-agents bundle their references and do not invoke Bash)
 
 **Step 5.3: Collect sub-agent results**
 
@@ -325,9 +339,25 @@ If a sub-agent returns `status: PAYLOAD_FAILED` or `status: VALIDATION_FAILED`, 
 
 **Step 5.4: Run batches sequentially**
 
-Wait for each batch to complete before spawning the next. This keeps total parallel sub-agent count ≤ 2 at any instant.
+Wait for each batch to complete before spawning the next. This keeps total parallel sub-agent count ≤ `parallelism` at any instant.
 
-### Phase 6: Update index and report
+### Phase 6: Update index, manifest, and report
+
+**Step 6.0: Update `handoffs/.manifest.json`**
+
+For each component that the orchestrator REGEN'd AND whose handoff-generator sub-agent returned `status: OK`, insert or replace its manifest entry using the `payload_hash` already returned by `context-builder` in Phase 3.5 (no need to re-hash on the orchestrator). Skipped components keep their existing entries untouched.
+
+```bash
+bun [plugin_dir]/skills/architecture-dev-handoff/utils/manifest-cli.ts \
+    update <project>/handoffs/.manifest.json \
+    <slug> "<payload_hash from context_result>" <template_version> <schema_version> \
+    <architecture_version> <handoff_file_rel from context_result> \
+    <doc_language from context_result> <generator_version> "<asset1>,<asset2>,..."
+```
+
+The CLI writes the manifest atomically (`.tmp` then rename). One invocation per regenerated component; skipped components are left as-is so their `generated` timestamp reflects when they were last actually produced.
+
+Components whose sub-agent run returned `status: VALIDATION_FAILED` or `status: PAYLOAD_FAILED` are NOT written to the manifest — that ensures the next run treats them as "needs regen" until the underlying problem is fixed. Same applies to components the context-builder reported as `decision: FAILED` in Phase 3.5.
 
 **Step 6.1: Create/Update `handoffs/README.md`**
 
@@ -375,7 +405,7 @@ Print the aggregated report:
 ```
 Handoff generation complete
 
-Generated: [N] component handoff(s)  ([K] failed)
+Generated: [N] component handoff(s)  ([K] failed, [S] skipped)
 Location: handoffs/
 
 Components:
@@ -385,13 +415,22 @@ Components:
   ✓ [Component Name] — NN-name-handoff.md
       Assets: deployment.yaml
       Gaps recorded: 0
+  ⏭ [Component Name] — skipped (unchanged since last generation)
+  ⏭ [Component Name] — skipped (unchanged since last generation)
   ✗ [Component Name] — VALIDATION_FAILED: [notes]
 
-Main-context reads (shared docs): [N]
-Sub-agent batches: [B] (2-parallel)
+Main-context reads (shared docs): 1 (ARCHITECTURE.md only — context-builder owns docs/04–09 + adr/)
+Context-builder (sonnet) reads:
+  shared docs: [shared_docs_read from CONTEXT_RESULT]
+  ADRs indexed: [adrs_indexed]
+  ADRs full-Read: [adrs_full_read]
+Sub-agent batches: [B] ({parallelism}-parallel)
+Skipped (unchanged): [S] component(s) — pass --force to regenerate
 
 💡 Generated N handoffs. Run `/compact` to trim main context now if continuing.
 ```
+
+If `[S] > 0`, list skipped components by slug on a separate line (e.g., `Skipped: inbox-ux, inbox-realtime, notification-preferences`) so the user can decide whether to `--force` a specific re-run.
 
 ---
 
@@ -413,16 +452,17 @@ Add to project `.claude/settings.json`:
 ```json
 "Write(handoffs/*)",
 "Read(handoffs/*)",
-"Write(/tmp/handoff-payloads/*)",
-"Read(/tmp/handoff-payloads/*)",
-"Write(/tmp/handoff-plugin-refs/*)",
-"Read(/tmp/handoff-plugin-refs/*)",
+"Write(handoffs/.manifest.json)",
+"Read(handoffs/.manifest.json)",
+"Write(//tmp/handoff-payloads/*)",
+"Read(//tmp/handoff-payloads/*)",
 "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
 "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
 "Bash(bun *)",
-"Agent(sa-skills:handoff-generator)"
+"Agent(sa-skills:handoff-generator)",
+"Agent(sa-skills:handoff-context-builder)"
 ```
 
-Directory creation (`/tmp/handoff-payloads/`, `/tmp/handoff-plugin-refs/`, and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
+Directory creation (`/tmp/handoff-payloads/` and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
 
-**Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability and falls back to `/tmp/handoff-plugin-refs/` if neither matches, but granting both removes the fallback path and keeps sub-agent Reads fast.
+**Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability under both. (Sub-agents no longer Read plugin files at runtime as of v3.13.0 — references are bundled into `agents/handoff-generator.md` — but the orchestrator still needs to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/*.ts` helpers, which require the bun binary to load files from `plugin_dir`.)

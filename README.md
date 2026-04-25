@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.13.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -107,7 +107,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.12.0` in the list.
+You should see `sa-skills v3.13.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -788,7 +788,45 @@ Where:
 
 ## Roadmap
 
-### v3.12.0 (Current Release) ✅
+### v3.13.0 (Current Release) ✅
+**perf: dev-handoff token + wall-clock overhaul + new `handoff-context-builder` Sonnet sub-agent**
+
+`architecture-dev-handoff` was instrumented on a captured 8-component run (~481K tokens / ~50 min wall-clock) and ten leaks were fixed in this release. Targets: ~70% token reduction on full runs, ~80% on minor-architecture-bump runs, ~40–50% wall-clock cut.
+
+**Architecture changes:**
+- **New `handoff-context-builder` sub-agent** (`agents/handoff-context-builder.md`, `model: sonnet`). Owns all I/O-heavy work the orchestrator's main context (typically Opus) used to do: reading `docs/01` + `docs/04–09` once, building an ADR term-index from each `adr/*.md` first 30 lines, per-component slicing, parsing component files into the new `## Component (structured)` YAML payload format, dedup of shared excerpts to `_shared.md`, payload writing, and SHA-256 manifest fingerprint + skip-vs-regen decision per component. Returns a `CONTEXT_RESULT:` block listing each component's `payload_path`, `payload_hash`, `decision`, `reason`, `asset_types`, `handoff_file_rel`. The orchestrator's main context never loads the ~80–120 KB shared docs + ADR corpus; the file-shuffling work runs on Sonnet at ~5× lower per-token cost.
+- **Static references bundled into both sub-agents.** `agents/handoff-generator.md` now bundles `HANDOFF_TEMPLATE.md`, `SECTION_EXTRACTION_GUIDE.md`, `assets/_index.md`, `ASSET_GENERATION_GUIDE.md`. `agents/handoff-context-builder.md` bundles `PAYLOAD_SCHEMA.md`. Bundled content lives in each sub-agent's system prompt and is API-prompt-cached across all spawns within the orchestration window — saving ~300K tokens per 8-component run vs. fresh per-spawn Reads.
+- **`tools/bundle-handoff-agent.ts`** — generalized bundler that handles both agents via a `BUNDLE_TARGETS` array. CI guard: `bun run bundle:check` exits 1 on drift, runs in `scripts/build-release.sh` before zipping.
+
+**Skip-if-unchanged manifest** (`handoffs/.manifest.json`):
+- SHA-256 fingerprint of `payload_file + template_version` per component. The orchestrator skips components whose fingerprint matches AND whose handoff file still exists. On the user's measured 2.13.0→2.13.1 architecture bump (3 components touched out of 8), this would mean 3 sub-agent spawns instead of 8.
+- New `--force` flag bypasses the skip check.
+- New `skills/architecture-dev-handoff/utils/manifest.ts` + `manifest-cli.ts` + 18-test unit suite covering hash determinism, manifest round-trip, every skip/regen condition, and the CLI smoke path.
+
+**Parallelism + flag plumbing:**
+- Sub-agent batches raised from 2 → 4 (default), with `--parallelism N` orchestrator flag accepting 1–8 (clamped on out-of-range with a warning).
+- `--force` and `--parallelism` are documented in `CLAUDE.md` trigger-routing.
+
+**Payload schema 2.0.0:**
+- `## Component File` verbatim markdown blob → `## Component (structured)` typed YAML block (`component.name`, `component.type`, `component.apis`, `component.config`, `component.scaling`, …). Denser and more deterministic for sub-agents to consume. Raw fallback (`## Component File (raw)`) preserved for unfamiliar component-doc structures.
+- New `shared_refs` frontmatter + `> See: _shared.md § Shared: <header>` body marker for content that appears verbatim in ≥3 component payloads (typically org-wide ADRs like ADR-012 mTLS, ADR-014 WAF). Sub-agent PHASE 0.3 resolves markers in memory before fill. ~30% smaller payloads on average for multi-component runs.
+
+**ADR pre-grep index:**
+- First 30 lines of every `adr/*.md` are read once into a term index (technologies, component names from title or visible Context, domain keywords). Per-component lookup intersects against the index and only full-Reads matched ADRs. Conservative fallback: include any ADR whose title or status header literally mentions the component or its technology even if intersection misses. Cuts orchestrator-side ADR token cost by ~60%.
+
+**Sub-agent tool discipline tightened:**
+- `agents/handoff-generator.md` PHASE 2 codifies the **Single-Write rule** — fill the entire template in memory and emit one `Write` call. Target: 4–6 tool calls per spawn, down from the 15–31 observed in v3.12.0.
+- `agents/handoff-generator.md` frontmatter dropped `Bash` from `tools:` — sub-agents no longer invoke any shell command (asset directory pre-created by orchestrator, `generation_date` from payload frontmatter, references bundled).
+
+**Removed dead code:**
+- `SKILL.md` Step 0c (plugin-ref staging to `/tmp/handoff-plugin-refs/`) — obsoleted by the agent bundle. Permissions block dropped `/tmp/handoff-plugin-refs/*` grants.
+- `SKILL.md` Step 2.2 (dependency-based component ordering) — sub-agents never read prior handoffs, so the sort provided no information benefit. Components now ordered by `component_index_position`.
+
+**Migration:** first run after upgrade has no `handoffs/.manifest.json` → context-builder returns `decision: REGEN` for every component → manifest is created. No surprises. Recommended git policy: commit `handoffs/.manifest.json` so teammates also benefit from skip-if-unchanged.
+
+**Permissions delta:** added `Read(handoffs/.manifest.json)`, `Write(handoffs/.manifest.json)`, `Agent(sa-skills:handoff-context-builder)`. Removed `Read(//tmp/handoff-plugin-refs/*)`, `Write(//tmp/handoff-plugin-refs/*)`. (Also fixed pre-existing single-slash absolute-path entries in `SKILL.md` permissions docs to the correct `//tmp/...` form.)
+
+### v3.12.0 (Previous Release) ✅
 **feat: new Asset 8 — `c4-descriptor.md` operational one-pager per component, EN/ES**
 
 `architecture-dev-handoff` now generates an eighth asset alongside the existing OpenAPI / DDL / Kubernetes / AsyncAPI / CronJob / Avro / Protobuf / Redis bundle: a **C4 Component Descriptor** (`handoffs/assets/NN-<slug>/c4-descriptor.md`). It's the consolidated operational one-pager dev teams hand to SRE, infra, and network partners when a component ships — three sections (Description / Responsibilities / Technical Decisions) with infrastructure metadata (hostname, IP, OS, domain, middleware stack), dependency rollup, ADR references, and resource allocation (TPS sustained/peak, CPU cores, RAM GB, storage GB, latency P99, availability SLO). The descriptor is always-on for every non-skip component — no opt-out flag. Skip-list types (`Library`, `SDK`, `Utility`, `Config`, `Documentation`) get nothing, matching the existing asset skip rule.
