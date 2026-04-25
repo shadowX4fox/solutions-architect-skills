@@ -9,7 +9,7 @@
       "name": "sa-skills",
       "source": "./",
       "description": "Professional architecture documentation workflow: Business requirements, technical architecture, and compliance documentation (10 specialized agents)",
-      "version": "3.14.2",
+      "version": "3.14.3",
       "author": {
         "name": "shadowX4fox"
       }

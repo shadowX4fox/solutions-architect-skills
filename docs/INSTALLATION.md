@@ -212,7 +212,7 @@ You should see `shadowx4fox-solution-architect-marketplace` in the list.
 After registering the marketplace, install the plugin:
 
 ```
-/plugin install solutions-architect-skills@shadowx4fox-solution-architect-marketplace
+/plugin install sa-skills@shadowx4fox-solution-architect-marketplace
 ```
 
 **OR** enable in your project's `.claude/settings.json`:
@@ -220,7 +220,7 @@ After registering the marketplace, install the plugin:
 ```json
 {
   "enabledPlugins": {
-    "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
+    "sa-skills@shadowx4fox-solution-architect-marketplace": true
   }
 }
 ```

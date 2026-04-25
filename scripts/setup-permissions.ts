@@ -103,10 +103,42 @@ for (const entry of exampleAllow) {
 }
 const mergedAllow = [...userAllow, ...permissionsAdded];
 
-// --- merge enabledPlugins (object merge, user wins) ---
+// --- merge enabledPlugins (object merge, user wins, with legacy-name migration) ---
+//
+// v3.14.3 — the plugin's marketplace name is `sa-skills`, but pre-v3.14.3
+// versions of settings.json.example registered it under the older name
+// `solutions-architect-skills`. Claude Code resolves enabledPlugins keys
+// against marketplace.json's `plugins[].name`, so a stale legacy key
+// produces "Plugin not found in marketplace" on `/reload-plugins`.
+//
+// On merge, rename any `solutions-architect-skills@<marketplace>` key in
+// the user's settings to `sa-skills@<marketplace>`, preserving its boolean
+// value. Then run the normal object merge against the example. The
+// migration is idempotent — re-running /setup on already-migrated
+// settings is a no-op.
 const userPlugins = user.enabledPlugins ?? {};
+const LEGACY_PLUGIN_NAME = "solutions-architect-skills";
+const NEW_PLUGIN_NAME = "sa-skills";
+const migratedPlugins: Record<string, unknown> = {};
+const pluginsMigrated: Array<{ from: string; to: string }> = [];
+for (const [k, v] of Object.entries(userPlugins)) {
+  const at = k.indexOf("@");
+  if (at !== -1 && k.slice(0, at) === LEGACY_PLUGIN_NAME) {
+    const renamed = `${NEW_PLUGIN_NAME}${k.slice(at)}`;
+    if (renamed in migratedPlugins) {
+      // User already had both keys — the new one wins; drop the legacy.
+      pluginsMigrated.push({ from: k, to: renamed });
+      continue;
+    }
+    migratedPlugins[renamed] = v;
+    pluginsMigrated.push({ from: k, to: renamed });
+  } else {
+    migratedPlugins[k] = v;
+  }
+}
+
 const examplePlugins = example.enabledPlugins ?? {};
-const mergedPlugins: Record<string, unknown> = { ...userPlugins };
+const mergedPlugins: Record<string, unknown> = { ...migratedPlugins };
 let pluginsAdded = 0;
 let pluginsKept = 0;
 for (const [k, v] of Object.entries(examplePlugins)) {
@@ -236,6 +268,19 @@ console.log(
 console.log(
   `Hooks:        added ${hooksAdded}  ·  already present ${hooksKept}`
 );
+
+if (pluginsMigrated.length > 0) {
+  console.log("");
+  console.log(
+    `🔄  Migrated ${pluginsMigrated.length} legacy enabledPlugins entr${pluginsMigrated.length === 1 ? "y" : "ies"} (pre-v3.14.3 plugin name):`
+  );
+  for (const m of pluginsMigrated) {
+    console.log(`   - "${m.from}" → "${m.to}"`);
+  }
+  console.log(
+    `   The plugin's marketplace name is now \`sa-skills\` (it was registered under \`solutions-architect-skills\` before v3.14.3). The old key triggers a "Plugin not found in marketplace" error on /reload-plugins; renaming it fixes that.`
+  );
+}
 
 if (permissionsAdded.length > 0) {
   console.log("");

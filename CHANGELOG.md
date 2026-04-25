@@ -5,6 +5,36 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.3]
+
+### Fixed — `enabledPlugins` key aligned with marketplace plugin name + auto-migration of legacy entries
+
+**Symptom**: `/plugin → Errors` showed `Plugin "solutions-architect-skills" not found in marketplace "shadowx4fox-solution-architect-marketplace"` after install or `/reload-plugins`. The plugin still loaded (cache was already extracted), but Claude Code couldn't reconcile the registration on each reload, so the error persisted.
+
+**Root cause**: the marketplace registers the plugin as `sa-skills` (matches `plugin.json`'s `name` field), but four user-facing files still referenced the older `solutions-architect-skills` name from before the marketplace rename:
+
+- `.claude/settings.json.example` → `enabledPlugins` key (the one `/setup` merges into every consuming project).
+- `README.md` → `/plugin install` one-liner.
+- `docs/INSTALLATION.md` → install one-liner + manual `enabledPlugins` snippet.
+
+Claude Code resolves `enabledPlugins` keys against `marketplace.json plugins[].name`, so the stale legacy key produced "Plugin not found in marketplace" on every reload.
+
+**Fix**:
+
+- All four references updated to `sa-skills@shadowx4fox-solution-architect-marketplace`.
+- `scripts/setup-permissions.ts` extended with auto-migration: any user `enabledPlugins["solutions-architect-skills@<marketplace>"]` is renamed to `sa-skills@<marketplace>` (boolean value preserved, stale key dropped). Idempotent — re-running `/setup` on already-migrated settings is a no-op.
+- New loud merge-summary line when migration fires: `🔄 Migrated 1 legacy enabledPlugins entry…` so the user sees exactly what changed and why.
+- Unrelated user plugins under any name are preserved verbatim.
+
+**Verification**:
+
+- `bun run typecheck` clean, `bun test` 478/478.
+- End-to-end smoke: fixture project with `solutions-architect-skills@…` legacy key + an unrelated `some-other-plugin@…` entry → migration renames the sa-skills key, leaves the unrelated plugin alone, second run reports `Plugins: added 0 · already present 1` with no migration line (idempotent).
+
+**Migration**: run `/setup` once. The migration line in the merge summary confirms the rename. Then `/reload-plugins` and the `/plugin → Errors` tab clears.
+
+**Roadmap**: per-skill explorer wiring shifts again — compliance integration moves from v3.14.3 → v3.14.4 (chain pushed by 1).
+
 ## [3.14.2]
 
 ### Fixed — `architecture-explorer` Tool Discipline tightened to eliminate spurious permission prompts

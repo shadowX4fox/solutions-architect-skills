@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -100,7 +100,7 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 /plugin marketplace add shadowX4fox/solutions-architect-skills
 
 # Step 2: Install plugin
-/plugin install solutions-architect-skills@shadowx4fox-solution-architect-marketplace
+/plugin install sa-skills@shadowx4fox-solution-architect-marketplace
 
 # Step 3: Verify installation
 /plugin list
@@ -797,7 +797,31 @@ Where:
 
 ## Roadmap
 
-### v3.14.2 (Current Release) ✅
+### v3.14.3 (Current Release) ✅
+**fix: align `enabledPlugins` key with the marketplace plugin name (`sa-skills`) + auto-migrate legacy `solutions-architect-skills@…` registrations**
+
+`/plugin` and `/reload-plugins` were reporting `Plugin "solutions-architect-skills" not found in marketplace "shadowx4fox-solution-architect-marketplace"` after a fresh install or a re-`/setup`. The `marketplace.json` correctly registers the plugin as `sa-skills` (matching `plugin.json`'s `name` field), but four user-facing files still pointed at the older `solutions-architect-skills` name from before the v3.8.5 marketplace rename — including the `enabledPlugins` block in `.claude/settings.json.example` that `/setup` merges into every consuming project.
+
+The plugin still ran (the cache had already extracted), but Claude Code couldn't reconcile the registration on every `/reload-plugins`, surfacing as a persistent error in `/plugin → Errors`.
+
+**What v3.14.3 changes**:
+
+- Aligned all four user-facing references with the marketplace name (`sa-skills@shadowx4fox-solution-architect-marketplace`):
+  - `.claude/settings.json.example` `enabledPlugins` key.
+  - `README.md` install one-liner.
+  - `docs/INSTALLATION.md` install one-liner and the manual `enabledPlugins` snippet.
+- **Auto-migration** in `scripts/setup-permissions.ts`: on `/setup`, any existing user `enabledPlugins["solutions-architect-skills@<marketplace>"]` is renamed to `sa-skills@<marketplace>` (preserving its boolean value, dropping the stale key). Idempotent — re-running `/setup` on already-migrated settings is a no-op. Unrelated user plugins under any name are preserved verbatim.
+- **Loud merge summary line** when migration fires: `🔄 Migrated 1 legacy enabledPlugins entry…` so users see exactly what changed and why.
+
+**Behavior change**: re-running `/setup` on existing v3.14.0–v3.14.2 installs silently fixes the broken registration. Fresh installs see the corrected name from the start. The `/plugin` Errors tab clears on the next `/reload-plugins`.
+
+**Verification**: `bun run typecheck` ✅, `bun test` 478/478 ✅, end-to-end smoke (fixture project with the legacy key + an unrelated `some-other-plugin@…` entry → migration renames the sa-skills key, preserves the unrelated plugin, second run is fully idempotent).
+
+**Migration**: re-run `/setup` once. The migration line in the merge summary confirms the rename. Then `/reload-plugins` and the previously-reported "Plugin not found" error in `/plugin → Errors` disappears.
+
+**Roadmap**: per-skill explorer wiring shifts again — compliance integration moves to v3.14.4 (was v3.14.3 after the v3.14.2 fix bumped the chain by one).
+
+### v3.14.2 (Previous Release) ✅
 **fix: tighten `architecture-explorer` Tool Discipline so the Haiku-tier classifier never triggers permission prompts**
 
 A Q&A invocation surfaced that the explorer was emitting a Bash here-doc (`cat > /tmp/explore_result.yaml << EOF`) to stage its EXPLORE_RESULT before writing the cache. The user's `.claude/settings.json` deliberately allows file writes only via the Write tool (path-globbed, auditable) or via `Bash(bun *)` — `Bash(cat *)` is not allowlisted, so the redirection fired a permission prompt mid-run.
@@ -817,7 +841,7 @@ The Haiku model wasn't malicious or buggy — the prompt was. v3.14.1's Tool Dis
 
 **Migration**: re-run `/setup` is **not required** — this fix lives entirely in the plugin agent file and takes effect on the next architecture-explorer invocation after the user picks up the new plugin version. The roadmap shifts: compliance integration moves from v3.14.2 → v3.14.3.
 
-### v3.14.1 (Previous Release) ✅
+### v3.14.1 ✅
 **feat: session-scoped EXPLORER_HEADER edit tracker + `/regenerate-explorer-headers --session` batch refresh**
 
 The v3.14.0 release introduced `<!-- EXPLORER_HEADER ... -->` blocks that the `architecture-explorer` agent samples in the first 60 lines of every doc to classify relevance. Bodies drift faster than headers: rename a component, swap a database, add an ADR reference — the body is updated, the header silently lies, and downstream classification quietly degrades. v3.14.1 closes that feedback loop with a **batch model** (per-edit autofix was deliberately rejected; per-doc work added complexity without clear wins).
@@ -856,14 +880,14 @@ v3.14.0 introduces a universal **`architecture-explorer`** sub-agent (model: hai
 
 | Patch | Skill | Work |
 |-------|-------|------|
-| 3.14.3 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
-| 3.14.4 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
-| 3.14.5 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
-| 3.14.6 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
-| 3.14.7 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
-| 3.14.8 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
+| 3.14.4 | `architecture-compliance` | Insert Step 3.2.5 Explore Phase before validator/generator fan-out; wire `compliance-generator` + 10 validators to honor `EXPLORE_RESULT.relevant_files[]` |
+| 3.14.5 | `architecture-analysis` | Insert Step 2.5 Explore Phase; wire `architecture-analysis-agent` |
+| 3.14.6 | `architecture-peer-review` | Insert Step 4.5 Explore Phase (all depths); wire `peer-review-category-agent` |
+| 3.14.7 | `architecture-dev-handoff` | Refactor `handoff-context-builder` → `handoff-slicer` (Sonnet, slicing/dedup/manifest only) with `architecture-explorer` running first via `handoff-component.json` |
+| 3.14.8 | `architecture-docs` | Q&A workflows route through explorer (`architecture-question.json`) with runtime keyword injection |
+| 3.14.9 | `architecture-definition-record` | ADR create/supersede route through explorer (`adr-application.json`) |
 
-(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix. Per-skill explorer wiring resumes at v3.14.3.)
+(v3.14.1 = session-edit tracker; v3.14.2 = explorer Tool Discipline fix; v3.14.3 = legacy plugin-name rename + auto-migration. Per-skill explorer wiring resumes at v3.14.4.)
 
 Each patch ships independently — `architecture-explorer` is self-contained infrastructure in v3.14.0; integrations are additive.
 

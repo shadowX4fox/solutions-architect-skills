@@ -11,7 +11,7 @@
 
   "// PLUGIN INSTALLATION": "Enable the solutions-architect-skills plugin",
   "enabledPlugins": {
-    "solutions-architect-skills@shadowx4fox-solution-architect-marketplace": true
+    "sa-skills@shadowx4fox-solution-architect-marketplace": true
   },
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
