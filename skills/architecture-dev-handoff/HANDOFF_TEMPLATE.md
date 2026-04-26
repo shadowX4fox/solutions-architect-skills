@@ -1,6 +1,7 @@
 # Component Development Handoff — [COMPONENT_NAME]
 
 <!-- managed by sa-skills:architecture-dev-handoff — do not edit manually -->
+<!-- TEMPLATE_VERSION: 1.0.0 -->
 
 ---
 

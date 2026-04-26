@@ -29,6 +29,18 @@
  *     Print the 32-char sha256 prefix used in cache directory names.
  *     (Diagnostic / test helper.)
  *
+ *   read-component-header <component_file>
+ *     Parse the EXPLORER_HEADER block in <component_file> and print the
+ *     fields as JSON. Exit code 1 if no header / malformed. Used by the
+ *     explorer agent's handoff-shortcut path (v3.14.8+).
+ *
+ *   handoff-shortcut <component_file> <config_path> <project_root> <inputs_hash>
+ *     Synthesize a complete EXPLORE_RESULT YAML block from the component
+ *     file's EXPLORER_HEADER without per-ADR LLM scoring. Prints the YAML
+ *     body to stdout. Exit code 1 if any precondition fails (no header,
+ *     missing config, etc.) — caller should fall through to normal
+ *     classification. v3.14.8+.
+ *
  * Exit codes: 0 success, 1 expected-miss, 2 invalid usage / IO error.
  */
 import { existsSync, readFileSync } from "fs";
@@ -42,6 +54,8 @@ import {
   writeCache,
   readCache,
 } from "./explore-cache";
+import { parseHeader } from "../../architecture-explorer-headers/utils/header-detector";
+import { synthesizeHandoffShortcut } from "./handoff-shortcut";
 
 type Config = {
   candidate_files?: string[];
@@ -146,9 +160,48 @@ switch (subcommand) {
     break;
   }
 
+  case "read-component-header": {
+    const [componentFile] = rest;
+    if (!componentFile) fail("usage: read-component-header <component_file>");
+    if (!existsSync(componentFile)) {
+      console.error(`component file not found: ${componentFile}`);
+      process.exit(1);
+    }
+    const fields = parseHeader(readFileSync(componentFile, "utf-8"));
+    if (!fields) {
+      console.error(`no EXPLORER_HEADER block in ${componentFile}`);
+      process.exit(1);
+    }
+    console.log(JSON.stringify(fields));
+    break;
+  }
+
+  case "handoff-shortcut": {
+    const [componentFile, configPath, projectRoot, inputsHash] = rest;
+    if (!componentFile || !configPath || !projectRoot || !inputsHash) {
+      fail(
+        "usage: handoff-shortcut <component_file> <config_path> <project_root> <inputs_hash>",
+      );
+    }
+    const outcome = synthesizeHandoffShortcut({
+      componentFile,
+      configPath,
+      projectRoot,
+      taskType: "handoff-component",
+      inputsHash,
+    });
+    if (!outcome.ok) {
+      console.error(`shortcut unavailable: ${outcome.reason}`);
+      process.exit(1);
+    }
+    process.stdout.write(outcome.resultYaml);
+    break;
+  }
+
   default:
     fail(
       `unknown subcommand "${subcommand ?? ""}". Expected one of: ` +
-        "inputs-hash, check-cache, expand-candidates, write-cache, read-cache, project-hash.",
+        "inputs-hash, check-cache, expand-candidates, write-cache, read-cache, " +
+        "project-hash, read-component-header, handoff-shortcut.",
     );
 }

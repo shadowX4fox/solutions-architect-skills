@@ -81,6 +81,19 @@ export function saveManifest(path: string, manifest: Manifest): void {
   renameSync(tmp, path);
 }
 
+export function readTemplateVersion(templatePath: string): string {
+  const bytes = readFileSync(templatePath, "utf-8");
+  const match = bytes.match(/^<!--\s*TEMPLATE_VERSION:\s*(\S+)\s*-->/m);
+  if (!match) {
+    throw new Error(
+      `TEMPLATE_VERSION marker not found in ${templatePath}. ` +
+        "Add `<!-- TEMPLATE_VERSION: X.Y.Z -->` near the top of the template " +
+        "and bump it whenever the template's structure or section list changes.",
+    );
+  }
+  return match[1]!;
+}
+
 export function hashPayload(payloadPath: string, templateVersion: string): string {
   const bytes = readFileSync(payloadPath);
   const h = createHash("sha256");

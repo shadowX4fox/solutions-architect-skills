@@ -294,8 +294,11 @@ prompt:
     - <component.slug>
     - <component.type>     # e.g. api-service, database, k8s-workload
     - <each entry from component.technology[]>
+  component_file: <abs path to component.component_file>     # v3.14.8+ — enables EXPLORER_HEADER fast-path
   force: <true if Phase 1.0 force is true, else false>
 ```
+
+**`component_file` (v3.14.8+)**: pass the absolute path to the single component `.md` file being explored. The explorer agent's PHASE 2.5 fast-path uses this to read the component's `<!-- EXPLORER_HEADER -->` block (specifically `related_adrs:`) and synthesize an `EXPLORE_RESULT` directly from those tags, skipping per-ADR LLM scoring. On a well-tagged component this drops Haiku token spend from ~84k to ~10–15k per explorer call. When the header is missing, malformed, or has empty `related_adrs:`, the agent transparently falls through to the normal scoring path. The dev-handoff orchestrator already has this path on hand from the component index, so passing it incurs no extra reads.
 
 The explorer's `handoff-component.json` config marks all 7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md` as `required_sections[]`, so they always appear in `EXPLORE_RESULT.relevant_files[]` regardless of score (false-negative safeguard). The variable members are ADRs that scored above `score_threshold: 0.20` and any cross-referenced component files. The `extra_terms` (component slug, type, technologies) are appended to `relevance_keywords.boost[]` at runtime with weight 4 — they differentiate one component's ADR allowlist from another's.
 
@@ -307,9 +310,17 @@ explore_results:
     relevant_files: [<repo-rel paths from EXPLORE_RESULT.relevant_files[].path>]
     cache_hit: <true|false>
     explorer_status: <OK|PARTIAL|FAILED>
+    explorer_mode: <cached | header-shortcut | full-scoring>     # v3.14.8+ — derived from EXPLORE_RESULT.cache_hit and metadata.shortcut
   <slug-2>:
     ...
 ```
+
+**Deriving `explorer_mode`**:
+- `cached` when `EXPLORE_RESULT.cache_hit == true`.
+- `header-shortcut` when `cache_hit == false` AND `metadata.shortcut == "header"` (PHASE 2.5 fast-path fired in the explorer agent).
+- `full-scoring` otherwise (normal PHASE 3–5 per-candidate scoring path).
+
+Track the mode counts for the Phase 7 report.
 
 If any explorer call returns `FAILED`, log a warning and synthesize a degraded `relevant_files[]` from the config's `required_sections[]` only (the 9 always-relevant entries) for that component. The context-builder will run in legacy mode for those slugs by intersecting against `adr_index` instead of trusting the empty allowlist.
 
@@ -332,7 +343,7 @@ prompt:
   generation_date: <YYYY-MM-DD from Step 3.3>
   payload_dir: /tmp/handoff-payloads
   manifest_path: <project>/handoffs/.manifest.json
-  template_version: <plugin version from .claude-plugin/plugin.json>
+  template_version: <output of `bun [plugin_dir]/skills/architecture-dev-handoff/utils/manifest-cli.ts template-version [plugin_dir]/skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`>
   schema_version: "2"
   force: <true|false from Step 1.0>
   plugin_dir: <abs path>
@@ -385,48 +396,121 @@ bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts <p
 
 (SKIP'd components keep their existing asset directories untouched. FAILED components are excluded.)
 
-### Phase 5: Two-stage fan-out — handoff documents (5A), assets (5B), gap merge (5C)
+### Phase 5: One-cohort parallel fan-out — handoff documents (5A) + assets (5B) concurrent, then gap merge (5C)
 
-As of v3.14.7, Phase 5 is split into three sequential stages. Stage 5A produces only the 16-section handoff document for each component. Stage 5B fans out per-asset Task() calls across all components, with model tier pinned per asset type (sonnet for code-style assets, haiku for the c4-descriptor asset). Stage 5C edits each component's handoff document in-place to append asset-level gaps to Section 15.
+As of v3.14.8, Stages 5A and 5B run as a single parallel cohort rather than sequentially. The handoff-generator (5A) and handoff-asset-generator (5B) Tasks both consume only `payload_path` (already on disk after Phase 3.5) — there is no cross-dependency between a component's handoff document and its asset files. Spawning them concurrently reclaims `~min(T(5A), T(5B))` of wall-time per run; on the observed single-component run that was ~200 s, scaling to 25–35 % off Phase 5 wall-clock on multi-component runs. Stage 5C still runs after both cohorts complete, editing each component's handoff document in-place to append asset-level gaps to Section 15.
 
-**Step 5.0: Filter to REGEN components**
+**Concurrency budget (changed in v3.14.8)**: At any instant, the total number of in-flight sub-agents is `parallelism + asset_parallelism` (default 4 + 4 = 8), not `max(parallelism, asset_parallelism)`. Cap each individually at 8 (so the absolute ceiling is 16). If your project rate-limits aggressively, lower `--parallelism` and/or `--asset-parallelism` accordingly.
 
-Take `context_result.components` (from Phase 3.5) and keep only entries with `decision == REGEN`. SKIP'd components are not spawned in Stage 5A — their existing handoff files and manifest entries remain valid. The same REGEN list is used to build the Stage 5B asset queue.
+**Step 5.0: Build both queues from REGEN components**
+
+Take `context_result.components` (from Phase 3.5) and keep only entries with `decision == REGEN`. SKIP'd components are not spawned — their existing handoff files, asset files, and manifest entries remain valid.
+
+From the REGEN list, build BOTH queues up-front:
+
+1. **Handoff queue** — one entry per REGEN component (input for Stage 5A handoff-generator Tasks).
+2. **Asset queue** — for each REGEN component, expand its `asset_types[]` into one tuple per asset (input for Stage 5B handoff-asset-generator Tasks). Use the static filename map and model-tier classification table below. **Important — eager asset spawning**: the asset queue is built from the REGEN list directly, NOT gated on Stage 5A success. Pre-v3.14.8 behavior was "drop from asset queue when 5A fails", but the queues now spawn together so this gating is no longer possible. See "Failure handling" below.
+
+If a component's `asset_types[]` is empty (skip-list type), no asset tuples are emitted for it. The component still appears in the Stage 6 manifest update (with `assets: ""`) and the Phase 7 report.
+
+**Asset filename map** (also embedded in `handoff-asset-generator` and in `assets/_index.md`):
+
+| asset_type | Filename |
+|------------|----------|
+| `openapi` | `openapi.yaml` |
+| `ddl` | `ddl.sql` |
+| `deployment` | `deployment.yaml` |
+| `asyncapi` | `asyncapi.yaml` |
+| `cronjob` | `cronjob.yaml` |
+| `avro` | `schema.avsc` |
+| `protobuf` | `schema.proto` |
+| `redis` | `redis-key-schema.md` |
+| `c4-descriptor` | `c4-descriptor.md` |
+
+**Asset → model tier classification** (frozen — change only by an explicit ADR):
+
+| asset_type | Tier | Model | Rationale |
+|------------|------|-------|-----------|
+| `openapi`, `ddl`, `deployment`, `asyncapi`, `cronjob`, `avro`, `protobuf`, `redis` | code | `sonnet` | Strict syntactic schemas (YAML, SQL, Avro, Protobuf, structured Redis key/TTL/eviction tables) — Sonnet's structural precision matters |
+| `c4-descriptor` | descriptor | `haiku` | Free-form markdown one-pager (EN/ES variant); template-fill task well within Haiku's capability |
+
+Order the asset queue by `(component_index_position, asset_type)` for determinism. Order the handoff queue by `component_index_position` for determinism.
 
 ---
 
-#### Stage 5A — Handoff-document fan-out
+#### Step 5.1: Spawn the combined cohort
 
-**Step 5A.1: Partition REGEN components into batches of `parallelism`**
+Send ONE message containing up to `parallelism` handoff-generator Tasks **plus** up to `asset_parallelism` handoff-asset-generator Tasks, all in parallel. Per-Task model pin still applies to the asset Tasks.
 
-Use the `parallelism` value resolved in Step 1.0 (default 4, capped at 8). The tail batch may be smaller than `parallelism` if `len(regen_components) % parallelism != 0`.
+**Handoff Task** (one per REGEN component, up to `parallelism` per cohort message):
 
-**Step 5A.2: Spawn one batch per message**
+```
+Task(subagent_type="sa-skills:handoff-generator", prompt="...")
+```
 
-For each batch, send ONE message containing up to `parallelism` `Task()` tool-use blocks in parallel. Each Task invokes `sa-skills:handoff-generator` with a prompt that provides (all values come from the matching `context_result.components[]` entry):
+Prompt body provides (from the matching `context_result.components[]` entry):
 
-- `payload_path`: from `payload_path` (absolute path to the component's payload file)
+- `payload_path`: absolute path to the component's payload file
 - `output_handoff_path`: absolute path `<project>/<handoff_file_rel>`
 - `component_slug`, `component_index_position`
 - `asset_types`: copy of the payload's `asset_types[]` array — handoff-generator uses this to deterministically populate Section 14 from the static filename map
 - `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
-- (`output_assets_dir` is no longer passed as of v3.14.7 — handoff-generator does not write asset files. `plugin_dir` is no longer required as of v3.13.0 — sub-agents bundle their references and do not invoke Bash.)
 
-**Step 5A.3: Collect sub-agent results**
+(`output_assets_dir` is not passed — handoff-generator does not write asset files. `plugin_dir` is not required — sub-agents bundle their references and do not invoke Bash.)
 
-Each sub-agent returns a `HANDOFF_RESULT:` block with status, handoff file path, `[NOT DOCUMENTED]` count, and validation notes. Aggregate across all sub-agents for the final report.
+**Asset Task** (one per asset tuple, up to `asset_parallelism` per cohort message). Set the `model:` parameter on each Task call to the tuple's `model_tier` — this overrides the agent's frontmatter (which is intentionally unset). Pattern modeled on `architecture-compliance/SKILL.md:863, 890`:
 
-If a sub-agent returns `status: PAYLOAD_FAILED` or `status: VALIDATION_FAILED`, DO NOT abort — drop the component from the Stage 5B asset queue and continue with the remaining components. Report failures at the end.
+```
+Task(subagent_type="sa-skills:handoff-asset-generator", model="<sonnet|haiku>", prompt="...")
+```
 
-**Step 5A.4: Run batches sequentially**
+Prompt body provides:
+- `payload_path`
+- `asset_type`
+- `output_asset_path` (computed from the static filename map)
+- `component_slug`
+- `doc_language` (relevant only for `c4-descriptor`; pass through for all asset types so the agent does not need to re-derive it)
+- `context7_cache_hint` (if context7 was used in Step 3.2 — otherwise omit)
 
-Wait for each batch to complete before spawning the next. This keeps total parallel sub-agent count ≤ `parallelism` at any instant.
+**Tail-batching**: when both queues have remaining work after the first message, send subsequent messages each containing up to `parallelism` handoff Tasks + up to `asset_parallelism` asset Tasks. The cohort size of the tail batch may be smaller. Wait for each cohort message to complete before sending the next — this keeps in-flight sub-agents bounded by `parallelism + asset_parallelism`.
 
 ---
 
-#### Stage 5B — Asset fan-out (model-pinned per asset type)
+#### Step 5.2: Collect results from both cohorts
 
-This stage runs after Stage 5A completes for all components. It produces every deliverable asset file in parallel, with model tier resolved per Task() call.
+Each handoff-generator returns a `HANDOFF_RESULT:` block with status, handoff file path, `[NOT DOCUMENTED]` count, and validation notes. Each handoff-asset-generator returns an `ASSET_RESULT:` block:
+
+```
+ASSET_RESULT:
+  component_slug: <slug>
+  asset_type: <token>
+  status: OK | VALIDATION_FAILED | PAYLOAD_FAILED
+  asset_path: <abs path>
+  gaps:
+    - field: "..."
+      recommended_location: "..."
+      impact: "..."
+  validation_notes: "..."
+```
+
+Aggregate handoff results across all components, and index asset results by `component_slug` for Stage 5C. Track per-tier counts (`sonnet_count`, `haiku_count`) for Phase 7. Do NOT abort on any single failure — continue collecting and report at the end.
+
+**Failure handling — orphaned assets when 5A fails (v3.14.8+)**: Because asset Tasks are spawned eagerly from the REGEN list (not gated on 5A success), a component whose handoff-generator returns `PAYLOAD_FAILED` or `VALIDATION_FAILED` may still have asset files written to disk by its asset Tasks. Treatment:
+
+1. **Leave orphaned asset files on disk.** They are valid stand-alone artifacts (YAML/SQL/manifests). Deleting them would require `rm` in the orchestrator — explicitly avoided post-v3.13.0 because file removal is hard to gate by permission.
+2. **Phase 6 (manifest update) already filters to `5A.status == OK`** — orphaned assets do NOT enter the manifest's `assets` field, so they get overwritten on the next successful run.
+3. **Phase 7 reports orphans** — for each component with `5A.status != OK` and at least one `5B.status == OK` asset, emit a separate line: `Asset written but handoff doc failed: <asset_path> — will be regenerated next run`.
+
+This trade is intentional: the wasted token cost (one component's asset cohort) is bounded and re-runs naturally clean up on the next successful pass; the wall-time savings (~200 s/component) accrue on every run regardless of failure rate. Track the 5A failure rate in Phase 7 — if it sustains above ~5 %, revisit (e.g. add a cheap pre-flight payload sanity check that gates 5B spawn).
+
+---
+
+#### Stage 5B asset queue — historical reference (v3.14.7 sequencing)
+
+Pre-v3.14.8, Stage 5B ran after Stage 5A completed for all components, with the asset queue built from `5A.status == OK` only. The current v3.14.8 sequencing collapses 5A.* and 5B.* into the parallel cohort above. The model-tier classification, filename map, and per-asset prompt body are unchanged — only the spawn ordering changed.
+
+<details>
+<summary>Pre-v3.14.8 sequential stages (kept for upgrade-path reference)</summary>
 
 **Step 5B.1: Build the flat asset queue**
 
@@ -509,13 +593,15 @@ Index results by `component_slug` for Stage 5C. If a Task returns `VALIDATION_FA
 
 Wait for each batch to complete before spawning the next. This keeps total parallel asset-agent count ≤ `asset_parallelism` at any instant.
 
+</details>
+
 ---
 
-#### Stage 5C — Asset-gap merge into Section 15
+#### Step 5.3: Asset-gap merge into Section 15
 
-For each component slug where Stage 5B produced at least one non-empty `gaps[]`, perform ONE `Edit` on the component's handoff document to append asset-level gaps to Section 15. Components with zero asset gaps are skipped (no Edit).
+For each component slug where Step 5.2 produced at least one non-empty `gaps[]`, perform ONE `Edit` on the component's handoff document to append asset-level gaps to Section 15. Components with zero asset gaps are skipped (no Edit). Components whose handoff-generator (5A) returned `PAYLOAD_FAILED` or `VALIDATION_FAILED` are skipped here too — there is no handoff doc to edit; their orphaned assets are surfaced separately in Phase 7.
 
-**Step 5C.1: Build the merged gap block per component**
+**Step 5.3.1: Build the merged gap block per component**
 
 Group all `gaps[]` from `ASSET_RESULT` by `component_slug`. For each component, render one block of lines using this format (matching the existing Section 15 idiom):
 
@@ -527,7 +613,7 @@ Group all `gaps[]` from `ASSET_RESULT` by `component_slug`. For each component, 
 
 Concatenate one entry per gap, ordered first by `asset_type` (alphabetical), then by gap order within that asset.
 
-**Step 5C.2: Edit each handoff document once**
+**Step 5.3.2: Edit each handoff document once**
 
 For each component_slug with a non-empty gap block, do ONE `Edit` call on `<project>/<handoff_file_rel>`. Use the existing Section 15 anchor in the handoff document:
 
@@ -540,11 +626,11 @@ For each component_slug with a non-empty gap block, do ONE `Edit` call on `<proj
 
 If neither anchor is found (the handoff document failed validation), skip the Edit and surface the slug in Phase 7 with note `asset-gap merge skipped: Section 15 anchor not found`.
 
-**Step 5C.3: Confirm Edit success**
+**Step 5.3.3: Confirm Edit success**
 
 The Edit tool returns success/failure. On failure, log the slug + failure reason; do not retry.
 
-This stage adds at most one Edit per component — typically 0 to N components depending on how many have asset-level gaps. There is no parallelism budget for Stage 5C; the orchestrator runs Edits sequentially in slug order.
+This step adds at most one Edit per component — typically 0 to N components depending on how many have asset-level gaps. There is no parallelism budget for Step 5.3; the orchestrator runs Edits sequentially in slug order.
 
 ### Phase 6: Update index, manifest, and report
 
@@ -552,7 +638,7 @@ This stage adds at most one Edit per component — typically 0 to N components d
 
 For each component that the orchestrator REGEN'd AND whose handoff-generator sub-agent returned `status: OK`, insert or replace its manifest entry using the `payload_hash` already returned by `context-builder` in Phase 3.5 (no need to re-hash on the orchestrator). Skipped components keep their existing entries untouched.
 
-The `<asset1>,<asset2>,...` argument is the comma-separated list of asset filenames the orchestrator built deterministically from the payload's `asset_types[]` (filename map in Stage 5B Step 5B.1). Filter the list to assets whose Stage 5B `ASSET_RESULT.status == OK` — failed asset Tasks do not appear in the manifest's `assets` field, which forces them to be retried on the next run.
+The `<asset1>,<asset2>,...` argument is the comma-separated list of asset filenames the orchestrator built deterministically from the payload's `asset_types[]` (filename map in Step 5.0). Filter the list to assets whose `ASSET_RESULT.status == OK` from Step 5.2 — failed asset Tasks do not appear in the manifest's `assets` field, which forces them to be retried on the next run.
 
 ```bash
 bun [plugin_dir]/skills/architecture-dev-handoff/utils/manifest-cli.ts \
@@ -562,9 +648,11 @@ bun [plugin_dir]/skills/architecture-dev-handoff/utils/manifest-cli.ts \
     <doc_language from context_result> <generator_version> "<asset1>,<asset2>,..."
 ```
 
+`<template_version>` is the same value passed into the context-builder in Step 3.5 — sourced from the `<!-- TEMPLATE_VERSION: -->` marker inside `HANDOFF_TEMPLATE.md` via `manifest-cli.ts template-version`. Cache it once at the top of Phase 6 rather than re-running the CLI per component. Bumping the plugin version no longer invalidates manifest entries when the handoff template is byte-identical (v3.14.8+); only a `TEMPLATE_VERSION` bump or template content change does.
+
 The CLI writes the manifest atomically (`.tmp` then rename). One invocation per regenerated component; skipped components are left as-is so their `generated` timestamp reflects when they were last actually produced.
 
-Components whose Stage 5A sub-agent run returned `status: VALIDATION_FAILED` or `status: PAYLOAD_FAILED` are NOT written to the manifest — that ensures the next run treats them as "needs regen" until the underlying problem is fixed. Same applies to components the context-builder reported as `decision: FAILED` in Phase 3.5. Asset-level Stage 5B failures alone do not block the manifest update — only the failing asset is dropped from the `assets` field, while the handoff document and successful assets are still recorded.
+Components whose handoff-generator (5A) sub-agent run returned `status: VALIDATION_FAILED` or `status: PAYLOAD_FAILED` are NOT written to the manifest — that ensures the next run treats them as "needs regen" until the underlying problem is fixed. Same applies to components the context-builder reported as `decision: FAILED` in Phase 3.5. Asset-level (5B) failures alone do not block the manifest update — only the failing asset is dropped from the `assets` field, while the handoff document and successful assets are still recorded. **Orphaned assets** (5B succeeded but 5A failed for the same component, possible since v3.14.8's eager-spawn cohort) are also excluded from the manifest, which guarantees they get overwritten on the next successful run.
 
 **Step 6.1: Create/Update `handoffs/README.md`**
 
@@ -631,15 +719,19 @@ Context-builder (sonnet) reads:
   shared docs: [shared_docs_read from CONTEXT_RESULT]
   ADRs indexed: [adrs_indexed]
   ADRs full-Read: [adrs_full_read]
-Stage 5A handoff batches: [B_A] ({parallelism}-parallel, sonnet)
-Stage 5B asset batches:    [B_B] ({asset_parallelism}-parallel — sonnet: [X], haiku: [Y])
-Stage 5C gap-merge edits:  [E] component(s) had asset-level gaps merged into §15
+Explorer mode (per component): cached: [Cc] | header-shortcut: [Ch] | full-scoring: [Cf]   (v3.14.8+ — header-shortcut bypasses per-ADR LLM scoring on well-tagged components)
+Phase 5 cohort messages:   [B_C] cohort(s) — handoff Tasks: {parallelism}-parallel sonnet | asset Tasks: {asset_parallelism}-parallel (sonnet: [X], haiku: [Y])
+Step 5.3 gap-merge edits:  [E] component(s) had asset-level gaps merged into §15
+5A failure rate:           [Kf] / [N_regen] handoff doc(s) failed ([P]%) — revisit gating if sustained > 5%
+Orphaned assets:           [O] asset file(s) written for components whose handoff doc failed (will be regenerated next run)
 Skipped (unchanged):       [S] component(s) — pass --force to regenerate
 
 💡 Generated N handoffs. Run `/compact` to trim main context now if continuing.
 ```
 
 If `[S] > 0`, list skipped components by slug on a separate line (e.g., `Skipped: inbox-ux, inbox-realtime, notification-preferences`) so the user can decide whether to `--force` a specific re-run.
+
+If `[O] > 0`, list each orphaned asset file on its own line as: `Asset written but handoff doc failed: <abs_asset_path> — will be regenerated next run`. These appear when a component's handoff-generator (5A) returned `PAYLOAD_FAILED|VALIDATION_FAILED` while one or more of its asset Tasks (5B) succeeded — a side-effect of v3.14.8's eager-spawn parallelization. The next clean run produces both the handoff doc and overwrites the orphans.
 
 ---
 

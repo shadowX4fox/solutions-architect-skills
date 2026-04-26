@@ -5,6 +5,59 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.8]
+
+### Changed — Three dev-handoff performance improvements (parallel 5A+5B cohort, decoupled template_version, EXPLORER_HEADER fast-path)
+
+A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k tokens) surfaced three avoidable bottlenecks. Each is shipped here independently — the changes are orthogonal and any single one is safe to revert.
+
+**Change 1 — Phase 5 collapses Stages 5A and 5B into one parallel cohort.** The `handoff-generator` (Stage 5A, sonnet) and `handoff-asset-generator` (Stage 5B, sonnet/haiku per tier) sub-agents both consume only `payload_path` after Phase 3.5; nothing else. Pre-v3.14.8 they ran sequentially because Stage 5A failures were used as a gate to skip Stage 5B asset spawns. Spawning them concurrently — one orchestrator message contains up to `parallelism` 5A Tasks plus up to `asset_parallelism` 5B Tasks — reclaims `~min(T(5A), T(5B))` of wall-time per run (~200 s on the observed single-component run, scaling to 25–35 % off Phase 5 wall-clock on multi-component runs). The concurrency budget is now `parallelism + asset_parallelism` (default 4 + 4 = 8), not `max(...)` — document this if you tune the flags. Stage 5C (asset-gap merge into Section 15) still runs after both cohorts complete, unchanged.
+
+The lost gating means a component whose 5A returns `PAYLOAD_FAILED|VALIDATION_FAILED` may still have asset files written by its 5B Tasks. Treatment: leave orphaned assets on disk (they are valid stand-alone artifacts), exclude them from `handoffs/.manifest.json` (already filtered by `5A.status == OK`), surface each one in Phase 7 as `Asset written but handoff doc failed: <abs_path> — will be regenerated next run`. The next clean run produces both the handoff doc and overwrites the orphans. Phase 7 also reports the `5A failure rate` as a tracking metric — if it sustains above 5 % the gating is worth re-introducing.
+
+**Change 2 — `architecture-explorer` agent gets a single-component EXPLORER_HEADER fast-path.** Pre-v3.14.8 the explorer LLM-scored every candidate ADR for every dev-handoff explorer call, even though the target component file already carries an authoritative `<!-- EXPLORER_HEADER -->` block (required structure since v3.14.0) whose `related_adrs:` list IS the answer the scoring loop would produce. The optimization lives **inside the explorer agent** (PHASE 2.5, after the cache-hit check), not around it — the dev-handoff orchestrator still spawns the explorer the same way, still receives an `EXPLORE_RESULT`, and is unaware of which internal path produced the result. Wins per single-component handoff: explorer Haiku token spend drops ~84 k → ~10–15 k; modest wall-time reduction from skipping per-ADR scoring.
+
+Trigger conditions (ALL must hold): orchestrator passed `component_file: <abs path>` (new optional input parameter, v3.14.8+), `task_family == handoff`, `force == false`. When any precondition fails — header missing, malformed, empty `related_adrs:`, or `--force` set — the agent transparently falls through to the normal PHASE 3 per-candidate scoring path. The synthesized `EXPLORE_RESULT` carries `metadata.shortcut: header` plus `metadata.shortcut_component: <repo-rel>` for telemetry and a `metadata.shortcut_unresolved_adrs: [...]` list when any header ADR id failed to glob to a file under `adr/`.
+
+**Change 3 — `template_version` is sourced from `HANDOFF_TEMPLATE.md`, not `plugin.json`.** Pre-v3.14.8, `manifest.ts` mixed `template_version = plugin_version` into every payload's SHA-256 fingerprint. Bumping the plugin version even for unrelated patches (e.g. v3.14.6 → v3.14.7) invalidated every component's manifest entry and forced a full re-generation pass even when `HANDOFF_TEMPLATE.md` was byte-identical. The new flow embeds `<!-- TEMPLATE_VERSION: 1.0.0 -->` in `HANDOFF_TEMPLATE.md` and reads it via the new `manifest-cli.ts template-version <template_path>` subcommand. Plugin patches no longer trigger spurious REGEN; only an actual template content change (paired with a `TEMPLATE_VERSION:` bump) does. A new tripwire test (`HANDOFF_TEMPLATE.md frozen fixture`) pins both the file's SHA-256 and the declared version — when the template is edited, both fixture values must be updated together, forcing a deliberate version bump.
+
+**New CLI subcommands**:
+
+- `manifest-cli.ts template-version <template_path>` — print the parsed `TEMPLATE_VERSION:` marker. Single source of truth for `template_version` callers in the dev-handoff orchestrator.
+- `explore-cli.ts read-component-header <component_file>` — print the parsed `<!-- EXPLORER_HEADER -->` fields as JSON.
+- `explore-cli.ts handoff-shortcut <component_file> <config_path> <project_root> <inputs_hash>` — synthesize a complete `EXPLORE_RESULT` YAML body from a component file's header + the handoff-component config's `required_sections[]`. Used by the explorer agent's PHASE 2.5 fast-path. Exit code 1 on any precondition failure (no header, malformed, empty `related_adrs:`, etc.) so callers fall through to normal classification.
+
+**New TypeScript modules**:
+
+- `skills/architecture-dev-handoff/utils/manifest.ts` — `readTemplateVersion(templatePath: string): string` exported alongside the existing hash/check helpers. Throws on a missing marker.
+- `skills/architecture-explorer/utils/handoff-shortcut.ts` — `synthesizeHandoffShortcut({componentFile, configPath, projectRoot, taskType, inputsHash})` returns `{ok, resultYaml, resolvedAdrs, adrsRequested}` or `{ok: false, reason}`. Reuses `parseHeader` from `skills/architecture-explorer-headers/utils/header-detector.ts` (cross-skill import; same pattern as the existing `manifest.ts` → `architecture-compliance/utils/date-utils` import).
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md` — new `<!-- TEMPLATE_VERSION: 1.0.0 -->` marker on line 4. Bump this whenever the template's structure or section list changes.
+- `skills/architecture-dev-handoff/utils/manifest.ts` — adds `readTemplateVersion()`.
+- `skills/architecture-dev-handoff/utils/manifest-cli.ts` — adds `template-version` subcommand.
+- `skills/architecture-dev-handoff/utils/manifest.test.ts` — adds 3 `readTemplateVersion` cases, 2 frozen-fixture cases, 1 CLI smoke case (6 new tests, +30 expect calls).
+- `skills/architecture-explorer/utils/explore-cli.ts` — adds `read-component-header` and `handoff-shortcut` subcommands.
+- `skills/architecture-explorer/utils/handoff-shortcut.test.ts` — new (9 tests, 32 expect calls; round-trip-validates synthesized YAML against `parseExploreResult()`).
+- `agents/builders/architecture-explorer.md` — new PHASE 2.5 fast-path section, new `component_file` optional input parameter, new allowed Bash command (`handoff-shortcut`). Agent version bumped to 1.1.0.
+- `skills/architecture-dev-handoff/SKILL.md` — Phase 3.4a passes the new `component_file` to the explorer Task and tracks `explorer_mode` (cached | header-shortcut | full-scoring) per component. Phase 3.5 sources `template_version` via the new CLI subcommand instead of `plugin.json`. Phase 5 fully restructured into one cohort + Step 5.3 (gap merge); the pre-v3.14.8 sequential 5A.x/5B.x steps are preserved inline as a `<details>` historical reference. Phase 6 manifest-update reuses the cached `template_version` value. Phase 7 report adds `Explorer mode` line, `5A failure rate` line, and orphaned-asset detail lines.
+
+**Verification**:
+
+- `bun run typecheck` clean.
+- `bun test` — 493 pass / 0 fail (was 484 before this release; +9 from `handoff-shortcut.test.ts`).
+- `bun run bundle:check` — all three bundled agents in sync.
+- End-to-end: re-run dev-handoff against a single component with a current `EXPLORER_HEADER`. Expect Phase 7 to report `Explorer mode: cached: 0 | header-shortcut: 1 | full-scoring: 0` and explorer token spend to drop ~84 k → ~10–15 k. Diff the produced handoff `.md` against a `--force`'d baseline — expect byte-identical output.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.8 picks up all three improvements automatically.
+
+- Existing `handoffs/.manifest.json` entries WILL be invalidated on the first run after upgrade because `template_version` flips from `3.14.7` (plugin version) to `1.0.0` (the new template version). Subsequent plugin patches no longer invalidate them.
+- Existing component files without an `EXPLORER_HEADER` block transparently fall through to the normal scoring path — the fast-path is purely additive. To activate the fast-path on legacy components, run `/regenerate-explorer-headers --session` (or the full backfill).
+- The Phase 5 parallel cohort is enabled unconditionally. To revert to sequential behavior locally for one run, lower `--asset-parallelism 0` is NOT supported (the flag is clamped to 1–8); instead, set `asset_parallelism` to a small value to bound concurrency.
+
+---
+
 ## [3.14.7]
 
 ### Added — Parallel asset generation in `architecture-dev-handoff` with per-tier model pinning

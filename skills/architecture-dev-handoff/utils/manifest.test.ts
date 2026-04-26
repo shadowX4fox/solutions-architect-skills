@@ -3,12 +3,14 @@
  * Mirrors the architecture-compliance test convention (Bun test, .temp dir).
  */
 import { describe, test, expect, beforeEach, afterAll } from "bun:test";
+import { createHash } from "crypto";
 import { mkdirSync, rmSync, writeFileSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import {
   emptyManifest,
   hashPayload,
   loadManifest,
+  readTemplateVersion,
   saveManifest,
   shouldSkip,
   updateEntry,
@@ -232,6 +234,54 @@ describe("shouldSkip", () => {
   });
 });
 
+describe("readTemplateVersion", () => {
+  test("parses TEMPLATE_VERSION marker from a template file", () => {
+    const t = join(TEMP_DIR, "tpl.md");
+    writeFileSync(
+      t,
+      "# Title\n\n<!-- some other comment -->\n<!-- TEMPLATE_VERSION: 2.4.1 -->\n\nbody",
+      "utf-8",
+    );
+    expect(readTemplateVersion(t)).toBe("2.4.1");
+  });
+
+  test("rejects file with no marker", () => {
+    const t = join(TEMP_DIR, "tpl.md");
+    writeFileSync(t, "# Title\n\nno marker here\n", "utf-8");
+    expect(() => readTemplateVersion(t)).toThrow(/TEMPLATE_VERSION marker not found/);
+  });
+
+  test("only matches marker at start of line (anchored)", () => {
+    const t = join(TEMP_DIR, "tpl.md");
+    writeFileSync(t, "# Title\n\nprefix <!-- TEMPLATE_VERSION: 1.0.0 -->\n", "utf-8");
+    expect(() => readTemplateVersion(t)).toThrow(/TEMPLATE_VERSION marker not found/);
+  });
+});
+
+describe("HANDOFF_TEMPLATE.md frozen fixture (tripwire)", () => {
+  // This test pins both the SHA-256 of the bundled template file and the
+  // TEMPLATE_VERSION it declares. When the template content changes you MUST
+  // update both fixture values together — that forces a TEMPLATE_VERSION bump
+  // alongside any structural edit, and prevents silently re-using cached
+  // payloads against an updated template.
+  //
+  // To update: bump TEMPLATE_VERSION in HANDOFF_TEMPLATE.md, then update both
+  // FROZEN_SHA and FROZEN_VERSION below to the new values.
+  const FROZEN_SHA = "d2789306659f7125c17a892c2daa0c3b51f5758b9551f930c1d16bf57638aaa4";
+  const FROZEN_VERSION = "1.0.0";
+  const TEMPLATE_PATH = join(__dirname, "..", "HANDOFF_TEMPLATE.md");
+
+  test("template content hash matches frozen fixture", () => {
+    const bytes = readFileSync(TEMPLATE_PATH);
+    const sha = createHash("sha256").update(bytes).digest("hex");
+    expect(sha).toBe(FROZEN_SHA);
+  });
+
+  test("declared TEMPLATE_VERSION matches frozen fixture", () => {
+    expect(readTemplateVersion(TEMPLATE_PATH)).toBe(FROZEN_VERSION);
+  });
+});
+
 describe("manifest CLI integration smoke", () => {
   test("hash subcommand prints sha256 prefix", async () => {
     const payload = writePayload("p", "abc");
@@ -240,6 +290,16 @@ describe("manifest CLI integration smoke", () => {
     });
     expect(proc.exitCode).toBe(0);
     expect(proc.stdout.toString().trim()).toMatch(/^sha256:[0-9a-f]{64}$/);
+  });
+
+  test("template-version subcommand prints the marker value", async () => {
+    const t = join(TEMP_DIR, "tpl.md");
+    writeFileSync(t, "# Title\n\n<!-- TEMPLATE_VERSION: 9.9.9 -->\n", "utf-8");
+    const proc = Bun.spawnSync({
+      cmd: ["bun", join(__dirname, "manifest-cli.ts"), "template-version", t],
+    });
+    expect(proc.exitCode).toBe(0);
+    expect(proc.stdout.toString().trim()).toBe("9.9.9");
   });
 
   test("check subcommand returns REGEN when no manifest exists", async () => {

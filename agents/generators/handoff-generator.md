@@ -85,6 +85,7 @@ If the payload's `asset_types[]` is empty (skip-list component), Section 14 is f
 # Component Development Handoff — [COMPONENT_NAME]
 
 <!-- managed by sa-skills:architecture-dev-handoff — do not edit manually -->
+<!-- TEMPLATE_VERSION: 1.0.0 -->
 
 ---
 

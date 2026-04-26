@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -116,7 +116,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.13.1` in the list.
+You should see `sa-skills v3.14.8` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -797,7 +797,43 @@ Where:
 
 ## Roadmap
 
-### v3.14.7 (Current Release) ✅
+### v3.14.8 (Current Release) ✅
+**perf: three dev-handoff performance improvements (parallel 5A+5B cohort, decoupled `template_version`, EXPLORER_HEADER fast-path inside the explorer agent)**
+
+A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k tokens) surfaced three avoidable bottlenecks. Each ships independently — any single one is safe to revert.
+
+**Change 1 — Phase 5 collapses Stages 5A and 5B into one parallel cohort.** The `handoff-generator` (Stage 5A, Sonnet) and `handoff-asset-generator` (Stage 5B, Sonnet/Haiku per tier) sub-agents both consume only `payload_path` after Phase 3.5 — they had no real cross-dependency. Spawning them concurrently in one orchestrator message (up to `parallelism` 5A Tasks + up to `asset_parallelism` 5B Tasks) reclaims `~min(T(5A), T(5B))` per run (~200 s on the observed run, scaling to 25–35 % off Phase 5 wall-time on multi-component runs). Stage 5C (asset-gap merge into Section 15) still runs after both cohorts. The lost gating means a 5A failure may leave orphaned asset files on disk — these are valid stand-alone artifacts, excluded from `handoffs/.manifest.json`, and surfaced in Phase 7 as `Asset written but handoff doc failed: <abs_path> — will be regenerated next run`. The new concurrency budget is `parallelism + asset_parallelism` (default 4 + 4 = 8); document this if you tune the flags.
+
+**Change 2 — `architecture-explorer` agent gets a single-component EXPLORER_HEADER fast-path (PHASE 2.5).** Component files have carried a required `<!-- EXPLORER_HEADER -->` block with `related_adrs:` since v3.14.0 — the architect's curated answer to the same question the per-ADR LLM scoring loop produces. The optimization lives **inside the explorer agent**, not around it: the dev-handoff orchestrator still spawns the explorer the same way and still receives an `EXPLORE_RESULT`. When the orchestrator passes the new `component_file:` input parameter and `force == false`, PHASE 2.5 runs the new `bun … explore-cli.ts handoff-shortcut` subcommand which synthesizes a complete `EXPLORE_RESULT` from the header + the config's `required_sections[]` + a globbed `adr/ADR-NNN-*.md` resolution. Explorer Haiku token spend drops from ~84 k to ~10–15 k per single-component handoff. Header missing, malformed, or ADR ids unresolvable → transparent fall-through to the normal scoring path. Telemetry: `metadata.shortcut: header` plus `metadata.shortcut_unresolved_adrs: [...]` for any unresolved ADR ids; Phase 7 reports `Explorer mode: cached | header-shortcut | full-scoring` per component.
+
+**Change 3 — `template_version` decoupled from plugin version.** Pre-v3.14.8, `manifest.ts` mixed `template_version = plugin_version` into every payload's SHA-256 fingerprint, so any plugin patch (e.g. v3.14.6 → v3.14.7) invalidated every component's manifest entry even when `HANDOFF_TEMPLATE.md` was byte-identical. v3.14.8 adds a `<!-- TEMPLATE_VERSION: 1.0.0 -->` marker to the template file and a new `manifest-cli.ts template-version <template_path>` subcommand. Plugin patches no longer trigger spurious REGEN — only an actual template content change (paired with a deliberate `TEMPLATE_VERSION:` bump) does. A new `manifest.test.ts` tripwire pins the template's SHA-256 against the declared version, forcing both fixture values to be updated together when the template is edited.
+
+**New CLI subcommands:**
+- `manifest-cli.ts template-version <template_path>` — print the parsed marker
+- `explore-cli.ts read-component-header <component_file>` — print parsed header fields as JSON
+- `explore-cli.ts handoff-shortcut <component_file> <config_path> <project_root> <inputs_hash>` — synthesize the full `EXPLORE_RESULT` YAML
+
+**New TypeScript modules:**
+- `skills/architecture-dev-handoff/utils/manifest.ts` — `readTemplateVersion()` exported alongside existing helpers
+- `skills/architecture-explorer/utils/handoff-shortcut.ts` — `synthesizeHandoffShortcut()`; reuses `parseHeader` from `skills/architecture-explorer-headers/utils/header-detector.ts` (cross-skill import, same pattern as the existing `manifest.ts` → `architecture-compliance/utils/date-utils` import)
+
+**Modified files:**
+- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md` — adds `<!-- TEMPLATE_VERSION: 1.0.0 -->` marker
+- `skills/architecture-dev-handoff/utils/manifest{,-cli}.ts` — `readTemplateVersion()` + `template-version` subcommand
+- `skills/architecture-dev-handoff/utils/manifest.test.ts` — +6 cases (frozen-fixture tripwire + CLI smoke)
+- `skills/architecture-explorer/utils/explore-cli.ts` — `read-component-header` and `handoff-shortcut` subcommands
+- `skills/architecture-explorer/utils/handoff-shortcut.test.ts` — new (9 tests, round-trip-validates synthesized YAML against `parseExploreResult()`)
+- `agents/builders/architecture-explorer.md` — new PHASE 2.5 section, new `component_file` input parameter, allowed Bash command #5 added; agent version bumped to 1.1.0
+- `skills/architecture-dev-handoff/SKILL.md` — Phase 3.4a passes `component_file` and tracks `explorer_mode` per component; Phase 3.5 sources `template_version` via the new CLI subcommand; Phase 5 fully restructured into one cohort + Step 5.3 (gap merge) with the pre-v3.14.8 sequential 5A.x/5B.x preserved inline as a `<details>` historical reference; Phase 7 report adds `Explorer mode`, `5A failure rate`, and orphaned-asset detail lines
+
+**Verification**: `bun run typecheck` clean. `bun test` 493 / 493 (was 484 — +9 from `handoff-shortcut.test.ts`). `bun run bundle:check` all three bundled agents in sync.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.8 picks up all three improvements automatically.
+- Existing `handoffs/.manifest.json` entries WILL be invalidated on the first run because `template_version` flips from `3.14.7` (plugin version) to `1.0.0` (the new template version). Subsequent plugin patches no longer invalidate them.
+- Component files without an `EXPLORER_HEADER` block transparently fall through to normal scoring — the fast-path is purely additive. To activate the fast-path on legacy components, run `/regenerate-explorer-headers --session` (or the full backfill).
+- The Phase 5 parallel cohort is enabled unconditionally. To bound concurrency, lower `--parallelism` and/or `--asset-parallelism`.
+
+### v3.14.7 (Previous Release) ✅
 **feat: parallel asset generation in `architecture-dev-handoff` with per-tier model pinning**
 
 A single Sonnet `handoff-generator` sub-agent did two unrelated jobs back-to-back per component — fill the 16-section handoff document, then sequentially write every deliverable asset (OpenAPI, DDL, Kubernetes Deployment, AsyncAPI, CronJob, Avro/Protobuf, Redis key schema, C4 descriptor). For a component with 4 assets that meant 5 serial Writes inside one Sonnet spawn even though the assets are independent. It also paid Sonnet rates for the `c4-descriptor.md` — a free-form markdown one-pager that template-fills cleanly on Haiku. v3.14.7 splits asset generation into a parallel sub-agent with model tier pinned per asset.
@@ -825,7 +861,7 @@ A single Sonnet `handoff-generator` sub-agent did two unrelated jobs back-to-bac
 
 **Migration**: no user action required. Re-running any handoff after upgrading to v3.14.7 picks up the new flow automatically. Existing `handoffs/.manifest.json` files remain valid (the `assets` field semantics are unchanged — same comma-separated filename list). Generated asset content is unchanged for code-tier assets (Sonnet still drives them) and may show stylistic variance only for `c4-descriptor.md` (now driven by Haiku, but the template scaffold and Asset Fidelity Rule are unchanged).
 
-### v3.14.6 (Previous Release) ✅
+### v3.14.6 ✅
 **feat: wire `architecture-explorer` into `architecture-analysis` — per-analysis FILES allowlists across all 10 analyses**
 
 The analysis flow's universal `architecture-analysis-agent` (Opus) was reading the orchestrator-prepared `doc_files` corpus in full for every one of the 10 analyses. The corpus is a single shared list (`ARCHITECTURE.md` + `docs/01–09` + `adr/*` + relevant component files), so a 10-analysis run reread the entire ~20+-file corpus 10 times — even though each analysis only consumes 5–10 of those files (SPOF cares about deployment + topology; STRIDE cares about trust boundaries + data flows; Cost Hotspots cares about technology stack + scalability). The Haiku-tier `architecture-explorer` plus its 10 already-shipped `analysis-<type>.json` configs were designed exactly for that trim; v3.14.6 wires them in.

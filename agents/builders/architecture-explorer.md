@@ -29,7 +29,8 @@ The orchestrator passes these in the prompt text. Treat them as authoritative.
 - `plugin_dir` — absolute path used to invoke `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts`.
 - `plugin_version` — e.g. `3.14.0`. Mixed into `inputs_hash` so plugin upgrades invalidate the cache.
 - `extra_terms` (optional) — a YAML list of free-form terms appended to `relevance_keywords.boost` at runtime with weight 4. Supported for `task_family: question` (the user's question keywords), `task_family: adr` (the proposed ADR's tech/component names), and `task_family: handoff` (the component's slug + display name + each technology + type keyword, used to differentiate per-component classification on a single shared corpus).
-- `force` (optional, default `false`) — when `true`, ignore the cache and run a fresh classification.
+- `component_file` (optional, v3.14.8+) — absolute path to a single C4 L2 component `.md` file. Set ONLY by the `architecture-dev-handoff` orchestrator when invoking with `task_type: handoff-component` for one component. Triggers the EXPLORER_HEADER fast-path in PHASE 2.5 (skips per-ADR LLM scoring when the component file's `<!-- EXPLORER_HEADER -->` block has a populated `related_adrs:` list). When this parameter is absent, malformed, or the shortcut precondition fails, classification falls through to the normal PHASE 3 path.
+- `force` (optional, default `false`) — when `true`, ignore the cache AND skip the PHASE 2.5 shortcut. A `--force` user always gets fresh per-ADR scoring.
 
 ## Workflow
 
@@ -71,7 +72,32 @@ bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts \
 The CLI prints either `HIT <abs_cache_path>` or `MISS <abs_cache_path>`.
 
 - On `HIT` (and `force` is false): Read the cache file, set `cache_hit: true` in the result, and skip directly to PHASE 6 (return). Do not re-classify.
-- On `MISS` (or `force` is true): proceed to PHASE 3.
+- On `MISS` (or `force` is true): proceed to PHASE 2.5.
+
+### PHASE 2.5 — Handoff fast-path (single-component shortcut, v3.14.8+)
+
+This phase only fires when ALL of the following hold:
+
+1. The orchestrator passed a `component_file` input parameter (single-component handoff scope).
+2. `task_type` starts with `handoff-component` (i.e., `task_family == handoff`).
+3. `force` is false (a `--force` user always gets fresh per-ADR scoring).
+
+When the trigger fires, run:
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts \
+    handoff-shortcut <component_file> <config_path> <project_root> <inputs_hash>
+```
+
+The CLI parses `<component_file>`'s `<!-- EXPLORER_HEADER -->` block (a v3.14.0-required structure on every component file), reads `related_adrs:`, resolves each ADR id (e.g. `ADR-118`) to its repo-relative path under `adr/`, combines the resolved ADR paths with `required_sections[]` from the config + the component file itself, and prints a complete `EXPLORE_RESULT` YAML body (status: OK, `metadata.shortcut: header`, `metadata.shortcut_component: <repo-rel>`).
+
+**Exit code 0 (success)**: capture the printed YAML, emit it inline in your final response wrapped in the standard `EXPLORE_RESULT:` ` ```yaml ` fence (PHASE 6 format), AND persist it to the cache via `write-cache` (one of the two legal write surfaces — see PHASE 6). Skip PHASES 3–5 entirely. The whole shortcut path costs ~one Bash invocation plus the cache write; per-ADR LLM scoring is bypassed.
+
+**Exit code 1 (shortcut unavailable)**: the CLI prints the reason to stderr (no header, malformed, missing config, no resolvable ADRs, etc.). Log `shortcut unavailable, scoring all candidates` and **fall through to PHASE 3** as if PHASE 2.5 had not run. The normal scoring path is the safety net — the shortcut is an optimization, never a single point of failure.
+
+**Why this is safe**: the EXPLORER_HEADER's `related_adrs:` is curated by the architect (the architecture-explorer-headers skill exists exactly to keep these headers fresh). It is the same answer the per-ADR LLM scoring loop would produce on a well-tagged component. When tags drift, the user has two escape hatches: (a) re-run the architecture-explorer-headers skill to refresh, (b) pass `--force` to the dev-handoff skill which propagates as `force: true` here and bypasses the shortcut.
+
+**Telemetry**: the synthesized YAML carries `metadata.shortcut: header` so downstream skills (and Phase 7 reports) can surface which path produced the classification. ADR ids that did not resolve to a file appear as `metadata.shortcut_unresolved_adrs: [ADR-NNN, ...]`.
 
 ### PHASE 3 — Expand Candidates and Read Headers
 
@@ -205,6 +231,7 @@ Always emit an `EXPLORE_RESULT` block — never exit silently.
 2. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts check-cache …`
 3. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts expand-candidates …`
 4. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts write-cache …`
+5. `bun [plugin_dir]/skills/architecture-explorer/utils/explore-cli.ts handoff-shortcut …` (PHASE 2.5 only)
 
 **ALLOWED writes** (file outputs use exactly one of these two surfaces — never any third path):
 
@@ -231,5 +258,5 @@ Always emit an `EXPLORE_RESULT` block — never exit silently.
 
 ---
 
-**Agent Version**: 1.0.0 (v3.14.0 — initial release)
+**Agent Version**: 1.1.0 (v3.14.8 — added EXPLORER_HEADER fast-path for single-component handoff scope; v3.14.0 — initial release)
 **Specialization**: Universal doc relevance classification (compliance, analysis, peer-review, handoff, Q&A, ADR application)

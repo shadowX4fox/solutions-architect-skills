@@ -20,11 +20,18 @@
  *
  *   init <manifest_path> <generator_version>
  *     Create an empty manifest if one doesn't exist. Idempotent.
+ *
+ *   template-version <template_path>
+ *     Print the TEMPLATE_VERSION marker embedded in the handoff template.
+ *     Single source of truth for `template_version` callers — bumping the
+ *     plugin version no longer invalidates manifest entries when the
+ *     template itself is byte-identical.
  */
 import {
   emptyManifest,
   hashPayload,
   loadManifest,
+  readTemplateVersion,
   saveManifest,
   shouldSkip,
   updateEntry,
@@ -146,9 +153,18 @@ switch (subcommand) {
     break;
   }
 
+  case "template-version": {
+    const [templatePath] = rest;
+    if (!templatePath) {
+      fail("usage: template-version <template_path>");
+    }
+    console.log(readTemplateVersion(templatePath));
+    break;
+  }
+
   default:
     fail(
       `unknown subcommand "${subcommand ?? ""}". ` +
-        "Expected one of: hash, check, update, init.",
+        "Expected one of: hash, check, update, init, template-version.",
     );
 }
