@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.15.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.15.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -116,7 +116,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.15.0` in the list.
+You should see `sa-skills v3.15.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -797,7 +797,23 @@ Where:
 
 ## Roadmap
 
-### v3.15.0 (Current Release) ✅
+### v3.15.1 (Current Release) ✅
+**fix: Avro / Protobuf detection misses when wire format is documented outside the canonical 5 fields**
+
+The `handoff-context-builder` resolver scanned only `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, `**Deploys as:**` of each component descriptor when deriving `asset_types`. Real-world component files commonly document the Kafka wire format ("Avro envelope", "Avro — schema-registry validated") in three places the resolver did not read: the `<!-- EXPLORER_HEADER -->` `technologies:` line, the inline `Subscriptions` / `Produces` / `Topics` tables further down the component file, and `docs/05-integration-points.md`. Result: components that consume or produce Avro topics had `asset_types: [asyncapi, deployment, c4-descriptor]` instead of `[asyncapi, deployment, avro, c4-descriptor]` — `schema.avsc` was silently never generated.
+
+**Fix — extend the resolver's `scanned_text`** to include (a) the `EXPLORER_HEADER` body (`technologies:` and `key_concepts:` lines) and (b) the cell contents of every table that follows an H2/H3 named `Subscriptions` / `Subscribes To` / `Produces` / `Consumes` / `Topics` / `Streams` / `Events`. Tighten the messaging-row asset rule to a token-explicit match: `[avro]` triggers on `avro` / `*.avsc` / `Schema Registry` (the latter only when `avro` is also present, since Schema Registry alone could be JSON Schema or Protobuf); `[protobuf]` triggers on `protobuf` / `proto3` / `*.proto` / `gRPC`. The canonical 5 fields still drive `component_type` selection — only the `asset_types` union is broadened.
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — secondary-signals list extended (new bullets 3 + 4 for EXPLORER_HEADER and inline tables); messaging-row asset rule made token-explicit.
+- `agents/builders/handoff-context-builder.md` — Step 3.1.5 now builds `scanned_text` from the canonical 5 + EXPLORER_HEADER body + the Subscriptions/Produces/Topics-style table rows; messaging avro/protobuf sub-rule applied. Bundle re-synced.
+
+**Migration**: none required. On the next handoff run, components whose `asset_types` list expands (because the resolver now sees their Avro signal) will be regenerated automatically — the payload's `asset_types` value changes → the manifest hash changes → the manifest CLI returns REGEN. Authors who used `**Asset Hints:**` as a workaround can keep them; they still take precedence.
+
+---
+
+### v3.15.0 (Previous Release) ✅
 **feat: dev-handoff document refactored to audience-segmented Dev/QA/Ops format (TEMPLATE_VERSION 2.0.0; BREAKING)**
 
 The Component Development Handoff document collapses from **16 flat sections to 8 audience-tagged sections** in three role tracks plus an appendix. Every Part header and section header carries `[DEV]` / `[QA]` / `[OPS]` badges (with multi-tags like `[DEV] [QA-CONTRACT]` for shared sections). Section 0 gains a Role Quick Index pointing each role to its starting sections.
@@ -846,7 +862,7 @@ Real-world feedback was that downstream teams (external dev shops, contracted QA
 
 ---
 
-### v3.14.9 (Previous Release) ✅
+### v3.14.9 ✅
 **fix: dev-handoff asset-type resolver — recognize Gateway/BFF/Edge, cloud K8s names (AKS/EKS/GKE/ECS/Fargate/Container/Docker), scan `**Communicates via:**` + `**Deploys as:**`, add `**Asset Hints:**` override**
 
 A real-world handoff for a "Gateway" component on AKS publishing to Kafka produced only `[openapi, c4-descriptor]` — missing `deployment.yaml` (every other deployable component in the same catalog had one) and `asyncapi.yaml`. Root cause: the `handoff-context-builder` resolver in `PAYLOAD_SCHEMA.md` only scanned the component file's `**Type:**` field and used a vocabulary that recognized abstract terms ("Kubernetes/K8s/Pod") but not the cloud-specific terms architects actually write ("AKS/EKS/Container/Docker"). "Gateway" was not a first-class archetype at all, so Gateway components had to accidentally match through other fields — and only `GraphQL` got through for this one (in `**Description:**`), missing the K8s and Kafka signals that lived in `**Deploys as:**` and `**Communicates via:**`.

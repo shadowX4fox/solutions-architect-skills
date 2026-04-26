@@ -55,7 +55,9 @@ The orchestrator scans **multiple component fields** to derive both `component_t
 
 1. **`**Type:**`** — primary signal; first match in the keyword table wins for `component_type` token assignment.
 2. **`**Technology:**`, `**Description:**`, `**Communicates via:**`, `**Deploys as:**`** — secondary signals; keyword hits in any of these contribute additional `asset_types` entries (the union semantics below). Real-world docs put the deployment target ("Docker container on AKS") in `**Deploys as:**` and the messaging fabric ("Kafka — outbound") in `**Communicates via:**`, so reading **only** `**Type:**` would miss the deployment.yaml + asyncapi.yaml that those components clearly need.
-3. **`**Asset Hints:**`** (optional, v3.14.9+) — explicit per-component override. Format: `**Asset Hints:** [openapi, deployment, asyncapi]` or `**Asset Hints:** skip`. When present, this list **replaces** the resolver's output entirely (still augmented with `c4-descriptor` unless the value is `skip`). Use this when the keyword resolver miscategorizes a component or when the architect knows better — the lowest-effort escape hatch from a resolver miss.
+3. **`<!-- EXPLORER_HEADER … -->` block** (v3.14.0+ headers) — the `technologies:` line is treated as an additional Technology source. Architects often list the wire format (Avro, Protobuf) alongside the runtime stack here even when `**Technology:**` only carries the framework names.
+4. **Inline subsection tables under H2/H3 headers `Subscriptions`, `Subscribes To`, `Produces`, `Consumes`, `Topics`, `Streams`, `Events`** — the "Notes" / "Format" / "Envelope" cells frequently encode the serialization format ("Same Avro envelope as …", "Avro / schema-registry validated", "Protobuf"). Scan every row of those tables.
+5. **`**Asset Hints:**`** (optional, v3.14.9+) — explicit per-component override. Format: `**Asset Hints:** [openapi, deployment, asyncapi]` or `**Asset Hints:** skip`. When present, this list **replaces** the resolver's output entirely (still augmented with `c4-descriptor` unless the value is `skip`). Use this when the keyword resolver miscategorizes a component or when the architect knows better — the lowest-effort escape hatch from a resolver miss.
 
 Every non-skip component also gets `c4-descriptor` appended to its `asset_types` (it is always-on except for the skip list).
 
@@ -66,7 +68,7 @@ Every non-skip component also gets `c4-descriptor` appended to its `asset_types`
 | Database, DB, Data Store, PostgreSQL, MySQL, MongoDB, Cassandra, DynamoDB | `database` | `[ddl, c4-descriptor]` |
 | Redis, Cache, ElastiCache, Memcached, Valkey, KeyDB | `cache` | `[redis, c4-descriptor]` |
 | Kubernetes, K8s, Deployment, Pod, AKS, EKS, GKE, OpenShift, ECS, Fargate, Container, Docker, containerized | `k8s-workload` | `[deployment, c4-descriptor]` |
-| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ, SQS, SNS, EventBridge, Pub/Sub, NATS | `message-consumer` or `message-producer` | `[asyncapi, c4-descriptor]` + `[avro]` or `[protobuf]` if serialization format documented |
+| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ, SQS, SNS, EventBridge, Pub/Sub, NATS | `message-consumer` or `message-producer` | `[asyncapi, c4-descriptor]` + `[avro]` if any scanned field contains case-insensitive `avro`, `*.avsc`, or `Schema Registry` (Confluent Avro) + `[protobuf]` if any scanned field contains `protobuf`, `proto3`, `*.proto`, or `gRPC` |
 | CronJob, Cron, Scheduled, Batch, Scheduler | `scheduled-job` | `[cronjob, c4-descriptor]` |
 | (combined — e.g., API service deployed on K8s with a DB, or Gateway publishing to Kafka) | compound (use the primary `**Type:**`-row token) | multiple entries (e.g., `[openapi, deployment, ddl, c4-descriptor]` or `[openapi, deployment, asyncapi, c4-descriptor]`) |
 | Library, SDK, Utility, Config, Documentation, Schema-only | `skip` | `[]` (no assets; no `c4-descriptor` either) |

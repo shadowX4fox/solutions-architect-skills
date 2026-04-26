@@ -5,6 +5,27 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.1]
+
+### Fixed — Avro / Protobuf detection misses when wire format is documented outside the canonical 5 fields
+
+**Problem**: the `handoff-context-builder` resolver scanned only `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, `**Deploys as:**` of each component descriptor when deriving `asset_types`. Real-world component files commonly document the Kafka wire format ("Avro envelope", "Avro — schema-registry validated") in three places the resolver did not read: the `<!-- EXPLORER_HEADER -->` `technologies:` line, the inline Subscriptions/Produces tables, and `docs/05-integration-points.md`. Result: components that consume or produce Avro topics had `asset_types: [asyncapi, deployment, c4-descriptor]` instead of `[asyncapi, deployment, avro, c4-descriptor]` — `schema.avsc` was silently never generated.
+
+**Resolution**: extend the resolver's `scanned_text` to include (a) the `EXPLORER_HEADER` body and (b) the cell contents of every table that follows an H2/H3 named Subscriptions / Subscribes To / Produces / Consumes / Topics / Streams / Events. Tighten the messaging-row asset rule to a token-explicit match: `[avro]` triggers on `avro`/`*.avsc`/`Schema Registry` (the latter only when `avro` is also present); `[protobuf]` triggers on `protobuf`/`proto3`/`*.proto`/`gRPC`. The canonical 5 fields still drive `component_type` selection — only the asset-types union is broadened.
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — secondary-signals list extended (new bullets 3 + 4 for EXPLORER_HEADER and inline tables); messaging-row asset rule made token-explicit.
+- `agents/builders/handoff-context-builder.md` — Step 3.1.5 of the asset-type derivation now builds `scanned_text` from the canonical 5 + EXPLORER_HEADER body + Subscriptions/Produces/Topics-style table rows; messaging avro/protobuf sub-rule applied with the Schema-Registry-only-when-avro-also-present qualifier. Bundle re-synced via `bun run bundle:handoff-agent`.
+
+**No code changes; no test changes.** The resolver lives entirely in the agent's prompt (LLM-driven). The bundle integrity test (`bun test tools/bundle-handoff-agent.test.ts`) catches PAYLOAD_SCHEMA.md ↔ handoff-context-builder.md drift.
+
+**Verification**: `bun run typecheck` clean. `bun test` 493/493. `bun run bundle:check` all in sync.
+
+**Migration**: none required. On next handoff run, components whose asset-types list expands will be regenerated automatically (manifest hash will change). Authors who used `**Asset Hints:**` as a workaround for this miss can keep them; they still take precedence.
+
+---
+
 ## [3.15.0]
 
 ### Changed — Dev-handoff document refactored to audience-segmented Dev/QA/Ops format (BREAKING — TEMPLATE_VERSION 2.0.0)
