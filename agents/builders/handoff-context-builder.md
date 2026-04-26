@@ -86,11 +86,16 @@ Read `component_file`. Convert to a `## Component (structured)` block per `PAYLO
 ```yaml
 component:
   name: <H1>
-  type: <**Type:** value, normalized to component_type token>
+  type: <**Type:** value, normalized to component_type token — see PAYLOAD_SCHEMA.md "Component type → asset type mapping">
   layer: <**Layer:** value if present>
   technology: [<each item from **Technology:**>]
   description: |
     <verbatim prose between H1 and the first **Field:** line>
+  communicates_via: |    # parsed from **Communicates via:** if present (v3.14.9+ — feeds asset-type resolver)
+    <verbatim>
+  deploys_as: |          # parsed from **Deploys as:** if present (v3.14.9+ — feeds asset-type resolver)
+    <verbatim>
+  asset_hints: [...]     # parsed from **Asset Hints:** if present (v3.14.9+ — explicit override for the resolver)
   apis: [...]          # parsed from **Endpoints:** / **Routes:** / API table
   schema: { tables: [...] }   # parsed from **Schema:** / **Tables:** block
   config:
@@ -104,6 +109,13 @@ component:
 ```
 
 Preserve every documented value verbatim (do NOT translate or paraphrase). Wrap any prose blocks in `description: |` literal blocks. Omit keys that are not present in the source — never invent.
+
+**Asset-type derivation (Step 3.1.5)** — after parsing, derive `asset_types` per the PAYLOAD_SCHEMA.md "Component type → asset type mapping" table:
+
+1. **If `**Asset Hints:**` is present**: parse it. If the value is the literal `skip`, set `component_type = "skip"` and `asset_types = []` and stop. Otherwise, set `asset_types = parsed_hints + [c4-descriptor]` (deduplicated). Set `component_type` from the `**Type:**`-row table lookup. Set `asset_hints_override = true` for this component in `CONTEXT_RESULT`.
+2. **Otherwise**: scan `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, and `**Deploys as:**` against the keyword vocabulary in PAYLOAD_SCHEMA.md. The `**Type:**` row that matches first determines `component_type`. Each row whose keywords match in any of the scanned fields contributes to the union of `asset_types`. Append `c4-descriptor` (always-on except for `skip`). Deduplicate.
+
+The wider scan is critical: real architecture docs put deployment targets (`Docker container on AKS`) in `**Deploys as:**` and messaging fabrics (`Kafka — outbound`) in `**Communicates via:**`. Reading only `**Type:**` would miss the `deployment.yaml` and `asyncapi.yaml` those components clearly need. (See PAYLOAD_SCHEMA.md "Gateway/Edge note" and "Union semantics" for canonical examples.)
 
 **Fallback**: if the component file uses an unfamiliar structure (no `**Field:**` lines, custom headers), skip the parse and emit the raw file under a `## Component File (raw)` section instead. Log the slug in `parse_fallback_slugs` for the return block. The downstream `handoff-generator` accepts both forms.
 
@@ -252,6 +264,7 @@ CONTEXT_RESULT:
       decision: <SKIP | REGEN>
       reason: <one-line>
       asset_types: [<token>, …]
+      asset_hints_override: <true | false>     # v3.14.9+ — true when the resolver was overridden by **Asset Hints:** in the component file
       doc_language: <en | es>
       handoff_file_rel: handoffs/<NN>-<slug>-handoff.md
     - slug: …
@@ -335,20 +348,31 @@ Field reference:
 
 ### Component type → asset type mapping
 
-The orchestrator uses the component's `**Type:**` field from its doc to determine both `component_type` and `asset_types`. Every non-skip component also gets `c4-descriptor` appended to its `asset_types` (it is always-on except for the skip list).
+The orchestrator scans **multiple component fields** to derive both `component_type` and `asset_types`:
 
-| `**Type:**` keyword match | `component_type` | `asset_types` |
-|----------------------------|------------------|---------------|
-| API, REST, GraphQL, gRPC, Service | `api-service` | `[openapi, c4-descriptor]` |
-| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB | `database` | `[ddl, c4-descriptor]` |
-| Redis, Cache, ElastiCache, Memcached, Valkey | `cache` | `[redis, c4-descriptor]` |
-| Kubernetes, K8s, Deployment, Pod | `k8s-workload` | `[deployment, c4-descriptor]` |
-| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ | `message-consumer` or `message-producer` | `[asyncapi, c4-descriptor]` + `[avro]` or `[protobuf]` if serialization format documented |
-| CronJob, Cron, Scheduled, Batch | `scheduled-job` | `[cronjob, c4-descriptor]` |
-| (combined — e.g., API service deployed on K8s with a DB) | compound (e.g., `api-service`) | multiple entries (e.g., `[openapi, deployment, ddl, c4-descriptor]`) |
-| Library, SDK, Utility, Config, Documentation | `skip` | `[]` (no assets; no `c4-descriptor` either) |
+1. **`**Type:**`** — primary signal; first match in the keyword table wins for `component_type` token assignment.
+2. **`**Technology:**`, `**Description:**`, `**Communicates via:**`, `**Deploys as:**`** — secondary signals; keyword hits in any of these contribute additional `asset_types` entries (the union semantics below). Real-world docs put the deployment target ("Docker container on AKS") in `**Deploys as:**` and the messaging fabric ("Kafka — outbound") in `**Communicates via:**`, so reading **only** `**Type:**` would miss the deployment.yaml + asyncapi.yaml that those components clearly need.
+3. **`**Asset Hints:**`** (optional, v3.14.9+) — explicit per-component override. Format: `**Asset Hints:** [openapi, deployment, asyncapi]` or `**Asset Hints:** skip`. When present, this list **replaces** the resolver's output entirely (still augmented with `c4-descriptor` unless the value is `skip`). Use this when the keyword resolver miscategorizes a component or when the architect knows better — the lowest-effort escape hatch from a resolver miss.
 
-A component may match multiple types; `asset_types` is a union. `c4-descriptor` is deduplicated like any other token.
+Every non-skip component also gets `c4-descriptor` appended to its `asset_types` (it is always-on except for the skip list).
+
+| Keyword match (in any of the scanned fields above) | `component_type` | `asset_types` |
+|----------------------------------------------------|------------------|---------------|
+| API, REST, GraphQL, gRPC, Service, Endpoint, Backend, BFF | `api-service` | `[openapi, c4-descriptor]` |
+| Gateway, API Gateway, Edge, Ingress, Reverse Proxy | `api-service` (also implies deployable — see note) | `[openapi, deployment, c4-descriptor]` |
+| Database, DB, Data Store, PostgreSQL, MySQL, MongoDB, Cassandra, DynamoDB | `database` | `[ddl, c4-descriptor]` |
+| Redis, Cache, ElastiCache, Memcached, Valkey, KeyDB | `cache` | `[redis, c4-descriptor]` |
+| Kubernetes, K8s, Deployment, Pod, AKS, EKS, GKE, OpenShift, ECS, Fargate, Container, Docker, containerized | `k8s-workload` | `[deployment, c4-descriptor]` |
+| Consumer, Producer, Queue, Topic, Event, Message, Kafka, RabbitMQ, SQS, SNS, EventBridge, Pub/Sub, NATS | `message-consumer` or `message-producer` | `[asyncapi, c4-descriptor]` + `[avro]` or `[protobuf]` if serialization format documented |
+| CronJob, Cron, Scheduled, Batch, Scheduler | `scheduled-job` | `[cronjob, c4-descriptor]` |
+| (combined — e.g., API service deployed on K8s with a DB, or Gateway publishing to Kafka) | compound (use the primary `**Type:**`-row token) | multiple entries (e.g., `[openapi, deployment, ddl, c4-descriptor]` or `[openapi, deployment, asyncapi, c4-descriptor]`) |
+| Library, SDK, Utility, Config, Documentation, Schema-only | `skip` | `[]` (no assets; no `c4-descriptor` either) |
+
+**Gateway/Edge note** (v3.14.9+): "Gateway/BFF/Edge/Ingress/Reverse Proxy" archetypes are first-class deployables — they always need `deployment.yaml` alongside `openapi.yaml` because they always run as containers/pods. The Gateway row encodes this directly so the resolver does not depend on the architect also writing "K8s" or "Pod" in the same component file.
+
+**Union semantics**: a component may match multiple rows; `asset_types` is the deduplicated union of all matched rows' outputs. `c4-descriptor` is deduplicated like any other token. Example: a "GraphQL Gateway on AKS publishing to Kafka" matches three rows (Gateway → `[openapi, deployment]`, K8s → `[deployment]`, Kafka → `[asyncapi]`) and `c4-descriptor`, producing `[openapi, deployment, asyncapi, c4-descriptor]`.
+
+**Asset Hints override** (v3.14.9+): when `**Asset Hints:**` is present in the component file, parse it as a flow sequence (`[openapi, deployment]`) or the literal `skip`. Replace the resolver's output with the parsed list (`asset_types = parsed_hints + [c4-descriptor]` deduplicated; or `asset_types = []` and `component_type = skip` for the literal `skip`). Log `asset_hints_override = true` for the component in `CONTEXT_RESULT` so the orchestrator's Phase 7 report can surface which components used the override.
 
 ### Body sections (required in this order)
 

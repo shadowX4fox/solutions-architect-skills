@@ -5,6 +5,40 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.9]
+
+### Fixed — Dev-handoff asset-type resolver missed Gateway/BFF/Edge archetypes, cloud-specific K8s names, and signals outside `**Type:**`
+
+**Symptom**: a real-world handoff for a "Gateway" component on AKS publishing analytics events to Kafka produced only `[openapi, c4-descriptor]`. Every other deployable container in the same catalog (5 of them — `inbox-ux`, `inbox-materializer`, `inbox-hub`, `notification-preferences`, `inbox-realtime`) had `deployment.yaml`. The Gateway was the lone outlier with no deployment manifest, and its Kafka publishing signal was also dropped — clearly a resolver miss, not a deliberate decision.
+
+**Root cause**: the asset-type resolver in `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` (bundled into `agents/builders/handoff-context-builder.md`) had three independent gaps:
+
+1. **Vocabulary gap — "Gateway" wasn't a first-class archetype.** The keyword table had `API, REST, GraphQL, gRPC, Service` for `api-service`, but no `Gateway/BFF/Edge/Ingress`. Gateway components had to accidentally match through other keywords. For this Gateway, only `GraphQL` (in the description) hit, producing `[openapi, c4-descriptor]` and missing the deployment.
+2. **Vocabulary gap — abstract K8s terms only.** The `k8s-workload` row recognized `Kubernetes, K8s, Deployment, Pod` but not the cloud-specific names architects actually write: `AKS, EKS, GKE, OpenShift, ECS, Fargate, Container, Docker`. The Gateway's `**Deploys as:** Docker container on AKS` therefore did not contribute `deployment.yaml`.
+3. **Scan-window gap — `**Type:**` only, in spec.** The resolver instruction said "uses the component's `**Type:**` field". The LLM-driven implementation often read more by accident, but never reliably. The Gateway's `**Communicates via:** Kafka (outbound)` was a Kafka signal that lived outside `**Type:**` and was ignored, so `asyncapi.yaml` was never queued.
+
+**Fix**: three orthogonal changes to PAYLOAD_SCHEMA.md plus an explicit override:
+
+- **New "Gateway" row** mapping `Gateway, API Gateway, Edge, Ingress, Reverse Proxy` to `[openapi, deployment, c4-descriptor]`. Gateways are first-class deployables; the row encodes this directly so the resolver does not depend on the architect also writing "K8s" or "Pod" elsewhere in the same component file.
+- **Wider vocabulary** in five rows: K8s adds `AKS, EKS, GKE, OpenShift, ECS, Fargate, Container, Docker, containerized`. API adds `Endpoint, Backend, BFF`. Database adds `Cassandra, DynamoDB`. Cache adds `KeyDB`. Messaging adds `SQS, SNS, EventBridge, Pub/Sub, NATS`.
+- **Wider scan window** — the resolver now scans `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, AND `**Deploys as:**`. The `**Type:**` row that matches first determines `component_type`; every keyword row whose terms match in any scanned field contributes to the union of `asset_types`. Step 3.1 of the agent extracts `communicates_via` and `deploys_as` into the structured YAML so the resolver has them in hand.
+- **New `**Asset Hints:**` override field** (v3.14.9+) — when present in a component file, the value (a flow sequence like `[openapi, deployment, asyncapi]` or the literal `skip`) **replaces** the resolver's keyword-derived list. `c4-descriptor` is still appended unless `skip` is used. Architect-authored escape hatch for any future resolver miss; reported in `CONTEXT_RESULT.components[i].asset_hints_override` so Phase 7 reports surface which components used it.
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — resolver instruction + table fully rewritten with multi-field scan, expanded keywords, Gateway row, Union semantics example ("GraphQL Gateway on AKS publishing to Kafka" → `[openapi, deployment, asyncapi, c4-descriptor]`), and the `**Asset Hints:**` override spec.
+- `agents/builders/handoff-context-builder.md` — re-bundled (the keyword table flows in from PAYLOAD_SCHEMA.md). Step 3.1 now extracts `communicates_via`, `deploys_as`, and `asset_hints` from the component file. New Step 3.1.5 codifies the resolver decision flow (override → keyword scan → union → `c4-descriptor` append). `CONTEXT_RESULT.components[i]` adds `asset_hints_override` boolean.
+
+**No code changes; no test changes.** The resolver lives entirely in the agent's prompt (LLM-driven, no TS implementation). The existing bundle integrity test (`bun test tools/bundle-handoff-agent.test.ts`) catches PAYLOAD_SCHEMA.md ↔ handoff-context-builder.md drift.
+
+**Verification**: `bun run typecheck` clean. `bun test` 493/493. `bun run bundle:check` all in sync.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.9 picks up the new resolver automatically. Components whose previous run produced a too-narrow `asset_types` list will be flagged REGEN on the next run because the payload's `asset_types` value changed → the payload hash changes → the manifest CLI returns REGEN. The new run produces the correct asset set and overwrites the under-specified handoff. To force regeneration immediately, pass `--force`.
+
+To opt-out the resolver for a specific component (e.g. a Gateway that intentionally has no deployment because it runs serverless), add `**Asset Hints:** [openapi]` to the component file — the override wins.
+
+---
+
 ## [3.14.8]
 
 ### Changed — Three dev-handoff performance improvements (parallel 5A+5B cohort, decoupled template_version, EXPLORER_HEADER fast-path)

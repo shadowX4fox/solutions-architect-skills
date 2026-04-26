@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.14.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -116,7 +116,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.14.8` in the list.
+You should see `sa-skills v3.14.9` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -797,7 +797,30 @@ Where:
 
 ## Roadmap
 
-### v3.14.8 (Current Release) ✅
+### v3.14.9 (Current Release) ✅
+**fix: dev-handoff asset-type resolver — recognize Gateway/BFF/Edge, cloud K8s names (AKS/EKS/GKE/ECS/Fargate/Container/Docker), scan `**Communicates via:**` + `**Deploys as:**`, add `**Asset Hints:**` override**
+
+A real-world handoff for a "Gateway" component on AKS publishing to Kafka produced only `[openapi, c4-descriptor]` — missing `deployment.yaml` (every other deployable component in the same catalog had one) and `asyncapi.yaml`. Root cause: the `handoff-context-builder` resolver in `PAYLOAD_SCHEMA.md` only scanned the component file's `**Type:**` field and used a vocabulary that recognized abstract terms ("Kubernetes/K8s/Pod") but not the cloud-specific terms architects actually write ("AKS/EKS/Container/Docker"). "Gateway" was not a first-class archetype at all, so Gateway components had to accidentally match through other fields — and only `GraphQL` got through for this one (in `**Description:**`), missing the K8s and Kafka signals that lived in `**Deploys as:**` and `**Communicates via:**`.
+
+**Fix — three orthogonal changes to the resolver in `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md`** (re-bundled into `agents/builders/handoff-context-builder.md` via `bun run bundle:handoff-agent`):
+
+1. **New "Gateway" row** mapping `Gateway, API Gateway, Edge, Ingress, Reverse Proxy` to `[openapi, deployment, c4-descriptor]` — gateways are first-class deployables and always run as containers/pods. The row encodes this directly so the resolver does not depend on the architect also writing "K8s" or "Pod" in the same component file.
+2. **Wider vocabulary** in the K8s row — adds `AKS, EKS, GKE, OpenShift, ECS, Fargate, Container, Docker, containerized` to `Kubernetes, K8s, Deployment, Pod`. Also expands the API row (`Endpoint, Backend, BFF`), the database row (`Cassandra, DynamoDB`), the cache row (`KeyDB`), and the messaging row (`SQS, SNS, EventBridge, Pub/Sub, NATS`).
+3. **Wider scan window** — the resolver now scans `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, AND `**Deploys as:**` (was: `**Type:**` only, in the prompt's literal wording — though the LLM-driven implementation often read more by accident, never reliably). The instruction is now explicit. Step 3.1 of the agent extracts `communicates_via` and `deploys_as` from the component file into the structured YAML so the resolver has them in hand.
+
+**Plus an explicit override for one-off corrections — `**Asset Hints:**`** (v3.14.9+). When present in a component file, the field's flow-sequence value (e.g. `**Asset Hints:** [openapi, deployment, asyncapi]`) **replaces** the resolver's keyword-derived list (`c4-descriptor` is still appended unless the literal `skip` is used). This is the lowest-effort escape hatch for any future resolver miss — the architect adds one line to the component file rather than waiting for a vocabulary patch. The override is reported in the orchestrator's `CONTEXT_RESULT.components[i].asset_hints_override = true`, so Phase 7 reports surface which components used it.
+
+**Modified files**:
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — resolver instruction + table fully rewritten with multi-field scan, expanded keywords, Gateway row, Union semantics example for "GraphQL Gateway on AKS publishing to Kafka", and the `**Asset Hints:**` override spec.
+- `agents/builders/handoff-context-builder.md` — re-bundled (table flows in from PAYLOAD_SCHEMA.md). Step 3.1 now extracts `communicates_via`, `deploys_as`, and `asset_hints` from the component file. New Step 3.1.5 codifies the resolver decision flow (override → keyword scan → union → c4-descriptor append). `CONTEXT_RESULT.components[i]` adds `asset_hints_override` boolean.
+
+**No code changes; no test changes.** The resolver lives entirely in the agent's prompt (LLM-driven). The bundle integrity test (`bun test tools/bundle-handoff-agent.test.ts`) catches drift between PAYLOAD_SCHEMA.md and handoff-context-builder.md.
+
+**Migration**: no user action required. Re-running any handoff after upgrading to v3.14.9 picks up the new resolver automatically. Components whose previous run produced a too-narrow `asset_types` list (e.g. a Gateway that only got `[openapi, c4-descriptor]` instead of `[openapi, deployment, c4-descriptor]`) will be flagged REGEN on the next run because the payload's `asset_types` value changed → the manifest hash changes → the manifest CLI returns REGEN. The new run produces the correct asset set and overwrites the under-specified handoff. To force regeneration sooner, pass `--force`.
+
+To opt-out the resolver for a specific component (e.g., a "Gateway" that intentionally has no deployment because it runs serverless), add `**Asset Hints:** [openapi]` to the component file — the override wins.
+
+### v3.14.8 (Previous Release) ✅
 **perf: three dev-handoff performance improvements (parallel 5A+5B cohort, decoupled `template_version`, EXPLORER_HEADER fast-path inside the explorer agent)**
 
 A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k tokens) surfaced three avoidable bottlenecks. Each ships independently — any single one is safe to revert.
@@ -833,7 +856,7 @@ A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k toke
 - Component files without an `EXPLORER_HEADER` block transparently fall through to normal scoring — the fast-path is purely additive. To activate the fast-path on legacy components, run `/regenerate-explorer-headers --session` (or the full backfill).
 - The Phase 5 parallel cohort is enabled unconditionally. To bound concurrency, lower `--parallelism` and/or `--asset-parallelism`.
 
-### v3.14.7 (Previous Release) ✅
+### v3.14.7 ✅
 **feat: parallel asset generation in `architecture-dev-handoff` with per-tier model pinning**
 
 A single Sonnet `handoff-generator` sub-agent did two unrelated jobs back-to-back per component — fill the 16-section handoff document, then sequentially write every deliverable asset (OpenAPI, DDL, Kubernetes Deployment, AsyncAPI, CronJob, Avro/Protobuf, Redis key schema, C4 descriptor). For a component with 4 assets that meant 5 serial Writes inside one Sonnet spawn even though the assets are independent. It also paid Sonnet rates for the `c4-descriptor.md` — a free-form markdown one-pager that template-fills cleanly on Haiku. v3.14.7 splits asset generation into a parallel sub-agent with model tier pinned per asset.
