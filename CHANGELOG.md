@@ -5,6 +5,62 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.0]
+
+### Changed — Dev-handoff document refactored to audience-segmented Dev/QA/Ops format (BREAKING — TEMPLATE_VERSION 2.0.0)
+
+**Problem**: the dev-handoff document was a flat 16-section monolith with no audience segmentation. Every reader (Dev, QA, Ops) had to scan all 16 sections; placeholder structure was verbose; nothing in the template signaled who owned what. Real-world feedback was that downstream teams (external dev shops, contracted QA firms, ops teams) wasted time discovering which sections were relevant to their role.
+
+**Resolution**: collapse the 16 sections into **8 audience-tagged sections** organized into three role tracks (Part A — Dev, Part B — QA, Part C — Ops) plus an Appendix. Each Part header and section header carries `[DEV]` / `[QA]` / `[OPS]` badges (with multi-tags like `[DEV] [QA-CONTRACT]` for shared sections). Section 0 gains a Role Quick Index pointing each role to its starting sections. TEMPLATE_VERSION bumped from 1.0.0 → 2.0.0.
+
+**Self-containment is preserved.** Readers may not have access to `docs/` (external contractors, segregated environments). Every value extracted from architecture documentation stays embedded verbatim in the handoff itself. Architecture-doc citations (`> Source: docs/...`) are provenance only — never load-bearing "see X for details" links.
+
+**New section structure**:
+
+| New ID | Title | Audience | Replaces (old §) |
+|--------|-------|----------|-------------------|
+| Section 0 | Metadata + Role Quick Index | All | §0 (gains Role Quick Index sub-table) |
+| A1 | Overview, Scope, Tech & ADRs | DEV | §1 + §2 + §11 + §13 |
+| A2 | API & Data Contract | DEV / QA-CONTRACT | §3 + §4 |
+| A3 | Integrations & Failure Modes | DEV / OPS-CONTRIBUTES | §5 + §10 (dev-half) |
+| B1 | Acceptance, Performance & Security Tests | QA / DEV-VERIFIES | §12 + §7 (latency/throughput) + §6 |
+| C1 | Deployment, Config & Resources | OPS / DEV-CONTRIBUTES | §7 (resources/scaling) + §8 + §11 (runtime) |
+| C2 | Observability & Runbook | OPS / DEV-ALERTS | §9 + §10 (ops-half) |
+| C3 | Deliverable Assets | OPS / DEV | §14 |
+| D1 | Open Questions and Assumptions | All | §15 |
+
+**Compression rules baked into the new template**:
+
+1. Self-contained extraction (values embedded verbatim — never link out to docs).
+2. Drop fields that duplicate other handoff sections (intra-handoff redundancy only).
+3. Tables over prose where there is a natural key→value structure.
+4. Per-section length budgets (A1 ≤60, A2 ≤100, A3 ≤70, B1 ≤80, C1 ≤70, C2 ≤70, C3 ≤25, D1 ≤30; total target ≤500 lines).
+5. Audience tags on every Part and section header.
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md` — full rewrite to 8-section v2 layout. TEMPLATE_VERSION marker bumped to 2.0.0.
+- `skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md` — full rewrite using new section identifiers, per-section length budgets, self-containment rule, and an old → new ID mapping table for migration.
+- `skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md` — every "Section N" / "§N" handoff reference renumbered to the new identifiers (A1/A2/A3/B1/C1/C2/C3/D1). Spanish c4-descriptor scaffold updated in lockstep.
+- `agents/generators/handoff-generator.md` — embedded `HANDOFF_TEMPLATE.md` and `SECTION_EXTRACTION_GUIDE.md` bundles re-synced from standalones; agent prose, validation rules, and `HANDOFF_RESULT.sections_with_gaps` example updated to new identifiers; PHASE 1 filename map relabeled to "Section C3 filename map"; agent version bumped to 2.0.0.
+- `agents/generators/handoff-asset-generator.md` — embedded `ASSET_GENERATION_GUIDE.md` bundle re-synced; surrounding prose and Stage 5C reference language updated to "section D1".
+- `agents/builders/handoff-context-builder.md` — losslessness rule reference updated from "Section 15" to "section D1".
+- `skills/architecture-dev-handoff/SKILL.md` — every section reference renumbered; description frontmatter updated; new **Phase 3.6 (v1 → v2 template upgrade detection)** added between Phase 3.5 and Phase 4 to silently auto-regenerate v1 handoffs to v2 on the next run.
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — losslessness rule reference updated.
+- `CLAUDE.md` — trigger-routing-table description updated to "8-section audience-segmented handoff" with v1 auto-regen note.
+
+**v1 → v2 silent auto-regen** (new Phase 3.6 in `SKILL.md`): after the context-builder returns SKIP/REGEN decisions, the orchestrator performs one cheap Read on each `decision: SKIP` handoff file looking for `<!-- TEMPLATE_VERSION: 1.0.0 -->`. When found, the decision is flipped to `REGEN` and the file is rewritten under v2 on this run. A single summary line is printed at the top of Stage 5 (`Detected N v1 handoff(s) → forcing regen to TEMPLATE_VERSION 2.0.0`); no prompt, no `--force` required. Files lacking any TEMPLATE_VERSION marker (e.g., hand-edited files) keep their SKIP decision; the user can pass `--force` to override.
+
+**Modified test fixtures**:
+
+- `skills/architecture-dev-handoff/utils/manifest.test.ts` — `FROZEN_SHA` and `FROZEN_VERSION` updated to match the v2 `HANDOFF_TEMPLATE.md`. The frozen-fixture tripwire continues to enforce that every template content change is paired with a deliberate `TEMPLATE_VERSION` bump.
+
+**Verification**: `bun run typecheck` clean. `bun test` 493/493. `bun run bundle:check` confirms the bundles in `agents/generators/handoff-generator.md` and `agents/generators/handoff-asset-generator.md` are byte-identical to the standalones in `skills/architecture-dev-handoff/`.
+
+**Migration**: no user action required. Existing handoffs at TEMPLATE_VERSION 1.0.0 auto-regenerate to v2 on the next dev-handoff run. To force regeneration of every component (including any handoffs the user hand-edited in v1 format), pass `--force`. `handoffs/.manifest.json` repopulates with v2 hashes automatically.
+
+---
+
 ## [3.14.9]
 
 ### Fixed — Dev-handoff asset-type resolver missed Gateway/BFF/Edge archetypes, cloud-specific K8s names, and signals outside `**Type:**`

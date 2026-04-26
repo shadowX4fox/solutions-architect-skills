@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.14.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.15.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -116,7 +116,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.14.9` in the list.
+You should see `sa-skills v3.15.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -797,7 +797,56 @@ Where:
 
 ## Roadmap
 
-### v3.14.9 (Current Release) ✅
+### v3.15.0 (Current Release) ✅
+**feat: dev-handoff document refactored to audience-segmented Dev/QA/Ops format (TEMPLATE_VERSION 2.0.0; BREAKING)**
+
+The Component Development Handoff document collapses from **16 flat sections to 8 audience-tagged sections** in three role tracks plus an appendix. Every Part header and section header carries `[DEV]` / `[QA]` / `[OPS]` badges (with multi-tags like `[DEV] [QA-CONTRACT]` for shared sections). Section 0 gains a Role Quick Index pointing each role to its starting sections.
+
+Real-world feedback was that downstream teams (external dev shops, contracted QA firms, ops teams in segregated environments) wasted time discovering which of the 16 sections were relevant to their role. The new layout solves both audience targeting and conciseness without breaking self-containment — every value extracted from architecture docs stays embedded verbatim in the handoff itself, since readers may not have access to `docs/`.
+
+**New section structure**:
+
+| New ID | Title | Audience | Replaces (old §) |
+|--------|-------|----------|-------------------|
+| Section 0 | Metadata + Role Quick Index | All | §0 (gains Role Quick Index) |
+| A1 | Overview, Scope, Tech & ADRs | DEV | §1 + §2 + §11 + §13 |
+| A2 | API & Data Contract | DEV / QA-CONTRACT | §3 + §4 |
+| A3 | Integrations & Failure Modes | DEV / OPS-CONTRIBUTES | §5 + §10 (dev-half) |
+| B1 | Acceptance, Performance & Security Tests | QA / DEV-VERIFIES | §12 + §7 (latency/throughput) + §6 |
+| C1 | Deployment, Config & Resources | OPS / DEV-CONTRIBUTES | §7 (resources/scaling) + §8 + §11 (runtime) |
+| C2 | Observability & Runbook | OPS / DEV-ALERTS | §9 + §10 (ops-half) |
+| C3 | Deliverable Assets | OPS / DEV | §14 |
+| D1 | Open Questions and Assumptions | All | §15 |
+
+**Compression rules baked into the new template**:
+
+1. Self-contained extraction — values embedded verbatim, never linked out (architecture-doc citations are provenance only).
+2. Drop fields that duplicate other handoff sections (intra-handoff redundancy).
+3. Tables over prose where there is a natural key→value structure.
+4. Per-section length budgets (A1 ≤60, A2 ≤100, A3 ≤70, B1 ≤80, C1 ≤70, C2 ≤70, C3 ≤25, D1 ≤30; total target ≤500 lines).
+
+**v1 → v2 silent auto-regen**: a new Phase 3.6 in `architecture-dev-handoff/SKILL.md` performs one cheap Read on each `decision: SKIP` handoff file looking for `<!-- TEMPLATE_VERSION: 1.0.0 -->`. When found, the decision flips to `REGEN` and the file is rewritten under v2 on this run. A single summary line is printed at the top of Stage 5 (`Detected N v1 handoff(s) → forcing regen to TEMPLATE_VERSION 2.0.0`); no prompt, no `--force` required. Files lacking any TEMPLATE_VERSION marker (e.g., hand-edited files) keep their SKIP decision; users can pass `--force` to override.
+
+**Modified files**:
+
+- `skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md` — full rewrite to 8-section v2 layout. TEMPLATE_VERSION marker bumped to 2.0.0.
+- `skills/architecture-dev-handoff/SECTION_EXTRACTION_GUIDE.md` — full rewrite using new section identifiers, per-section length budgets, self-containment rule, and an old → new ID mapping table.
+- `skills/architecture-dev-handoff/ASSET_GENERATION_GUIDE.md` — every "Section N" / "§N" handoff reference renumbered (Spanish c4-descriptor scaffold updated in lockstep).
+- `agents/generators/handoff-generator.md` — embedded bundles re-synced; agent prose, validation rules, and `HANDOFF_RESULT.sections_with_gaps` example updated to new identifiers; agent version bumped to 2.0.0.
+- `agents/generators/handoff-asset-generator.md` — embedded `ASSET_GENERATION_GUIDE.md` bundle re-synced.
+- `agents/builders/handoff-context-builder.md` — losslessness rule reference updated.
+- `skills/architecture-dev-handoff/SKILL.md` — every section reference renumbered; description frontmatter updated; new Phase 3.6 (v1 → v2 detection) added.
+- `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — losslessness rule reference updated.
+- `skills/architecture-dev-handoff/utils/manifest.test.ts` — `FROZEN_SHA` and `FROZEN_VERSION` updated to match the v2 template.
+- `CLAUDE.md` — trigger-routing-table description updated to "8-section audience-segmented handoff".
+
+**Verification**: `bun run typecheck` clean. `bun test` 493/493. `bun run bundle:check` confirms all three handoff agent bundles are byte-identical to their standalones.
+
+**Migration**: no user action required. Existing handoffs at TEMPLATE_VERSION 1.0.0 auto-regenerate to v2 on the next dev-handoff run. To force regeneration of every component (including hand-edited v1 files), pass `--force`. `handoffs/.manifest.json` repopulates with v2 hashes automatically.
+
+---
+
+### v3.14.9 (Previous Release) ✅
 **fix: dev-handoff asset-type resolver — recognize Gateway/BFF/Edge, cloud K8s names (AKS/EKS/GKE/ECS/Fargate/Container/Docker), scan `**Communicates via:**` + `**Deploys as:**`, add `**Asset Hints:**` override**
 
 A real-world handoff for a "Gateway" component on AKS publishing to Kafka produced only `[openapi, c4-descriptor]` — missing `deployment.yaml` (every other deployable component in the same catalog had one) and `asyncapi.yaml`. Root cause: the `handoff-context-builder` resolver in `PAYLOAD_SCHEMA.md` only scanned the component file's `**Type:**` field and used a vocabulary that recognized abstract terms ("Kubernetes/K8s/Pod") but not the cloud-specific terms architects actually write ("AKS/EKS/Container/Docker"). "Gateway" was not a first-class archetype at all, so Gateway components had to accidentally match through other fields — and only `GraphQL` got through for this one (in `**Description:**`), missing the K8s and Kafka signals that lived in `**Deploys as:**` and `**Communicates via:**`.
@@ -820,7 +869,7 @@ A real-world handoff for a "Gateway" component on AKS publishing to Kafka produc
 
 To opt-out the resolver for a specific component (e.g., a "Gateway" that intentionally has no deployment because it runs serverless), add `**Asset Hints:** [openapi]` to the component file — the override wins.
 
-### v3.14.8 (Previous Release) ✅
+### v3.14.8 ✅
 **perf: three dev-handoff performance improvements (parallel 5A+5B cohort, decoupled `template_version`, EXPLORER_HEADER fast-path inside the explorer agent)**
 
 A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k tokens) surfaced three avoidable bottlenecks. Each ships independently — any single one is safe to revert.

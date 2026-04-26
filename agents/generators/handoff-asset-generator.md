@@ -17,7 +17,7 @@ Generate exactly ONE deliverable asset file for a single C4 Level 2 (Container) 
 
 The agent file has no `model:` frontmatter — the orchestrator passes `model:` per Task call. This mirrors the per-Task model resolution pattern used by `architecture-compliance` (`SKILL.md:863, 890`).
 
-**CRITICAL CONSTRAINT — Asset Fidelity Rule**: Every value in the generated asset (endpoint, field, schema, resource limit, env var, port, path, version, hostname, IP, cron expression, key pattern, eviction policy, etc.) MUST come verbatim from the payload. No defaults, no inferred values, no industry-standard substitutions. If a value is required by the asset's spec but absent from the payload, write `# TODO: [NOT DOCUMENTED — add to <source-file>]` (or the syntactic equivalent for the asset type — `--`, `<!--`, `//`, `[NO DOCUMENTADO …]` for Spanish c4-descriptor variants). Surface that gap in the returned `ASSET_RESULT.gaps[]` so the orchestrator can append it to the handoff document's Section 15.
+**CRITICAL CONSTRAINT — Asset Fidelity Rule**: Every value in the generated asset (endpoint, field, schema, resource limit, env var, port, path, version, hostname, IP, cron expression, key pattern, eviction policy, etc.) MUST come verbatim from the payload. No defaults, no inferred values, no industry-standard substitutions. If a value is required by the asset's spec but absent from the payload, write `# TODO: [NOT DOCUMENTED — add to <source-file>]` (or the syntactic equivalent for the asset type — `--`, `<!--`, `//`, `[NO DOCUMENTADO …]` for Spanish c4-descriptor variants). Surface that gap in the returned `ASSET_RESULT.gaps[]` so the orchestrator can append it to the handoff document's section D1 (Open Questions and Assumptions).
 
 ## Input Parameters (from prompt)
 
@@ -223,13 +223,13 @@ Read the component's `**Type:**` field (and the component doc body) to determine
 | Type contains: `Consumer`, `Producer`, `Queue`, `Topic`, `Event`, `Message`, `Kafka`, `RabbitMQ`, `SQS`, `EventBridge`, `Pub/Sub` | `asyncapi.yaml` |
 | Kafka component AND `Avro` / `Schema Registry` / `Confluent` mentioned in component doc, `docs/05-integration-points.md`, or `docs/06-technology-stack.md` | `schema.avsc` |
 | Kafka component AND `Protobuf` / `proto` / `gRPC serialization` mentioned in those files | `schema.proto` |
-| Kafka component AND serialization format NOT documented | `schema.avsc` + `schema.proto` (generate both; note in §14 that dev team must pick one and discard the other) |
+| Kafka component AND serialization format NOT documented | `schema.avsc` + `schema.proto` (generate both; note in C3 that dev team must pick one and discard the other) |
 | Type contains: `CronJob`, `Cron`, `Scheduled Job`, `Batch`, `Job` | `cronjob.yaml` |
 | Always generated (except for the skip-list types below) | `c4-descriptor.md` |
 
 A component can match multiple conditions and generate multiple assets.
 
-**When to skip**: If the component type is `Library`, `SDK`, `Utility`, `Config`, or `Documentation`, generate no assets (including no `c4-descriptor.md`) and write `—` in the handoff's Section 14 table.
+**When to skip**: If the component type is `Library`, `SDK`, `Utility`, `Config`, or `Documentation`, generate no assets (including no `c4-descriptor.md`) and write `—` in the handoff's section C3 table.
 
 ---
 
@@ -237,7 +237,7 @@ A component can match multiple conditions and generate multiple assets.
 
 **Trigger**: API / REST / GraphQL / gRPC / Service components
 
-**Source data** (from Section 3 — API Contract of the handoff):
+**Source data** (from A2 — API & Data Contract of the handoff):
 - Base path / server URL
 - All endpoints (method + path + description)
 - Request body schemas
@@ -255,7 +255,7 @@ info:
   title: "[COMPONENT_NAME] API"
   version: "[API_VERSION]"
   description: |
-    [COMPONENT_PURPOSE — from Section 1 of the handoff]
+    [COMPONENT_PURPOSE — from A1 of the handoff]
   contact:
     name: "[ARCHITECT_NAME]"
   # TODO: Add license if required by your organization
@@ -297,11 +297,11 @@ paths:
   #               $ref: '#/components/schemas/[RESPONSE_SCHEMA_NAME]'
   #       '[ERROR_CODE]':
   #         description: "[ERROR_DESCRIPTION]"
-  # TODO: Add all endpoints from Section 3 of the handoff document
+  # TODO: Add all endpoints from A2 of the handoff document
 
 components:
   schemas:
-    # TODO: Define all request and response schemas from Section 3 of the handoff document
+    # TODO: Define all request and response schemas from A2 of the handoff document
     # Example:
     # ExampleRequest:
     #   type: object
@@ -312,14 +312,14 @@ components:
     #       type: string
     #       description: "[FIELD_DESCRIPTION]"
 
-  # TODO: Define security schemes from Section 6 of the handoff document
+  # TODO: Define security schemes from B1 of the handoff document
 ```
 
 **Filling instructions**:
-1. Replace all `[PLACEHOLDER]` values with extracted data from Section 3 of the handoff.
+1. Replace all `[PLACEHOLDER]` values with extracted data from A2 of the handoff.
 2. Uncomment and fill one `paths:` entry per endpoint documented in the component file.
 3. Uncomment and fill one `schemas:` entry per request/response schema.
-4. Uncomment the `securitySchemes:` block matching the auth mechanism from Section 6.
+4. Uncomment the `securitySchemes:` block matching the auth mechanism from B1.
 5. Leave `# TODO: [NOT DOCUMENTED]` for any values not found in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented endpoint appears as a `paths:` entry, every request/response schema is defined, and no undocumented endpoints or schemas are present.
@@ -332,7 +332,7 @@ components:
 
 **Trigger**: Database / Data Store components
 
-**Source data** (from Section 4 — Data Model of the handoff):
+**Source data** (from A2 — API & Data Contract (Data Model) of the handoff):
 - Entity/table names
 - Column names, types, and constraints
 - Primary keys and foreign keys
@@ -363,7 +363,7 @@ CREATE TABLE IF NOT EXISTS [table_name_1] (
     -- Primary Key
     id              [ID_TYPE]        PRIMARY KEY DEFAULT [DEFAULT_VALUE],
 
-    -- TODO: Add columns from Section 4 of the handoff document
+    -- TODO: Add columns from A2 of the handoff document
     -- Example:
     -- column_name     [DATA_TYPE]    [NOT NULL / NULL]   DEFAULT [default_value],
 
@@ -372,11 +372,11 @@ CREATE TABLE IF NOT EXISTS [table_name_1] (
     -- updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     -- created_by      VARCHAR(255),
 
-    -- TODO: Add CHECK constraints from validation rules in Section 4
+    -- TODO: Add CHECK constraints from validation rules in A2
     -- CONSTRAINT chk_example CHECK (column_name > 0)
 
     -- Foreign Keys
-    -- TODO: Add FKs from relationships in Section 4
+    -- TODO: Add FKs from relationships in A2
     -- FOREIGN KEY (related_id) REFERENCES [other_table](id) ON DELETE [CASCADE / RESTRICT]
 );
 
@@ -387,7 +387,7 @@ COMMENT ON TABLE [table_name_1] IS '[ENTITY_DESCRIPTION]';
 -- =============================================================================
 -- Indexes: [TABLE_NAME_1]
 -- =============================================================================
--- TODO: Add indexes from Section 4 of the handoff document
+-- TODO: Add indexes from A2 of the handoff document
 -- Example:
 -- CREATE UNIQUE INDEX IF NOT EXISTS idx_[table]_[column] ON [table_name_1] ([column]);
 -- CREATE INDEX IF NOT EXISTS idx_[table]_[column] ON [table_name_1] ([column]);
@@ -400,11 +400,11 @@ COMMENT ON TABLE [table_name_1] IS '[ENTITY_DESCRIPTION]';
 ```
 
 **Filling instructions**:
-1. Replace `[DATABASE_TYPE]` with the actual database technology from Section 11.
-2. Replace `[TABLE_NAME_1]` and column definitions with data from Section 4 (Data Model).
+1. Replace `[DATABASE_TYPE]` with the actual database technology from A1.
+2. Replace `[TABLE_NAME_1]` and column definitions with data from A2 (Data Model).
 3. Add one `CREATE TABLE` block per entity owned by this component.
-4. Add `CREATE INDEX` statements from the indexes listed in Section 4.
-5. Add foreign key constraints from the relationships in Section 4.
+4. Add `CREATE INDEX` statements from the indexes listed in A2.
+5. Add foreign key constraints from the relationships in A2.
 6. Leave `-- TODO: [NOT DOCUMENTED]` for columns/constraints not documented in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented entity has a `CREATE TABLE` block, every documented column and index is present, and no undocumented tables or columns exist.
@@ -419,11 +419,11 @@ COMMENT ON TABLE [table_name_1] IS '[ENTITY_DESCRIPTION]';
 
 **Source data**:
 - Container image name (from component doc or technology stack)
-- Resource requests/limits (from Section 7 — Performance Targets)
-- Environment variables (from Section 8 — Configuration)
-- Replica configuration (from Section 7 — Scaling)
-- Health check endpoint (from Section 9 — Observability)
-- Service port (from Section 3 — API Contract)
+- Resource requests/limits (from C1 — Resources & Scaling)
+- Environment variables (from C1 — Configuration & Environment)
+- Replica configuration (from C1 — Scaling)
+- Health check endpoint (from C2 — Observability & Runbook)
+- Service port (from A2 — API & Data Contract)
 
 ### Scaffold Template
 
@@ -447,7 +447,7 @@ metadata:
     version: "[VERSION]"
     component: "[COMPONENT_NUMBER]"
 spec:
-  replicas: [MIN_REPLICAS]  # Min replicas from Section 7
+  replicas: [MIN_REPLICAS]  # Min replicas from C1
   selector:
     matchLabels:
       app: [component-name-kebab]
@@ -464,19 +464,19 @@ spec:
 
           ports:
             - name: http
-              containerPort: [SERVICE_PORT]  # From Section 3 — API Contract
+              containerPort: [SERVICE_PORT]  # From A2 — API & Data Contract
               protocol: TCP
 
           resources:
             requests:
-              cpu: "[CPU_REQUEST]"        # From Section 7 — Performance Targets
-              memory: "[MEMORY_REQUEST]"  # From Section 7 — Performance Targets
+              cpu: "[CPU_REQUEST]"        # From C1 — Resources & Scaling
+              memory: "[MEMORY_REQUEST]"  # From C1 — Resources & Scaling
             limits:
-              cpu: "[CPU_LIMIT]"           # From Section 7 — Performance Targets
-              memory: "[MEMORY_LIMIT]"    # From Section 7 — Performance Targets
+              cpu: "[CPU_LIMIT]"           # From C1 — Resources & Scaling
+              memory: "[MEMORY_LIMIT]"    # From C1 — Resources & Scaling
 
           env:
-            # Environment variables from Section 8 — Configuration
+            # Environment variables from C1 — Configuration & Environment
             # [ENV_VAR_1]:
             - name: "[ENV_VAR_NAME]"
               value: "[ENV_VAR_VALUE]"
@@ -489,7 +489,7 @@ spec:
 
           livenessProbe:
             httpGet:
-              path: "[HEALTH_CHECK_PATH]"  # From Section 9 — Observability
+              path: "[HEALTH_CHECK_PATH]"  # From C2 — Observability & Runbook
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -498,7 +498,7 @@ spec:
 
           readinessProbe:
             httpGet:
-              path: "[HEALTH_CHECK_PATH]"  # From Section 9 — Observability
+              path: "[HEALTH_CHECK_PATH]"  # From C2 — Observability & Runbook
               port: http
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -525,11 +525,11 @@ spec:
       port: [SERVICE_PORT]
       targetPort: http
       protocol: TCP
-  type: [SERVICE_TYPE]  # From Section 3 — API Contract
+  type: [SERVICE_TYPE]  # From A2 — API & Data Contract
 
 ---
 # Horizontal Pod Autoscaler
-# From Section 7 — Performance Targets (Scaling Configuration)
+# From C1 — Resources & Scaling
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -540,23 +540,23 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: [component-name-kebab]
-  minReplicas: [MIN_REPLICAS]   # From Section 7
-  maxReplicas: [MAX_REPLICAS]   # From Section 7
+  minReplicas: [MIN_REPLICAS]   # From C1
+  maxReplicas: [MAX_REPLICAS]   # From C1
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: [CPU_SCALE_TARGET]  # From Section 7 — Scale Trigger
+          averageUtilization: [CPU_SCALE_TARGET]  # From C1 — Scale Trigger
 ```
 
 **Filling instructions**:
 1. Replace all `[PLACEHOLDER]` values with data from the handoff sections referenced in each comment.
 2. Replace `[component-name-kebab]` with the component name in kebab-case throughout.
-3. Populate the `env:` block with all variables from Section 8 (Configuration & Environment).
-4. Update resource requests/limits from Section 7 (Performance Targets).
-5. Set the health check path from Section 9 (Observability).
+3. Populate the `env:` block with all variables from C1 (Configuration & Environment).
+4. Update resource requests/limits from C1 (Resources & Scaling).
+5. Set the health check path from C2 (Observability).
 6. Leave `# TODO: [NOT DOCUMENTED]` for values not found in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented env var, resource limit, replica count, port, and health check path is present, and no undocumented values have been added.
@@ -569,7 +569,7 @@ spec:
 
 **Trigger**: Message Consumer / Producer / Event-driven components
 
-**Source data** (from Section 5 — Integration Requirements, async subsection):
+**Source data** (from A3 — Integrations & Failure Modes, async subsection):
 - Broker type (Kafka, RabbitMQ, SQS, etc.)
 - Topic/queue names
 - Role: producer or consumer (or both)
@@ -585,7 +585,7 @@ info:
   title: "[COMPONENT_NAME] — Async Interface"
   version: "[VERSION]"
   description: |
-    [COMPONENT_PURPOSE — from Section 1 of the handoff]
+    [COMPONENT_PURPOSE — from A1 of the handoff]
     Role: [PRODUCER / CONSUMER / BOTH]
 
 servers:
@@ -601,7 +601,7 @@ channels:
   #   messages:
   #     [MessageName]:
   #       $ref: '#/components/messages/[MessageName]'
-  # TODO: Add all topics/queues from Section 5 — Integration Requirements (async subsection)
+  # TODO: Add all topics/queues from A3 — Integrations & Failure Modes (async subsection)
 
 operations:
   # [OPERATION_NAME]:
@@ -617,7 +617,7 @@ components:
     #   name: "[MessageName]"
     #   payload:
     #     $ref: '#/components/schemas/[SchemaName]'
-    # TODO: Define all message types from Section 5
+    # TODO: Define all message types from A3
 
   schemas:
     # [SchemaName]:
@@ -628,14 +628,14 @@ components:
     #     field1:
     #       type: string
     #       description: "[FIELD_DESCRIPTION]"
-    # TODO: Define all message schemas from Section 5
+    # TODO: Define all message schemas from A3
 ```
 
 **Filling instructions**:
-1. Replace broker details from the technology stack (Section 11) and integration requirements (Section 5).
-2. Add one `channels:` entry per topic/queue listed in Section 5 (async integrations).
+1. Replace broker details from the technology stack (A1) and integration requirements (A3).
+2. Add one `channels:` entry per topic/queue listed in A3 (async integrations).
 3. Set `action: send` for producer roles, `action: receive` for consumer roles.
-4. Define message schemas from the message format descriptions in Section 5.
+4. Define message schemas from the message format descriptions in A3.
 5. Leave `# TODO: [NOT DOCUMENTED]` for values not documented.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented topic/queue has a `channels:` entry and a corresponding `operations:` entry, and no undocumented channels are present.
@@ -651,8 +651,8 @@ components:
 **Source data**:
 - Schedule expression (from component doc or configuration)
 - Job command (from component doc)
-- Resource limits (from Section 7)
-- Environment variables (from Section 8)
+- Resource limits (from C1)
+- Environment variables (from C1)
 
 ### Scaffold Template
 
@@ -676,7 +676,7 @@ metadata:
     component: "[COMPONENT_NUMBER]"
 spec:
   schedule: "[CRON_SCHEDULE]"
-  # From component doc or Section 8 — Configuration
+  # From component doc or C1 — Configuration & Environment
 
   concurrencyPolicy: Forbid  # TODO: Change to Allow or Replace if needed
   successfulJobsHistoryLimit: 3
@@ -703,14 +703,14 @@ spec:
 
               resources:
                 requests:
-                  cpu: "[CPU_REQUEST]"        # From Section 7
-                  memory: "[MEMORY_REQUEST]"  # From Section 7
+                  cpu: "[CPU_REQUEST]"        # From C1
+                  memory: "[MEMORY_REQUEST]"  # From C1
                 limits:
-                  cpu: "[CPU_LIMIT]"           # From Section 7
-                  memory: "[MEMORY_LIMIT]"    # From Section 7
+                  cpu: "[CPU_LIMIT]"           # From C1
+                  memory: "[MEMORY_LIMIT]"    # From C1
 
               env:
-                # Environment variables from Section 8 — Configuration
+                # Environment variables from C1 — Configuration & Environment
                 - name: "[ENV_VAR_NAME]"
                   value: "[ENV_VAR_VALUE]"
                 # TODO: For sensitive values use secretKeyRef
@@ -722,8 +722,8 @@ spec:
 1. Set the `schedule:` cron expression from the component's configuration documentation.
 2. Replace `[component-name-kebab]` throughout with the component name in kebab-case.
 3. Set `command:` and `args:` from the component's execution specification.
-4. Populate `env:` from Section 8 (Configuration & Environment).
-5. Set resource limits from Section 7 (Performance Targets).
+4. Populate `env:` from C1 (Configuration & Environment).
+5. Set resource limits from C1 (Resources & Scaling).
 6. Leave `# TODO: [NOT DOCUMENTED]` for undocumented values.
 
 **Post-generation check**: Verify 1:1 correspondence — the schedule, command, args, env vars, and resource limits all match the architecture docs exactly; no defaults have been substituted.
@@ -738,7 +738,7 @@ spec:
 
 **Why separate from `asyncapi.yaml`**: The AsyncAPI spec describes channels, operations, and message metadata. The serialization schema (`schema.avsc` or `schema.proto`) is the artifact the dev team compiles into code or registers in a Schema Registry (e.g., Confluent Schema Registry). They serve different purposes and are consumed differently.
 
-**Source data** (from Section 5 — Integration Requirements, async subsection):
+**Source data** (from A3 — Integrations & Failure Modes, async subsection):
 - Topic names and their message types
 - Field names, types, and descriptions (from message format docs)
 - Namespace (from component namespace or package conventions in `docs/06-technology-stack.md`)
@@ -748,7 +748,7 @@ spec:
 1. If `Avro` or `Schema Registry` or `Confluent` is mentioned → generate `schema.avsc` only
 2. If `Protobuf` or `proto` is mentioned → generate `schema.proto` only
 3. If both are mentioned → generate both
-4. If Kafka is used but serialization format is NOT documented → generate both, add a note in §14 and §15 that the dev team must choose one and discard the other
+4. If Kafka is used but serialization format is NOT documented → generate both, add a note in C3 and D1 that the dev team must choose one and discard the other
 
 **File naming**: one schema file per topic/message type → `NN-<component>-<topic-name>.avsc` or `NN-<component>-<topic-name>.proto`. If the topic is unnamed, use `schema.avsc` / `schema.proto`.
 
@@ -776,7 +776,7 @@ Generate one `.avsc` file per message type the component produces or consumes.
   "name": "[MESSAGE_NAME]",
   "doc": "[MESSAGE_DESCRIPTION]",
   "fields": [
-    // TODO: Add fields from Section 5 — Integration Requirements (message schema)
+    // TODO: Add fields from A3 — Integrations (message schema)
     // Example field definitions:
 
     // Required string field:
@@ -802,8 +802,8 @@ Generate one `.avsc` file per message type the component produces or consumes.
 
 **Filling instructions**:
 1. Set `namespace` from the component's package/namespace convention in `docs/06-technology-stack.md` or the component doc.
-2. Set `name` from the message type name documented in Section 5 (async integrations).
-3. Add one entry in `fields` per field documented in the message schema (Section 5).
+2. Set `name` from the message type name documented in A3 (async integrations).
+3. Add one entry in `fields` per field documented in the message schema (A3).
 4. For fields not documented, add `// TODO: [NOT DOCUMENTED]` inline.
 5. Generate one `.avsc` file per distinct message type (topic).
 
@@ -839,7 +839,7 @@ package [NAMESPACE];
 
 // [MESSAGE_DESCRIPTION]
 message [MESSAGE_NAME] {
-  // TODO: Add fields from Section 5 — Integration Requirements (message schema)
+  // TODO: Add fields from A3 — Integrations (message schema)
   // Field numbering: start at 1, never reuse numbers (even after removing fields)
   // Types: string, int32, int64, bool, bytes, float, double, or nested message
 
@@ -872,8 +872,8 @@ message [MESSAGE_NAME] {
 
 **Filling instructions**:
 1. Set `package` from the component's package convention in `docs/06-technology-stack.md`.
-2. Set message `name` from the message type name documented in Section 5.
-3. Add one `field` per entry documented in the message schema (Section 5), assigning sequential field numbers starting at 1.
+2. Set message `name` from the message type name documented in A3.
+3. Add one `field` per entry documented in the message schema (A3), assigning sequential field numbers starting at 1.
 4. For fields not documented, add `// TODO: [NOT DOCUMENTED]` inline.
 5. Generate one `.proto` file per distinct message type (topic).
 
@@ -888,13 +888,13 @@ message [MESSAGE_NAME] {
 **Trigger**: Redis / Cache / ElastiCache / Memcached / Valkey components
 
 **Source data**:
-- Key patterns and naming conventions (from Section 4 — Data Model or component doc)
-- Data structures per key (from Section 4 — Data Model)
-- TTL configuration per key pattern (from Section 4 or Section 8 — Configuration)
-- Eviction policy (from Section 8 — Configuration or `docs/06-technology-stack.md`)
-- Memory sizing / maxmemory (from Section 7 — Performance Targets)
-- Fail-open behavior (from Section 10 — Error Handling or component doc)
-- Connection pooling configuration (from Section 8 — Configuration)
+- Key patterns and naming conventions (from A2 — API & Data Contract (Data Model) or component doc)
+- Data structures per key (from A2 — API & Data Contract (Data Model))
+- TTL configuration per key pattern (from A2 or C1 — Configuration & Environment)
+- Eviction policy (from C1 — Configuration & Environment or `docs/06-technology-stack.md`)
+- Memory sizing / maxmemory (from C1 — Resources & Scaling)
+- Fail-open behavior (from C2 — Failure Recovery or component doc)
+- Connection pooling configuration (from C1 — Configuration & Environment)
 
 ### Scaffold Template
 
@@ -920,7 +920,7 @@ message [MESSAGE_NAME] {
 | maxmemory-policy | [EVICTION_POLICY] |
 | Persistence | [NONE / RDB / AOF / RDB+AOF] |
 
-<!-- TODO: [NOT DOCUMENTED] — fill from Section 8 (Configuration) or docs/06-technology-stack.md -->
+<!-- TODO: [NOT DOCUMENTED] — fill from C1 (Configuration) or docs/06-technology-stack.md -->
 
 ## Connection Pooling
 
@@ -932,11 +932,11 @@ message [MESSAGE_NAME] {
 | Retry attempts | [RETRY_COUNT] |
 | Retry backoff | [RETRY_BACKOFF_MS] ms |
 
-<!-- TODO: [NOT DOCUMENTED] — fill from Section 8 (Configuration) or component doc -->
+<!-- TODO: [NOT DOCUMENTED] — fill from C1 (Configuration) or component doc -->
 
 ## Key Patterns
 
-<!-- Add one row per key pattern documented in Section 4 (Data Model) or the component doc.
+<!-- Add one row per key pattern documented in A2 (Data Model) or the component doc.
      Key format: use ':' as namespace separator per Redis convention.
      Example: `service:entity:{id}:field` -->
 
@@ -944,7 +944,7 @@ message [MESSAGE_NAME] {
 |---|-------------|---------------|-----|-------------|
 | 1 | [NAMESPACE]:[ENTITY]:{id} | [STRING / HASH / SET / SORTED SET / LIST / STREAM] | [TTL_SECONDS]s | [KEY_DESCRIPTION] |
 
-<!-- TODO: Add all key patterns from Section 4 of the handoff document -->
+<!-- TODO: Add all key patterns from A2 of the handoff document -->
 <!-- TODO: [NOT DOCUMENTED] — if key patterns are absent from architecture docs, add them to docs/components/NN-component.md -->
 
 ## TTL Strategy
@@ -954,14 +954,14 @@ message [MESSAGE_NAME] {
 | [KEY_PATTERN_1] | [TTL_SECONDS]s | [WHY_THIS_TTL] |
 
 <!-- TODO: Add TTL rationale for each key pattern from architecture docs -->
-<!-- TODO: [NOT DOCUMENTED] — if TTL values are not documented, flag in §15 -->
+<!-- TODO: [NOT DOCUMENTED] — if TTL values are not documented, flag in D1 -->
 
 ## Eviction Policy
 
 - **Policy**: `[EVICTION_POLICY]`  <!-- allkeys-lru, volatile-lru, allkeys-lfu, volatile-lfu, volatile-ttl, noeviction, etc. -->
 - **Rationale**: [EVICTION_RATIONALE]
 
-<!-- TODO: [NOT DOCUMENTED] — fill from Section 8 (Configuration) or docs/06-technology-stack.md -->
+<!-- TODO: [NOT DOCUMENTED] — fill from C1 (Configuration) or docs/06-technology-stack.md -->
 
 ## Memory Sizing
 
@@ -972,7 +972,7 @@ message [MESSAGE_NAME] {
 | Headroom (recommended ≥ 25%) | [HEADROOM_PERCENTAGE]% |
 | Peak expected memory | [PEAK_MEMORY] |
 
-<!-- TODO: [NOT DOCUMENTED] — fill from Section 7 (Performance Targets) or capacity planning docs -->
+<!-- TODO: [NOT DOCUMENTED] — fill from C1 (Resources & Scaling) or capacity planning docs -->
 
 ## Fail-Open Behavior
 
@@ -985,18 +985,18 @@ Defines application behavior when the Redis instance is unavailable (network par
 | Write timeout | [FAIL_OPEN / FAIL_CLOSED] | [FALLBACK_DESCRIPTION] |
 | Eviction storm (hit rate drops) | [ALERT / CIRCUIT_BREAK / IGNORE] | [FALLBACK_DESCRIPTION] |
 
-<!-- TODO: [NOT DOCUMENTED] — fill from Section 10 (Error Handling) or component doc -->
-<!-- NOTE: If fail-open behavior is not documented, this is a critical gap — add to §15 with HIGH priority -->
+<!-- TODO: [NOT DOCUMENTED] — fill from C2 (Failure Recovery) or component doc -->
+<!-- NOTE: If fail-open behavior is not documented, this is a critical gap — add to D1 with HIGH priority -->
 ````
 
 **Filling instructions**:
-1. Replace `[REDIS_VERSION_OR_SERVICE]` with the engine/version from Section 11 (Technology Constraints) or `docs/06-technology-stack.md`.
-2. Fill the Instance Configuration table from Section 8 (Configuration) and the technology stack docs.
-3. Add one row per key pattern from Section 4 (Data Model) or the component doc to the Key Patterns table.
+1. Replace `[REDIS_VERSION_OR_SERVICE]` with the engine/version from A1 (Technology Constraints) / C1 (Runtime) or `docs/06-technology-stack.md`.
+2. Fill the Instance Configuration table from C1 (Configuration) and the technology stack docs.
+3. Add one row per key pattern from A2 (Data Model) or the component doc to the Key Patterns table.
 4. Fill TTL Strategy with rationale for each key pattern's TTL from architecture docs.
-5. Set the eviction policy and rationale from Section 8 (Configuration) or infrastructure docs.
-6. Fill the Memory Sizing table from Section 7 (Performance Targets) or capacity planning documentation.
-7. Fill the Fail-Open Behavior table from Section 10 (Error Handling) or the component doc.
+5. Set the eviction policy and rationale from C1 (Configuration) or infrastructure docs.
+6. Fill the Memory Sizing table from C1 (Resources & Scaling) or capacity planning documentation.
+7. Fill the Fail-Open Behavior table from C2 (Failure Recovery) or the component doc.
 8. Leave `<!-- TODO: [NOT DOCUMENTED] -->` for any values not found in the architecture docs.
 
 **Post-generation check**: Verify 1:1 correspondence — every documented key pattern appears in the Key Patterns table, every documented TTL is listed in the TTL Strategy, eviction policy and memory limits match the docs exactly, and no undocumented key patterns or configuration values have been added.
@@ -1020,19 +1020,19 @@ Defines application behavior when the Redis instance is unavailable (network par
 | Technology | `**Technology:**` in component file | `docs/06-technology-stack.md` |
 | Architecture Version | `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` in `ARCHITECTURE.md` | — |
 | Component Version | `**Component Version:**` in component file | — |
-| Purpose (prose) | Handoff §1 (Component Overview) | Component file Overview |
+| Purpose (prose) | Handoff A1 (Component Overview) | Component file Overview |
 | Hostname / IP / OS / Domain / Middleware | Payload `## Ops Config` section (sourced from `docs/09-operational-considerations.md`) | Component file body |
-| Upstream consumers | Handoff §2.3 | Payload `## Integrations` |
-| Downstream dependencies | Handoff §2.4 | Payload `## Integrations` |
-| Data ownership | Handoff §4 (Data Model) | `docs/05-data-model.md` |
-| ADR references | Handoff §13 | `adr/*.md` front-matter |
-| TPS sustained/peak | Handoff §7 / Payload `## Perf Targets` | `docs/07-performance-targets.md` |
-| CPU cores | Handoff §8 (Configuration) / Payload `## Ops Config` | `deployment.yaml` if generated |
-| Memory (RAM GB) | Handoff §8 / Payload `## Ops Config` | `deployment.yaml` if generated |
-| Storage (GB) | Handoff §4 (sizing) / Payload `## Ops Config` | `deployment.yaml` if generated |
-| Latency P99 | Handoff §7 | — |
-| Availability target | Handoff §7 (SLOs) | — |
-| Health check | Handoff §9 (Observability) | — |
+| Upstream consumers | Handoff A1 (Boundaries) | Payload `## Integrations` |
+| Downstream dependencies | Handoff A1 (Boundaries) | Payload `## Integrations` |
+| Data ownership | Handoff A2 (Data Model) | `docs/05-data-model.md` |
+| ADR references | Handoff A1 (Relevant ADRs) | `adr/*.md` front-matter |
+| TPS sustained/peak | Handoff B1 / Payload `## Perf Targets` | `docs/07-performance-targets.md` |
+| CPU cores | Handoff C1 (Configuration) / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Memory (RAM GB) | Handoff C1 / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Storage (GB) | Handoff A2 / C1 (sizing) / Payload `## Ops Config` | `deployment.yaml` if generated |
+| Latency P99 | Handoff B1 | — |
+| Availability target | Handoff B1 (SLOs) | — |
+| Health check | Handoff C2 (Observability) | — |
 | Escalation owner | Component file `**Team Owner:**` | — |
 
 **Fidelity policy for operational fields** (hostname, IP, OS, domain, middleware): most projects do not yet capture these in architecture docs. Write `[NOT DOCUMENTED — add to docs/09-operational-considerations.md]` (EN) or `[NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]` (ES) rather than inferring. The marker doubles as the reviewer's checklist.
@@ -1051,7 +1051,7 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 ## Description
 
-**Purpose**: [1–3 sentences from handoff §1 or component Overview]
+**Purpose**: [1–3 sentences from handoff A1 or component Overview]
 
 **Infrastructure**:
 - **Hostname**: `[VALUE or NOT DOCUMENTED — add to docs/09-operational-considerations.md]`
@@ -1066,11 +1066,11 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 ## Responsibilities
 
-[Prose from handoff §1 / component Overview — 1–3 sentences describing the business-facing purpose and why this component exists]
+[Prose from handoff A1 / component Overview — 1–3 sentences describing the business-facing purpose and why this component exists]
 
-**Upstream consumers**: [Comma-separated list from §2.3, or NOT DOCUMENTED]
-**Downstream dependencies**: [From §2.4, or NOT DOCUMENTED]
-**Data ownership**: [Entities/tables from §4, or NOT DOCUMENTED]
+**Upstream consumers**: [Comma-separated list from A1, or NOT DOCUMENTED]
+**Downstream dependencies**: [From A1 (Boundaries), or NOT DOCUMENTED]
+**Data ownership**: [Entities/tables from A2, or NOT DOCUMENTED]
 
 ## Technical Decisions
 
@@ -1084,15 +1084,15 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 | Resource | Target | Source |
 |----------|--------|--------|
-| TPS (sustained) | [VALUE] | §7 Performance Targets |
-| TPS (peak) | [VALUE] | §7 |
-| CPU cores | [VALUE] | §8 Configuration |
-| Memory RAM (GB) | [VALUE] | §8 |
-| Storage (GB) | [VALUE] | §4 / §8 |
-| Latency P99 (ms) | [VALUE] | §7 |
+| TPS (sustained) | [VALUE] | B1 Performance Targets |
+| TPS (peak) | [VALUE] | B1 |
+| CPU cores | [VALUE] | C1 Configuration |
+| Memory RAM (GB) | [VALUE] | C1 |
+| Storage (GB) | [VALUE] | A2 / C1 |
+| Latency P99 (ms) | [VALUE] | B1 |
 
-**Availability target**: [SLO / uptime% from §7, or NOT DOCUMENTED]
-**Health check endpoint**: [URL/path from §9, or NOT DOCUMENTED]
+**Availability target**: [SLO / uptime% from B1, or NOT DOCUMENTED]
+**Health check endpoint**: [URL/path from C2, or NOT DOCUMENTED]
 **Escalation owner**: [Team from component file `**Team Owner:**`, or NOT DOCUMENTED]
 
 ---
@@ -1116,7 +1116,7 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 ## Descripción
 
-**Propósito**: [1–3 oraciones desde §1 del handoff o el Overview del componente]
+**Propósito**: [1–3 oraciones desde A1 del handoff o el Overview del componente]
 
 **Infraestructura**:
 - **Hostname**: `[VALOR o NO DOCUMENTADO — agregar a docs/09-operational-considerations.md]`
@@ -1131,11 +1131,11 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 ## Responsabilidades
 
-[Prosa desde §1 del handoff / Overview del componente — 1–3 oraciones describiendo el propósito de negocio y por qué existe este componente]
+[Prosa desde A1 del handoff / Overview del componente — 1–3 oraciones describiendo el propósito de negocio y por qué existe este componente]
 
-**Consumidores upstream**: [Lista separada por comas desde §2.3, o NO DOCUMENTADO]
-**Dependencias downstream**: [Desde §2.4, o NO DOCUMENTADO]
-**Propiedad de datos**: [Entidades/tablas desde §4, o NO DOCUMENTADO]
+**Consumidores upstream**: [Lista separada por comas desde A1, o NO DOCUMENTADO]
+**Dependencias downstream**: [Desde A1 (Boundaries), o NO DOCUMENTADO]
+**Propiedad de datos**: [Entidades/tablas desde A2, o NO DOCUMENTADO]
 
 ## Decisiones técnicas
 
@@ -1149,15 +1149,15 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 | Recurso | Objetivo | Fuente |
 |---------|----------|--------|
-| TPS (sostenido) | [VALOR] | §7 Performance Targets |
-| TPS (pico) | [VALOR] | §7 |
-| Núcleos CPU | [VALOR] | §8 Configuration |
-| Memoria RAM (GB) | [VALOR] | §8 |
-| Almacenamiento (GB) | [VALOR] | §4 / §8 |
-| Latencia P99 (ms) | [VALOR] | §7 |
+| TPS (sostenido) | [VALOR] | B1 Performance Targets |
+| TPS (pico) | [VALOR] | B1 |
+| Núcleos CPU | [VALOR] | C1 Configuration |
+| Memoria RAM (GB) | [VALOR] | C1 |
+| Almacenamiento (GB) | [VALOR] | A2 / C1 |
+| Latencia P99 (ms) | [VALOR] | B1 |
 
-**Objetivo de disponibilidad**: [SLO / % uptime desde §7, o NO DOCUMENTADO]
-**Endpoint de health check**: [URL/ruta desde §9, o NO DOCUMENTADO]
+**Objetivo de disponibilidad**: [SLO / % uptime desde B1, o NO DOCUMENTADO]
+**Endpoint de health check**: [URL/ruta desde C2, o NO DOCUMENTADO]
 **Responsable de escalamiento**: [Equipo desde `**Team Owner:**` del archivo de componente, o NO DOCUMENTADO]
 
 ---
@@ -1172,7 +1172,7 @@ Defines application behavior when the Redis instance is unavailable (network par
 2. For each `[VALUE]` token, look up the value using the Source data map above — check the primary source first, then the fallback.
 3. If a value is not in any source, write `[NOT DOCUMENTED — add to <file>]` / `[NO DOCUMENTADO — agregar a <file>]` with the specific file that should own the gap.
 4. For Middleware / Runtime Stack: preserve the nesting depth from the source (sub-bullets indent two spaces). If the source is prose ("runs IIS with ASP.NET on .NET Framework 4.8"), split into a nested list as shown in the example.
-5. For the ADR list: populate from handoff §13. If §13 is empty or shows `—`, render `— No applicable ADRs` / `— Sin ADRs aplicables` and do NOT invent decisions.
+5. For the ADR list: populate from handoff A1 (Relevant ADRs table). If A1's ADR table is empty or shows `—`, render `— No applicable ADRs` / `— Sin ADRs aplicables` and do NOT invent decisions.
 6. Never localize component names, hostnames, technology names, or ADR IDs — those stay verbatim regardless of language variant.
 
 **Post-generation check**: Verify the file has exactly three top-level headings (`## Description` / `## Responsibilities` / `## Technical Decisions` or the Spanish equivalents). Verify every `[NOT DOCUMENTED]` marker names a specific source file (no bare `[NOT DOCUMENTED]` without a file hint). Verify the `Generated` date matches the handoff generation date.
@@ -1185,12 +1185,12 @@ Defines application behavior when the Redis instance is unavailable (network par
 
 Once all assets are written:
 
-1. List the generated assets in **Section 14** of the handoff document.
+1. List the generated assets in **section C3** of the handoff document.
 2. For each asset, provide: asset type, relative path from the handoff file, and one-line description.
-3. If any `# TODO:` comments remain in an asset, add a corresponding entry to **Section 15** (Open Questions) referencing the asset file and the specific field.
+3. If any `# TODO:` comments remain in an asset, add a corresponding entry to **section D1** (Open Questions) referencing the asset file and the specific field.
 
 ```
-Example Section 15 entry for asset gaps:
+Example section D1 entry for asset gaps:
 - **Asset — openapi.yaml**: Base server URL not documented
   → Recommended location: docs/05-integration-points.md
   → Impact: Dev team cannot configure API client base URL without architecture guidance
@@ -1257,7 +1257,7 @@ ASSET_RESULT:
 
 If no gaps were emitted, write `gaps: []`.
 
-Always return `ASSET_RESULT` — never exit silently. The orchestrator's Stage 5C iterates over every `gaps[]` entry and appends it to the handoff document's Section 15.
+Always return `ASSET_RESULT` — never exit silently. The orchestrator's Stage 5C iterates over every `gaps[]` entry and appends it to the handoff document's section D1 (Open Questions and Assumptions).
 
 ## Tool Discipline
 

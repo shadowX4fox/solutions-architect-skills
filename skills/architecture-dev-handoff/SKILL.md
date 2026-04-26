@@ -1,6 +1,6 @@
 ---
 name: architecture-dev-handoff
-description: Generate Component Development Handoff documents from architecture documentation. Creates per-component implementation guides with deliverable assets (OpenAPI specs, DDL scripts, Kubernetes manifests) for development teams. Invoke when handing off a component for implementation, when a dev team needs implementation specs, or when generating development handoff documents.
+description: Generate Component Development Handoff documents from architecture documentation. Creates per-component, audience-segmented (Dev/QA/Ops) implementation guides in an 8-section condensed format with deliverable assets (OpenAPI specs, DDL scripts, Kubernetes manifests). Invoke when handing off a component for implementation, when a dev team needs implementation specs, or when generating development handoff documents.
 triggers:
   - generate handoff
   - create handoff
@@ -66,7 +66,7 @@ This skill generates **Component Development Handoff** documents — one per com
 **Output location:** `handoffs/` directory at the project root
 
 **Per-component output** (all names use **lowercase kebab-case** — no spaces, no uppercase, no underscores):
-- `handoffs/NN-<component-name>-handoff.md` — 16-section handoff document
+- `handoffs/NN-<component-name>-handoff.md` — 8-section audience-segmented handoff document (Dev / QA / Ops tracks; TEMPLATE_VERSION 2.0.0)
 - `handoffs/assets/NN-<component-name>/` — scaffolded deliverable assets (OpenAPI spec, DDL, Kubernetes manifests, etc.)
 - `handoffs/README.md` — managed index updated after each generation
 
@@ -82,7 +82,7 @@ The `<component-name>` slug is derived from the component file name in `docs/com
 1. ✅ **ONLY replace explicit `[PLACEHOLDER]` tokens** — text inside `[...]` brackets
 2. ✅ **PRESERVE ALL other text exactly** — including formatting, headers, structure
 3. ❌ **NEVER transform template content** — no custom prose restructuring, no reformatting
-4. ✅ **GAP DETECTION** — if data is not found in architecture docs, write `[NOT DOCUMENTED]` and add entry to Section 15 (Open Questions)
+4. ✅ **GAP DETECTION** — if data is not found in architecture docs, write `[NOT DOCUMENTED]` and add entry to section D1 (Open Questions & Assumptions)
 5. ❌ **NEVER invent** values not stated in the architecture documentation
 
 These rules apply to both the orchestrator (payload construction) and the sub-agent (template filling).
@@ -97,7 +97,7 @@ All handoff documents must trace data back to architecture docs.
 2. ✅ **CITE source files** (e.g., `docs/components/01-api-gateway.md`, `docs/07-security-architecture.md`)
 3. ✅ **NEVER infer or guess** values not stated in the docs
 4. ❌ **NO INFERENCE** — even if industry standards suggest a value
-5. ✅ When data is missing: write `[NOT DOCUMENTED — add to docs/NN-file.md]` and record in §15
+5. ✅ When data is missing: write `[NOT DOCUMENTED — add to docs/NN-file.md]` and record in section D1
 
 ---
 
@@ -175,7 +175,7 @@ Inspect the user's invocation for flags. Default values apply when a flag is abs
 
 Store the resolved values as `parallelism`, `asset_parallelism`, and `force` for use throughout the workflow. If no flags are present, behaviour matches today's defaults (`parallelism = asset_parallelism = 4`).
 
-**Why two parallelism flags?** Stage 5A spawns one Sonnet handoff-generator per component (heavier — fills the full 16-section document). Stage 5B spawns one asset agent per (component, asset_type) tuple — typically lighter, and a mix of Sonnet (code-style assets) and Haiku (descriptor-style asset). The two stages have different cost profiles, so they expose independent dials. Most users leave both at the default 4.
+**Why two parallelism flags?** Stage 5A spawns one Sonnet handoff-generator per component (heavier — fills the full 8-section audience-segmented document). Stage 5B spawns one asset agent per (component, asset_type) tuple — typically lighter, and a mix of Sonnet (code-style assets) and Haiku (descriptor-style asset). The two stages have different cost profiles, so they expose independent dials. Most users leave both at the default 4.
 
 **Step 1.1: Locate ARCHITECTURE.md**
 
@@ -386,6 +386,29 @@ Store the `components[]` list as `context_result` for use in Phase 4 and Phase 6
 
 **Recommended git policy**: commit `handoffs/.manifest.json` alongside the handoff files. Teammates pulling the branch then benefit from skip-if-unchanged on their own machines. The file is small (one JSON object per component) and changes deterministically with the handoffs. If a project explicitly does not want to track it, add `handoffs/.manifest.json` to `.gitignore`; the skill works either way (just regenerates everything on the first machine that doesn't have it locally).
 
+### Phase 3.6: v1 → v2 template upgrade detection (silent auto-regen)
+
+After receiving `context_result` from Phase 3.5, scan every component whose `decision == SKIP` for an existing handoff file written under TEMPLATE_VERSION 1.0.0 (the pre-v2 16-section format). When found, flip the decision to `REGEN` so the v1 file is rewritten under v2 on this run. This is silent and unconditional — auto-regen, not opt-in.
+
+For each component in `context_result.components` with `decision == SKIP`:
+
+1. Compute the handoff file path: `<project>/<handoff_file_rel>` (already provided by context-builder).
+2. If the file does not exist, skip (the SKIP decision is wrong — context-builder will catch this on the next run; do not flip here).
+3. Read the first ~10 lines of the file (cheap — one Read per SKIP component, no fan-out needed). Look for the literal marker `<!-- TEMPLATE_VERSION: 1.0.0 -->`.
+4. If the marker is present, override `decision` from `SKIP` to `REGEN` and append a reason: `v1 template upgrade — auto-regen to TEMPLATE_VERSION 2.0.0`.
+5. If the marker is `<!-- TEMPLATE_VERSION: 2.0.0 -->` (or any other v2.x), keep the SKIP decision.
+6. If the marker is absent entirely (e.g., a hand-edited file), keep SKIP — flipping every unmarked file would force regen on legitimate user edits. The user can always pass `--force` to regenerate everything.
+
+After the scan, if any component was flipped, emit ONE summary line at the top of Stage 5 (do not prompt or pause):
+
+```
+Detected N v1 handoff(s) → forcing regen to TEMPLATE_VERSION 2.0.0
+```
+
+If `N == 0`, print nothing.
+
+This phase adds at most one Read per SKIP component (~milliseconds). REGEN'd components have their orphan-asset handling and manifest update flow through Phases 5–6 normally — no special-casing past this point.
+
 ### Phase 4: Pre-create asset directories for REGEN components
 
 Filter `context_result.components` to entries where `decision == REGEN`. For each one, pre-create its asset output directory so the downstream `handoff-generator` sub-agent never needs Bash:
@@ -398,7 +421,7 @@ bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts <p
 
 ### Phase 5: One-cohort parallel fan-out — handoff documents (5A) + assets (5B) concurrent, then gap merge (5C)
 
-As of v3.14.8, Stages 5A and 5B run as a single parallel cohort rather than sequentially. The handoff-generator (5A) and handoff-asset-generator (5B) Tasks both consume only `payload_path` (already on disk after Phase 3.5) — there is no cross-dependency between a component's handoff document and its asset files. Spawning them concurrently reclaims `~min(T(5A), T(5B))` of wall-time per run; on the observed single-component run that was ~200 s, scaling to 25–35 % off Phase 5 wall-clock on multi-component runs. Stage 5C still runs after both cohorts complete, editing each component's handoff document in-place to append asset-level gaps to Section 15.
+As of v3.14.8, Stages 5A and 5B run as a single parallel cohort rather than sequentially. The handoff-generator (5A) and handoff-asset-generator (5B) Tasks both consume only `payload_path` (already on disk after Phase 3.5) — there is no cross-dependency between a component's handoff document and its asset files. Spawning them concurrently reclaims `~min(T(5A), T(5B))` of wall-time per run; on the observed single-component run that was ~200 s, scaling to 25–35 % off Phase 5 wall-clock on multi-component runs. Stage 5C still runs after both cohorts complete, editing each component's handoff document in-place to append asset-level gaps to section D1.
 
 **Concurrency budget (changed in v3.14.8)**: At any instant, the total number of in-flight sub-agents is `parallelism + asset_parallelism` (default 4 + 4 = 8), not `max(parallelism, asset_parallelism)`. Cap each individually at 8 (so the absolute ceiling is 16). If your project rate-limits aggressively, lower `--parallelism` and/or `--asset-parallelism` accordingly.
 
@@ -453,7 +476,7 @@ Prompt body provides (from the matching `context_result.components[]` entry):
 - `payload_path`: absolute path to the component's payload file
 - `output_handoff_path`: absolute path `<project>/<handoff_file_rel>`
 - `component_slug`, `component_index_position`
-- `asset_types`: copy of the payload's `asset_types[]` array — handoff-generator uses this to deterministically populate Section 14 from the static filename map
+- `asset_types`: copy of the payload's `asset_types[]` array — handoff-generator uses this to deterministically populate section C3 from the static filename map
 - `context7_cache_hint` (if context7 was used in Step 3.2): a path or inline summary — otherwise omit
 
 (`output_assets_dir` is not passed — handoff-generator does not write asset files. `plugin_dir` is not required — sub-agents bundle their references and do not invoke Bash.)
@@ -597,13 +620,13 @@ Wait for each batch to complete before spawning the next. This keeps total paral
 
 ---
 
-#### Step 5.3: Asset-gap merge into Section 15
+#### Step 5.3: Asset-gap merge into section D1
 
-For each component slug where Step 5.2 produced at least one non-empty `gaps[]`, perform ONE `Edit` on the component's handoff document to append asset-level gaps to Section 15. Components with zero asset gaps are skipped (no Edit). Components whose handoff-generator (5A) returned `PAYLOAD_FAILED` or `VALIDATION_FAILED` are skipped here too — there is no handoff doc to edit; their orphaned assets are surfaced separately in Phase 7.
+For each component slug where Step 5.2 produced at least one non-empty `gaps[]`, perform ONE `Edit` on the component's handoff document to append asset-level gaps to section D1 (Open Questions and Assumptions). Components with zero asset gaps are skipped (no Edit). Components whose handoff-generator (5A) returned `PAYLOAD_FAILED` or `VALIDATION_FAILED` are skipped here too — there is no handoff doc to edit; their orphaned assets are surfaced separately in Phase 7.
 
 **Step 5.3.1: Build the merged gap block per component**
 
-Group all `gaps[]` from `ASSET_RESULT` by `component_slug`. For each component, render one block of lines using this format (matching the existing Section 15 idiom):
+Group all `gaps[]` from `ASSET_RESULT` by `component_slug`. For each component, render one block of lines using this format (matching the existing section D1 idiom):
 
 ```
 - **Asset — <asset_filename>**: <field>
@@ -615,16 +638,16 @@ Concatenate one entry per gap, ordered first by `asset_type` (alphabetical), the
 
 **Step 5.3.2: Edit each handoff document once**
 
-For each component_slug with a non-empty gap block, do ONE `Edit` call on `<project>/<handoff_file_rel>`. Use the existing Section 15 anchor in the handoff document:
+For each component_slug with a non-empty gap block, do ONE `Edit` call on `<project>/<handoff_file_rel>`. Use the existing section D1 anchor in the handoff document:
 
 - Find the literal placeholder text:
   ```
   [OPEN_QUESTIONS_LIST or "No gaps detected — all sections fully documented."]
   ```
-  This line appears verbatim only when handoff-generator emitted no Section 1–13 gaps. Replace it with the rendered gap block.
-- If that placeholder is NOT present (handoff-generator already substituted it with handoff-level gaps), append the gap block to the end of Section 15 by anchoring on the line `**Format for each gap:**` and inserting the new block above it.
+  This line appears verbatim only when handoff-generator emitted no A1–C2 gaps. Replace it with the rendered gap block.
+- If that placeholder is NOT present (handoff-generator already substituted it with handoff-level gaps), append the gap block to the end of section D1 by anchoring on the line `**Format for each gap:**` and inserting the new block above it.
 
-If neither anchor is found (the handoff document failed validation), skip the Edit and surface the slug in Phase 7 with note `asset-gap merge skipped: Section 15 anchor not found`.
+If neither anchor is found (the handoff document failed validation), skip the Edit and surface the slug in Phase 7 with note `asset-gap merge skipped: section D1 anchor not found`.
 
 **Step 5.3.3: Confirm Edit success**
 
@@ -706,7 +729,7 @@ Location: handoffs/
 Components:
   ✓ [Component Name] — NN-name-handoff.md
       Assets: openapi.yaml, ddl.sql
-      Gaps recorded: [M] open questions in §15
+      Gaps recorded: [M] open questions in D1
   ✓ [Component Name] — NN-name-handoff.md
       Assets: deployment.yaml
       Gaps recorded: 0
@@ -721,7 +744,7 @@ Context-builder (sonnet) reads:
   ADRs full-Read: [adrs_full_read]
 Explorer mode (per component): cached: [Cc] | header-shortcut: [Ch] | full-scoring: [Cf]   (v3.14.8+ — header-shortcut bypasses per-ADR LLM scoring on well-tagged components)
 Phase 5 cohort messages:   [B_C] cohort(s) — handoff Tasks: {parallelism}-parallel sonnet | asset Tasks: {asset_parallelism}-parallel (sonnet: [X], haiku: [Y])
-Step 5.3 gap-merge edits:  [E] component(s) had asset-level gaps merged into §15
+Step 5.3 gap-merge edits:  [E] component(s) had asset-level gaps merged into D1
 5A failure rate:           [Kf] / [N_regen] handoff doc(s) failed ([P]%) — revisit gating if sustained > 5%
 Orphaned assets:           [O] asset file(s) written for components whose handoff doc failed (will be regenerated next run)
 Skipped (unchanged):       [S] component(s) — pass --force to regenerate
@@ -738,7 +761,7 @@ If `[O] > 0`, list each orphaned asset file on its own line as: `Asset written b
 ## Files in This Skill
 
 - **SKILL.md** — this file (orchestrator workflow)
-- **HANDOFF_TEMPLATE.md** — 16-section template with `[PLACEHOLDER]` tokens (consumed by the sub-agent)
+- **HANDOFF_TEMPLATE.md** — 8-section audience-segmented template with `[PLACEHOLDER]` tokens (consumed by the sub-agent)
 - **SECTION_EXTRACTION_GUIDE.md** — extraction rules per handoff section (consumed by the sub-agent)
 - **PAYLOAD_SCHEMA.md** — contract between orchestrator and sub-agent
 - **assets/_index.md** — asset-type → line-range map for `ASSET_GENERATION_GUIDE.md`

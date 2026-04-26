@@ -8,7 +8,7 @@ The orchestrator builds one payload file per selected component and writes it to
 
 - **Main context stays flat**: the orchestrator reads shared docs once, slices them N times, and spawns N sub-agents. Shared-doc reads do not scale with component count.
 - **Sub-agent context stays small**: each sub-agent window carries ~25–40 KB (component file + slice + template + asset section) regardless of project size.
-- **Losslessness**: every value the template requires must be present in the payload. If a value is absent from the architecture docs entirely, the orchestrator includes a literal `[NOT DOCUMENTED — add to <file>]` marker in the relevant payload section so the sub-agent can surface it in Section 15 without re-reading anything.
+- **Losslessness**: every value the template requires must be present in the payload. If a value is absent from the architecture docs entirely, the orchestrator includes a literal `[NOT DOCUMENTED — add to <file>]` marker in the relevant payload section so the sub-agent can surface it in section D1 (Open Questions and Assumptions) without re-reading anything.
 
 ## File format
 

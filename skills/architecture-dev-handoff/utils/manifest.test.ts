@@ -267,8 +267,8 @@ describe("HANDOFF_TEMPLATE.md frozen fixture (tripwire)", () => {
   //
   // To update: bump TEMPLATE_VERSION in HANDOFF_TEMPLATE.md, then update both
   // FROZEN_SHA and FROZEN_VERSION below to the new values.
-  const FROZEN_SHA = "d2789306659f7125c17a892c2daa0c3b51f5758b9551f930c1d16bf57638aaa4";
-  const FROZEN_VERSION = "1.0.0";
+  const FROZEN_SHA = "1de42b8f9d73dcb198bc9a4445cbe113e5d82289091d14f4d043197ee7f52234";
+  const FROZEN_VERSION = "2.0.0";
   const TEMPLATE_PATH = join(__dirname, "..", "HANDOFF_TEMPLATE.md");
 
   test("template content hash matches frozen fixture", () => {
