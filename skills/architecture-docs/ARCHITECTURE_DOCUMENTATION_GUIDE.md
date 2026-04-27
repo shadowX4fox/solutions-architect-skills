@@ -157,7 +157,7 @@ related_adrs: ADR-014, ADR-022
 
 Field guidance:
 
-- **key_concepts** — comma-separated list of 5–15 domain terms a downstream synthesis agent would search for. Pull from the doc's actual content. Match the vocabulary in `agents/configs/explorer/<task_type>.json` `relevance_keywords.boost[]` where applicable.
+- **key_concepts** — comma-separated list of 5–15 domain terms a downstream synthesis agent would search for. Pull from the doc's actual content. Concrete, domain-specific vocabulary surfaces relevant docs in downstream filtering; generic vocabulary surfaces nothing.
 - **technologies** — concrete tools/products named in the doc (Prometheus, AWS, Kubernetes, Spring Boot, etc.). Skip generic terms like "database" or "API".
 - **components** — kebab-case component names referenced in the doc, matching `docs/components/<NN>-<slug>.md` filenames.
 - **scope** — one short sentence (≤120 chars) explaining what the doc covers and what it explicitly does NOT cover.

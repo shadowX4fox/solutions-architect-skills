@@ -789,42 +789,57 @@ Only delete prefixes for the contract types being generated (from `selected_cont
 
 Run all deletions in a single `rm -f` command. If `compliance-docs/` does not exist yet, skip this step.
 
-**Step 3.2.5: Per-contract explorer fan-out (v3.14.5+)**
+**Step 3.2.5: Per-contract explorer findings fan-out (v3.16.0+)**
 
-Spawn `sa-skills:architecture-explorer` once per selected contract type, in parallel batches of 4. Each invocation classifies the project's architecture corpus *for that domain specifically*, returning an `EXPLORE_RESULT` allowlist that both the validator (Step 3.3) and the generator (Step 3.4) will honor.
+Spawn `sa-skills:architecture-explorer` once per selected contract, in **parallel batches of 4**. Each call runs the explorer in FINDINGS mode, scoped to that contract's domain vocabulary, and returns line-level evidence (`files[]` with `line` / `heading` / `excerpt` per match). The synthesis tier (Sonnet/Opus generator) then starts from pinpointed excerpts instead of doing its own grep across the corpus.
 
-For each selected contract, send one `Task()` with this prompt body:
+For each selected contract, read its domain config and join `key_data_points[]` into a comma-separated query:
+
+```
+contract_query = ", ".join(read_json(<plugin_dir>/agents/configs/<contract_type>.json).key_data_points)
+```
+
+`key_data_points[]` is a curated 6–10-term vocabulary list present in every `agents/configs/<contract_type>.json`. SRE: SLO, SLI, Error Budget, MTTR, MTBF, Runbook coverage, Monitoring tools, Incident response. Security: API authentication, Encryption (TLS/AES), mTLS, Secrets management, Vulnerability SLAs, Security event logging. Cloud: Cloud provider, Deployment model, Multi-region, IaC, Cloud costs, Cloud-native services. Etc.
+
+Spawn template:
 
 ```
 Task(sa-skills:architecture-explorer)
 prompt:
-  task_type: compliance-<contract_type>     # e.g. compliance-sre, compliance-security
-  config_path: <plugin_dir>/agents/configs/explorer/compliance-<contract_type>.json
   project_root: <dirname(architecture_file)>
-  plugin_dir: <plugin_dir>
-  plugin_version: <version from .claude-plugin/plugin.json>
-  force: false
+  query: <contract_query>
 ```
 
-The explorer's `compliance-<contract>.json` config marks every file the validator and generator absolutely cannot operate without (e.g., `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md`, `docs/components/README.md` for `compliance-sre`) as `required_sections[]`, so they always appear in `EXPLORE_RESULT.relevant_files[]` regardless of score (false-negative safeguard). The variable members are docs that scored above threshold for this domain (e.g., security docs that mention SRE topics) and any cross-referenced ADRs.
+That's the complete prompt — no `task_type`, no `config_path`, no `agent_version`, no `force`. Per-contract differentiation is entirely in the `query`.
 
-Collect each `EXPLORE_RESULT` into a per-contract map:
+Collect each contract's `EXPLORE_FINDINGS` block keyed by contract type:
 
 ```yaml
-explore_results:
-  <contract_type-1>:                         # e.g. sre, security, cloud
-    relevant_files: [<repo-rel paths from EXPLORE_RESULT.relevant_files[].path>]
-    cache_hit: <true|false>
-    explorer_status: <OK|PARTIAL|FAILED>
-  <contract_type-2>:
+findings_by_contract:
+  sre:
+    findings_yaml: |
+      schema_version: 2
+      status: OK
+      query: "..."
+      files:
+        - file: docs/08-scalability-and-performance.md
+          matched_terms: [SLO, MTTR]
+          matches:
+            - line: 42
+              heading: "## 8.3 SLO Targets"
+              excerpt: |
+                ...
+        ...
+    explorer_status: <OK|FAILED>
+  security:
     ...
 ```
 
-Pass each contract's `relevant_files[]` into both its validator (Step 3.3) and its generator (Step 3.4) prompts as a `EXPLORE_RESULT` block.
+Pass each contract's `findings_yaml` into that contract's generator prompt (Step 3.4) as an `EXPLORE_FINDINGS:` block. **Validators do NOT receive findings** — they continue using their hardcoded read lists since the v3.16.0 cleanup.
 
-**Cache behavior**: on repeat runs against unchanged docs, every explorer call returns `cache_hit: true` with zero Haiku tokens. The cached `EXPLORE_RESULT` flows into the validator and generator unchanged, so the only cost on a re-run is the synthesis tier (Sonnet/Opus) re-reading the same allowlist — same as today.
+**Cost shape**: per-contract Haiku fan-out (parallel batches of 4) for a 10-contract run is 3 batches (4+4+2). Each call is small (one Read of ARCHITECTURE.md + parallel Greps + parallel context Reads). Net synthesis-tier savings come from the generator no longer re-grepping the corpus to extract placeholder values — `findings.files[*].matches[*]` already names the line, heading, and surrounding excerpt.
 
-**Degraded mode** (fail-open): if any explorer call returns `FAILED`, omit `EXPLORE_RESULT` from that contract's downstream prompts. Validators and generators fall back to their hardcoded / `phase3.required_files` lists. The skill always produces a contract.
+**Degraded mode** (fail-open): if any explorer call returns `status: FAILED` or empty `files[]`, omit the `EXPLORE_FINDINGS` block from that contract's generator prompt entirely. The generator falls back to `phase3.required_files[]` only.
 
 **Step 3.3: Spawn Validators (FIRST)**
 
@@ -852,13 +867,9 @@ Invoke validators for the selected contracts in **batches of 2 per message** (st
 Validate [Contract Type] compliance.
 architecture_file: [absolute path to ARCHITECTURE.md]
 plugin_dir: [plugin_dir resolved in Step 3.1]
-
-EXPLORE_RESULT:                                  # v3.14.5+ — from Step 3.2.5 (omit block entirely if explorer failed for this contract)
-  relevant_files: [<repo-rel paths>]
-  cache_hit: <true|false>
 ```
 
-The validator honors `EXPLORE_RESULT.relevant_files[]` as its read set when present (covers the validator's existing hardcoded "Required Files" list since the explorer config marks them `required_sections[]`). When the block is absent (degraded mode), the validator falls back to its hardcoded list.
+The validator uses its hardcoded "Required Files" list. As of v3.16.0 the orchestrator no longer passes an explorer block to validators — `agents/configs/<contract_type>.json:phase3.required_files[]` is a superset of the validator's hardcoded list, so the generator's manifest-driven read set still covers everything the validator might check.
 
 **Model selection per validator**: for each validator Task() call, set the `model:` parameter using `resolve_model(contract_type, "validator", model_preset)` from Step 1.5. Example: `Task(subagent_type="...", model="sonnet", prompt="...")`. If `model_preset` is not set, default to `sonnet`.
 
@@ -870,7 +881,7 @@ After all validators complete, invoke generators for the selected contracts. **I
 
 All generators use the **single universal agent** `sa-skills:compliance-generator`. The `contract_type` parameter determines which config and template to use.
 
-**Generator prompt template** (includes contract_type, validation result, and explore result):
+**Generator prompt template** (includes contract_type, validation result, and the shared manifest):
 ```
 Generate compliance contract.
 contract_type: [config name, e.g., cloud]
@@ -880,12 +891,11 @@ plugin_dir: [plugin_dir resolved in Step 3.1]
 VALIDATION_RESULT:
 [paste the full VALIDATION_RESULT block returned by the validator for this contract type]
 
-EXPLORE_RESULT:                                  # v3.14.5+ — from Step 3.2.5 (omit block entirely if explorer failed for this contract)
-  relevant_files: [<repo-rel paths>]
-  cache_hit: <true|false>
+EXPLORE_FINDINGS:                                # v3.16.0+ — from Step 3.2.5 per-contract findings call (omit block entirely if the explorer returned status: FAILED or empty files[])
+[paste the full EXPLORE_FINDINGS YAML body verbatim from findings_by_contract[<contract_type>]]
 ```
 
-The generator's PHASE 3 Step 3.3 honors `EXPLORE_RESULT.relevant_files[]` as its read set when present (the explorer's `required_sections[]` covers everything in the config's `phase3.required_files` plus any cross-referenced docs that scored above threshold). When the block is absent (degraded mode), the generator falls back to `phase3.required_files` from its domain config.
+The generator's PHASE 3 Step 3.3 reads `phase3.required_files[]` from the domain config (always — the floor that guarantees domain coverage) plus any additional files listed in `findings.files[]`. The findings entries pre-locate evidence at line + heading granularity (`matches[].line`, `matches[].heading`, `matches[].excerpt`) — the generator uses them as starting points for placeholder extraction instead of grepping the full files itself. No metadata cross-reference is needed because the explorer already scoped findings to `phase3.key_data_points[]` via the `query` parameter. When the findings block is absent (degraded mode), the generator falls back to `phase3.required_files` only.
 
 **Model selection for generators**: for every generator Task() call, set the `model:` parameter using `resolve_model(contract_type, "generator", model_preset)` from Step 1.5. This resolves to `sonnet` for eco/balanced/critical-opus, or `opus` for max. Example: `Task(subagent_type="sa-skills:compliance-generator", model="sonnet", prompt="...")`.
 

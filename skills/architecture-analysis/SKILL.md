@@ -210,40 +210,61 @@ Selection (e.g. "1", "1,3,5", "6-10", or "all"):
 
 ---
 
-## Step 2.5 — Per-analysis explorer fan-out (v3.14.6+)
+## Step 2.5 — Per-analysis explorer findings fan-out (v3.16.0+)
 
-Spawn `sa-skills:architecture-explorer` once per selected analysis, in parallel batches of 4. Each invocation classifies the project's architecture corpus *for that analysis specifically*, returning an `EXPLORE_RESULT` allowlist that replaces the universal `doc_files` list (built in Step 1) as the per-agent FILES section in Step 3.
+Spawn `sa-skills:architecture-explorer` **once per selected analysis** in findings mode. Each call passes a hardcoded vocabulary `query` lifted from the analysis's spec ("Evidence Extraction Priority" table + rule examples). The explorer emits an `EXPLORE_FINDINGS` block listing the matched files with line-level matches, headings, and 3–5-line excerpts — pre-located evidence the analysis agent reads in step.
 
-For each selected analysis, send one `Task()` with this prompt body:
+**Per-analysis vocabulary** (joined as a comma-separated string for the `query` parameter):
 
+| Analysis | Vocabulary |
+|----------|------------|
+| `spof` | single point of failure, failover, redundancy, HA, multi-region, multi-AZ, active-active, circuit breaker |
+| `blast-radius` | downstream, dependency, cascade, fan-out, retry, timeout, bulkhead |
+| `bottleneck` | throughput, capacity, headroom, queue, backpressure, p99, saturation |
+| `cost-hotspots` | cost, pricing, instance, GB-month, reserved, spot, FinOps, billing |
+| `stride` | trust boundary, authentication, authorization, mTLS, encryption, audit, RBAC, threat |
+| `vendor-lockin` | vendor, proprietary, portability, exit, migration, lock-in, managed service |
+| `latency-budget` | latency, p95, p99, SLO, hop, budget, end-to-end |
+| `tech-debt` | EOL, end of life, deprecated, legacy, version, sunset, upgrade |
+| `coupling` | coupling, fan-in, fan-out, instability, cycle, dependency direction |
+| `data-sensitivity` | PII, encryption at rest, encryption in transit, retention, GDPR, data classification |
+
+**Per-analysis spawn**:
 ```
 Task(sa-skills:architecture-explorer)
 prompt:
-  task_type: analysis-<analysis_type>     # e.g. analysis-spof, analysis-stride
-  config_path: <plugin_dir>/agents/configs/explorer/analysis-<analysis_type>.json
   project_root: <dirname(architecture_file)>
-  plugin_dir: <plugin_dir>
-  plugin_version: <version from .claude-plugin/plugin.json>
-  force: false
+  query: <vocabulary[type] joined as ", ">
 ```
 
-The explorer's `analysis-<type>.json` config marks every load-bearing file for that analysis as `required_sections[]` (false-negative safeguard). For SPOF: `ARCHITECTURE.md`, `docs/03-architecture-layers.md`, `docs/components/**`. For STRIDE: those plus `docs/07-security-architecture.md` and ADRs that mention auth / boundaries / threat. Each analysis's config is hand-tuned or auto-derived from the analysis spec's classification rules.
+**Batching**: dispatch in **parallel batches of 4 per message** to keep the explorer fan-out cost-bounded while preserving wall-clock parallelism. After each batch returns, collect the results before sending the next.
 
-Collect each `EXPLORE_RESULT` into a per-analysis map:
+Collect each analysis's `EXPLORE_FINDINGS` block keyed by analysis type:
 
-```yaml
-explore_results:
-  <analysis_type-1>:
-    relevant_files: [<absolute paths from EXPLORE_RESULT.relevant_files[].path>]
-    cache_hit: <true|false>
-    explorer_status: <OK|PARTIAL|FAILED>
-  <analysis_type-2>:
-    ...
+```
+findings_by_analysis = {
+  "spof":             "<EXPLORE_FINDINGS YAML body>",
+  "stride":           "<EXPLORE_FINDINGS YAML body>",
+  ...
+}
 ```
 
-When passing the FILES list into Step 3 below, use **`relevant_files[]` for that analysis** instead of the universal `doc_files` from Step 1. The cache-keyed Haiku tier means repeat runs against unchanged docs cost zero classification tokens.
+**Build the FILES list per analysis** as `union(base_files[type], findings.files[*].file)` — base is the always-read floor that guarantees domain coverage even when no findings match; findings adds where evidence actually lives. The base sets:
 
-**Degraded mode** (fail-open): if any explorer call returns `FAILED`, fall back to the full `doc_files` from Step 1 for that analysis only — the analysis still runs against the universal corpus, just without the trim. No silent skips, no missed analyses.
+| Analysis | Base FILES (always) |
+|----------|---------------------|
+| `spof` | ARCHITECTURE.md, docs/03-architecture-layers.md, docs/components/README.md |
+| `blast-radius` | ARCHITECTURE.md, docs/04-data-flow-patterns.md, docs/05-integration-points.md, docs/components/README.md |
+| `bottleneck` | ARCHITECTURE.md, docs/08-scalability-and-performance.md, docs/04-data-flow-patterns.md, docs/components/README.md |
+| `cost-hotspots` | ARCHITECTURE.md, docs/06-technology-stack.md, docs/09-operational-considerations.md |
+| `stride` | ARCHITECTURE.md, docs/07-security-architecture.md, docs/05-integration-points.md, docs/components/README.md |
+| `vendor-lockin` | ARCHITECTURE.md, docs/06-technology-stack.md, docs/03-architecture-layers.md |
+| `latency-budget` | ARCHITECTURE.md, docs/04-data-flow-patterns.md, docs/08-scalability-and-performance.md |
+| `tech-debt` | ARCHITECTURE.md, docs/06-technology-stack.md, docs/03-architecture-layers.md |
+| `coupling` | ARCHITECTURE.md, docs/05-integration-points.md, docs/components/README.md |
+| `data-sensitivity` | ARCHITECTURE.md, docs/07-security-architecture.md, docs/05-integration-points.md, docs/04-data-flow-patterns.md |
+
+**Degraded mode** (fail-open): if any explorer call returns `status: FAILED` or empty `files[]`, fall back to that analysis's base FILES table only (plus the universal `doc_files` from Step 1 if the failure is universal). The analysis still runs.
 
 ---
 
@@ -296,9 +317,9 @@ FILES:
 <absolute path N — last file>
 ```
 
-**File selection (v3.14.6+)**: the FILES list above comes from this analysis's `EXPLORE_RESULT.relevant_files[]` (Step 2.5), not the universal `doc_files` corpus from Step 1. Each analysis sees only the files the explorer judged relevant for its `task_type`, plus any `required_sections[]` from the explorer config (always-included, false-negative safeguard). The agent's contract is unchanged — it reads every path in FILES, in order — but the list is now ~5–10 paths per analysis instead of the full ~20+ corpus.
+**File selection (v3.16.0+)**: the FILES list is `union(base_files[type], findings_by_analysis[type].files[*].file)` — the per-analysis base set from Step 2.5 (always-read floor) unioned with the files surfaced by that analysis's findings call. Typical list size: 5–10 paths per analysis instead of the full corpus. Order: base files first (in the order listed), then any additional findings files.
 
-If Step 2.5 reported `explorer_status: FAILED` for this analysis, fall back to the universal `doc_files` from Step 1 for this one analysis only. The agent runs identically; just without the explorer trim.
+If Step 2.5 reported `status: FAILED` or empty `files[]` for a given analysis, that analysis's FILES list collapses to its base set only. If the explorer was unreachable for the entire run, fall back to the universal `doc_files` from Step 1 for every analysis. The agent runs identically; just without the trim.
 
 Set each `description` to `"<Analysis Name> analysis"` (e.g., `"SPOF analysis"`).
 

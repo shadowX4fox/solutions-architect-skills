@@ -128,7 +128,7 @@ For each file in `needs_header`:
 
 **Step 3.2 — Extract metadata.** Build the EXPLORER_HEADER content from the file's actual content:
 
-- `key_concepts` — 5–15 domain terms that recur in the doc. Pull from H2/H3 headings, bold terms, table headers, and frequently-occurring capitalized phrases. Avoid generic words ("system", "approach", "data"); favor specific ones ("SLO", "MTTR", "idempotency", "circuit breaker"). Match vocabulary from `agents/configs/explorer/<task_type>.json` `relevance_keywords.boost[]` where applicable.
+- `key_concepts` — 5–15 domain terms that recur in the doc. Pull from H2/H3 headings, bold terms, table headers, and frequently-occurring capitalized phrases. Avoid generic words ("system", "approach", "data"); favor specific ones ("SLO", "MTTR", "idempotency", "circuit breaker"). Downstream skills (compliance, analysis, dev-handoff) filter the explorer's manifest by these terms when deciding which files to read — concrete, domain-specific vocabulary surfaces relevant docs; generic vocabulary surfaces nothing.
 - `technologies` — concrete tools/products named in the doc (Prometheus, AWS, PostgreSQL 16, Spring Boot 3.3, etc.). Skip generic terms ("database", "API"). Preserve version numbers.
 - `components` — kebab-case component names referenced in the doc. Match `docs/components/<NN>-<slug>.md` filenames. For component files themselves, use `component_self: <slug>` instead.
 - `scope` — one short sentence (≤120 chars) describing what the doc covers and what it does NOT. Read the doc's intro paragraph to source this.

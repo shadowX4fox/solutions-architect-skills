@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.15.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.16.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -53,13 +53,11 @@ For detailed information about Claude Code's plugin system, see the [official Cl
   - `architecture-icepanel-sync` (beta): Sync C4 model to IcePanel via import YAML or REST API
   - `architecture-explorer-headers` (v3.14.0): Backfill `<!-- EXPLORER_HEADER -->` blocks into legacy docs so the universal `architecture-explorer` agent can classify them accurately. Slash command: `/regenerate-explorer-headers` (with `--dry-run`, `--force`, scope glob)
 
-- **Universal `architecture-explorer` Agent (v3.14.0)**
-  - Haiku-tier doc classifier — front door for every doc-consuming workflow (compliance, analysis, peer-review, dev-handoff, free-form Q&A, ADR application)
-  - Reads task-specific configs from `agents/configs/explorer/<task_type>.json` (36 ship in v3.14.0: 10 compliance + 10 analysis + 13 peer-review + 3 special)
-  - Samples first 60 lines + headings of each candidate file (`ARCHITECTURE.md` is read in full as the navigation index) and returns an `EXPLORE_RESULT` allowlist of relevant files plus detected gaps
-  - Per-project `/tmp/architecture-explorer/<project_hash>/` cache keyed by candidate-file mtimes + plugin version + config mtime — repeat runs cost zero Haiku tokens
-  - Always-on by design: false-negatives prevented at the config level via `required_sections[]` (the runtime parser rejects any result that omits them, falling back to degraded mode)
-  - `<!-- EXPLORER_HEADER -->` blocks in `docs/NN-*.md` and `docs/components/**/*.md` files (5–10 lines after the H1, listing key concepts, technologies, components, scope, related ADRs) maximize classification accuracy. Backwards-compatible — legacy docs without the header still work via fallback scoring
+- **Universal `architecture-explorer` Agent (v3.16.0)**
+  - Haiku-tier doc navigator — front door for every doc-consuming workflow (compliance, analysis, peer-review, dev-handoff, free-form Q&A, ADR application)
+  - Walks the canonical layout (`ARCHITECTURE.md` + `docs/` + `adr/`) and emits an `EXPLORE_MANIFEST` listing every file in the corpus along with its `<!-- EXPLORER_HEADER -->` metadata (`key_concepts`, `technologies`, `related_adrs`, …)
+  - **No ranking, no cache, no per-task configs.** Downstream skills consume the manifest and pick what to read using their own domain configs (e.g. `agents/configs/<contract>.json:phase3.required_files` for compliance, hardcoded base file lists per analysis lens). The dev-handoff orchestrator passes a `component_file` parameter to enable a per-component `focus_component.related_adrs` block sourced directly from that component's EXPLORER_HEADER.
+  - `<!-- EXPLORER_HEADER -->` blocks in `docs/NN-*.md` and `docs/components/**/*.md` files (5–10 lines after the H1, listing key concepts, technologies, components, scope, related ADRs) maximize downstream filtering accuracy. Legacy docs without a header are listed in the manifest with `has_header: false` and treated conservatively by downstream filters.
 
 - **C4 Model Integration (IcePanel)**
   - Components follow C4 Level 2 (Container diagram) rules — every component must be a separately deployable unit (App or Store)
@@ -116,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.15.1` in the list.
+You should see `sa-skills v3.16.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -797,7 +795,33 @@ Where:
 
 ## Roadmap
 
-### v3.15.1 (Current Release) ✅
+### v3.16.0 (Current Release) ✅
+**feat: `architecture-explorer` simplified to a structure navigator + Findings mode + consumer migration to per-X fan-out**
+
+This release reshapes the universal `architecture-explorer` agent and migrates its three consumer skills (compliance, analysis, dev-handoff) to a new evidence-driven contract.
+
+**1. Explorer simplification (BREAKING — internal contract)**: the v3.14.x ranking machinery is gone. 36 per-task JSON configs (`agents/configs/explorer/*.json`), the Bun CLI with 12 subcommands, the mtime-keyed `/tmp/` cache, the in-house scoring formula, gap-marker regexes, and ~18 TypeScript modules with their tests have all been deleted. The new agent uses Read + Glob only, walks the canonical layout (`ARCHITECTURE.md` + `docs/` + `adr/`), extracts `<!-- EXPLORER_HEADER -->` metadata inline, and emits a single `EXPLORE_MANIFEST` listing every doc, component, and ADR with `key_concepts`, `technologies`, `related_adrs`. Schema break: `EXPLORE_RESULT` → `EXPLORE_MANIFEST`, `schema_version` 1 → 2; per-task config / cache parameters all removed.
+
+**2. Findings mode (Added)**: a second, mutually exclusive mode keyed on an optional `query` parameter. When provided, the agent runs Claude's Explore-agent methodology scoped to the architectural surface — plans 3–8 search terms, parallel `Grep` for every term, parallel context `Read` (`offset: anchor − 5, limit: 30`) for nearest H1/H2/H3 heading, and emits an `EXPLORE_FINDINGS` block with `files[]` carrying `matched_terms`, `matches[].line`, `heading`, and 3–5-line `excerpt`. No manifest enumeration in this mode — focuses entirely on what was asked. The agent does not answer the question; it surfaces evidence the caller synthesizes.
+
+**3. Consumer migration to per-X findings fan-out**: the synthesis tier (Sonnet/Opus) no longer re-greps inside each generator/analysis/context-builder. Haiku pre-locates evidence at line + heading granularity. Hardcoded floors (compliance `phase3.required_files[]`, analysis per-lens base file lists) stay as guarantees; findings ADD line-level evidence on top.
+
+- **Compliance** — Step 3.2.5 fans out per-contract findings calls keyed on each domain config's `key_data_points[]` (already 6–10 vocab terms per contract). Generator consumes `EXPLORE_FINDINGS`, reads `phase3.required_files[]` (floor) plus `findings.files[]` using `matches[].line`/`heading`/`excerpt` as placeholder-extraction starting points. Validators unchanged — they still use their hardcoded read lists.
+- **Analysis** — Step 2.5 fans out per-analysis findings calls keyed on a hardcoded vocabulary map (8 terms × 10 lenses, lifted from each spec's "Evidence Extraction Priority" table). FILES list = `union(base_files[type], findings.files[*].file)`.
+- **Dev-handoff** — Step 3.4a per-component spawn now sends `component_file` AND `query: <slug>, <type>, <technologies>`. Step 3.5 input renamed `manifest` → `findings_by_component`. Context-builder PHASE 3.2 swaps in-builder name+type+technology grep for findings-driven slicing; per-component fallback to v3.13.0 in-builder grep when that slug's explorer call failed. Agent v1.2.0 → 1.3.0. Phase 7 telemetry adds the new findings-evidence line.
+- **Explorer agent** v3.0.0 → 3.3.0 — `component_file` + `query` may be passed together; the agent emits a `focus_component` block alongside findings so dev-handoff per-component fan-out keeps its ADR allowlist.
+
+**4. CLAUDE.md guidance refresh**: the injected `sa-skills:architecture-pointer` block in project CLAUDE.md is rewritten around the manifest-vs-findings two-mode model. Decision tree for re-triggering the explorer is keyed on whether the prior block in conversation is `EXPLORE_MANIFEST` vs `EXPLORE_FINDINGS`. `/setup` now also documents the v3.16.0 changes.
+
+**Degraded mode**: any explorer call returning `status: FAILED` or empty `files[]` triggers per-unit fallback to the hardcoded floor (compliance → `phase3.required_files`; analysis → base FILES; dev-handoff → v3.13.0 in-builder grep slicing). All three skills still produce output; no run aborts on explorer failure.
+
+**Migration**: no project-side action required. Existing projects re-running any compliance / analysis / dev-handoff skill after upgrading get the new behavior automatically. The `Agent(sa-skills:architecture-explorer)` permission grant is unchanged. The `/tmp/architecture-explorer/<project_hash>/` cache directory becomes orphaned and clears on reboot. Compliance contracts, analysis reports, and handoffs regenerate identically — the manifest carries everything the previous `EXPLORE_RESULT` did, plus the full corpus listing for downstream domain-driven selection; findings supply pinpointed excerpts the synthesis tier reads instead of full files.
+
+**Verification**: `bun run typecheck` clean. `bun test` 405/405 pass.
+
+---
+
+### v3.15.1 (Previous Release) ✅
 **fix: Avro / Protobuf detection misses when wire format is documented outside the canonical 5 fields**
 
 The `handoff-context-builder` resolver scanned only `**Type:**`, `**Technology:**`, `**Description:**`, `**Communicates via:**`, `**Deploys as:**` of each component descriptor when deriving `asset_types`. Real-world component files commonly document the Kafka wire format ("Avro envelope", "Avro — schema-registry validated") in three places the resolver did not read: the `<!-- EXPLORER_HEADER -->` `technologies:` line, the inline `Subscriptions` / `Produces` / `Topics` tables further down the component file, and `docs/05-integration-points.md`. Result: components that consume or produce Avro topics had `asset_types: [asyncapi, deployment, c4-descriptor]` instead of `[asyncapi, deployment, avro, c4-descriptor]` — `schema.avsc` was silently never generated.

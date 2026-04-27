@@ -27,8 +27,6 @@ Apply this personality when framing evidence, writing deviation descriptions, an
 
 - `architecture_file`: Path to ARCHITECTURE.md
 - `plugin_dir`: Absolute path to the solutions-architect-skills plugin directory
-- `EXPLORE_RESULT` (v3.14.5+, optional block in prompt): a YAML block produced by `sa-skills:architecture-explorer` for `task_type: compliance-<this-domain>`, listing the files relevant for this validation. When present, honor `relevant_files[]` as the read set instead of the hardcoded "Required Files" list below — the explorer's `required_sections[]` already covers every file in that list (it was derived from this validator's hardcoded list), so the allowlist is always a superset and there is no false-negative risk. When the block is absent (degraded mode — explorer failed), fall back to the hardcoded list.
-
 
 ## Domain Configuration
 
@@ -143,9 +141,9 @@ These fields drive your validation — if a data point is listed, you must check
 
 ### Required Files
 
-When the prompt includes an `EXPLORE_RESULT` block, read the files listed in `relevant_files[]` instead of (or in addition to) the hardcoded list below. The explorer's classification covers the files documented here plus any cross-referenced docs that scored above the domain's relevance threshold. The hardcoded list below is the **fallback** for degraded mode.
+This validator reads its hardcoded file list below. As of v3.16.0 the orchestrator no longer sends an explorer block to validators — `agents/configs/<contract>.json:phase3.required_files[]` (consumed by the generator) is a superset of this list, so domain coverage is preserved.
 
-#### Hardcoded fallback (used when EXPLORE_RESULT is absent)
+#### Required files
 
 - `docs/05-integration-points.md` — APIs, messaging, integration patterns, error handling
 - `docs/07-security-architecture.md` — mTLS, service authentication, API security

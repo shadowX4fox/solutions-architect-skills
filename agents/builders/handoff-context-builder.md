@@ -29,7 +29,7 @@ The orchestrator passes these in the prompt text:
 - `generation_date`: `YYYY-MM-DD` captured by the orchestrator from `prepare-payload-dir.ts`
 - `payload_dir`: absolute path to `/tmp/handoff-payloads/` (already created by the orchestrator)
 - `components`: a YAML list (in the prompt body) of `{ slug, component_file, type, technology, component_index_position }` for every selected component. The orchestrator has already gated on C4 Level 2 — every entry here is in scope.
-- `explore_results` (v3.14.4+): a YAML map of `{ <component_slug>: { relevant_files: [<repo-rel paths>], cache_hit: <bool> } }` produced by the orchestrator's per-component fan-out of `sa-skills:architecture-explorer` (Haiku, `task_type: handoff-component`). The 7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md` always appear in every component's `relevant_files[]` (config-level `required_sections[]` guarantee). The variability is in ADR allowlists and component-file allowlists. **When this parameter is present**: PHASE 1 reads only files that appear in at least one component's `relevant_files[]`; PHASE 2 ADR indexing is skipped entirely (the explorer already classified them); PHASE 3.3 takes its per-component ADR list directly from `explore_results[<slug>].relevant_files[]` filtered to `adr/*.md`. **When absent** (degraded mode — explorer failed or skipped): fall back to the legacy v3.13.0 behavior described in the workflow phases below.
+- `findings_by_component` (v3.16.0+): an `EXPLORE_FINDINGS` YAML block per component produced by the orchestrator's per-component fan-out of `sa-skills:architecture-explorer` running in findings mode. Each fan-out call passes both `component_file` (so the agent emits a `focus_component` block with `related_adrs` and `has_header`) AND `query: <slug>, <type>, <technologies>` (so the agent surfaces line-level matches across the canonical doc surface for that component's vocabulary). The orchestrator collates these per-component findings blocks into a map keyed by slug. **When this parameter is present**: PHASE 1 reads the seven shared docs + `ARCHITECTURE.md` + `docs/components/README.md` once; PHASE 2 ADR indexing reads only the ADRs that appear in *any* component's `focus_component.related_adrs` (deduplicated union); PHASE 3.2 slices shared docs using `findings_by_component[<slug>].files[*]` line-level matches as the per-component anchor instead of in-builder name+type+technology grep; PHASE 3.3 takes its per-component ADR allowlist directly from `findings_by_component[<slug>].focus_component.related_adrs`. **When absent for a given component** (degraded mode — that component's explorer call failed or returned empty `files[]`): fall back to the legacy v3.13.0 in-builder grep slicing for that component only — other components keep the findings-driven path.
 - `manifest_path`: absolute path to `handoffs/.manifest.json`
 - `template_version`: plugin version (used in payload-hash inputs)
 - `schema_version`: payload schema version (currently `2`)
@@ -39,41 +39,33 @@ The orchestrator passes these in the prompt text:
 
 ## Workflow
 
-### PHASE 1 — Read shared docs once (explorer-aware)
+### PHASE 1 — Read shared docs once
 
-**With `explore_results` (v3.14.4+ default path)** — read every distinct file that appears in **any** component's `relevant_files[]` exactly once. Compute the union as:
+Read each of the seven shared docs once: `docs/01-system-overview.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md`, `docs/07-security-architecture.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md`. Also read `ARCHITECTURE.md` and `docs/components/README.md`. If any file is missing, note the gap but do NOT abort — per-component sections sourced from missing files will be marked `[NOT DOCUMENTED — add to <file>]` in PHASE 3.
+
+Track `shared_docs_read` = count of full-Read shared docs in this phase.
+
+### PHASE 2 — Build the ADR index
+
+**With `findings_by_component` (v3.16.0+ default path)** — compute the deduped union of relevant ADR identifiers across all components:
 
 ```
-union_files = sorted(set(
-  path
-  for component in explore_results.values()
-  for path in component.relevant_files
+union_adrs = sorted(set(
+  adr_id
+  for findings in findings_by_component.values()
+  for adr_id in (findings.focus_component.related_adrs or [])
 ))
 ```
 
-The 7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md` are always in this union (the `handoff-component.json` config marks them `required_sections[]`, so the explorer guarantees each component's `relevant_files[]` includes them). The variable members are ADRs that scored above threshold for at least one component, plus any cross-referenced component files.
-
-For each path in `union_files`:
-- If it is `adr/<...>.md`: defer the Read until PHASE 3.3 (full content is needed only when slicing per-component); the explorer's first-60 sample is sufficient for the indexing decision and is already done. Record the path in `union_adrs` and DO NOT re-read it here.
-- Else (shared docs, ARCHITECTURE.md, components/README.md, component files): full Read on this thread, in memory for PHASE 3.
-
-If any file in `union_files` is unreadable, note the gap and continue. Per-component sections sourced from missing files will be marked `[NOT DOCUMENTED — add to <file>]` in PHASE 3.
-
-Track `shared_docs_read` (count of full-Read non-ADR files in this phase), `adrs_indexed` = `len(union_adrs)`.
-
-**Without `explore_results` (degraded fallback)** — read each of the seven shared docs once: `docs/01-system-overview.md`, `docs/04-data-flow-patterns.md`, `docs/05-integration-points.md`, `docs/06-technology-stack.md`, `docs/07-security-architecture.md`, `docs/08-scalability-and-performance.md`, `docs/09-operational-considerations.md`. If any file is missing, note the gap but do NOT abort.
-
-### PHASE 2 — Build the ADR index (explorer-aware)
-
-**With `explore_results`** — `union_adrs` is already the deduped relevant ADR set across all components. Skip the indexing-Read pass; you do not need to scan first-30-lines of each ADR to decide relevance — the Haiku explorer already did that with first-60-line scans. Initialize:
+For each ADR identifier in `union_adrs`, locate its file by `Glob adr/*.md` matching the ID prefix (e.g. `ADR-012` → `adr/ADR-012-*.md` or `adr/012-*.md`) and read the file's first 30 lines:
 
 ```
-adr_index = {} # populated lazily in PHASE 3.3 when each ADR is first full-Read
+adr_index[<ADR-ID>] = { path, title, status, terms }
 ```
 
-`adrs_indexed = len(union_adrs)`. Indexing-pass cost on Sonnet is now zero.
+ADRs not referenced by any component's `focus_component.related_adrs` are left out of `adr_index` — the per-component allowlist drives consumption, not the corpus. Track `adrs_indexed = len(union_adrs)`.
 
-**Without `explore_results`** — the legacy path: `Glob adr/*.md`, then for each match read the first 30 lines (header + status + the start of `## Context`) and capture `adr_index[<ADR-ID>] = { path, title, status, terms }`. Track `adrs_indexed = N`.
+**Without `findings_by_component` (degraded fallback)** — the legacy path: `Glob adr/*.md`, then for each match read the first 30 lines (header + status + the start of `## Context`) and capture `adr_index[<ADR-ID>] = { path, title, status, terms }`. Track `adrs_indexed = N`.
 
 ### PHASE 3 — Per-component slicing
 
@@ -125,38 +117,39 @@ The wider scan is critical: real architecture docs put deployment targets (`Dock
 
 **Step 3.2 — Slice each shared doc for this component**
 
-For each of `docs/01, 04, 05, 06, 07, 08, 09` already in memory:
+**With `findings_by_component[<slug>]` (v3.16.0+ default path)** — the explorer has already located per-component matches at line + heading granularity. For each entry in `findings_by_component[<slug>].files[*]` whose `file` is one of the seven shared docs already in PHASE 1 memory:
 
-- Match by component display name, `**Type:**` keyword, and each technology in `**Technology:**`.
-- Retain matched rows / bullets / table entries / paragraph blocks **verbatim** — do NOT reformat, summarize, or collapse.
-- Map the matches into the named payload sections per `PAYLOAD_SCHEMA.md`:
+- Use each `match.line` as the anchor; retain the surrounding row / bullet / table entry / paragraph block **verbatim** from the in-memory copy of the file (do NOT reformat, summarize, or collapse). The `match.heading` plus `match.excerpt` are starting points — extend the slice to include the full table row or paragraph block when the match lands mid-structure.
+- Map matches into named payload sections per `PAYLOAD_SCHEMA.md` by source file:
   - `docs/05-integration-points.md` matches → `## Integrations`
   - `docs/04-data-flow-patterns.md` matches → `## Flows`
   - `docs/07-security-architecture.md` matches → `## Security Requirements`
   - `docs/08-scalability-and-performance.md` matches → `## Perf Targets`
   - `docs/09-operational-considerations.md` matches → `## Ops Config`
-- If a section has no matches, emit the standard `[NOT DOCUMENTED — add to <file>]` marker (see PAYLOAD_SCHEMA.md per-section "If nothing component-specific is documented" wording).
+- If a section's source doc has no matches in `findings_by_component[<slug>].files[*]`, emit the standard `[NOT DOCUMENTED — add to <file>]` marker (see PAYLOAD_SCHEMA.md per-section "If nothing component-specific is documented" wording).
+
+**Without `findings_by_component[<slug>]` (degraded fallback)** — the legacy v3.13.0 path: for each of `docs/01, 04, 05, 06, 07, 08, 09` already in memory, match by component display name, `**Type:**` keyword, and each technology in `**Technology:**`. Retain matched rows / bullets / table entries / paragraph blocks verbatim and map into the named payload sections as above. This path is taken per component when that component's explorer call failed or returned empty `files[]`; the other components keep the findings-driven path.
 
 **Step 3.3 — ADR lookup**
 
-**With `explore_results` (v3.14.4+ default path)** — the explorer has already classified each ADR's relevance per component. Take the per-component allowlist directly:
+**With `findings_by_component[<slug>]` (v3.16.0+ default path)** — each component's EXPLORER_HEADER `related_adrs:` field is the authoritative allowlist. Take it directly from the component's findings block:
 
 ```
-component_adrs = [
-  path for path in explore_results[component.slug].relevant_files
-  if path.startswith("adr/") and path.endswith(".md")
-]
+component_adr_ids = findings_by_component[component.slug].focus_component.related_adrs or []
+component_adrs    = [adr_index[id].path for id in component_adr_ids if id in adr_index]
 ```
 
 For each path in `component_adrs`:
 
-1. Full-Read the ADR file (first full Read of this ADR — the indexing first-30 from the legacy path is no longer done).
-2. Excerpt ≤30 lines focused on the paragraphs that reference the component or its technology. (The explorer's `matched_sections[]` for this file lists which headings scored — start your excerpt at those.)
+1. Full-Read the ADR file.
+2. Excerpt ≤30 lines focused on the paragraphs that reference the component or its technology.
 3. Track `adrs_full_read += 1`.
 
-If `component_adrs` is empty, write `## Relevant ADRs\n\nNo ADRs in adr/ reference this component, its technology, or its domain.` and move on. The explorer's `score_threshold: 0.20` for `handoff-component` is conservative; an empty list here means the ADRs genuinely do not match.
+**Conservative fallback for unheaded components**: if `findings_by_component[component.slug].focus_component.has_header` is `false`, the EXPLORER_HEADER list is unreliable. Intersect the component's name + technology + domain keywords against `adr_index[*].terms[]` and include any ADR whose title literally mentions a match.
 
-**Without `explore_results` (degraded fallback)** — intersect the component's name + technology + domain keywords against `adr_index[*].terms[]`. For each matched ADR, full-Read and excerpt as above. Conservative fallback: if the intersection returns 0 ADRs, also include any ADR whose title or status header literally mentions the component's name or any of its technologies.
+If `component_adrs` is empty, write `## Relevant ADRs\n\nNo ADRs in adr/ reference this component, its technology, or its domain.` and move on.
+
+**Without `findings_by_component[<slug>]` (degraded fallback)** — intersect the component's name + technology + domain keywords against `adr_index[*].terms[]`. For each matched ADR, full-Read and excerpt as above. Conservative fallback: if the intersection returns 0 ADRs, also include any ADR whose title or status header literally mentions the component's name or any of its technologies.
 
 Format matches under `## Relevant ADRs` per `PAYLOAD_SCHEMA.md`.
 
@@ -596,5 +589,5 @@ Flow: User login — Gatekeeper writes session to cache with 30min TTL. See docs
 
 ---
 
-**Agent Version**: 1.1.0 (v3.14.4 — accepts `explore_results` for explorer-classified ADR allowlists; falls back to legacy v3.13.0 indexing pass when absent)
+**Agent Version**: 1.3.0 (v3.16.0 — accepts `findings_by_component` (EXPLORE_FINDINGS per-component map) for both ADR allowlists (from `focus_component.related_adrs`) AND per-component shared-doc slicing (from `files[*]` line-level matches); PHASE 3.2 swaps in-builder name+type+technology grep for findings-driven slicing; per-component degraded fallback to legacy v3.13.0 grep slicing when that component's explorer call failed. v1.2.0 — v3.16.0 manifest-mode integration. v1.1.0 — v3.14.4 explore_results integration.)
 **Specialization**: Per-component handoff payload assembly + manifest skip-check (C4 L2 containers only)

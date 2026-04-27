@@ -119,14 +119,15 @@ Restart Claude Code (or press Ctrl+R) to reload settings.
 
 ## v3.14.0 — what's new in this setup
 
-Existing projects re-running `/setup` after upgrading to v3.14.0 will see two new permissions added:
+Existing projects re-running `/setup` after upgrading to v3.14.0 will see one new permission added:
 
-- `Agent(sa-skills:architecture-explorer)` — the universal Haiku-tier doc classifier (front door for compliance / analysis / peer-review / handoff / Q&A / ADR workflows). Pre-existing `Agent(sa-skills:*)` grants are preserved; the new line is appended.
-- `Write(//tmp/architecture-explorer/**)` and `Read(//tmp/architecture-explorer/**)` — the explorer's per-project cache (sha256-keyed by candidate-file mtimes + plugin version + config mtime). Cache hits cost zero Haiku tokens.
+- `Agent(sa-skills:architecture-explorer)` — the universal Haiku-tier doc navigator (front door for compliance / analysis / peer-review / handoff / Q&A / ADR workflows). Pre-existing `Agent(sa-skills:*)` grants are preserved; the new line is appended.
+
+(The v3.14.0 explorer cache permissions for `/tmp/architecture-explorer/**` were removed in v3.16.0 — the cache and per-task config files are gone. The `/tmp/architecture-explorer/sessions/**` write permission is owned by the unrelated `architecture-explorer-headers` skill and is added separately under the v3.14.1 hook entry.)
 
 No marketplace re-registration is needed. The new `architecture-explorer-headers` skill (and its `/regenerate-explorer-headers` slash command) inherit existing `Bash(bun *)` and `Read/Write` doc-tree permissions — no extra grants required to run them.
 
-If a project's `settings.json` was committed with the v3.13.x permissions list and you want the upgrade visible in version control, run `/setup` and then commit the resulting two-line addition to `permissions.allow`.
+If a project's `settings.json` was committed with the v3.13.x permissions list and you want the upgrade visible in version control, run `/setup` and then commit the resulting one-line addition to `permissions.allow`.
 
 ## v3.14.1 — what's new in this setup
 
@@ -148,3 +149,19 @@ Existing projects re-running `/setup` after upgrading to v3.14.7 will see one ne
 No other permission, hook, marketplace, or `.gitignore` change is needed for v3.14.7. If you skip running `/setup` after the upgrade, dev-handoff invocations will hit a one-time permission prompt for `Agent(sa-skills:handoff-asset-generator)` on the first run — approve once and it will not repeat.
 
 The new `--asset-parallelism N` flag (default 4, capped at 8) is parsed by the orchestrator and requires no permission changes.
+
+## v3.16.0 — what's new in this setup
+
+Existing projects re-running `/setup` after upgrading to v3.16.0 will see one user-visible change and one quiet refresh:
+
+1. **CLAUDE.md managed block rewrite** — Step 5 replaces the v3.14.0 manifest-only explorer guidance with the v3.16.0 two-mode model:
+   - Manifest mode (no `query`) — corpus enumeration with EXPLORER_HEADER metadata.
+   - Findings mode (with `query`) — Explore-agent-style content discovery with line-level matches and headings.
+
+   The injected block also documents that compliance / analysis / dev-handoff now invoke the explorer in **findings mode** internally (per-contract / per-analysis / per-component fan-out keyed on hardcoded vocabularies), while peer-review and ADR creation invoke it in **manifest mode**. Free-form architecture Q&A from the main session uses findings mode with the user's question as the `query`. The decision tree for re-triggering the explorer (now keyed on whether the prior block in conversation is `EXPLORE_MANIFEST` vs `EXPLORE_FINDINGS`) replaces the v3.14.0 cache-aware tree.
+
+   The replacement is transparent — the helper script swaps only the content between the `<!-- sa-skills:architecture-pointer:begin -->` / `:end -->` markers. Any user content above or below those markers is preserved byte-for-byte.
+
+2. **Permissions** — no new grants are added in v3.16.0. The broad `Write(//tmp/architecture-explorer/**)` / `Read(//tmp/architecture-explorer/**)` entries from v3.14.0 are **retained** in `settings.json.example` because `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog` (the unrelated `architecture-explorer-headers` session-edit tracker, v3.14.1+) lives under that prefix. The per-task ranking cache files those grants originally covered no longer exist (the cache and per-task config files were removed in v3.16.0), but the same grant naturally covers the surviving `sessions/` editlog — so the line stays. The `Agent(sa-skills:architecture-explorer)` permission added in v3.14.0 is unchanged; v3.16.0 only renamed the agent's output block (`EXPLORE_RESULT` → `EXPLORE_MANIFEST`/`EXPLORE_FINDINGS`), which is invisible to the permission system.
+
+No marketplace re-registration, no hook change, no `.gitignore` change is required. If you skip `/setup` after upgrading to v3.16.0, the plugin still runs — you simply keep the v3.14.0 CLAUDE.md guidance pointing at the old manifest-only model, which slightly under-describes how the explorer behaves now.

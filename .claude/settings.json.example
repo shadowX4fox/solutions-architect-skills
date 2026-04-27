@@ -15,10 +15,10 @@
   },
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
-  "// BASH": "bun (template expansion, utils, explorer cache CLI, header detector CLI), date (contract timestamps), mkdir (compliance-docs dir)",
-  "// FILE ACCESS": "Read/Write /tmp/* (template processing), Read/Write //tmp/architecture-explorer/** (explorer cache, v3.14.0+), Read/Write compliance-docs/* (contract output)",
+  "// BASH": "bun (template expansion, utils, header detector CLI), date (contract timestamps), mkdir (compliance-docs dir)",
+  "// FILE ACCESS": "Read/Write /tmp/* (template processing), Read/Write //tmp/architecture-explorer/sessions/** (architecture-explorer-headers session-edit tracker), Read/Write compliance-docs/* (contract output)",
   "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
-  "// AGENTS": "10 compliance generators + 10 validators + universal architecture-explorer (Haiku classifier, v3.14.0) + 2 reviewers + handoff agents + docs export",
+  "// AGENTS": "10 compliance generators + 10 validators + universal architecture-explorer (Haiku navigator, v3.16.0) + 2 reviewers + handoff agents + docs export",
   "// WEBSEARCH": "Validators use WebSearch for EOL (end-of-life) technology version checks",
   "permissions": {
     "allow": [

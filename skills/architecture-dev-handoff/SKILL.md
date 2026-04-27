@@ -276,57 +276,54 @@ For each selected component, gather the following from its file header (15–30 
 
 Pack these into a YAML list to embed in the spawn prompt body. The context-builder does NOT re-read these files for metadata extraction — it consumes the orchestrator's pre-extracted list directly. Step 3.4 keeps the orchestrator's pre-3 work consistent with what it already does for component selection.
 
-**Step 3.4a: Per-component explorer fan-out (v3.14.4+)**
+**Step 3.4a: Per-component explorer findings fan-out (v3.16.0+)**
 
-Spawn `sa-skills:architecture-explorer` once per selected component, in parallel batches of `parallelism` (the Step 1.0 value, default 4, capped at 8). Each invocation classifies the project's architecture corpus *for that component specifically*, returning an `EXPLORE_RESULT` allowlist that the context-builder will use to skip irrelevant ADRs.
+Spawn `sa-skills:architecture-explorer` in findings mode once per selected component, in parallel batches of `parallelism` (the Step 1.0 value, default 4, capped at 8). Each invocation passes both `component_file` (for the `focus_component.related_adrs` allowlist) AND `query` (for line-level evidence across the canonical doc surface). The agent emits an `EXPLORE_FINDINGS` block carrying both — the per-component ADR allowlist AND the per-component shared-doc match map for Step 3.5.
 
 For each component, send one `Task()` with this prompt body:
 
 ```
 Task(sa-skills:architecture-explorer)
 prompt:
-  task_type: handoff-component
-  config_path: <plugin_dir>/agents/configs/explorer/handoff-component.json
   project_root: <project_root>
-  plugin_dir: <plugin_dir>
-  plugin_version: <plugin version from .claude-plugin/plugin.json>
-  extra_terms:
-    - <component.slug>
-    - <component.type>     # e.g. api-service, database, k8s-workload
-    - <each entry from component.technology[]>
-  component_file: <abs path to component.component_file>     # v3.14.8+ — enables EXPLORER_HEADER fast-path
-  force: <true if Phase 1.0 force is true, else false>
+  component_file: <abs path to component.component_file>
+  query: <component.slug>, <component.type>, <component.technology joined as ", ">
 ```
 
-**`component_file` (v3.14.8+)**: pass the absolute path to the single component `.md` file being explored. The explorer agent's PHASE 2.5 fast-path uses this to read the component's `<!-- EXPLORER_HEADER -->` block (specifically `related_adrs:`) and synthesize an `EXPLORE_RESULT` directly from those tags, skipping per-ADR LLM scoring. On a well-tagged component this drops Haiku token spend from ~84k to ~10–15k per explorer call. When the header is missing, malformed, or has empty `related_adrs:`, the agent transparently falls through to the normal scoring path. The dev-handoff orchestrator already has this path on hand from the component index, so passing it incurs no extra reads.
+That's the complete prompt — no `task_type`, no `config_path`, no `agent_version`, no `extra_terms`, no `force`. The explorer (a) reads the component's `<!-- EXPLORER_HEADER -->` block and copies `related_adrs:` into `focus_component.related_adrs`, and (b) runs parallel Grep + targeted Read across the canonical doc surface (`ARCHITECTURE.md`, `docs/**/*.md`, `adr/**/*.md`) for the query terms, emitting line-level matches with headings and 3–5-line excerpts.
 
-The explorer's `handoff-component.json` config marks all 7 shared docs + `ARCHITECTURE.md` + `docs/components/README.md` as `required_sections[]`, so they always appear in `EXPLORE_RESULT.relevant_files[]` regardless of score (false-negative safeguard). The variable members are ADRs that scored above `score_threshold: 0.20` and any cross-referenced component files. The `extra_terms` (component slug, type, technologies) are appended to `relevance_keywords.boost[]` at runtime with weight 4 — they differentiate one component's ADR allowlist from another's.
-
-Collect each `EXPLORE_RESULT` into a per-component map:
+Collect each findings block into a per-component map keyed by slug:
 
 ```yaml
-explore_results:
+findings_by_component:
   <slug-1>:
-    relevant_files: [<repo-rel paths from EXPLORE_RESULT.relevant_files[].path>]
-    cache_hit: <true|false>
-    explorer_status: <OK|PARTIAL|FAILED>
-    explorer_mode: <cached | header-shortcut | full-scoring>     # v3.14.8+ — derived from EXPLORE_RESULT.cache_hit and metadata.shortcut
+    findings: |                          # full EXPLORE_FINDINGS YAML body
+      schema_version: 2
+      status: OK
+      query: "<slug>, <type>, <tech>"
+      total_files_matched: <N>
+      total_matches: <M>
+      files: [...]                       # line-level matches per file
+      focus_component:
+        file: docs/components/<system>/NN-<slug>.md
+        related_adrs: [ADR-018, ADR-031]
+        has_header: true
+    explorer_status: <OK|FAILED>
+    explorer_mode: <header | unheaded | failed>
   <slug-2>:
     ...
 ```
 
 **Deriving `explorer_mode`**:
-- `cached` when `EXPLORE_RESULT.cache_hit == true`.
-- `header-shortcut` when `cache_hit == false` AND `metadata.shortcut == "header"` (PHASE 2.5 fast-path fired in the explorer agent).
-- `full-scoring` otherwise (normal PHASE 3–5 per-candidate scoring path).
+- `header` when the component's `focus_component.has_header == true` and `related_adrs` is populated (the canonical fast path).
+- `unheaded` when `has_header == false` (legacy doc; downstream falls back to title-match against `adr_index[*].terms`).
+- `failed` when the explorer returned `status: FAILED`.
 
-Track the mode counts for the Phase 7 report.
+Track the mode counts for the Phase 7 report. Also track `total_files_matched` and `total_matches` summed across components for the new findings-evidence telemetry line.
 
-If any explorer call returns `FAILED`, log a warning and synthesize a degraded `relevant_files[]` from the config's `required_sections[]` only (the 9 always-relevant entries) for that component. The context-builder will run in legacy mode for those slugs by intersecting against `adr_index` instead of trusting the empty allowlist.
+If any explorer call returns `FAILED` or empty `files[]`, log a warning. The context-builder will run in v3.13.0 legacy in-builder grep slicing for those slugs.
 
-If every explorer call returns `FAILED`, omit `explore_results` from the context-builder spawn prompt entirely — the builder will fall back to the v3.13.0 legacy path.
-
-This phase is the dev-handoff analog of the per-skill explorer integrations rolling out across v3.14.x. On a cache hit (no doc-tree changes since the last run), every explorer call costs zero Haiku tokens — the cached `EXPLORE_RESULT` is returned verbatim.
+If every explorer call returns `FAILED`, omit `findings_by_component` from the context-builder spawn prompt entirely — the builder falls back to the v3.13.0 legacy path corpus-wide.
 
 **Step 3.5: Spawn `sa-skills:handoff-context-builder`** (single Task call, NOT batched)
 
@@ -356,16 +353,25 @@ prompt:
       component_index_position: "NN"
     - slug: …
       …
-  explore_results:                                    # v3.14.4+ — from Step 3.4a
+  findings_by_component:                              # v3.16.0+ — from Step 3.4a
     <slug-1>:
-      relevant_files: [<repo-rel paths>]
-      cache_hit: <true|false>
-      explorer_status: <OK|PARTIAL|FAILED>
+      findings: |                                     # full EXPLORE_FINDINGS YAML body
+        schema_version: 2
+        status: OK
+        query: "<slug>, <type>, <tech>"
+        total_files_matched: <N>
+        total_matches: <M>
+        files: [...]
+        focus_component:
+          file: docs/components/<system>/NN-<slug>.md
+          related_adrs: [...]
+          has_header: <true|false>
+      explorer_status: <OK|FAILED>
     <slug-2>:
       ...
 ```
 
-(Omit the `explore_results` key entirely if Step 3.4a reported every component's explorer call `FAILED` — the builder falls back to the v3.13.0 legacy path that does its own ADR indexing.)
+(Omit the `findings_by_component` key entirely if Step 3.4a reported every component's explorer call `FAILED` — the builder falls back to the v3.13.0 legacy path that does its own ADR indexing and in-builder grep slicing. Per-component fallback applies to individual `FAILED` slugs while keeping the findings-driven path for the rest.)
 
 Wait for the `CONTEXT_RESULT:` block. The context-builder returns:
 
@@ -742,7 +748,8 @@ Context-builder (sonnet) reads:
   shared docs: [shared_docs_read from CONTEXT_RESULT]
   ADRs indexed: [adrs_indexed]
   ADRs full-Read: [adrs_full_read]
-Explorer mode (per component): cached: [Cc] | header-shortcut: [Ch] | full-scoring: [Cf]   (v3.14.8+ — header-shortcut bypasses per-ADR LLM scoring on well-tagged components)
+Explorer mode (per component): header: [Ch] | unheaded: [Cu] | failed: [Cf]   (v3.16.0+ — `header` is the canonical fast path: `findings.focus_component.has_header == true`; `unheaded` falls back to title-match against `adr_index[*].terms`; `failed` invokes the legacy v3.13.0 in-builder grep slicing path for that component)
+Explorer findings (per component): [TFM] matched files / [TM] total matches across [N] component(s)   (v3.16.0+ — sum of `findings.total_files_matched` and `findings.total_matches` across all OK components; surfaces how much line-level evidence the context-builder starts from instead of grepping the shared docs itself)
 Phase 5 cohort messages:   [B_C] cohort(s) — handoff Tasks: {parallelism}-parallel sonnet | asset Tasks: {asset_parallelism}-parallel (sonnet: [X], haiku: [Y])
 Step 5.3 gap-merge edits:  [E] component(s) had asset-level gaps merged into D1
 5A failure rate:           [Kf] / [N_regen] handoff doc(s) failed ([P]%) — revisit gating if sustained > 5%

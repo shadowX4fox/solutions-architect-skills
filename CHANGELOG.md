@@ -5,6 +5,99 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.16.0]
+
+### Added — Compliance / Analysis / Dev-handoff migrate to Findings mode (per-X fan-out)
+
+**Motivation**: with findings mode shipped (see entry below), the three consuming skills could move from manifest-mode enumeration ("here are all the files in the corpus, pick what to read") to findings-mode pinpointing ("here are the files where this domain's vocabulary actually appears, with line + heading + excerpt"). The synthesis tier (Sonnet/Opus) no longer re-greps inside each generator/analysis/context-builder — Haiku pre-locates the evidence.
+
+**Resolution**: per-X fan-out (per-contract / per-analysis / per-component) — each consumer spawns one explorer findings call per unit of work with a `query` lifted from that unit's hardcoded vocabulary. Hardcoded floors (compliance `phase3.required_files[]`, analysis per-lens base file lists) stay as guarantees; findings ADD line-level evidence on top. Per-X explorer calls are dispatched in parallel batches of 4 to preserve the cost shape that v3.14.x had before the simplification.
+
+**Compliance**:
+- `skills/architecture-compliance/SKILL.md` Step 3.2.5 — single shared explorer call replaced by per-contract findings fan-out keyed on `agents/configs/<contract>.json:key_data_points[]` (already 6–10 vocab terms per contract, no config edits needed).
+- `agents/generators/compliance-generator.md` — `EXPLORE_MANIFEST` consumption replaced with `EXPLORE_FINDINGS`. PHASE 3 Step 3.3 reads `phase3.required_files[]` (floor) plus `findings.files[]` using `matches[].line` / `heading` / `excerpt` as placeholder-extraction starting points (replaces the old grep-driven loop). No metadata cross-reference — findings are pre-scoped via `query`.
+- Validators unchanged — they still use their hardcoded read lists from the v3.16.0 cleanup.
+
+**Analysis**:
+- `skills/architecture-analysis/SKILL.md` Step 2.5 — single explorer call replaced by per-analysis findings fan-out keyed on a hardcoded vocabulary map (8 terms per analysis, lifted from each spec's "Evidence Extraction Priority" table).
+- Per-analysis FILES list = `union(base_files[type], findings.files[*].file)` — the hardcoded base set is the always-read floor; findings adds where evidence actually lives.
+- `agents/reviewers/architecture-analysis-agent.md` — docstring updated; agent contract unchanged.
+
+**Dev-handoff**:
+- `skills/architecture-dev-handoff/SKILL.md` Step 3.4a — per-component spawn now sends `component_file` AND `query: <slug>, <type>, <technologies>`. Step 3.5 context-builder input renamed `manifest` → `findings_by_component`.
+- `agents/builders/handoff-context-builder.md` — PHASE 2 ADR indexing reads files matched by `Glob adr/*.md` (no longer relies on a manifest `adrs[]` listing). PHASE 3.2 swaps in-builder name+type+technology grep for consumption of `findings_by_component[<slug>].files[*]` line-level matches; per-component fallback to v3.13.0 in-builder grep when that slug's explorer call failed. PHASE 3.3 ADR allowlist still sourced from `focus_component.related_adrs`. Agent version 1.2.0 → 1.3.0.
+- `agents/builders/architecture-explorer.md` — when `component_file` AND `query` are both set, the agent now runs the findings workflow AND emits the `focus_component` block (so per-component fan-out keeps the ADR allowlist alongside line-level evidence). Agent version 3.2.0 → 3.3.0.
+- Phase 7 telemetry — added line `Explorer findings (per component): N matched files / K total matches across N component(s)` surfacing how much line-level evidence the synthesis tier starts from.
+
+**Degraded mode**: any explorer call returning `status: FAILED` or empty `files[]` triggers per-unit fallback to the hardcoded floor (compliance → `phase3.required_files`; analysis → base FILES; dev-handoff → v3.13.0 in-builder grep slicing). All three skills still produce output; no run aborts on explorer failure.
+
+**Schema impact on consumer prompts** (BREAKING for prompt readers, transparent for users): the consumer skill prompts now embed `EXPLORE_FINDINGS:` blocks instead of `EXPLORE_MANIFEST:` blocks. Stays in v3.16.0 since the consumer migration ships with the findings mode that enabled it.
+
+---
+
+### Added — `architecture-explorer` gains Findings mode (Explore-agent-style content search)
+
+**Motivation**: with the per-task ranking machinery removed (see "Changed" below), the explorer became a pure enumerator — it lists what exists but does not surface where specific content lives. For free-form architecture Q&A ("what does our architecture say about SLOs?", "where do we discuss Kafka?"), the caller still had to bulk-read the manifest's listed files. That's the redundant-read pattern the explorer was originally meant to eliminate.
+
+**Resolution**: add an optional `query` input parameter that switches the agent into a second, **mutually exclusive** mode focused entirely on finding what was asked:
+
+- **Manifest mode** (no `query`) — the corpus enumeration introduced by the simplification (see "Changed"). Walks `ARCHITECTURE.md` + `docs/` + `adr/`, samples each file's first 60 / 40 lines for EXPLORER_HEADER metadata, emits an `EXPLORE_MANIFEST` listing every doc and ADR. Used by compliance, analysis, dev-handoff orchestrators.
+- **Findings mode** (`query` provided) — Claude's Explore-agent methodology, scoped to the architectural surface. Plans 3–8 search terms from the query, runs **parallel Grep** for every term in one tool message, aggregates matches by file, runs **parallel context Reads** (`offset: anchor − 5, limit: 30`) so the nearest H1/H2/H3 heading is captured, and emits an `EXPLORE_FINDINGS` block. **No manifest enumeration in this mode** — the output focuses entirely on what was asked. The agent does **not** answer the question — it surfaces evidence; the caller synthesizes.
+
+The two modes are mutually exclusive. When `query` is present, the manifest workflow is skipped entirely — no `docs[]` / `components[]` / `adrs[]` enumeration in the output. When `query` is absent, the findings workflow is skipped. The caller picks one mode per invocation; if both are needed, two separate calls.
+
+**`EXPLORE_FINDINGS` schema** (findings mode only):
+- `query: "<verbatim>"` — the input query string.
+- `search_terms: [...]` — the terms the agent extracted and grepped for (transparency).
+- `total_files_matched` / `total_matches` — counts.
+- `truncated` / `truncation_note` — set when capped at 10 files / 5 matches per file.
+- `files[]` — per-file entries with `matched_terms[]` and `matches[]` (each carrying `line`, `heading`, `excerpt`). Sorted by distinct terms matched DESC, then total match count DESC.
+
+**Surface scope**: findings mode runs strictly over `ARCHITECTURE.md` + `docs/*.md` + `docs/components/**/*.md` + `adr/*.md`. Source code, configuration, and tests are never read, even when the query mentions them. The "only difference vs Claude's general Explore agent" is the surface, not the methodology.
+
+**No effect on existing consumers**: compliance, analysis, and dev-handoff orchestrators do not pass `query`. They consume manifest mode only. The new `EXPLORE_FINDINGS` block is unreachable from their code paths. Backwards compatible.
+
+**Modified files**:
+- `agents/builders/architecture-explorer.md` — added Grep to tool list; added findings workflow (Steps F1–F9); split workflow into Mode dispatch with M-prefixed manifest steps and F-prefixed findings steps; agent version 3.0.0 → 3.2.0 (3.1.0 was an interim revision that merged the two modes — superseded).
+- `scripts/setup-claude-md.ts` — injected CLAUDE.md block updated to describe both modes; decision tree re-shaped around manifest-vs-findings mode selection.
+
+---
+
+### Changed — `architecture-explorer` simplified to a pure structure navigator (BREAKING)
+
+**Problem**: the v3.14.x explorer evolved into a relevance-classification engine with 36 per-task JSON configs, a Bun CLI with 12 subcommands, an mtime-keyed `/tmp/` cache, an in-house scoring formula (`boost / (boost + negative + 5)` + anchor bonus), gap-marker regexes, an EXPLORER_HEADER fast-path, and ~10 TypeScript modules with their tests. The complexity wasn't justified — every consuming skill (compliance, analysis, dev-handoff) already knows its own domain through its own configs and specs, so the per-task ranking only added a layer of indirection between the corpus and the agents that read it.
+
+**Resolution**: collapse the explorer to its actual job — be the front door that walks the canonical layout (`ARCHITECTURE.md` + `docs/` + `adr/`) and emits a manifest of what exists. The new agent uses Read + Glob only, extracts `<!-- EXPLORER_HEADER -->` metadata inline, and emits a single `EXPLORE_MANIFEST` YAML block listing every doc, component, and ADR in the corpus along with their `key_concepts`, `technologies`, `related_adrs`, etc. Downstream skills consume the manifest and pick what to read using their own domain configs (e.g. `agents/configs/<contract>.json:phase3.required_files` for compliance, hardcoded base-file lists per analysis lens). The dev-handoff orchestrator passes `component_file` to enable a per-component `focus_component.related_adrs` block sourced directly from that component's EXPLORER_HEADER.
+
+**Schema break**: `EXPLORE_RESULT` block renamed to `EXPLORE_MANIFEST`; `schema_version` bumped 1 → 2; `task_type` / `config_path` / `agent_version` / `extra_terms` / `force` / `explain` parameters removed; per-task config files removed.
+
+**Removed**:
+- `agents/configs/explorer/` — entire directory (37 files: 36 task-typed configs + `_schema.json`).
+- `skills/architecture-explorer/utils/` — entire directory (~18 TypeScript files: `classify.ts`, `score-files.ts`, `extract-file-facts.ts`, `emit-yaml.ts`, `explore-cache.ts`, `explore-cli.ts`, `parse-explore-result.ts`, `validate-config.ts`, `handoff-shortcut.ts`, plus tests).
+- `tools/derive-explorer-configs.ts` — the orphaned config-deriver.
+- The `/tmp/architecture-explorer/<project_hash>/<task_type>.json` cache (re-runs walk the corpus fresh).
+
+**Modified**:
+- `agents/builders/architecture-explorer.md` — full rewrite (~80 lines, model: haiku, tools: Read + Glob). Agent version bumped 2.0.0 → 3.0.0.
+- `agents/generators/compliance-generator.md` — consumes `EXPLORE_MANIFEST`; reads `phase3.required_files[]` always plus manifest entries whose metadata matches `phase3.key_data_points[]`.
+- `agents/builders/handoff-context-builder.md` — accepts a per-component `manifest` map; PHASE 3.3 takes ADR allowlist from `focus_component.related_adrs`. Agent version bumped 1.1.0 → 1.2.0.
+- `agents/reviewers/architecture-analysis-agent.md` — docstring updated to reflect orchestrator-built FILES list.
+- `skills/architecture-compliance/SKILL.md` — explorer fan-out collapses to a single call; validators no longer receive an explorer block; generators receive the shared manifest.
+- `skills/architecture-analysis/SKILL.md` — explorer call collapses to one invocation; per-analysis FILES lists are hardcoded base sets plus manifest-driven optional includes.
+- `skills/architecture-dev-handoff/SKILL.md` — per-component fan-out preserves the cost shape; explorer prompt simplifies to `project_root` + `component_file`. Phase 7 telemetry switches from `cached | header-shortcut | full-scoring` to `header | unheaded | failed`.
+- `scripts/setup-claude-md.ts` — injected CLAUDE.md block rewritten to describe the manifest model.
+- `commands/setup.md` — v3.14.0 setup section updated; cache permission line removed.
+- `.claude/settings.json.example` — header comments updated; cache write permission still listed (covers the orthogonal `/tmp/architecture-explorer/sessions/` editlog used by `architecture-explorer-headers`).
+- `CLAUDE.md` — Plugin Structure + Code Architecture + explorer paragraph rewritten.
+- `README.md` — top-of-file feature blurb rewritten.
+- `.claude-plugin/plugin.json` — version 3.15.1 → 3.16.0; description updated.
+
+**Migration**: no project-side action required. Existing projects re-running any compliance / analysis / dev-handoff skill after upgrading get the new behavior automatically. The `Agent(sa-skills:architecture-explorer)` permission grant is unchanged. The cache directory `/tmp/architecture-explorer/<project_hash>/` becomes orphaned; `/tmp` clears it on reboot. Compliance contracts, analysis reports, and handoffs regenerate identically — the manifest carries everything the previous `EXPLORE_RESULT` did, plus the full corpus listing for downstream domain-driven selection.
+
+**Verification**: `bun run typecheck` clean. `bun test` clean (deleted tests removed with the deleted code). `grep -rn "agents/configs/explorer" .` and `grep -rn "EXPLORE_RESULT" .` return only historical hits in this CHANGELOG entry. End-to-end smoke against a sample architecture project: compliance-sre, analysis-spof, and per-component dev-handoff all run identically to v3.15.1, with the explorer emitting `EXPLORE_MANIFEST` instead of `EXPLORE_RESULT`.
+
+---
+
 ## [3.15.1]
 
 ### Fixed — Avro / Protobuf detection misses when wire format is documented outside the canonical 5 fields
