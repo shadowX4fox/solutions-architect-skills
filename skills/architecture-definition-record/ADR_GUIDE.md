@@ -45,6 +45,45 @@ Every ADR carries a **Scope** field that determines which number range it occupi
 
 ---
 
+## Institutional ADR Content Discipline
+
+Institutional ADRs (001–100) are organization-wide standards reused across **all** projects. To stay reusable, they MUST be project-agnostic.
+
+### Open with Scope only
+
+Every institutional ADR opens with exactly:
+
+```
+**Scope**: Institutional
+```
+
+No "Institutional Inheritance Note" header, no project tag, no parent-project metadata.
+
+### What an Institutional ADR MUST NOT contain
+
+| Forbidden pattern | Use instead |
+|-------------------|-------------|
+| "Institutional Inheritance Note" header tying the ADR to a specific project | (omit entirely) |
+| "Section 3 — Project Application" table | (omit entirely) |
+| "Project Application — \<Feature\>" subsections | (omit entirely) |
+| Specific component names (e.g., Inbox Hub, Inbox Materializer, omn-mfa, omn-bs, sda-msa-payments-gateway, bmo-msa-gk-action-balance) | "platform", "service team", "the workload namespace", "platform-specific component" |
+| Specific operator / carrier / brand names (e.g., Claro, Movistar, Tuenti, CNT) | Generic phrasing — "the operator", "the partner", or omit |
+| Specific feature names (e.g., "Recargas y Combos", specific topic names) | Generic capability description |
+| Project budget figures (e.g., "$276,411 budget") | "platform delivery budget" or omit |
+| Project deadlines (e.g., "MVP deadline of June 30, 2026") | "platform delivery timelines" or omit |
+| Project user counts (e.g., "7M mobile users / 300K web users") | "the bank's customer base", "millions of customers" |
+| Cross-references to project ADRs (ADR-101+) | Cross-reference only other institutional ADRs (ADR-001..100) |
+
+### Why this matters
+
+Institutional ADRs are inherited by every project. If ADR-005 says "applies to omn-mfa", every team that doesn't run omn-mfa has to mentally translate the rule — and translation drift creates compliance gaps. Generic phrasing keeps the standard reusable verbatim.
+
+### When project specifics belong in an ADR
+
+If a decision is genuinely project-local — bound to a specific component, operator, budget, or deadline — it is a **User/Project ADR** (ADR-101+), not an institutional one. Move it to the project range and write project-specific content freely there.
+
+---
+
 ## ADR Template
 
 Use this template for all architectural decisions:

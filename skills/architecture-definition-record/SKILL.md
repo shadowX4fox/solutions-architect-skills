@@ -227,6 +227,8 @@ Store template content in memory for reuse across all ADR files.
 
 > **CRITICAL**: Use the **full canonical template** (all 10 sections). Do NOT produce abbreviated stubs with empty body sections. Every section for which architecture documentation provides relevant context MUST be populated. Only Implementation Plan and Success Metrics may remain as optional stubs.
 
+> **Institutional content discipline**: When generating any ADR with `Scope: Institutional` (numbers 001–100), apply the rules in `ADR_GUIDE.md § Institutional ADR Content Discipline` — no "Institutional Inheritance Note", no "Project Application" sections, no component/operator/budget/timeline specifics, no cross-refs to ADR-101+. If source material from `ARCHITECTURE.md` contains those specifics, generalize them in the institutional ADR (and optionally retain the specifics in a paired User/Project ADR).
+
 For each ADR in the list:
 
 **Generate file path:**
@@ -409,6 +411,15 @@ TEMPLATE LOAD FAILURE: Could not load ADR-000-template.md. ADR generation aborte
 ```
 
 Populate all sections from the interview answers. Fill the `**Scope**` header field with the value from Step 2.1a (`Institutional` or `User`). Leave Implementation Plan and Success Metrics as optional stubs unless user provided that information.
+
+**Step 2.4a — Institutional content gate**: If the scope chosen in Step 2.1a is `Institutional`, before writing the file, verify the populated content does NOT contain:
+- "Institutional Inheritance Note" header
+- "Project Application" sections or tables
+- Specific component names, operator names, or feature names
+- Project budgets, deadlines, or user counts
+- Cross-references to ADR-101+
+
+If any are present, generalize them per `ADR_GUIDE.md § Institutional ADR Content Discipline` and confirm with the user before writing.
 
 #### Step 2.5: Write File
 

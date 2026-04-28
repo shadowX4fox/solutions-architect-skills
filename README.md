@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.16.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.16.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.16.0` in the list.
+You should see `sa-skills v3.16.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,31 @@ Where:
 
 ## Roadmap
 
-### v3.16.0 (Current Release) ✅
+### v3.16.1 (Current Release) ✅
+**docs: Institutional ADR content discipline — codify project-agnostic rules for ADR-001..100 in `architecture-definition-record`**
+
+Adds a new "Institutional ADR Content Discipline" section to `skills/architecture-definition-record/ADR_GUIDE.md` (between "ADR Scope" and "ADR Template"). The section enumerates the project-specific patterns that institutional ADRs (numbers 001–100) must NOT contain — "Institutional Inheritance Note" headers, "Section 3 — Project Application" tables, specific component names (Inbox Hub, omn-mfa, sda-msa-payments-gateway, etc.), specific operator / carrier / brand names (Claro, Movistar, Tuenti, CNT), specific feature names, project budgets ("$276,411"), project deadlines ("MVP June 30, 2026"), user counts ("7M mobile users / 300K web users"), and cross-references to project ADRs (ADR-101+). Each forbidden pattern is paired with the generic phrasing that replaces it ("platform", "service team", "the workload namespace", "the bank's customer base", "platform delivery timelines", etc.). Captures the recent rewrite of all 14 institutional ADRs as a durable rule rather than oral tradition.
+
+**Enforcement at the workflow level**: cross-references added at two gates inside `architecture-definition-record/SKILL.md`:
+
+- **Workflow 1 Step 1.5 (Generate from ARCHITECTURE.md)** — institutional content callout fires when generating any ADR with `Scope: Institutional`, instructing the generator to generalize project-specific source material from `ARCHITECTURE.md` (and optionally retain those specifics in a paired User/Project ADR).
+- **Workflow 2 Step 2.4a (Create Individual ADR)** — new content gate after Step 2.4 (Load Template and Populate). When the scope chosen at Step 2.1a is `Institutional`, the gate verifies the populated content does not contain any forbidden pattern before the write happens; if it does, the skill generalizes per the new ADR_GUIDE section and confirms with the user.
+
+Both gates fire only for institutional scope; user/project ADRs (ADR-101+) are unaffected and may continue to carry project-specific content freely. The canonical template (`adr/ADR-000-template.md`) gains a one-line HTML comment next to the `**Scope**` field pointing authors at the new guide section so the rule is visible at the moment of authoring even when the skill is not in the loop.
+
+**Modified files**:
+
+- `skills/architecture-definition-record/ADR_GUIDE.md` — new "Institutional ADR Content Discipline" section with forbidden-pattern table, "why it matters" rationale (translation drift creates compliance gaps when institutional standards leak project specifics), and "when project specifics belong in an ADR" guidance pointing readers to the User/Project range.
+- `skills/architecture-definition-record/SKILL.md` — Workflow 1 Step 1.5 institutional content callout (line 230); Workflow 2 Step 2.4a institutional content gate (line 415–422).
+- `skills/architecture-definition-record/adr/ADR-000-template.md` — inline HTML hint comment on the `**Scope**` line (invisible in rendered output, visible to template editors).
+
+**No code changes**: pure documentation / skill-content edits. Type-check and test suites are unaffected. The numeric scope partition rule from `CLAUDE.md` ("ADR Scope Partition" — ADR-001..100 institutional, ADR-101+ user/project) is unchanged; this release adds the *content* dimension that complements the *number range* dimension.
+
+**Migration**: none required. The rule applies to new institutional ADRs created or generated through the skill from this version forward. Existing institutional ADRs that were already rewritten to be project-agnostic continue to comply automatically. Projects with non-compliant historical institutional ADRs can run a manual review against the new ADR_GUIDE section — the skill does not retroactively rewrite already-written ADRs.
+
+---
+
+### v3.16.0 (Previous Release) ✅
 **feat: `architecture-explorer` simplified to a structure navigator + Findings mode + consumer migration to per-X fan-out**
 
 This release reshapes the universal `architecture-explorer` agent and migrates its three consumer skills (compliance, analysis, dev-handoff) to a new evidence-driven contract.

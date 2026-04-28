@@ -2,6 +2,7 @@
 
 **Status**: Proposed | Accepted | Deprecated | Superseded by ADR-XXX
 **Scope**: Institutional | User
+<!-- For Institutional scope (ADR-001..100), see ADR_GUIDE.md § Institutional ADR Content Discipline — no project-specific content allowed. -->
 **Date**: YYYY-MM-DD
 **Authors**: [Author names or team name]
 **Related**: [Links to related ADRs, e.g., ADR-001, ADR-005]
