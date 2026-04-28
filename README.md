@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.17.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.17.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.17.1` in the list.
+You should see `sa-skills v3.17.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,16 @@ Where:
 
 ## Roadmap
 
-### v3.17.1 (Current Release) ✅
+### v3.17.2 (Current Release) ✅
+**fix: drop incorrect Ctrl+R claim from `/setup` final reminder**
+
+`commands/setup.md` Step 7 (Final reminder) printed `Restart Claude Code (or press Ctrl+R) to reload settings.` — the Ctrl+R parenthetical was wrong: Claude Code's Ctrl+R is bound to `HistorySearch`, not settings reload. On Linux the chord is also intercepted by bash readline's reverse-history-search before it ever reaches Claude Code, so the instruction misled users who tried it. The reminder now reads `Restart Claude Code to reload settings.` — accurate, terminal-agnostic.
+
+**Files**: `commands/setup.md` (1 line). No skill behavior or workflow change. Existing tests unaffected (no code touched).
+
+---
+
+### v3.17.1 (Previous Release) ✅
 **feat: ADR title and Problem Statement length constraints (blocking gate)**
 
 Adds two universal length rules enforced at every ADR write — first-time create (Workflow 2) and bulk generation from Section 12 (Workflow 1):

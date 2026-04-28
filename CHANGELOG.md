@@ -5,6 +5,16 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.17.2]
+
+### Fixed — `/setup` final reminder no longer claims Ctrl+R reloads settings
+
+`commands/setup.md` Step 7 printed `Restart Claude Code (or press Ctrl+R) to reload settings.` — the Ctrl+R parenthetical was incorrect. In Claude Code, Ctrl+R is bound to `HistorySearch`, not settings reload. On Linux the chord is additionally intercepted by bash readline's reverse-history-search before it can reach Claude Code, so the instruction misled users who tried it. The reminder now reads `Restart Claude Code to reload settings.`
+
+**Files**: `commands/setup.md` (1-line change). No skill, workflow, agent, or code behavior changes. The 405 existing Bun tests remain green.
+
+---
+
 ## [3.17.1]
 
 ### Added — ADR title and Problem Statement length constraints (blocking gate)

@@ -106,7 +106,7 @@ Print:
 
 ```
 
-Restart Claude Code (or press Ctrl+R) to reload settings.
+Restart Claude Code to reload settings.
 ```
 
 ## Notes

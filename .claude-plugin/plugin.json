@@ -1,7 +1,7 @@
 {
   "name": "sa-skills",
-  "version": "3.17.1",
-  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (14 skills, 10 compliance agents, universal architecture-explorer with manifest + findings modes, per-component asset generation, two-layer Section 3 enforcement gate v3.17.1)",
+  "version": "3.17.2",
+  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (14 skills, 10 compliance agents, universal architecture-explorer with manifest + findings modes, per-component asset generation, two-layer Section 3 enforcement gate v3.17.2)",
   "author": {
     "name": "shadowX4fox",
     "email": "your-email@example.com",
