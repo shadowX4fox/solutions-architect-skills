@@ -706,6 +706,33 @@ For comprehensive Mermaid diagram guidance, including:
 
 **Purpose**: Guiding principles that drive architectural decisions.
 
+### Quality Attribute vs. Principle — disambiguation
+
+**Section 1** (Executive Summary → Key Metrics) records **outcomes**: measurable system properties.
+**Section 3** records **decision rules**: how the team decides between options when trade-offs arise.
+
+| Belongs in Section 1 (Quality Attribute / KPI) | Belongs in Section 3 (Principle / Decision Rule) |
+|---|---|
+| "99.9% availability" | "We accept 3x infrastructure cost to achieve 99.9% availability" |
+| "p95 latency < 200ms" | "We prefer denormalized reads over normalized joins to meet our p95 latency target" |
+| "10,000 RPS peak throughput" | "We scale horizontally over vertically; capacity is a feature, not a constraint" |
+| "Data classification: PII (Tier 2)" | "We encrypt all PII at rest with HSM-backed keys; we accept 5–10% write-path latency" |
+| "RPO ≤ 15 minutes" | "We choose synchronous cross-region replication despite +30ms p95 write latency" |
+
+A statement is a **principle** if it begins with — or implies — a verb of *choice*: `accept`, `prefer`, `prioritize`, `defer`, `delegate`, `choose`, `trade`, `refuse`, `favor`, `reject`, `require`, `enforce`, `mandate`.
+
+A statement is a **quality attribute** if it states a target metric or measurable outcome with no actor making a decision.
+
+**Why this matters**:
+- A principle of "99.9% availability" is **not a principle** — it's a goal restated. It tells the team nothing about *how* to choose between competing designs that all could plausibly achieve 99.9%.
+- A principle of "We accept 3x infrastructure cost to achieve 99.9% availability" is a **decision rule** — it tells the team that when a cheaper design at 99.5% is offered, the answer is no.
+
+**Enforcement**: `PRINCIPLE_VALIDATION.md` rule `P-QA-CONFLATION-01` blocks Description fields that state a numeric outcome without a decision verb. Layer 2 reviewer (`agents/reviewers/principle-quality-reviewer.md`) catches paraphrased outcomes the regex misses (`checkType: conflation`).
+
+Use **Description** to state the rule, **Implementation** to show the chosen tactics, **Trade-offs** to enumerate the cost of the choice. Never state a metric in Description without naming the trade-off the metric implies.
+
+---
+
 **Required Principles (in order):**
 
 All architecture documents must include these 9 core principles in this exact order:

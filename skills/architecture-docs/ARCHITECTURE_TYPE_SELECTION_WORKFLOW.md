@@ -474,7 +474,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 > **CRITICAL**: Steps 4a–4g (C4 component structure) below are MANDATORY for ALL PO Spec paths (Option 1, 2, 3, or 4). The C4 system folder structure MUST be created regardless of how business context was provided. Do NOT skip system identification (4a–4c) or create flat component files without system subfolders.
 
 **ADR Context Block consistency**: Reference the ADR Context Block (from Step 0.5) when writing each section. As decisions are made during section creation, update the corresponding ADR candidate from `PENDING` to `DECIDED` with the decision summary and rationale. This ensures:
-- **Section 3 (Principles)**: Trade-offs align with ADR candidates — each principle's Implementation/Trade-offs should reference relevant pending or decided ADRs
+- **Section 3 (Principles)**: Trade-offs align with ADR candidates — each principle's Implementation OR Trade-offs **MUST** contain at least one ADR reference (`[ADR-NNN](...)`, `per ADR-NNN`, or equivalent) **OR** the explicit `<!-- NO_ADR_GOVERNS -->` sentinel (also accepted as the visible blockquote `> No ADR governs this aspect yet`). Layer 1 (`PRINCIPLE_VALIDATION.md` rule `P-ADR-REF-01`) enforces this; Layer 2 (`principle-quality-reviewer`) flags overuse of the sentinel for explicit user confirmation.
 - **Section 4 (Architecture Layers)**: References ADR for architecture pattern (decided at Step 2)
 - **Section 8 (Technology Stack)**: Each technology choice resolves a technology-related ADR candidate
 - **Section 9 (Security)**: References security/compliance ADR candidates
@@ -496,7 +496,11 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      - Populate Implementation and Trade-offs using: PO Spec Section 7 (Business Constraints), architecture type decisions, and technology choices from the architecture discussion
      - **Document header**: Use `## Architecture Principles (9 Core Principles)` — or `(10 Core Principles)` if optional principle 10 is included
      - Do NOT invent custom principles, omit any of the 9, or reorder them
-     - Validate against VALIDATIONS.md → "Section 3: Architecture Principles Validation" checklist before finalizing
+     - **Section 3 Enforcement Gate (BLOCKING)**: After writing this file, run the two-layer validation pipeline (see SKILL.md → "Section 3 Enforcement Gate"):
+       1. Layer 1 — execute every rule in `PRINCIPLE_VALIDATION.md` against `docs/02-architecture-principles.md`. The report MUST quote the grep output for each rule (anti-self-attestation).
+       2. Layer 2 — invoke `agents/reviewers/principle-quality-reviewer.md` in `mode: first-write` with the principles file, system overview, layers (for `arch_type`), tech stack, and ADR index.
+       3. Both layers must return `status: PASS` (warnings allowed) before this section is considered finalized. On FAIL, regenerate per the report and re-run from Layer 1; cap at 3 rounds, then escalate to user. Do NOT proceed to subsequent sections (S4 → S11) until S3 passes the gate.
+       The advisory VALIDATIONS.md checklist (now described in `VALIDATIONS.md` → "Validator-Enforced Rules") documents what the gate enforces — it is no longer a separate manual step.
    - `docs/03-architecture-layers.md` — Section 4 (Architecture Layers, type-specific template)
    - `docs/04-data-flow-patterns.md` — Section 6 (Data Flow Patterns)
    - `docs/05-integration-points.md` — Section 7 (Integration Points)
@@ -635,7 +639,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
      **Last Updated:** <today ISO date>
      ```
    - Fill in component details using the type-specific Section 5 template (loaded in Step 3)
-   - Use placeholder values (e.g., `[To be defined]`) for fields the user hasn't specified yet
+   - Use placeholder values (e.g., `[To be defined]`) ONLY for **non-mandatory** fields the user hasn't specified yet. **Mandatory fields with placeholders BLOCK Step 6 (ADR generation)** — see the Placeholder Elimination Gate below and `PRINCIPLE_VALIDATION.md` → Appendix A for the mandatory-field map.
    - **Description field**: mandatory; write a one-line tagline (≤120 characters) summarizing what this component does. Longer prose belongs in the **Purpose** section.
    - **Version fields**: all new components start at `Component Version: 1.0.0` with `Architecture Version` matching the parent architecture version (initially `1.0.0`). `Last Updated` = today's date in ISO format.
 
@@ -748,6 +752,33 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 - At least one `docs/components/NN-name.md` file per identified component
 - `docs/components/README.md` with 5-column index matching all component files
 - Each component file has: breadcrumb, `# Heading`, `**Type:**` field
+
+#### Step 5.7: Placeholder Elimination Gate (BLOCKING — runs before Step 6)
+
+After Step 5 completes (all `docs/` files written), run the Placeholder Elimination Gate. The gate is BLOCKING — Step 6 (ADR delegation) does NOT run until the gate passes.
+
+**Mandatory-field map** lives in `PRINCIPLE_VALIDATION.md` → Appendix A. Scope `first-write` enforces:
+
+- `docs/01-system-overview.md`: System Name, Purpose, Business Value, every Key Metric row
+- `docs/02-architecture-principles.md`: every Description / Implementation / Trade-offs subsection (also enforced by the Section 3 Enforcement Gate)
+- `docs/03-architecture-layers.md`: `<!-- ARCHITECTURE_TYPE: -->` value, every layer name and description
+- `docs/06-technology-stack.md`: Languages, Frameworks, Databases, Infrastructure tables
+- `docs/07-security-architecture.md`: Authentication, Authorization, Encryption-in-transit, Encryption-at-rest
+- `docs/components/<system>/NN-*.md`: Type, Technology, C4 Level, Description, Purpose
+- `docs/components/<system>.md`: Owner, Containers count, Description
+
+**Detection**:
+```bash
+grep -rnE '\[(to be defined|tbd|placeholder|fixme|your [a-z]+|describe [a-z]+)\]|<TODO>|TODO:|XXX' \
+  docs/01-system-overview.md docs/02-architecture-principles.md docs/03-architecture-layers.md \
+  docs/06-technology-stack.md docs/07-security-architecture.md docs/components/
+```
+
+**Pass criterion**: 0 matches in the listed mandatory fields. Matches in non-mandatory fields are warnings, not blockers.
+
+**On FAIL**: list every offending field to the user with the file:line reference, regenerate the offending field with concrete content, re-run the gate. Cap at 3 rounds. Round 4 → escalate to user with the list and ask whether to proceed with the placeholders intact (explicit override only).
+
+**Why this gate**: an architecture document that ships with `[To be defined]` in mandatory fields will silently fail compliance contracts, peer reviews, and the release workflow downstream. Catching it here costs minutes; catching it at release costs days.
 
 #### Step 6: Delegate ADR Generation (Optional)
 

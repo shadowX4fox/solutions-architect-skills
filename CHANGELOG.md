@@ -5,6 +5,63 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.17.0]
+
+### Added — Two-layer Section 3 (Architecture Principles) Enforcement Gate (no-code, reliability-first)
+
+**Motivation**: Section 3 validation in `architecture-docs` was advisory. `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md:499` and `SKILL.md:238` said a checklist "MUST" pass before finalizing the principles file, but the checklist was loose prose with no exact patterns and no enforcement mechanism. Models routinely "self-validated" by claiming it passed without actually checking. Three concrete failure modes shipped through this gap regularly:
+
+1. **Platitudes** ("industry best practices", "we follow industry standards", "enterprise-grade") survived all checks because no blocklist existed.
+2. **Quality-attribute conflation** — principle Descriptions stating outcomes ("99.9% availability", "p95 < 200ms") rather than decision rules — were never flagged as the central category error of Section 3.
+3. **Trade-offs** that were quantification-poor ("more complexity", "higher costs", "increased operational burden") passed structural checks because the checklist asked for "honest and substantive" without defining what that meant operationally.
+4. **Edits** to S3 didn't re-validate downstream — Phase 1–5 propagation did keyword grep, not semantic alignment. Principle changes drifted out of sync with S4–S11 invisibly.
+5. **No architecture-type expectations** — all five architecture types (3-Tier / Microservices / N-Layer / META / BIAN) got the same generic 9 principles with no type-aware requirements (e.g., Microservices not requiring circuit breakers in Resilience).
+
+**Resolution — two-layer validation, both pure Markdown** (no compiled code, no new dependencies — the existing `Bash(grep:*)` permission is the only execution surface):
+
+- **Layer 1 — Prescriptive checklist** (`skills/architecture-docs/PRINCIPLE_VALIDATION.md`, NEW): single source of truth for principle validation rules. 14 rule IDs (`P-STRUCT-01..04`, `P-PLACEHOLDER-01`, `P-CUSTOM-01`, `P-PLATITUDE-01`, `P-SPECIFIC-01`, `P-TRADEOFF-QUANT-01`, `P-TRADEOFF-COUNT-01`, `P-TRADEOFF-NEG-01`, `P-QA-CONFLATION-01`, `P-ADR-REF-01`, `P-CROSS-CONTRA-01`, `P-TYPE-MATRIX-01`). Each rule documents an exact `grep` command, a pass criterion, and a fail-message template. The model executes rules in order and emits a `PRINCIPLE_VALIDATION_REPORT` block. **Anti-self-attestation rule**: every finding MUST quote the grep output verbatim — claims without evidence are treated as FAIL by the orchestrator. Includes an architecture-type matrix (per-type required-any-of phrases) and Appendix A (mandatory-field placeholder map for first-write / edit / release scopes).
+
+- **Layer 2 — Semantic reviewer** (`agents/reviewers/principle-quality-reviewer.md`, NEW; model: opus): runs after Layer 1 passes. Three modes — `first-write` (full review), `edit-delta` (focus on changed principles), `downstream-impact` (assess one downstream file against new/changed principles). Seven `checkType` judgments — `decision-rule`, `specificity`, `tradeoff-honesty`, `adr-alignment`, `cross-principle`, `conflation`, `type-sanity`. Each catches a class of failures the regex layer cannot: paraphrased platitudes, tech-name-dropping (citing tech the system doesn't actually use), trade-offs that *look* quantified but aren't, ADR citations to nonexistent files, type-incoherent advice, conflations that dodge `P-QA-CONFLATION-01` via paraphrase. Hallucination guard: every cited ADR file must exist in `adr/`. Fail-open: timeouts / empty responses are PASS-with-warning, never block forever.
+
+- **Hard gate at S3 write** (modified `skills/architecture-docs/SKILL.md` lines 237–245 and `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` line 499): both first-write and edit paths to `docs/02-architecture-principles.md` invoke the two-layer gate. Both layers must pass before the write is finalized. On FAIL, the model receives the report and revises in a loop. Cap at 3 rounds, then escalate to user with all 3 rounds' reports side by side. No silent overrides.
+
+- **ADR reference enforcement** (`ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md:477`): the advisory "Trade-offs align with ADR candidates — should reference" is now MUST. Each principle's Implementation OR Trade-offs must contain at least one ADR link or carry the explicit `<!-- NO_ADR_GOVERNS -->` sentinel. Layer 1 enforces; Layer 2 flags overuse of the sentinel.
+
+- **Phase 1.5 — Principle Alignment Audit** (new section in `SKILL.md` between Phase 1 and Phase 2 of the Downstream Documentation Propagation): runs only when the edit target is `docs/02-architecture-principles.md` AND the diff has substantive word-level changes in any of {Description, Implementation, Trade-offs}. Diffs S3 per-principle, fans out the `principle-quality-reviewer` sub-agent in `mode: downstream-impact` over each downstream file (S4–S11 + every `docs/components/**/*.md`) in parallel batches of 4. Findings flow into the Phase 2 approval checklist labeled `[principle-impact]`. Skips silently on whitespace/formatting-only diffs (anti-cost). Anti-recursion: Phase 1.5 sub-agent calls do NOT trigger another Phase 1.5.
+
+- **S5 → S3 reverse dependency** (`SKILL.md` line 292 row): adding a component now triggers a principle-vs-component sanity check via `principle-quality-reviewer` in `mode: downstream-impact`. Catches the common drift where new components silently violate existing principles.
+
+- **Placeholder Elimination Gate** (new Step 5.7 in `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`, before Step 6 ADR delegation): scans the mandatory-field map (`PRINCIPLE_VALIDATION.md` Appendix A) for `[To be defined]`, `[TBD]`, `<TODO>`, `TODO:`, `XXX`, etc. Any match in a mandatory field BLOCKS Step 6. Step 4d's permissive "use placeholder values" is now scoped to non-mandatory fields only.
+
+- **Quality Attribute vs. Principle disambiguation** (new H3 in `ARCHITECTURE_DOCUMENTATION_GUIDE.md` before Section 3): explicit comparison table (outcomes vs. decision rules), the "verb of choice" rule (`accept`, `prefer`, `prioritize`, `defer`, `delegate`, `choose`, `trade`, `refuse`, `favor`, `reject`, `require`, `enforce`, `mandate`), and worked examples. Closes the conflation gap that `P-QA-CONFLATION-01` enforces operationally.
+
+- **VALIDATIONS.md rewrite** (lines 134–174): the prose checklist is replaced by a `Validator-Enforced Rules` table (Rule ID / Severity / What it enforces / Pass example / Fail example). New sub-sections summarize the architecture-type matrix and the Layer 2 semantic review. The TS-validator-style "source of truth" disclaimer makes `PRINCIPLE_VALIDATION.md` canonical.
+
+- **REVIEW_AUDIT_WORKFLOW.md update** (Phase 1 Check 3.1): "run the validator first" replaces the manual checklist. If the validator returns BLOCKING, Phase 1 fails immediately and the document is not ready for review. Manual review is now scoped to what the validator does NOT catch — narrative coherence, principle prioritization vs. business strategy, redundancy across principles.
+
+**Permission additions** (`.claude/settings.json.example`):
+- `Bash(grep:*)`, `Bash(rg:*)`, `Bash(awk:*)`, `Bash(ls:*)` — scoped permissions for the validator's grep commands and ADR-existence checks (the existing `Bash(bun *)` did not cover these).
+- `Agent(sa-skills:principle-quality-reviewer)` — the new sub-agent.
+- Updated agent-count comment header to reflect "3 reviewers" (peer-review-category, architecture-analysis, principle-quality).
+
+**Reliability stance**: this release optimizes for the **correctness of produced documentation**, not for token cost. Deeper context loads, more sub-agent calls, hard blockers where there were soft warnings, mandatory grep-output quoting to prevent self-attestation, max-3-round revision loops with explicit user escalation. Users who need a fast/cheap path can pin to v3.16.1.
+
+**Files**:
+- ADD `skills/architecture-docs/PRINCIPLE_VALIDATION.md`
+- ADD `agents/reviewers/principle-quality-reviewer.md`
+- MODIFY `skills/architecture-docs/SKILL.md` (Section 3 Enforcement Gate at lines 237–245; Phase 1.5 between Phases 1 and 2; S5 reverse dependency row at line 292)
+- MODIFY `skills/architecture-docs/ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` (lines 477, 499; Step 4d placeholder note; new Step 5.7 Placeholder Elimination Gate)
+- MODIFY `skills/architecture-docs/ARCHITECTURE_DOCUMENTATION_GUIDE.md` (new "Quality Attribute vs. Principle" callout before Section 3)
+- MODIFY `skills/architecture-docs/VALIDATIONS.md` (Validator-Enforced Rules table + Architecture-Type Specific Expectations + Layer 2 Semantic Review sub-sections)
+- MODIFY `skills/architecture-docs/REVIEW_AUDIT_WORKFLOW.md` (Phase 1 Check 3.1 invokes validator first)
+- MODIFY `.claude/settings.json.example` (permissions + agent count)
+- MODIFY `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json` (3.16.1 → 3.17.0)
+- MODIFY `README.md` (recent-releases line)
+
+**Note on version reuse**: 3.17.0 was previously the version of an explore→Plan→editor pipeline that was reverted in commits `def0d80` and `557cf71` before any `architecture-v*` or `v*` tag was created. No git tag exists for the prior 3.17.0 — reuse is safe.
+
+---
+
 ## [3.16.0]
 
 ### Added — Compliance / Analysis / Dev-handoff migrate to Findings mode (per-X fan-out)

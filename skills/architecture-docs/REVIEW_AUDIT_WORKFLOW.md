@@ -105,34 +105,32 @@ Verify structural integrity and compliance with architecture documentation stand
 
 #### 3. Architecture Principles Enforcement
 
-**What to Check**:
-- All 9 core principles documented in Section 3
-- Each principle has three required subsections:
-  1. **Description**: What the principle is and why it matters
-  2. **Implementation**: How it's implemented in this specific system
-  3. **Trade-offs**: Real costs and downsides (minimum 3 trade-offs per principle)
-- Trade-offs are honest and substantive (not superficial or generic)
+**Step 1 — Run the validator first**.
 
-**9 Core Principles**:
-1. Separation of Concerns
-2. High Availability
-3. Scalability First
-4. Security by Design
-5. Observability
-6. Resilience
-7. Simplicity
-8. Cloud-Native (or equivalent deployment model)
-9. Open Standards
+Layer 1 (`PRINCIPLE_VALIDATION.md`) and Layer 2 (`agents/reviewers/principle-quality-reviewer.md`) catch the structural, hygiene, semantic-lite, ADR-reference, type-matrix, and platitude/conflation issues. Run them as the first action of this check. The validator's `PRINCIPLE_VALIDATION_REPORT` block (Layer 1) and `PRINCIPLE_REVIEW_RESULT` block (Layer 2) replace the bulk of the manual checklist below.
 
-**Trade-off Quality Criteria**:
-- ✅ **Good**: "3x infrastructure costs for redundancy, 10-minute manual database failover RTO, requires 24/7 on-call rotation"
-- ❌ **Bad**: "More complexity", "Higher costs", "Increased operational burden" (too vague)
+If the validator returns BLOCKING findings, **the document is not ready for review** — Phase 1 fails immediately. Surface the validator findings to the user and stop. The author must fix validator findings before this audit re-runs.
 
-**Common Violations**:
-- ❌ Missing one or more core principles
-- ❌ Principle lacks Description, Implementation, or Trade-offs subsection
-- ❌ Fewer than 3 trade-offs listed
-- ❌ Trade-offs are superficial or generic
+If the validator returns PASS, proceed to Step 2 — manual review for issues the validator does NOT catch.
+
+**Step 2 — Manual review for non-validator concerns**.
+
+The validator covers ~95% of Section 3 quality issues. The reviewer focuses on what's left:
+
+- **Narrative coherence**: do the 9 (or 10) principles read as a coherent set with a consistent voice and abstraction level? (Validator: no.)
+- **Principle prioritization vs. business strategy**: does the *order of emphasis* (which principles get the most concrete trade-offs, which get one-line treatment) match the project's business priorities? E.g., a financial-trading platform whose Trade-offs detail is heaviest under Simplicity rather than under Resilience or Observability is suspicious. (Validator: no.)
+- **Redundancy across principles**: do two principles end up describing the same constraint with different framing? E.g., Resilience and High Availability both centering on database failover with no clear demarcation. (Validator: no — Layer 2 covers explicit contradictions, but redundancy is a softer call.)
+- **Coverage of the actually-load-bearing principles**: is the principle that *should* drive the most decisions in this architecture (e.g., Cloud-Native for a serverless system, Open Standards for an interop-heavy integration platform) treated with proportional depth? (Validator: no.)
+
+**Reference (for the validator-enforced rules)**:
+- `PRINCIPLE_VALIDATION.md` — Layer 1 rule reference (P-STRUCT-01, P-PLATITUDE-01, P-TRADEOFF-QUANT-01, etc.)
+- `agents/reviewers/principle-quality-reviewer.md` — Layer 2 semantic review checktypes (decision-rule, specificity, tradeoff-honesty, adr-alignment, cross-principle, conflation, type-sanity)
+- `VALIDATIONS.md` → "Validator-Enforced Rules" — human-readable summary of every rule
+
+**Common Phase 1 Failure Modes** (after the validator pass):
+- Trade-off list passes `P-TRADEOFF-QUANT-01` (has a quantification token) but the cost is misattributed (e.g., naming infrastructure cost when the real cost is engineering time) — Layer 2's `tradeoff-honesty` should catch most of these; this audit is the safety net.
+- Principle prioritization doesn't reflect business priorities — purely a human judgment call.
+- The 10 principles read as 10 isolated paragraphs rather than a system with internal logic.
 
 ---
 

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.16.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.17.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.16.1` in the list.
+You should see `sa-skills v3.17.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,30 @@ Where:
 
 ## Roadmap
 
-### v3.16.1 (Current Release) ✅
+### v3.17.0 (Current Release) ✅
+**feat: Two-layer Section 3 (Architecture Principles) Enforcement Gate — no-code, reliability-first**
+
+Hardens the `architecture-docs` skill across both first-write and edit paths by replacing the advisory Section 3 validation checklist with a two-layer enforcement gate that runs on every write to `docs/02-architecture-principles.md`.
+
+**Layer 1 — Prescriptive checklist** (`skills/architecture-docs/PRINCIPLE_VALIDATION.md`, NEW): single source of truth for principle validation rules. 14 rule IDs covering structural, hygiene, semantic-lite, ADR-reference, cross-principle, and architecture-type-specific concerns. Each rule documents an exact `grep` command, a pass criterion, and a fail-message template. The model executes rules in order and emits a `PRINCIPLE_VALIDATION_REPORT` block. **Anti-self-attestation rule**: every finding MUST quote the grep output verbatim — claims without evidence are treated as FAIL by the orchestrator. Includes a per-architecture-type matrix (Microservices → circuit breakers, BIAN → service domains, etc.) and Appendix A (mandatory-field placeholder map for first-write / edit / release scopes).
+
+**Layer 2 — Semantic reviewer** (`agents/reviewers/principle-quality-reviewer.md`, NEW; model: opus): runs after Layer 1 passes. Three modes — `first-write`, `edit-delta`, `downstream-impact`. Seven `checkType` judgments (`decision-rule`, `specificity`, `tradeoff-honesty`, `adr-alignment`, `cross-principle`, `conflation`, `type-sanity`) catch failures the regex layer cannot: paraphrased platitudes, tech-name-dropping, trade-offs that look quantified but aren't, ADR citations to nonexistent files, type-incoherent advice, conflations of quality attributes (Section 1) with principles (Section 3). Hallucination guard: every cited ADR file must exist. Fail-open: timeouts → PASS-with-warning, never block forever.
+
+**Phase 1.5 Principle Alignment Audit** (added to `SKILL.md` Downstream Documentation Propagation): when `docs/02-architecture-principles.md` itself is edited, fan out the `principle-quality-reviewer` sub-agent in `mode: downstream-impact` over each downstream file (S4–S11 + every component) in parallel batches of 4. Findings flow into the Phase 2 approval checklist labeled `[principle-impact]`. Skips silently on whitespace/formatting-only diffs.
+
+**ADR reference enforcement**: the advisory "Trade-offs align with ADR candidates — should reference" is now MUST. Each principle's Implementation OR Trade-offs must contain at least one ADR link or carry the explicit `<!-- NO_ADR_GOVERNS -->` sentinel.
+
+**Quality Attribute vs. Principle disambiguation** (added to `ARCHITECTURE_DOCUMENTATION_GUIDE.md` before Section 3): explicit comparison table (outcomes vs. decision rules) and the "verb of choice" rule. Closes the conflation gap that `P-QA-CONFLATION-01` enforces operationally.
+
+**Placeholder Elimination Gate** (new Step 5.7 in `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md`): scans the mandatory-field map for `[To be defined]` / `[TBD]` / `<TODO>` / `TODO:` etc. Any match in a mandatory field BLOCKS Step 6 (ADR delegation).
+
+**Reliability stance**: this release optimizes for the **correctness of produced documentation**, not for token cost. Deeper context loads, more sub-agent calls, hard blockers where there were soft warnings, mandatory grep-output quoting to prevent self-attestation, max-3-round revision loops with explicit user escalation. Pin to v3.16.1 if you need a fast/cheap path.
+
+**No new dependencies**: pure Markdown changes — the existing `Bash(grep:*)` permission is the only execution surface (now scoped explicitly via `Bash(grep:*)`, `Bash(rg:*)`, `Bash(awk:*)`, `Bash(ls:*)` permissions added in `.claude/settings.json.example`).
+
+---
+
+### v3.16.1 (Previous Release) ✅
 **docs: Institutional ADR content discipline — codify project-agnostic rules for ADR-001..100 in `architecture-definition-record`**
 
 Adds a new "Institutional ADR Content Discipline" section to `skills/architecture-definition-record/ADR_GUIDE.md` (between "ADR Scope" and "ADR Template"). The section enumerates the project-specific patterns that institutional ADRs (numbers 001–100) must NOT contain — "Institutional Inheritance Note" headers, "Section 3 — Project Application" tables, specific component names (Inbox Hub, omn-mfa, sda-msa-payments-gateway, etc.), specific operator / carrier / brand names (Claro, Movistar, Tuenti, CNT), specific feature names, project budgets ("$276,411"), project deadlines ("MVP June 30, 2026"), user counts ("7M mobile users / 300K web users"), and cross-references to project ADRs (ADR-101+). Each forbidden pattern is paired with the generic phrasing that replaces it ("platform", "service team", "the workload namespace", "the bank's customer base", "platform delivery timelines", etc.). Captures the recent rewrite of all 14 institutional ADRs as a durable rule rather than oral tradition.

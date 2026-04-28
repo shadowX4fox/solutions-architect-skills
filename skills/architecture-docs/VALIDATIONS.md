@@ -131,47 +131,65 @@ When creating or updating Section 3, verify:
 - If non-standard principles exist, map them to standard principles
 - Or remove and incorporate content into appropriate standard principle
 
-### Validation Checklist
+### Validator-Enforced Rules
 
-Use this checklist when reviewing Section 3:
+> **Source of truth for these rules**: `PRINCIPLE_VALIDATION.md` (in this same directory). The rules are *executed by the model* (no compiled code) — each rule has an exact grep command and a pass criterion. The orchestrator's gate text in `SKILL.md` requires every rule's report to quote its grep output (anti-self-attestation). This document is the human-readable summary; `PRINCIPLE_VALIDATION.md` is canonical.
 
-```
-Section 3: Architecture Principles Validation
-════════════════════════════════════════════════
+| Rule ID | Severity | What it enforces | Pass example | Fail example |
+|---|---|---|---|---|
+| `P-STRUCT-01` | BLOCKING | All 9 (or 10 with optional P10) principles present in canonical order with matching numeric prefixes. | `### 1. Separation of Concerns` … `### 9. Open Standards` (in order) | Skipped principle 6, or "Security by Design" before "High Availability" |
+| `P-STRUCT-02` | BLOCKING | Each principle has exactly one each of Description / Implementation / Trade-offs subsection. | All three `**Description:**`, `**Implementation:**`, `**Trade-offs:**` markers present per principle | Trade-offs subsection omitted |
+| `P-STRUCT-03` | BLOCKING | Section header reflects principle count: `## Architecture Principles (9 Core Principles)` or `(10 Core Principles)`. | Header matches the count | Header says "(9)" but file has 10 |
+| `P-STRUCT-04` | BLOCKING | Optional principle 10 (Decouple Through Events) appears only when async patterns exist in S1 or components. | P10 included AND `kafka` mentioned in `docs/01-system-overview.md` | P10 included but architecture is purely synchronous REST |
+| `P-PLACEHOLDER-01` | BLOCKING | No `[To be defined]` / `[TBD]` / `<TODO>` / `TODO:` / `XXX` / `[your X]` / `[describe X]` in any subsection. | All subsections have concrete content | `Description: [TBD]` or `Implementation: TODO: explain` |
+| `P-CUSTOM-01` | BLOCKING | No custom principles beyond the canonical 9–10. | Only canonical names | `### 11. Innovation` or renamed `### 1. Modularity Above All` |
+| `P-PLATITUDE-01` | BLOCKING | No platitude phrases (`industry best practices`, `we follow best practices`, `enterprise-grade`, `world-class`, `state of the art`, `as needed`, `where applicable`, `robust solution`, `cutting edge`, `battle-tested`, `future-proof`, `we will be {scalable\|secure\|reliable\|maintainable\|observable}`) in Implementation or Trade-offs. | "OAuth 2.0 + JWT, TLS 1.3, AWS WAF v3 with managed rule sets" | "We follow industry best practices for security" |
+| `P-SPECIFIC-01` | BLOCKING | Each Implementation has ≥2 system-specific tokens (tech name from S6/components, version number, percentage, integer with unit, ≥3-letter acronym, backtick-quoted path). | "Stateless services on Kubernetes 1.29 with HPA scaling on 70% CPU" (3 tokens) | "We use containers and best practices for scaling" (0 tokens) |
+| `P-TRADEOFF-QUANT-01` | BLOCKING | Each Trade-offs has ≥1 quantification token OR a recognized cost noun. | "3x infrastructure cost; +15% p95 latency; 24/7 on-call rotation" | "More complexity; harder debugging" |
+| `P-TRADEOFF-COUNT-01` | BLOCKING | Each Trade-offs has ≥3 bullet items. | 3+ bullets | 2 bullets |
+| `P-TRADEOFF-NEG-01` | BLOCKING | Trade-offs is not "None" / "Minimal" / "N/A" / "No significant trade-offs". | Any non-trivial trade-off list | `**Trade-offs:** None.` |
+| `P-QA-CONFLATION-01` | BLOCKING | Description that cites a numeric outcome (`%`, `nines`, `ms`, `RPS`, `TPS`, `RTO`, `RPO`, `SLA`, `SLO`) MUST also contain a decision verb (`accept`, `prefer`, `prioritize`, `trade`, `choose`, `defer`, `delegate`, `refuse`, `favor`, `reject`, `require`, `enforce`, `mandate`). | "We accept 3x infrastructure cost to achieve our 99.9% SLA" | "99.9% availability" |
+| `P-ADR-REF-01` | BLOCKING | Each principle's Implementation OR Trade-offs cites at least one ADR (`[ADR-NNN](...)`, `per ADR-NNN`) OR carries the explicit `<!-- NO_ADR_GOVERNS -->` sentinel (or `> No ADR governs this aspect yet` blockquote). Cited ADR files must exist. | `per [ADR-007](../adr/ADR-007-multi-region.md)` | No link, no sentinel |
+| `P-CROSS-CONTRA-01` | WARNING | Curated keyword pairs that suggest cross-principle contradictions (e.g., Simplicity says "monolith" + Scalability First says "horizontal scaling per service"). Layer 2 reviewer escalates to BLOCKING when explicit. | No conflicting pairs detected | Conflicting pair detected |
+| `P-TYPE-MATRIX-01` | BLOCKING (when arch type known) | Architecture-type-specific concept expectations — see "Architecture-Type Specific Expectations" below. | All required-any-of phrases matched per row | Microservices arch but P6 (Resilience) lacks any of {circuit breaker, bulkhead, retry, DLQ, …} |
 
-Principle Presence:
-☐ 1. Separation of Concerns
-☐ 2. High Availability
-☐ 3. Scalability First
-☐ 4. Security by Design
-☐ 5. Observability
-☐ 6. Resilience
-☐ 7. Simplicity
-☐ 8. Cloud-Native
-☐ 9. Open Standards
-☐ 10. Decouple Through Events (optional - apply selectively)
+> **Reminder**: Layer 1 stops the obvious failures. Layer 2 (`agents/reviewers/principle-quality-reviewer.md`) catches paraphrased platitudes, tech-name-dropping, and conflations the regex layer cannot. Both must pass before any write to `docs/02-architecture-principles.md` is finalized. See "Layer 2: Semantic Review" below.
 
-Structure Validation:
-☐ All principles in exact order (1-9, optional 10)
-☐ Section heading says "(9 Core Principles)" or "(10 Core Principles)" matching actual count
-☐ Each principle has "Description" subsection
-☐ Each principle has "Implementation" subsection
-☐ Each principle has "Trade-offs" subsection
+### Architecture-Type Specific Expectations
 
-Content Quality:
-☐ Implementations are system-specific (not generic)
-☐ Technologies and patterns explicitly named
-☐ Trade-offs are realistic and honest
-☐ No placeholder text ("TBD", "TODO", etc.)
-☐ Decouple Through Events (#10) only where async provides benefits
+`P-TYPE-MATRIX-01` enforces type-specific concept presence. The full per-type table lives in `PRINCIPLE_VALIDATION.md` → "Architecture-Type Matrix"; this is the human-readable summary.
 
-Common Errors:
-☐ No missing principles from core 9
-☐ No reordered principles
-☐ No single-sentence descriptions without structure
-☐ No generic "best practices" placeholders
-☐ No omitted Trade-offs sections
-```
+| Architecture Type | Highest-signal expectations |
+|---|---|
+| MICROSERVICES | Resilience must mention circuit breaker / bulkhead / retry / DLQ; Scalability must mention horizontal scaling per service or HPA; Observability must mention distributed tracing |
+| BIAN | Separation of Concerns must reference service domains; Security must reference regulatory frameworks (PCI/SOX/AML/KYC); Open Standards must mention BIAN V12.0 or ISO 20022 |
+| 3-TIER | Separation of Concerns must reference tier boundaries with no direct DB access from presentation; Scalability must mention stateless tier or session externalization |
+| N-LAYER | Separation of Concerns must reference dependency inversion / ports-and-adapters / clean architecture / hexagonal; Simplicity must mention framework-free domain |
+| META | Separation of Concerns must reference the 6-layer model; Open Standards must mention BIAN |
+
+When `<!-- ARCHITECTURE_TYPE: -->` is absent, `P-TYPE-MATRIX-01` is skipped with a WARNING.
+
+To waive a single type-matrix rule with explicit acknowledgment, insert `<!-- TYPE_MATRIX_WAIVED: P-<principleNumber>: <reason> -->` inside the principle block. Layer 2 reviewer flags every waiver for confirmation.
+
+### Layer 2: Semantic Review
+
+After Layer 1 passes, the orchestrator invokes `agents/reviewers/principle-quality-reviewer.md` (model: opus). The reviewer renders judgments the regex layer cannot. Findings are keyed by `checkType`:
+
+| `checkType` | What Layer 2 evaluates | Why Layer 1 can't catch it |
+|---|---|---|
+| `decision-rule` | Does this principle constrain a design choice, or is it an outcome assertion paraphrased to dodge `P-QA-CONFLATION-01`? | Paraphrased outcomes don't match the metric regex |
+| `specificity` | Does Implementation reference *this specific system's* tech (cross-checked against S6 + components), not a generic mention? | Tech-name-dropping passes `P-SPECIFIC-01` if the name appears anywhere |
+| `tradeoff-honesty` | Is each trade-off a real cost the architect would defend, or hand-waving paraphrased to dodge `P-TRADEOFF-QUANT-01`? | "Increased engineering effort" reads quantifiable but isn't |
+| `adr-alignment` | When an ADR is cited, does the link point to a file that exists (verified in `adr/`) AND match the principle's topic? | Regex confirms link form, not topical fit |
+| `cross-principle` | Does any principle directly contradict another (escalates `P-CROSS-CONTRA-01` warnings to BLOCKING when explicit)? | Keyword pairs alone can't tell intent |
+| `conflation` | Quality Attribute (S1) vs. Principle (S3) — does the principle encode *how we decide*, not *what we measure*? | Paraphrased conflations dodge the metric regex |
+| `type-sanity` | Does the principle's Implementation make sense for the chosen architecture type? | Beyond the curated matrix, type-coherence is a judgment call |
+
+Both layers must return `status: PASS` (warnings allowed) before any write to `docs/02-architecture-principles.md` is finalized. On FAIL, the orchestrator regenerates and re-runs from Layer 1; max 3 rounds, then escalate to user.
+
+### Validation Run Procedure
+
+For the full run procedure (which files to load, what order to run rules, the report schema, and the round-3 escalation flow), see `PRINCIPLE_VALIDATION.md` → "Run Procedure". The orchestration that drives this lives in `SKILL.md` → "Section 3 Enforcement Gate".
 
 ### Common Mistakes to Avoid
 

@@ -235,8 +235,15 @@ See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conve
    - Example: "Edit security architecture" → navigate to `docs/07-security-architecture.md`
 
 2. **Load Context Anchor** *(REQUIRED for downstream sections)*
-   - **Section 3 Enforcement Gate**: Any write to `docs/02-architecture-principles.md` — whether creation, migration, or edit — MUST pass the Section 3 validation checklist from VALIDATIONS.md (9 principles present in exact order, three subsections each: Description/Implementation/Trade-offs, system-specific content, no custom principles). Run the checklist before finalizing the write.
-   - **SKIP** this step when editing `docs/01-system-overview.md`, `docs/02-architecture-principles.md`, or for typo/formatting-only fixes
+   - **Section 3 Enforcement Gate** (BLOCKING — runs on every write to `docs/02-architecture-principles.md`):
+     1. **Layer 1 — Prescriptive checklist**. Read `skills/architecture-docs/PRINCIPLE_VALIDATION.md` and execute every rule in order. Each rule's report MUST quote its grep output verbatim — a finding without quoted output is treated as FAIL (anti-self-attestation). Emit the `PRINCIPLE_VALIDATION_REPORT` block at the end. If any BLOCKING finding, regenerate `docs/02-architecture-principles.md` per the recommendations and re-run from rule 1. Increment round counter.
+     2. **Layer 2 — Semantic review**. Invoke `agents/reviewers/principle-quality-reviewer.md` with the appropriate `mode` (`first-write` for new docs; `edit-delta` for edits). Pass `principles_file`, `arch_type` (read from `<!-- ARCHITECTURE_TYPE: -->` in `docs/03-architecture-layers.md`), `system_overview_file`, `arch_layers_file`, `tech_stack_file`, `adr_index_glob`, `round`. If `status: FAIL` with BLOCKING findings, regenerate per recommendations and re-run from Layer 1.
+     3. **Round-3 escalation**. After 3 failed rounds across both layers (counted together), STOP. Show the user all 3 rounds' reports side by side and ask: "Three revision rounds have not produced a passing principles document. Pick: (a) edit further manually, (b) accept the current version with the listed findings (explicit override), or (c) abort the workflow." Do NOT silently accept.
+     4. **Fail-open clauses**:
+        - If Layer 2 sub-agent returns empty / errors / times out: treat as PASS-with-warning ("manual review required"). Do not block forever on tool failure.
+        - If Layer 1 grep tools are unavailable (`grep: command not found`): treat as fail-closed → escalate immediately. The user fixes the environment or overrides.
+   - **SKIP** the Context Anchor load below when editing `docs/01-system-overview.md` only, or for typo/formatting-only fixes
+   - For edits to `docs/02-architecture-principles.md`: load `docs/01-system-overview.md`, `docs/03-architecture-layers.md`, `docs/06-technology-stack.md`, and the ADR index BEFORE editing — the Section 3 Enforcement Gate above runs after the edit
    - **REQUIRED** when editing any file from `docs/03-architecture-layers.md` through `docs/09-operational-considerations.md`, or any `docs/components/*.md` file
    - **Universal Foundation**: Always load `docs/01-system-overview.md` + `docs/02-architecture-principles.md`
    - **Relevant ADRs**: Match ADR titles from `ARCHITECTURE.md` navigation table against target section keywords; load matched ADRs
@@ -289,7 +296,7 @@ Runs immediately after the Post-Write Alignment Audit passes. Detects downstream
 | S1+S2 (System Overview) | `docs/01-system-overview.md` | ALL sections (S4–S11) + `docs/components/*` |
 | S3 (Principles) | `docs/02-architecture-principles.md` | ALL sections (S4–S11) + `docs/components/*` |
 | S4 (Layers) | `docs/03-architecture-layers.md` | S5 (`docs/components/*`), S8 (`docs/06-technology-stack.md`) |
-| S5 (Components) | `docs/components/*.md` | S6 (`docs/04-data-flow-patterns.md`), S7 (`docs/05-integration-points.md`), S8 (`docs/06-technology-stack.md`), S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`), Refs (`docs/10-references.md`) |
+| S5 (Components) | `docs/components/*.md` | S6 (`docs/04-data-flow-patterns.md`), S7 (`docs/05-integration-points.md`), S8 (`docs/06-technology-stack.md`), S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`), Refs (`docs/10-references.md`), **+ S3 semantic re-check** (Phase 1.5 — invoke `principle-quality-reviewer` in `mode: downstream-impact` with `downstream_file = docs/02-architecture-principles.md`; flag any principle whose Implementation/Trade-offs the new component contradicts) |
 | S6 (Data Flow) | `docs/04-data-flow-patterns.md` | *(leaf — no downstream sections)* |
 | S7 (Integration) | `docs/05-integration-points.md` | S9 (`docs/07-security-architecture.md`) |
 | S8 (Tech Stack) | `docs/06-technology-stack.md` | S9 (`docs/07-security-architecture.md`), S10 (`docs/08-scalability-and-performance.md`), S11 (`docs/09-operational-considerations.md`), Refs (`docs/10-references.md`) |
@@ -347,6 +354,44 @@ grep -rl "{edited_filename}" docs/ docs/components/ handoffs/ 2>/dev/null
 **1d. Handoff scan** — For each fact-delta keyword (component names, technology names, pattern names), grep `handoffs/` for matching terms.
 
 **1e. Merge and deduplicate** — Combine results from 1b+1c+1d. Remove duplicates and remove the edited file itself.
+
+#### Phase 1.5: Principle Alignment Audit (S3 edits only)
+
+Runs **only** when the edited file is `docs/02-architecture-principles.md` AND Phase 1a's fact-delta extraction reported substantive word-level changes in any of {Description, Implementation, Trade-offs} subsections.
+
+**Trigger gate** — skip Phase 1.5 silently when:
+- The diff contains only whitespace, punctuation, link reformatting, or markdown structure changes (no word-level changes inside D/I/T blocks).
+- The Section 3 Enforcement Gate above failed and the principles file was regenerated wholesale (the regenerated file is treated as a first-write, not an edit, and the orchestrator already re-ran the gate).
+- Phase 1a's diff is empty (no substantive changes detected).
+
+**Audit procedure** when the gate fires:
+
+1. **Extract per-principle deltas** from the diff. For each principle that changed, capture:
+   - `principleNumber`, `principleName`
+   - Which subsection(s) changed (Description / Implementation / Trade-offs)
+   - A 1-line summary of the change (what was added, removed, or rephrased)
+
+2. **Fan out to `principle-quality-reviewer`** in `mode: downstream-impact`. For each downstream file from the reverse dependency table for S3 (S4–S11 + every `docs/components/**/*.md`), spawn one sub-agent call with:
+   - `principles_file` — `docs/02-architecture-principles.md` (post-edit)
+   - `principles_diff` — the per-principle deltas from step 1
+   - `downstream_file` — the specific file under audit
+   - `arch_type`, `system_overview_file`, `arch_layers_file`, `tech_stack_file`, `adr_index_glob` — same as the Section 3 Enforcement Gate
+   - `round` — pass through the orchestrator's revision counter
+
+   **Parallelism**: dispatch in batches of 4 (mirrors v3.16.0 explorer fan-out pattern). Wait for each batch before starting the next.
+
+3. **Aggregate results** — each sub-agent returns one of:
+   - `status: PASS` with `findings: []` and a finding `checkType: downstream-impact, severity: NO_IMPACT` → file unaffected; no action.
+   - `status: PASS` with `WARNING` findings → surface in Phase 2 checklist as `[principle-impact]` items but don't block.
+   - `status: FAIL` with `BLOCKING` findings → file contradicts a changed principle; surface in Phase 2 checklist as `[principle-impact-BLOCKING]` items requiring user review.
+
+4. **Fail-open clauses**:
+   - Sub-agent timeout / empty / error on any single file: skip that file with a Phase 2 warning ("`{file}` — principle alignment review unavailable; manual review required"). Do not block.
+   - All sub-agents fail (e.g., system-wide tool outage): emit one warning at the top of Phase 2 ("Principle Alignment Audit unavailable; downstream files not semantically re-checked. Run `/skill architecture-peer-review` after edits land if reliability matters for this change.") and proceed to standard Phase 2 with structural impacts only.
+
+5. **Inject findings into Phase 2 checklist** — semantic findings appear as a dedicated subsection labeled "Principle Alignment Findings" between the structural impact list and the "Approve all?" prompt. User can approve / deselect / skip per file (same UX as structural impacts).
+
+**Anti-recursion**: Phase 1.5 sub-agent calls do NOT trigger another Phase 1.5 invocation when their findings translate into Phase 3 edits.
 
 #### Phase 2: Generate Checklist
 
