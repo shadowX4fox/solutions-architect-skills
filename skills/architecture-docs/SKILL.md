@@ -228,70 +228,6 @@ See **RESTRUCTURING_GUIDE.md** for the full directory structure and naming conve
 
 **IMPORTANT**: The multi-file structure makes context loading simple — individual `docs/` files are 50–400 lines each (full file fits in context). No line-offset tricks needed.
 
-### Sub-agent Orchestration Pattern (v3.17.0+)
-
-For **Workflows 1, 2–6, and 8**, this skill offloads research, planning, and execution to sub-agents so the orchestrator (your main session) only coordinates and dialogues with the user. The flow is **explore → Plan → router → (editor | delegated skill)**.
-
-| Tier | Agent | Model | Role |
-|------|-------|-------|------|
-| Explore | `architecture-explorer` (FINDINGS mode) | haiku (pinned) | Surfaces files + line-level evidence for the user's intent. |
-| Plan | built-in default `Plan` subagent | **inherits the main session model** (no `model:` override) — picking the planning tier is the user's choice via their session model | Proposes concrete edits as prose, organized into Route A / B / C. |
-| Router | the orchestrator | (your session) | Reads Plan's prose, displays at any existing user-approval gate, dispatches per route. |
-| Editor | `architecture-docs-editor` | sonnet (pinned) | Executes Route C (doc edits) — Edit/Write per the plan, re-reads, emits a brief summary. |
-
-Names in this table are role labels. When invoking via the `Agent` tool, use the namespaced `subagent_type:` form: `sa-skills:builders:architecture-explorer` and `sa-skills:generators:architecture-docs-editor`. The Plan subagent is invoked as `Plan` (built-in).
-
-**Routes Plan must emit:**
-
-- `## Route A — architecture-definition-record` — ADR work (creations, status changes, supersedes).
-- `## Route B — architecture-component-guardian` — component-index updates (`docs/components/README.md`, component add/remove/migrate).
-- `## Route C — editor` — all other documentation edits, ordered by propagation tier (upstream → downstream).
-
-Any of the three may be empty; Plan only emits headers for non-empty routes.
-
-**Orchestrator dispatch on approval:**
-
-```
-Route A → Skill({skill: "sa-skills:architecture-definition-record", args: <Route A prose>})
-Route B → Skill({skill: "sa-skills:architecture-component-guardian", args: <Route B prose>})
-Route C → Agent({subagent_type: "sa-skills:generators:architecture-docs-editor", prompt: <Route C prose verbatim>})
-```
-
-**Plan invocation contract (orchestrator side):**
-
-```
-Agent({
-  subagent_type: "Plan",
-  description: "Plan architecture-docs edits",
-  prompt: <see prompt template below>
-  // Do NOT pass `model:` — Plan inherits the main session model.
-})
-```
-
-The orchestrator's prompt to the Plan subagent must:
-1. Pass the user's INTENT verbatim.
-2. Paste the full `EXPLORE_FINDINGS` block from the explorer.
-3. Restate the repo conventions Plan must honour:
-   - Section number S1..S12 vs file prefix 01..10 are independent — see "Section Number vs File Prefix Disambiguation" above.
-   - Foundational Context Anchor Protocol — when editing S4–S11 or `docs/components/*`, name the upstream anchors loaded.
-   - Source Attribution — derived metrics, ADR refs, principle invocations all require an inline link in the proposed `new_string`.
-   - Propagation — name downstream files for the W5.5 checklist gate.
-   - Delegation — never propose direct edits to `docs/components/README.md` or `adr/*.md`; route to architecture-component-guardian / architecture-definition-record instead.
-   - **Section 3 Enforcement Gate** — when any Route C item targets `docs/02-architecture-principles.md` (creation, edit, or replace), the proposed `new_string` (or full file content) MUST preserve all 9 mandatory principles in exact order — (1) Separation of Concerns, (2) High Availability, (3) Scalability First, (4) Security by Design, (5) Observability, (6) Resilience, (7) Simplicity, (8) Cloud-Native, (9) Open Standards — each with the three subsections **Description / Implementation / Trade-offs**. Optional principle 10 (Decouple Through Events) may be appended only if async patterns are documented. Plan MUST NOT invent custom principles, omit any of the 9, or reorder them. If the user's intent would violate this rule, Plan emits a notes line under Route C explaining the conflict instead of a violating edit. Source: VALIDATIONS.md → "Section 3: Architecture Principles Validation".
-4. **For W1 / W2-6 edits to `docs/02-architecture-principles.md`**: the orchestrator MUST embed the full 9-principle template (from ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Section 3: Architecture Principles") verbatim in the Plan prompt — paste the template, not just a reference, so Plan can match its proposed content against the canonical structure without an extra Read call.
-5. Instruct Plan to organize output as the three labelled routes above. Each Route C item: file path, section, intent, and (for surgical edits) a brief excerpt of current text + proposed replacement.
-
-**Editor handoff is prose, not schema.** The editor parses intent itself; the orchestrator does not transform Plan's output.
-
-**Safety net** — if a Plan slipped a `docs/components/README.md` or `adr/*.md` path into Route C, the editor stops and emits a `DELEGATE: <skill>` line. The orchestrator parses it and re-routes via `Skill`. When parsing a `DELEGATE:` line, prepend `sa-skills:` to the bare skill name before invoking via the `Skill` tool (e.g., `DELEGATE: architecture-definition-record` → `Skill({skill: "sa-skills:architecture-definition-record", …})`).
-
-**User-approval gates are preserved.** Existing gates (PO Spec gate, ADR Context Block confirmation, type selection, propagation checklist, theme prompt, metric audit, design driver confirmation) shift from "main session edits then asks" to "Plan proposes, orchestrator presents at the same gate, user approves, dispatch fires".
-
-**Out of scope:**
-- Workflow 7 (Q&A) — already explorer-only, no editor needed.
-- Workflow 9 (migrate) — runs in main session; user-deferred.
-- Workflow 10 (release) — sequential git preconditions, stays main-session.
-
 ### Context-Efficient Workflow
 
 1. **Find the target section**
@@ -299,8 +235,7 @@ The orchestrator's prompt to the Plan subagent must:
    - Example: "Edit security architecture" → navigate to `docs/07-security-architecture.md`
 
 2. **Load Context Anchor** *(REQUIRED for downstream sections)*
-   - **v3.17.0+ ownership note**: Under the sub-agent orchestration pattern, this step IDENTIFIES the anchor file paths — it does NOT pre-read them. The orchestrator lists the paths in the Plan prompt; Plan reads them itself using its own Read tool. The "Always load …" / "REQUIRED" / "SKIP" rules below describe which paths must appear in the Plan prompt's anchor list.
-   - **Section 3 Enforcement Gate**: Any write to `docs/02-architecture-principles.md` — whether creation, migration, or edit — MUST pass the Section 3 validation checklist from VALIDATIONS.md (9 principles present in exact order, three subsections each: Description/Implementation/Trade-offs, system-specific content, no custom principles). The orchestrator runs the checklist on the editor's summary before reporting completion to the user.
+   - **Section 3 Enforcement Gate**: Any write to `docs/02-architecture-principles.md` — whether creation, migration, or edit — MUST pass the Section 3 validation checklist from VALIDATIONS.md (9 principles present in exact order, three subsections each: Description/Implementation/Trade-offs, system-specific content, no custom principles). Run the checklist before finalizing the write.
    - **SKIP** this step when editing `docs/01-system-overview.md`, `docs/02-architecture-principles.md`, or for typo/formatting-only fixes
    - **REQUIRED** when editing any file from `docs/03-architecture-layers.md` through `docs/09-operational-considerations.md`, or any `docs/components/*.md` file
    - **Universal Foundation**: Always load `docs/01-system-overview.md` + `docs/02-architecture-principles.md`
@@ -309,36 +244,19 @@ The orchestrator's prompt to the Plan subagent must:
    - Example for S9 (Security): load S1+2 (foundation) + S5/README (components) + S7 (integrations) + S8 (tech stack) + relevant ADRs
    - Context budget: 250–850 lines depending on section tier
 
-3. **Spawn the explorer (FINDINGS mode)**
-   - `Agent({subagent_type: "sa-skills:builders:architecture-explorer", prompt: <project_root + query lifted from user intent + S-number/filename>})`
-   - Receive an `EXPLORE_FINDINGS` block — files, line numbers, headings, excerpts.
-   - The explorer is haiku-tier: cheap parallel reads, never blocks the orchestrator.
+3. **Read the entire target file**
+   - Individual `docs/` files are small enough to read in full
+   - `Read(file_path="docs/07-security-architecture.md")`  — no offset/limit needed
 
-4. **Spawn the default Plan subagent → receive prose plan**
-   - `Agent({subagent_type: "Plan", description: "Plan architecture-docs edits", prompt: <see prompt template>})`
-   - **Do NOT pass `model:`** — Plan inherits the main session model so the user picks the planning tier via their session model choice.
-   - Prompt body must include: user INTENT verbatim; the verbatim `EXPLORE_FINDINGS` block; the repo conventions to honour (S-number ≠ file prefix; Foundational Context Anchor Protocol — name upstream anchors loaded; Source Attribution rules below; propagation reverse dependency table; **Section 3 Enforcement Gate — see the principle-gate bullet in the Plan invocation contract above**); the **route-labelling instruction** — Plan must organize output into `## Route A — architecture-definition-record`, `## Route B — architecture-component-guardian`, `## Route C — editor`, with empty routes omitted.
-   - **If any Route C target is `docs/02-architecture-principles.md`**: paste the full 9-principle template (from ARCHITECTURE_DOCUMENTATION_GUIDE.md → "Section 3: Architecture Principles") into the Plan prompt verbatim, so Plan can validate its proposal against the canonical structure before emitting Route C.
-   - **Source Attribution rules** Plan must encode in every Route C `new_string`:
+4. **Edit the target file directly**
+   - Use the Edit tool on the specific `docs/NN-name.md` file
+   - **Do NOT edit ARCHITECTURE.md** unless you are adding a new section/file to the navigation table
+   - **Source Attribution** *(during editing)*: When writing derived content in downstream sections, insert cross-reference links to the source:
      - **Metrics**: When repeating a metric from S1 Key Metrics → `(see [Key Metrics](01-system-overview.md#key-metrics))`
      - **ADR decisions**: When content implements an ADR → `per [ADR-NNN](../adr/ADR-NNN-title.md)`
      - **Principles**: When invoking an S3 principle → `per [Principle Name](02-architecture-principles.md#anchor)`
      - **Parent section references**: When referencing components, layers, integrations, or tech → link to the specific file
-     - **Unverifiable claims**: If a specific claim cannot be traced to an existing section, user input, or ADR → insert `<!-- TODO: Add source reference -->` marker
-   - **Do NOT edit ARCHITECTURE.md** in Route C unless adding a new section/file to the navigation table.
-
-4a. **Surface Plan's prose at the user-approval gate**
-   - Display Plan's Route A/B/C output to the user verbatim. The user accepts, modifies (e.g., asks for a different file or a tweaked phrasing), or rejects.
-   - For W1, gates that run **before** the Plan call (PO Spec gate, ADR Context Block confirmation, architecture type selection — see ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md) are unchanged. The Plan call comes after these gates pass.
-   - For W8, the diagram theme prompt runs before the Plan call.
-   - The W5.5 propagation checklist (Phase 2 below) is a **separate** gate that fires only after a substantive edit has been written and is sourced from impact discovery (Reverse Dependency Table + cross-reference scan), NOT from Plan's Route C. Do not conflate the two.
-
-4b. **Dispatch per route**
-   - Route A (non-empty) → `Skill({skill: "sa-skills:architecture-definition-record", args: <Route A prose>})`
-   - Route B (non-empty) → `Skill({skill: "sa-skills:architecture-component-guardian", args: <Route B prose>})`
-   - Route C (non-empty) → `Agent({subagent_type: "sa-skills:generators:architecture-docs-editor", prompt: <Route C prose verbatim, prefixed with project_root>})`
-   - Collect each handler's summary; if the editor returns any `DELEGATE:` lines, parse them and invoke the named skill with the carried intent.
-   - Report a unified result to the user.
+     - **Unverifiable claims**: If a specific claim (metric, decision, constraint) cannot be traced to an existing section, user input, or ADR → insert `<!-- TODO: Add source reference -->` marker
 
 5. **Post-Write Alignment & Traceability Audit**
    - **Check A — Principle traceability**: Written content does not contradict Section 3 principles
@@ -416,12 +334,7 @@ This rule runs **instead of** the standard Phase 1–3 propagation for S12 chang
 
 #### Phase 1: Impact Discovery
 
-**1a. Fact-delta extraction** — Extract a concrete bullet list of what changed from Plan's Route C output (the orchestrator no longer holds the pre-edit state itself; Plan's prose is the source of truth for the diff). For each Route C item:
-- `surgical-edit` mode: compare the plan's `old_string` excerpt against its `new_string` — the diff is the fact-delta (e.g., "Database: PostgreSQL → CockroachDB", "Added: Redis caching layer", "Removed: legacy SOAP endpoint").
-- `replace-file` mode: if Plan's prose describes only the new content, Read the pre-edit file once and compare against the new content; otherwise use Plan's described diff.
-- `new-file` mode: the entire file content is the delta — every component, technology, and constraint named in the new content is a "new" fact for downstream propagation.
-
-If zero substantive deltas → skip propagation entirely.
+**1a. Fact-delta extraction** — Compare the file content before and after the edit. Produce a concrete bullet list of what changed (e.g., "Database: PostgreSQL → CockroachDB", "Added: Redis caching layer", "Removed: legacy SOAP endpoint"). If zero substantive deltas → skip propagation entirely.
 
 **1b. Structural dependency scan** — Look up the edited section in the reverse dependency table above. Collect all downstream section files.
 
@@ -467,21 +380,19 @@ Wait for user response before proceeding.
 
 #### Phase 3: Execute Updates
 
-Process approved files **in tier order** (lower tiers first → higher tiers last) so each updated file is available as context for files that depend on it. Phase 3 uses the same explore → Plan → router → editor pipeline as Steps 3–4b above, batched: one Plan call covers all approved propagation files; one editor call applies them.
+Process approved files **in tier order** (lower tiers first → higher tiers last) so each updated file is available as context for files that depend on it.
 
-1. **Build the Plan prompt** — include:
-   - The fact-deltas from Phase 1a (verbatim).
-   - The list of approved files (after the user's `all` / number-strip / `skip` response).
-   - The Source Attribution rules (Step 4 above) so Plan encodes `per [Section X](../...)` links in each `new_string`.
-   - The propagation tier order (lower tiers first) so Plan presents Route C in the correct order — the editor processes files in plan order.
-2. **Spawn the default Plan subagent** (no `model:` override). Plan emits Route C with one item per approved file. Route A/B should be empty unless an approved file happens to be `docs/components/README.md` (Route B) or an `adr/*.md` file (Route A); the orchestrator dispatches accordingly.
-3. **Dispatch** — Skill calls for any Route A/B; one editor Agent call for Route C.
-4. **Post-Write Alignment Audit** runs in the orchestrator on the editor's summary. The editor's verification step has already re-read each modified file; if a stricter audit is needed, the orchestrator re-reads the affected files itself.
-5. **Mark each completed file as `[x]`** in the propagation report from the editor's summary.
+For each approved `docs/*.md` or `docs/components/*.md` file:
+1. Load Context Anchor (universal foundation + section-specific parents per the dependency table)
+2. Read the target file in full
+3. Identify passages affected by the fact-deltas
+4. Apply updates, maintaining Source Attribution links (`per [Section X](../...)`)
+5. Run the 5-check Post-Write Alignment Audit on the updated file
+6. Mark as `[x]`
 
-For approved `handoffs/*.md` files: include them in the same Plan prompt with an instruction that they follow the dev-handoff Documentation Fidelity Policy. They appear in Route C. The editor edits them like any other markdown file.
+For approved `handoffs/*.md` files: Read, locate affected passages, update following the dev-handoff Documentation Fidelity Policy. Mark as `[x]`.
 
-If user selected `skip`: do **not** invoke Plan/editor; instead, add `<!-- PROPAGATION PENDING: upstream {edited_file} changed ({date}) — downstream not yet updated -->` at the top of the edited file directly (one Edit call from the orchestrator — the cheapest possible footprint for a skip).
+If user selected `skip`: Add `<!-- PROPAGATION PENDING: upstream {edited_file} changed ({date}) — downstream not yet updated -->` comment at the top of the edited file.
 
 #### Component File Edit Handling
 
@@ -584,16 +495,9 @@ If propagation was **skipped**: prepend to the advisory:
 
 ---
 
-6. **Verification (trust the editor's summary)**
-   - The editor's verification step (Step 4 of the editor agent) has already re-read each modified file. Trust the editor's summary by default.
-   - Re-read a file yourself ONLY when the editor's summary lists a verification warning for it, or when a downstream check (Step 5 audit) flags inconsistency that would be impossible without inspecting the actual on-disk content.
-   - Use Grep when you need to scan for content across many files without loading them.
-   - **Section 3 post-edit validation**: if any modified file is `docs/02-architecture-principles.md`, run the VALIDATIONS.md → "Section 3: Architecture Principles Validation" checklist on the on-disk content. If validation fails:
-     1. Surface the specific failure to the user (which principle is missing/out-of-order/missing-subsection).
-     2. Re-invoke the Plan subagent with the original INTENT plus the validation error appended (`PRIOR ATTEMPT VIOLATED Section 3 Enforcement Gate: <error>. Reproduce the canonical 9-principle structure in your replacement.`).
-     3. Dispatch the corrected Route C through the editor as a remediation pass.
-     4. Re-run validation. If it fails twice in a row, stop and ask the user how to proceed (manual edit vs. abandon the change).
-     This remediation flow is Plan→editor only — do NOT have the orchestrator hand-edit the principle file directly, since that would bypass the same gate that caused the violation.
+6. **Verification**
+   - After edits, re-read the modified `docs/` file to verify changes
+   - Use Grep to search for specific content without loading multiple files
 
 ### Discovering Available Files
 

@@ -480,17 +480,7 @@ Instead of creating a single `ARCHITECTURE.md`, create the full multi-file `docs
 - **Section 9 (Security)**: References security/compliance ADR candidates
 - **Section 12 (ADR Table)**: Populate directly from the ADR Context Block — all confirmed candidates become rows with their final status, drivers, and impact
 
-**Sub-agent dispatch (v3.17.0+)**: After Steps 4a–4c complete (system identification, focus-system selection, container classification — these stay in the orchestrator because they are user dialogues), the actual **file creation** (the `docs/NN-*.md` files, the `docs/components/**/*.md` files, the `ARCHITECTURE.md` navigation index, `docs/CHANGELOG.md`, and the architecture-type metadata comment) is dispatched as **one Plan + one editor invocation** — see SKILL.md → "Sub-agent Orchestration Pattern" for the contract.
-
-The orchestrator builds a single Plan prompt that:
-- Carries the chosen architecture type (Step 2), the type-specific templates (Step 3 — paste verbatim into the prompt), the ADR Context Block (Step 0.5), the system/container inventory (Steps 4a–4c), and the metadata fields (Step 4 — Architect, Version, Status).
-- Instructs Plan to emit Route C with one `mode: new-file` item per file in the Creation Order below, each with full content (EXPLORER_HEADER block, breadcrumb, `# Heading`, `**Type:**` field — see Step 4d for the C4 component file template).
-- Reminds Plan that `docs/components/README.md` is **Route B** (architecture-component-guardian) — Plan must list it under Route B with the 5-column index spec, not under Route C.
-- Carries the **HARD GATE** rule: Route C must include at least one component file under `docs/components/<system>/` per identified system. The Plan agent is responsible for satisfying this gate; if it can't, Plan emits a Route C of zero component files and a notes line — orchestrator surfaces this and asks the user to define primary containers before re-running.
-
-After the editor returns its summary, the orchestrator runs the HARD GATE check against the editor's "Files created" list. Step 6 (ADR delegation) and Step 7 (diagram generation) follow as before.
-
-**Creation Order** (Plan emits one Route C item per file, in this order):
+**Creation Order:**
 1. Create `docs/` directory
 2. Create `docs/components/` directory
 3. Write each section to its corresponding `docs/NN-name.md` file (see RESTRUCTURING_GUIDE.md for file mapping):
