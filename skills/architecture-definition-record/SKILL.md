@@ -288,6 +288,25 @@ If the ADR title is a placeholder (`[Title]`, `[title]`, `Title`), add at the to
 > **TODO**: Auto-generated with placeholder title. Update title, filename, and all sections with the actual architectural decision.
 ```
 
+**Step 1.5a — Length Validation Gate (BLOCKING)**: Before the file is written, verify both length constraints from `ADR_GUIDE.md § Title and Problem Statement Length Constraints`:
+
+1. **Title length** — extract the text after `# ADR-NNN: ` from the populated H1 line and count characters. Must be ≤ 50.
+2. **Problem Statement length** — extract the body between `### Problem Statement` and the next `### ` (or `---`) heading, strip any HTML comments, trim whitespace, and count characters. Must be ≤ 200.
+
+```bash
+# Title check (in-memory before write):
+title_text="<populated title>"
+[ ${#title_text} -le 50 ] || echo "FAIL P1: title is ${#title_text} chars (>50)"
+
+# Problem Statement check (in-memory before write):
+ps_body="<populated Problem Statement body, comments stripped, trimmed>"
+[ ${#ps_body} -le 200 ] || echo "FAIL P2: Problem Statement is ${#ps_body} chars (>200)"
+```
+
+On any FAIL: revise the field per the guide ("drop weak words, prefer single concrete nouns" for titles; "compress to one tight sentence, move requirements to `### Requirements`" for Problem Statement) and re-run the gate. Cap at 3 revision rounds. Round 4 → escalate to user with the actual lengths and current text; ask whether to split the ADR into sub-decisions (the recommended fix when content genuinely cannot fit).
+
+**No waiver mechanism**: if the decision cannot fit, split it into multiple ADRs.
+
 **Write file** and report: `✅ Created: adr/ADR-001-technology-stack.md`
 
 #### Step 1.6: Summary Report
@@ -420,6 +439,25 @@ Populate all sections from the interview answers. Fill the `**Scope**` header fi
 - Cross-references to ADR-101+
 
 If any are present, generalize them per `ADR_GUIDE.md § Institutional ADR Content Discipline` and confirm with the user before writing.
+
+**Step 2.4b — Length Validation Gate (BLOCKING)**: Before the file is written, verify both length constraints from `ADR_GUIDE.md § Title and Problem Statement Length Constraints`. Applies to ALL scopes (Institutional and User/Project alike — the rules are universal).
+
+1. **Title length** — extract the text after `# ADR-NNN: ` from the populated H1 line and count characters. Must be ≤ 50.
+2. **Problem Statement length** — extract the body between `### Problem Statement` and the next `### ` (or `---`) heading, strip any HTML comments, trim whitespace, and count characters. Must be ≤ 200.
+
+```bash
+# Title check (in-memory before write):
+title_text="<populated title from Step 2.2 interview>"
+[ ${#title_text} -le 50 ] || echo "FAIL T1: title is ${#title_text} chars (>50)"
+
+# Problem Statement check (in-memory before write):
+ps_body="<populated Problem Statement body, comments stripped, trimmed>"
+[ ${#ps_body} -le 200 ] || echo "FAIL P2: Problem Statement is ${#ps_body} chars (>200)"
+```
+
+On FAIL: prompt the user with the actual length and the current text, and ask them to revise. The interactive flow allows direct rewording; do NOT proceed to Step 2.5 until both checks pass. Cap at 3 revision rounds — on round 4, recommend splitting the decision into multiple ADRs (the natural fix when scope is too broad to fit the constraints).
+
+**No waiver mechanism**: a decision that cannot be stated as a 50-char title and a 200-char problem statement is one decision too many.
 
 #### Step 2.5: Write File
 

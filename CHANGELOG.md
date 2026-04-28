@@ -5,6 +5,41 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.17.1]
+
+### Added — ADR title and Problem Statement length constraints (blocking gate)
+
+**Motivation**: ADR titles and Problem Statements were unbounded. Real-world drift produced ADR titles like "Adopt Dynatrace SaaS as the Mandatory Observability Platform for All Production Workloads" (90 chars) and Problem Statement bodies that were verbatim copies of the four scaffolding questions from the template (often 250–400 chars of bullet points). Both pollute downstream surfaces: titles wrap unpredictably in tables, breadcrumbs, and the architecture-explorer manifest; Problem Statements that are still scaffolding indicate the decision hasn't been crystallized.
+
+**Resolution — two universal length rules, enforced at every ADR write**:
+
+- **Title ≤ 50 characters** — the text after `# ADR-NNN: ` is capped at 50 chars (the prefix itself is not counted). Forces sharp, single-noun-phrase titles.
+- **Problem Statement ≤ 200 characters** — the body of the `### Problem Statement` subsection (between the heading and the next `###` or `---`, with HTML comments stripped) is capped at 200 chars. Forces compose-then-compress: internally answer the four scaffolding questions (what problem? who's impacted? cost of inaction? current state and why insufficient?), then write one tight sentence.
+
+Both rules apply to ALL scopes (Institutional and User/Project) and to all creation paths. Violations BLOCK the write — no waivers. If a decision genuinely cannot fit, split it into multiple ADRs.
+
+**Where it's enforced**:
+- `skills/architecture-definition-record/SKILL.md` Workflow 1 Step 1.5a — Length Validation Gate after generation, before file write. Cap at 3 revision rounds; round 4 recommends splitting the ADR.
+- `skills/architecture-definition-record/SKILL.md` Workflow 2 Step 2.4b — same gate in the interactive create path; on FAIL, the user is prompted with the actual length and current text and asked to revise.
+
+**Documentation**:
+- `skills/architecture-definition-record/ADR_GUIDE.md` — new "Title and Problem Statement Length Constraints" section between Institutional Discipline and the ADR Template. Includes pass/fail examples (Dynatrace 45 ✓, 90-char rewrite ✗; 149-char Problem Statement ✓, copied scaffolding ✗) and the exact awk/sed detection commands the gates use.
+- `skills/architecture-definition-record/adr/ADR-000-template.md` — inline HTML comments under the H1 and `### Problem Statement` heading point authors at the constraint at the moment of authoring.
+- The embedded template snippet in `ADR_GUIDE.md` ("## ADR Template" code block) carries the same comments so authors copying from the guide see the rules.
+
+**No code touched** — pure Markdown / skill-content edits. All 405 existing Bun tests pass. Compatible with v3.17.0's Section 3 Enforcement Gate (the two gates are independent and run in different skills).
+
+**Migration**: existing ADRs are not retroactively rewritten. The rules apply to ADRs created or modified through the skill from this version forward. Projects with non-compliant historical ADRs can run a manual review against the new ADR_GUIDE section.
+
+**Files**:
+- MODIFY `skills/architecture-definition-record/SKILL.md` (Step 1.5a Length Validation Gate after Step 1.5; Step 2.4b Length Validation Gate after Step 2.4a)
+- MODIFY `skills/architecture-definition-record/ADR_GUIDE.md` (new "Title and Problem Statement Length Constraints" section before "ADR Template"; updated embedded template snippet with HTML comments)
+- MODIFY `skills/architecture-definition-record/adr/ADR-000-template.md` (HTML comments under H1 and `### Problem Statement`; concise placeholder body)
+- MODIFY `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json` (3.17.0 → 3.17.1)
+- MODIFY `README.md` (badge, install verification, release notes)
+
+---
+
 ## [3.17.0]
 
 ### Added — Two-layer Section 3 (Architecture Principles) Enforcement Gate (no-code, reliability-first)

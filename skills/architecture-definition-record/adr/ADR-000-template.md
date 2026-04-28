@@ -1,4 +1,5 @@
 # ADR-XXX: [Short Decision Title]
+<!-- Title rule: the text AFTER `# ADR-NNN: ` must be ≤ 50 characters. Example: "Dynatrace as Mandatory Observability Platform" (45). See ADR_GUIDE.md § Title and Problem Statement Length Constraints. -->
 
 **Status**: Proposed | Accepted | Deprecated | Superseded by ADR-XXX
 **Scope**: Institutional | User
@@ -14,12 +15,9 @@
 > What is the issue or situation that is motivating this decision or change?
 
 ### Problem Statement
+<!-- Length rule: the Problem Statement body must be ≤ 200 characters total. Compose by answering — internally — What problem? Who is impacted? Cost of inaction? Current state and why insufficient? — then compress the answer to one tight sentence (or two short ones). The author-facing questions belong in your draft notes, not in the final ADR. See ADR_GUIDE.md § Title and Problem Statement Length Constraints. -->
 
-[Describe the problem or opportunity. Be specific about:]
-- What problem are we trying to solve?
-- Who is impacted by this problem? (users, developers, operations, business)
-- What are the consequences of not solving this problem?
-- What is the current state and why is it insufficient?
+[A concise statement (≤ 200 characters) describing the problem or opportunity. Compose by answering: What problem? Who is impacted? Cost of inaction? Current state and why insufficient? — then compress to a single tight sentence.]
 
 ### Requirements
 

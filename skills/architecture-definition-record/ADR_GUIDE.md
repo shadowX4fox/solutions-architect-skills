@@ -84,12 +84,82 @@ If a decision is genuinely project-local — bound to a specific component, oper
 
 ---
 
+## Title and Problem Statement Length Constraints
+
+Every ADR — Institutional or User/Project — must satisfy two length rules. Both are enforced in `SKILL.md` Workflow 1 Step 1.5 (generation from `ARCHITECTURE.md`) and Workflow 2 Step 2.4 (interactive create); a violation BLOCKS the write until the field is shortened.
+
+### Rule 1 — Title ≤ 50 characters
+
+The text after `# ADR-NNN: ` must be **50 characters or fewer**.
+
+| | Title text | Length | Verdict |
+|---|---|---|---|
+| ✅ Pass | `Dynatrace as Mandatory Observability Platform` | 45 | OK |
+| ✅ Pass | `PostgreSQL as Primary Relational Datastore` | 42 | OK |
+| ❌ Fail | `Adopt Dynatrace SaaS as the Mandatory Observability Platform for All Production Workloads` | 90 | exceeds 50 |
+| ❌ Fail | `Use PostgreSQL 15 as the System-of-Record Relational Database for Customer-Facing Services` | 92 | exceeds 50 |
+
+Why 50: titles appear in tables, navigation indexes, breadcrumbs, and the architecture-explorer manifest. Anything longer wraps unpredictably and forces every consumer to truncate.
+
+**Detection** (the workflow gate runs this):
+
+```bash
+# Extract the title text (after `# ADR-NNN: `) from the first H1, count its characters.
+title_text=$(head -1 adr/ADR-006-dynatrace.md | sed -E 's/^# ADR-[0-9]+:[[:space:]]+//')
+title_len=${#title_text}
+if [ "$title_len" -gt 50 ]; then
+  echo "FAIL: title is $title_len chars (>50): $title_text"
+fi
+```
+
+If the title exceeds 50 chars, **revise** — drop weak words ("the", "for", "as", "all"), prefer single concrete nouns, abbreviate qualifiers. Do NOT truncate mid-word.
+
+### Rule 2 — Problem Statement ≤ 200 characters
+
+The body of the `### Problem Statement` subsection (the prose between the heading and the next `###` heading or blank-line break) must be **200 characters or fewer**, including spaces and punctuation but excluding the heading itself and any HTML comments.
+
+The compose-then-compress approach: internally answer the four scaffolding questions (what problem? who's impacted? cost of inaction? current state and why insufficient?), then write a single tight sentence (or two short ones) ≤ 200 chars. The four questions themselves are *prompts for thinking*, not the final ADR content.
+
+| | Problem Statement text | Length | Verdict |
+|---|---|---|---|
+| ✅ Pass | `Production incidents take 30+ min to triage because telemetry is fragmented across three vendor tools and engineers cannot correlate traces with logs.` | 149 | OK |
+| ✅ Pass | `Read latency at p99 exceeds the 200ms SLO under peak load; the current single-region Postgres replica cannot keep up with cross-region read fan-out.` | 147 | OK |
+| ❌ Fail | A bulleted list of four questions copied from the template. | varies, often 250-400 | exceeds 200 |
+| ❌ Fail | A multi-paragraph problem narrative. | 400+ | exceeds 200 |
+
+Why 200: ADRs are read by humans under decision pressure. A 200-char problem statement forces the author to crystallize the issue; a 600-word one buries it.
+
+**Detection** (the workflow gate runs this):
+
+```bash
+# Extract the Problem Statement body (between "### Problem Statement" and the next "###" or blank-line section break),
+# strip HTML comments, count characters.
+awk '/^### Problem Statement/{flag=1; next} /^### |^---/{flag=0} flag' adr/ADR-006-dynatrace.md \
+  | sed -E 's/<!--[^>]*-->//g' \
+  | tr -d '\n' \
+  | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); print length }'
+# Compare the result to 200.
+```
+
+If the Problem Statement exceeds 200 chars, **compress** — pick the most load-bearing sentence, drop background that belongs in `Context`, and move requirements to `### Requirements`. The four-question scaffolding stays in your draft notes.
+
+### Why both rules are blocking
+
+A long title or problem statement is not a stylistic preference — it's a signal that the decision has not yet been crystallized. ADRs are bound contracts; an author who cannot state the title in 50 characters or the problem in 200 has not yet decided what they're deciding. Forcing the constraint at write-time produces sharper ADRs.
+
+### Sentinels and waivers
+
+There is no waiver mechanism. If a decision genuinely cannot fit the constraint, split it into multiple ADRs (one per sub-decision) — that's almost always the better answer.
+
+---
+
 ## ADR Template
 
 Use this template for all architectural decisions:
 
 ```markdown
 # ADR-XXX: [Decision Title]
+<!-- Title rule: the text AFTER `# ADR-NNN: ` must be ≤ 50 characters. -->
 
 **Status**: Proposed | Accepted | Deprecated | Superseded
 **Scope**: Institutional | User
@@ -104,9 +174,8 @@ Use this template for all architectural decisions:
 What is the issue that we're seeing that is motivating this decision or change?
 
 **Problem Statement:**
-- What problem are we trying to solve?
-- Who is impacted by this problem?
-- What are the consequences of not solving it?
+<!-- Length rule: the Problem Statement body must be ≤ 200 characters total. Compose by answering — internally — What problem? Who is impacted? Cost of inaction? — then compress to one tight sentence. -->
+[A concise statement (≤ 200 characters) of the problem or opportunity.]
 
 **Requirements:**
 - Functional requirements

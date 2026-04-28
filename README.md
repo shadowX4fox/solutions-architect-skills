@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.17.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.17.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.17.0` in the list.
+You should see `sa-skills v3.17.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,23 @@ Where:
 
 ## Roadmap
 
-### v3.17.0 (Current Release) ✅
+### v3.17.1 (Current Release) ✅
+**feat: ADR title and Problem Statement length constraints (blocking gate)**
+
+Adds two universal length rules enforced at every ADR write — first-time create (Workflow 2) and bulk generation from Section 12 (Workflow 1):
+
+- **Title ≤ 50 characters** — the text after `# ADR-NNN: ` is capped at 50 chars (the prefix itself is not counted). Example: `Dynatrace as Mandatory Observability Platform` (45) passes; `Adopt Dynatrace SaaS as the Mandatory Observability Platform for All Production Workloads` (90) blocks.
+- **Problem Statement ≤ 200 characters** — the body of the `### Problem Statement` subsection (between the heading and the next `###` or `---`, with HTML comments stripped) is capped at 200 chars. Forces compose-then-compress: internally answer the four scaffolding questions, then write one tight sentence.
+
+Both rules apply to all scopes (Institutional and User/Project) and BLOCK the write on violation. Cap at 3 revision rounds; round 4 recommends splitting the ADR — no waivers, because a decision that cannot fit is one decision too many.
+
+**Documentation**: new "Title and Problem Statement Length Constraints" section in `ADR_GUIDE.md` with pass/fail examples and exact detection commands. Inline HTML comments in `adr/ADR-000-template.md` surface the rules at authoring time.
+
+**Files**: `skills/architecture-definition-record/SKILL.md` (Steps 1.5a + 2.4b), `ADR_GUIDE.md` (new section + updated embedded template), `adr/ADR-000-template.md` (HTML comments). No code changed. All 405 existing tests pass.
+
+---
+
+### v3.17.0 (Previous Release) ✅
 **feat: Two-layer Section 3 (Architecture Principles) Enforcement Gate — no-code, reliability-first**
 
 Hardens the `architecture-docs` skill across both first-write and edit paths by replacing the advisory Section 3 validation checklist with a two-layer enforcement gate that runs on every write to `docs/02-architecture-principles.md`.
