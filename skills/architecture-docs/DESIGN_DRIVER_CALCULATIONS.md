@@ -455,11 +455,15 @@ All three algorithms return structured data:
 **IMPORTANT**: All calculations must be presented to user for review before applying changes to ARCHITECTURE.md.
 
 **Review Workflow**:
-1. Run all three algorithms
-2. Generate calculation report
-3. Present findings to user
-4. Await user approval or manual override
-5. Only then update Section 2.2.1
+1. Run all three algorithms (orchestrator computes — these are deterministic numeric calculations, no sub-agent needed).
+2. Generate calculation report.
+3. Present findings to user.
+4. Await user approval or manual override.
+5. **Apply via the explore → Plan → editor pipeline** (v3.17.0+, see SKILL.md → "Sub-agent Orchestration Pattern"):
+   - Skip the explorer call (target file is fixed: `docs/01-system-overview.md` → Section 2.2.1).
+   - Build a Plan prompt carrying: the approved calculation values, the existing Section 2.2.1 content (orchestrator reads it once), and the instruction to emit Route C with one surgical-edit on `docs/01-system-overview.md`.
+   - Dispatch via the editor agent.
+   - Read the editor's summary; mark complete.
 
 ### Manual Override Support
 

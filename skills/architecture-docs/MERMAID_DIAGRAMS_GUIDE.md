@@ -512,6 +512,26 @@ Include this legend after every Mermaid architecture diagram:
 
 ## 8. Step-by-Step Instructions
 
+### Sub-agent dispatch (v3.17.0+)
+
+Workflow 8 (diagram generation) runs through the explore → Plan → router → editor pipeline (see SKILL.md → "Sub-agent Orchestration Pattern"). The orchestrator does **not** assemble the diagram fences itself.
+
+1. **Theme detection** — orchestrator reads `<!-- DIAGRAM_THEME -->` comments in the target docs. If absent, orchestrator prompts the user (light | dark) and writes the marker. This is the only pre-Plan I/O the orchestrator does.
+2. **Explorer (FINDINGS mode)** — query: components, layers, integrations, flows, technology names lifted from the user's intent.
+3. **Plan subagent** — orchestrator's prompt includes:
+   - The `EXPLORE_FINDINGS` block.
+   - The theme value.
+   - This guide's Section 4 (component representation), Section 5 (flow conventions), Section 6 (color palette + dark theme), Section 7 (legend template), and Section 11 (best practices) — pasted verbatim or referenced by file path so Plan honours the guide.
+   - The instruction to emit Route C with one item per target file:
+     - `docs/03-architecture-layers.md` — surgical edits or `replace-file` for the ASCII Logical View, C4 L1 System Context, C4 L2 Container, and Detailed View (`graph TB`) Mermaid blocks.
+     - `docs/04-data-flow-patterns.md` — surgical edits for each Data Flow sequence diagram block (one per documented flow).
+   - The "Creating a New …" / "Updating an Existing …" sub-sections below describe the **content** Plan must produce inside each Route C item's `new_string`. They are not literal orchestrator steps.
+4. **User-approval gate** — the existing Workflow 8 review prompt (if any). Plan's prose is what the user sees.
+5. **Editor dispatch** — orchestrator passes Route C verbatim to `architecture-docs-editor`. Editor uses `Edit` for surgical Mermaid-fence swaps and `Write` for net-new diagram sections.
+6. **Mandatory completeness audit** (Selection Workflow Step 7.3) runs in the orchestrator on the editor's summary.
+
+The sub-sections below ("Creating a New Mermaid Diagram", "Updating an Existing Mermaid Diagram") describe the diagram *content* Plan must produce. Treat them as the Plan agent's content checklist, not as literal main-session steps.
+
 ### Creating a New Mermaid Diagram
 
 **Step 1: Identify Architecture Layers**
