@@ -621,7 +621,11 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 - Do not use `graph TB` or `flowchart` syntax inside sequence diagrams
 - Do not use HTML tags in participant names or messages — including `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, or any `<...>` element. Use `\n` for multi-line messages.
 - Do not use emoji characters in labels (rendering varies)
-- Do not use `;` (semicolons) in message labels — semicolons terminate statements in Mermaid/ZenUML and cause parse errors. Use `,` (comma) instead (e.g., "Replace skeletons with cards, hide null sections")
+- Do not use `;` (semicolons) anywhere after the `:` in **message labels** (`A->>B: ...`) **or Note text** (`Note over A,B: ...`, `Note left of A: ...`, `Note right of A: ...`), **including inside parenthetical sub-clauses**. Mermaid's sequence tokenizer treats `;` as a statement terminator and stops reading the label there, then chokes on the trailing characters and the next line's arrow. Replace with `,` (comma), `—` (em dash), or `.` (period).
+  - **Wrong**: `GW->>Pay: existing payment path (sync; ORQPagos2002 stateless)` → parse error: *"Expecting SOLID_ARROW … got NEWLINE"* on the next line.
+  - **Right**: `GW->>Pay: existing payment path (sync, ORQPagos2002 stateless)`
+  - **Wrong**: `Note over BS: omn-bs returns failure response; flow ends here.`
+  - **Right**: `Note over BS: omn-bs returns failure response, flow ends here.`
 - Do not nest `alt` blocks more than 2 levels deep (readability degrades)
 
 ---
@@ -715,7 +719,7 @@ Run this check on every generated Mermaid block:
 | Pattern | What to look for | Fix |
 |---------|------------------|-----|
 | HTML tags | `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, `<span>`, any `<...>` | Replace `<br/>` with `\n` (sequence/C4) or remove entirely (topology node labels can use `\n`) |
-| Semicolons in labels | `;` inside message labels, node labels, or edge labels | Replace with `,` (comma) or `.` (period) |
+| Semicolons in labels | `;` anywhere after `:` on a line that starts with a sequence message (`A->>B:`), a Note (`Note over …:`, `Note left of …:`, `Note right of …:`), a flowchart node label (`[...]`, `(...)`, `{...}`), or an edge label (`-- text -->`, `--> text`). **Includes occurrences inside parenthetical sub-clauses.** Suggested scan regex (sequence diagrams): `^\s*(\S+\s*-+>>?\+?-?\s*\S+\s*:|Note (over\|left of\|right of) [^:]+:).*;` | Replace with `,` (comma), `—` (em dash), or `.` (period). |
 | Emoji in labels | Any Unicode emoji characters (`🔴`, `✅`, etc.) | Remove — rendering varies by platform |
 | Pipe in node text | `\|` inside node label text (not as edge delimiter) | Replace with `/` |
 | Unescaped double quotes | `"` inside `"..."` labels | Replace inner quotes with `'` (single quotes) |
@@ -723,7 +727,7 @@ Run this check on every generated Mermaid block:
 
 ### Validation Procedure
 
-1. **Scan** each generated Mermaid/ZenUML code block with the forbidden pattern list above
+1. **Scan** each generated Mermaid/ZenUML code block with the forbidden pattern list above. For sequence diagrams, the scan must cover **both** message labels (`A->>B: ...`) **and** Note bodies (`Note over A,B: ...`, `Note left of A: ...`, `Note right of A: ...`); a `;` anywhere between the `:` and end-of-line is a violation, including inside parentheses.
 2. **For each violation found**, report which pattern and which line
 3. **Rewrite** the diagram with the fix applied
 4. **Re-scan** the fixed diagram to confirm no violations remain

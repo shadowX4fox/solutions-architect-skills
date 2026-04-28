@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.17.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.17.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.17.2` in the list.
+You should see `sa-skills v3.17.3` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,16 @@ Where:
 
 ## Roadmap
 
-### v3.17.2 (Current Release) ✅
+### v3.17.3 (Current Release) ✅
+**fix: harden semicolon rule in DIAGRAM-GENERATION-GUIDE (covers Notes + parenthetical sub-clauses)**
+
+`skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md` already forbade `;` in sequence-diagram message labels, but the rule wording was too narrow and the Pre-Write Validation row's scan hint missed two real-world cases that broke generated diagrams: (a) a `;` inside a parenthetical sub-clause of a message (e.g. `A->>B: existing payment path (sync; ORQPagos2002 stateless)` → Mermaid parse error *"Expecting SOLID_ARROW … got NEWLINE"*), and (b) a `;` inside `Note over … :` / `Note left of … :` / `Note right of … :` bodies. Three localized edits — the DO NOT bullet now spans message labels **and** Note text **and** parenthetical sub-clauses with negative + positive examples for each; the validation table row is broadened with a scannable regex; the Validation Procedure step 1 explicitly requires scanning Note bodies. Documentation hardening only — no skill behavior, no workflow change.
+
+**Files**: `skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md` (10 lines: +7/-3). No code touched, no validators changed.
+
+---
+
+### v3.17.2 (Previous Release) ✅
 **fix: drop incorrect Ctrl+R claim from `/setup` final reminder**
 
 `commands/setup.md` Step 7 (Final reminder) printed `Restart Claude Code (or press Ctrl+R) to reload settings.` — the Ctrl+R parenthetical was wrong: Claude Code's Ctrl+R is bound to `HistorySearch`, not settings reload. On Linux the chord is also intercepted by bash readline's reverse-history-search before it ever reaches Claude Code, so the instruction misled users who tried it. The reminder now reads `Restart Claude Code to reload settings.` — accurate, terminal-agnostic.
