@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.17.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.16.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.17.0` in the list.
+You should see `sa-skills v3.16.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,33 +795,7 @@ Where:
 
 ## Roadmap
 
-### v3.17.0 (Current Release) ✅
-**feat: `architecture-docs` explore→Plan→editor pipeline + Section 3 Enforcement Gate propagation**
-
-Introduces a sub-agent orchestration pattern for `architecture-docs` Workflows 1, 2–6, and 8 so the orchestrator coordinates and dialogues only — research goes to `architecture-explorer` (haiku, FINDINGS mode), planning goes to the built-in `Plan` subagent (inherits the main session model), and execution goes to a new `architecture-docs-editor` agent (sonnet, pinned). Plan emits a prose plan organized into three labelled routes — A → `architecture-definition-record` (ADRs), B → `architecture-component-guardian` (component index), C → `architecture-docs-editor` (all other doc edits) — empty routes omitted. Routes A/B dispatch via the `Skill` tool; Route C dispatches via the `Agent` tool. The editor includes a `DELEGATE:` safety net so any ADR / component-index path slipped into Route C re-routes to the correct skill instead of being written by the wrong tier.
-
-**Section 3 Enforcement Gate end-to-end**: the mandatory 9-principle structure for `docs/02-architecture-principles.md` (Separation of Concerns → High Availability → Scalability First → Security by Design → Observability → Resilience → Simplicity → Cloud-Native → Open Standards, each with Description / Implementation / Trade-offs subsections) is now enforced at three points across the new pipeline: (1) **Plan-time prevention** — the orchestrator embeds the principle-gate convention bullet plus the verbatim 9-principle template in the Plan prompt whenever Route C targets the principles file, so Plan refuses violating edits with a notes line rather than emitting them; (2) **Post-edit validation** — the orchestrator runs the VALIDATIONS.md checklist on the editor's summary before reporting completion; (3) **Documented remediation flow** — when post-edit validation fails, the orchestrator re-invokes Plan with the validation error appended, dispatches a remediation pass through the editor, and after two failed attempts escalates to the user. Orchestrator hand-edits to the principles file are explicitly prohibited because they would bypass the same gate that flagged the violation.
-
-**Out of scope for the pipeline**: Workflow 7 (Q&A — already explorer-only, no editor needed), Workflow 9 (migration — runs in main session, user-deferred), Workflow 10 (release — sequential git preconditions, stays main-session).
-
-**New agent**: `agents/generators/architecture-docs-editor.md` — sonnet-pinned executor with `Read`, `Edit`, `Write`, `Glob`, `Grep` (no `Bash`, no `Agent`). Steps: inventory the plan → delegation guard for stray ADR / component-index paths (emits `DELEGATE: <skill>` lines) → apply edits in plan order with `surgical-edit` / `replace-file` / `new-file` modes → re-read each modified file to verify the change landed → emit a brief `EDITOR SUMMARY` prose summary. Refuses files outside the project root, paths with `..` after resolution, and writes to `adr/*.md` or `docs/components/README.md`.
-
-**Audit-pass clarifications in `architecture-docs/SKILL.md`**: Step 4a now describes only the post-Plan user-approval gate (no longer conflated with the W5.5 propagation checklist, which is sourced from impact discovery); Step 6 trusts the editor's verification by default (orchestrator only re-reads on a verification warning); Step 2 carries a v3.17.0+ ownership note clarifying that the orchestrator names anchor file paths but does not pre-read them (Plan reads them itself); Phase 1a fact-delta extraction now sources deltas from Plan's Route C output rather than a before/after file comparison; tier table carries a role-label note pointing readers to the namespaced `subagent_type:` form for invocation; the Safety Net paragraph documents the bare → prefixed mapping for `DELEGATE:` lines.
-
-**Modified files**:
-
-- `agents/generators/architecture-docs-editor.md` — new sonnet-pinned executor agent (NEW).
-- `skills/architecture-docs/SKILL.md` — Sub-agent Orchestration Pattern section, Plan invocation contract with the Section 3 Enforcement Gate convention bullet and 9-principle template-paste rule, Context-Efficient Workflow rewired to explore → Plan → router → editor, W5.5 Phase 3 batched as one Plan + one editor call, Step 6 remediation flow.
-- `skills/architecture-docs/ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` — Workflow 1 Step 5 file-creation dispatched as one Plan + one editor invocation after the user-dialogue steps (4a–4c) complete.
-- `skills/architecture-docs/DESIGN_DRIVER_CALCULATIONS.md` — Section 2.2.1 update applied via the Plan + editor pipeline (explorer skipped because the target file is fixed).
-- `skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md` — Workflow 8 sub-agent dispatch section (theme detection stays in the orchestrator; everything else routes through Plan + editor).
-- `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json`, `README.md` — version 3.16.1 → 3.17.0.
-
-**Migration**: none required. The pattern activates on the next `architecture-docs` invocation. Existing user-approval gates (PO Spec gate, ADR Context Block confirmation, type selection, propagation checklist, theme prompt, metric audit, design driver confirmation) are preserved — they shift from "main session edits then asks" to "Plan proposes, orchestrator presents at the same gate, user approves, dispatch fires". The orchestrator's main session no longer holds upstream architecture file content directly, which substantially reduces token pressure on Opus-tier sessions.
-
----
-
-### v3.16.1 (Previous Release) ✅
+### v3.16.1 (Current Release) ✅
 **docs: Institutional ADR content discipline — codify project-agnostic rules for ADR-001..100 in `architecture-definition-record`**
 
 Adds a new "Institutional ADR Content Discipline" section to `skills/architecture-definition-record/ADR_GUIDE.md` (between "ADR Scope" and "ADR Template"). The section enumerates the project-specific patterns that institutional ADRs (numbers 001–100) must NOT contain — "Institutional Inheritance Note" headers, "Section 3 — Project Application" tables, specific component names (Inbox Hub, omn-mfa, sda-msa-payments-gateway, etc.), specific operator / carrier / brand names (Claro, Movistar, Tuenti, CNT), specific feature names, project budgets ("$276,411"), project deadlines ("MVP June 30, 2026"), user counts ("7M mobile users / 300K web users"), and cross-references to project ADRs (ADR-101+). Each forbidden pattern is paired with the generic phrasing that replaces it ("platform", "service team", "the workload namespace", "the bank's customer base", "platform delivery timelines", etc.). Captures the recent rewrite of all 14 institutional ADRs as a durable rule rather than oral tradition.
