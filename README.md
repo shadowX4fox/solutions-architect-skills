@@ -91,16 +91,53 @@ For detailed information about Claude Code's plugin system, see the [official Cl
 
 **See [Installation Guide](docs/INSTALLATION.md) for detailed instructions.**
 
-**Quick Start (Using Marketplace - Recommended):**
+#### Step 0 — Install Bun (one-time prerequisite)
+
+The plugin requires Bun (v1.0+) for template expansion, contract validation, the cross-platform helper scripts (`scripts/today.ts`, `scripts/ensure-dir.ts`, `scripts/remove-glob.ts`), and the UserPromptSubmit hook. Pick the install path that matches your OS:
+
+**Windows (native cmd / PowerShell)** — recommended path:
+
+```powershell
+npm install -g bun
+```
+
+This is the most reliable Windows-native install. Requires Node.js (which is already on most Windows dev machines because of the broader JavaScript tooling). The official `irm bun.sh/install.ps1 | iex` one-liner also works on PowerShell, but it occasionally trips on execution-policy restrictions, corporate proxies, or signed-script enforcement — `npm install -g bun` sidesteps all three because npm is already trusted in your PowerShell profile if Node is installed.
+
+**macOS / Linux**
 
 ```bash
-# Step 1: Register marketplace (one-time)
+curl -fsSL https://bun.sh/install | bash
+```
+
+Or, on macOS only, via Homebrew:
+
+```bash
+brew install bun
+```
+
+**WSL2 or Git Bash on Windows** — use the Linux/macOS curl one-liner above. The plugin works identically inside WSL or Git Bash because both expose a POSIX userland; v3.21.1's native wrappers also work natively in either, so you don't have to choose between them.
+
+**Verify** (any OS):
+
+```bash
+bun --version
+# 1.0.0 or higher
+```
+
+If `bun` is not on `PATH` after install, restart your terminal (or, on Windows, sign out and back in so the system PATH update takes effect).
+
+#### Step 1 — Install the plugin
+
+**Quick Start (Using Marketplace — Recommended on every OS):**
+
+```bash
+# Register marketplace (one-time)
 /plugin marketplace add shadowX4fox/solutions-architect-skills
 
-# Step 2: Install plugin
+# Install plugin
 /plugin install sa-skills@shadowx4fox-solution-architect-marketplace
 
-# Step 3: Verify installation
+# Verify installation
 /plugin list
 ```
 
@@ -114,9 +151,41 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.19.2` in the list.
+You should see `sa-skills v3.21.1` in the list.
 
-**Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
+**Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
+
+#### Step 2 — Configure for your platform with `/setup`
+
+The plugin's UserPromptSubmit hook ships in three native variants under `hooks/`:
+
+- `route-architecture-docs.sh` (Linux, macOS, WSL, Git Bash)
+- `route-architecture-docs.cmd` (Windows native cmd.exe)
+- `route-architecture-docs.ps1` (PowerShell on any OS)
+
+Each wrapper self-resolves its own directory and forwards to `bun route-architecture-docs.ts`, so the hook command never depends on `~` expansion (cmd.exe and PowerShell don't expand `~`). On every OS, run:
+
+```
+/setup
+```
+
+The setup helper:
+1. Detects `process.platform` at install time.
+2. Computes the absolute path to the matching wrapper.
+3. Writes that absolute path into your project's `.claude/settings.json` under `hooks.UserPromptSubmit`.
+4. Sweeps any legacy hook entry from earlier sa-skills versions (v3.19.0 `sh ~/...sh`, v3.21.0 `bun ~/...ts`) in the same pass.
+5. Reports which platform was detected and the resolved hook command in its stdout summary.
+
+**Why per-OS sections matter:** before v3.21.1 the plugin's hook used `bun ~/.claude/plugins/.../*.ts`, which only works in shells that expand `~`. The native wrappers + `/setup` auto-detection eliminate that gap — Windows cmd, Windows PowerShell, Linux, macOS, WSL, and Git Bash all install with the same one-line `/setup` command and end up with a hook command that runs natively on the host shell.
+
+| Your OS / Shell | Bun install (Step 0) | What `/setup` writes (Step 2) |
+|---|---|---|
+| Windows cmd.exe | `npm install -g bun` | `cmd /c "<abs-path>\\hooks\\route-architecture-docs.cmd"` |
+| Windows PowerShell | `npm install -g bun` | `cmd /c "<abs-path>\\hooks\\route-architecture-docs.cmd"` (cmd wrapper still chosen — universally available; if you specifically want the .ps1, edit settings.json by hand) |
+| Windows + WSL2 | `curl -fsSL https://bun.sh/install \| bash` (inside WSL) | `sh <abs-path>/hooks/route-architecture-docs.sh` |
+| Windows + Git Bash | `curl -fsSL https://bun.sh/install \| bash` (inside Git Bash) | `sh <abs-path>/hooks/route-architecture-docs.sh` |
+| macOS | `brew install bun` or curl one-liner | `sh <abs-path>/hooks/route-architecture-docs.sh` |
+| Linux | curl one-liner | `sh <abs-path>/hooks/route-architecture-docs.sh` |
 
 ### Optional: Enable context7
 
@@ -699,18 +768,31 @@ To request specific examples or use cases, [open an issue](https://github.com/sh
 ## Requirements
 
 - **Claude Code** (latest version)
-- **Bun** (v1.0.0 or later) - Required for compliance generation and template validation
-- **Platform:** macOS, Linux, or Windows
+- **Bun** (v1.0.0 or later) — required for compliance generation, template validation, the cross-platform helper scripts, and the UserPromptSubmit hook
+- **Platform:** macOS, Linux, or Windows (native cmd / PowerShell, WSL2, or Git Bash — all supported as of v3.21.1)
 
 ### Why Bun?
 
-The architecture-compliance skill uses Bun for:
+The architecture-compliance skill (and several other skills) use Bun for:
 - Template expansion with `@include` directives
 - Pre-validation of template structure (Phase 4.1)
 - Post-validation of generated contracts (Phase 4.6)
-- High-performance TypeScript execution
+- The cross-platform helpers under `scripts/` (`today.ts`, `ensure-dir.ts`, `remove-glob.ts`) that replaced the v3.19.x POSIX `date` / `mkdir` / `rm` shell-outs
+- High-performance TypeScript execution without a separate transpile step
 
-**Installation:** See [INSTALLATION.md](docs/INSTALLATION.md#installing-bun) for Bun setup instructions.
+### Installing Bun by OS
+
+| OS / Shell | Recommended install command | Notes |
+|---|---|---|
+| **Windows (native cmd / PowerShell)** | `npm install -g bun` | Most reliable Windows-native path. Requires Node.js. Sidesteps PowerShell execution-policy and proxy issues that the official PowerShell installer occasionally hits in corporate environments. |
+| Windows + WSL2 | `curl -fsSL https://bun.sh/install \| bash` (inside WSL) | Same as Linux. |
+| Windows + Git Bash | `curl -fsSL https://bun.sh/install \| bash` (inside Git Bash) | Same as Linux. |
+| macOS | `brew install bun` or `curl -fsSL https://bun.sh/install \| bash` | Either works; `brew` integrates with the rest of your formula updates. |
+| Linux | `curl -fsSL https://bun.sh/install \| bash` | The official one-liner. |
+
+After install, verify with `bun --version` (must be `1.0.0` or higher). If `bun` is not on PATH, restart your terminal — or on Windows, sign out and back in so the user PATH update takes effect.
+
+For full Bun installation troubleshooting, see [INSTALLATION.md](docs/INSTALLATION.md#installing-bun).
 
 ## Recommended VS Code Setup
 

@@ -32,15 +32,35 @@ bun --version
 
 Expected output: `1.0.0` or later
 
-#### Windows
+#### Windows (native cmd / PowerShell)
+
+**Recommended — npm global install** (most reliable on every Windows version):
 
 ```powershell
-# Install Bun (PowerShell)
-powershell -c "irm bun.sh/install.ps1 | iex"
+npm install -g bun
+```
 
-# Verify installation
+This requires Node.js. The npm global install sidesteps the PowerShell execution-policy restrictions, corporate proxy issues, and signed-script enforcement that occasionally trip the official `irm` one-liner in enterprise environments. Because npm is already trusted in your PowerShell profile if Node.js is installed, no additional permission prompts are needed.
+
+**Alternative — official PowerShell installer:**
+
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+
+Use this when Node.js is not installed and you don't want to install it just for Bun. Note: requires PowerShell execution policy `RemoteSigned` or `Unrestricted` (default in interactive PowerShell sessions, but corporate Group Policy may force `Restricted`).
+
+**Verify** (either path):
+
+```powershell
 bun --version
 ```
+
+Expected: `1.0.0` or later. If `bun` is not on PATH after install, sign out and back in so the user PATH update takes effect.
+
+#### Windows + WSL2 or Git Bash
+
+Use the macOS/Linux instructions above. The plugin works identically inside WSL2 or Git Bash because both expose a POSIX userland — `curl -fsSL https://bun.sh/install | bash` is the standard install command in either environment.
 
 #### Alternative: Using Package Managers
 
@@ -53,6 +73,8 @@ brew install oven-sh/bun/bun
 ```bash
 sudo snap install bun-js
 ```
+
+**Windows (npm)** — see the recommended path above; `npm install -g bun` is the preferred Windows-native install.
 
 **Verify Installation:**
 ```bash
