@@ -73,30 +73,6 @@ This applies to Workflows 1, 2, and 4. There are no exceptions.
 
 ---
 
-## Pre-flight: Session-Edit Check (v3.14.1+)
-
-Before any workflow that gathers architecture context for ADR creation or supersession (Workflows 2 and 4), run the EXPLORER_HEADER session-edit pre-flight (identical across every doc-consuming sa-skills skill). ADR creation reads architecture sections to ground the decision; stale EXPLORER_HEADERs mislead the architecture-explorer's classification of which sections to load.
-
-```bash
-bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
-```
-
-- **Output `0`** → editlog is clean. Proceed directly to the workflow.
-- **Output `N > 0`** → run `... session-log list --project-root <project_root>`, then emit a loud preamble before the workflow's first prompt:
-
-  ```
-  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
-    Affected:
-      - <path-1>
-      - …
-    ACTION REQUIRED before this ADR's context can be trusted:
-      → Run: /regenerate-explorer-headers --session
-  ```
-
-  Continue running the workflow (non-blocking). Add a freshness note in the ADR's "Context" section indicating which architecture docs were edited but not yet re-classified by the explorer.
-
-Workflow 1 (the bulk ADR generation from `ARCHITECTURE.md` Section 12) and Workflow 3 (status updates / listing) do not need the pre-flight — Workflow 1 reads `ARCHITECTURE.md` directly (always exempt from EXPLORER_HEADER tracking) and Workflow 3 is metadata-only.
-
 ## Workflows
 
 ### Workflow 1 — Generate ADRs from ARCHITECTURE.md Section 12 Table

@@ -68,23 +68,6 @@ Once the explorer has run in a conversation, the resulting \`EXPLORE_MANIFEST\` 
 
 **EXPLORER_HEADER blocks** — each \`docs/NN-*.md\` and \`docs/components/**/*.md\` file should carry a 5–10 line \`<!-- EXPLORER_HEADER ... -->\` block right after the H1 listing key concepts, technologies, components, scope, and related ADRs. These are the metadata the explorer surfaces in the manifest. If your docs predate v3.14.0 or look stale, run \`/regenerate-explorer-headers\` (or \`--dry-run\` first) to backfill them. \`ARCHITECTURE.md\` is exempt — it's a navigation index, no header needed.
 
-### Session edit tracker — keep EXPLORER_HEADERs honest (v3.14.1+)
-
-When you (Claude) Write or Edit any file under \`docs/**/*.md\`, the user's \`.claude/settings.json\` PostToolUse hook silently appends the path to a session editlog at \`/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog\`. Body content can drift from its EXPLORER_HEADER (renamed components, swapped technologies, new ADR refs) without the header tracking the change — the editlog is the system's memory of which docs need a header refresh before the next architecture-consuming workflow runs.
-
-**Your obligation as the orchestrator**: keep one and only one task on the user-visible task list whenever the editlog is non-empty. After every successful Write or Edit on a \`docs/**/*.md\` file (yours or the user's), do:
-
-1. Run \`bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project-root>\` and capture the integer.
-2. If the count is 0, do nothing.
-3. If the count is N > 0:
-   - If a TaskList entry already starts with \`Regenerate EXPLORER_HEADERs for \`, \`TaskUpdate\` its subject to \`Regenerate EXPLORER_HEADERs for N session-edited docs (run /regenerate-explorer-headers --session)\`. Leave its status as \`pending\`.
-   - Else \`TaskCreate\` exactly that subject with \`activeForm: "Regenerating EXPLORER_HEADERs"\`. Status starts \`pending\`.
-4. Never duplicate the task. Never auto-execute \`/regenerate-explorer-headers --session\` — that command is LLM-heavy and the user must decide when to spend it. Surface it; do not run it.
-5. After the user runs \`/regenerate-explorer-headers --session\` and the slash command reports success, the editlog is cleared by the command itself. On your next turn, run \`session-log count\` again; if it is 0, mark the existing TaskList entry as \`completed\`.
-6. \`ARCHITECTURE.md\` and \`docs/README.md\` (component index) are silently ignored by the tracker — never count them, never warn about them.
-
-**Free-form Q&A and read-only workflows** do not edit docs and so do not trigger this loop. The TODO only appears when an actual Write/Edit landed on an architecture file in the current session.
-
 To bootstrap or update these documents, invoke the appropriate sa-skills skill (see the plugin's \`docs/WORKFLOW_GUIDE.md\`).`;
 
 const managedBlock = `${BEGIN}\n${blockBody}\n${END}`;

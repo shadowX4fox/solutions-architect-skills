@@ -67,8 +67,20 @@ type Settings = {
 // its installed `command` field. Order does not matter; matching is by
 // substring containment.
 const SA_SKILLS_HOOK_MARKERS: ReadonlyArray<string> = [
-  "header-cli.ts session-log add", // v3.14.1+ PostToolUse editlog tracker
   "route-architecture-docs.sh",    // v3.19.0+ UserPromptSubmit ARCHITECTURE.md router
+];
+
+// Removal markers — hooks shipped in earlier sa-skills versions that have
+// been retired. On every /setup run, any user-side hook entry whose
+// `command` contains one of these substrings is stripped from
+// settings.json (idempotent; removed entries are reported as cleaned).
+//
+// v3.19.1: the v3.14.1 PostToolUse editlog tracker
+// (`header-cli.ts session-log add`) silently no-op'd because it relied on
+// `$TOOL_INPUT_FILE_PATH`, which Claude Code does not export. The hook
+// and the editlog feature are gone; this entry sweeps stale installs.
+const SA_SKILLS_HOOK_REMOVAL_MARKERS: ReadonlyArray<string> = [
+  "header-cli.ts session-log add", // v3.14.1 PostToolUse editlog tracker (retired v3.19.1)
 ];
 
 function findMarkerForCommand(command: string): string | null {
@@ -76,6 +88,13 @@ function findMarkerForCommand(command: string): string | null {
     if (command.includes(m)) return m;
   }
   return null;
+}
+
+function commandMatchesRemovalMarker(command: string): boolean {
+  for (const m of SA_SKILLS_HOOK_REMOVAL_MARKERS) {
+    if (command.includes(m)) return true;
+  }
+  return false;
 }
 
 let rawExample: unknown;
@@ -252,6 +271,31 @@ for (const [event, exampleEntries] of Object.entries(exampleHooks)) {
   mergedHooks[event] = userEntries;
 }
 
+// --- sweep retired sa-skills hooks (idempotent removal pass) ---
+const removedHooks: Array<{ event: string; command: string }> = [];
+for (const [event, entries] of Object.entries(mergedHooks)) {
+  if (!Array.isArray(entries)) continue;
+  const filteredEntries: HookEntry[] = [];
+  for (const entry of entries) {
+    const cmds = entry.hooks ?? [];
+    const keptCmds: HookCommand[] = [];
+    for (const cmd of cmds) {
+      if (typeof cmd.command === "string" && commandMatchesRemovalMarker(cmd.command)) {
+        removedHooks.push({ event, command: cmd.command });
+        continue;
+      }
+      keptCmds.push(cmd);
+    }
+    if (keptCmds.length === 0) continue;
+    filteredEntries.push({ ...entry, hooks: keptCmds });
+  }
+  if (filteredEntries.length === 0) {
+    delete mergedHooks[event];
+  } else {
+    mergedHooks[event] = filteredEntries;
+  }
+}
+
 // --- assemble merged object, preserving user's other top-level keys ---
 const merged: Settings = { ...user };
 if (Object.keys(mergedMarketplaces).length > 0) {
@@ -289,8 +333,21 @@ console.log(
   `Plugins:      added ${pluginsAdded}  ·  already present ${pluginsKept}`
 );
 console.log(
-  `Hooks:        added ${hooksAdded}  ·  already present ${hooksKept}`
+  `Hooks:        added ${hooksAdded}  ·  already present ${hooksKept}  ·  retired ${removedHooks.length}`
 );
+
+if (removedHooks.length > 0) {
+  console.log("");
+  console.log(
+    `🧹  Swept ${removedHooks.length} retired sa-skills hook${removedHooks.length === 1 ? "" : "s"}:`
+  );
+  for (const r of removedHooks) {
+    console.log(`   - ${r.event}: ${r.command}`);
+  }
+  console.log(
+    "   These hooks shipped in an earlier sa-skills version and have been retired. They were a no-op in practice (see v3.19.1 release notes); the removal is safe."
+  );
+}
 
 if (pluginsMigrated.length > 0) {
   console.log("");

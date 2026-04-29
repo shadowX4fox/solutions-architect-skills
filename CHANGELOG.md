@@ -5,6 +5,32 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.19.1]
+
+### Removed — silently-broken v3.14.1 PostToolUse session-edit tracker
+
+The v3.14.1 release shipped a `PostToolUse[Write|Edit]` hook that was supposed to record every architecture doc edit into a session-scoped editlog under `/tmp/architecture-explorer/sessions/`, so `/regenerate-explorer-headers --session` could refresh only the files that changed. The hook command interpolated `$TOOL_INPUT_FILE_PATH` — but Claude Code does **not** export tool-input fields as environment variables. The `tool_input.file_path` is only available via JSON on stdin (Hooks Reference, "Input/Output"). The variable always expanded to the empty string, the tracker CLI hit its "no path → exit 0 silently" branch, and the editlog has been empty since v3.14.1 shipped on 2026-04-25.
+
+Five releases (v3.14.1 → v3.19.0) carried this latent bug. The 13 unit tests in `session-log.test.ts` exercised the JS API directly, never the shell-hook seam, so they passed. Every downstream check ("if editlog count > 0, warn") gracefully reported "no session edits" — indistinguishable from "the user genuinely hasn't edited any docs in this session."
+
+**Resolution — retire the feature instead of patching to `jq`**:
+
+- `.claude/settings.json.example` — drops `hooks.PostToolUse[Write|Edit]` and the `Write/Read(//tmp/architecture-explorer/**)` permission grants. The v3.19.0 `UserPromptSubmit` router hook is unaffected.
+- `skills/architecture-explorer-headers/utils/session-log.ts` and `session-log.test.ts` — deleted (~400 lines, 13 tests).
+- `skills/architecture-explorer-headers/utils/header-cli.ts` — drops the `session-log {add|list|count|clear}` subcommand and its `./session-log` imports.
+- `skills/architecture-explorer-headers/SKILL.md` and `commands/regenerate-explorer-headers.md` — drop `--session` mode. `--force`, `--dry-run`, and `<path-glob>` modes stay.
+- `skills/{architecture-compliance,architecture-analysis,architecture-peer-review,architecture-dev-handoff,architecture-definition-record,architecture-docs}/SKILL.md` — six "Pre-flight: Session-Edit Check" blocks removed (every one was reading 0).
+- `scripts/setup-claude-md.ts` — drops the "Session edit tracker — keep EXPLORER_HEADERs honest" subsection that instructed Claude to maintain a TaskList entry whenever the editlog was non-empty.
+- `scripts/setup-permissions.ts` — adds `SA_SKILLS_HOOK_REMOVAL_MARKERS`. Re-running `/setup` on an existing install now actively *strips* any hook entry whose command contains `header-cli.ts session-log add` and reports it under a new "retired" counter. Idempotent: a second run is a no-op.
+- `commands/setup.md` — v3.14.1 section deleted, new v3.19.1 section added documenting the cleanup pass.
+- `CLAUDE.md` — trigger-table row for `architecture-explorer-headers` drops the `refresh session explorer headers` / `regenerate session edited explorer headers` aliases and the `--session` mention.
+
+**Verification**: `bun run typecheck` clean. `bun test` reports 465 pass (was 478; lost the 13 `session-log.test.ts` cases). `/setup` smoke on a project carrying the broken hook reports `Hooks: added 0 · already present 1 · retired 1` and removes the entry.
+
+**Migration**: re-running `/setup` after upgrading is sufficient to strip the broken hook entry. The `/tmp/architecture-explorer/**` permission grants are non-destructive (the merger preserves user `permissions.allow` entries) and must be removed by hand for total cleanup; harmless to leave.
+
+---
+
 ## [3.17.2]
 
 ### Fixed — `/setup` final reminder no longer claims Ctrl+R reloads settings

@@ -45,7 +45,7 @@ The helper:
   - `permissions.allow` — array union, deduplicated, user entries first, then any new entries from the example in their original order.
   - `enabledPlugins` — object-level merge; if a key already exists in the user file, the user's value wins.
   - `extraKnownMarketplaces` — same object-level merge.
-  - `hooks` — **(v3.14.1+)** event-keyed merge with idempotent recognition of the sa-skills marker `header-cli.ts session-log add`. Existing user hooks under any matcher are preserved verbatim; if the user already has a `Write|Edit` matcher with our session-log command in its `hooks[]` array, it is recognized as already present and not duplicated. If the user has a `Write|Edit` matcher with unrelated hooks, the sa-skills hook command is appended into the same matcher entry without disturbing the user's existing commands.
+  - `hooks` — event-keyed merge with idempotent recognition of the active sa-skills marker `route-architecture-docs.sh` (v3.19.0+). Existing user hooks under any matcher are preserved verbatim; the sa-skills hook command is recognized by marker substring and not duplicated on re-runs. **Retirement pass (v3.19.1+)**: any user-side hook entry whose command contains a marker in `SA_SKILLS_HOOK_REMOVAL_MARKERS` (currently `header-cli.ts session-log add` — the silently-broken v3.14.1 PostToolUse editlog tracker) is stripped from the merged `hooks` block and reported under a separate "retired" counter. Idempotent — once retired, a second run is a no-op.
 - Leaves every other user-specific top-level key (`model`, `theme`, custom keys) untouched.
 - Writes the merged object back with 2-space indentation and a trailing newline.
 - Prints a structured summary to stdout (now four lines: Permissions / Marketplaces / Plugins / Hooks).
@@ -123,22 +123,11 @@ Existing projects re-running `/setup` after upgrading to v3.14.0 will see one ne
 
 - `Agent(sa-skills:architecture-explorer)` — the universal Haiku-tier doc navigator (front door for compliance / analysis / peer-review / handoff / Q&A / ADR workflows). Pre-existing `Agent(sa-skills:*)` grants are preserved; the new line is appended.
 
-(The v3.14.0 explorer cache permissions for `/tmp/architecture-explorer/**` were removed in v3.16.0 — the cache and per-task config files are gone. The `/tmp/architecture-explorer/sessions/**` write permission is owned by the unrelated `architecture-explorer-headers` skill and is added separately under the v3.14.1 hook entry.)
+(The v3.14.0 explorer cache permissions for `/tmp/architecture-explorer/**` were removed in v3.16.0 — the cache and per-task config files are gone. The leftover sessions-only permission was carried until v3.19.1, when the v3.14.1 PostToolUse editlog tracker that needed it was retired; re-running `/setup` on v3.19.1+ sweeps both the stale hook and the stale `/tmp/architecture-explorer/**` grants.)
 
 No marketplace re-registration is needed. The new `architecture-explorer-headers` skill (and its `/regenerate-explorer-headers` slash command) inherit existing `Bash(bun *)` and `Read/Write` doc-tree permissions — no extra grants required to run them.
 
 If a project's `settings.json` was committed with the v3.13.x permissions list and you want the upgrade visible in version control, run `/setup` and then commit the resulting one-line addition to `permissions.allow`.
-
-## v3.14.1 — what's new in this setup
-
-Existing projects re-running `/setup` after upgrading to v3.14.1 will see one additional change:
-
-- `hooks.PostToolUse[Write|Edit]` — a session-scoped editlog tracker is merged into your `.claude/settings.json`. After every Write or Edit to any file under `docs/**/*.md`, the hook silently appends one JSONL line to `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog`. Cost per edit: ~10 ms (bun startup + JSONL append). The hook never blocks the user's edit and never invokes an LLM.
-- The Step 5 `CLAUDE.md` managed block grows a new subsection — *Session edit tracker — keep EXPLORER_HEADERs honest* — that instructs Claude (the orchestrator) to keep one and only one task on the user-visible task list (`Regenerate EXPLORER_HEADERs for N session-edited docs (run /regenerate-explorer-headers --session)`) whenever the editlog is non-empty. The orchestrator never auto-runs the slash command — the user decides when to spend the LLM-heavy refresh.
-
-Idempotency: re-running `/setup` is safe. The hook-merge logic in Step 3 detects the sa-skills marker `header-cli.ts session-log add` and refuses to duplicate the entry. Unrelated user hooks under the same `Write|Edit` matcher are preserved verbatim — only the sa-skills command is added.
-
-If you previously edited your `.claude/settings.json` to add other hooks under `PostToolUse`, those are kept as-is. If you'd rather opt out of the tracker entirely, delete the corresponding entry from `hooks.PostToolUse` after `/setup` runs; the rest of the plugin works without it (you'll lose the edit-tracking TODO and skill pre-flight warnings about session edits, but the explorer cache and slash commands continue to function).
 
 ## v3.14.7 — what's new in this setup
 
@@ -162,7 +151,7 @@ Existing projects re-running `/setup` after upgrading to v3.16.0 will see one us
 
    The replacement is transparent — the helper script swaps only the content between the `<!-- sa-skills:architecture-pointer:begin -->` / `:end -->` markers. Any user content above or below those markers is preserved byte-for-byte.
 
-2. **Permissions** — no new grants are added in v3.16.0. The broad `Write(//tmp/architecture-explorer/**)` / `Read(//tmp/architecture-explorer/**)` entries from v3.14.0 are **retained** in `settings.json.example` because `/tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog` (the unrelated `architecture-explorer-headers` session-edit tracker, v3.14.1+) lives under that prefix. The per-task ranking cache files those grants originally covered no longer exist (the cache and per-task config files were removed in v3.16.0), but the same grant naturally covers the surviving `sessions/` editlog — so the line stays. The `Agent(sa-skills:architecture-explorer)` permission added in v3.14.0 is unchanged; v3.16.0 only renamed the agent's output block (`EXPLORE_RESULT` → `EXPLORE_MANIFEST`/`EXPLORE_FINDINGS`), which is invisible to the permission system.
+2. **Permissions** — no new grants are added in v3.16.0. The broad `Write(//tmp/architecture-explorer/**)` / `Read(//tmp/architecture-explorer/**)` entries from v3.14.0 are temporarily retained because the v3.14.1 session-edit tracker stored its editlog under that prefix; both grants and the tracker were retired together in v3.19.1. The `Agent(sa-skills:architecture-explorer)` permission added in v3.14.0 is unchanged; v3.16.0 only renamed the agent's output block (`EXPLORE_RESULT` → `EXPLORE_MANIFEST`/`EXPLORE_FINDINGS`), which is invisible to the permission system.
 
 No marketplace re-registration, no hook change, no `.gitignore` change is required. If you skip `/setup` after upgrading to v3.16.0, the plugin still runs — you simply keep the v3.14.0 CLAUDE.md guidance pointing at the old manifest-only model, which slightly under-describes how the explorer behaves now.
 
@@ -172,8 +161,19 @@ Existing projects re-running `/setup` after upgrading to v3.19.0 will see one ad
 
 - `hooks.UserPromptSubmit[]` — an architecture routing reminder is merged into your `.claude/settings.json`. On every user prompt, the hook stat's the project root for `ARCHITECTURE.md`. When the file is present it injects a one-paragraph `additionalContext` system-reminder telling Claude that any architecture-related action (questions about the architecture, edits to `ARCHITECTURE.md` / `docs/**/*.md` / `docs/components/**/*.md` / `adr/**/*.md`, diagrams, releases, compliance, peer review, dev handoff) MUST route through the matching `sa-skills:architecture-*` skill — not direct Edit/Write calls — because the skills enforce validation gates (Section 3 enforcement, downstream propagation, source attribution, semver bump, drift detection) that direct edits silently skip. When `ARCHITECTURE.md` is absent the hook exits silently with zero output. Cost per prompt: ~1–5 ms (POSIX shell + one stat); zero context cost on non-architecture-governed projects. The hook never blocks the prompt and never invokes an LLM.
 
-Idempotency: re-running `/setup` is safe. The hook-merge logic in Step 3 detects the sa-skills marker `route-architecture-docs.sh` and refuses to duplicate the entry. The marker matcher is per-hook (v3.19.0+), so the v3.14.1 PostToolUse editlog tracker and the v3.19.0 UserPromptSubmit router are deduplicated independently — installing one does not mask installation of the other on a later run. Unrelated user hooks under `UserPromptSubmit` are preserved verbatim.
+Idempotency: re-running `/setup` is safe. The hook-merge logic in Step 3 detects the sa-skills marker `route-architecture-docs.sh` and refuses to duplicate the entry. Unrelated user hooks under `UserPromptSubmit` are preserved verbatim.
 
 Opt-out: delete the entry from `hooks.UserPromptSubmit[]` after `/setup` runs. The rest of the plugin continues working without it; you lose only the routing reminder. The SKILL.md activation triggers and the project's CLAUDE.md trigger table still steer most invocations — the hook just makes that steering harness-level rather than model-discretionary.
 
 No marketplace re-registration, no permission change, no `.gitignore` change is required for v3.19.0.
+
+## v3.19.1 — what's new in this setup
+
+Existing projects re-running `/setup` after upgrading to v3.19.1 will see two cleanup changes:
+
+- **Retired `hooks.PostToolUse[Write|Edit]` entry** — the v3.14.1 session-edit tracker (`header-cli.ts session-log add`) silently no-op'd from the day it shipped because it relied on `$TOOL_INPUT_FILE_PATH`, which Claude Code does not export to hook commands (only `tool_input.file_path` on stdin). The editlog was never populated; downstream pre-flight checks always reported "no session edits"; nothing in the wild used the data. v3.19.1 removes the example hook, deletes the `--session` mode of `/regenerate-explorer-headers`, drops the orchestrator-managed TODO loop in the CLAUDE.md block, and removes the six SKILL pre-flight Session-Edit Check sections. The hook-merge logic on `/setup` now actively **strips** the retired hook from existing `settings.json` files — re-running `/setup` once cleans installs that carried the broken entry from v3.14.1+.
+- **Retired `Write(//tmp/architecture-explorer/**)` / `Read(//tmp/architecture-explorer/**)` permissions** — these grants existed only to cover the v3.14.1 editlog. With the editlog gone, both lines are removed from `settings.json.example`. Existing projects keep them in their merged `settings.json` (the merger is non-destructive on `permissions.allow`); they're harmless to leave but safe to delete by hand.
+
+Idempotency: re-running `/setup` on a v3.19.1+ install is a no-op for hooks (router stays, no PostToolUse entry to add or remove). Unrelated user hooks under any matcher are preserved verbatim.
+
+No marketplace re-registration, no `.gitignore` change is required for v3.19.1.

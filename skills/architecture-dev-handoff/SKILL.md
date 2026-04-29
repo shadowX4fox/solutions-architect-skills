@@ -116,28 +116,6 @@ All handoff documents must trace data back to architecture docs.
 
 ## Orchestration Workflow
 
-### Pre-flight: Session-Edit Check (v3.14.1+)
-
-Before Step 0, run the EXPLORER_HEADER session-edit pre-flight (identical across every doc-consuming sa-skills skill). The handoff workflow fans out per-component context payloads built from the architecture docs; stale EXPLORER_HEADERs cause the architecture-explorer to misroute slices to the wrong components.
-
-```bash
-bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts session-log count --project-root <project_root>
-```
-
-- **Output `0`** → editlog is clean. Proceed directly to Step 0.
-- **Output `N > 0`** → run `... session-log list --project-root <project_root>`, then emit a loud preamble before Step 0:
-
-  ```
-  ⚠ N docs were edited this session; their EXPLORER_HEADERs may be stale.
-    Affected:
-      - <path-1>
-      - …
-    ACTION REQUIRED before this skill's results can be trusted:
-      → Run: /regenerate-explorer-headers --session
-  ```
-
-  Continue running the workflow. In the Phase 7 final report, set the metadata flag `headers_status: stale-edits-pending` so downstream dev-handoff consumers can grep for runs that were based on partially-stale headers.
-
 ### Step 0 — Resolve Plugin Directory
 
 Before any workflow, resolve the absolute path to the plugin installation so sub-agents can read the handoff template, section-extraction guide, asset-generation guide, and asset index.

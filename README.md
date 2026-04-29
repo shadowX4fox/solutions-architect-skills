@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.19.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.19.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.19.0` in the list.
+You should see `sa-skills v3.19.1` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,31 @@ Where:
 
 ## Roadmap
 
-### v3.19.0 (Current Release) ✅
+### v3.19.1 (Current Release) ✅
+**fix: retire silently-broken v3.14.1 PostToolUse session-edit tracker**
+
+The v3.14.1 release shipped a `PostToolUse[Write|Edit]` hook that was supposed to record every architecture doc edit into a session-scoped editlog under `/tmp/architecture-explorer/sessions/`, so `/regenerate-explorer-headers --session` could refresh only the files that changed. The hook command interpolated `$TOOL_INPUT_FILE_PATH` — but Claude Code does **not** export tool-input fields as environment variables. The `tool_input.file_path` is only available via JSON on stdin (Hooks Reference, "Input/Output"). The variable always expanded to the empty string, the tracker CLI hit its "no path → exit 0 silently" branch, and the editlog has been empty since v3.14.1 shipped on 2026-04-25.
+
+Five releases (v3.14.1 → v3.19.0) carried this latent bug. The 13 unit tests in `session-log.test.ts` exercised the JS API directly, never the shell-hook seam, so they passed. Every downstream check ("if editlog count > 0, warn") gracefully reported "no session edits" — indistinguishable from "the user genuinely hasn't edited any docs in this session."
+
+v3.19.1 retires the feature instead of patching it. The fix-it path would have added a `jq` dependency to the plugin install seed for a feature with zero field-validated value; removal sheds ~600 LOC across hooks, CLI subcommands, six SKILL.md pre-flight blocks, the orchestrator-managed CLAUDE.md TODO loop, and the `/tmp/architecture-explorer/**` permission grants.
+
+Coordinated removals:
+
+1. **Hook + permissions** — `.claude/settings.json.example` drops `hooks.PostToolUse[Write|Edit]` and the `Write/Read(//tmp/architecture-explorer/**)` grants. Only the v3.19.0 `UserPromptSubmit` router hook remains.
+2. **CLI + utility** — `skills/architecture-explorer-headers/utils/session-log.ts` and its 13-test test file are deleted. `header-cli.ts` loses the `session-log {add|list|count|clear}` subcommand.
+3. **Slash command** — `/regenerate-explorer-headers --session` is removed from the skill, the slash-command doc, and `CLAUDE.md`'s trigger table. `--force`, `--dry-run`, and `<path-glob>` modes stay.
+4. **Pre-flight checks** — six SKILLs (compliance, analysis, peer-review, dev-handoff, definition-record, docs Q&A) lose their "Pre-flight: Session-Edit Check" sections — they were always reading 0.
+5. **Orchestrator TODO loop** — `scripts/setup-claude-md.ts` drops the "Session edit tracker — keep EXPLORER_HEADERs honest" subsection that instructed Claude to maintain a TaskList entry whenever the editlog was non-empty.
+6. **Active migration on `/setup`** — `scripts/setup-permissions.ts` adds a `SA_SKILLS_HOOK_REMOVAL_MARKERS` array. Re-running `/setup` on an existing install now actively *strips* any hook entry whose command contains `header-cli.ts session-log add`. Idempotent: a second run is a no-op. The `/tmp/architecture-explorer/**` permission grants are non-destructive and must be removed by hand if the user wants total cleanup.
+
+**Files**: `.claude/settings.json.example` (-15 lines), `skills/architecture-explorer-headers/utils/{session-log.ts, session-log.test.ts}` (deleted, -~400 lines), `skills/architecture-explorer-headers/utils/header-cli.ts` (-50 lines), `skills/architecture-explorer-headers/SKILL.md` (-25 lines), `commands/regenerate-explorer-headers.md` (-12 lines), six SKILL.md pre-flight blocks (-~120 lines total), `scripts/setup-claude-md.ts` (-16 lines), `scripts/setup-permissions.ts` (+30 lines for the removal pass), `commands/setup.md` (v3.19.1 section + v3.14.1 section deletion), `CLAUDE.md` trigger-table edit, `CHANGELOG.md` entry.
+
+**Verification**: `bun run typecheck` ✅, `bun test` (465/465 pass — 13 retired tests dropped from the v3.14.1 baseline of 478) ✅.
+
+---
+
+### v3.19.0 (Previous Release) ✅
 **feat: ARCHITECTURE.md → sa-skills:architecture-* routing hook (UserPromptSubmit, harness-level enforcement)**
 
 When a project root contains `ARCHITECTURE.md`, the architecture is governed by the sa-skills plugin and every architecture-related action — questions about the architecture; edits to `ARCHITECTURE.md` / `docs/**/*.md` / `docs/components/**/*.md` / `adr/**/*.md`; diagrams; release / version bump; compliance contracts; peer review; dev handoff — must route through the matching `sa-skills:architecture-*` skill, because the skills enforce validation gates (Section 3 enforcement, downstream propagation, source attribution, drift detection) that direct edits silently skip. Before v3.19.0, this routing relied on three soft layers (the `architecture-docs` SKILL.md description, the project's CLAUDE.md trigger table, and the SKILL.md descriptions of sibling skills); all three were hints the model could bypass.
@@ -805,8 +829,8 @@ v3.19.0 adds a `UserPromptSubmit` hook that fires on every prompt at the harness
 Three coordinated additions ship together:
 
 1. **Hook script** — `hooks/route-architecture-docs.sh` — POSIX shell, executable, emits the documented UserPromptSubmit `hookSpecificOutput.additionalContext` JSON shape when `ARCHITECTURE.md` exists, exits silently otherwise.
-2. **Settings registration** — `.claude/settings.json.example` adds the `UserPromptSubmit` entry alongside the existing `PostToolUse` editlog tracker, with a leading `// HOOKS — v3.19.0+` comment matching the existing convention.
-3. **Merger refactor** — `scripts/setup-permissions.ts` replaces the single-string `SA_SKILLS_HOOK_MARKER` constant with a `SA_SKILLS_HOOK_MARKERS` list, and the per-command dedup test now matches by *the specific marker for this command* instead of "any sa-skills marker present in target." The refactor is strictly tightening: with one marker the behavior is identical to v3.14.1; with two markers (v3.19.0+) it correctly distinguishes the two sa-skills hooks so installing one does not mask installation of the other on a later `/setup` run.
+2. **Settings registration** — `.claude/settings.json.example` adds the `UserPromptSubmit` entry with a leading `// HOOKS — v3.19.0+` comment. (At ship time, this entry sat alongside the v3.14.1 `PostToolUse` editlog tracker; the tracker was retired in v3.19.1 once it was confirmed silently broken since v3.14.1.)
+3. **Merger refactor** — `scripts/setup-permissions.ts` replaces the single-string `SA_SKILLS_HOOK_MARKER` constant with a `SA_SKILLS_HOOK_MARKERS` list, and the per-command dedup test now matches by *the specific marker for this command* instead of "any sa-skills marker present in target." (v3.19.1 reused this multi-marker list to add a parallel `SA_SKILLS_HOOK_REMOVAL_MARKERS` cleanup pass.)
 
 Existing projects re-running `/setup` after upgrading get the new hook merged into their `.claude/settings.json` non-destructively. `commands/setup.md` documents the v3.19.0 changes inline. Idempotent — re-running `/setup` reports `Hooks: added 0 · already present 2`.
 
@@ -1063,7 +1087,7 @@ A profiling pass on a single-component dev-handoff run (~26 min wall, ~340k toke
 
 **Migration**: no user action required. Re-running any handoff after upgrading to v3.14.8 picks up all three improvements automatically.
 - Existing `handoffs/.manifest.json` entries WILL be invalidated on the first run because `template_version` flips from `3.14.7` (plugin version) to `1.0.0` (the new template version). Subsequent plugin patches no longer invalidate them.
-- Component files without an `EXPLORER_HEADER` block transparently fall through to normal scoring — the fast-path is purely additive. To activate the fast-path on legacy components, run `/regenerate-explorer-headers --session` (or the full backfill).
+- Component files without an `EXPLORER_HEADER` block transparently fall through to normal scoring — the fast-path is purely additive. To activate the fast-path on legacy components, run `/regenerate-explorer-headers` (the full backfill).
 - The Phase 5 parallel cohort is enabled unconditionally. To bound concurrency, lower `--parallelism` and/or `--asset-parallelism`.
 
 ### v3.14.7 ✅
