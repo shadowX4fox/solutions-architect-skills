@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.1` in the list.
+You should see `sa-skills v3.21.2` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,45 @@ Where:
 
 ## Roadmap
 
-### v3.21.1 (Current Release) ✅
+### v3.21.2 (Current Release) ✅
+**docs: OS-specific Bun install + plugin-configure sections in README and INSTALLATION.md — Windows native gets `npm install -g bun` as the recommended path**
+
+v3.21.1 made the plugin technically OS-agnostic (native wrappers + `/setup` auto-detection), but the README still presented Linux/macOS as the canonical install path with no first-class Windows-native guidance. v3.21.2 closes that documentation gap so a Windows-native developer (cmd / PowerShell, no WSL or Git Bash) can read the README top-to-bottom and end up with a working install in under five minutes.
+
+**`README.md` changes:**
+
+- **Quick Start → Step 0 — Install Bun.** New per-OS install matrix and prose. Windows native gets `npm install -g bun` as the **recommended** install path, with the rationale spelled out: it sidesteps PowerShell execution-policy restrictions, corporate proxies, and signed-script enforcement that occasionally trip the official `irm bun.sh/install.ps1 | iex` one-liner in enterprise environments. macOS gets `brew install bun` or the curl one-liner; Linux gets the curl one-liner; WSL/Git Bash explicitly directed at the Linux/macOS path.
+- **Quick Start → Step 2 — Configure for your platform with `/setup`.** New subsection documenting the three native hook wrappers (`.sh` / `.cmd` / `.ps1`) and the `/setup` platform detection added in v3.21.1. Includes a "Your OS / Shell → Bun install command → What `/setup` writes" table so users can pick the right combination at a glance.
+- **Requirements → Installing Bun by OS.** Same install matrix repeated in tabular form for users who skip the Quick Start and read Requirements first. Provides verification command and a PATH-not-updated troubleshooting hint specific to Windows.
+- **Stale version reference fixed.** The "You should see `sa-skills v3.19.2` in the list" line — left over from a v3.19.2 release and missed in subsequent bumps — corrected to `v3.21.2` (this release).
+
+**`docs/INSTALLATION.md` changes:**
+
+- **`### Windows` section reordered.** `npm install -g bun` is now the **recommended** install with rationale, and the official `powershell -c "irm bun.sh/install.ps1 | iex"` is demoted to **alternative** (used when Node.js isn't installed and the user doesn't want to install it just for Bun). Verification command now includes the "sign out and back in for PATH update" hint that's specific to Windows installers.
+- **New `#### Windows + WSL2 or Git Bash` subsection.** Explicit pointer back at the macOS/Linux instructions so users on those Windows compatibility layers don't get confused about which path to follow.
+- **`#### Alternative: Using Package Managers` extended.** `npm install -g bun` listed as the Windows package-manager path alongside Homebrew (macOS) and Snap (Linux), pointing back at the recommended-path section above.
+
+**Why `npm install -g bun` over the official PowerShell installer for Windows native:**
+
+The official Bun installer (`irm bun.sh/install.ps1 | iex`) is the upstream-recommended path on Windows and works in most home / personal-dev environments. But three classes of friction make it less reliable as a *primary* recommendation in a plugin README that has to onboard Windows users sight-unseen:
+
+1. **PowerShell execution policy.** Corporate Group Policy commonly forces `Restricted` or `AllSigned`, blocking the unsigned `install.ps1` script. `npm install -g` is just an HTTP fetch + extract through npm, no script-policy gate.
+2. **Corporate proxies.** `irm` (Invoke-RestMethod) inherits PowerShell's proxy resolution, which doesn't always pick up the user's npm-configured proxy. npm's proxy handling is mature and well-documented; users who already have npm working through their proxy get Bun working through it for free.
+3. **Signed-script enforcement.** Some Windows installs require all PowerShell scripts to be signed by a trusted publisher. The Bun installer is unsigned. npm's package install bypasses this gate entirely.
+
+Because Node.js is already installed on the vast majority of Windows dev machines (it's a near-prerequisite for any modern web tooling), `npm install -g bun` is the install path with the highest first-try success rate. Keeping the official installer documented as the alternative preserves the option for users on minimal Node-free Windows setups.
+
+**No code changes.** This is a pure documentation release — no SKILL.md / agent / TypeScript / hook / setup-permissions changes. v3.21.1's runtime behavior is unchanged.
+
+**Files**: `README.md` (+OS-specific install matrix in Quick Start + Requirements; stale `v3.19.2` reference corrected; net +104 lines), `docs/INSTALLATION.md` (Windows section reordered to recommend `npm install -g bun`; new WSL/Git Bash subsection; +28 lines).
+
+**Migration**: none required. Existing users on any OS continue to work unchanged. New Windows-native users following the README from scratch now get a Windows-first-class install path instead of being implicitly funneled toward WSL/Git Bash.
+
+**Verification**: `bun run typecheck` ✅. `bun test` reports 392/392 pass (no test changes — docs-only release).
+
+---
+
+### v3.21.1 (Previous Release) ✅
 **fix: native platform-specific hook wrappers + /setup auto-detection — closes the residual `~` expansion gap that v3.21.0 left for Windows native**
 
 v3.21.0's `bun ~/.claude/plugins/.../hooks/route-architecture-docs.ts` hook command still relied on `~` expansion to resolve the user's home directory. POSIX shells expand `~`; cmd.exe and PowerShell do not. On Windows native (no Git Bash, no WSL) the hook command would either fail to locate the script or — depending on Claude Code's command runner — silently no-op. The v3.21.0 release notes explicitly flagged this as the only remaining OS-agnosticity gap. v3.21.1 closes it.
