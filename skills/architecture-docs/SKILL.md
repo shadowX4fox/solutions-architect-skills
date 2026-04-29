@@ -202,6 +202,35 @@ If the user's request doesn't match any workflow triggers:
 
 ---
 
+## Lazy-Load Contract — Workflow-Gated Reference Guides
+
+This skill ships with several large reference guides that are loaded **only when the matching workflow fires**, never speculatively. Each guide is 350–2,000 lines; loading one outside its trigger consumes Opus context unnecessarily and invalidates downstream prompt-cache prefixes when the user later switches workflows.
+
+| Guide | Size (lines) | Triggering workflow / signal |
+|---|---|---|
+| `ARCHITECTURE_DOCUMENTATION_GUIDE.md` | ~2,009 | Workflow 1 (new ARCHITECTURE.md), section editing requiring template structure |
+| `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` | ~1,105 | Workflow 1 Step 0 — PO Spec gate + type selection |
+| `MERMAID_DIAGRAMS_GUIDE.md` | ~1,024 | Workflow 8 (diagram generation) |
+| `references/DIAGRAM-GENERATION-GUIDE.md` | ~743 | Workflow 8 (diagram generation) |
+| `RELEASE_WORKFLOW.md` | ~687 | Workflow 10 (release) — also for the drift-detection text deep-dive |
+| `QUERY_SECTION_MAPPING.md` | ~650 | Workflow 7 (informational query) when section mapping is needed |
+| `DESIGN_DRIVER_CALCULATIONS.md` | ~593 | "calculate / update design drivers", "architecture review" Design Drivers branch |
+| `PRINCIPLE_VALIDATION.md` | ~474 | Section 3 Enforcement Gate — every write to `docs/02-architecture-principles.md` |
+| `METRIC_CALCULATIONS.md` | ~350 | Section 1 Key Metrics edits, "verify metrics", "audit metrics" |
+| `RESTRUCTURING_GUIDE.md` | ~146 | Workflow 9 (multi-file migration) |
+| `references/{TYPE}-ARCHITECTURE.md` + `{TYPE}-TO-C4-TRANSLATION.md` | ~400–1,000 each | Workflow 1 type selection (load only the chosen type's pair) |
+
+**Rules**:
+- Do NOT pre-load any of the guides above "to be ready" — wait for the trigger.
+- When a workflow fires, load only its row's guide(s); do not chain into other workflows' guides.
+- For type-specific references (`MICROSERVICES`, `BIAN`, `META`, `3-TIER`, `N-LAYER`), load only the pair that matches the architecture's `<!-- ARCHITECTURE_TYPE: -->` value — never load all five.
+- Workflow detection (the AUTOMATIC WORKFLOW DETECTION section above) is what selects the trigger; once selected, no other workflow's guides are loaded.
+- The Section 3 Enforcement Gate's `PRINCIPLE_VALIDATION.md` is the only large guide loaded mid-edit (Layer 1); the Layer 2 sub-agent loads the foundational architecture files separately and is invoked via the Agent tool, so its reads do not pollute the orchestrator's context.
+
+This contract is what keeps the orchestrator's main-session context narrow enough that SKILL.md + the active workflow's guides fit in cache; speculative pre-loads would burst the working set and force prefix re-evaluation on every tool call.
+
+---
+
 ## File Naming Convention
 
 **IMPORTANT**: All architecture documentation uses the multi-file `docs/` structure.
@@ -370,26 +399,106 @@ Runs **only** when the edited file is `docs/02-architecture-principles.md` AND P
    - `principleNumber`, `principleName`
    - Which subsection(s) changed (Description / Implementation / Trade-offs)
    - A 1-line summary of the change (what was added, removed, or rephrased)
+   - **Token set for pruning** — derived from the *raw* added/removed lines of the changed subsections (not from the 1-line summary). Build a single de-duplicated set containing:
+     - **Principle names** — the `principleName` of every changed principle.
+     - **ADR IDs** — every `ADR-NNN` token (regex `ADR-\d{3}`) that appears in either the before-text or the after-text of changed Description / Implementation / Trade-offs subsections.
+     - **Affected tech tokens** — every named tech term that appears on an added or removed diff line AND is enumerated in `docs/06-technology-stack.md` (i.e., a tech this system actually uses). Intersecting with the tech stack avoids matching English words that happen to be tech-name-shaped. Compare case-insensitive on whole-token boundaries.
 
-2. **Fan out to `principle-quality-reviewer`** in `mode: downstream-impact`. For each downstream file from the reverse dependency table for S3 (S4–S11 + every `docs/components/**/*.md`), spawn one sub-agent call with:
-   - `principles_file` — `docs/02-architecture-principles.md` (post-edit)
-   - `principles_diff` — the per-principle deltas from step 1
-   - `downstream_file` — the specific file under audit
-   - `arch_type`, `system_overview_file`, `arch_layers_file`, `tech_stack_file`, `adr_index_glob` — same as the Section 3 Enforcement Gate
-   - `round` — pass through the orchestrator's revision counter
+   This token set powers the pruning step below; if the set ends up empty (e.g., the diff only rephrased Description prose with no concrete principle names, ADR IDs, or system-tech tokens) the fall-back is conservative — fan out to all candidates without pruning.
+
+2. **Pre-fan-out pruning** — Token-grep each candidate downstream file against the token set from step 1 to drop files with zero references to anything that changed. The reviewer is Opus and the median S3 edit touches one principle's Implementation, so most downstream files don't even mention the changed content. Skipping them on the basis of a cheap structural grep avoids spending Opus on guaranteed `NO_IMPACT` verdicts.
+
+   **Candidate set** = the reverse dependency files for S3 (S4–S11 + every `docs/components/**/*.md` listed in `docs/components/README.md`).
+
+   **Pruning rule (per candidate file):**
+   - If the token set from step 1 is empty → KEEP the file (conservative: nothing concrete to grep against; fall through to fan-out).
+   - Else, run a single composite case-insensitive grep over the file using a regex alternation of every token in the set (escape regex metacharacters in principle names; whole-line match is fine — we only need a hit/no-hit signal). Examples:
+     ```bash
+     grep -liE 'Principle Name 1|Principle Name 4|ADR-005|ADR-012|Spring Boot|PostgreSQL|Redis' \
+       docs/03-architecture-layers.md docs/04-data-flow-patterns.md \
+       docs/05-integration-points.md docs/06-technology-stack.md \
+       docs/07-security-architecture.md docs/08-scalability-and-performance.md \
+       docs/09-operational-considerations.md docs/components/*.md
+     ```
+   - File path emitted by grep → KEEP for the fan-out in step 3.
+   - File NOT emitted → SKIP. Record one Phase 2 note for the user:
+     ```
+     ℹ️  {file} — no token references to changed principles, cited ADRs, or affected tech; semantic review skipped (Phase 1.5 pruning).
+     ```
+
+   **Empty kept-set after pruning** — when zero candidate files token-match (and the token set was non-empty, so the prune was real), emit one consolidated Phase 2 note ("Principle Alignment Audit: no downstream files reference any of the changed principles, cited ADRs, or affected tech — nothing to review.") and skip steps 3–6 of this Audit procedure. Phase 2 still runs with the structural impact list from Phase 1b–1d.
+
+   **Fail-open** — if `grep` is unavailable or returns an unexpected error, emit a one-line Phase 2 warning ("Phase 1.5 pruning unavailable; fanned out to the full candidate set") and fall through to step 3 with all candidates kept. Pruning is an optimization, not a gate.
+
+   **Why this is recall-safe** — the token set includes principle names AND cited ADR IDs AND affected tech, all three. Most "implicit contradiction" cases (a downstream file paraphrases a principle without naming it) still surface because the file usually mentions either the cited ADR or the affected tech. The conservative empty-set fallback covers the long tail (pure prose changes with no concrete tokens).
+
+3. **Fan out to `principle-quality-reviewer`** in `mode: downstream-impact`. The orchestrator MUST construct the sub-agent prompt using the **stable-prefix → dynamic-suffix template** below so parallel calls in the same batch share the maximum cacheable prefix (Anthropic prompt cache hits on byte-identical prefixes within the 5-min TTL).
+
+   **Read-once foundational context.** Before dispatching any sub-agent in this fan-out, read the four foundational files **once** in the orchestrator's session and capture their content. The five blocks below are byte-identical across every sub-agent call in the fan-out, so inlining them lets calls 2..N hit the prompt cache for the entire prefix instead of each agent re-Reading the same files independently:
+
+   - `docs/02-architecture-principles.md` (post-edit) → `<principles>` block
+   - `docs/01-system-overview.md` → `<system_overview>` block
+   - `docs/03-architecture-layers.md` → `<arch_layers>` block
+   - `docs/06-technology-stack.md` → `<tech_stack>` block
+   - `Glob('adr/*.md')` ID list (one `ADR-NNN` per line, sorted) → `<adr_index>` block (the IDs alone — bodies are not needed for existence checks)
+
+   **Prompt template** — positional, order must not change. Lines above the marker are stable across the batch; only `downstream_file` (last line) differs per call:
+
+   ```
+   mode: downstream-impact
+   round: <int>
+   arch_type: <MICROSERVICES|META|BIAN|3-TIER|N-LAYER|unknown>
+   principles_file: docs/02-architecture-principles.md
+   principles_diff: |
+     <per-principle deltas from step 1, identical for every call in this batch>
+
+   <principles>
+   {full content of docs/02-architecture-principles.md (post-edit)}
+   </principles>
+
+   <system_overview>
+   {full content of docs/01-system-overview.md}
+   </system_overview>
+
+   <arch_layers>
+   {full content of docs/03-architecture-layers.md}
+   </arch_layers>
+
+   <tech_stack>
+   {full content of docs/06-technology-stack.md}
+   </tech_stack>
+
+   <adr_index>
+   {one ADR-NNN id per line, sorted}
+   </adr_index>
+
+   # === Stable prefix ends here. Only the line below differs per call. ===
+
+   downstream_file: {absolute path to the specific downstream file under audit}
+   ```
+
+   The agent's Step 1 consumes the five inlined blocks directly — it does NOT re-Read the four foundational files when the blocks are present. See `agents/reviewers/principle-quality-reviewer.md` Step 1 (Inlined-blocks fast path) for the consumption contract.
+
+   **Why the order matters**: Anthropic's prompt cache is a prefix matcher. Any per-call discriminator above the marker would split the cache and force every parallel call to be a cache miss. Keep `downstream_file` as the LAST line; keep `principles_diff` and the five inlined blocks above it; keep them in the order shown so all calls in the batch share a byte-identical prefix.
+
+   **Backward compatibility**: when running the reviewer outside this orchestrator (e.g., direct invocation, older callers), the agent still accepts path-only inputs and falls back to `Read` / `Glob`. The path parameters (`system_overview_file`, `arch_layers_file`, `tech_stack_file`, `adr_index_glob`) remain in the prompt as fallback values; they are ignored when the inlined blocks are present.
 
    **Parallelism**: dispatch in batches of 4 (mirrors v3.16.0 explorer fan-out pattern). Wait for each batch before starting the next.
 
-3. **Aggregate results** — each sub-agent returns one of:
+   **Cache-warm sequencing (first batch only)**: in the FIRST batch of any Phase 1.5 fan-out, fire **one** sub-agent call first and wait for its response to settle before firing the remaining 1–3 calls in parallel. The first call's response writes the byte-identical stable prefix (the five inlined blocks above) into Anthropic's prompt cache; the remaining calls in that batch — and every call in every subsequent batch within the 5-min cache TTL — read the prefix from cache instead of re-paying it. After the first batch completes, dispatch subsequent batches normally (full parallel of 4); the cache is already warm.
+
+   The latency cost is one extra serialized call (~30–60s) paid only on the first batch of each Phase 1.5 fan-out. For typical S3 edits where step 2 pruning leaves 2–4 candidate files, this adds < 1 minute of wall-clock time. For wider fan-outs (8+ files post-pruning) the savings compound across batches because each non-first batch hits cache for the full prefix instead of re-writing it.
+
+4. **Aggregate results** — each sub-agent returns one of:
    - `status: PASS` with `findings: []` and a finding `checkType: downstream-impact, severity: NO_IMPACT` → file unaffected; no action.
    - `status: PASS` with `WARNING` findings → surface in Phase 2 checklist as `[principle-impact]` items but don't block.
    - `status: FAIL` with `BLOCKING` findings → file contradicts a changed principle; surface in Phase 2 checklist as `[principle-impact-BLOCKING]` items requiring user review.
 
-4. **Fail-open clauses**:
+5. **Fail-open clauses**:
    - Sub-agent timeout / empty / error on any single file: skip that file with a Phase 2 warning ("`{file}` — principle alignment review unavailable; manual review required"). Do not block.
    - All sub-agents fail (e.g., system-wide tool outage): emit one warning at the top of Phase 2 ("Principle Alignment Audit unavailable; downstream files not semantically re-checked. Run `/skill architecture-peer-review` after edits land if reliability matters for this change.") and proceed to standard Phase 2 with structural impacts only.
 
-5. **Inject findings into Phase 2 checklist** — semantic findings appear as a dedicated subsection labeled "Principle Alignment Findings" between the structural impact list and the "Approve all?" prompt. User can approve / deselect / skip per file (same UX as structural impacts).
+6. **Inject findings into Phase 2 checklist** — semantic findings appear as a dedicated subsection labeled "Principle Alignment Findings" between the structural impact list and the "Approve all?" prompt. Pruning notes from step 2 (skipped files) appear in the same subsection under a "Skipped (no token references)" sub-heading so the user retains visibility into what was deliberately not reviewed. User can approve / deselect / skip per file (same UX as structural impacts).
 
 **Anti-recursion**: Phase 1.5 sub-agent calls do NOT trigger another Phase 1.5 invocation when their findings translate into Phase 3 edits.
 

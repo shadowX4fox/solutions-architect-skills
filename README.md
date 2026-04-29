@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.17.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.18.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.17.3` in the list.
+You should see `sa-skills v3.18.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,28 @@ Where:
 
 ## Roadmap
 
-### v3.17.3 (Current Release) ✅
+### v3.18.0 (Current Release) ✅
+**feat: cache-optimized Phase 1.5 fan-out — stable-prefix template + read-once foundational inlining + token-grep pruning**
+
+The Section 3 (Architecture Principles) gate's downstream-impact propagation (`architecture-docs` Phase 1.5) fans the `principle-quality-reviewer` sub-agent (Opus, by design — "optimized for reliability, not cost") out across every downstream file in batches of 4. Before this change, each parallel sub-agent independently re-read the four foundational files (`docs/01-system-overview.md`, `docs/02-architecture-principles.md` post-edit, `docs/03-architecture-layers.md`, `docs/06-technology-stack.md`) plus a `Glob` over `adr/*.md` — the same ~4 KLOC of byte-identical content was loaded N times per S3 edit, and the per-call discriminator (`downstream_file`) sat in the middle of the prompt body, splitting Anthropic's prompt cache prefix on every call. Even worse, the fan-out fired against **every** downstream file in the reverse dependency table (S4–S11 + every component) regardless of whether the file referenced anything that had actually changed.
+
+Three coordinated changes attack both the per-call cost and the call count:
+
+1. **Stable-prefix dispatch template** — `skills/architecture-docs/SKILL.md` Phase 1.5 — orchestrator now reads the four foundational files once and inlines their content as five XML-style blocks (`<principles>`, `<system_overview>`, `<arch_layers>`, `<tech_stack>`, `<adr_index>`) at fixed positions in every sub-agent prompt. The `downstream_file` parameter is the LAST line, the only thing that differs across the batch. Calls 2..N of each batch now hit Anthropic's prompt cache for the entire prefix.
+2. **Inlined-blocks fast path on the reviewer** — `agents/reviewers/principle-quality-reviewer.md` Step 1 — agent prefers the inlined-blocks fast path when present (no re-Read of foundational files), with the original path-based reads kept as a fallback for `first-write` / `edit-delta` modes and direct invocations outside the orchestrator. The Input Parameters table documents both paths and the precedence.
+3. **Pre-fan-out token-grep pruning** — `skills/architecture-docs/SKILL.md` Phase 1.5 step 2 — before dispatching, the orchestrator builds a token set from the diff (changed principle names, ADR IDs cited in the diff, tech tokens added/removed that intersect `docs/06-technology-stack.md`) and `grep`s each candidate downstream file for any token. Files with zero hits are skipped with a non-blocking Phase 2 note ("no token references to changed principles, cited ADRs, or affected tech; semantic review skipped"); only files that token-match get a sub-agent call. The empty-token-set case (e.g., pure prose rephrase with no concrete tokens) falls back conservatively to the full fan-out so recall is preserved on edits with nothing concrete to grep against.
+4. **Cache-warm sequencing (first batch only)** — `skills/architecture-docs/SKILL.md` Phase 1.5 step 3 parallelism note — within the first batch of each fan-out, the orchestrator fires one sub-agent call first and waits for it to settle before firing the remaining 1–3 calls in parallel. The first response writes the stable prefix into Anthropic's prompt cache; subsequent calls (in the same batch and in every later batch within the 5-min TTL) read the prefix from cache instead of re-paying it. Costs ~30–60s of extra wall-clock on the first batch only; subsequent batches dispatch full-parallel as before.
+5. **Lazy-Load Contract** — `skills/architecture-docs/SKILL.md` adds a new section (after AUTOMATIC WORKFLOW DETECTION) that codifies which large reference guides (`ARCHITECTURE_DOCUMENTATION_GUIDE.md` 2K+ lines, `ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` 1.1K, `MERMAID_DIAGRAMS_GUIDE.md` 1K, `RELEASE_WORKFLOW.md` 687, etc.) load only when their workflow fires. Documents the rule explicitly so neither the model nor a future maintainer pre-loads guides "to be ready" — speculative loads burst the working set and force prefix re-evaluation on every tool call.
+
+Backward-compatible: any caller that still passes paths only (older orchestrator versions, ad-hoc invocations) continues to work unchanged via the fallback path. The pruning step is fail-open — `grep` errors degrade to the full fan-out with a one-line warning. No skill workflow or output format changed; reliability bias preserved.
+
+Combined effect on the median S3 edit: the call count drops (typically 2–4 sub-agents instead of 8 + N components), and the calls that do fire spend 1× cold + (N−1)× cached prefix instead of N× full-cost.
+
+**Files**: `skills/architecture-docs/SKILL.md` (Phase 1.5 audit procedure, ~95 lines added: token-set extraction extension to step 1, new step 2 pruning, renumbered tail), `agents/reviewers/principle-quality-reviewer.md` (Input Parameters table + Step 1 Load Context, ~25 lines added). No code touched. All 405 unit tests pass.
+
+---
+
+### v3.17.3 (Previous Release) ✅
 **fix: harden semicolon rule in DIAGRAM-GENERATION-GUIDE (covers Notes + parenthetical sub-clauses)**
 
 `skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md` already forbade `;` in sequence-diagram message labels, but the rule wording was too narrow and the Pre-Write Validation row's scan hint missed two real-world cases that broke generated diagrams: (a) a `;` inside a parenthetical sub-clause of a message (e.g. `A->>B: existing payment path (sync; ORQPagos2002 stateless)` → Mermaid parse error *"Expecting SOLID_ARROW … got NEWLINE"*), and (b) a `;` inside `Note over … :` / `Note left of … :` / `Note right of … :` bodies. Three localized edits — the DO NOT bullet now spans message labels **and** Note text **and** parenthetical sub-clauses with negative + positive examples for each; the validation table row is broadened with a scannable regex; the Validation Procedure step 1 explicitly requires scanning Note bodies. Documentation hardening only — no skill behavior, no workflow change.

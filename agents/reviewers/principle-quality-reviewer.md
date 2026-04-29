@@ -33,13 +33,15 @@ Your prompt will contain all of these (orchestrator passes them inline):
 | `mode` | always | One of: `first-write`, `edit-delta`, `downstream-impact` |
 | `principles_file` | always | Absolute path to `docs/02-architecture-principles.md` |
 | `arch_type` | always | One of: `MICROSERVICES`, `META`, `BIAN`, `3-TIER`, `N-LAYER`, `unknown` |
-| `system_overview_file` | always | Absolute path to `docs/01-system-overview.md` |
-| `arch_layers_file` | always | Absolute path to `docs/03-architecture-layers.md` |
-| `tech_stack_file` | always | Absolute path to `docs/06-technology-stack.md` |
-| `adr_index_glob` | always | Glob pattern like `adr/*.md` for ADR existence checks |
-| `principles_diff` | when mode=`edit-delta` | Unified diff or per-principle delta summary of S3 (before vs. after) |
+| `system_overview_file` | always | Absolute path to `docs/01-system-overview.md` (used as fallback when `<system_overview>` block is absent) |
+| `arch_layers_file` | always | Absolute path to `docs/03-architecture-layers.md` (used as fallback when `<arch_layers>` block is absent) |
+| `tech_stack_file` | always | Absolute path to `docs/06-technology-stack.md` (used as fallback when `<tech_stack>` block is absent) |
+| `adr_index_glob` | always | Glob pattern like `adr/*.md` (used as fallback when `<adr_index>` block is absent) |
+| `principles_diff` | when mode=`edit-delta` or `downstream-impact` | Unified diff or per-principle delta summary of S3 (before vs. after) |
 | `downstream_file` | when mode=`downstream-impact` | Absolute path to one downstream file to assess against new/changed principles |
 | `round` | always | Integer 1, 2, or 3 (revision-loop counter) |
+
+**Cache-optimized inlining (preferred path for `mode: downstream-impact`)**: the orchestrator MAY inline the content of the four foundational files plus the ADR ID list as five XML-style blocks (`<principles>`, `<system_overview>`, `<arch_layers>`, `<tech_stack>`, `<adr_index>`) at fixed positions in the prompt — see `skills/architecture-docs/SKILL.md` Phase 1.5 for the exact template. When present, Step 1's "Inlined-blocks fast path" consumes them directly; the path parameters above remain as a fallback. This pattern is what allows parallel Phase 1.5 calls to share a byte-identical prompt prefix and hit Anthropic's prompt cache on calls 2..N of each batch.
 
 ---
 
@@ -47,15 +49,33 @@ Your prompt will contain all of these (orchestrator passes them inline):
 
 ### Step 1 — Load Context
 
+**Inlined-blocks fast path (preferred when the orchestrator provides them)**
+
+When the prompt contains the five XML-style blocks `<principles>`, `<system_overview>`, `<arch_layers>`, `<tech_stack>`, and `<adr_index>` (the stable-prefix template documented in `architecture-docs/SKILL.md` Phase 1.5), use those blocks directly instead of issuing fresh `Read` / `Glob` tool calls. The blocks contain the same content you would have read, and consuming them inline is what makes parallel sub-agent calls share the prompt-cache prefix.
+
+Treat the blocks as authoritative substitutes:
+- `<principles>` → content of `principles_file`
+- `<system_overview>` → content of `system_overview_file`
+- `<arch_layers>` → content of `arch_layers_file`
+- `<tech_stack>` → content of `tech_stack_file`
+- `<adr_index>` → one `ADR-NNN` ID per line; this is the canonical set for ADR existence checks (do NOT `Glob('adr/*.md')` again — the orchestrator already enumerated them)
+
+If any single block is malformed or empty, fall back to the path-based read for *that* file only and continue with the remaining blocks.
+
+**Path-based fallback (for `first-write` / `edit-delta`, or when no blocks are inlined)**
+
+When the inlined blocks are absent — typically `mode: first-write` or `mode: edit-delta`, or any direct invocation outside the architecture-docs orchestrator — load context via tool calls:
+
 1. Read `principles_file` in full.
 2. Read `system_overview_file` in full (need Key Metrics for QA-conflation cross-check, business value for type-sanity).
 3. Read `arch_layers_file` in full (confirms `arch_type`, lists layers).
 4. Read `tech_stack_file` in full (source of truth for tech-name cross-check).
 5. List ADR files: `Glob(adr_index_glob)`. Build a set of `ADR-NNN` IDs that actually exist.
-6. **Mode-specific reads**:
-   - `first-write` — no extra reads.
-   - `edit-delta` — parse `principles_diff`; identify which principles changed (Description / Implementation / Trade-offs subsection per principle).
-   - `downstream-impact` — read `downstream_file` in full; identify all references to principle names, ADR IDs, and tech tokens.
+
+**Mode-specific work** (after foundational context is loaded by either path):
+- `first-write` — no extra reads.
+- `edit-delta` — parse `principles_diff`; identify which principles changed (Description / Implementation / Trade-offs subsection per principle).
+- `downstream-impact` — read `downstream_file` in full; identify all references to principle names, ADR IDs, and tech tokens. Do NOT inline the downstream file content into a re-issued prompt — the orchestrator deliberately passes only its path because each parallel call audits a different one (the per-call discriminator).
 
 ### Step 2 — Per-Principle Judgments (modes `first-write` and `edit-delta`)
 
