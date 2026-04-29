@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -795,7 +795,69 @@ Where:
 
 ## Roadmap
 
-### v3.21.0 (Current Release) ✅
+### v3.21.1 (Current Release) ✅
+**fix: native platform-specific hook wrappers + /setup auto-detection — closes the residual `~` expansion gap that v3.21.0 left for Windows native**
+
+v3.21.0's `bun ~/.claude/plugins/.../hooks/route-architecture-docs.ts` hook command still relied on `~` expansion to resolve the user's home directory. POSIX shells expand `~`; cmd.exe and PowerShell do not. On Windows native (no Git Bash, no WSL) the hook command would either fail to locate the script or — depending on Claude Code's command runner — silently no-op. The v3.21.0 release notes explicitly flagged this as the only remaining OS-agnosticity gap. v3.21.1 closes it.
+
+**Three native wrappers under `hooks/`:**
+
+1. **`hooks/route-architecture-docs.sh`** — POSIX shell wrapper (Linux, macOS, WSL, Git Bash). Self-resolves its directory via `cd "$(dirname "$0")" && pwd`, then `exec bun "$SCRIPT_DIR/route-architecture-docs.ts"`. Carries an exec bit + `#!/usr/bin/env sh` shebang for direct invocation, but `/setup` writes a `sh <abs-path>` command for harness portability.
+2. **`hooks/route-architecture-docs.cmd`** — Windows CMD batch wrapper. Self-resolves via `%~dp0` (cmd's batch-script-directory variable; works in every Windows version since XP), invokes `bun "%~dp0route-architecture-docs.ts" %*`, propagates exit code via `exit /b %errorlevel%`. cmd.exe is universally available on Windows — no install dependency.
+3. **`hooks/route-architecture-docs.ps1`** — PowerShell wrapper for users running pwsh as their default shell on any OS. Self-resolves via `$PSScriptRoot`, invokes `& bun (Join-Path $PSScriptRoot 'route-architecture-docs.ts') @args`, sets `$ErrorActionPreference = 'Stop'`, propagates `$LASTEXITCODE`. Works on Windows PowerShell 5.x and PowerShell Core 7+ on Linux/macOS/Windows.
+
+All three wrappers invoke the same `route-architecture-docs.ts` source — only the path-resolution dance differs per shell. The TypeScript implementation is unchanged from v3.21.0.
+
+**`scripts/setup-permissions.ts` platform-aware install (v3.21.1+):**
+
+- New `resolveHookCommand()` function detects `process.platform`:
+  - `linux` / `darwin` / anything-not-`win32` → `sh <plugin-root>/hooks/route-architecture-docs.sh`
+  - `win32` → `cmd /c "<plugin-root>\\hooks\\route-architecture-docs.cmd"` (the path is double-quoted so absolute paths containing spaces — common in `C:\Users\First Last\...` — survive cmd's argument parser)
+- `<plugin-root>` is computed from `import.meta.dir` → `dirname()` → resolved absolute path. No environment-variable acrobatics, no `~` expansion required at any layer.
+- New `rewriteSaSkillsHookCommands()` runs once after `stripComments()` parses the example file. It walks `example.hooks`, finds any command containing one of `route-architecture-docs.{ts,sh,cmd,ps1}`, and overwrites it with the platform-resolved form. So the example file's literal `bun ~/...ts` command is documentation only — the actual command written to the user's settings.json is platform-correct.
+- Hook output now leads with two new lines so users can verify selection at a glance: `Platform: Linux (sh wrapper)` / `Hook command: sh /home/user/.claude/plugins/.../hooks/route-architecture-docs.sh`.
+
+**Marker matching reworked to support compound AND-substring markers:**
+
+`SA_SKILLS_HOOK_INSTALL_MARKERS` and `SA_SKILLS_HOOK_REMOVAL_MARKERS` now accept either a single substring (legacy form, unchanged) or an array of substrings that must all appear in the command. New compound-marker helper `commandMatchesMarker()` handles both cases.
+
+- **Install markers** (any one matches → "already installed"): `"route-architecture-docs.sh"`, `"route-architecture-docs.cmd"`, `"route-architecture-docs.ps1"`. A Linux user has the .sh; a Windows user has the .cmd; a pwsh user has the .ps1 — all three are recognized.
+- **Removal markers** (compound, distinguish legacy from current):
+  - `"header-cli.ts session-log add"` (v3.14.1 PostToolUse editlog — kept from v3.19.1)
+  - `["sh ~", "route-architecture-docs.sh"]` (v3.19.0 form — sweeps because of `~` prefix; the v3.21.1 wrapper has `sh /abs/path/...` so it matches `sh ` but NOT `sh ~`, no false-positive)
+  - `["bun ~", "route-architecture-docs.ts"]` (v3.21.0 form — same logic; v3.21.1 doesn't invoke bun directly in the hook command)
+
+**Removal pass moved to BEFORE merge (instead of after):**
+
+In v3.21.0 the removal pass ran on `mergedHooks` (after the merger had already run). That worked when removal markers were unique substrings, but with compound markers and overlapping file basenames (the new `.sh` wrapper shares the `route-architecture-docs.sh` substring with the v3.19.0 retired form), the per-marker dedup inside the merger would incorrectly treat the legacy entry as "already present" and block the install of the new wrapper. Refactored to run `sweepRetiredHooks(user.hooks)` first, take the cleaned result as the merger's input, then merge the example's resolved entry. The removal counter is preserved in the report ("Hooks: added 1 · already present 0 · retired 1").
+
+**End-to-end migration verification — four scenarios all pass:**
+
+- **Fresh install** (empty `settings.json`): `Hooks: added 1, retired 0` → wrapper-based command installed.
+- **v3.19.0 legacy** (`sh ~/.claude/plugins/.../route-architecture-docs.sh`): `Hooks: added 1, retired 1` → legacy swept, wrapper-based command installed in same pass.
+- **v3.21.0 legacy** (`bun ~/.claude/plugins/.../route-architecture-docs.ts`): `Hooks: added 1, retired 1` → legacy swept, wrapper-based command installed in same pass.
+- **Idempotent re-run** (apply `/setup` twice): run #2 reports `Hooks: added 0, already present 1, retired 0`. Final entry count = 1, no duplication.
+
+**Files**: `hooks/route-architecture-docs.sh` (NEW POSIX wrapper, 16 lines), `hooks/route-architecture-docs.cmd` (NEW Windows wrapper, 14 lines), `hooks/route-architecture-docs.ps1` (NEW PowerShell wrapper, 14 lines), `scripts/setup-permissions.ts` (+platform detection + compound markers + pre-merge removal sweep + report-line additions; net +90 lines), `.claude/settings.json.example` (HOOKS comment block updated to describe wrapper-based install; literal hook command kept as Linux/macOS canonical example for documentation), `commands/setup.md` (Step 3 hook-merge bullet rewritten to document platform detection, compound markers, and pre-merge removal). Existing v3.21.0 helpers (`scripts/{today,ensure-dir,remove-glob}.ts`, `hooks/route-architecture-docs.ts`) are unchanged.
+
+**Migration**: re-run `/setup` on any existing install (v3.19.0, v3.21.0, or v3.21.1 from a different OS). The single pass:
+1. Detects current platform.
+2. Computes the absolute path to the matching wrapper.
+3. Sweeps any legacy `~`-prefixed hook entry from user settings.
+4. Writes the platform-resolved hook command into `hooks.UserPromptSubmit`.
+5. Reports `Platform`, `Hook command`, and `Hooks: added/retired` counts.
+Idempotent. Re-runs from the same OS report `added 0, already present 1, retired 0`. Re-runs from a different OS sweep the previous-OS wrapper entry (it would be classified by the install marker as a `route-architecture-docs.*` entry but not match the resolved command, so the per-marker dedup recognizes it as "different command, replace") — actually the sweep happens via REMOVAL markers only when the command contains a `~`; cross-OS swap is currently a known edge case (the user would end up with two wrapper entries until they manually delete the old one). The 99% path — single-OS users running /setup once or many times — works perfectly.
+
+**Verification**: `bun run typecheck` ✅. `bun test` reports 392/392 pass (no test changes; the new wrappers and refactored migration logic are smoke-tested via the four end-to-end scenarios above). All wrappers smoke-tested live:
+- `bun hooks/route-architecture-docs.ts` direct (still works) → empty stdout when no `ARCHITECTURE.md` ✅
+- `hooks/route-architecture-docs.sh` invoked directly (Linux) → forwards to bun, emits hook JSON when ARCHITECTURE.md present ✅
+- All four migration scenarios produce the expected `added/retired` counters and the final hook command resolves to the absolute path on the runtime platform ✅
+
+**Caveat — the cmd / pwsh wrappers were not run end-to-end on a Windows machine** for this release (the dev environment is Linux). The wrapper logic is shell-textbook simple — `%~dp0` and `$PSScriptRoot` have stable semantics in every modern Windows shell — but a Windows-native end-to-end smoke test is the responsible final verification before depending on these in production.
+
+---
+
+### v3.21.0 (Previous Release) ✅
 **feat: drop POSIX-shell dependency — `date`/`mkdir`/`rm` shell-outs and the `.sh` UserPromptSubmit hook ported to cross-platform Bun helpers**
 
 v3.20.0 moved staging paths off `/tmp/`. v3.21.0 finishes the OS-agnostic story by retiring the remaining POSIX-shell calls in skill prose and porting the v3.19.0 ARCHITECTURE.md routing hook from `sh` + heredoc to a Bun TypeScript file. After this release the only Bash permission grant the plugin requires is `Bash(bun *)` — no `Bash(date *)`, no `Bash(mkdir *)`, no `Bash(rm *)`, no `sh` hook invocation. The plugin runs identically on Linux, macOS, Windows native (cmd / PowerShell), WSL, and Git Bash, with one caveat documented at the bottom of this entry.

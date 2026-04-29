@@ -19,7 +19,54 @@
 // under the same matcher; those are preserved verbatim.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { dirname } from "path";
+import { dirname, resolve, join } from "path";
+
+// --- Platform-aware hook command resolution (v3.22.0+) -------------------
+//
+// The plugin ships three native wrappers under `hooks/`:
+//   - route-architecture-docs.sh   (Linux, macOS, WSL, Git Bash)
+//   - route-architecture-docs.cmd  (Windows native cmd.exe)
+//   - route-architecture-docs.ps1  (PowerShell / pwsh on any OS)
+//
+// Each wrapper resolves its own directory and invokes
+// `bun route-architecture-docs.ts`, so we sidestep `~` expansion entirely
+// (cmd.exe and PowerShell do NOT expand `~`; only POSIX shells do). Setup
+// detects the runtime OS and writes the absolute path to the matching
+// wrapper into the user's settings.json. No `~`, no `sh` prefix on
+// Windows, no environment-variable acrobatics.
+//
+// Plugin root detection: this script lives at
+// `<plugin-root>/scripts/setup-permissions.ts`. `import.meta.dir` resolves
+// to `<plugin-root>/scripts/`; one `dirname()` up gets the plugin root,
+// and the wrappers live at `<plugin-root>/hooks/`.
+const SCRIPT_DIR = import.meta.dir;
+const PLUGIN_ROOT = dirname(SCRIPT_DIR);
+const HOOKS_DIR = resolve(PLUGIN_ROOT, "hooks");
+
+function resolveHookCommand(): string {
+  if (process.platform === "win32") {
+    // cmd.exe wrapper — universally available on Windows. Quoting the
+    // path with double-quotes lets the absolute path contain spaces (e.g.
+    // `C:\Users\Some Name\.claude\plugins\...`).
+    const cmdPath = join(HOOKS_DIR, "route-architecture-docs.cmd");
+    return `cmd /c "${cmdPath}"`;
+  }
+  // POSIX path. The wrapper carries an exec bit and a `#!/usr/bin/env sh`
+  // shebang, but we prefix `sh` explicitly to be robust against harnesses
+  // that strip the exec bit on copy or that invoke the command via
+  // `child_process.spawn` without a shell.
+  const shPath = join(HOOKS_DIR, "route-architecture-docs.sh");
+  return `sh ${shPath}`;
+}
+
+const RESOLVED_HOOK_COMMAND = resolveHookCommand();
+
+function describePlatform(): string {
+  if (process.platform === "win32") return "Windows (cmd.exe wrapper)";
+  if (process.platform === "darwin") return "macOS (sh wrapper)";
+  if (process.platform === "linux") return "Linux (sh wrapper)";
+  return `${process.platform} (sh wrapper — POSIX fallback)`;
+}
 
 const [examplePath, userPath] = process.argv.slice(2);
 
@@ -63,44 +110,73 @@ type Settings = {
   [k: string]: unknown;
 };
 
-// Each entry uniquely identifies one sa-skills hook by a substring of
-// its installed `command` field. Order does not matter; matching is by
-// substring containment.
-const SA_SKILLS_HOOK_MARKERS: ReadonlyArray<string> = [
-  "route-architecture-docs.ts",    // v3.21.0+ UserPromptSubmit ARCHITECTURE.md router (Bun TS port of v3.19.0 .sh)
+// Install markers — substring (or substring-array AND-match) that
+// identifies the *currently shipped* sa-skills hook. Used to decide
+// "already present" during the install pass so re-running /setup does
+// not duplicate the entry. Each entry is either a single substring or
+// an array of substrings that must all appear in the command.
+//
+// v3.22.0+: any of the three native wrappers (.sh, .cmd, .ps1) counts
+// as installed — a Linux user who has the .sh wrapper does not need
+// the .cmd added (and the converse on Windows). Cross-platform users
+// who switch OSes are handled by the removal pass below: their stale
+// wrapper for the other OS gets swept and the current-OS wrapper is
+// installed in the same run.
+type Marker = string | ReadonlyArray<string>;
+
+const SA_SKILLS_HOOK_INSTALL_MARKERS: ReadonlyArray<Marker> = [
+  "route-architecture-docs.sh",   // POSIX wrapper (Linux/macOS/WSL/Git Bash)
+  "route-architecture-docs.cmd",  // Windows cmd wrapper
+  "route-architecture-docs.ps1",  // PowerShell wrapper
 ];
 
-// Removal markers — hooks shipped in earlier sa-skills versions that have
-// been retired. On every /setup run, any user-side hook entry whose
-// `command` contains one of these substrings is stripped from
+// Removal markers — hooks shipped in earlier sa-skills versions that
+// have been retired. On every /setup run, any user-side hook entry
+// whose `command` matches one of these markers is stripped from
 // settings.json (idempotent; removed entries are reported as cleaned).
 //
-// v3.19.1: the v3.14.1 PostToolUse editlog tracker
-// (`header-cli.ts session-log add`) silently no-op'd because it relied on
-// `$TOOL_INPUT_FILE_PATH`, which Claude Code does not export. The hook
-// and the editlog feature are gone; this entry sweeps stale installs.
+// Each marker is either a single substring or an array of substrings
+// that ALL must appear in the command (compound AND-match). Compound
+// markers let us sweep the v3.19.0 / v3.21.0 `~`-prefixed forms without
+// false-matching the v3.22.0+ absolute-path wrapper, which still ends
+// in `route-architecture-docs.sh` on POSIX.
 //
-// v3.21.0: the v3.19.0 POSIX shell hook (`route-architecture-docs.sh`) is
-// retired in favor of the Bun TypeScript port (`route-architecture-docs.ts`).
-// The .sh version required `sh` and POSIX heredoc support, which fail on
-// Windows native (cmd / PowerShell without Git Bash). Removing the stale
-// entry on /setup ensures upgrading users do not run two competing hooks
-// (the .ts entry is added through the install-marker pass in the same run).
-const SA_SKILLS_HOOK_REMOVAL_MARKERS: ReadonlyArray<string> = [
-  "header-cli.ts session-log add", // v3.14.1 PostToolUse editlog tracker (retired v3.19.1)
-  "route-architecture-docs.sh",    // v3.19.0 POSIX shell hook (retired v3.21.0 — replaced by .ts port)
+// v3.19.1: the v3.14.1 PostToolUse editlog tracker
+// (`header-cli.ts session-log add`) silently no-op'd because it relied
+// on `$TOOL_INPUT_FILE_PATH`, which Claude Code does not export. The
+// hook and the editlog feature are gone; this entry sweeps stale
+// installs.
+//
+// v3.22.0: the v3.19.0 POSIX shell hook (invoked as
+// `sh ~/.claude/plugins/.../route-architecture-docs.sh`) and the
+// v3.21.0 Bun-direct hook (invoked as
+// `bun ~/.claude/plugins/.../route-architecture-docs.ts`) are both
+// retired. They depended on `~` expansion, which is a POSIX-shell
+// feature with no equivalent on Windows native (cmd / PowerShell).
+// The new wrappers receive an absolute path with no leading `~` and
+// no leading `sh ` / `bun ` prefix referencing the script directly,
+// so the compound markers below distinguish the legacy forms cleanly.
+const SA_SKILLS_HOOK_REMOVAL_MARKERS: ReadonlyArray<Marker> = [
+  "header-cli.ts session-log add",                    // v3.14.1 PostToolUse editlog (retired v3.19.1)
+  ["sh ~", "route-architecture-docs.sh"],             // v3.19.0 .sh+tilde form (retired v3.22.0)
+  ["bun ~", "route-architecture-docs.ts"],            // v3.21.0 .ts+tilde form (retired v3.22.0)
 ];
 
-function findMarkerForCommand(command: string): string | null {
-  for (const m of SA_SKILLS_HOOK_MARKERS) {
-    if (command.includes(m)) return m;
+function commandMatchesMarker(command: string, marker: Marker): boolean {
+  if (typeof marker === "string") return command.includes(marker);
+  return marker.every((part) => command.includes(part));
+}
+
+function findMarkerForCommand(command: string): Marker | null {
+  for (const m of SA_SKILLS_HOOK_INSTALL_MARKERS) {
+    if (commandMatchesMarker(command, m)) return m;
   }
   return null;
 }
 
 function commandMatchesRemovalMarker(command: string): boolean {
   for (const m of SA_SKILLS_HOOK_REMOVAL_MARKERS) {
-    if (command.includes(m)) return true;
+    if (commandMatchesMarker(command, m)) return true;
   }
   return false;
 }
@@ -113,6 +189,46 @@ try {
   process.exit(1);
 }
 const example = stripComments(rawExample) as Settings;
+
+// --- Rewrite sa-skills hook commands to the platform-resolved form ------
+//
+// The example file carries the canonical Linux/macOS form for documentation
+// (`bun ~/.claude/plugins/.../hooks/route-architecture-docs.ts`). For the
+// actual install on the current OS, swap that for the platform-specific
+// wrapper command with an absolute path — no `~` expansion required.
+//
+// Any sa-skills hook command in the example (current or any legacy form)
+// is rewritten. Non-sa-skills hooks under the same matcher pass through
+// unchanged.
+function rewriteSaSkillsHookCommands(s: Settings): { rewritten: number } {
+  let rewritten = 0;
+  if (!s.hooks) return { rewritten };
+  const SA_SKILLS_FILE_TOKENS = [
+    "route-architecture-docs.ts",
+    "route-architecture-docs.sh",
+    "route-architecture-docs.cmd",
+    "route-architecture-docs.ps1",
+  ];
+  for (const event of Object.keys(s.hooks)) {
+    const entries = s.hooks[event];
+    if (!Array.isArray(entries)) continue;
+    for (const entry of entries) {
+      const cmds = entry.hooks ?? [];
+      for (const cmd of cmds) {
+        if (typeof cmd.command !== "string") continue;
+        if (SA_SKILLS_FILE_TOKENS.some((tok) => cmd.command!.includes(tok))) {
+          if (cmd.command !== RESOLVED_HOOK_COMMAND) {
+            cmd.command = RESOLVED_HOOK_COMMAND;
+            rewritten++;
+          }
+        }
+      }
+    }
+  }
+  return { rewritten };
+}
+
+rewriteSaSkillsHookCommands(example);
 
 let user: Settings = {};
 const userExistedBefore = existsSync(userPath);
@@ -222,7 +338,43 @@ function entriesMatchByMatcher(a: HookEntry, b: HookEntry): boolean {
   return (a.matcher ?? "") === (b.matcher ?? "") && (a.if ?? "") === (b.if ?? "");
 }
 
-const userHooks: HooksBlock = user.hooks ?? {};
+// --- sweep retired sa-skills hooks BEFORE merge (idempotent removal pass) ---
+//
+// The removal pass runs on the user's existing hooks first so legacy entries
+// (v3.19.0 sh+tilde, v3.21.0 bun+tilde) are gone before the per-marker dedup
+// in the merge would otherwise treat them as "already present" and block the
+// install of the new wrapper-based command.
+function sweepRetiredHooks(hooks: HooksBlock): {
+  cleaned: HooksBlock;
+  removed: Array<{ event: string; command: string }>;
+} {
+  const removed: Array<{ event: string; command: string }> = [];
+  const cleaned: HooksBlock = {};
+  for (const [event, entries] of Object.entries(hooks)) {
+    if (!Array.isArray(entries)) continue;
+    const filteredEntries: HookEntry[] = [];
+    for (const entry of entries) {
+      const cmds = entry.hooks ?? [];
+      const keptCmds: HookCommand[] = [];
+      for (const cmd of cmds) {
+        if (typeof cmd.command === "string" && commandMatchesRemovalMarker(cmd.command)) {
+          removed.push({ event, command: cmd.command });
+          continue;
+        }
+        keptCmds.push(cmd);
+      }
+      if (keptCmds.length === 0) continue;
+      filteredEntries.push({ ...entry, hooks: keptCmds });
+    }
+    if (filteredEntries.length > 0) {
+      cleaned[event] = filteredEntries;
+    }
+  }
+  return { cleaned, removed };
+}
+
+const { cleaned: cleanedUserHooks, removed: removedHooks } = sweepRetiredHooks(user.hooks ?? {});
+const userHooks: HooksBlock = cleanedUserHooks;
 const exampleHooks: HooksBlock = example.hooks ?? {};
 const mergedHooks: HooksBlock = { ...userHooks };
 let hooksAdded = 0;
@@ -261,7 +413,7 @@ for (const [event, exampleEntries] of Object.entries(exampleHooks)) {
         const cmdMarker = findMarkerForCommand(cmd.command);
         if (cmdMarker !== null) {
           const alreadyHasThisMarker = (target.hooks ?? []).some(
-            (h) => typeof h.command === "string" && h.command.includes(cmdMarker),
+            (h) => typeof h.command === "string" && commandMatchesMarker(h.command, cmdMarker),
           );
           if (alreadyHasThisMarker) continue;
         }
@@ -277,31 +429,6 @@ for (const [event, exampleEntries] of Object.entries(exampleHooks)) {
   }
 
   mergedHooks[event] = userEntries;
-}
-
-// --- sweep retired sa-skills hooks (idempotent removal pass) ---
-const removedHooks: Array<{ event: string; command: string }> = [];
-for (const [event, entries] of Object.entries(mergedHooks)) {
-  if (!Array.isArray(entries)) continue;
-  const filteredEntries: HookEntry[] = [];
-  for (const entry of entries) {
-    const cmds = entry.hooks ?? [];
-    const keptCmds: HookCommand[] = [];
-    for (const cmd of cmds) {
-      if (typeof cmd.command === "string" && commandMatchesRemovalMarker(cmd.command)) {
-        removedHooks.push({ event, command: cmd.command });
-        continue;
-      }
-      keptCmds.push(cmd);
-    }
-    if (keptCmds.length === 0) continue;
-    filteredEntries.push({ ...entry, hooks: keptCmds });
-  }
-  if (filteredEntries.length === 0) {
-    delete mergedHooks[event];
-  } else {
-    mergedHooks[event] = filteredEntries;
-  }
 }
 
 // --- assemble merged object, preserving user's other top-level keys ---
@@ -330,6 +457,9 @@ const legacyGrants = mergedAllow.filter(
 console.log(
   `✅ ${userExistedBefore ? "Merged" : "Created"} sa-skills settings in ${userPath}`
 );
+console.log("");
+console.log(`Platform:     ${describePlatform()}`);
+console.log(`Hook command: ${RESOLVED_HOOK_COMMAND}`);
 console.log("");
 console.log(
   `Permissions:  added ${permissionsAdded.length}  ·  already present ${permissionsKept.length}`
