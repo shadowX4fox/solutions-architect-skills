@@ -1,8 +1,51 @@
 {
   "template_name": "Process Transformation and Automation",
   "template_id": "cc-008-process-transformation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "approval_authority": "Process Transformation Review Board",
+  "applicability": {
+    "summary": "Contract is Not Applicable when the architecture contains NEITHER a BPM platform NOR a Document Management System (DMS).",
+    "bpm_platforms": [
+      "Camunda",
+      "Camunda 8",
+      "IBM Business Automation Workflow",
+      "IBM BAW",
+      "IBM BPM",
+      "Activiti",
+      "jBPM",
+      "Bonita",
+      "Flowable",
+      "Pega",
+      "Pega Platform",
+      "Appian",
+      "ProcessMaker",
+      "Oracle BPM Suite",
+      "TIBCO ActiveMatrix BPM"
+    ],
+    "dms_platforms": [
+      "FileNet",
+      "FileNet P8",
+      "Athento",
+      "SharePoint",
+      "Documentum",
+      "Alfresco",
+      "OpenText Content Server",
+      "OpenText Documentum",
+      "Nuxeo",
+      "Hyland OnBase",
+      "OnBase",
+      "Box",
+      "M-Files"
+    ],
+    "scoping_rules": {
+      "neither_bpm_nor_dms": "All four LAA codes Not Applicable. Contract scored N/A overall.",
+      "bpm_only": "Apply LAA1, LAA2, LAA3. Mark LAA4 Not Applicable (no DMS in architecture).",
+      "dms_only_no_workflow": "Apply LAA1, LAA3, LAA4. Mark LAA2 Not Applicable (no BPM platform in architecture).",
+      "dms_with_embedded_workflow": "If the project uses the DMS's embedded workflow engine for non-trivial process orchestration (e.g., FileNet Process Engine, Athento workflow), treat as both BPM and DMS — apply all four LAAs.",
+      "both": "Apply all four LAAs."
+    },
+    "verification": "Validator MUST grep ARCHITECTURE.md (Sections 4 Meta Architecture, 5 Component Model, 6 Data Model, 7 Integration View, 8 Technology Stack) for any BPM or DMS platform name and record the result in External Validation Summary under 'Applicability Verification'."
+  },
   "scoring": {
     "scale": 10,
     "thresholds": {
@@ -27,13 +70,13 @@
   "validation_sections": [
     {
       "section_id": "laa1_feasibility_impact_analysis",
-      "section_name": "Feasibility and Impact Analysis (LAA1)",
+      "section_name": "BPM / DMS Feasibility and Impact Analysis (LAA1) — applies if architecture includes a BPM platform (Camunda, IBM BAW, Pega, Activiti, Flowable, Bonita, Appian, ProcessMaker) and/or DMS (FileNet, Athento, SharePoint, Documentum, Alfresco, OpenText, Nuxeo, OnBase). Otherwise N/A — see contract Applicability section.",
       "weight": 0.30,
       "required": true,
       "validation_items": [
         {
           "item_id": "manual_effort_quantification",
-          "question": "Is current manual effort quantified in FTE hours/week?",
+          "question": "Is current manual workflow effort (BPM-replaced approvals/hand-offs) or manual document effort (DMS-replaced filing/classification/retrieval) quantified in FTE hours/week?",
           "architecture_md_section": "Section 3 (Business Context)",
           "required": true,
           "weight": 0.15,
@@ -41,62 +84,62 @@
             "type": "presence_check",
             "pass_criteria": "Manual effort quantified with specific FTE hours/week",
             "fail_criteria": "Manual effort not quantified",
-            "na_criteria": "Net-new automation with no existing manual process",
+            "na_criteria": "Net-new BPM/DMS deployment with no prior manual process",
             "unknown_criteria": "Process mentioned but effort not quantified"
           }
         },
         {
           "item_id": "process_complexity",
-          "question": "Is process complexity assessed (simple/moderate/complex)?",
-          "architecture_md_section": "Section 3 (Business Context)",
+          "question": "Is BPM process / DMS workflow complexity assessed (simple/moderate/complex) — for BPM by BPMN node count, gateway count, escalation paths; for DMS by document type taxonomy size, classification rules, retention schedule complexity?",
+          "architecture_md_section": "Section 3 (Business Context) or Section 5 (Component Model)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "value_check",
             "approved_values": ["simple", "moderate", "complex"],
-            "pass_criteria": "Complexity categorized based on decision points and integrations",
+            "pass_criteria": "Complexity categorized for BPM (BPMN nodes/gateways/escalations) and/or DMS (document types/classification rules/retention schedule)",
             "fail_criteria": "Complexity not assessed",
-            "na_criteria": "N/A",
-            "unknown_criteria": "Process described but complexity unclear"
+            "na_criteria": "N/A — neither BPM nor DMS in architecture",
+            "unknown_criteria": "BPM/DMS described but complexity unclear"
           }
         },
         {
           "item_id": "roi_justification",
-          "question": "Is automation ROI documented with time savings and cost reduction?",
+          "question": "Is BPM / DMS ROI documented — for BPM with cycle-time reduction (e.g., 5d → 4h) and labor cost reduction per process instance; for DMS with storage cost savings, retrieval-time reduction, and compliance-risk reduction?",
           "architecture_md_section": "Section 3 (Business Context) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "ROI calculated with time savings (hours/week) and cost reduction (%)",
+            "pass_criteria": "BPM cycle-time reduction quantified and/or DMS storage / retrieval / compliance-risk savings calculated with cost units",
             "fail_criteria": "ROI not documented",
-            "na_criteria": "Regulatory requirement (no ROI needed)",
+            "na_criteria": "Regulatory mandate (legal hold capability, RM compliance) — ROI not required",
             "unknown_criteria": "Benefits mentioned but not quantified"
           }
         },
         {
           "item_id": "integration_points",
-          "question": "Are integration points documented with system names and protocols?",
+          "question": "Are BPM connectors and DMS integration points documented? For BPM: every Service Task / External Task / Send Task target with connector type (External Task, REST connector, JMS, BAW Service Flow). For DMS: every API consumer (CMIS, REST, SMB, IMAP, e-signature, scanner pipeline).",
           "architecture_md_section": "Section 5 (Component Model) or Section 7 (Integration View)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Integration points documented with system names, protocols (REST/SOAP), and endpoints",
+            "pass_criteria": "BPM connector inventory and DMS API surface documented with target system names and protocols",
             "fail_criteria": "Integration requirements not specified",
-            "na_criteria": "Standalone automation with no integrations",
-            "unknown_criteria": "Integrations mentioned but systems not identified"
+            "na_criteria": "Standalone BPM with no external calls AND/OR standalone DMS with manual upload only",
+            "unknown_criteria": "Integrations mentioned but BPM/DMS-specific systems not identified"
           }
         },
         {
           "item_id": "data_flows",
-          "question": "Are data flows mapped between systems?",
+          "question": "Are data flows mapped — for BPM, process variable flow across Service Tasks and message correlations; for DMS, document content + metadata flow from ingestion source to repository to downstream consumer?",
           "architecture_md_section": "Section 6 (Data Model) or Section 7 (Integration View)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Data flows documented showing source → transformation → destination",
+            "pass_criteria": "BPM process variable flow and/or DMS document/metadata flow documented showing source → transformation → destination",
             "fail_criteria": "Data movement not documented",
             "na_criteria": "No cross-system data transfer",
             "unknown_criteria": "Data mentioned but flows unclear"
@@ -104,296 +147,296 @@
         },
         {
           "item_id": "user_experience_impact",
-          "question": "Are user workflow changes and training requirements documented?",
+          "question": "Are case-worker / document-handler workflow changes and BPM tasklist / DMS UI training requirements documented?",
           "architecture_md_section": "Section 3 (Business Context) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "custom",
-            "pass_criteria": "Workflow changes and training plan documented",
-            "fail_criteria": "UX impact not assessed",
-            "na_criteria": "Back-end automation with no user-facing changes",
-            "unknown_criteria": "Automation mentioned but user impact unclear"
+            "pass_criteria": "BPM tasklist surface (Camunda Tasklist, BAW Process Portal, Pega Case Worker UI, custom forms) and/or DMS UI (Workplace XT, Content Navigator, Athento client, SharePoint library, Alfresco Share) named, with training plan",
+            "fail_criteria": "BPM/DMS user impact not assessed",
+            "na_criteria": "Headless BPM (no human tasks) AND headless DMS (API-only ingestion)",
+            "unknown_criteria": "BPM/DMS mentioned but participant impact unclear"
           }
         },
         {
           "item_id": "data_quality_requirements",
-          "question": "Are data quality standards and validation rules defined?",
+          "question": "Are process-variable / document-content quality standards defined — BPM start-form validation rules and Service Task validators, DMS OCR confidence threshold, mandatory metadata properties, content-type validation, virus-scan rule?",
           "architecture_md_section": "Section 6 (Data Model)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Data completeness, accuracy, and validation rules defined",
-            "fail_criteria": "Data quality not addressed",
-            "na_criteria": "No data processing required",
+            "pass_criteria": "BPM variable validation rules and/or DMS document quality gates (OCR confidence, mandatory properties, virus scan) defined",
+            "fail_criteria": "Process variable / document quality not addressed",
+            "na_criteria": "Trivial process with no variables AND/OR DMS-only with single ingestion path",
             "unknown_criteria": "Quality mentioned but standards unclear"
           }
         },
         {
           "item_id": "data_sensitivity_classification",
-          "question": "Is data classified by sensitivity (public/internal/confidential/restricted)?",
+          "question": "Are BPM process variables and/or DMS Document Classes classified by sensitivity (public/internal/confidential/restricted) driving BPM variable encryption and DMS Object Store / Document Class ACLs / RM security?",
           "architecture_md_section": "Section 6 (Data Model) or Section 9 (Security Architecture)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "value_check",
             "approved_values": ["public", "internal", "confidential", "restricted"],
-            "pass_criteria": "Data classified with sensitivity levels",
-            "fail_criteria": "Data classification not performed",
-            "na_criteria": "N/A",
-            "unknown_criteria": "Security mentioned but classification unclear"
+            "pass_criteria": "BPM variables and/or DMS Document Classes classified with sensitivity levels and corresponding security controls",
+            "fail_criteria": "Process variable / document classification not performed",
+            "na_criteria": "N/A — neither BPM variables nor DMS documents in scope",
+            "unknown_criteria": "Security mentioned but BPM/DMS classification unclear"
           }
         }
       ]
     },
     {
       "section_id": "laa2_automation_factors",
-      "section_name": "Automation Factors (LAA2)",
+      "section_name": "BPM / DMS Operational Factors (LAA2) — applies if architecture includes a BPM platform OR a DMS using its embedded workflow engine for non-trivial process orchestration. Mark Not Applicable for DMS-only projects with no orchestration layer.",
       "weight": 0.30,
       "required": true,
       "validation_items": [
         {
           "item_id": "execution_schedule_type",
-          "question": "Is execution timing documented (real-time/batch/event-driven/scheduled)?",
-          "architecture_md_section": "Section 10 (Non-Functional Requirements) or Section 11 (Operational Considerations)",
+          "question": "Is the BPM execution model classified per BPMN task (User Task with SLA, Service Task sync/async, External Task, Receive Task event-driven, Timer Boundary) and/or the DMS ingestion path (manual upload, scan-to-DMS, email-to-DMS, API push) documented?",
+          "architecture_md_section": "Section 5 (Component Model) or Section 10 (Non-Functional Requirements) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.20,
           "validation_rules": {
             "type": "value_check",
-            "approved_values": ["real-time", "batch", "event-driven", "scheduled"],
-            "pass_criteria": "Timing model documented",
-            "fail_criteria": "Execution timing not defined",
-            "na_criteria": "N/A",
-            "unknown_criteria": "Automation mentioned but timing unclear"
+            "approved_values": ["bpmn_user_task", "bpmn_service_task_sync", "bpmn_service_task_async", "bpmn_external_task", "bpmn_receive_task", "bpmn_timer_boundary", "cmmn_case", "dms_manual_upload", "dms_scan_to_dms", "dms_email_to_dms", "dms_api_push", "dms_event_driven"],
+            "pass_criteria": "BPM task types labeled with execution semantics and human-task SLAs, and/or DMS ingestion path classified with availability target",
+            "fail_criteria": "BPM execution model / DMS ingestion path not defined",
+            "na_criteria": "N/A — no BPM platform AND no DMS workflow trigger",
+            "unknown_criteria": "BPM/DMS mentioned but execution semantics unclear"
           }
         },
         {
           "item_id": "run_frequency",
-          "question": "Is automation run frequency specified (hourly/daily/on-demand)?",
-          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "question": "Are BPM time-critical SLAs and DMS ingestion latency targets specified (e.g., approval within 4 business hours; scanned document available within 2 minutes)?",
+          "architecture_md_section": "Section 10 (Non-Functional Requirements) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Execution frequency documented (e.g., every 4 hours, nightly at 2am)",
-            "fail_criteria": "Frequency not specified",
-            "na_criteria": "N/A",
-            "unknown_criteria": "Automation mentioned but frequency unclear"
+            "pass_criteria": "BPM cycle-time SLA targets and DMS ingestion-to-availability latency documented",
+            "fail_criteria": "Time-critical requirements not specified",
+            "na_criteria": "No time-critical operations",
+            "unknown_criteria": "Timing mentioned but BPM SLA / DMS latency unclear"
           }
         },
         {
           "item_id": "peak_load_capacity",
-          "question": "Are peak load handling and capacity planning documented?",
+          "question": "Are BPM process-instance / DMS document throughput and engine sizing documented — peak and steady-state instances/day, engine cluster topology, broker capacity, DMS storage projection?",
           "architecture_md_section": "Section 10 (Non-Functional Requirements → Scalability)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Expected transaction volumes and peak load scenarios documented",
-            "fail_criteria": "Capacity planning not addressed",
+            "pass_criteria": "BPM throughput (instances/day peak and steady-state, concurrent active instances) and engine sizing documented; DMS ingestion rate and year-3 storage projection documented",
+            "fail_criteria": "Throughput / capacity planning not addressed",
             "na_criteria": "Minimal load variation",
-            "unknown_criteria": "Load mentioned but capacity unclear"
+            "unknown_criteria": "Volume mentioned but BPM/DMS-specific numbers unclear"
           }
         },
         {
           "item_id": "retry_strategy",
-          "question": "Is retry logic and backoff strategy documented?",
+          "question": "Is BPM Incident handling / DMS error pipeline documented — Camunda Cockpit / BAW PA Incident triage, External Task retry, dead-letter policy, DMS failed-OCR queue, low-confidence-classification review queue, retention-policy failure alerts?",
           "architecture_md_section": "Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Retry attempts, exponential backoff, and circuit breaker patterns documented",
-            "fail_criteria": "Retry strategy not defined",
+            "pass_criteria": "BPM Incident triage flow and/or DMS exception handling documented with retry/escalation policy",
+            "fail_criteria": "BPM/DMS error handling not defined",
             "na_criteria": "N/A",
-            "unknown_criteria": "Error handling mentioned but retry logic unclear"
+            "unknown_criteria": "Errors mentioned but BPM/DMS-specific handling unclear"
           }
         },
         {
           "item_id": "license_costs",
-          "question": "Are automation platform license costs documented?",
+          "question": "Are BPM and/or DMS platform license costs documented with platform-specific metrics — Camunda per-engine, IBM BAW PVU, Pega per case-type, Appian Application User, FileNet PVU + CAL + Connection license, Athento per-active-process + per-user + per-document-store, SharePoint per-server + CAL?",
           "architecture_md_section": "Section 8 (Technology Stack) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "License costs quantified for automation platforms and third-party integrations",
-            "fail_criteria": "License costs not quantified",
-            "na_criteria": "Open-source solution with no license fees",
-            "unknown_criteria": "Licensing mentioned but costs unclear"
+            "pass_criteria": "Platform-specific licensing model and unit costs documented for the named BPM and/or DMS platform",
+            "fail_criteria": "Platform license costs not quantified",
+            "na_criteria": "Open-source-only stack (Camunda Community, Activiti Community, Alfresco Community)",
+            "unknown_criteria": "BPM/DMS licensing mentioned but model and costs unclear"
           }
         },
         {
           "item_id": "infrastructure_costs",
-          "question": "Are infrastructure costs (compute, storage, network) estimated?",
+          "question": "Are BPM engine and DMS repository infrastructure costs estimated — engine pods/VMs, broker capacity, DMS object-store / file-system / DB tier, OCR pipeline?",
           "architecture_md_section": "Section 4 (Meta Architecture) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Cloud resources or on-premise server costs estimated",
+            "pass_criteria": "BPM engine and DMS repository infrastructure costs estimated",
             "fail_criteria": "Infrastructure costs not calculated",
             "na_criteria": "N/A",
-            "unknown_criteria": "Resources mentioned but costs unclear"
+            "unknown_criteria": "Resources mentioned but BPM/DMS-specific costs unclear"
           }
         },
         {
           "item_id": "monitoring_requirements",
-          "question": "Are monitoring metrics and dashboards documented?",
+          "question": "Are BPM / DMS monitoring metrics defined — for BPM, per-model active instances, cycle time p50/p95, human-task SLA breaches, External Task fail rate, incidents; for DMS, ingestion success rate, classification confidence, retention-policy execution, repository free-space, OCR latency?",
           "architecture_md_section": "Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Automation health metrics defined (success rate, execution time, errors)",
-            "fail_criteria": "Monitoring requirements not defined",
+            "pass_criteria": "BPM and/or DMS dashboards defined with platform-specific metrics",
+            "fail_criteria": "BPM/DMS monitoring not defined",
             "na_criteria": "N/A",
-            "unknown_criteria": "Monitoring mentioned but specifics unclear"
+            "unknown_criteria": "Monitoring mentioned but BPM/DMS-specific metrics unclear"
           }
         },
         {
           "item_id": "support_model",
-          "question": "Is support model with SLAs documented?",
+          "question": "Is the BPM / DMS support model documented — L1 (tasklist user / retrieval issues), L2 (Incident triage, classification rule fixes, retention adjustments), L3 (engine upgrades, taxonomy / RM file-plan changes) with response-time SLAs?",
           "architecture_md_section": "Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.05,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "L1/L2/L3 support responsibilities and response time SLAs defined",
+            "pass_criteria": "L1/L2/L3 BPM/DMS responsibilities and response-time SLAs defined",
             "fail_criteria": "Support responsibilities not defined",
             "na_criteria": "N/A",
-            "unknown_criteria": "Support mentioned but model unclear"
+            "unknown_criteria": "Support mentioned but BPM/DMS-specific model unclear"
           }
         }
       ]
     },
     {
       "section_id": "laa3_license_efficiency",
-      "section_name": "Efficient License Usage (LAA3)",
+      "section_name": "BPM / DMS License Usage (LAA3) — applies if architecture includes a BPM platform and/or DMS. Otherwise N/A.",
       "weight": 0.25,
       "required": true,
       "validation_items": [
         {
           "item_id": "license_consumption_model",
-          "question": "Is licensing model documented (concurrent/named user/API calls)?",
+          "question": "Is the BPM / DMS license metric documented for the chosen platform — Camunda per-engine/per-cluster, IBM BAW PVU + Authorized User, Pega per case-type per environment + per developer seat, Appian Application User tier, FileNet PVU + Authorized User CAL + Connection, Athento per-active-process + per-user + per-repository, SharePoint per-server + CAL or M365 per-user, Documentum per-repository + Authorized User?",
           "architecture_md_section": "Section 8 (Technology Stack)",
           "required": true,
           "weight": 0.30,
           "validation_rules": {
             "type": "value_check",
-            "approved_values": ["concurrent", "named_user", "api_calls", "cpu_based"],
-            "pass_criteria": "Licensing model documented (e.g., UiPath attended/unattended robots)",
-            "fail_criteria": "License model not specified",
-            "na_criteria": "Open-source solution with no licensing",
-            "unknown_criteria": "Licensing mentioned but model unclear"
+            "approved_values": ["per_engine", "per_cluster", "pvu", "authorized_user_cal", "named_user", "concurrent_user", "per_case_type", "per_active_process", "per_repository", "per_server_plus_cal", "m365_per_user", "connection_license", "open_source"],
+            "pass_criteria": "Exact BPM/DMS license metric documented for the named platform",
+            "fail_criteria": "License metric not specified",
+            "na_criteria": "Open-source-only deployment (Camunda Community, Activiti, Alfresco Community)",
+            "unknown_criteria": "Licensing mentioned but BPM/DMS-specific metric unclear"
           }
         },
         {
           "item_id": "license_quantity",
-          "question": "Is required license count estimated?",
-          "architecture_md_section": "Section 11 (Operational Considerations)",
+          "question": "Is the required BPM / DMS license quantity calculated — engine count, PVU total, named-user CAL count, per-active-process count, repository / Object Store count, federation / connection license count?",
+          "architecture_md_section": "Section 8 (Technology Stack) or Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.20,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "License quantity calculated based on concurrent executions, users, or API calls",
+            "pass_criteria": "BPM/DMS license quantity calculated based on platform metric (engines, PVU, CALs, repositories, federations)",
             "fail_criteria": "License quantity not estimated",
-            "na_criteria": "N/A",
-            "unknown_criteria": "Licensing mentioned but quantity unclear"
+            "na_criteria": "Open-source only / N/A",
+            "unknown_criteria": "Licensing mentioned but BPM/DMS quantity unclear"
           }
         },
         {
           "item_id": "third_party_integration_licenses",
-          "question": "Are third-party integration licenses identified?",
+          "question": "Are line-of-business integration licenses identified for systems the BPM engine calls or the DMS depends on — Salesforce per-API-call tier, SAP RFC connector, ServiceNow integration users, e-signature per-envelope (DocuSign / Adobe Sign), OCR engine (ABBYY, Tesseract Pro)?",
           "architecture_md_section": "Section 7 (Integration View) or Section 8 (Technology Stack)",
           "required": true,
           "weight": 0.25,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Additional licenses for integrated systems documented (Salesforce, SAP, ServiceNow API licenses)",
-            "fail_criteria": "Integration licensing not addressed",
-            "na_criteria": "No third-party integrations",
+            "pass_criteria": "LOB integration licensing model documented per system the BPM Service Tasks call or the DMS pipeline depends on",
+            "fail_criteria": "LOB integration licensing not addressed",
+            "na_criteria": "No third-party LOB integrations",
             "unknown_criteria": "Integrations mentioned but licensing unclear"
           }
         },
         {
           "item_id": "license_cost_optimization",
-          "question": "Are license cost reduction strategies documented?",
+          "question": "Are BPM / DMS cost-reduction tactics documented — for BPM, cluster consolidation, tier-based engine sizing, off-peak External Task worker scaling, OSS for low-criticality flows; for DMS, storage tiering, Document-Class consolidation, federation to existing repositories, archive-tier migration?",
           "architecture_md_section": "Section 11 (Operational Considerations) or Section 12 (ADRs)",
           "required": true,
           "weight": 0.15,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Cost optimization strategies like batch processing, off-peak execution, or license scheduling documented",
+            "pass_criteria": "BPM and/or DMS cost-optimization tactics documented",
             "fail_criteria": "Cost reduction not addressed",
             "na_criteria": "Fixed licensing with no optimization options",
-            "unknown_criteria": "Cost mentioned but tactics unclear"
+            "unknown_criteria": "Cost mentioned but BPM/DMS tactics unclear"
           }
         },
         {
           "item_id": "license_compliance_monitoring",
-          "question": "Is license usage tracking and audit procedure defined?",
+          "question": "Is BPM / DMS license consumption tracked at the platform metric — engine count, PVU consumption, named-user CAL utilization, per-case-type counts, Authorized User CAL utilization, repository / Object Store count, federation usage — and reconciled against entitlements via vendor tooling (IBM ILMT, Flexera, vendor portals)?",
           "architecture_md_section": "Section 11 (Operational Considerations)",
           "required": true,
           "weight": 0.10,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "License usage tracking and audit procedures documented",
-            "fail_criteria": "Compliance monitoring not defined",
+            "pass_criteria": "BPM/DMS license usage tracking and quarterly reconciliation procedures documented",
+            "fail_criteria": "BPM/DMS compliance monitoring not defined",
             "na_criteria": "N/A",
-            "unknown_criteria": "Monitoring mentioned but approach unclear"
+            "unknown_criteria": "Monitoring mentioned but BPM/DMS approach unclear"
           }
         }
       ]
     },
     {
       "section_id": "laa4_document_management_alignment",
-      "section_name": "Document Management Alignment (LAA4)",
+      "section_name": "Document Management Alignment (LAA4) — applies if architecture includes a DMS (FileNet, Athento, SharePoint, Documentum, Alfresco, OpenText Content Server, Nuxeo, OnBase, Box Governance, M-Files). Mark Not Applicable for BPM-only projects.",
       "weight": 0.15,
       "required": true,
       "validation_items": [
         {
           "item_id": "document_lifecycle_scope",
-          "question": "Is document lifecycle documented (creation/storage/retrieval/archival/deletion)?",
-          "architecture_md_section": "Section 6 (Data Model)",
+          "question": "Is the DMS-native object model and document lifecycle documented — for FileNet (Object Stores + Document Classes + Lifecycle Policies + Records Management states), Athento (Dossiers + Document Types + Workflow states + Retention Templates), SharePoint (Site Collections + Libraries + Content Types + Information Management Policies), Alfresco (Sites + Folders + Aspects + Rules)?",
+          "architecture_md_section": "Section 5 (Component Model) or Section 6 (Data Model)",
           "required": true,
           "weight": 0.35,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "Document lifecycle operations documented (upload, version, archive)",
-            "fail_criteria": "DMS scope not defined",
-            "na_criteria": "No document management required",
-            "unknown_criteria": "Documents mentioned but lifecycle unclear"
+            "pass_criteria": "DMS-native object model defined (Object Stores / Repositories, Document Classes / Content Types, lifecycle states from creation → classification → versioning → retention → disposition)",
+            "fail_criteria": "DMS object model and lifecycle not specified",
+            "na_criteria": "No DMS in architecture (BPM-only project)",
+            "unknown_criteria": "DMS mentioned but native model unclear"
           }
         },
         {
           "item_id": "dms_licensing",
-          "question": "Are DMS licenses documented (SharePoint, Documentum, etc.)?",
+          "question": "Are DMS licenses documented with platform-specific metric — FileNet (PVU + Authorized User CAL + Connection / Federation + RM module), Athento (per-active-process + per-user + per-repository + premium connector), SharePoint (per-server + CAL or M365 per-user + AIP/Purview), Documentum (per-repository + Authorized User + xCP), Alfresco (per-repository + per-active-user + RM module), OpenText Content Server (per-user + connector), Nuxeo (per-CPU + per-active-user)?",
           "architecture_md_section": "Section 8 (Technology Stack)",
           "required": true,
           "weight": 0.35,
           "validation_rules": {
             "type": "presence_check",
-            "pass_criteria": "DMS licenses and organizational agreement alignment verified",
+            "pass_criteria": "DMS license stack documented with platform-specific metrics and unit counts",
             "fail_criteria": "DMS licensing not addressed",
-            "na_criteria": "No DMS integration",
-            "unknown_criteria": "DMS mentioned but licensing unclear"
+            "na_criteria": "No DMS in architecture (BPM-only project)",
+            "unknown_criteria": "DMS mentioned but licensing model unclear"
           }
         },
         {
           "item_id": "dms_integration_authentication",
-          "question": "Is DMS authentication documented (OAuth, SAML, service accounts)?",
+          "question": "Is DMS authentication and authorization documented — authn via SAML / OAuth / Kerberos / AD-LDAP / service accounts; authorization via DMS-native ACLs (FileNet Object Store + Document Class ACLs, SharePoint permissions + groups, Alfresco group-based + Aspects, Athento dossier-level ACLs, Documentum ACL templates) plus RM record-class security?",
           "architecture_md_section": "Section 7 (Integration View) or Section 9 (Security Architecture)",
           "required": true,
           "weight": 0.30,
           "validation_rules": {
             "type": "value_check",
-            "approved_values": ["OAuth", "SAML", "service_accounts", "basic_auth"],
-            "pass_criteria": "DMS authentication method documented",
-            "fail_criteria": "Access controls not defined",
-            "na_criteria": "No DMS integration",
-            "unknown_criteria": "Security mentioned but controls unclear"
+            "approved_values": ["SAML", "OAuth", "Kerberos", "AD_LDAP", "service_accounts", "basic_auth"],
+            "pass_criteria": "DMS authentication method AND DMS-native ACL model (Object Store / Library / Dossier ACLs, RM record-class security) documented",
+            "fail_criteria": "DMS access controls not defined",
+            "na_criteria": "No DMS in architecture (BPM-only project)",
+            "unknown_criteria": "Security mentioned but DMS-native model unclear"
           }
         }
       ]
@@ -404,7 +447,7 @@
       "overall_status": "PASS",
       "document_status": "Approved",
       "action": "AUTO_APPROVE",
-      "message": "High confidence validation. Contract automatically approved for process automation.",
+      "message": "High confidence validation. BPM / DMS Process Transformation contract automatically approved.",
       "review_actor": "System (Auto-Approved)"
     },
     "7.0-7.9": {
@@ -418,29 +461,30 @@
       "overall_status": "CONDITIONAL",
       "document_status": "Draft",
       "action": "NEEDS_WORK",
-      "message": "Process automation analysis incomplete. Address gaps before approval.",
+      "message": "BPM / DMS Process Transformation analysis incomplete. Address gaps before approval.",
       "blockers": [
-        "Complete feasibility analysis (manual effort, integration points, data types)",
-        "Document automation factors (timing, costs, monitoring)",
-        "Address license efficiency and DMS alignment"
+        "Complete BPM/DMS feasibility (manual workflow / paper-document effort, BPM connector inventory, DMS API surface, BPMN/CMMN diagrams, DMS object model)",
+        "Document BPM/DMS operational factors (BPMN task types + SLAs, DMS ingestion paths, throughput, engine sizing, monitoring)",
+        "Address BPM/DMS license metrics, ELA alignment, and DMS records-management policy"
       ]
     },
     "0.0-4.9": {
       "overall_status": "FAIL",
       "document_status": "Rejected",
       "action": "REJECT",
-      "message": "Insufficient process automation documentation. Cannot proceed to review.",
+      "message": "Insufficient BPM / DMS Process Transformation documentation. Cannot proceed to review.",
       "blockers": [
-        "Automation feasibility not established (ROI, manuality, integration complexity)",
-        "Critical automation factors missing (execution timing, costs, operability)",
-        "License efficiency not addressed"
+        "BPM/DMS feasibility not established (manual effort, BPMN/CMMN diagrams, DMS object model, integration inventory)",
+        "Critical BPM/DMS operational factors missing (execution model, throughput, engine sizing, monitoring)",
+        "BPM/DMS license metrics not addressed"
       ]
     }
   },
   "remediation_guidance": {
-    "FAIL_items": "Document automation feasibility (manual effort, ROI, integration points), automation factors (timing, frequency, costs, monitoring), license efficiency, and DMS alignment in ARCHITECTURE.md",
-    "UNKNOWN_items": "Add process automation details to ARCHITECTURE.md Section 3 (Business Context), Section 5 (Component Model), Section 6 (Data Model), Section 7 (Integration View), Section 8 (Technology Stack), Section 10 (Non-Functional Requirements), Section 11 (Operational Considerations)",
-    "completeness_below_threshold": "Complete all 4 LAA requirements: feasibility analysis, automation factors, license efficiency, and document management alignment",
-    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and line numbers"
+    "applicability_check": "If the architecture contains NEITHER a BPM platform NOR a DMS, mark all four LAA codes Not Applicable with the justification 'No BPM platform or DMS in architecture'. Score the contract N/A overall and exit the auto-approve gate.",
+    "FAIL_items": "Document BPM/DMS feasibility (manual effort, BPMN/CMMN diagrams, DMS object model, BPM connectors, DMS API surface), operational factors (execution model, throughput, engine sizing, monitoring), license metrics (PVU, CAL, per-engine, per-active-process, federation), and DMS records-management policy in ARCHITECTURE.md",
+    "UNKNOWN_items": "Add BPM/DMS-specific details to ARCHITECTURE.md Section 3 (Business Context — manual effort, ROI), Section 5 (Component Model — BPMN/CMMN diagrams, DMS components), Section 6 (Data Model — DMS object model, Document Classes, retention), Section 7 (Integration View — BPM connectors, DMS APIs), Section 8 (Technology Stack — BPM/DMS platform names, license metrics), Section 10 (NFRs — throughput, engine sizing), Section 11 (Operational Considerations — BPM execution model, DMS workflow, monitoring, retention)",
+    "completeness_below_threshold": "Complete all applicable LAA requirements: feasibility analysis (LAA1), BPM/DMS operational factors (LAA2), license efficiency (LAA3), and document management alignment (LAA4). LAA4 is N/A for BPM-only projects.",
+    "low_quality_score": "Improve traceability by referencing specific ARCHITECTURE.md sections and naming the exact BPM platform (Camunda, IBM BAW, Pega, etc.) and/or DMS (FileNet, Athento, SharePoint, etc.)"
   }
 }

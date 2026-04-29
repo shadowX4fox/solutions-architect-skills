@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.2` in the list.
+You should see `sa-skills v3.21.3` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,53 @@ Where:
 
 ## Roadmap
 
-### v3.21.2 (Current Release) ✅
+### v3.21.3 (Current Release) ✅
+**feat: BPM / DMS scope reframe of CC-008 Process Transformation contract — applicability gate + platform-specific questions**
+
+Before v3.21.3, the CC-008 Process Transformation contract was framed in generic "automation" language (manual effort, automation factors, license efficiency, document management alignment). Anyone running compliance against an architecture that had no BPM platform and no Document Management System would still get the contract scored against generic prose, producing low-signal output and false-negative gaps. Conversely, users with FileNet / Athento / Camunda / IBM BAW architectures got questions that didn't anchor on the platform's actual semantics (PVU, CAL, Object Stores, BPMN node types, External Tasks, Records Management). v3.21.3 reframes the entire contract around the BPM / DMS scope it was always intended to evaluate.
+
+**Contract scope change:**
+
+- **New `Applicability` section** at the top of the contract enumerates the BPM platforms (Camunda, Camunda 8, IBM BAW, Activiti, jBPM, Bonita, Flowable, Pega, Appian, ProcessMaker, Oracle BPM Suite, TIBCO ActiveMatrix BPM) and DMS platforms (FileNet P8, Athento, SharePoint-as-DMS, OpenText Documentum, Alfresco, OpenText Content Server, Nuxeo, Hyland OnBase, Box Enterprise, M-Files) the contract evaluates. **If the architecture contains NEITHER, all four LAA codes are marked Not Applicable** and the contract is scored N/A overall — no false-negative gaps on projects this contract was never supposed to apply to.
+- **Partial applicability rules** documented for **BPM-only** (LAA1+LAA2+LAA3 apply; LAA4 N/A), **DMS-only** (LAA1+LAA3+LAA4 apply; LAA2 N/A), and **both** (canonical case — all four apply).
+- The validator agent is now required to grep `ARCHITECTURE.md` Sections 4/5/6/7/8 for any BPM or DMS platform name and record the result in `External Validation Summary → Applicability Verification`.
+
+**Template — all 14 subsections reframed:**
+
+- **LAA1 (Feasibility & Impact)** anchors questions in BPM concepts (BPMN node count, gateway count, escalation paths, sub-process nesting, cycle-time ROI) and DMS concepts (Document Type taxonomy size, classification rules, retention schedule complexity, ingestion-to-availability latency, storage / retrieval ROI).
+- **LAA2 (Operational Factors)** classifies BPMN task types (User Task with SLA, Service Task sync/async, External Task, Receive Task, Timer Boundary) and DMS ingestion paths (manual upload, scan-to-DMS, email-to-DMS, API push). Throughput questions ask for process-instances/day and documents/day at peak and steady state. Monitoring questions name BPM-specific metrics (per-model active instances, cycle-time p50/p95, External Task fail rate, Incident count) and DMS-specific metrics (ingestion success rate, classification confidence, retention-policy execution, repository free-space).
+- **LAA3 (License Usage)** enumerates platform-specific licensing metrics: Camunda per-engine/per-cluster, IBM BAW PVU + Authorized User, Pega per-case-type, Appian Application User tier, FileNet PVU + Authorized User CAL + Connection license, Athento per-active-process + per-user + per-document-store, SharePoint per-server+CAL or M365 per-user, Documentum per-repository + Authorized User, Alfresco per-repository + per-active-user. Cost-optimization tactics are platform-aware (engine cluster consolidation, External Task off-peak scaling, OSS for low-criticality flows; DMS storage tiering, Document-Class consolidation, federation, archive-tier migration).
+- **LAA4 (Document Management Alignment)** uses DMS-native semantics: FileNet (Object Stores + Document Classes + Lifecycle Policies + Records Management), Athento (Dossiers + Document Types + Workflow states + Retention Templates), SharePoint (Site Collections + Libraries + Content Types + Information Management Policies), Alfresco (Sites + Folders + Aspects + Rules). Authentication / authorization questions name DMS-native ACL surfaces (Object Store ACLs, Library permissions, RM record-class security, Information Management Policies / AIP labels).
+
+**Definitions (A.1)** split into **BPM Terms** (BPMN, CMMN, Process Instance, Token, External Task, User Task), **DMS Terms** (Object Store, Document Class, Records Management, CMIS, Federation/Connection license), and **Cross-Cutting Terms** (Manuality, LOB Integration, ROI). Adds `BAW` (IBM Business Automation Workflow) abbreviation; removes `RPA` (out of scope — generic RPA without an underlying BPM engine routes to other contracts).
+
+**Common Gaps Quick Reference (A.3.1)** rewritten with 13 BPM/DMS-specific entries. The **first row is "BPM/DMS platform not named"** — flags applicability ambiguity (where the architecture says "workflow engine" or "document store" without naming a platform) as the highest-priority gap, since misclassification at the gate cascades into every downstream LAA evaluation.
+
+**Auto-Approve guide (A.3.2)** reorganized around the BPM/DMS scope: a **Pre-step verifies the applicability gate**, then remediation is anchored in BPMN/CMMN diagrams, DMS object models, BPM connector inventories, and platform licensing models.
+
+**Validation JSON (`cc-008-process-transformation-validation.json`)** bumped to **2.1.0** with:
+
+- New top-level `applicability` block enumerating `bpm_platforms`, `dms_platforms`, 5 `scoping_rules` (neither / BPM-only / DMS-only / DMS-with-embedded-workflow / both), and a `verification` rule for the validator agent.
+- All **24 questions** across **4 sections** reframed in BPM/DMS terminology — no question references generic "automation" anymore.
+- `outcome_mapping` blockers and `remediation_guidance` rewritten with BPM/DMS scope and explicit `applicability_check` guidance.
+
+**Domain config (`shared/config/process-transformation.json`)** aligned with the BPM/DMS reframe: `domain_terms` rebuilt around BPM Platform / DMS / BPMN / CMMN / Process Instance / Object Store / Document Class / Records Management / CMIS / Federation; `abbreviations` updated (added BAW; PVU, CAL, ELA, BPMN, CMMN, CMIS retained); `framework_description` rewritten to enumerate platform names and explicitly state "Contract is Not Applicable when neither a BPM platform nor a DMS is in the architecture"; `primary_source_sections` retargeted to Sections 5/6/7/8/10/11.
+
+**Pre-existing bug fix bundled.** The domain config had `compliance_prefix: "LAP"` and `code_format.prefix: "LAP"` while the template (and every reference in the world) used `LAA`. This silent misalignment would have caused requirement-code injection failures in any future pipeline pass that read `compliance_prefix` from the config. Aligned all three to `LAA`.
+
+**Migration**: none required for **users**. Anyone running CC-008 against an architecture that genuinely contains a BPM platform or DMS will see noticeably more relevant questions and platform-specific remediation notes; anyone running CC-008 against an architecture with neither will now get a fast `Not Applicable` exit instead of a flood of irrelevant gaps. Any **manually-stored** prior CC-008 contract output remains valid as a historical artifact — re-generation is recommended once the underlying architecture is BPM/DMS-bearing.
+
+**Files**:
+
+- `skills/architecture-compliance/templates/cc-008-process-transformation.template.md` — Applicability section added; all 14 subsections (1.1–1.4, 2.1–2.4, 3.1–3.3, 4.1–4.3) reframed in BPM/DMS terminology; A.1 Definitions / A.3.1 Common Gaps / A.3.2 Auto-Approve Guide / A.4 Change History rewritten; net +~330 lines.
+- `skills/architecture-compliance/validation/cc-008-process-transformation-validation.json` — schema version bumped to 2.1.0; new top-level `applicability` block; all 24 questions reframed; outcome_mapping + remediation_guidance updated; net +~80 lines.
+- `skills/architecture-compliance/shared/config/process-transformation.json` — `domain_terms`, `abbreviations`, `framework_description`, `primary_source_sections` BPM/DMS-aligned; `compliance_prefix` + `code_format.prefix` LAP→LAA fix.
+
+**Verification**: `bun run typecheck` ✅. `bun test` reports **392/392 pass** (no test changes required — content-only contract scope reframe). Template `@include` resolution verified with `bun resolve-includes.ts` (613 → 776 lines after expansion).
+
+---
+
+### v3.21.2 (Previous Release) ✅
 **docs: OS-specific Bun install + plugin-configure sections in README and INSTALLATION.md — Windows native gets `npm install -g bun` as the recommended path**
 
 v3.21.1 made the plugin technically OS-agnostic (native wrappers + `/setup` auto-detection), but the README still presented Linux/macOS as the canonical install path with no first-class Windows-native guidance. v3.21.2 closes that documentation gap so a Windows-native developer (cmd / PowerShell, no WSL or Git Bash) can read the README top-to-bottom and end up with a working install in under five minutes.
