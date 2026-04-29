@@ -88,7 +88,7 @@ bun "$plugin_dir/scripts/setup-gitignore.ts" "$project_cwd"
 The helper ensures `$project_cwd/.gitignore` contains the sa-skills baseline entries:
 
 - `exports/` — generated Word `.docx` deliverables (`architecture-docs-export` output)
-- `/tmp/` — local scratch output
+- `.cache/sa-skills/` — project-local scratch dir for handoff payloads, expanded compliance templates, and IcePanel JSON snapshots (replaces the previous `/tmp/` staging — OS-agnostic, works on Linux, macOS, Windows native, WSL, and Git Bash)
 - `CLAUDE.md` — the per-project Claude Code instructions file (managed by Step 5)
 
 Behavior:

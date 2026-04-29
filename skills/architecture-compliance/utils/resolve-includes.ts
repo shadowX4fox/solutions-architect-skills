@@ -17,8 +17,8 @@
  * If output-file is omitted, outputs to stdout.
  */
 
-import { resolve, join, basename } from 'path';
-import { existsSync } from 'fs';
+import { resolve, join, basename, dirname } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import {
   validateTemplateStructure,
   generateTemplateValidationReport
@@ -311,6 +311,7 @@ async function main() {
 
     // Output
     if (outputPath) {
+      mkdirSync(dirname(resolve(outputPath)), { recursive: true });
       await Bun.write(outputPath, expanded);
       console.log(`✅ Template expanded successfully: ${outputPath}`);
 

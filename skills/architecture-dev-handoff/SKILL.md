@@ -234,13 +234,13 @@ If the context7 MCP tool is available and one or more selected components produc
 
 Skip silently if context7 is unavailable.
 
-**Step 3.3: Capture `generation_date` and prepare `/tmp/handoff-payloads/`**
+**Step 3.3: Capture `generation_date` and prepare `.cache/sa-skills/handoff-payloads/`**
 
 ```bash
-generation_date=$(bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts /tmp/handoff-payloads)
+generation_date=$(bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts .cache/sa-skills/handoff-payloads)
 ```
 
-The helper `mkdir -p`s the payload directory and prints `YYYY-MM-DD`. Capture both for the context-builder spawn prompt.
+The helper creates the payload directory (recursive `mkdirSync` — cross-platform, no shell `mkdir -p` dependency) and prints `YYYY-MM-DD`. Capture both for the context-builder spawn prompt. The path is project-relative and gitignored via `setup-gitignore.ts`, so it works identically on Linux, macOS, and Windows (native + WSL + Git Bash) without any `/tmp` permission grant.
 
 **Step 3.4: Compute per-component metadata for the spawn prompt**
 
@@ -316,7 +316,7 @@ prompt:
   architecture_version: <from <!-- ARCHITECTURE_VERSION: ... -->, or "unversioned">
   doc_language: <en|es from Step 3.1>
   generation_date: <YYYY-MM-DD from Step 3.3>
-  payload_dir: /tmp/handoff-payloads
+  payload_dir: .cache/sa-skills/handoff-payloads
   manifest_path: <project>/handoffs/.manifest.json
   template_version: <output of `bun [plugin_dir]/skills/architecture-dev-handoff/utils/manifest-cli.ts template-version [plugin_dir]/skills/architecture-dev-handoff/HANDOFF_TEMPLATE.md`>
   schema_version: "2"
@@ -763,8 +763,8 @@ Add to project `.claude/settings.json`:
 "Read(handoffs/*)",
 "Write(handoffs/.manifest.json)",
 "Read(handoffs/.manifest.json)",
-"Write(//tmp/handoff-payloads/*)",
-"Read(//tmp/handoff-payloads/*)",
+"Write(.cache/sa-skills/handoff-payloads/**)",
+"Read(.cache/sa-skills/handoff-payloads/**)",
 "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
 "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
 "Bash(bun *)",
@@ -773,6 +773,6 @@ Add to project `.claude/settings.json`:
 "Agent(sa-skills:handoff-context-builder)"
 ```
 
-Directory creation (`/tmp/handoff-payloads/` and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
+Directory creation (`.cache/sa-skills/handoff-payloads/` and `handoffs/assets/NN-<slug>/`) and the per-run `generation_date` are produced by `utils/prepare-payload-dir.ts`, so the only bash grant required is the project-wide `Bash(bun *)`. The helper uses `mkdirSync(..., { recursive: true })` — POSIX-free, identical behavior on Windows native, WSL, and Git Bash. Earlier versions used `Bash(mkdir *)` plus a chained `&& date +%Y-%m-%d`, which triggered a permission prompt on every run because the chained form was not pre-approved.
 
 **Why two plugin read grants?** `plugin_dir` may resolve to either the marketplaces manifest path or the versioned cache install path depending on how the plugin was installed. Step 0 probes readability under both. (Sub-agents no longer Read plugin files at runtime as of v3.13.0 — references are bundled into `agents/generators/handoff-generator.md` and `agents/builders/handoff-context-builder.md` — but the orchestrator still needs to invoke `bun [plugin_dir]/skills/architecture-dev-handoff/utils/*.ts` helpers, which require the bun binary to load files from `plugin_dir`.)

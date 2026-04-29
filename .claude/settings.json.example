@@ -16,7 +16,7 @@
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
   "// BASH": "bun (template expansion, utils, header detector CLI), date (contract timestamps), mkdir (compliance-docs dir)",
-  "// FILE ACCESS": "Read/Write /tmp/* (template processing), Read/Write compliance-docs/* (contract output)",
+  "// FILE ACCESS": "Read/Write .cache/sa-skills/** (project-local staging — handoff payloads, expanded compliance templates, icepanel JSON; OS-agnostic, no /tmp dependency), Read/Write compliance-docs/* (contract output)",
   "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
   "// AGENTS": "10 compliance generators + 10 validators + universal architecture-explorer (Haiku navigator, v3.16.0) + 3 reviewers (peer-review-category, architecture-analysis, principle-quality — v3.17.0) + handoff agents + docs export",
   "// WEBSEARCH": "Validators use WebSearch for EOL (end-of-life) technology version checks",
@@ -34,8 +34,8 @@
       "Glob(**/skills/architecture-compliance/SKILL.md)",
       "Glob(**/skills/architecture-dev-handoff/SKILL.md)",
       "Glob(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
-      "Read(//tmp/*)",
-      "Write(//tmp/*)",
+      "Read(.cache/sa-skills/**)",
+      "Write(.cache/sa-skills/**)",
       "Write(compliance-docs/*)",
       "Read(compliance-docs/*)",
       "Agent(sa-skills:compliance-generator)",
@@ -66,8 +66,6 @@
       "Read(handoffs/*)",
       "Write(handoffs/.manifest.json)",
       "Read(handoffs/.manifest.json)",
-      "Write(//tmp/handoff-payloads/*)",
-      "Read(//tmp/handoff-payloads/*)",
       "WebSearch"
     ]
   },

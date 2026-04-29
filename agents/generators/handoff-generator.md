@@ -21,7 +21,7 @@ Deliverable assets (OpenAPI, DDL, Kubernetes manifests, AsyncAPI, CronJob, Avro/
 
 The skill orchestrator passes these in the prompt text — read them from the prompt verbatim:
 
-- `payload_path`: Absolute path to the per-component payload file (e.g., `/tmp/handoff-payloads/inbox-hub.md`). Contains the component file content + all sliced architecture context in the format defined by `PAYLOAD_SCHEMA.md`.
+- `payload_path`: Absolute path to the per-component payload file (e.g., `.cache/sa-skills/handoff-payloads/inbox-hub.md`). Contains the component file content + all sliced architecture context in the format defined by `PAYLOAD_SCHEMA.md`.
 - `output_handoff_path`: Absolute path where the handoff document must be written (e.g., `/path/to/project/handoffs/04-inbox-hub-handoff.md`).
 - `plugin_dir`: (optional, may be omitted) Absolute path to the solutions-architect-skills plugin directory. Reference content is bundled into this agent's system prompt as of v3.13.0, so `plugin_dir` is no longer required for any Read or Bash operation. If present in the prompt, ignore it.
 - `component_slug`: The component's kebab-case slug (e.g., `inbox-hub`). Used in output filenames and the C3 asset-row paths.

@@ -238,18 +238,21 @@ Generated icepanel-sync/c4-model.yaml
 
 ### Step 2.1 — Fetch Existing Objects
 
-Query the IcePanel API:
+Query the IcePanel API. The cache directory is created by the cross-platform Bun helper (works identically on Linux, macOS, Windows native, WSL, and Git Bash):
 
 ```bash
+# Ensure project-local cache dir exists (cross-platform; no POSIX `mkdir -p` dependency)
+bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts .cache/sa-skills/icepanel
+
 # Fetch model objects
 curl -s "https://api.icepanel.io/v1/model/objects" \
   -H "Authorization: ApiKey ${ICEPANEL_API_KEY}" \
-  > /tmp/icepanel-objects.json
+  > .cache/sa-skills/icepanel/objects.json
 
 # Fetch model connections
 curl -s "https://api.icepanel.io/v1/model/connections" \
   -H "Authorization: ApiKey ${ICEPANEL_API_KEY}" \
-  > /tmp/icepanel-connections.json
+  > .cache/sa-skills/icepanel/connections.json
 ```
 
 If either request fails (non-200 status), report the error and fall back to offline mode:

@@ -3,9 +3,9 @@
 // Usage: bun scripts/setup-gitignore.ts <project_cwd>
 //
 // Ensures the project's .gitignore contains the sa-skills baseline entries
-// (exports/, /tmp/, CLAUDE.md). Line-level merge — existing entries and user
-// additions are preserved; only missing entries are appended under a
-// "# sa-skills" header. Idempotent.
+// (exports/, .cache/sa-skills/, CLAUDE.md). Line-level merge — existing
+// entries and user additions are preserved; only missing entries are
+// appended under a "# sa-skills" header. Idempotent.
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
@@ -20,7 +20,7 @@ if (!projectCwd) {
 
 const gitignorePath = join(projectCwd, ".gitignore");
 const HEADER = "# sa-skills";
-const MANAGED_ENTRIES = ["exports/", "/tmp/", "CLAUDE.md"];
+const MANAGED_ENTRIES = ["exports/", ".cache/sa-skills/", "CLAUDE.md"];
 
 function lineMatches(line: string, entry: string): boolean {
   const trimmed = line.trim();

@@ -2,7 +2,7 @@
 
 This document defines the contract between the `architecture-dev-handoff` skill orchestrator (main context) and the `handoff-generator` sub-agent (isolated context).
 
-The orchestrator builds one payload file per selected component and writes it to `/tmp/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/` or `adr/` directories.
+The orchestrator builds one payload file per selected component and writes it to `.cache/sa-skills/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/` or `adr/` directories.
 
 ## Why a payload-based contract
 
@@ -12,7 +12,7 @@ The orchestrator builds one payload file per selected component and writes it to
 
 ## File format
 
-Payloads are markdown with YAML frontmatter. The orchestrator writes one per component to `/tmp/handoff-payloads/<component-slug>.md`.
+Payloads are markdown with YAML frontmatter. The orchestrator writes one per component to `.cache/sa-skills/handoff-payloads/<component-slug>.md`.
 
 ### Frontmatter (required)
 
@@ -165,7 +165,7 @@ No ADRs in adr/ reference this component, its technology, or its domain.
 
 ## Shared excerpts (`_shared.md`) — v3.13.0
 
-For multi-component runs, the orchestrator deduplicates content that appears verbatim in three or more component payloads (typically org-wide ADRs like ADR-012 mTLS, ADR-014 WAF, plus shared paragraphs from `docs/07`/`08`/`10`). The duplicated excerpt is written once to `/tmp/handoff-payloads/_shared.md` under a stable header:
+For multi-component runs, the orchestrator deduplicates content that appears verbatim in three or more component payloads (typically org-wide ADRs like ADR-012 mTLS, ADR-014 WAF, plus shared paragraphs from `docs/07`/`08`/`10`). The duplicated excerpt is written once to `.cache/sa-skills/handoff-payloads/_shared.md` under a stable header:
 
 ```markdown
 ## Shared: ADR-012
@@ -201,7 +201,7 @@ If only one or two components share an excerpt, leave it inline — the deduplic
 
 2. **Slice each shared doc per component** using grep/regex matching on the component's name, its `Type` field, and the technology names listed in its `**Technology:**` field.
 
-3. **Write payloads** to `/tmp/handoff-payloads/<component-slug>.md`. Create the `/tmp/handoff-payloads/` directory first (`mkdir -p`).
+3. **Write payloads** to `.cache/sa-skills/handoff-payloads/<component-slug>.md`. The directory is pre-created by the orchestrator via `prepare-payload-dir.ts` (cross-platform Bun helper) — sub-agents do not invoke `mkdir`.
 
 4. **Pass payload path to sub-agent** in the prompt — do NOT inline the payload content in the prompt, as the goal is to keep the main-context / sub-agent-prompt size small.
 
@@ -216,7 +216,7 @@ If only one or two components share an excerpt, leave it inline — the deduplic
 
 - Created: by the orchestrator in Phase 1.5 of `SKILL.md`, one per selected component
 - Consumed: by the sub-agent in PHASE 0 Step 0.1
-- Retention: payloads remain in `/tmp/handoff-payloads/` for the life of the `/tmp` directory. Cleanup is not required — the next invocation overwrites them.
+- Retention: payloads remain in `.cache/sa-skills/handoff-payloads/` (project-local, gitignored) until overwritten by the next invocation. Cleanup is not required — the next run rewrites the directory; safe to delete by hand or wipe `.cache/sa-skills/` entirely between releases.
 
 ## Example: minimal payload for a cache component
 

@@ -1,6 +1,6 @@
 ---
 name: handoff-context-builder
-description: Builds per-component handoff payloads from shared architecture documentation. Reads docs/01, docs/04–09, and adr/ once on Sonnet (saving Opus tokens in the orchestrator's main context), slices each shared doc per component, indexes ADRs by term and intersects against component metadata, parses each component file into a structured YAML block, deduplicates excerpts that appear in 3+ payloads to /tmp/handoff-payloads/_shared.md, computes SHA-256 fingerprints, and consults handoffs/.manifest.json to decide SKIP vs REGEN per component. Returns a CONTEXT_RESULT block listing each component's payload path, hash, decision, and reason. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
+description: Builds per-component handoff payloads from shared architecture documentation. Reads docs/01, docs/04–09, and adr/ once on Sonnet (saving Opus tokens in the orchestrator's main context), slices each shared doc per component, indexes ADRs by term and intersects against component metadata, parses each component file into a structured YAML block, deduplicates excerpts that appear in 3+ payloads to .cache/sa-skills/handoff-payloads/_shared.md, computes SHA-256 fingerprints, and consults handoffs/.manifest.json to decide SKIP vs REGEN per component. Returns a CONTEXT_RESULT block listing each component's payload path, hash, decision, and reason. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 ---
@@ -13,7 +13,7 @@ You are the I/O-heavy half of the architecture-dev-handoff orchestration. The sk
 
 1. The orchestrator's main context never loads the ~80–120 KB of shared docs + ADR corpus.
 2. The I/O work runs on Sonnet (cheaper per token, faster wall-clock for file shuffling) instead of Opus.
-3. The downstream `handoff-generator` sub-agents receive ready-to-consume payloads via stable paths in `/tmp/handoff-payloads/`.
+3. The downstream `handoff-generator` sub-agents receive ready-to-consume payloads via stable paths in `.cache/sa-skills/handoff-payloads/`.
 
 You are **not** a content-generation agent. You do not fill the handoff template (that's `handoff-generator`'s job). You produce *payloads* — pre-sliced architecture excerpts — that match the contract in `PAYLOAD_SCHEMA.md` (bundled below in this system prompt).
 
@@ -27,7 +27,7 @@ The orchestrator passes these in the prompt text:
 - `architecture_version`: extracted by the orchestrator from `<!-- ARCHITECTURE_VERSION: X.Y.Z -->` (or `unversioned`)
 - `doc_language`: `en` or `es` — detected once by the orchestrator (Step 3.3)
 - `generation_date`: `YYYY-MM-DD` captured by the orchestrator from `prepare-payload-dir.ts`
-- `payload_dir`: absolute path to `/tmp/handoff-payloads/` (already created by the orchestrator)
+- `payload_dir`: absolute path to `.cache/sa-skills/handoff-payloads/` (already created by the orchestrator)
 - `components`: a YAML list (in the prompt body) of `{ slug, component_file, type, technology, component_index_position }` for every selected component. The orchestrator has already gated on C4 Level 2 — every entry here is in scope.
 - `findings_by_component` (v3.16.0+): an `EXPLORE_FINDINGS` YAML block per component produced by the orchestrator's per-component fan-out of `sa-skills:architecture-explorer` running in findings mode. Each fan-out call passes both `component_file` (so the agent emits a `focus_component` block with `related_adrs` and `has_header`) AND `query: <slug>, <type>, <technologies>` (so the agent surfaces line-level matches across the canonical doc surface for that component's vocabulary). The orchestrator collates these per-component findings blocks into a map keyed by slug. **When this parameter is present**: PHASE 1 reads the seven shared docs + `ARCHITECTURE.md` + `docs/components/README.md` once; PHASE 2 ADR indexing reads only the ADRs that appear in *any* component's `focus_component.related_adrs` (deduplicated union); PHASE 3.2 slices shared docs using `findings_by_component[<slug>].files[*]` line-level matches as the per-component anchor instead of in-builder name+type+technology grep; PHASE 3.3 takes its per-component ADR allowlist directly from `findings_by_component[<slug>].focus_component.related_adrs`. **When absent for a given component** (degraded mode — that component's explorer call failed or returned empty `files[]`): fall back to the legacy v3.13.0 in-builder grep slicing for that component only — other components keep the findings-driven path.
 - `manifest_path`: absolute path to `handoffs/.manifest.json`
@@ -296,7 +296,7 @@ The payload contract is embedded below as part of your system prompt — **DO NO
 
 This document defines the contract between the `architecture-dev-handoff` skill orchestrator (main context) and the `handoff-generator` sub-agent (isolated context).
 
-The orchestrator builds one payload file per selected component and writes it to `/tmp/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/` or `adr/` directories.
+The orchestrator builds one payload file per selected component and writes it to `.cache/sa-skills/handoff-payloads/<component-slug>.md`. Each payload is a self-contained, pre-sliced projection of the architecture documentation onto a single component. The sub-agent reads the payload in full and uses it as its sole source of architecture content — it does NOT re-read the project's `docs/` or `adr/` directories.
 
 ## Why a payload-based contract
 
@@ -306,7 +306,7 @@ The orchestrator builds one payload file per selected component and writes it to
 
 ## File format
 
-Payloads are markdown with YAML frontmatter. The orchestrator writes one per component to `/tmp/handoff-payloads/<component-slug>.md`.
+Payloads are markdown with YAML frontmatter. The orchestrator writes one per component to `.cache/sa-skills/handoff-payloads/<component-slug>.md`.
 
 ### Frontmatter (required)
 
@@ -459,7 +459,7 @@ No ADRs in adr/ reference this component, its technology, or its domain.
 
 ## Shared excerpts (`_shared.md`) — v3.13.0
 
-For multi-component runs, the orchestrator deduplicates content that appears verbatim in three or more component payloads (typically org-wide ADRs like ADR-012 mTLS, ADR-014 WAF, plus shared paragraphs from `docs/07`/`08`/`10`). The duplicated excerpt is written once to `/tmp/handoff-payloads/_shared.md` under a stable header:
+For multi-component runs, the orchestrator deduplicates content that appears verbatim in three or more component payloads (typically org-wide ADRs like ADR-012 mTLS, ADR-014 WAF, plus shared paragraphs from `docs/07`/`08`/`10`). The duplicated excerpt is written once to `.cache/sa-skills/handoff-payloads/_shared.md` under a stable header:
 
 ```markdown
 ## Shared: ADR-012
@@ -495,7 +495,7 @@ If only one or two components share an excerpt, leave it inline — the deduplic
 
 2. **Slice each shared doc per component** using grep/regex matching on the component's name, its `Type` field, and the technology names listed in its `**Technology:**` field.
 
-3. **Write payloads** to `/tmp/handoff-payloads/<component-slug>.md`. Create the `/tmp/handoff-payloads/` directory first (`mkdir -p`).
+3. **Write payloads** to `.cache/sa-skills/handoff-payloads/<component-slug>.md`. The directory is pre-created by the orchestrator via `prepare-payload-dir.ts` (cross-platform Bun helper) — sub-agents do not invoke `mkdir`.
 
 4. **Pass payload path to sub-agent** in the prompt — do NOT inline the payload content in the prompt, as the goal is to keep the main-context / sub-agent-prompt size small.
 
@@ -510,7 +510,7 @@ If only one or two components share an excerpt, leave it inline — the deduplic
 
 - Created: by the orchestrator in Phase 1.5 of `SKILL.md`, one per selected component
 - Consumed: by the sub-agent in PHASE 0 Step 0.1
-- Retention: payloads remain in `/tmp/handoff-payloads/` for the life of the `/tmp` directory. Cleanup is not required — the next invocation overwrites them.
+- Retention: payloads remain in `.cache/sa-skills/handoff-payloads/` (project-local, gitignored) until overwritten by the next invocation. Cleanup is not required — the next run rewrites the directory; safe to delete by hand or wipe `.cache/sa-skills/` entirely between releases.
 
 ## Example: minimal payload for a cache component
 

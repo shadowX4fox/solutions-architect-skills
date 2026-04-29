@@ -23,7 +23,7 @@ The agent file has no `model:` frontmatter — the orchestrator passes `model:` 
 
 The orchestrator passes these in the prompt text — read them verbatim:
 
-- `payload_path`: Absolute path to the per-component payload file (e.g., `/tmp/handoff-payloads/inbox-hub.md`). Same payload format already consumed by `handoff-generator`; see `PAYLOAD_SCHEMA.md`.
+- `payload_path`: Absolute path to the per-component payload file (e.g., `.cache/sa-skills/handoff-payloads/inbox-hub.md`). Same payload format already consumed by `handoff-generator`; see `PAYLOAD_SCHEMA.md`.
 - `asset_type`: One of `openapi | ddl | deployment | asyncapi | cronjob | avro | protobuf | redis | c4-descriptor`. The orchestrator validates this against the component's `asset_types[]` before dispatch — if the value is anything else, abort with `status: VALIDATION_FAILED`.
 - `output_asset_path`: Absolute path where the asset file MUST be written (e.g., `/path/to/project/handoffs/assets/04-inbox-hub/openapi.yaml`). The orchestrator pre-creates the parent directory in Phase 4 of `architecture-dev-handoff/SKILL.md` — do NOT invoke `mkdir` or any bun helper.
 - `component_slug`: Component kebab-case slug (e.g., `inbox-hub`). Returned in `ASSET_RESULT` so the orchestrator can index by slug in Stage 5C.

@@ -97,13 +97,13 @@ Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silentl
 - `Bash(bun:*)` — allows any bun command. Uses `command:*` format because `Bash(command *)` patterns cannot match arguments containing `/` path separators
 - `Bash(mkdir:*)`, `Bash(date:*)` — directory creation and date stamping in generated contracts
 - `Bash(cat:*)`, `Bash(cp:*)`, `Bash(grep:*)`, `Bash(python3:*)` — safety-net rules that prevent prompts if the model improvises file operations
-- `Read(//tmp/*)`, `Write(//tmp/*)` — agents expand templates to `/tmp/` then read them back. Note: `//` prefix is required for absolute paths — `/tmp/*` would be interpreted as relative to the project root
+- `Read(.cache/sa-skills/**)`, `Write(.cache/sa-skills/**)` — agents stage handoff payloads, expanded compliance templates, and IcePanel JSON snapshots in this project-local cache dir. Path is project-relative (no `//` prefix), so the same permission entry works identically on Linux, macOS, Windows native, WSL, and Git Bash. The dir is auto-gitignored by `setup-gitignore.ts`
 - `Write(compliance-docs/*)` — agents write generated compliance contracts directly to `compliance-docs/` in your project root
 - `Agent(sa-skills:*-compliance-generator)` — allows Claude to spawn compliance agents without manual approval prompts
 
 > **Important**: Two permission format rules:
 > 1. Use `Bash(command *)` with a **space** (e.g. `Bash(bun *)`). The `*` wildcard matches across `/` path separators so absolute paths work. The `:*` colon syntax is legacy/deprecated.
-> 2. For Read/Write, use `//` prefix for absolute paths (e.g. `Read(//tmp/*)`). A single `/` is treated as relative to the project root.
+> 2. Use project-relative paths whenever possible (e.g. `Read(.cache/sa-skills/**)`) — they are OS-agnostic. A single leading `/` is treated as relative to the project root; the `//` double-slash prefix is only needed for true absolute paths and is rarely required by sa-skills as of the project-local cache migration.
 
 ### Add Permissions to Your Project Settings
 
@@ -120,8 +120,8 @@ Create or update `.claude/settings.json` in your project root:
       "Bash(cp *)",
       "Bash(grep *)",
       "Bash(python3 *)",
-      "Read(//tmp/*)",
-      "Write(//tmp/*)",
+      "Read(.cache/sa-skills/**)",
+      "Write(.cache/sa-skills/**)",
       "Write(compliance-docs/*)",
       "Agent(sa-skills:business-continuity-compliance-generator)",
       "Agent(sa-skills:sre-compliance-generator)",

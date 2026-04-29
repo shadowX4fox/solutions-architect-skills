@@ -43,8 +43,8 @@ bun utils/resolve-includes.ts templates/cc-009-security-architecture.template.md
 ```bash
 for template in templates/cc-*.template.md; do
   echo "Testing: $(basename $template)"
-  bun utils/resolve-includes.ts "$template" /tmp/test.md
-  rm /tmp/test.md
+  bun utils/resolve-includes.ts "$template" .cache/sa-skills/expanded/test.md
+  rm .cache/sa-skills/expanded/test.md
 done
 ```
 

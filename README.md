@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.19.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.20.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -795,7 +795,34 @@ Where:
 
 ## Roadmap
 
-### v3.19.2 (Current Release) ✅
+### v3.20.0 (Current Release) ✅
+**feat: project-local cache dir (`.cache/sa-skills/`) replaces `/tmp/` staging — OS-agnostic on Linux, macOS, Windows native, WSL, and Git Bash**
+
+Every ephemeral file the plugin writes during a run — handoff payloads (`architecture-dev-handoff`), expanded compliance templates (`architecture-compliance`), and IcePanel JSON snapshots (`architecture-icepanel-sync`) — used to land in `/tmp/handoff-payloads/`, `/tmp/expanded_*`, and `/tmp/icepanel-*.json`. The system tmp dir does not exist on native Windows (only inside Git Bash or WSL), and the matching permission strings (`Read(//tmp/*)`, `Write(//tmp/handoff-payloads/*)`) used a POSIX `//`-prefix glob form with no Windows equivalent. Together these made the plugin effectively WSL-or-Git-Bash-only on Windows.
+
+v3.20.0 moves all three staging surfaces to `.cache/sa-skills/{handoff-payloads,expanded,icepanel}/` — a project-relative path that resolves identically on every OS. Because the path is project-local, the permission strings collapse to a single project-relative entry (`Read(.cache/sa-skills/**)` / `Write(.cache/sa-skills/**)`), no `//`-prefix needed and no system-tmp dependency.
+
+Coordinated changes:
+
+1. **`scripts/setup-gitignore.ts`** — managed entries flip from `["exports/", "/tmp/", "CLAUDE.md"]` to `["exports/", ".cache/sa-skills/", "CLAUDE.md"]`. Re-running `/setup` on an existing install appends `.cache/sa-skills/` to `.gitignore`; the previous defensive `/tmp/` entry remains harmlessly (the merger is non-destructive on `.gitignore`).
+2. **`skills/architecture-compliance/utils/resolve-includes.ts`** — adds `mkdirSync(dirname(resolve(outputPath)), { recursive: true })` before `Bun.write` so callers no longer need a separate dir-creation step. Cross-platform — no shell `mkdir -p` dependency.
+3. **`skills/architecture-icepanel-sync/SKILL.md`** — Phase 2 now invokes `prepare-payload-dir.ts .cache/sa-skills/icepanel` before the curl pair, ensuring the parent dir exists on every OS.
+4. **`skills/architecture-dev-handoff/SKILL.md`** — Step 3.3 passes `.cache/sa-skills/handoff-payloads` to `prepare-payload-dir.ts`; the sub-agent `payload_dir` parameter and permissions block (`Write/Read(.cache/sa-skills/handoff-payloads/**)`) follow. The "POSIX-free, identical behavior on Windows native, WSL, and Git Bash" note is added to the directory-creation prose.
+5. **Permissions migration** — `.claude/settings.json.example` collapses `Read/Write(//tmp/*)` and `Read/Write(//tmp/handoff-payloads/*)` into a single broader project-relative pair (`Read/Write(.cache/sa-skills/**)`). Existing installs re-running `/setup` get the new entry appended; the legacy `//tmp/` grants stay (non-destructive merger, harmless to leave, safe to delete by hand).
+6. **Documentation parity** — `commands/setup.md`, `docs/INSTALLATION.md`, `skills/architecture-compliance/{shared,utils}/README.md`, `agents/builders/handoff-context-builder.md` (re-bundled via `bun run bundle:handoff-agent`), `agents/generators/{handoff-generator,handoff-asset-generator,compliance-generator}.md`, `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` — every example, lifecycle paragraph, frontmatter description, and parameter sample reflects the new path. Stale `mkdir -p` references in PAYLOAD_SCHEMA.md and handoff-context-builder.md (the dir is already pre-created by the Bun helper) are removed.
+
+**What was NOT changed**: `scripts/build-release.sh` still references `/tmp/test-plugin` in its user-facing post-build example output (the release-build script targets release-engineering laptops where bash is already a hard dependency via `set -e` + `zip` + `sha256sum`). Historical CHANGELOG / README sections describing retired `/tmp/` features (v3.13.0 `/tmp/handoff-plugin-refs/` staging, v3.14.x `/tmp/architecture-explorer/**` cache, v3.14.1 PostToolUse editlog) are left intact for archival accuracy.
+
+**Migration**: re-run `/setup` on existing installs — it appends `Read/Write(.cache/sa-skills/**)` to permissions and `.cache/sa-skills/` to `.gitignore`. The legacy `Read/Write(//tmp/*)` permission grants and the `/tmp/` gitignore entry remain untouched by the non-destructive merger; they are harmless to leave and safe to delete by hand for total cleanup. No source-doc rewrites are required.
+
+**Verification**: `bun run typecheck` ✅. `bun test` reports 392/392 pass (one bundle-sync test self-healed after `bun run bundle:handoff-agent`). Smoke-tested all three live invocation paths:
+- `bun skills/architecture-dev-handoff/utils/prepare-payload-dir.ts .cache/sa-skills/handoff-payloads` → creates dir, prints date ✅
+- `bun skills/architecture-compliance/utils/resolve-includes.ts <template> .cache/sa-skills/expanded/test.md` → auto-creates parent, expands template successfully ✅
+- `bun scripts/setup-gitignore.ts <test_dir>` → emits `.cache/sa-skills/` as a managed entry, three baseline entries written ✅
+
+---
+
+### v3.19.2 (Previous Release) ✅
 **fix: drop stale `phase3.key_data_points[]` reference in compliance SKILL.md**
 
 The `architecture-compliance` skill's Step 3.4 (Spawn generators) carried a stale phrase: "the explorer already scoped findings to `phase3.key_data_points[]` via the `query` parameter." `phase3.key_data_points[]` does not exist in the config schema — `key_data_points[]` is a top-level array in `agents/configs/<contract_type>.json`. The same SKILL.md's Step 3.2.5 (line 776) reads it correctly from the top level. The two passages contradicted each other, and orchestrator sessions that internalised the wrong one constructed broken jq probes (`jq -r '.phase3.key_data_points | …'` → `Cannot iterate over null`) before self-correcting on the next attempt.

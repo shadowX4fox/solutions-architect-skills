@@ -382,7 +382,7 @@ Use the standard include directives pattern found in existing templates:
 ### Step 3: Test Template Expansion
 
 ```bash
-bun utils/resolve-includes.ts templates/TEMPLATE_<NAME>.md /tmp/test.md
+bun utils/resolve-includes.ts templates/TEMPLATE_<NAME>.md .cache/sa-skills/expanded/test.md
 ```
 
 Verify:

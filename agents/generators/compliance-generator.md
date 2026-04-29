@@ -130,7 +130,7 @@ Use Bash tool to run resolve-includes.ts with `--strip-internal` (removes intern
 ```bash
 bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts \
   [plugin_dir]/skills/architecture-compliance/templates/[domain.template_filename] \
-  /tmp/expanded_[domain.tmp_prefix]_template.md \
+  .cache/sa-skills/expanded/[domain.tmp_prefix]_template.md \
   --strip-internal
 ```
 
@@ -138,7 +138,7 @@ bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts \
 
 Use Read tool:
 ```
-Read file: /tmp/expanded_[domain.tmp_prefix]_template.md
+Read file: .cache/sa-skills/expanded/[domain.tmp_prefix]_template.md
 Store content in variable: template_content
 ```
 
