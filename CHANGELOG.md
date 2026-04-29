@@ -5,6 +5,22 @@ All notable changes to the Solutions Architect Skills plugin will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.19.2]
+
+### Fixed — stale `phase3.key_data_points[]` reference in compliance SKILL.md
+
+The `architecture-compliance` skill's Step 3.4 (Spawn generators) section contained a stale phrase: `"the explorer already scoped findings to phase3.key_data_points[] via the query parameter."` This path does not exist in the config schema — `key_data_points[]` lives at the **top level** of `agents/configs/<contract_type>.json`, not under `phase3`. The same SKILL.md's Step 3.2.5 reads it correctly from the top level (line 776), so the two passages contradicted each other. Orchestrator sessions that latched onto the wrong description constructed broken jq probes (`jq -r '.phase3.key_data_points | …'` → `Cannot iterate over null`) on the first attempt and self-corrected on the second — burning one tool call per contract and producing red error noise in the user-visible transcript.
+
+**Resolution**: one-line edit to `skills/architecture-compliance/SKILL.md:875` replacing `phase3.key_data_points[]` with `the top-level key_data_points[] array (the same field used at Step 3.2.5 to construct contract_query)`. The cross-reference to Step 3.2.5 is deliberate — it ties the two passages together so a future LLM reader cannot get a mismatched mental model of where `key_data_points` lives.
+
+**Scope verification**: searched all of `skills/architecture-compliance/`, `agents/generators/`, and `agents/builders/` for analogous stale paths (`phase3.X`, `phase4.X`, `scoring.Y` where the field actually lives at top level). No other occurrences. Single touch.
+
+**Files**: `skills/architecture-compliance/SKILL.md` (one-line phrasing fix). No agent prompts, no config files, no TypeScript, no test changes.
+
+**Verification**: `grep -rn "phase3.key_data_points" skills/ agents/` returns zero hits. `bun run typecheck` clean. `bun test` reports 392/392 pass (unchanged).
+
+---
+
 ## [3.19.1]
 
 ### Removed — silently-broken v3.14.1 PostToolUse session-edit tracker

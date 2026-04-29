@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.19.1-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.19.2-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.19.1` in the list.
+You should see `sa-skills v3.19.2` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,24 @@ Where:
 
 ## Roadmap
 
-### v3.19.1 (Current Release) ✅
+### v3.19.2 (Current Release) ✅
+**fix: drop stale `phase3.key_data_points[]` reference in compliance SKILL.md**
+
+The `architecture-compliance` skill's Step 3.4 (Spawn generators) carried a stale phrase: "the explorer already scoped findings to `phase3.key_data_points[]` via the `query` parameter." `phase3.key_data_points[]` does not exist in the config schema — `key_data_points[]` is a top-level array in `agents/configs/<contract_type>.json`. The same SKILL.md's Step 3.2.5 (line 776) reads it correctly from the top level. The two passages contradicted each other, and orchestrator sessions that internalised the wrong one constructed broken jq probes (`jq -r '.phase3.key_data_points | …'` → `Cannot iterate over null`) before self-correcting on the next attempt.
+
+**Resolution**: one-line edit to `skills/architecture-compliance/SKILL.md:875`. The replacement explicitly ties the sentence to Step 3.2.5 so a future LLM reader cannot get a mismatched mental model:
+
+> "No metadata cross-reference is needed because the explorer already scoped findings to the top-level `key_data_points[]` array (the same field used at Step 3.2.5 to construct `contract_query`) via the `query` parameter."
+
+**Scope verification**: searched all of `skills/architecture-compliance/`, `agents/generators/`, and `agents/builders/` for analogous stale paths (`phase3.X`, `phase4.X`, `scoring.Y` where the field actually lives at top level). No other occurrences. Single touch.
+
+**Files**: `skills/architecture-compliance/SKILL.md` (one-line phrasing fix). No agent prompts, no config files, no TypeScript, no test changes.
+
+**Verification**: `grep -rn "phase3.key_data_points" skills/ agents/` returns zero hits. `bun run typecheck` clean. `bun test` reports 392/392 pass (unchanged from v3.19.1).
+
+---
+
+### v3.19.1 (Previous Release) ✅
 **fix: retire silently-broken v3.14.1 PostToolUse session-edit tracker**
 
 The v3.14.1 release shipped a `PostToolUse[Write|Edit]` hook that was supposed to record every architecture doc edit into a session-scoped editlog under `/tmp/architecture-explorer/sessions/`, so `/regenerate-explorer-headers --session` could refresh only the files that changed. The hook command interpolated `$TOOL_INPUT_FILE_PATH` — but Claude Code does **not** export tool-input fields as environment variables. The `tool_input.file_path` is only available via JSON on stdin (Hooks Reference, "Input/Output"). The variable always expanded to the empty string, the tracker CLI hit its "no path → exit 0 silently" branch, and the editlog has been empty since v3.14.1 shipped on 2026-04-25.
