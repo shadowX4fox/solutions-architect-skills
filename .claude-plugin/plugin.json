@@ -1,7 +1,7 @@
 {
   "name": "sa-skills",
-  "version": "3.18.0",
-  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (14 skills, 10 compliance agents, universal architecture-explorer with manifest + findings modes, per-component asset generation, two-layer Section 3 enforcement gate, cache-optimized Phase 1.5 fan-out — stable-prefix template + read-once foundational inlining + token-grep pruning + first-batch cache-warm sequencing v3.18.0)",
+  "version": "3.19.0",
+  "description": "Professional architecture documentation workflow: Business requirements → Technical architecture → ADRs → Compliance documents → Development handoffs → Word export → IcePanel sync (14 skills, 10 compliance agents, universal architecture-explorer with manifest + findings modes, per-component asset generation, two-layer Section 3 enforcement gate, cache-optimized Phase 1.5 fan-out, ARCHITECTURE.md → sa-skills:architecture-* UserPromptSubmit routing hook v3.19.0)",
   "author": {
     "name": "shadowX4fox",
     "email": "your-email@example.com",

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.18.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.19.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -114,7 +114,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.18.0` in the list.
+You should see `sa-skills v3.19.0` in the list.
 
 **Important:** Marketplace registration is a security feature - you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -795,7 +795,26 @@ Where:
 
 ## Roadmap
 
-### v3.18.0 (Current Release) ✅
+### v3.19.0 (Current Release) ✅
+**feat: ARCHITECTURE.md → sa-skills:architecture-* routing hook (UserPromptSubmit, harness-level enforcement)**
+
+When a project root contains `ARCHITECTURE.md`, the architecture is governed by the sa-skills plugin and every architecture-related action — questions about the architecture; edits to `ARCHITECTURE.md` / `docs/**/*.md` / `docs/components/**/*.md` / `adr/**/*.md`; diagrams; release / version bump; compliance contracts; peer review; dev handoff — must route through the matching `sa-skills:architecture-*` skill, because the skills enforce validation gates (Section 3 enforcement, downstream propagation, source attribution, drift detection) that direct edits silently skip. Before v3.19.0, this routing relied on three soft layers (the `architecture-docs` SKILL.md description, the project's CLAUDE.md trigger table, and the SKILL.md descriptions of sibling skills); all three were hints the model could bypass.
+
+v3.19.0 adds a `UserPromptSubmit` hook that fires on every prompt at the harness level (before Claude reads the prompt), stat's `$CLAUDE_PROJECT_DIR/ARCHITECTURE.md`, and — when present — injects a one-paragraph `additionalContext` system-reminder steering the model to the right `sa-skills:architecture-*` skill. The hook is POSIX shell (~25 lines, ~1–5 ms cold start), exits silently with zero output when no `ARCHITECTURE.md` is present, never blocks, and never invokes an LLM.
+
+Three coordinated additions ship together:
+
+1. **Hook script** — `hooks/route-architecture-docs.sh` — POSIX shell, executable, emits the documented UserPromptSubmit `hookSpecificOutput.additionalContext` JSON shape when `ARCHITECTURE.md` exists, exits silently otherwise.
+2. **Settings registration** — `.claude/settings.json.example` adds the `UserPromptSubmit` entry alongside the existing `PostToolUse` editlog tracker, with a leading `// HOOKS — v3.19.0+` comment matching the existing convention.
+3. **Merger refactor** — `scripts/setup-permissions.ts` replaces the single-string `SA_SKILLS_HOOK_MARKER` constant with a `SA_SKILLS_HOOK_MARKERS` list, and the per-command dedup test now matches by *the specific marker for this command* instead of "any sa-skills marker present in target." The refactor is strictly tightening: with one marker the behavior is identical to v3.14.1; with two markers (v3.19.0+) it correctly distinguishes the two sa-skills hooks so installing one does not mask installation of the other on a later `/setup` run.
+
+Existing projects re-running `/setup` after upgrading get the new hook merged into their `.claude/settings.json` non-destructively. `commands/setup.md` documents the v3.19.0 changes inline. Idempotent — re-running `/setup` reports `Hooks: added 0 · already present 2`.
+
+**Files**: `hooks/route-architecture-docs.sh` (new, ~25 lines), `.claude/settings.json.example` (+13 lines), `scripts/setup-permissions.ts` (marker refactor, +20 / -8), `commands/setup.md` (v3.19.0 section, +9 lines), version bumps in `.claude-plugin/{plugin,marketplace}.json`, `package.json`, `README.md` badge / verification line. No skill behavior or skill workflow changed. All 405 unit tests pass; typecheck clean.
+
+---
+
+### v3.18.0 (Previous Release) ✅
 **feat: cache-optimized Phase 1.5 fan-out — stable-prefix template + read-once foundational inlining + token-grep pruning**
 
 The Section 3 (Architecture Principles) gate's downstream-impact propagation (`architecture-docs` Phase 1.5) fans the `principle-quality-reviewer` sub-agent (Opus, by design — "optimized for reliability, not cost") out across every downstream file in batches of 4. Before this change, each parallel sub-agent independently re-read the four foundational files (`docs/01-system-overview.md`, `docs/02-architecture-principles.md` post-edit, `docs/03-architecture-layers.md`, `docs/06-technology-stack.md`) plus a `Glob` over `adr/*.md` — the same ~4 KLOC of byte-identical content was loaded N times per S3 edit, and the per-call discriminator (`downstream_file`) sat in the middle of the prompt body, splitting Anthropic's prompt cache prefix on every call. Even worse, the fan-out fired against **every** downstream file in the reverse dependency table (S4–S11 + every component) regardless of whether the file referenced anything that had actually changed.

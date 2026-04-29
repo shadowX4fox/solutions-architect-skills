@@ -75,6 +75,7 @@
   },
 
   "// HOOKS — v3.14.1+: session-scoped editlog tracker": "Records every Write/Edit on a docs/**/*.md file into /tmp/architecture-explorer/sessions/<projectHash>-<sessionId>.editlog. The /regenerate-explorer-headers --session slash command consumes the log and clears it on success. Cost per edit: ~10 ms (bun startup + JSONL append). The hook never blocks the user's edit.",
+  "// HOOKS — v3.19.0+: ARCHITECTURE.md → sa-skills router": "When the project root contains ARCHITECTURE.md, this UserPromptSubmit hook injects a system-reminder telling Claude to route any architecture-related action through the matching sa-skills:architecture-* skill instead of direct file edits. Cost per prompt: ~1-5 ms (POSIX shell + one stat); zero output and zero context cost when no ARCHITECTURE.md is present. The hook never blocks the prompt and never invokes an LLM.",
   "hooks": {
     "PostToolUse": [
       {
@@ -84,6 +85,16 @@
           {
             "type": "command",
             "command": "bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/skills/architecture-explorer-headers/utils/header-cli.ts session-log add \"$TOOL_INPUT_FILE_PATH\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/hooks/route-architecture-docs.sh"
           }
         ]
       }

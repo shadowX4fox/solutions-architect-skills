@@ -8,13 +8,15 @@
 // preserved; only missing entries are added. `//`-prefixed comment keys
 // in the example are stripped.
 //
-// Hook merging (v3.14.1+): the plugin's settings.json.example carries a
-// real `hooks.PostToolUse[Write|Edit]` block that records every doc
-// edit into the session editlog. The merge is idempotent: an existing
-// PostToolUse entry whose `hooks[].command` already contains the
-// substring `header-cli.ts session-log add` is recognized as already
-// present and skipped. Users may add unrelated hooks under the same
-// matcher; those are preserved verbatim.
+// Hook merging (v3.14.1+): the plugin's settings.json.example carries
+// real hook entries that the merger installs idempotently into the
+// user's settings.json. Each sa-skills hook is identified by a marker
+// substring inside its `command` field (see SA_SKILLS_HOOK_MARKERS
+// below). The merge is per-marker idempotent: an existing entry whose
+// `hooks[].command` already contains the matching marker is recognized
+// as already present and skipped, even when the user has multiple
+// sa-skills hooks installed (v3.19.0+). Users may add unrelated hooks
+// under the same matcher; those are preserved verbatim.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
@@ -61,7 +63,20 @@ type Settings = {
   [k: string]: unknown;
 };
 
-const SA_SKILLS_HOOK_MARKER = "header-cli.ts session-log add";
+// Each entry uniquely identifies one sa-skills hook by a substring of
+// its installed `command` field. Order does not matter; matching is by
+// substring containment.
+const SA_SKILLS_HOOK_MARKERS: ReadonlyArray<string> = [
+  "header-cli.ts session-log add", // v3.14.1+ PostToolUse editlog tracker
+  "route-architecture-docs.sh",    // v3.19.0+ UserPromptSubmit ARCHITECTURE.md router
+];
+
+function findMarkerForCommand(command: string): string | null {
+  for (const m of SA_SKILLS_HOOK_MARKERS) {
+    if (command.includes(m)) return m;
+  }
+  return null;
+}
 
 let rawExample: unknown;
 try {
@@ -165,10 +180,10 @@ for (const [k, v] of Object.entries(exampleMarketplaces)) {
   }
 }
 
-// --- merge hooks (event-keyed, idempotent on sa-skills marker) ---
+// --- merge hooks (event-keyed, idempotent on per-marker dedup) ---
 function entryContainsSaSkillsCommand(entry: HookEntry): boolean {
   return (entry.hooks ?? []).some(
-    (h) => typeof h.command === "string" && h.command.includes(SA_SKILLS_HOOK_MARKER),
+    (h) => typeof h.command === "string" && findMarkerForCommand(h.command) !== null,
   );
 }
 
@@ -211,9 +226,17 @@ for (const [event, exampleEntries] of Object.entries(exampleHooks)) {
       for (const cmd of exampleEntry.hooks ?? []) {
         if (typeof cmd.command !== "string") continue;
         if (commandAlreadyPresent(target, cmd.command)) continue;
-        if (cmd.command.includes(SA_SKILLS_HOOK_MARKER) &&
-            (target.hooks ?? []).some((h) => typeof h.command === "string" && h.command.includes(SA_SKILLS_HOOK_MARKER))) {
-          continue;
+        // Per-marker dedup: skip when this command's specific sa-skills
+        // marker is already present in the target. With one marker this
+        // matches the v3.14.1 behavior; with multiple markers (v3.19.0+)
+        // it correctly distinguishes hooks so installing one does not
+        // mask installation of the other.
+        const cmdMarker = findMarkerForCommand(cmd.command);
+        if (cmdMarker !== null) {
+          const alreadyHasThisMarker = (target.hooks ?? []).some(
+            (h) => typeof h.command === "string" && h.command.includes(cmdMarker),
+          );
+          if (alreadyHasThisMarker) continue;
         }
         target.hooks.push(cmd);
         entryAdded = true;
