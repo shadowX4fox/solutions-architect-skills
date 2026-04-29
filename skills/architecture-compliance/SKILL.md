@@ -740,13 +740,15 @@ This is needed for the pipeline in Phase 4.
 
 **Step 3.2.1: Clean Up Old Contracts**
 
-Before generating new contracts, remove existing contracts for the selected types to prevent stale dated files from accumulating:
+Before generating new contracts, remove existing contracts for the selected types to prevent stale dated files from accumulating. Use the cross-platform Bun helper (replaces `rm -f` shell-out — works identically on Linux, macOS, Windows native, WSL, and Git Bash; supports glob patterns and is idempotent like `rm -f`):
 
 ```bash
-# For each selected contract type, delete any existing files matching the prefix
-# Example: rm compliance-docs/CC-001-business-continuity_*.md
-for prefix in [selected contract prefixes]:
-    rm -f compliance_docs_dir/PREFIX_*.md
+# Pass one glob pattern per selected contract prefix in a single bun call.
+# Example for the SRE + Business Continuity contracts:
+#   bun [plugin_dir]/scripts/remove-glob.ts \
+#     "compliance-docs/CC-001-business-continuity_*.md" \
+#     "compliance-docs/CC-010-sre-architecture_*.md"
+bun [plugin_dir]/scripts/remove-glob.ts "compliance-docs/<PREFIX_1>_*.md" "compliance-docs/<PREFIX_2>_*.md" ...
 ```
 
 Only delete prefixes for the contract types being generated (from `selected_contracts`). Use the contract type → filename prefix mapping:
@@ -764,7 +766,7 @@ Only delete prefixes for the contract types being generated (from `selected_cont
 | security | `CC-009-security-architecture` |
 | sre | `CC-010-sre-architecture` |
 
-Run all deletions in a single `rm -f` command. If `compliance-docs/` does not exist yet, skip this step.
+Run all deletions in a single `bun [plugin_dir]/scripts/remove-glob.ts` invocation (pass every glob pattern as a separate argument). If `compliance-docs/` does not exist yet, skip this step entirely — the helper would simply find zero matches but the call is unnecessary.
 
 **Step 3.2.5: Per-contract explorer findings fan-out (v3.16.0+)**
 

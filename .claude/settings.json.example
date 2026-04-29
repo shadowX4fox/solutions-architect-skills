@@ -15,7 +15,7 @@
   },
 
   "// PERMISSIONS": "Required for compliance generation agents — plugin agents cannot use permissionMode frontmatter",
-  "// BASH": "bun (template expansion, utils, header detector CLI), date (contract timestamps), mkdir (compliance-docs dir)",
+  "// BASH": "bun (covers ALL shell needs since v3.21.0 — date/mkdir/rm replaced by scripts/{today,ensure-dir,remove-glob}.ts; OS-agnostic, no POSIX-shell dependency)",
   "// FILE ACCESS": "Read/Write .cache/sa-skills/** (project-local staging — handoff payloads, expanded compliance templates, icepanel JSON; OS-agnostic, no /tmp dependency), Read/Write compliance-docs/* (contract output)",
   "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
   "// AGENTS": "10 compliance generators + 10 validators + universal architecture-explorer (Haiku navigator, v3.16.0) + 3 reviewers (peer-review-category, architecture-analysis, principle-quality — v3.17.0) + handoff agents + docs export",
@@ -23,12 +23,6 @@
   "permissions": {
     "allow": [
       "Bash(bun *)",
-      "Bash(mkdir *)",
-      "Bash(date *)",
-      "Bash(grep:*)",
-      "Bash(rg:*)",
-      "Bash(awk:*)",
-      "Bash(ls:*)",
       "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
       "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
       "Glob(**/skills/architecture-compliance/SKILL.md)",
@@ -57,7 +51,6 @@
       "Agent(sa-skills:handoff-context-builder)",
       "Agent(sa-skills:architecture-explorer)",
       "Agent(sa-skills:docs-export-generator)",
-      "Bash(rm *)",
       "Write(exports/*)",
       "Read(exports/*)",
       "Write(analysis/*)",
@@ -70,14 +63,14 @@
     ]
   },
 
-  "// HOOKS — v3.19.0+: ARCHITECTURE.md → sa-skills router": "When the project root contains ARCHITECTURE.md, this UserPromptSubmit hook injects a system-reminder telling Claude to route any architecture-related action through the matching sa-skills:architecture-* skill instead of direct file edits. Cost per prompt: ~1-5 ms (POSIX shell + one stat); zero output and zero context cost when no ARCHITECTURE.md is present. The hook never blocks the prompt and never invokes an LLM.",
+  "// HOOKS — v3.21.0+: ARCHITECTURE.md → sa-skills router (Bun TypeScript port of v3.19.0 .sh)": "When the project root contains ARCHITECTURE.md, this UserPromptSubmit hook injects a system-reminder telling Claude to route any architecture-related action through the matching sa-skills:architecture-* skill instead of direct file edits. Cost per prompt: ~10–20 ms (Bun cold start + one stat); zero output and zero context cost when no ARCHITECTURE.md is present. The hook never blocks the prompt and never invokes an LLM. Bun replaces the v3.19.0 POSIX shell + heredoc — works identically on Linux, macOS, Windows native, WSL, and Git Bash. /setup migrates existing installs by stripping the stale .sh hook entry and installing the new .ts entry.",
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "sh ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/hooks/route-architecture-docs.sh"
+            "command": "bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/hooks/route-architecture-docs.ts"
           }
         ]
       }

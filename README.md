@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.20.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.0-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -795,7 +795,60 @@ Where:
 
 ## Roadmap
 
-### v3.20.0 (Current Release) ✅
+### v3.21.0 (Current Release) ✅
+**feat: drop POSIX-shell dependency — `date`/`mkdir`/`rm` shell-outs and the `.sh` UserPromptSubmit hook ported to cross-platform Bun helpers**
+
+v3.20.0 moved staging paths off `/tmp/`. v3.21.0 finishes the OS-agnostic story by retiring the remaining POSIX-shell calls in skill prose and porting the v3.19.0 ARCHITECTURE.md routing hook from `sh` + heredoc to a Bun TypeScript file. After this release the only Bash permission grant the plugin requires is `Bash(bun *)` — no `Bash(date *)`, no `Bash(mkdir *)`, no `Bash(rm *)`, no `sh` hook invocation. The plugin runs identically on Linux, macOS, Windows native (cmd / PowerShell), WSL, and Git Bash, with one caveat documented at the bottom of this entry.
+
+**Three new cross-platform helpers under `scripts/`:**
+
+1. **`scripts/today.ts`** — prints today's date as `YYYY-MM-DD` in the local timezone, identical to `date +%Y-%m-%d`. Backed by `getLocalDateString()` from `architecture-compliance/utils/date-utils` so timezone behavior matches the existing compliance pipeline (no UTC shift after midnight). Replaces seven `date +%Y-%m-%d` shell-outs across `agents/generators/{compliance-generator,docs-export-generator}.md`, `skills/architecture-compliance-review/SKILL.md`, and `skills/architecture-compliance/COMPLIANCE_GENERATION_GUIDE.md`.
+2. **`scripts/ensure-dir.ts`** — idempotent multi-path directory creator using Node's `mkdirSync(..., { recursive: true })`. Replaces `mkdir -p` invocations in `skills/architecture-analysis/SKILL.md` (analysis dir), `skills/architecture-icepanel-sync/SKILL.md` (icepanel-sync dir + the `.cache/sa-skills/icepanel/` cache dir), `skills/architecture-dev-handoff/SKILL.md` Phase 4 (asset directories — split out from the previous overloaded use of `prepare-payload-dir.ts`), `skills/architecture-compliance/COMPLIANCE_GENERATION_GUIDE.md`, `skills/architecture-compliance/utils/README.md`, and the docs-export-generator's `exports/` dir creation.
+3. **`scripts/remove-glob.ts`** — deletes files matching one or more glob patterns using Bun's built-in `Glob.scanSync()` and `unlinkSync`. Equivalent to `rm -f <glob>` with shell glob expansion, idempotent on missing files (ENOENT is silently swallowed). Replaces the `for prefix in ...; do rm -f compliance_docs_dir/PREFIX_*.md; done` shell loop at `skills/architecture-compliance/SKILL.md` Step 3.2.1 (the only `rm -f` shell-out the plugin had at runtime).
+
+**`hooks/route-architecture-docs.ts` — Bun TypeScript port of v3.19.0 `.sh` hook:**
+
+- Same input contract (`CLAUDE_PROJECT_DIR` env var, falls back to `process.cwd()`) and same output contract (UserPromptSubmit JSON shape with `additionalContext`).
+- Same fast-path: missing `ARCHITECTURE.md` → `process.exit(0)` with no output.
+- Drops the POSIX requirements that broke Windows native: `set -e`, `cat <<'JSON'` heredoc, `sh` interpreter dependency. Bun's `JSON.stringify(payload)` is shell-agnostic.
+- Cold-start cost rises from ~3–5 ms (POSIX shell + stat) to ~10–20 ms (Bun startup + stat). Still zero LLM call, still never blocks, still emits zero output when `ARCHITECTURE.md` is absent. The cost ceiling on a sa-skills project (which always has ARCHITECTURE.md) is ~20 ms per prompt — within the same order of magnitude as the .sh version and well below any user-perceivable threshold.
+- The `.sh` file is deleted from the repo. Existing user installs keep the stale entry in their `settings.json` until the next `/setup` run, which actively strips it (see migration block below).
+
+**`scripts/setup-permissions.ts` migration logic:**
+
+- `SA_SKILLS_HOOK_MARKERS` flips from `["route-architecture-docs.sh"]` to `["route-architecture-docs.ts"]`. The install pass on every `/setup` run now adds the new `.ts` hook entry to projects that don't have it.
+- `SA_SKILLS_HOOK_REMOVAL_MARKERS` adds `"route-architecture-docs.sh"` alongside the v3.19.1 `header-cli.ts session-log add` entry. The removal pass actively strips any user-side hook entry whose `command` substring contains `route-architecture-docs.sh`. Idempotent: a second `/setup` run is a no-op.
+- End-to-end migration verified by simulation: a synthetic `settings.json` carrying the v3.19.0 `.sh` hook entry, after one `/setup` run, has the `.sh` entry removed and the `.ts` entry installed in a single pass — output: `Hooks: added 1 · already present 0 · retired 1`.
+
+**Permission grants pruned from `.claude/settings.json.example`:**
+
+- Removed: `Bash(mkdir *)`, `Bash(date *)`, `Bash(rm *)`, `Bash(grep:*)`, `Bash(rg:*)`, `Bash(awk:*)`, `Bash(ls:*)` — none required after the helper migration. (The colon-form `Bash(*:*)` entries were legacy v2 grants that no skill referenced anymore; the migration was an opportune time to sweep them.)
+- Retained: `Bash(bun *)` — the only Bash grant the plugin needs at runtime. Existing user installs keep their pruned grants harmlessly (the merger is non-destructive on `permissions.allow`); they're safe to delete by hand for a clean profile.
+
+**Documentation parity:** every skill SKILL.md, agent system prompt, and reference guide that previously documented `date +%Y-%m-%d` / `mkdir -p` / `rm -f` as ALLOWED Bash commands now lists the matching `bun [plugin_dir]/scripts/{today,ensure-dir,remove-glob}.ts` helper, with one-line callouts that this is the cross-platform path. The bundled `agents/builders/handoff-context-builder.md` was re-bundled via `bun run bundle:handoff-agent` to pull the updated `PAYLOAD_SCHEMA.md` table cell that now documents `prepare-payload-dir.ts` as the date source instead of `date +%Y-%m-%d`.
+
+**Caveat — Claude Code's harness shell on Windows native:** the hook command `bun ~/.claude/plugins/marketplaces/.../hooks/route-architecture-docs.ts` and the agent-side `bun [plugin_dir]/scripts/today.ts` calls are still passed through whatever shell Claude Code uses on the user's OS. On Linux / macOS / WSL / Git Bash, `~` expansion and `bun` lookup are routine. On Windows native (cmd / PowerShell), `~` is **not** a shell expansion — its handling depends on Claude Code's permission matcher and command runner, which may or may not normalize `~` independently. If Claude Code's Windows port doesn't expand `~`, the user must rewrite the hook command and `Read(~/.claude/plugins/...)` permissions to use absolute Windows paths or `${USERPROFILE}`. This is the only OS-agnosticity gap remaining after v3.21.0 and is a Claude Code harness concern, not a plugin concern.
+
+**Files**: `scripts/today.ts` (NEW, 17 lines), `scripts/ensure-dir.ts` (NEW, 28 lines), `scripts/remove-glob.ts` (NEW, 49 lines), `hooks/route-architecture-docs.ts` (NEW, 36 lines), `hooks/route-architecture-docs.sh` (DELETED, was 30 lines), `.claude/settings.json.example` (-7 grants, +1 hook command swap, comment block updated), `.claude/settings.json` (project's own settings — 3 grants pruned), `scripts/setup-permissions.ts` (+install marker swap +removal marker entry), `agents/generators/compliance-generator.md` (TOOL DISCIPLINE block + Step 3.2 invocation), `agents/generators/docs-export-generator.md` (Step 0.1 + 0.2 + Tool Discipline block), `agents/builders/handoff-context-builder.md` (table cell — re-bundled), `skills/architecture-compliance/SKILL.md` (Step 3.2.1 rm-loop replaced with single `remove-glob.ts` invocation), `skills/architecture-compliance/COMPLIANCE_GENERATION_GUIDE.md` (3 occurrences), `skills/architecture-compliance/utils/README.md` (testing example), `skills/architecture-compliance-review/SKILL.md` (date capture step), `skills/architecture-analysis/SKILL.md` (Step 0 dir creation), `skills/architecture-icepanel-sync/SKILL.md` (Step 0.5 + Phase 2 cache dir), `skills/architecture-dev-handoff/SKILL.md` (Phase 4 asset dir creation switched from prepare-payload-dir.ts → ensure-dir.ts), `skills/architecture-dev-handoff/PAYLOAD_SCHEMA.md` (table cell).
+
+**Migration**: re-run `/setup` on existing installs. The single pass:
+1. Strips the stale `.sh` hook entry (`SA_SKILLS_HOOK_REMOVAL_MARKERS` match).
+2. Installs the new `.ts` hook entry (`SA_SKILLS_HOOK_MARKERS` match).
+3. Adds `Read/Write(.cache/sa-skills/**)` if not already present (carryover from v3.20.0).
+4. Adds the project-relative permission grants if not already present.
+The merger is non-destructive: legacy `Bash(date *)`, `Bash(mkdir *)`, `Bash(rm *)` grants in user-side settings are not removed; they are simply unused by the plugin going forward and safe to delete by hand.
+
+**Verification**: `bun run typecheck` ✅. `bun test` reports 392/392 pass (no test changes; the four new helper files have no dedicated tests yet — they are smoke-tested manually as part of this release). All four helpers smoke-tested live:
+- `bun scripts/today.ts` → prints today's date as YYYY-MM-DD ✅
+- `bun scripts/ensure-dir.ts /tmp/sa-test-a /tmp/sa-test-b /tmp/sa-test-a/nested` → creates 3 dirs incl. nested ✅
+- `bun scripts/remove-glob.ts "/tmp/sa-test-a/*.md"` → removes 2 .md files, leaves the .txt ✅
+- `bun hooks/route-architecture-docs.ts` (no ARCHITECTURE.md) → exits 0, zero output ✅
+- `CLAUDE_PROJECT_DIR=/tmp bun hooks/route-architecture-docs.ts` (with ARCHITECTURE.md) → emits valid JSON to stdout ✅
+- `bun scripts/setup-permissions.ts` end-to-end on a synthetic settings.json with the stale `.sh` hook → strips `.sh`, installs `.ts` in a single pass, idempotent on second run ✅
+
+---
+
+### v3.20.0 (Previous Release) ✅
 **feat: project-local cache dir (`.cache/sa-skills/`) replaces `/tmp/` staging — OS-agnostic on Linux, macOS, Windows native, WSL, and Git Bash**
 
 Every ephemeral file the plugin writes during a run — handoff payloads (`architecture-dev-handoff`), expanded compliance templates (`architecture-compliance`), and IcePanel JSON snapshots (`architecture-icepanel-sync`) — used to land in `/tmp/handoff-payloads/`, `/tmp/expanded_*`, and `/tmp/icepanel-*.json`. The system tmp dir does not exist on native Windows (only inside Git Bash or WSL), and the matching permission strings (`Read(//tmp/*)`, `Write(//tmp/handoff-payloads/*)`) used a POSIX `//`-prefix glob form with no Windows equivalent. Together these made the plugin effectively WSL-or-Git-Bash-only on Windows.

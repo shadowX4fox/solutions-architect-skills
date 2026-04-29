@@ -116,8 +116,10 @@ To enable online sync, set ICEPANEL_API_KEY and ICEPANEL_LANDSCAPE_ID in your en
 
 ### Step 0.5 — Create Output Directory
 
+Cross-platform Bun helper (replaces `mkdir -p icepanel-sync` — works identically on Linux, macOS, Windows native, WSL, and Git Bash):
+
 ```bash
-mkdir -p icepanel-sync
+bun [plugin_dir]/scripts/ensure-dir.ts icepanel-sync
 ```
 
 ---
@@ -242,7 +244,7 @@ Query the IcePanel API. The cache directory is created by the cross-platform Bun
 
 ```bash
 # Ensure project-local cache dir exists (cross-platform; no POSIX `mkdir -p` dependency)
-bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts .cache/sa-skills/icepanel
+bun [plugin_dir]/scripts/ensure-dir.ts .cache/sa-skills/icepanel
 
 # Fetch model objects
 curl -s "https://api.icepanel.io/v1/model/objects" \

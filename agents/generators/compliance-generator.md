@@ -102,11 +102,11 @@ The most critical and common failure is when the agent IGNORES the template and 
 
 ### TOOL DISCIPLINE (MANDATORY)
 
-**ALLOWED Bash commands** (these ONLY):
+**ALLOWED Bash commands** (these ONLY — all routed through `bun` for OS-agnostic execution; the v3.21.0 migration replaced `date`/`mkdir` shell-outs with cross-platform Bun helpers):
 1. `bun [plugin_dir]/skills/architecture-compliance/utils/resolve-includes.ts ...` (template expansion)
-2. `date +%Y-%m-%d` (get current date)
+2. `bun [plugin_dir]/scripts/today.ts` (get current date as YYYY-MM-DD; replaces `date +%Y-%m-%d`)
 3. `bun [plugin_dir]/skills/architecture-compliance/utils/check-dir.ts compliance-docs` (check if output directory exists — run this FIRST, read output)
-4. `mkdir compliance-docs` (create output directory — ONLY if step 3 output was empty, meaning directory does not exist)
+4. `bun [plugin_dir]/scripts/ensure-dir.ts compliance-docs` (create output directory — ONLY if step 3 output was empty, meaning directory does not exist; replaces `mkdir compliance-docs`)
 
 **FORBIDDEN** — do NOT use Bash for:
 - ❌ `python3`, `python`, `node` or ANY scripting language
@@ -173,9 +173,9 @@ Note: ARCHITECTURE.md is a navigation index only — section content lives in do
 
 **Step 3.2: Get Current Date**
 
-Use Bash tool:
+Use Bash tool (cross-platform helper — works identically on Linux, macOS, Windows native, WSL, and Git Bash):
 ```bash
-date +%Y-%m-%d
+bun [plugin_dir]/scripts/today.ts
 ```
 Store as: generation_date
 

@@ -67,7 +67,7 @@ type Settings = {
 // its installed `command` field. Order does not matter; matching is by
 // substring containment.
 const SA_SKILLS_HOOK_MARKERS: ReadonlyArray<string> = [
-  "route-architecture-docs.sh",    // v3.19.0+ UserPromptSubmit ARCHITECTURE.md router
+  "route-architecture-docs.ts",    // v3.21.0+ UserPromptSubmit ARCHITECTURE.md router (Bun TS port of v3.19.0 .sh)
 ];
 
 // Removal markers — hooks shipped in earlier sa-skills versions that have
@@ -79,8 +79,16 @@ const SA_SKILLS_HOOK_MARKERS: ReadonlyArray<string> = [
 // (`header-cli.ts session-log add`) silently no-op'd because it relied on
 // `$TOOL_INPUT_FILE_PATH`, which Claude Code does not export. The hook
 // and the editlog feature are gone; this entry sweeps stale installs.
+//
+// v3.21.0: the v3.19.0 POSIX shell hook (`route-architecture-docs.sh`) is
+// retired in favor of the Bun TypeScript port (`route-architecture-docs.ts`).
+// The .sh version required `sh` and POSIX heredoc support, which fail on
+// Windows native (cmd / PowerShell without Git Bash). Removing the stale
+// entry on /setup ensures upgrading users do not run two competing hooks
+// (the .ts entry is added through the install-marker pass in the same run).
 const SA_SKILLS_HOOK_REMOVAL_MARKERS: ReadonlyArray<string> = [
   "header-cli.ts session-log add", // v3.14.1 PostToolUse editlog tracker (retired v3.19.1)
+  "route-architecture-docs.sh",    // v3.19.0 POSIX shell hook (retired v3.21.0 — replaced by .ts port)
 ];
 
 function findMarkerForCommand(command: string): string | null {

@@ -3,8 +3,6 @@
     "allow": [
       "Bash(bun *)",
       "Bash(ls *)",
-      "Bash(mkdir *)",
-      "Bash(date *)",
       "Bash(cat *)",
       "Bash(cp *)",
       "Bash(grep *)",

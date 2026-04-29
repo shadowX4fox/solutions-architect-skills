@@ -395,10 +395,10 @@ This phase adds at most one Read per SKIP component (~milliseconds). REGEN'd com
 
 ### Phase 4: Pre-create asset directories for REGEN components
 
-Filter `context_result.components` to entries where `decision == REGEN`. For each one, pre-create its asset output directory so the downstream `handoff-generator` sub-agent never needs Bash:
+Filter `context_result.components` to entries where `decision == REGEN`. For each one, pre-create its asset output directory so the downstream `handoff-generator` sub-agent never needs Bash. Uses the generic `ensure-dir.ts` helper (no date side effect — `prepare-payload-dir.ts` is reserved for the Step 3.3 dir + date capture):
 
 ```bash
-bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts <project>/handoffs/assets/NN-<slug>
+bun [plugin_dir]/scripts/ensure-dir.ts <project>/handoffs/assets/NN-<slug>
 ```
 
 (SKIP'd components keep their existing asset directories untouched. FAILED components are excluded.)

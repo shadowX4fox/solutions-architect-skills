@@ -41,18 +41,18 @@ Follow the branch matching `job_type`.
 bun [plugin_dir]/skills/architecture-compliance/utils/check-dir.ts exports
 ```
 
-If the output is empty (directory does not exist), create it:
+If the output is empty (directory does not exist), create it (cross-platform Bun helper — replaces `mkdir` shell-out):
 
 ```bash
-mkdir exports
+bun [plugin_dir]/scripts/ensure-dir.ts exports
 ```
 
-If output says "Directory exports/ exists.", do NOT run `mkdir`.
+If output says "Directory exports/ exists.", do NOT run `ensure-dir.ts` again (it is idempotent but the extra call is unnecessary).
 
-**Step 0.2**: Get today's date (only if the orchestrator did not provide one):
+**Step 0.2**: Get today's date (only if the orchestrator did not provide one). Cross-platform Bun helper — replaces `date +%Y-%m-%d`:
 
 ```bash
-date +%Y-%m-%d
+bun [plugin_dir]/scripts/today.ts
 ```
 
 ---
@@ -230,16 +230,17 @@ Use the orchestrator-facing report exactly as above — it expects this block.
 
 ## Tool Discipline
 
-**ALLOWED Bash commands**:
+**ALLOWED Bash commands** (all routed through `bun` for OS-agnostic execution since v3.21.0):
 1. `bun run [plugin_dir]/tools/docgen/generate-doc.js ...` (docgen)
 2. `bun [plugin_dir]/skills/architecture-compliance/utils/check-dir.ts exports` (directory check)
-3. `mkdir exports` (ONLY when check-dir.ts output was empty)
-4. `date +%Y-%m-%d` (if date not provided)
-5. `rm <temporary file>` (cleanup of `sa-executive-summary.md` only)
+3. `bun [plugin_dir]/scripts/ensure-dir.ts exports` (ONLY when check-dir.ts output was empty; replaces `mkdir`)
+4. `bun [plugin_dir]/scripts/today.ts` (if date not provided; replaces `date +%Y-%m-%d`)
+5. `bun [plugin_dir]/scripts/remove-glob.ts <pattern>` (cleanup of `sa-executive-summary.md` only; replaces `rm`)
 
 **FORBIDDEN**:
 - ❌ `node` (not an authorized runtime for the generator)
 - ❌ `cat`, `cp`, `mv`, `sed`, `awk`, `grep`, `find`, `echo`, heredocs — use dedicated tools
+- ❌ `date`, `mkdir`, `rm` direct shell calls — use the bun helpers above (POSIX-shell-free, Windows-native compatible)
 
 ## Error Handling
 

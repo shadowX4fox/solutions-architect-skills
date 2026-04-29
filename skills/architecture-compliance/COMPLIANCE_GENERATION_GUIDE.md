@@ -1083,7 +1083,7 @@ The template format MUST be preserved exactly as written. Do NOT transform, rewr
 Replace standard placeholders:
 
 [PROJECT_NAME] → "Job Scheduling Platform" (from ARCHITECTURE.md H1 header)
-[GENERATION_DATE] → "2025-12-07" (use `date +%Y-%m-%d` bash command to get local system date)
+[GENERATION_DATE] → "2025-12-07" (use `bun [plugin_dir]/scripts/today.ts` to get local system date — cross-platform Bun helper, replaces `date +%Y-%m-%d`)
 [EXTRACTED_VALUE] → Actual value from cached data
 [SOURCE_REFERENCE] → "docs/NN-name.md" (from cache)
 
@@ -1152,7 +1152,7 @@ Using validation_results from Step 3.5, populate Document Control fields:
 
 Standard Placeholders:
 [SOLUTION_ARCHITECT] → Extract from ARCHITECTURE.md or docs/01-system-overview.md metadata
-[GENERATION_DATE] → Current date (YYYY-MM-DD) - Use `date +%Y-%m-%d` bash command to get local system date
+[GENERATION_DATE] → Current date (YYYY-MM-DD) - Use `bun [plugin_dir]/scripts/today.ts` to get local system date (cross-platform Bun helper, replaces `date +%Y-%m-%d`)
 [NEXT_REVIEW_DATE] → GENERATION_DATE + 6 months (or per policy)
 
 Validation-Driven Placeholders:
@@ -1734,8 +1734,8 @@ If file exists:
 ```
 Output directory: /compliance-docs/ (default)
 
-Create directory if doesn't exist:
-mkdir -p /compliance-docs/
+Create directory if doesn't exist (cross-platform; replaces `mkdir -p`):
+bun [plugin_dir]/scripts/ensure-dir.ts compliance-docs
 
 Write file:
 Write content to: /compliance-docs/ARQUITECTURA_SRE_JobSchedulingPlatform_2025-11-26.md

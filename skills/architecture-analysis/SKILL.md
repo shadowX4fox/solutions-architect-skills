@@ -264,9 +264,9 @@ For each selected analysis, determine:
 | Coupling | `coupling` | `COUPLING.md` | `COUPLING-<date>.md` |
 | Data Sensitivity | `data-sensitivity` | `DATA_SENSITIVITY.md` | `DATA-SENSITIVITY-<date>.md` |
 
-**Ensure `analysis/` directory exists:**
+**Ensure `analysis/` directory exists** (cross-platform Bun helper — replaces `mkdir -p analysis`):
 ```bash
-mkdir -p analysis
+bun [plugin_dir]/scripts/ensure-dir.ts analysis
 ```
 
 Issue Task() calls in **batches of 2 per message** (strict parallel barrier).

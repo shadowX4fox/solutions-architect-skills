@@ -45,7 +45,7 @@ Field reference:
 | `architecture_md_path` | yes | absolute path to `ARCHITECTURE.md` (sub-agent may read for navigation if needed — rare) |
 | `project_name` | yes | first H1 in `ARCHITECTURE.md` |
 | `architect` | no | from `ARCHITECTURE.md` metadata; `Not specified` if absent |
-| `generation_date` | yes | ISO date (YYYY-MM-DD) from `date +%Y-%m-%d` |
+| `generation_date` | yes | ISO date (YYYY-MM-DD) captured by the orchestrator from `bun [plugin_dir]/skills/architecture-dev-handoff/utils/prepare-payload-dir.ts` (cross-platform; replaces `date +%Y-%m-%d` shell-out as of v3.21.0) |
 | `doc_language` | yes | `en` or `es` — set once per session by the orchestrator from architecture-doc language detection (see SKILL.md). Default `en` when ambiguous. Drives template-variant selection for the `c4-descriptor` asset. |
 | `shared_refs` | no | optional list of paths (relative to the payload file) that the sub-agent must Read alongside this payload to resolve `> See: <path> § <header>` markers. Currently always `[_shared.md]` when shared excerpts are present, omitted otherwise. Added in v3.13.0 (Item 8 — dedupe). |
 

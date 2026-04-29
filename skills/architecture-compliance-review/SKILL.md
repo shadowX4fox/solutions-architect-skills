@@ -79,7 +79,7 @@ Read `compliance-docs/COMPLIANCE_MANIFEST.md`. Extract:
 - Project name
 - For each listed contract: contract type, filename, generation date, status, score
 
-**Get today's date** by running: `date +%Y-%m-%d`
+**Get today's date** by running: `bun [plugin_dir]/scripts/today.ts` (cross-platform Bun helper; replaces `date +%Y-%m-%d` so the skill runs identically on Linux, macOS, Windows native, WSL, and Git Bash)
 
 **6-month cutoff rule**: A contract is VALID only if its generation date is within 6 calendar months of today. Compute the cutoff date = today minus 6 months (e.g., if today is 2026-03-22, the cutoff is 2025-09-22).
 

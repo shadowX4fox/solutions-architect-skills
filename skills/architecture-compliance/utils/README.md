@@ -431,8 +431,8 @@ When modifying the manifest structure:
 ### Testing
 
 ```bash
-# Create compliance-docs directory for testing
-mkdir -p compliance-docs
+# Create compliance-docs directory for testing (cross-platform Bun helper)
+bun [plugin_dir]/scripts/ensure-dir.ts compliance-docs
 
 # Test create mode
 bun utils/manifest-generator.ts --mode create --project "Test Project" \
