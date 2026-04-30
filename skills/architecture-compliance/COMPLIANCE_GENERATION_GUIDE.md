@@ -753,8 +753,8 @@ Variables like `{{review_board}}` in shared files are replaced with these values
 - Requirement: All integrations must implement distributed tracing and structured logging with correlation IDs
 
 **LAI7: Event-Driven Integration Compliance**
-- Event schemas (JSON Schema/Avro), CloudEvents compliance, event versioning, schema registry, event catalog, consumer contracts, delivery guarantees, DLQ handling
-- Requirement: Event-driven integrations must follow CloudEvents specification with schema registry
+- Event schemas (JSON Schema/Avro), event versioning, schema registry, event catalog, consumer contracts, delivery guarantees, DLQ handling
+- Requirement: Event-driven integrations must use schema registry with versioning
 
 **Source Sections from ARCHITECTURE.md**:
 - **Primary**:
@@ -763,12 +763,12 @@ Variables like `{{review_board}}` in shared files are replaced with these values
   - Section 9 (Security Architecture) - 25% of content
     - API authentication, authorization, TLS encryption, secrets management, security logging (LAI2)
   - Section 6 (Data Model) - 15% of content
-    - Event schemas, CloudEvents, schema registry, event catalog, DLQ handling (LAI7)
+    - Event schemas, schema registry, event catalog, DLQ handling (LAI7)
 - **Secondary**:
   - Section 5 (Component Model) - 10% of content
     - API Gateway, message brokers, service mesh, schema registry (LAI1, LAI3, LAI6)
 
-**Validation Items**: 25 items across 7 LAI sections (5+4+4+4+4+4+4)
+**Validation Items**: 28 items across 7 LAI sections (5+4+4+4+4+4+3)
 **Template Version**: 2.0
 
 **Template Priority**: High (Template #10)

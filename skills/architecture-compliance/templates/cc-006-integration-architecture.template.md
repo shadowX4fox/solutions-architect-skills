@@ -351,12 +351,6 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 - Source: [ARCHITECTURE.md Section 6 (Data Model → Event Schemas) or Section 7 (Integration View → Event Definitions), lines X-Y or "Not documented"]
 - Note: [If Non-Compliant or Unknown: Define event schemas in Section 6 using JSON Schema or Avro. Include schema versioning and validation]
 
-**CloudEvents Compliance**: [Value or "Not specified"]
-- Status: [Compliant/Non-Compliant/Not Applicable/Unknown]
-- Explanation: [If Compliant: Events follow CloudEvents specification for metadata (id, source, type, time). If Non-Compliant: Custom event format without standard metadata. If Not Applicable: No async event decoupling. If Unknown: CloudEvents compliance not documented]
-- Source: [ARCHITECTURE.md Section 6 (Data Model → Event Format / CloudEvents), lines X-Y or "Not documented"]
-- Note: [If Non-Compliant or Unknown: Adopt CloudEvents specification in Section 6 for event metadata standardization. Include required fields: id, source, specversion, type]
-
 ### 7.2 Event Versioning and Compatibility
 
 **Event Versioning Strategy**: [Value or "Not specified"]
@@ -431,8 +425,6 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 
 **Distributed Tracing**: Observability technique tracking requests across distributed services using correlation IDs and trace context.
 
-**CloudEvents**: CNCF specification for describing events in a common format to ensure interoperability.
-
 **Schema Registry**: Centralized repository for event and message schemas with versioning and compatibility enforcement.
 
 **Dead Letter Queue (DLQ)**: Queue for messages/events that fail processing after retry attempts, enabling manual inspection and remediation.
@@ -464,7 +456,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 | API governance not defined | LAI4 Unknown | Section 7 (Integration View) | Define API naming conventions, lifecycle management, change control |
 | Third-party API inventory missing | LAI5 Unknown | Section 7 (Integration View) | Inventory external APIs with vendors, endpoints, SLAs, support contacts |
 | Distributed tracing not implemented | LAI6 Unknown | Section 7 (Integration View) | Implement OpenTelemetry, correlation IDs, structured logging |
-| Event schemas not documented | LAI7 Unknown | Section 6 or 7 (Data Model/Integration) | Define event schemas with JSON Schema/Avro, CloudEvents compliance |
+| Event schemas not documented | LAI7 Unknown | Section 6 or 7 (Data Model/Integration) | Define event schemas with JSON Schema/Avro |
 | Schema registry not specified | LAI7 Unknown | Section 7 (Integration View) | Specify schema registry (Confluent, AWS Glue), backward compatibility |
 | Dead letter queue handling undefined | LAI7 Unknown | Section 7 (Integration View) | Define DLQ strategy, retention, reprocessing workflow |
 
@@ -498,7 +490,6 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
    - Document API authentication: OAuth 2.0, JWT, or mTLS (Section 9)
    - Add TLS 1.2+ encryption for all API communications (Section 9)
    - Define secrets management for API keys (Vault, Key Vault) in Section 9
-   - Ensure CloudEvents compliance for selective async patterns (Section 7)
    - Add API security logging and threat detection (Section 9)
 
 **Priority Order**: LAI1 (API catalog) → LAI2 (API auth) → LAI4 (API governance) → LAI6 (distributed tracing) → LAI5 (third-party APIs) → LAI3 (protocols) → LAI7 (event schemas)
@@ -506,7 +497,7 @@ This Integration Architecture compliance contract validates 7 LAI (Integration A
 **For FAIL Items**:
 - **Obsolete Technologies**: Upgrade SOAP 1.0, WebSphere MQ, legacy ESB to REST, Kafka, modern integration
 - **Security Gaps**: Implement OAuth 2.0/mTLS, TLS 1.2+, vault-based secrets
-- **Missing Standards**: Implement API governance, event schema registry, CloudEvents compliance
+- **Missing Standards**: Implement API governance, event schema registry
 - **Approved Exceptions**: Document exception with risk acceptance in Section 12 (ADRs)
 
 **Estimated Final Score After Remediation**: 8.3-8.8/10 (AUTO_APPROVE)

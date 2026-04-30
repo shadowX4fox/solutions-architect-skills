@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.4` in the list.
+You should see `sa-skills v3.21.5` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,32 @@ Where:
 
 ## Roadmap
 
-### v3.21.4 (Current Release) ✅
+### v3.21.5 (Current Release) ✅
+**chore(cc-006): drop CloudEvents Compliance field from Integration Architecture contract — scope reduction**
+
+The CC-006 Integration Architecture contract (`templates/cc-006-integration-architecture.template.md`) carried a dedicated `CloudEvents Compliance` field under §7.1 Event Schema Standards, scored at weight 0.20 inside `lai7_event_driven`. CloudEvents is one of several valid event-metadata conventions (alongside custom envelopes, AsyncAPI message metadata, and Avro/Protobuf headers); pinning the contract to the CNCF specification produced false-negative deviations against architectures that used equivalent custom metadata schemes documented in §6 — the validator could only return PASS for explicit CloudEvents adoption, FAIL for absence, or UNKNOWN when the documented format wasn't named CloudEvents. The field was removing signal more often than it added. v3.21.5 removes it; the surviving §7.1 control (`Event Schema Definition`) covers the underlying intent (events have a documented schema format) without privileging one specification.
+
+**Changes:**
+
+- `templates/cc-006-integration-architecture.template.md` — `CloudEvents Compliance` field block removed from §7.1; CloudEvents removed from the Definitions glossary, the Common Gaps Quick Reference remediation row, the §6.3 "Strengthen Security & Standards Compliance" recommendations bullet, and the FAIL-Items "Missing Standards" remediation list. §7.1 now flows from a single control directly into §7.2 Event Versioning and Compatibility.
+- `validation/cc-006-integration-architecture-validation.json` — `cloudevents_compliance` item removed from `lai7_event_driven`. Remaining LAI7 weights rebalanced to sum to 1.0: `event_schema_definition` 0.25 → 0.30, `event_catalog` 0.25 → 0.30, `dlq_handling` 0.30 → 0.40 (DLQ retains the highest weight as the most operationally consequential async control).
+- `SECTION_MAPPING_GUIDE.md` — LAI7 Section 6 mapping no longer lists CloudEvents; Section 6 Key Extractions row drops "CloudEvents format"; LAI7 Requirement reframed from "CloudEvents specification with schema registry" to "Schema registry with versioning."
+- `COMPLIANCE_GENERATION_GUIDE.md` — LAI7 generation guidance and Section 6 extraction note updated to drop CloudEvents; total Validation Items count corrected to 28 (5+4+4+4+4+4+3) — the previous "25" figure was already arithmetically inconsistent with the actual 7-section breakdown.
+
+**Out of scope:** The integration-validator agent (INT-01..INT-13 item set) never had a CloudEvents check — its INT-05 message-pattern item evaluates pub/sub / event sourcing / CQRS, and INT-06 evaluates message format (JSON / Avro / Protobuf) without specification-name privileging. No validator change was needed. The CC-005 Enterprise Architecture template retains a single CloudEvents mention as one of three example schema standards in a remediation note; that's CC-005 scope, not CC-006.
+
+**Impact on existing contracts.** Already-generated CC-006 contracts containing the CloudEvents field remain valid as historical artifacts but will not match the new validation JSON shape. Users regenerating CC-006 after upgrading will get the 3-item LAI7 section directly; no migration is needed.
+
+**Files**:
+
+- `skills/architecture-compliance/templates/cc-006-integration-architecture.template.md` — net −12/+1 lines.
+- `skills/architecture-compliance/validation/cc-006-integration-architecture-validation.json` — net −13 lines (item removed) plus three weight edits.
+- `skills/architecture-compliance/SECTION_MAPPING_GUIDE.md` — net −2/+2 lines.
+- `skills/architecture-compliance/COMPLIANCE_GENERATION_GUIDE.md` — net −3/+3 lines.
+
+---
+
+### v3.21.4 (Previous Release) ✅
 **chore(setup): `/setup` gitignore step now manages `.claude/settings.json` — avoids committing platform-resolved absolute hook paths**
 
 v3.21.1 introduced platform-aware install in `setup-permissions.ts`: at `/setup` time the helper detects `process.platform` and writes the **absolute** path to a native hook wrapper (`route-architecture-docs.sh` on Linux/macOS/WSL/Git Bash, `.cmd` on Windows native cmd, `.ps1` on PowerShell) into the merged `.claude/settings.json`. Both the wrapper choice and the absolute path differ per host (Linux home dir vs Windows user profile vs WSL mount), so committing `.claude/settings.json` to a shared repo creates cross-OS friction — a teammate on a different host would inherit a hook command pointing at a non-existent path until they re-ran `/setup` themselves. v3.21.4 closes this by gitignoring the file.

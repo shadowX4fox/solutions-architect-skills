@@ -441,7 +441,7 @@
           "question": "Are event schemas defined with standard format (JSON Schema/Avro)?",
           "architecture_md_section": "6",
           "required": false,
-          "weight": 0.25,
+          "weight": 0.30,
           "validation_rules": {
             "type": "value_check",
             "approved_values": ["JSON Schema", "Avro", "Protocol Buffers"],
@@ -452,25 +452,11 @@
           }
         },
         {
-          "item_id": "cloudevents_compliance",
-          "question": "Do events follow CloudEvents specification?",
-          "architecture_md_section": "6",
-          "required": false,
-          "weight": 0.20,
-          "validation_rules": {
-            "type": "custom",
-            "pass_criteria": "Events follow CloudEvents specification for metadata (id, source, type, time)",
-            "fail_criteria": "Custom event format without standard metadata",
-            "na_criteria": "No async event decoupling",
-            "unknown_criteria": "CloudEvents compliance not documented"
-          }
-        },
-        {
           "item_id": "event_catalog",
           "question": "Is event catalog documenting all events?",
           "architecture_md_section": "6",
           "required": false,
-          "weight": 0.25,
+          "weight": 0.30,
           "validation_rules": {
             "type": "custom",
             "pass_criteria": "Event catalog documenting all events (name, schema, producers, consumers, purpose)",
@@ -484,7 +470,7 @@
           "question": "Is Dead Letter Queue configured for failed events?",
           "architecture_md_section": "6",
           "required": false,
-          "weight": 0.30,
+          "weight": 0.40,
           "validation_rules": {
             "type": "custom",
             "pass_criteria": "DLQ configured for failed event processing with monitoring and retry policies",

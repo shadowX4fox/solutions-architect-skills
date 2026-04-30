@@ -1932,14 +1932,14 @@ All templates with Section 9 references must use this standard:
 - Requirement: Distributed tracing and structured logging with correlation IDs
 
 **LAI7: Event-Driven Integration Compliance**
-- Section 6 (Data Model): Event schema definition (JSON Schema, Avro), CloudEvents compliance, event versioning strategy, schema registry implementation, event catalog, consumer contracts, event delivery semantics, Dead Letter Queue (DLQ) handling
+- Section 6 (Data Model): Event schema definition (JSON Schema, Avro), event versioning strategy, schema registry implementation, event catalog, consumer contracts, event delivery semantics, Dead Letter Queue (DLQ) handling
 - Section 7 (Integration View): Event-driven patterns, event catalog, messaging guarantees
 - Section 5 (Component Model): Schema registry, event bus, message brokers
-- Requirement: CloudEvents specification with schema registry for async event decoupling integrations
+- Requirement: Schema registry with versioning for async event decoupling integrations
 
 **Key Extractions**:
 - Section 5: API Gateway (LAI1), message brokers (LAI3, LAI7), schema registry (LAI7), observability infrastructure (LAI6)
-- Section 6: Event schemas (LAI7), CloudEvents format, event catalog, DLQ configuration
+- Section 6: Event schemas (LAI7), event catalog, DLQ configuration
 - Section 7: Domain APIs (LAI1), API catalog, REST/SOAP protocols (LAI3), governance standards (LAI4), third-party APIs (LAI5), distributed tracing (LAI6), event patterns (LAI7)
 - Section 9: API authentication/authorization (LAI2), TLS encryption, secrets management, security logging
 
