@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.3-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.4-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.3` in the list.
+You should see `sa-skills v3.21.4` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,35 @@ Where:
 
 ## Roadmap
 
-### v3.21.3 (Current Release) ✅
+### v3.21.4 (Current Release) ✅
+**chore(setup): `/setup` gitignore step now manages `.claude/settings.json` — avoids committing platform-resolved absolute hook paths**
+
+v3.21.1 introduced platform-aware install in `setup-permissions.ts`: at `/setup` time the helper detects `process.platform` and writes the **absolute** path to a native hook wrapper (`route-architecture-docs.sh` on Linux/macOS/WSL/Git Bash, `.cmd` on Windows native cmd, `.ps1` on PowerShell) into the merged `.claude/settings.json`. Both the wrapper choice and the absolute path differ per host (Linux home dir vs Windows user profile vs WSL mount), so committing `.claude/settings.json` to a shared repo creates cross-OS friction — a teammate on a different host would inherit a hook command pointing at a non-existent path until they re-ran `/setup` themselves. v3.21.4 closes this by gitignoring the file.
+
+**`scripts/setup-gitignore.ts` changes:**
+
+- **`.claude/settings.json` added to `MANAGED_ENTRIES`** — the script now manages four entries instead of three (`exports/`, `.cache/sa-skills/`, `CLAUDE.md`, `.claude/settings.json`). Each developer re-runs `/setup` locally; the merged settings file stays on disk per-machine instead of being version-controlled.
+- **Already-tracked warning loop generalized** — the existing one-line warning (which previously only checked `CLAUDE.md`) now iterates over a `FILE_ENTRIES_TO_CHECK` array covering both `CLAUDE.md` and `.claude/settings.json`. If either file was already committed before the upgrade, the helper prints a `git rm --cached <path>` instruction so the user can untrack it without losing the file on disk. `.gitignore` alone never untracks files git already knows about — the warning makes the next step explicit.
+
+**`commands/setup.md` (Step 6) changes:**
+
+- Lists the fourth entry (`.claude/settings.json`) and spells out the rationale: v3.21.1+ writes platform-resolved **absolute** hook paths, so the file is per-developer, not committable.
+- Documents the generalized already-tracked warning behavior so users on existing installs understand why they may see the `git rm --cached` prompt the first time they re-run `/setup` after upgrading.
+
+**Idempotent.** Re-running `/setup` after upgrading prints `+ .claude/settings.json` once, then `Unchanged` on every subsequent run. Existing user `.gitignore` entries are never reordered or removed; the helper only appends missing entries under the `# sa-skills` header.
+
+**Migration.** Users who previously checked in `.claude/settings.json` should run `/setup` once to add the entry to `.gitignore`, then run `git rm --cached .claude/settings.json` (the helper prints this command for them) to stop tracking the file. The file stays on disk; only the git index entry is removed. Users who never committed `.claude/settings.json` see only the new gitignore line — no other action needed.
+
+**Files**:
+
+- `scripts/setup-gitignore.ts` — `.claude/settings.json` added to `MANAGED_ENTRIES`; already-tracked warning loop generalized from `CLAUDE.md`-only to a `FILE_ENTRIES_TO_CHECK` array covering both file-style entries; net +10/-7 lines.
+- `commands/setup.md` — Step 6 documentation updated with the fourth entry, the platform-resolved-absolute-paths rationale, and the generalized already-tracked warning note; net +3/-1 lines.
+
+**Verification**: `bun run typecheck` ✅. Smoke-tested on a fresh `git init` directory (first run adds all 4 entries, second run reports `Unchanged`) and on a repo where both `CLAUDE.md` and `.claude/settings.json` were committed before the upgrade (both `git rm --cached` warnings fire correctly).
+
+---
+
+### v3.21.3 (Previous Release) ✅
 **feat: BPM / DMS scope reframe of CC-008 Process Transformation contract — applicability gate + platform-specific questions**
 
 Before v3.21.3, the CC-008 Process Transformation contract was framed in generic "automation" language (manual effort, automation factors, license efficiency, document management alignment). Anyone running compliance against an architecture that had no BPM platform and no Document Management System would still get the contract scored against generic prose, producing low-signal output and false-negative gaps. Conversely, users with FileNet / Athento / Camunda / IBM BAW architectures got questions that didn't anchor on the platform's actual semantics (PVU, CAL, Object Stores, BPMN node types, External Tasks, Records Management). v3.21.3 reframes the entire contract around the BPM / DMS scope it was always intended to evaluate.

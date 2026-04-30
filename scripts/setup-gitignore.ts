@@ -20,7 +20,12 @@ if (!projectCwd) {
 
 const gitignorePath = join(projectCwd, ".gitignore");
 const HEADER = "# sa-skills";
-const MANAGED_ENTRIES = ["exports/", ".cache/sa-skills/", "CLAUDE.md"];
+const MANAGED_ENTRIES = [
+  "exports/",
+  ".cache/sa-skills/",
+  "CLAUDE.md",
+  ".claude/settings.json",
+];
 
 function lineMatches(line: string, entry: string): boolean {
   const trimmed = line.trim();
@@ -69,22 +74,24 @@ if (missing.length > 0) {
   for (const e of missing) console.log(`     + ${e}`);
 }
 
-// If CLAUDE.md was newly added to .gitignore but is already tracked by git,
-// .gitignore has no effect on it — warn the user how to untrack.
-if (missing.includes("CLAUDE.md")) {
+// If a file-style entry was newly added to .gitignore but is already tracked
+// by git, .gitignore has no effect on it — warn the user how to untrack.
+const FILE_ENTRIES_TO_CHECK = ["CLAUDE.md", ".claude/settings.json"];
+for (const entry of FILE_ENTRIES_TO_CHECK) {
+  if (!missing.includes(entry)) continue;
   const tracked = spawnSync(
     "git",
-    ["-C", projectCwd, "ls-files", "--error-unmatch", "CLAUDE.md"],
+    ["-C", projectCwd, "ls-files", "--error-unmatch", entry],
     { stdio: "ignore" }
   );
   if (tracked.status === 0) {
     console.log("");
     console.log(
-      "⚠️  CLAUDE.md is already tracked by git. .gitignore will not untrack it."
+      `⚠️  ${entry} is already tracked by git. .gitignore will not untrack it.`
     );
     console.log(
       "   To stop tracking it while keeping the file on disk, run:"
     );
-    console.log(`     git rm --cached CLAUDE.md`);
+    console.log(`     git rm --cached ${entry}`);
   }
 }

@@ -90,13 +90,15 @@ The helper ensures `$project_cwd/.gitignore` contains the sa-skills baseline ent
 - `exports/` — generated Word `.docx` deliverables (`architecture-docs-export` output)
 - `.cache/sa-skills/` — project-local scratch dir for handoff payloads, expanded compliance templates, and IcePanel JSON snapshots (replaces the previous `/tmp/` staging — OS-agnostic, works on Linux, macOS, Windows native, WSL, and Git Bash)
 - `CLAUDE.md` — the per-project Claude Code instructions file (managed by Step 5)
+- `.claude/settings.json` — the per-project Claude Code settings file (managed by Step 3). Gitignored because v3.21.1+ writes platform-resolved **absolute** hook paths into it (different on Linux vs macOS vs Windows native vs WSL vs PowerShell), so committing it would create cross-OS friction on multi-developer teams. Each developer re-runs `/setup` locally to regenerate their own platform-correct copy.
 
 Behavior:
 
-- If `.gitignore` does not exist → creates it with a `# sa-skills` header + the three entries.
+- If `.gitignore` does not exist → creates it with a `# sa-skills` header + the four entries.
 - If it exists and the entries are missing → appends them under a `# sa-skills` header (only if the header is not already there).
 - Existing entries (exact line match, ignoring comments and leading slash normalization) are counted under "already present" and left alone.
 - User's existing `.gitignore` entries are never reordered or removed.
+- For file-style entries (`CLAUDE.md` and `.claude/settings.json`), if the file is **already tracked by git**, the helper prints a one-line warning with the `git rm --cached <path>` command needed to stop tracking it. `.gitignore` alone does not untrack files that git already knows about.
 
 Display the helper's stdout verbatim. If it exits non-zero, print the stderr verbatim — the earlier steps remain successful and independent.
 
