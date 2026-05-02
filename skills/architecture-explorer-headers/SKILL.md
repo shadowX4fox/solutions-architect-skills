@@ -25,7 +25,7 @@ Manually activated when users want to add or refresh `<!-- EXPLORER_HEADER -->` 
 
 NOT activated for:
 - Routine architecture authoring (use `architecture-docs`).
-- Component index changes (use `architecture-component-guardian`).
+- **Component file creation or update** — `architecture-component-guardian` is the first-class writer of EXPLORER_HEADER blocks for `docs/components/**/*.md` (L1 descriptors and L2 containers) at create/update/migrate time. This backfill skill must NOT be used to fill gaps left by the guardian; reach for it only on legacy `docs/NN-*.md` files or to repair drift caused by external edits.
 - ADR creation (use `architecture-definition-record`).
 
 `ARCHITECTURE.md` at the project root is **never touched by this skill** — it is a navigation index and the explorer reads it in full.

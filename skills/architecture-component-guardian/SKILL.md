@@ -211,6 +211,92 @@ Use brackets around the technology with version: `[Spring Boot 3.2]`, `[PostgreS
 
 ---
 
+## EXPLORER_HEADER Block — Generation Rules
+
+This skill is the **first-class writer** of `<!-- EXPLORER_HEADER -->` blocks for every component file it produces (L1 system descriptors and L2 containers). The dedicated `architecture-explorer-headers` skill is for **legacy backfill only** — it must not be relied on to fill gaps left by this skill.
+
+**Why headers are mandatory at creation time**: `agents/builders/architecture-explorer.md` (the universal Haiku navigator) reads only the **first 60 lines** of each component file and extracts EXPLORER_HEADER metadata into the `EXPLORE_MANIFEST` it emits. Compliance, dev-handoff, peer-review, and analysis skills filter that manifest by `key_concepts`, `technologies`, `component_self`, `component_type`, and `related_adrs`. A component file written without a header degrades every downstream classification until backfilled.
+
+**Canonical format reference**: `skills/architecture-docs/ARCHITECTURE_DOCUMENTATION_GUIDE.md` (sections "Format" and "What goes in `docs/components/NN-<slug>.md`").
+**Field allowlist + validator**: `skills/architecture-explorer-headers/utils/header-detector.ts` (`HEADER_OPEN`, `HEADER_CLOSE`, `ALLOWED_FIELDS`, `REQUIRED_FIELDS_*`).
+
+### Format — L2 Container (`docs/components/<system>/NN-*.md`)
+
+Insert immediately after the H1, before the `**Type:**` line:
+
+```markdown
+# Payment Service
+
+<!-- EXPLORER_HEADER
+key_concepts: PCI compliance, idempotency, refund, chargeback, settlement
+technologies: Spring Boot 3.3, PostgreSQL 16, Stripe API
+component_self: payment-service
+component_type: api-service
+scope: API service handling card authorization, capture, refund, and ledger persistence
+related_adrs: ADR-018, ADR-031
+-->
+
+> Payment Service ingests authorization requests from the order-checkout flow, calls the Stripe API for capture/refund/void operations, and persists ledger entries with idempotency guarantees.
+
+**Type:** API Service
+...
+```
+
+### Format — L1 System Descriptor (`docs/components/<system>.md`)
+
+Insert immediately after the H1, before the `**C4 Level:** System (L1)` line:
+
+```markdown
+# Notification Inbox Platform
+
+<!-- EXPLORER_HEADER
+key_concepts: multi-channel delivery, event ingest, fan-out, dedupe, opt-in registry
+technologies: Kafka, PostgreSQL 16, Redis, Spring Boot 3.3
+component_self: notification-inbox-platform
+component_type: internal-system
+scope: System boundary for ingesting events and fanning out push/email/SMS notifications
+related_adrs: ADR-014, ADR-022
+-->
+
+> Notification Inbox Platform owns the end-to-end multi-channel delivery pipeline for transactional and marketing events, from upstream ingest through per-channel adapters.
+
+**C4 Level:** System (L1)
+**Type:** Internal System
+...
+```
+
+### Field Derivation Rules
+
+| Field | Source for L2 container | Source for L1 descriptor |
+|-------|------------------------|--------------------------|
+| `key_concepts` | 5–15 domain terms from the component description, `## Overview`, and the architecture context (Section 6 / 8 / 9 docs). Concrete vocabulary only — no generic words like "service", "data", "system". | 5–15 terms describing the system's responsibility and dominant patterns; pull from architecture docs and any existing system summary. |
+| `technologies` | Exact value of `**Technology:**` (without IcePanel brackets), comma-separated when multiple. Preserve version numbers. | Aggregate of the technologies listed in the system's contained containers, deduplicated. |
+| `component_self` | Kebab-case of the filename slug (filename without `NN-` prefix and without `.md`). E.g., `03-payment-service.md` → `payment-service`. | Kebab-case of the system folder name. E.g., `notification-inbox-platform.md` → `notification-inbox-platform`. |
+| `component_type` | Kebab-case of the canonical `**Type:**` value: `api-service`, `web-application`, `worker-consumer`, `gateway`, `database`, `cache`, `message-broker`, `object-storage`. | `internal-system` or `external-system` (drawn from `**Type:**`). |
+| `scope` | One sentence (≤120 chars) describing what the container does and what it does NOT do. | One sentence (≤120 chars) describing the system boundary. |
+| `related_adrs` | ADR identifiers (`ADR-NNN`) loaded in Step 6a whose titles or decisions reference this component. | ADRs that scope the system as a whole (architecture-shaping decisions). |
+
+**Validator quirk**: `header-detector.ts:188-189` flags any path containing `/components/` as a "component file" requiring `component_self`. L1 descriptors and L2 containers therefore both use `component_self` (not `components`). The L1 descriptor's `component_type: internal-system | external-system` is the explicit distinguishing token.
+
+### Refresh Rules
+
+- **`add component`** → write the full header from scratch using the rules above.
+- **`update component`** → if `Component Name`, `**Type:**`, or `**Technology:**` changed, refresh `component_self`, `component_type`, and `technologies` in the existing header. Preserve `key_concepts`, `scope`, and `related_adrs` unless the user-facing change clearly invalidates them (e.g., a wholesale responsibility shift).
+- **`migrate`** → write headers as part of Phase M3.5 (see Migrate Workflow below).
+- **`sync`** → read-only. Never modifies headers.
+
+### Post-Write Validation
+
+Every file written by this skill must pass:
+
+```bash
+bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts validate <abs_path>
+```
+
+Exit 0 = valid. Exit 1 = malformed; revert the header block via Edit tool, leave the rest of the file intact, and warn the user that header authoring degraded for that file. The component file itself is **not** rolled back.
+
+---
+
 ## Workflow
 
 ### Step 1 — Detect mode
@@ -239,11 +325,11 @@ Offer to rename the file automatically.
 
 | Argument | Action |
 |----------|--------|
-| `sync` | Rebuild table from current files, no other change |
-| `add component <description>` | Resolve target system folder, create the new component file (with `Component Version: 1.0.0`, `Architecture Version` from ARCHITECTURE.md, `Last Updated: today`), then sync (see Step 3a below) |
+| `sync` | Rebuild table from current files, no other change. Read-only — does NOT modify component file bodies or EXPLORER_HEADER blocks. |
+| `add component <description>` | Resolve target system folder, create the new component file with EXPLORER_HEADER block + 30-second summary blockquote (see "EXPLORER_HEADER Block — Generation Rules" above) and version fields (`Component Version: 1.0.0`, `Architecture Version` from ARCHITECTURE.md, `Last Updated: today`), then sync (see Step 3a below) |
 | `remove component <name>` | Confirm deletion of component file, then sync |
-| `update component <name>` | Edit the relevant component file fields, update `**Last Updated:**` to today, suggest a `**Component Version:**` bump (see "Component Version Management" below), then sync |
-| `migrate` | Run the full C4 multi-system migration workflow (Phases M1–M8). Converts flat `docs/components/` to system-subfolder structure with canonical C4 metadata and updates all cross-references. See "Migrate Workflow" section below. |
+| `update component <name>` | Edit the relevant component file fields, update `**Last Updated:**` to today, suggest a `**Component Version:**` bump (see "Component Version Management" below). If `Component Name`, `**Type:**`, or `**Technology:**` changed, refresh `component_self`, `component_type`, and `technologies` in the EXPLORER_HEADER (preserve `key_concepts`, `scope`, `related_adrs` unless the change clearly invalidates them). Then sync. |
+| `migrate` | Run the full C4 multi-system migration workflow (Phases M1–M8). Converts flat `docs/components/` to system-subfolder structure with canonical C4 metadata, writes EXPLORER_HEADER blocks (Phase M3.5), and updates all cross-references. See "Migrate Workflow" section below. |
 
 **When creating a new component file** (`add`): always convert the component name to lowercase kebab-case for the filename. Examples: "Payment Service" → `NN-payment-service.md`, "CRM Domain Service" → `NN-crm-domain-service.md`, "Redis Cache" → `NN-redis-cache.md`. The display name in the `# Heading` inside the file keeps its natural casing (e.g., `# Payment Service`).
 
@@ -291,9 +377,20 @@ Create Level 1 (system descriptor) + Level 2 (container folder) structure? [Yes/
 **3a.4 Create L1+L2 folder structure**:
 
 1. **Create system subfolder**: `docs/components/<system-name>/` (kebab-case)
-2. **Create L1 system descriptor**: `docs/components/<system-name>.md` with:
+2. **Create L1 system descriptor**: `docs/components/<system-name>.md` with EXPLORER_HEADER + 30-second blockquote (per "EXPLORER_HEADER Block — Generation Rules" above) + C4 metadata:
    ```markdown
    # <System Display Name>
+
+   <!-- EXPLORER_HEADER
+   key_concepts: <5–15 system-level domain terms>
+   technologies: <aggregate of contained-container technologies, deduplicated>
+   component_self: <system-name>
+   component_type: internal-system | external-system
+   scope: <one sentence ≤120 chars describing the system boundary>
+   related_adrs: <ADR-NNN, ADR-NNN>
+   -->
+
+   > <30-second summary of the system's responsibility and dominant patterns>
 
    **C4 Level:** System (L1)
    **Type:** <Internal System | External System>
@@ -314,7 +411,8 @@ Create Level 1 (system descriptor) + Level 2 (container folder) structure? [Yes/
    ## Communication Patterns
    <how this system communicates with others — protocols, events, APIs>
    ```
-3. **Create L2 container file**: `docs/components/<system-name>/01-<component-name>.md` with the standard C4 L2 metadata fields
+3. **Create L2 container file**: `docs/components/<system-name>/01-<component-name>.md` with EXPLORER_HEADER + 30-second blockquote (per "EXPLORER_HEADER Block — Generation Rules" above) + standard C4 L2 metadata fields. Insert the header block immediately after the H1, before the `**Type:**` line. Pull `key_concepts` and `technologies` from the architecture context (Section 6 Technology Stack, Section 8 Scalability, Section 9 Operations) and the user's component description; pull `related_adrs` from ADR titles matched in Step 6a.
+4. **Validate every written file**: run `bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts validate <abs_path>` against each new file (L1 descriptor + L2 container). On exit 1, revert only the EXPLORER_HEADER block via Edit and warn the user — keep the C4 file body intact.
 
 **3a.5 Confirm placement**: Before writing files, display:
 
@@ -344,6 +442,8 @@ Before finishing, confirm:
 - [ ] No component appears twice
 - [ ] Breadcrumb is `[Architecture](../../ARCHITECTURE.md) > Components`
 - [ ] Sections appear in order: Components table → Key Relationships → Related Documentation
+- [ ] Every newly written component file (L1 descriptor or L2 container) contains an `<!-- EXPLORER_HEADER -->` block immediately after the H1
+- [ ] Validator passes — `bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts validate <abs_path>` returns exit 0 for each file written or modified by this run. On exit 1, revert only the header block via Edit and warn the user that header authoring degraded for that file (the C4 file body remains intact and the rest of the workflow continues)
 
 ---
 
@@ -458,7 +558,21 @@ Wait for user confirmation.
 **Communicates via:** [infer or placeholder]
 ```
 
-Present Phase 3 summary with all fixes applied.
+**M3.5 Write EXPLORER_HEADER block**: For every file in scope, derive the header fields from the file's existing body and insert immediately after the H1 (before any other metadata). This is the only place in `migrate` where the guardian both creates and improves header metadata in one pass.
+
+Field derivation:
+- `key_concepts` — 5–15 domain terms from H2/H3 headings, bold terms in `## Overview`, and table headers in the file body. Skip generic words.
+- `technologies` — value of the now-canonicalized `**Technology:**` field (without IcePanel brackets), plus any other named tools/products in the body. Preserve version numbers.
+- `component_self` — kebab-case slug from the filename (`NN-<slug>.md` → `<slug>`).
+- `component_type` — kebab-case of the canonical `**Type:**` value set by M3.2.
+- `scope` — one sentence (≤120 chars) drawn from the file's intro paragraph.
+- `related_adrs` — `ADR-NNN` identifiers found in the body or footer.
+
+Skip files that already have an EXPLORER_HEADER block (the migration is structural; do not overwrite hand-curated headers). Track count for the M8.4 final report.
+
+Validate each written header via `bun [plugin_dir]/skills/architecture-explorer-headers/utils/header-cli.ts validate <abs_path>`. On exit 1, revert only the header block via Edit and continue with the next file.
+
+Present Phase 3 summary with all fixes applied (including EXPLORER_HEADERs added).
 
 ---
 
@@ -466,7 +580,7 @@ Present Phase 3 summary with all fixes applied.
 
 **M4.1 Create system subfolders**: `docs/components/<system-name>/` (kebab-case).
 
-**M4.1b Create C4 L1 system descriptor files**: For each system, write `docs/components/<system-name>.md` at the root using the L1 system file format (C4 Level: System L1, Type: Internal/External, Owner, Container table, System Boundaries, Communication). Populate from architecture docs context.
+**M4.1b Create C4 L1 system descriptor files**: For each system, write `docs/components/<system-name>.md` at the root using the L1 system file format (EXPLORER_HEADER + 30-second blockquote per "EXPLORER_HEADER Block — Generation Rules" above, then C4 Level: System L1, Type: Internal/External, Owner, Container table, System Boundaries, Communication). Populate header fields and body from architecture docs context. Validate each L1 descriptor via the same `header-cli.ts validate` call as Phase M3.5.
 
 **M4.2 Detect project type**: Check if `.git/` exists in project root.
 - Git repo → use `git mv` (preserves history)
@@ -551,6 +665,7 @@ C4 MIGRATION — COMPLETE
 Systems: N (M internal, K external)
 Files moved: X
 Metadata fixes: Y (headings, types, technology, C4 headers)
+EXPLORER_HEADERs added: H files
 References updated: Z markdown links, W anchor slugs
 Plain-text refs logged: N (manual review recommended)
 ═══════════════════════════════════════════════════════════

@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.5-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.6-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.5` in the list.
+You should see `sa-skills v3.21.6` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,28 @@ Where:
 
 ## Roadmap
 
-### v3.21.5 (Current Release) ✅
+### v3.21.6 (Current Release) ✅
+**feat(component-guardian): write `<!-- EXPLORER_HEADER -->` blocks at component-creation time — first-class header authoring**
+
+`architecture-component-guardian` is the only sanctioned writer for `docs/components/**/*.md` (L1 system descriptors and L2 containers), but until v3.21.6 every file it produced went to disk **without** an EXPLORER_HEADER block. The downstream cost was real: `agents/builders/architecture-explorer.md` (the universal Haiku navigator) reads only the first 60 lines of each component file and surfaces `key_concepts`, `technologies`, `component_self`, `component_type`, and `related_adrs` from the header block into the `EXPLORE_MANIFEST`. Compliance, dev-handoff, peer-review, and analysis skills filter that manifest by those fields. Components freshly minted by the guardian appeared in the manifest with empty arrays until `architecture-explorer-headers` was run separately to backfill — degrading every downstream classification. The same gap existed in the C4 multi-system migration workflow (Phases M3/M4): legacy files gained C4 metadata but no EXPLORER_HEADER. v3.21.6 promotes the guardian to first-class header writer; `architecture-explorer-headers` returns to its true backfill-only purpose.
+
+**Changes:**
+
+- `skills/architecture-component-guardian/SKILL.md` — new `## EXPLORER_HEADER Block — Generation Rules` section between the Format Specification and Workflow sections, with format spec for both L2 containers and L1 system descriptors, field derivation rules table, refresh rules per action (`add`/`update`/`migrate`/`sync`), and post-write validation via the existing `header-cli.ts validate` CLI. Step 3 action table updated so `add`/`update`/`migrate` rows mention header authoring/refresh; `sync` explicitly stays read-only. Step 3a.4 templates extended — L1 descriptor and L2 container both now embed the EXPLORER_HEADER + 30-second blockquote between the H1 and the first metadata line, with a new sub-step 4 that validates each written file. New Phase M3.5 (`Write EXPLORER_HEADER block`) added to the migration workflow with field-derivation rules sourced from the migrated file's existing body; skips files that already have a hand-curated header. Phase M4.1b reuses the same format for L1 descriptors created during migration. Step 5 verification gains two checklist items (header presence + validator pass) plus a header-only revert protocol on validator failure (the C4 file body is never rolled back). Phase M8.4 final report adds an `EXPLORER_HEADERs added: H files` line.
+- `skills/architecture-explorer-headers/SKILL.md` — `## When This Skill Is Invoked` "NOT activated for" list strengthened: the `architecture-component-guardian` entry now explicitly states that the guardian is the first-class writer for component files at create/update/migrate time, and this backfill skill must NOT be used to fill gaps left by the guardian — only for legacy `docs/NN-*.md` files or to repair drift caused by external edits.
+- `CLAUDE.md` — Trigger Routing table row for `architecture-component-guardian` extended to note the new EXPLORER_HEADER responsibility ("only sanctioned writer ... and `<!-- EXPLORER_HEADER -->` blocks for every component file it writes").
+
+**No code changes.** `header-detector.ts` (`HEADER_OPEN`, `HEADER_CLOSE`, `ALLOWED_FIELDS`, `REQUIRED_FIELDS_*`, `buildHeader`, `validateHeader`, `findInsertionPoint`) and `header-cli.ts` (`validate` subcommand) already expose everything the guardian needs. The existing `Bash(bun *)` permission in `.claude/settings.json.example:25` covers the validator invocation — no permission changes required.
+
+**Files**:
+
+- `skills/architecture-component-guardian/SKILL.md` — net +127 lines (new section + Step 3a.4 / Phase M3.5 / Step 5 / Phase M8.4 edits).
+- `skills/architecture-explorer-headers/SKILL.md` — net +1 line (clarification of activation scope).
+- `CLAUDE.md` — net 0 lines (table row appended in place).
+
+---
+
+### v3.21.5 (Previous Release) ✅
 **chore(cc-006): drop CloudEvents Compliance field from Integration Architecture contract — scope reduction**
 
 The CC-006 Integration Architecture contract (`templates/cc-006-integration-architecture.template.md`) carried a dedicated `CloudEvents Compliance` field under §7.1 Event Schema Standards, scored at weight 0.20 inside `lai7_event_driven`. CloudEvents is one of several valid event-metadata conventions (alongside custom envelopes, AsyncAPI message metadata, and Avro/Protobuf headers); pinning the contract to the CNCF specification produced false-negative deviations against architectures that used equivalent custom metadata schemes documented in §6 — the validator could only return PASS for explicit CloudEvents adoption, FAIL for absence, or UNKNOWN when the documented format wasn't named CloudEvents. The field was removing signal more often than it added. v3.21.5 removes it; the surviving §7.1 control (`Event Schema Definition`) covers the underlying intent (events have a documented schema format) without privileging one specification.
