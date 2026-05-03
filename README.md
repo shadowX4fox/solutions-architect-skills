@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.9-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.10-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.9` in the list.
+You should see `sa-skills v3.21.10` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,26 @@ Where:
 
 ## Roadmap
 
-### v3.21.9 (Current Release) ✅
+### v3.21.10 (Current Release) ✅
+**feat(architecture-docs): bidirectional Connection Naming Rule scope enforcement — sequence diagrams explicitly exempt; reviewers / audit gates skip CNR checks on `sequenceDiagram` blocks**
+
+v3.21.9 introduced the canonical Connection Naming Rule (`<PROTOCOL>/<STYLE> [Action Type]`) for the 4th `Rel()` parameter at C4 L1, C4 L2, and Diagram 4. The rule was scoped correctly in the prose (it talked about `Rel()` and `graph TB` arrow labels), but the **scope itself was not enforced as a first-class section** of the rule — a future reader could plausibly try to apply it to sequence-diagram messages too, since `sequenceDiagram` blocks also live in `docs/04-data-flow-patterns.md` and the v3.21.9 prose did not say "stop". Sequence-diagram messages (`A->>B: ...`, `A-->>B: ...`, `A-)B: ...`) are deliberately **free prose** describing what flows step-by-step — appending `[Data]` / `[Event]` / `[Internal]` to a sequence-diagram message degrades the flow narrative without adding signal. v3.21.10 adds explicit bidirectional scope enforcement: the rule **MUST** be applied to L1 / L2 / Diagram 4 (under-application is a violation), and the rule **MUST NOT** be applied to sequence-diagram message labels (over-application is also a violation). Audit gates and reviewers now have a deterministic instruction to skip Connection-Naming-Rule checks when the diagram's first line is `sequenceDiagram`.
+
+**Changes:**
+
+- `skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md` — **new `#### Scope (ENFORCED — read before applying)` subsection** inside the Connection Naming Rule (between the rule statement and the Action-Type Vocabulary table) listing exactly what the rule applies to (Diagram 2 — C4 L1 `C4Context`, Diagram 3 — C4 L2 `C4Container`, Diagram 4 — Detailed View `graph TB` arrow labels) and what it explicitly does NOT apply to (Diagram 1 ASCII Logical View — labels are free prose; **Sequence Diagrams in `docs/04-data-flow-patterns.md` — free prose**, do NOT append `[Action Type]` tags, do NOT enforce `<PROTOCOL>/<STYLE>` casing, do NOT reject a label because it lacks the normal form; element-metadata strings inside `Container("name", "technology", "description")` are not connections). Includes a worked counter-example showing that a sequence-diagram message reading `Frontend->>BFF: GET /orders` is correct as-is and must NOT be rewritten to `Frontend->>BFF: GET /orders [Data]` or `Frontend->>BFF: HTTPS/JSON [Data]`. Sequence Diagrams (Sequence Diagrams) DO block at line ~787 gains a new "write message labels as free prose" instruction with three flow-narrative examples (`Frontend->>BFF: GET /orders`, `BFF->>OrderSvc: CreateOrder(items, customerId)`, `OrderSvc-)EventBus: OrderPlaced event`); DON'T block gains an explicit `Do NOT apply the Connection Naming Rule to sequence-diagram message labels` directive that calls out over-application as a rule violation in the opposite direction and instructs reviewers and audit gates to **skip Connection-Naming-Rule checks entirely** when the diagram's first line is `sequenceDiagram`.
+- `skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md` — Section 5 cross-reference block (line ~292) extended with a third paragraph stating "Sequence diagrams are exempt from the Connection Naming Rule" and pointing back to the canonical Scope subsection. Reinforces the same audit-gate instruction.
+
+**No code changes.** Pure scope-clarification edits; no agent / TypeScript / hook / template / config changes. Existing `bun run typecheck` and `bun test` (392 pass / 0 fail) remain green.
+
+**Files**:
+
+- `skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md` — net +28 lines (Scope subsection + sequence-diagram Do/Don't extension).
+- `skills/architecture-docs/MERMAID_DIAGRAMS_GUIDE.md` — net +2 lines (Section 5 cross-reference block third paragraph).
+
+---
+
+### v3.21.9 (Previous Release) ✅
 **feat(architecture-docs): canonical Connection Naming Rule for C4 L1 + L2 — `<PROTOCOL>/<STYLE> [Action Type]` normal form, closed action vocabulary (10 entries), via/topic moved to description**
 
 The 4th `Rel()` parameter (the "protocol" string) had no canonical normal form across this repo. Examples were inconsistent — `"REST/HTTPS"`, `"JDBC"`, `"Kafka topic: order-events"`, `"HTTPS via Kong"`, `"Kafka async"` — all valid Mermaid C4 input but unparseable by readers and tooling that grep over diagrams (notably the IcePanel importer at `skills/architecture-icepanel-sync/ICEPANEL_IMPORT_REFERENCE.md`, which records the field verbatim into `modelConnections.name`). v3.21.7's Infrastructure-as-via Rule had also packed `via Kong` / `Kafka topic: order-events (async)` into the same field, mixing transport spec with transit context. v3.21.9 settles the field: the 4th parameter is now a strict normal form `<PROTOCOL>/<STYLE> [Action Type]`; via-hop, topic / queue name, and sync/async flag move to the **3rd parameter (description)** in `(via Kong)` / `(Kafka topic: orders, async)` form. Action type is a **closed vocabulary of 10 tags** — `[Data]` (cross-trust-boundary business data), `[Internal]` (service-to-service), `[Event]` (async pub/sub), `[Auth]` (authn/authz/token validation), `[Cache]` (Redis/Memcached I/O), `[Stream]` (WebSocket / SSE / gRPC streaming), `[Query]` (DB/search read), `[Write]` (DB/search write — distinguish from `[Query]` only when CQRS), `[Storage]` (S3/GCS/Azure Blob), `[Telemetry]` (OTLP/Prometheus/Jaeger). Anything outside the closed set is rejected by the rule.

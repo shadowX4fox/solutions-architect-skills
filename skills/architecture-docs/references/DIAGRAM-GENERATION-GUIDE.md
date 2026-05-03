@@ -310,6 +310,22 @@ The 4th parameter of every `Rel()` MUST follow this strict normal form:
 
 The 3rd parameter (description) carries human prose: the verb, the data subject, the via-hop, the topic / queue name, and the sync/async flag.
 
+#### Scope (ENFORCED — read before applying)
+
+This rule applies to, and ONLY to:
+
+- **Diagram 2 — C4 L1 System Context** (`C4Context` block) — every `Rel()` 4th parameter
+- **Diagram 3 — C4 L2 Container** (`C4Container` block) — every `Rel()` 4th parameter
+- **Diagram 4 — Detailed View** (`graph TB` block) — every labeled edge (`A -- "..." --> B`, `A -. "..." .-> B`)
+
+This rule does **NOT** apply to:
+
+- **Diagram 1 — Logical View (ASCII)** — labels are free prose; ASCII rendering does not have a parameter slot for a normal form
+- **Data Flow / Sequence Diagrams** (`sequenceDiagram` blocks in `docs/04-data-flow-patterns.md`) — message labels (`A->>B: ...`, `A-->>B: ...`, `A-)B: ...`) are **free prose** describing what flows step-by-step. Do NOT append `[Action Type]` tags, do NOT enforce `<PROTOCOL>/<STYLE>` casing, do NOT reject a label because it lacks the normal form. Sequence-diagram labels are scoped by Pre-Write Validation only (no `<br/>` / HTML tags, no `;` in message text, no emoji)
+- **Notation inside element labels** — `Container("name", "technology", "description")` is element metadata, not a connection — Connection Naming Rule does not apply
+
+When generating, auditing, or reviewing diagrams, check the diagram **type** first; apply the rule only if the diagram is L1, L2, or Diagram 4. A sequence-diagram message reading `Frontend->>BFF: GET /orders` is correct as-is — do not rewrite it to `Frontend->>BFF: GET /orders [Data]` or `Frontend->>BFF: HTTPS/JSON [Data]`.
+
 #### Action-Type Vocabulary (closed set — reject anything outside this list)
 
 | Tag | Meaning | Typical pairings |
@@ -768,11 +784,13 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 - Use `critical/option/end` for critical sections with fallback
 - Use `break/end` for early exit from a flow
 - Use `Note over A,B: text` for protocol annotations
+- **Write message labels as free prose**, describing what flows step-by-step (e.g., `Frontend->>BFF: GET /orders`, `BFF->>OrderSvc: CreateOrder(items, customerId)`, `OrderSvc-)EventBus: OrderPlaced event`). Free prose is the rule for sequence diagrams — readability of the flow narrative dominates
 
 **DO NOT:**
 - Do not use `graph TB` or `flowchart` syntax inside sequence diagrams
 - Do not use HTML tags in participant names or messages — including `<br/>`, `<br>`, `<b>`, `<i>`, `<sup>`, or any `<...>` element. Use `\n` for multi-line messages.
 - Do not use emoji characters in labels (rendering varies)
+- **Do NOT apply the Connection Naming Rule (`<PROTOCOL>/<STYLE> [Action Type]`) to sequence-diagram message labels.** That rule is scoped to C4 L1, C4 L2, and Diagram 4 only — see "Connection Naming Rule (L1 + L2)" → Scope. Sequence-diagram messages are free prose; appending `[Data]` / `[Event]` / `[Internal]` to a `->>` label is a rule violation in the opposite direction (over-application). Reviewers and audit gates: when the diagram's first line is `sequenceDiagram`, skip Connection-Naming-Rule checks entirely
 - Do not use `;` (semicolons) anywhere after the `:` in **message labels** (`A->>B: ...`) **or Note text** (`Note over A,B: ...`, `Note left of A: ...`, `Note right of A: ...`), **including inside parenthetical sub-clauses**. Mermaid's sequence tokenizer treats `;` as a statement terminator and stops reading the label there, then chokes on the trailing characters and the next line's arrow. Replace with `,` (comma), `—` (em dash), or `.` (period).
   - **Wrong**: `GW->>Pay: existing payment path (sync; ORQPagos2002 stateless)` → parse error: *"Expecting SOLID_ARROW … got NEWLINE"* on the next line.
   - **Right**: `GW->>Pay: existing payment path (sync, ORQPagos2002 stateless)`
