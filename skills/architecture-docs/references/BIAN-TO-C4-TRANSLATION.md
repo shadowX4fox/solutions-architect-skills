@@ -84,7 +84,7 @@ At C1, the entire BIAN platform is shown as systems and persons. Individual Serv
 
 ### C2 — Container Diagram
 
-At C2, zoom into the "Banking Platform" System to show its deployable units using pure C4 conventions. Each BIAN Service Domain is a **separate Container** because in a BIAN-compliant architecture, SDs run as independent services (microservice-per-SD pattern). BIAN layer grouping does NOT appear in the C4 L2 diagram — layer grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
+At C2, zoom into the "Banking Platform" System to show its deployable units using pure C4 conventions. Each BIAN Service Domain is a **separate Container** because in a BIAN-compliant architecture, SDs run as independent services (microservice-per-SD pattern). BIAN layer grouping does NOT appear in the C4 L2 diagram — layer grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores. **Transit infrastructure** (API gateway, message brokers, topics, queues, service mesh, iPaaS) → **edge label**, not a node. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2).
 
 #### What to Show
 
@@ -94,8 +94,8 @@ At C2, zoom into the "Banking Platform" System to show its deployable units usin
 | Business Capability (L3) | Container (App) | `Payment Processor [Spring Boot, BIAN V12.0]` |
 | Service Domain (L4) | Container (App) | `Savings Account SD [Spring Boot, BIAN V12.0]` |
 | SD Database | Container (Store) | `Savings Account DB [PostgreSQL 15]` |
-| Event Bus | Container | `Domain Event Bus [Apache Kafka]` |
-| API Gateway | Container (App) | `BIAN API Gateway [Kong, BIAN V12.0]` |
+| Event Bus | **Edge label only** | `Kafka topic: domain-events (async)` on producer→consumer `Rel()`. Do NOT emit `Domain Event Bus [Apache Kafka]` as a node. See Infrastructure-as-via Rule (L2). |
+| API Gateway | **Edge label only** | `HTTPS via Kong` on actor/system→service `Rel()`. Exception: gateway with custom architectural logic. |
 | Cache | Container (Store) | `Reference Data Cache [Redis 7]` |
 
 #### BIAN-Specific Labeling Convention
@@ -112,11 +112,16 @@ Examples:
   Deposit Account Manager [Spring Boot, BIAN V12.0]
 ```
 
-Non-BIAN containers (databases, caches, brokers) use standard labels:
+Non-BIAN containers (databases, caches) use standard labels:
 ```
   Savings Account DB [PostgreSQL 15]
-  Domain Event Bus [Apache Kafka 3.6]
   Reference Data Cache [Redis 7]
+```
+
+Transit infrastructure (brokers, gateways) does NOT appear as a node at L2 — it lives on the edge label:
+```
+  Rel(payment_sd, settlement_sd, "Settlement events (async)", "Kafka topic: settlement-events")
+  Rel(channel, savings_sd, "Account inquiry", "HTTPS via Kong")
 ```
 
 #### Example C2 — Payments Domain

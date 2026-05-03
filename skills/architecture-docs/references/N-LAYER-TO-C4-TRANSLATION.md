@@ -41,9 +41,10 @@ Therefore, an N-Layer backend is **ONE Container** regardless of how many intern
 | Element | Separate Container? | Why |
 |---------|-------------------|-----|
 | Backend application (all layers) | YES — one Container | Single deployable process |
-| PostgreSQL database | YES — separate Container | Separate process, own lifecycle |
-| Redis cache | YES — separate Container | Separate process, own lifecycle |
-| Kafka / RabbitMQ | YES — separate Container | Separate process, own lifecycle |
+| PostgreSQL database | YES — separate Container | Separate process, owns state |
+| Redis cache | YES — separate Container | Separate process, owns state |
+| Kafka / RabbitMQ / SQS / SNS | NO at L2 — **edge label** | Transit infrastructure. Collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: order-events (async)"`). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). Diagram 4 (Detailed View) still renders topics/queues as nodes. Exception: an owned/custom in-house broker that IS the architectural unit may stay as a `ContainerQueue()`. |
+| API Gateway / APIM | NO at L2 — **edge label** | Transit infrastructure. Collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: gateway with custom architectural logic. |
 | Frontend SPA (if served separately) | YES — separate Container | Separate deployable |
 | Domain Layer | NO | Code module inside the backend |
 | Application Layer | NO | Code module inside the backend |
@@ -98,7 +99,7 @@ At C1, you show:
 
 ## C2 — Container Diagram
 
-At C2, zoom into the System to show its deployable units using pure C4 conventions. The N-Layer backend is still **ONE Container** here — internal layers do NOT appear as visual groupings in the C4 L2 diagram (layer grouping belongs in Diagrams 1 and 4). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
+At C2, zoom into the System to show its deployable units using pure C4 conventions. The N-Layer backend is still **ONE Container** here — internal layers do NOT appear as visual groupings in the C4 L2 diagram (layer grouping belongs in Diagrams 1 and 4). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores. **Transit infrastructure** (API gateway, message brokers, topics, queues, service mesh, iPaaS) → **edge label**, not a node. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2).
 
 ### What to Show
 
@@ -108,7 +109,8 @@ At C2, zoom into the System to show its deployable units using pure C4 conventio
 | Frontend SPA | Container (App) | `Web App [React SPA]` |
 | Primary database | Container (Store) | `Order DB [PostgreSQL 15]` |
 | Cache | Container (Store) | `Cache [Redis 7]` |
-| Message broker | Container (App) | `Event Bus [Apache Kafka]` |
+| Message broker | **Edge label only** | Collapse into `Rel()` 4th parameter — e.g. `"Kafka topic: order-events (async)"`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
+| API Gateway / APIM | **Edge label only** | Collapse into `Rel()` 4th parameter — e.g. `"HTTPS via Kong"`. |
 | External systems | External System | `Payment Gateway [Stripe]` |
 
 ### Example C2
@@ -209,12 +211,13 @@ Zoom into: Order Service [Spring Boot] Container
 |  +----------+----------+  +----------+----------+               |
 +------------------------------------------------------------------+
               |                          |
-              | SQL                      | Kafka Protocol
+              | SQL                      | Kafka topic: orders (async)
               v                          v
      +---------------+          +----------------+
-     | Order DB      |          | Event Bus      |
-     | [PostgreSQL]  |          | [Kafka]        |
+     | Order DB      |          | Inventory Svc  |
+     | [PostgreSQL]  |          | [Spring Boot]  |
      +---------------+          +----------------+
+     (broker collapsed onto the edge label per Infrastructure-as-via Rule)
 ```
 
 ### Variant-Specific C3: Clean Architecture
@@ -291,12 +294,13 @@ Zoom into: Order Service [Spring Boot] Container
 |  +----------+----------+  +----------+----------+               |
 +------------------------------------------------------------------+
               |                          |
-              | SQL                      | Kafka Protocol
+              | SQL                      | Kafka topic: orders (async)
               v                          v
      +---------------+          +----------------+
-     | Order DB      |          | Event Bus      |
-     | [PostgreSQL]  |          | [Kafka]        |
+     | Order DB      |          | Inventory Svc  |
+     | [PostgreSQL]  |          | [Spring Boot]  |
      +---------------+          +----------------+
+     (broker collapsed onto the edge label per Infrastructure-as-via Rule)
 ```
 
 ---
@@ -356,8 +360,10 @@ Domain Events flow through an Event Publisher component to an external message b
 ```
 C3 Level:
   Order Aggregate --raises--> OrderPlacedEvent
-  DomainEventDispatcher [Component] --publishes to--> Event Bus [Kafka] (C2 Container)
-  InventoryEventListener [Component] --subscribes from--> Event Bus
+  DomainEventDispatcher [Component] --[Kafka topic: order-events (async)]-->
+                                       Inventory Service (C2 Container — consumer)
+  (broker collapsed onto edge label per Infrastructure-as-via Rule;
+   InventoryEventListener appears as a C3 component inside Inventory Service)
 ```
 
 ---
@@ -393,7 +399,8 @@ C3 Level:
 | Backend (all layers combined) | ONE Container `[Framework]` |
 | Database | Container (Store) `[Technology]` |
 | Cache | Container (Store) `[Technology]` |
-| Message broker | Container `[Technology]` |
+| Message broker | **Edge label only** — `Kafka topic: X (async)` on the producer→consumer `Rel()`. See Infrastructure-as-via Rule (L2). |
+| API Gateway / APIM | **Edge label only** — `HTTPS via Kong`. |
 | External API | External System |
 | Frontend SPA | Container (App) `[Technology]` |
 
@@ -426,10 +433,12 @@ Component labels:   Name [Stereotype]
                     IOrderRepository [Repository Interface]
                     PostgresOrderRepo [Repository]
 
-Arrow labels:       Protocol or purpose
+Arrow labels:       Protocol or purpose (with `via` / topic for transit infra)
                     SQL/JDBC
                     REST/HTTPS
-                    Kafka Protocol
+                    HTTPS via Kong              ← APIM collapsed
+                    Kafka topic: orders (async) ← broker collapsed
+                    RabbitMQ queue: settlements (async)
                     implements
                     calls
                     publishes to

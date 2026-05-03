@@ -97,21 +97,21 @@ At C2, you **zoom into the Banking Platform System** and show its internal struc
 | Each microservice in Layer 4 | `Container()` — e.g., "Payment Service [Spring Boot]" |
 | Each microservice in Layer 5 | `Container()` — e.g., "Current Account SD [Quarkus]" |
 | Layer 2 BFF services | `Container()` — e.g., "Mobile BFF [Node.js]" |
-| API Gateway | `Container()` — e.g., "API Gateway [Kong]" |
+| API Gateway | **Edge label only** — collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: keep as `Container()` only when the gateway runs custom architectural logic that is itself a unit of decision (in-house policy engine, complex routing). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
 | Transversal services | `Container()` — e.g., "IAM Service [Keycloak]" |
 | Each database per service | `ContainerDb()` — e.g., "Payment DB [PostgreSQL]" |
-| Message broker (Kafka) | `ContainerQueue()` — e.g., "Event Bus [Apache Kafka]" |
+| Message broker (Kafka) | **Edge label only** — collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: payment-events (async)"`). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
 | Cache | `ContainerDb()` — e.g., "Session Cache [Redis]" |
 
 ### C2 Grouping Convention
 
 The C4 L2 diagram uses **pure C4 conventions** — containers are grouped by their C4 element type, not by META layers:
 
-- **`Container()`** for all application/service containers (BFFs, orchestrators, business services, domain services, transversal services, API gateway)
+- **`Container()`** for all application/service containers (BFFs, orchestrators, business services, domain services, transversal services)
 - **`ContainerDb()`** for all data stores (databases, caches)
-- **`ContainerQueue()`** for message brokers (Kafka, RabbitMQ)
+- **Transit infrastructure** (API gateway, message brokers, topics, queues, service mesh, iPaaS) → **edge label**, not a node. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) for the canonical rule and label syntax.
 
-The Mermaid C4 renderer visually differentiates these by shape (box, cylinder, queue). No nested `Container_Boundary()` blocks are used for META layer grouping.
+The Mermaid C4 renderer visually differentiates the remaining nodes by shape (box, cylinder). No nested `Container_Boundary()` blocks are used for META layer grouping.
 
 **Note**: META layer grouping (horizontal bands for L2–L5, transversal column) is expressed in Diagram 1 (ASCII Logical View) and Diagram 4 (Detailed View), not in the C4 L2 diagram.
 
@@ -119,11 +119,10 @@ The Mermaid C4 renderer visually differentiates these by shape (box, cylinder, q
 
 ```
 Container: "Mobile BFF [Node.js + Express]"
-  → routes requests through [REST/HTTPS] → Container: "API Gateway [Kong]"
-
-Container: "API Gateway [Kong]"
-  → routes to [REST/HTTPS] → Container: "Transfer Orchestrator [Spring Boot]"
-  → routes to [REST/HTTPS] → Container: "Payment Service [Spring Boot]"
+  → routes requests [HTTPS via Kong] → Container: "Transfer Orchestrator [Spring Boot]"
+  → routes requests [HTTPS via Kong] → Container: "Payment Service [Spring Boot]"
+                                       (API Gateway collapsed onto the edge label —
+                                        not a node)
 
 Container: "Transfer Orchestrator [Spring Boot]"          ← Layer 3
   → calls [REST/HTTPS] → Container: "Payment Service [Spring Boot]"
@@ -133,7 +132,11 @@ Container: "Transfer Orchestrator [Spring Boot]"          ← Layer 3
 
 Container: "Payment Service [Spring Boot]"                ← Layer 4
   → calls [gRPC] → Container: "Payment Order SD [Quarkus]"
-  → publishes events [Kafka topic: payment-events] → Container: "Event Bus [Apache Kafka]"
+  → publishes events [Kafka topic: payment-events (async)]
+       → Container: "Settlement Service [Spring Boot]"
+       → Container: "Notification Service [Node.js]"
+       → Container: "Audit Log Service [Quarkus]"
+       (broker collapsed — one edge per producer-consumer pair, topic name is the join)
   → reads/writes [JDBC] → Container: "Payment DB [PostgreSQL]"
 
 Container: "Payment Order SD [Quarkus]"                   ← Layer 5
@@ -141,7 +144,7 @@ Container: "Payment Order SD [Quarkus]"                   ← Layer 5
   → reads/writes [JDBC] → Container: "Payment Domain DB [PostgreSQL]"
 
 Container: "IAM Service [Keycloak]"                       ← Transversal
-  ← validates tokens [REST/HTTPS] ← Container: "API Gateway [Kong]"
+  ← validates tokens [HTTPS via Kong] ← Container: "Mobile BFF [Node.js]"
 
 Container: "GL Posting Service [Spring Boot]"             ← Transversal
   → posts entries [MQ/JMS] → External System: "General Ledger [SAP]"
@@ -183,7 +186,8 @@ Component: "ComplianceClient [REST Client]"
   → calls [REST/HTTPS] → Container: "Compliance Service [Spring Boot]"
 
 Component: "NotificationClient [Kafka Producer]"
-  → publishes [Kafka topic: notification-events] → Container: "Event Bus [Apache Kafka]"
+  → [Kafka topic: notification-events (async)] → Container: "Notification Service [Node.js]"
+  (broker collapsed onto edge label per Infrastructure-as-via Rule)
 ```
 
 ### C3 for a BIAN Service Domain (Layer 5)
@@ -209,7 +213,10 @@ Component: "AccountRepository [Data Access]"
   → reads/writes [JDBC] → Container: "Account Domain DB [PostgreSQL]"
 
 Component: "AccountEventPublisher [Kafka Producer]"
-  → publishes [Kafka topic: account-events] → Container: "Event Bus [Apache Kafka]"
+  → [Kafka topic: account-events (async)] → Container: "Audit Service [Spring Boot]"
+  → [Kafka topic: account-events (async)] → Container: "Notification Service [Node.js]"
+  (broker collapsed onto edge labels per Infrastructure-as-via Rule;
+   one edge per producer-consumer pair, topic name is the join)
 ```
 
 The **Anti-Corruption Layer** component is critical in Layer 5 — it isolates the clean domain model from the complexity of legacy core banking protocols and data formats.
@@ -299,7 +306,7 @@ Transversal services are modeled as regular Containers but visually grouped vert
 
 ```
 C2: Container: "IAM Service [Keycloak]"
-      ← validates tokens ← Container: "API Gateway [Kong]"
+      ← validates tokens [HTTPS via Kong] ← Container: "Web BFF [Node.js]"
       ← authenticates users ← Container: "Mobile BFF [Node.js]"
 
     Container: "GL Posting Service [Spring Boot]"
@@ -443,9 +450,10 @@ The orchestrator is the **most connected Container** at C2 — it is the hub of 
 │ Layer 6 Data Fabric  │ C2: External System or Container             │
 │ Transversal services │ C2: Containers (vertical grouping)           │
 │ Financial Gateways   │ C1/C2: External System                      │
-│ API Gateway          │ C2: Container (infrastructure)               │
+│ API Gateway          │ C2: Edge label (`HTTPS via Kong`) — not node │
 │ Per-service database  │ C2: Container (data store)                  │
-│ Event Bus (Kafka)    │ C2: Container (infrastructure)               │
+│ Event Bus (Kafka)    │ C2: Edge label (`Kafka topic: X (async)`) — │
+│                      │     not node. Diagram 4 keeps it as a node.  │
 │ BIAN SD internals    │ C3: Components (incl. ACL)                   │
 │ Orchestrator internals│ C3: Components (saga steps)                 │
 ├──────────────────────┼──────────────────────────────────────────────┤

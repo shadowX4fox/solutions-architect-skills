@@ -68,7 +68,7 @@ System: "Order Management System"
 
 ## 3. C2 — Container Diagram
 
-At C2, you **zoom into the System** and show each independently deployed unit using pure C4 conventions. The 3-tier layer structure does NOT appear as visual groupings in the C4 L2 diagram — tier grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores, `ContainerQueue()` for brokers.
+At C2, you **zoom into the System** and show each independently deployed unit using pure C4 conventions. The 3-tier layer structure does NOT appear as visual groupings in the C4 L2 diagram — tier grouping belongs in Diagrams 1 (Logical View) and 4 (Detailed View). Containers are grouped by C4 element type: `Container()` for apps, `ContainerDb()` for stores. **Transit infrastructure** (API gateway, message brokers, topics, queues, service mesh, iPaaS) → **edge label**, not a node. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2).
 
 ### Deployment Variant 1: SPA + API + Database
 
@@ -384,20 +384,23 @@ Complexity: Low
 ```
 Containers:
   1. Web Application [React]
-  2. API Gateway [Kong]
-  3. Order Service [Spring Boot]         ← Business logic distributed
-  4. Payment Service [Spring Boot]
-  5. Inventory Service [Go]
-  6. Notification Service [Node.js]
-  7. Order DB [PostgreSQL]               ← Database per service
-  8. Payment DB [PostgreSQL]
-  9. Inventory DB [MongoDB]
-  10. Event Bus [Apache Kafka]
-  11. Search Service [Python]
-  12. Search Index [Elasticsearch]
+  2. Order Service [Spring Boot]         ← Business logic distributed
+  3. Payment Service [Spring Boot]
+  4. Inventory Service [Go]
+  5. Notification Service [Node.js]
+  6. Order DB [PostgreSQL]               ← Database per service
+  7. Payment DB [PostgreSQL]
+  8. Inventory DB [MongoDB]
+  9. Search Service [Python]
+  10. Search Index [Elasticsearch]
 
-Total: 10-20+ containers
-Arrows: Many (service-to-service, service-to-DB, service-to-broker)
+(API Gateway "Kong" and Event Bus "Apache Kafka" are NOT separate
+ containers at L2 — collapsed into edge labels per Infrastructure-as-via Rule.
+ Diagram 4 still renders the broker and gateway as nodes for ops fidelity.)
+
+Total: 10-15 containers
+Arrows: Many (service-to-service, service-to-DB; broker/gateway encoded
+        on edge labels as `Kafka topic: X (async)` / `HTTPS via Kong`)
 Complexity: High
 ```
 

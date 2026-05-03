@@ -288,6 +288,8 @@ CoreSystemA["Core System A<br/>(External)"]
 ## 5. Data Flow Guidelines
 
 > **Note**: This section covers data flow **arrows in `graph TB` topology diagrams** (Diagrams 1 and 4). For per-flow **sequence diagrams**, use `sequenceDiagram` format as defined in `references/DIAGRAM-GENERATION-GUIDE.md` → "Data Flow Diagrams — Sequence Diagrams". For C4 diagrams (Diagrams 2 and 3), use native `C4Context` / `C4Container` syntax — see DIAGRAM-GENERATION-GUIDE for templates.
+>
+> **Infrastructure scope differs by diagram type**: C4 L1 and L2 (Diagrams 2 and 3) collapse transit infrastructure (APIM, brokers, topics, queues, service mesh, iPaaS) into edge labels — see `DIAGRAM-GENERATION-GUIDE.md` → "Infrastructure-as-via Rule (L1)" and "(L2)". The Detailed View (Diagram 4, `graph TB` below) is the place where every topic, queue, and broker IS a first-class node — operational fidelity lives here.
 
 ### Synchronous Flows (Solid Arrows)
 

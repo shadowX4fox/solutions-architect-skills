@@ -155,6 +155,32 @@ C4Context
     Rel(system, ext1, "What flows", "Protocol")
 ```
 
+### Infrastructure-as-via Rule (L1)
+
+At C4 L1 the system is a single opaque box. Infrastructure that **only forwards traffic** between an actor/system and the system boundary is NOT a separate `System_Ext()` — it collapses into the edge label using a `via` annotation in the 4th `Rel()` parameter.
+
+**Collapse to edge label** (do NOT declare as `System_Ext()`):
+
+- Edge gateways and APIM placed in front of the system (Apigee, Kong, AWS API Gateway, Azure APIM, Cloudflare API Gateway)
+- iPaaS / ESB / integration platforms used purely for transit (Mulesoft, Boomi, Workato)
+- Edge CDNs used for routing (Cloudflare, CloudFront, Akamai)
+- Service mesh, load balancers, reverse proxies — always invisible at L1
+
+**Keep as `System_Ext()`**:
+
+- Any external system that owns business logic or persistent state — Stripe, SAP, Core Banking, SWIFT, Salesforce, vendor SaaS that the business depends on for an outcome
+- Authoritative data sources / systems of record outside the boundary
+
+**Edge label syntax** (4th `Rel()` parameter):
+
+```
+Rel(actor, system, "Submits payments", "HTTPS via Apigee")
+Rel(system, stripe, "Processes payments", "HTTPS via Mulesoft")
+Rel(actor, system, "Mobile API", "HTTPS via CloudFront → AWS APIGW")
+```
+
+If two transit hops chain (CDN → APIM), join them with `→` in the same label.
+
 ### Color Conventions (C4 standard — built-in)
 
 Native Mermaid C4 diagrams apply C4 color conventions automatically:
@@ -197,7 +223,7 @@ No `classDef` or manual styling is needed — the Mermaid C4 renderer handles co
 ### Structure Rules
 
 1. **System boundary**: Use `Container_Boundary()` to wrap all internal containers
-2. **Pure C4 grouping**: Group containers by C4 element type — `Container()` for apps/services, `ContainerDb()` for databases, `ContainerQueue()` for message brokers/queues. The element function itself provides visual differentiation (box vs cylinder vs queue shape). Do NOT group by architecture-specific layers/tiers — that belongs in Diagrams 1 and 4
+2. **Pure C4 grouping**: Group containers by C4 element type — `Container()` for apps/services, `ContainerDb()` for databases. The element function itself provides visual differentiation (box vs cylinder). Do NOT group by architecture-specific layers/tiers — that belongs in Diagrams 1 and 4. **Transit infrastructure (APIM, brokers, topics, queues, service mesh, load balancers, iPaaS) collapses into edge labels — see "Infrastructure-as-via Rule (L2)" below.** `ContainerQueue()` is reserved for the rare case where an owned/custom broker IS the architectural unit (e.g. an in-house event store)
 3. **External actor outside**: Declared before the boundary
 4. **External systems outside**: Declared after the boundary
 5. **Every relationship has a protocol label**: Use the 4th parameter of `Rel()` — `HTTPS`, `gRPC`, `Kafka`, `JDBC`, etc.
@@ -218,19 +244,57 @@ C4Container
 
         ContainerDb(s1, "store-name", "Technology", "Purpose")
 
-        ContainerQueue(q1, "broker-name", "Technology", "Purpose")
-
     }
 
     System_Ext(ext, "External System", "Technology")
 
-    Rel(actor, c1, "Uses", "Protocol")
-    Rel(c1, c2, "Calls", "Protocol")
-    Rel(c2, s1, "Reads/Writes", "Protocol")
-    Rel(c1, q1, "Publishes events", "Protocol")
-    Rel(q1, c2, "Consumes events", "Protocol")
-    Rel(c2, ext, "Calls", "Protocol")
+    Rel(actor, c1, "Uses", "HTTPS via Apigee")
+    Rel(c1, c2, "Publishes order events (async)", "Kafka topic: order-events")
+    Rel(c2, s1, "Reads/Writes", "JDBC")
+    Rel(c2, ext, "Calls", "HTTPS")
 ```
+
+### Infrastructure-as-via Rule (L2)
+
+At C4 L2 the diagram answers "which deployable units talk to which". **Transit infrastructure** — components that forward a request or route a message without owning business state or logic — is collapsed into the edge label rather than declared as a node.
+
+**Collapse to edge label** (do NOT declare as `Container()` or `ContainerQueue()`):
+
+- API Gateway / APIM (Kong, Apigee, AWS API Gateway, Azure APIM, Tyk)
+- Message brokers, topics, queues (Apache Kafka, RabbitMQ, AWS SQS, AWS SNS, AWS EventBridge, Azure Service Bus, ActiveMQ, NATS, Redis Streams used as a transport)
+- Service mesh (Istio, Linkerd, Consul Connect, AWS App Mesh)
+- Load balancers, reverse proxies, edge CDNs (NGINX-as-LB, HAProxy, ELB/ALB, CloudFront)
+- iPaaS / ESB used purely for transit (Mulesoft, Boomi, Workato, MuleSoft Anypoint)
+
+**Keep as nodes**:
+
+- All `ContainerDb()` — databases and caches own state, never collapse them
+- Application containers with business logic — BFFs, services, orchestrators, workers, schedulers
+- External systems with their own logic/state — `System_Ext()`
+- An owned/custom broker that IS the architectural unit (in-house event store, custom router) — exceptional use of `ContainerQueue()`
+
+**Edge label syntax** (4th `Rel()` parameter):
+
+| Pattern | Example |
+|---------|---------|
+| Sync via gateway | `Rel(client, service, "Calls", "HTTPS via Kong")` |
+| Async via topic | `Rel(producer, consumer, "Publishes order events (async)", "Kafka topic: order-events")` |
+| Async via queue | `Rel(producer, consumer, "Settlement requests (async)", "RabbitMQ queue: settlements")` |
+| Multi-hop transit | `Rel(client, service, "Submits payment", "HTTPS via Apigee → AWS APIGW")` |
+
+**Pub/sub fan-out**: draw one `Rel()` per producer-consumer pair, each labeled with the topic. Do not emit a broker node even when N consumers share a topic — the topic name on each edge is the join key.
+
+```
+Rel(orderSvc, paymentSvc,      "Order placed (async)", "Kafka topic: order-events")
+Rel(orderSvc, notificationSvc, "Order placed (async)", "Kafka topic: order-events")
+Rel(orderSvc, analyticsSvc,    "Order placed (async)", "Kafka topic: order-events")
+```
+
+**Subscriber with no in-scope producer**: model the upstream as `System_Ext("event-source", "...")` and keep the topic on the edge label. Do NOT fall back to a broker node.
+
+**Why**: at L2 the audience asks "what talks to what" — every transit hop on the page costs them attention. Operational fidelity (every topic, queue, partition) lives in **Diagram 4 (Detailed View)** below, where brokers and topics ARE first-class nodes per Rule 3.
+
+### Color Conventions (C4 standard — built-in)
 
 ### Color Conventions (C4 standard — built-in)
 
@@ -241,7 +305,7 @@ Native Mermaid C4 diagrams apply consistent styling automatically:
 | External actor | `Person()` | Dark blue box with person icon |
 | Application containers | `Container()` | Blue box |
 | Database containers | `ContainerDb()` | Blue cylinder |
-| Queue/broker containers | `ContainerQueue()` | Blue queue shape |
+| Queue/broker containers | `ContainerQueue()` | Blue queue shape — exceptional use only (owned/custom broker that IS the architectural unit). Default: collapse brokers/topics/queues to edge labels per Infrastructure-as-via Rule (L2). |
 | External systems | `System_Ext()` | Gray box |
 | System boundary | `Container_Boundary()` | Dashed border |
 
@@ -593,10 +657,13 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 **DO:**
 - Use `C4Context` or `C4Container` as the first line inside the Mermaid fence block
 - Use `Person()`, `System()`, `System_Ext()` for C4 L1 elements
-- Use `Container()`, `ContainerDb()`, `ContainerQueue()`, `Container_Boundary()` for C4 L2 elements
+- Use `Container()`, `ContainerDb()`, `Container_Boundary()` for C4 L2 elements
 - Use `Rel(from, to, "description", "protocol")` for all relationships
+- Encode transit infra (APIM, brokers, topics, queues, service mesh, iPaaS) on the 4th `Rel()` parameter — `"HTTPS via Kong"`, `"Kafka topic: X (async)"` — per Infrastructure-as-via Rule (Diagram 2 §"L1" / Diagram 3 §"L2"). Do NOT declare transit infra as `Container()`/`ContainerQueue()`/`System_Ext()` nodes
 - Use `title` for diagram titles
 - Use `UpdateElementStyle()` for custom colors when needed
+
+`ContainerQueue()` is reserved for the rare case where an owned/custom broker IS the architectural unit (in-house event store, custom router).
 
 **DO NOT:**
 - Do not mix `graph TB` syntax (`-->`, `subgraph`, `classDef`) with C4 diagram types

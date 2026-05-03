@@ -83,8 +83,9 @@ At C2, you **zoom into the System** and show every independently deployable unit
 |----------------------|-------------------|----------|
 | Each microservice | Application container | "Order Service [Spring Boot]" |
 | Each database | Data store container | "Order DB [PostgreSQL]" |
-| API Gateway / BFF | Application container | "API Gateway [Kong]" |
-| Message broker | Infrastructure container | "Event Bus [Apache Kafka]" |
+| BFF | Application container | "Mobile BFF [Node.js]" — owns business-facing logic, keep as node |
+| API Gateway | **Edge label only** | Collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: keep as `Container()` only when the gateway runs custom architectural logic. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
+| Message broker | **Edge label only** | Collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: order-events (async)"`). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
 | Cache | Data store container | "Session Cache [Redis]" |
 | SPA frontend | Application container | "Web App [React + TypeScript]" |
 | Mobile app | Application container | "Mobile App [React Native]" |
@@ -93,8 +94,10 @@ At C2, you **zoom into the System** and show every independently deployable unit
 
 ### Notation Conventions
 
-- **Technology in brackets**: Every container must specify its technology — `[Spring Boot]`, `[PostgreSQL]`, `[Apache Kafka]`
-- **Protocol on arrows**: Every arrow must specify the communication protocol — `REST/HTTPS`, `gRPC`, `AMQP`, `Kafka topic: order-events`, `JDBC`
+- **Technology in brackets**: Every container must specify its technology — `[Spring Boot]`, `[PostgreSQL]`
+- **Protocol on arrows**: Every arrow must specify the communication protocol — `REST/HTTPS`, `gRPC`, `AMQP`, `JDBC`
+- **`via` annotation**: When the call transits APIM, a service mesh, or an iPaaS, append `via <name>` to the protocol (e.g. `"HTTPS via Kong"`, `"HTTPS via Apigee → AWS APIGW"`) instead of declaring the transit hop as a node
+- **Topic / queue annotation**: When the call traverses a broker, the protocol parameter carries the topic or queue name and async flag (e.g. `"Kafka topic: order-events (async)"`, `"RabbitMQ queue: settlements (async)"`) — the broker is NOT a node at L2
 - **Direction matters**: Arrows point in the direction of the dependency (caller → callee)
 - **Database arrows**: Service → Database (the service depends on the database, not the reverse)
 - **Async arrows**: Distinguish synchronous (solid) from asynchronous (dashed) communication
@@ -103,36 +106,39 @@ At C2, you **zoom into the System** and show every independently deployable unit
 
 The C4 L2 diagram uses **pure C4 conventions** — containers are grouped by their C4 element type, not by architecture layers:
 
-- **`Container()`** for all application/service containers (API gateway, microservices, BFFs, workers)
+- **`Container()`** for all application/service containers (microservices, BFFs, workers, schedulers)
 - **`ContainerDb()`** for all data stores (databases, caches)
-- **`ContainerQueue()`** for message brokers (Kafka, RabbitMQ)
+- **Transit infrastructure** (API gateway, message brokers, topics, queues, service mesh, iPaaS) → **edge label**, not a node. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2).
 
-The Mermaid C4 renderer visually differentiates these by shape (box, cylinder, queue). Architecture-specific grouping (bounded contexts, deployment boundaries, functional groups) belongs in Diagrams 1 and 4.
+The Mermaid C4 renderer visually differentiates the remaining nodes by shape (box, cylinder). Architecture-specific grouping (bounded contexts, deployment boundaries, functional groups) belongs in Diagrams 1 and 4.
 
 ### Example C2 Elements
 
 ```
 Container: "Web App [React + TypeScript]"
-  → makes API calls to [REST/HTTPS] → Container: "API Gateway [Kong]"
-
-Container: "API Gateway [Kong]"
-  → routes to [REST/HTTPS] → Container: "Order Service [Spring Boot]"
-  → routes to [REST/HTTPS] → Container: "Product Service [Go]"
-  → routes to [REST/HTTPS] → Container: "Customer Service [NestJS]"
+  → makes API calls [HTTPS via Kong] → Container: "Order Service [Spring Boot]"
+  → makes API calls [HTTPS via Kong] → Container: "Product Service [Go]"
+  → makes API calls [HTTPS via Kong] → Container: "Customer Service [NestJS]"
+  (API Gateway collapsed onto edge labels — not a node)
 
 Container: "Order Service [Spring Boot]"
   → reads/writes [JDBC] → Container: "Order DB [PostgreSQL]"
-  → publishes events [Kafka topic: order-events] → Container: "Event Bus [Apache Kafka]"
+  → publishes order events [Kafka topic: order-events (async)]
+       → Container: "Payment Service [Spring Boot]"
+       → Container: "Notification Service [Node.js]"
+       (broker collapsed — one edge per producer-consumer pair)
   → calls [gRPC] → Container: "Inventory Service [Go]"
 
 Container: "Payment Service [Spring Boot]"
   → reads/writes [JDBC] → Container: "Payment DB [PostgreSQL]"
-  → subscribes to [Kafka topic: order-events] → Container: "Event Bus [Apache Kafka]"
-  → processes payments via [REST/HTTPS] → External System: "Stripe"
+  → publishes payment events [Kafka topic: payment-events (async)]
+       → Container: "Notification Service [Node.js]"
+  → processes payments [HTTPS via Mulesoft] → External System: "Stripe"
 
 Container: "Notification Service [Node.js]"
-  → subscribes to [Kafka topic: order-events, payment-events] → Container: "Event Bus [Apache Kafka]"
-  → sends emails via [REST/HTTPS] → External System: "SendGrid"
+  → sends emails [HTTPS] → External System: "SendGrid"
+  (subscriptions to order-events and payment-events appear on the
+   producer-side edges above — no broker node needed)
 ```
 
 ---
@@ -173,10 +179,12 @@ Component: "InventoryClient [REST Client]"
   → calls [REST/HTTPS] → Container: "Inventory Service [Go]"
 
 Component: "OrderEventPublisher [Kafka Producer]"
-  → publishes to [Kafka topic: order-events] → Container: "Event Bus [Apache Kafka]"
+  → publishes [Kafka topic: order-events (async)] → Container: "Notification Service"
+  → publishes [Kafka topic: order-events (async)] → Container: "Inventory Service"
+  (broker collapsed onto edge label per Infrastructure-as-via Rule)
 
 Component: "PaymentEventConsumer [Kafka Consumer]"
-  → subscribes to [Kafka topic: payment-events] → Container: "Event Bus [Apache Kafka]"
+  ← subscribes [Kafka topic: payment-events (async)] ← Container: "Payment Service"
   → uses → Component: "OrderService [Spring Service]"
 ```
 
@@ -214,23 +222,20 @@ Each BFF is a separate Container. Do not merge BFFs into a single "API Gateway" 
 
 ### 5.2 Event-Driven / Choreography Pattern
 
+At L2 the broker is **not** a node. Each producer-consumer pair becomes one direct edge labeled with the topic name and `(async)`. The topic name on the edge IS the join key — readers can still see the choreography without an "Event Bus" box clogging the diagram. Diagram 4 (Detailed View) keeps the broker as a node for ops visibility.
+
 ```
 C2 Translation:
   Container: "Order Service [Spring Boot]"
-    → publishes [Kafka: order-created] → Container: "Event Bus [Apache Kafka]"
+    → [Kafka topic: order-created (async)] → Container: "Payment Service [Spring Boot]"
+    → [Kafka topic: order-created (async)] → Container: "Inventory Service [Go]"
+    → [Kafka topic: order-created (async)] → Container: "Notification Service [Node.js]"
 
   Container: "Payment Service [Spring Boot]"
-    → subscribes [Kafka: order-created] → Container: "Event Bus [Apache Kafka]"
-    → publishes [Kafka: payment-completed] → Container: "Event Bus [Apache Kafka]"
-
-  Container: "Inventory Service [Go]"
-    → subscribes [Kafka: order-created] → Container: "Event Bus [Apache Kafka]"
-
-  Container: "Notification Service [Node.js]"
-    → subscribes [Kafka: order-created, payment-completed] → Container: "Event Bus [Apache Kafka]"
+    → [Kafka topic: payment-completed (async)] → Container: "Notification Service [Node.js]"
 ```
 
-Show the event bus as a single Container. Label arrows with the specific topic/event name. Use dashed arrows to distinguish async communication from sync.
+Each `Rel()` carries `Kafka topic: <name> (async)` on the protocol parameter. Use dashed arrows to distinguish async from sync. Do NOT declare an "Event Bus" container.
 
 ### 5.3 Saga Orchestration Pattern
 
