@@ -84,8 +84,8 @@ At C2, you **zoom into the System** and show every independently deployable unit
 | Each microservice | Application container | "Order Service [Spring Boot]" |
 | Each database | Data store container | "Order DB [PostgreSQL]" |
 | BFF | Application container | "Mobile BFF [Node.js]" — owns business-facing logic, keep as node |
-| API Gateway | **Edge label only** | Collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: keep as `Container()` only when the gateway runs custom architectural logic. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
-| Message broker | **Edge label only** | Collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: order-events (async)"`). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
+| API Gateway | **Edge encoding only** | Description = `(via Kong)`; protocol = `"HTTPS/JSON [Data]"` (canonical normal form). Exception: keep as `Container()` only when the gateway runs custom architectural logic. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
+| Message broker | **Edge encoding only** | Description = `(Kafka topic: order-events, async)`; protocol = `"TLS/AVRO [Event]"` (canonical normal form). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
 | Cache | Data store container | "Session Cache [Redis]" |
 | SPA frontend | Application container | "Web App [React + TypeScript]" |
 | Mobile app | Application container | "Mobile App [React Native]" |
@@ -95,9 +95,9 @@ At C2, you **zoom into the System** and show every independently deployable unit
 ### Notation Conventions
 
 - **Technology in brackets**: Every container must specify its technology — `[Spring Boot]`, `[PostgreSQL]`
-- **Protocol on arrows**: Every arrow must specify the communication protocol — `REST/HTTPS`, `gRPC`, `AMQP`, `JDBC`
-- **`via` annotation**: When the call transits APIM, a service mesh, or an iPaaS, append `via <name>` to the protocol (e.g. `"HTTPS via Kong"`, `"HTTPS via Apigee → AWS APIGW"`) instead of declaring the transit hop as a node
-- **Topic / queue annotation**: When the call traverses a broker, the protocol parameter carries the topic or queue name and async flag (e.g. `"Kafka topic: order-events (async)"`, `"RabbitMQ queue: settlements (async)"`) — the broker is NOT a node at L2
+- **Protocol on arrows (canonical normal form)**: The 4th `Rel()` parameter MUST follow `<PROTOCOL>/<STYLE> [Action Type]` per the Connection Naming Rule in DIAGRAM-GENERATION-GUIDE. Examples: `"HTTPS/JSON [Data]"`, `"gRPC/PROTOBUF [Internal]"`, `"TLS/AVRO [Event]"`, `"JDBC/SQL [Query]"`, `"TCP/RESP [Cache]"`
+- **`via` annotation**: When the call transits APIM, a service mesh, or an iPaaS, encode it in the **3rd `Rel()` parameter (description)** as `(via Kong)` / `(via Apigee → AWS APIGW)`. Do NOT put `via X` in the 4th parameter — that field is reserved for the canonical normal form
+- **Topic / queue annotation**: When the call traverses a broker, encode the topic / queue name and async flag in the **3rd `Rel()` parameter (description)** as `(Kafka topic: order-events, async)` / `(RabbitMQ queue: settlements, async)`. The 4th parameter carries the canonical normal form (`"TLS/AVRO [Event]"`, `"AMQP/JSON [Event]"`). The broker is NOT a node at L2
 - **Direction matters**: Arrows point in the direction of the dependency (caller → callee)
 - **Database arrows**: Service → Database (the service depends on the database, not the reverse)
 - **Async arrows**: Distinguish synchronous (solid) from asynchronous (dashed) communication
@@ -114,29 +114,31 @@ The Mermaid C4 renderer visually differentiates the remaining nodes by shape (bo
 
 ### Example C2 Elements
 
+Format note for prose narrative: `description → target — <PROTOCOL>/<STYLE> [Action]`. The em-dash separates the 3rd `Rel()` parameter (description, with via/topic context) from the 4th parameter (canonical normal form).
+
 ```
 Container: "Web App [React + TypeScript]"
-  → makes API calls [HTTPS via Kong] → Container: "Order Service [Spring Boot]"
-  → makes API calls [HTTPS via Kong] → Container: "Product Service [Go]"
-  → makes API calls [HTTPS via Kong] → Container: "Customer Service [NestJS]"
-  (API Gateway collapsed onto edge labels — not a node)
+  → makes API calls (via Kong)   → Container: "Order Service [Spring Boot]"      — HTTPS/JSON [Data]
+  → makes API calls (via Kong)   → Container: "Product Service [Go]"             — HTTPS/JSON [Data]
+  → makes API calls (via Kong)   → Container: "Customer Service [NestJS]"        — HTTPS/JSON [Data]
+  (API Gateway collapsed into description — not a node)
 
 Container: "Order Service [Spring Boot]"
-  → reads/writes [JDBC] → Container: "Order DB [PostgreSQL]"
-  → publishes order events [Kafka topic: order-events (async)]
+  → reads/writes order rows      → Container: "Order DB [PostgreSQL]"            — JDBC/SQL [Write]
+  → publishes (Kafka topic: order-events, async)                                  — TLS/AVRO [Event]
        → Container: "Payment Service [Spring Boot]"
        → Container: "Notification Service [Node.js]"
-       (broker collapsed — one edge per producer-consumer pair)
-  → calls [gRPC] → Container: "Inventory Service [Go]"
+       (broker collapsed into description — one edge per producer-consumer pair)
+  → calls Inventory Service      → Container: "Inventory Service [Go]"           — gRPC/PROTOBUF [Internal]
 
 Container: "Payment Service [Spring Boot]"
-  → reads/writes [JDBC] → Container: "Payment DB [PostgreSQL]"
-  → publishes payment events [Kafka topic: payment-events (async)]
+  → reads/writes payment rows    → Container: "Payment DB [PostgreSQL]"          — JDBC/SQL [Write]
+  → publishes (Kafka topic: payment-events, async)                                — TLS/AVRO [Event]
        → Container: "Notification Service [Node.js]"
-  → processes payments [HTTPS via Mulesoft] → External System: "Stripe"
+  → processes payments (via Mulesoft) → External System: "Stripe"                — HTTPS/JSON [Data]
 
 Container: "Notification Service [Node.js]"
-  → sends emails [HTTPS] → External System: "SendGrid"
+  → sends emails                 → External System: "SendGrid"                   — HTTPS/JSON [Data]
   (subscriptions to order-events and payment-events appear on the
    producer-side edges above — no broker node needed)
 ```
@@ -173,18 +175,20 @@ Component: "OrderService [Spring Service]"
   → uses → Component: "OrderEventPublisher [Kafka Producer]"
 
 Component: "OrderRepository [Spring Data JPA]"
-  → reads/writes [JDBC] → Container: "Order DB [PostgreSQL]"
+  → reads/writes order rows      → Container: "Order DB [PostgreSQL]"            — JDBC/SQL [Write]
 
 Component: "InventoryClient [REST Client]"
-  → calls [REST/HTTPS] → Container: "Inventory Service [Go]"
+  → calls Inventory Service      → Container: "Inventory Service [Go]"           — HTTPS/REST [Internal]
 
 Component: "OrderEventPublisher [Kafka Producer]"
-  → publishes [Kafka topic: order-events (async)] → Container: "Notification Service"
-  → publishes [Kafka topic: order-events (async)] → Container: "Inventory Service"
-  (broker collapsed onto edge label per Infrastructure-as-via Rule)
+  → publishes (Kafka topic: order-events, async)                                  — TLS/AVRO [Event]
+       → Container: "Notification Service"
+       → Container: "Inventory Service"
+  (broker collapsed into description per Infrastructure-as-via Rule)
 
 Component: "PaymentEventConsumer [Kafka Consumer]"
-  ← subscribes [Kafka topic: payment-events (async)] ← Container: "Payment Service"
+  ← subscribes (Kafka topic: payment-events, async)                               — TLS/AVRO [Event]
+       ← Container: "Payment Service"
   → uses → Component: "OrderService [Spring Service]"
 ```
 
@@ -227,25 +231,27 @@ At L2 the broker is **not** a node. Each producer-consumer pair becomes one dire
 ```
 C2 Translation:
   Container: "Order Service [Spring Boot]"
-    → [Kafka topic: order-created (async)] → Container: "Payment Service [Spring Boot]"
-    → [Kafka topic: order-created (async)] → Container: "Inventory Service [Go]"
-    → [Kafka topic: order-created (async)] → Container: "Notification Service [Node.js]"
+    → publishes (Kafka topic: order-created, async)                                  — TLS/AVRO [Event]
+         → Container: "Payment Service [Spring Boot]"
+         → Container: "Inventory Service [Go]"
+         → Container: "Notification Service [Node.js]"
 
   Container: "Payment Service [Spring Boot]"
-    → [Kafka topic: payment-completed (async)] → Container: "Notification Service [Node.js]"
+    → publishes (Kafka topic: payment-completed, async)                              — TLS/AVRO [Event]
+         → Container: "Notification Service [Node.js]"
 ```
 
-Each `Rel()` carries `Kafka topic: <name> (async)` on the protocol parameter. Use dashed arrows to distinguish async from sync. Do NOT declare an "Event Bus" container.
+Each `Rel()` carries the topic name and `async` flag in the **3rd parameter (description)** as `(Kafka topic: <name>, async)`, and the canonical `"TLS/AVRO [Event]"` normal form in the **4th parameter (protocol)**. Use dashed arrows to distinguish async from sync. Do NOT declare an "Event Bus" container.
 
 ### 5.3 Saga Orchestration Pattern
 
 ```
 C2 Translation:
   Container: "Checkout Orchestrator [Spring Boot]"   ← the saga orchestrator
-    → calls [REST] → Container: "Order Service"
-    → calls [REST] → Container: "Payment Service"
-    → calls [REST] → Container: "Inventory Service"
-    → reads/writes [JDBC] → Container: "Saga State DB [PostgreSQL]"
+    → calls Order Service       → Container: "Order Service"                     — HTTPS/REST [Internal]
+    → calls Payment Service     → Container: "Payment Service"                   — HTTPS/REST [Internal]
+    → calls Inventory Service   → Container: "Inventory Service"                 — HTTPS/REST [Internal]
+    → reads/writes saga state   → Container: "Saga State DB [PostgreSQL]"        — JDBC/SQL [Write]
 ```
 
 The saga orchestrator is its own Container. It maintains saga state in its own database. Show direct calls (REST/gRPC) from the orchestrator to participating services.
@@ -255,16 +261,16 @@ The saga orchestrator is its own Container. It maintains saga state in its own d
 ```
 C2 Translation:
   Container: "Order Command Service [Spring Boot]"       ← write side
-    → appends events [HTTP] → Container: "Event Store [EventStoreDB]"
+    → appends events            → Container: "Event Store [EventStoreDB]"        — HTTPS/JSON [Write]
 
   Container: "Event Store [EventStoreDB]"                 ← event log
-    → publishes [subscription] → Container: "Order Query Projector [Node.js]"
+    → publishes (subscription)  → Container: "Order Query Projector [Node.js]"   — HTTPS/JSON [Event]
 
   Container: "Order Query Projector [Node.js]"            ← projection builder
-    → writes [JDBC] → Container: "Order Read DB [PostgreSQL]"
+    → writes projections        → Container: "Order Read DB [PostgreSQL]"        — JDBC/SQL [Write]
 
   Container: "Order Query Service [Node.js]"              ← read side
-    → reads [JDBC] → Container: "Order Read DB [PostgreSQL]"
+    → reads projections         → Container: "Order Read DB [PostgreSQL]"        — JDBC/SQL [Query]
 ```
 
 CQRS means the write side and read side are separate Containers. The event store is a distinct data store Container. The projector is a separate Container that builds read models.
@@ -274,16 +280,16 @@ CQRS means the write side and read side are separate Containers. The event store
 ```
 C2 Translation:
   Container: "Order Service [Spring Boot]"
-    → reads/writes [JDBC] → Container: "Order DB [PostgreSQL]"
+    → reads/writes order rows   → Container: "Order DB [PostgreSQL]"             — JDBC/SQL [Write]
 
   Container: "Product Service [Go]"
-    → reads/writes [MongoDB Wire Protocol] → Container: "Product DB [MongoDB]"
+    → reads/writes products     → Container: "Product DB [MongoDB]"              — TCP/BINARY [Write]
 
   Container: "Search Service [Python]"
-    → reads/writes [REST] → Container: "Search Index [Elasticsearch]"
+    → reads/writes index docs   → Container: "Search Index [Elasticsearch]"      — HTTPS/JSON [Write]
 ```
 
-Each service has its own dedicated data store Container. Data stores are never shared between services. Use the specific protocol on the arrow (JDBC, MongoDB Wire Protocol, REST).
+Each service has its own dedicated data store Container. Data stores are never shared between services. Use the canonical normal form on the protocol field — collapse `[Query]` + `[Write]` into `[Internal]` only when the diagram doesn't separate read and write paths.
 
 ### 5.6 Service Mesh Pattern
 
@@ -303,11 +309,11 @@ The service mesh is a deployment concern, not an architectural container. Showin
 ```
 C2 Translation:
   Container: "Payment Service [Spring Boot]"
-    → processes payments via [REST/HTTPS] → External System: "Stripe [Payment Gateway]"
+    → processes payments        → External System: "Stripe [Payment Gateway]"    — HTTPS/JSON [Data]
 
   Container: "Notification Service [Node.js]"
-    → sends emails via [REST/HTTPS] → External System: "SendGrid [Email Service]"
-    → sends SMS via [REST/HTTPS] → External System: "Twilio [SMS Service]"
+    → sends emails              → External System: "SendGrid [Email Service]"    — HTTPS/JSON [Data]
+    → sends SMS                 → External System: "Twilio [SMS Service]"        — HTTPS/JSON [Data]
 ```
 
 External SaaS systems are always shown as External Systems (grey boxes), even at C2. They are not Containers within your system boundary.
@@ -329,13 +335,18 @@ External SaaS systems are always shown as External Systems (grey boxes), even at
 
 ### Arrow Conventions
 
-| Communication Type | Arrow Style | Label Example |
-|-------------------|-------------|---------------|
-| Synchronous REST | Solid arrow | `REST/HTTPS` |
-| Synchronous gRPC | Solid arrow | `gRPC/HTTP2` |
-| Asynchronous messaging | Dashed arrow | `Kafka topic: order-events` |
-| Database access | Solid arrow | `JDBC`, `MongoDB Wire Protocol` |
-| File/object access | Solid arrow | `S3 API / HTTPS` |
+| Communication Type | Arrow Style | Canonical 4th-`Rel()` Form | Description (3rd `Rel()`) |
+|-------------------|-------------|---------------------------|---------------------------|
+| Synchronous REST (external) | Solid arrow | `HTTPS/JSON [Data]` or `HTTPS/REST [Data]` | verb + via-hop if any |
+| Synchronous REST (internal) | Solid arrow | `HTTPS/REST [Internal]` or `HTTP/REST [Internal]` | verb |
+| Synchronous gRPC | Solid arrow | `gRPC/PROTOBUF [Internal]` | verb |
+| Asynchronous messaging | Dashed arrow | `TLS/AVRO [Event]` (or `Kafka/AVRO [Event]`) | `(Kafka topic: <name>, async)` |
+| Database write | Solid arrow | `JDBC/SQL [Write]` (Postgres/MySQL) · `TCP/BINARY [Write]` (MongoDB) | verb |
+| Database read | Solid arrow | `JDBC/SQL [Query]` · `HTTPS/JSON [Query]` (Elasticsearch) | verb |
+| Cache I/O | Solid arrow | `TCP/RESP [Cache]` (Redis) · `TCP/BINARY [Cache]` (Memcached) | verb |
+| Object/blob storage | Solid arrow | `HTTPS/BINARY [Storage]` (S3, GCS, Azure Blob) | verb |
+| Token validation / authn | Solid arrow | `HTTPS/JSON [Auth]` | `(via Kong)` if applicable |
+| Streaming | Solid arrow | `WSS/JSON [Stream]` · `gRPC/PROTOBUF [Stream]` | verb |
 
 ### Grouping
 
@@ -446,11 +457,15 @@ List all microservices, databases, message brokers, and frontends that make up y
 ├──────────────────────┼──────────────────────────────────────────────┤
 │ Arrow Labels         │                                              │
 ├──────────────────────┼──────────────────────────────────────────────┤
-│ REST call            │ "REST/HTTPS"                                 │
-│ gRPC call            │ "gRPC/HTTP2"                                 │
-│ Kafka publish        │ "Kafka topic: <name>"                        │
-│ Database access      │ "JDBC" / "MongoDB Wire Protocol" / "Redis"   │
-│ Async message        │ Dashed arrow + topic/queue name              │
+│ REST call (external) │ 4th param: "HTTPS/JSON [Data]"               │
+│ REST call (internal) │ 4th param: "HTTPS/REST [Internal]"           │
+│ gRPC call            │ 4th param: "gRPC/PROTOBUF [Internal]"        │
+│ Kafka publish        │ 3rd param: "(Kafka topic: <name>, async)"   │
+│                      │ 4th param: "TLS/AVRO [Event]"                │
+│ Database write       │ 4th param: "JDBC/SQL [Write]"                │
+│ Database read        │ 4th param: "JDBC/SQL [Query]"                │
+│ Cache I/O            │ 4th param: "TCP/RESP [Cache]" (Redis)        │
+│ Async (general)      │ Dashed arrow + topic/queue in 3rd param      │
 ├──────────────────────┼──────────────────────────────────────────────┤
 │ Common Mistakes      │                                              │
 ├──────────────────────┼──────────────────────────────────────────────┤

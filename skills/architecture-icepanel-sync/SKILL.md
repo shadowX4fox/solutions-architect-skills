@@ -138,7 +138,7 @@ Find code fences containing `C4Context`. For each element:
 - `Person_Ext(id, "name", "description")` → Record as external person
 - `System(id, "name", "description")` → Record as internal system
 - `System_Ext(id, "name", "description")` → Record as external system
-- `Rel(from, to, "description", "protocol")` → Record as connection
+- `Rel(from, to, "description", "protocol")` → Record as connection. The 3rd parameter (description) carries the verb plus any via-hop / topic / queue / async context; the 4th parameter (protocol) follows the canonical `<PROTOCOL>/<STYLE> [Action Type]` normal form per the Connection Naming Rule in `references/DIAGRAM-GENERATION-GUIDE.md`. The IcePanel `modelConnections.name` field stores the 4th-parameter value verbatim.
 
 **Extract from `C4Container` blocks:**
 
@@ -147,8 +147,8 @@ Find code fences containing `C4Container`. For each element:
 - `Container_Boundary(id, "name")` → Record the system boundary ID and name
 - `Container(id, "name", "technology", "description")` → Record as app container
 - `ContainerDb(id, "name", "technology", "description")` → Record as store container
-- `ContainerQueue(id, "name", "technology", "description")` → Record as store container (subtype: message-broker)
-- `Rel(from, to, "description", "protocol")` → Record as connection (merge with L1 connections, deduplicate)
+- `ContainerQueue(id, "name", "technology", "description")` → Record as store container (subtype: message-broker). Exceptional use only — per the Infrastructure-as-via Rule, transit brokers collapse into edge encoding (description + protocol on `Rel()`), not a `ContainerQueue` node
+- `Rel(from, to, "description", "protocol")` → Record as connection (merge with L1 connections, deduplicate). Same Connection Naming Rule applies — 4th parameter MUST be the canonical normal form
 
 **Skip**: `%%{init: ...}%%` theme directives, `title` lines, comment lines starting with `%%`.
 

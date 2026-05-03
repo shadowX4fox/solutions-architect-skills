@@ -74,15 +74,17 @@ At C2, you **zoom into the System** and show each independently deployed unit us
 
 The most common modern 3-tier deployment.
 
+Format note for prose narrative: `description → target — <PROTOCOL>/<STYLE> [Action]`. The em-dash separates the 3rd `Rel()` parameter (description) from the 4th parameter (canonical normal form per Connection Naming Rule).
+
 ```
 Container: "Web Application [React + TypeScript]"
-  → makes API calls to [REST/HTTPS] → Container: "Backend API [Spring Boot]"
+  → makes API calls               → Container: "Backend API [Spring Boot]"     — HTTPS/JSON [Data]
 
 Container: "Backend API [Spring Boot]"
-  → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+  → reads/writes order rows       → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 
 External System: "Stripe [Payment Gateway]"
-  ← processes payments via [REST/HTTPS] ← Container: "Backend API [Spring Boot]"
+  ← processes payments            ← Container: "Backend API [Spring Boot]"     — HTTPS/JSON [Data]
 ```
 
 **Containers: 3** (SPA + Backend + Database)
@@ -93,10 +95,10 @@ Traditional server-rendered application (no SPA).
 
 ```
 Container: "Web Application [Spring Boot + Thymeleaf]"
-  → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+  → reads/writes app state        → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 
 Person: "Customer"
-  → uses [HTTPS] → Container: "Web Application [Spring Boot + Thymeleaf]"
+  → uses                          → Container: "Web Application [Spring Boot + Thymeleaf]" — HTTPS/JSON [Data]
 ```
 
 **Containers: 2** (Web App + Database). The Presentation and Application tiers are a single Container because they deploy together.
@@ -107,17 +109,17 @@ Full-featured deployment with caching and background jobs.
 
 ```
 Container: "Web Application [React + TypeScript]"
-  → makes API calls to [REST/HTTPS] → Container: "Backend API [NestJS]"
+  → makes API calls               → Container: "Backend API [NestJS]"          — HTTPS/JSON [Data]
 
 Container: "Backend API [NestJS]"
-  → reads/writes [Prisma/PostgreSQL protocol] → Container: "Database [PostgreSQL]"
-  → caches/reads [Redis protocol] → Container: "Cache [Redis]"
-  → enqueues jobs [BullMQ/Redis protocol] → Container: "Job Queue [Redis]"
+  → reads/writes app rows         → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
+  → caches/reads session keys     → Container: "Cache [Redis]"                 — TCP/RESP [Cache]
+  → enqueues jobs                 → Container: "Job Queue [Redis]"             — TCP/RESP [Internal]
 
 Container: "Background Worker [NestJS]"
-  → dequeues jobs [BullMQ/Redis protocol] → Container: "Job Queue [Redis]"
-  → reads/writes [Prisma/PostgreSQL protocol] → Container: "Database [PostgreSQL]"
-  → sends emails via [REST/HTTPS] → External System: "SendGrid"
+  → dequeues jobs                 → Container: "Job Queue [Redis]"             — TCP/RESP [Internal]
+  → reads/writes app rows         → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
+  → sends emails                  → External System: "SendGrid"                — HTTPS/JSON [Data]
 ```
 
 **Containers: 5** (SPA + Backend + Worker + Database + Redis). Note: Redis may serve as both cache and job queue — model as one or two Containers depending on whether they are the same Redis instance.
@@ -128,10 +130,10 @@ Mobile application consuming a backend API.
 
 ```
 Container: "Mobile App [React Native]"
-  → makes API calls to [REST/HTTPS] → Container: "Backend API [NestJS]"
+  → makes API calls               → Container: "Backend API [NestJS]"          — HTTPS/JSON [Data]
 
 Container: "Backend API [NestJS]"
-  → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+  → reads/writes app rows         → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 ```
 
 **Containers: 3** (Mobile App + Backend + Database)
@@ -142,10 +144,10 @@ Backend API consumed by external systems or partner integrations.
 
 ```
 Container: "Backend API [FastAPI + Python]"
-  → reads/writes [psycopg2/PostgreSQL protocol] → Container: "Database [PostgreSQL]"
+  → reads/writes app rows         → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 
 External System: "Partner System"
-  → calls [REST/HTTPS + API Key] → Container: "Backend API [FastAPI + Python]"
+  → calls (API key auth)          → Container: "Backend API [FastAPI + Python]" — HTTPS/JSON [Data]
 ```
 
 **Containers: 2** (Backend + Database). No frontend Container.
@@ -174,13 +176,13 @@ Component: "CustomerService [Spring Service]"
   → uses → Component: "CustomerRepository [Spring Data JPA]"
 
 Component: "OrderRepository [Spring Data JPA]"
-  → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+  → reads/writes order rows       → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 
 Component: "CustomerRepository [Spring Data JPA]"
-  → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+  → reads/writes customer rows    → Container: "Database [PostgreSQL]"         — JDBC/SQL [Write]
 
 Component: "StripeClient [REST Client]"
-  → calls [REST/HTTPS] → External System: "Stripe [Payment Gateway]"
+  → processes payments            → External System: "Stripe [Payment Gateway]" — HTTPS/JSON [Data]
 ```
 
 ### Component Categories
@@ -205,11 +207,11 @@ Component: "StripeClient [REST Client]"
 ```
 C2:
   Container: "Web App [React]"
-    → redirects to [HTTPS] → External System: "Auth0 [IdP]"
+    → redirects to                → External System: "Auth0 [IdP]"             — HTTPS/JSON [Auth]
   External System: "Auth0 [IdP]"
-    → returns JWT token [HTTPS/redirect] → Container: "Web App [React]"
+    → returns JWT token           → Container: "Web App [React]"               — HTTPS/JSON [Auth]
   Container: "Web App [React]"
-    → sends requests with JWT [REST/HTTPS + Bearer token] → Container: "Backend API [Spring Boot]"
+    → sends requests (Bearer JWT) → Container: "Backend API [Spring Boot]"     — HTTPS/JSON [Data]
 
 C3 (inside Backend API):
   Component: "JwtAuthFilter [Spring Security Filter]"
@@ -225,8 +227,8 @@ C2:
   Container: "Web App [React]"
     → uploads file [multipart/form-data] → Container: "Backend API [NestJS]"
   Container: "Backend API [NestJS]"
-    → stores file [S3 API/HTTPS] → External System: "AWS S3 [Object Storage]"
-    → stores metadata [Prisma/PostgreSQL] → Container: "Database [PostgreSQL]"
+    → stores file                   → External System: "AWS S3 [Object Storage]" — HTTPS/BINARY [Storage]
+    → stores metadata               → Container: "Database [PostgreSQL]"       — JDBC/SQL [Write]
 
 C3 (inside Backend API):
   Component: "FileController"
@@ -241,11 +243,11 @@ C3 (inside Backend API):
 ```
 C2:
   Container: "Backend API [NestJS]"
-    → enqueues job [BullMQ] → Container: "Redis [Job Queue]"
+    → enqueues job                  → Container: "Redis [Job Queue]"           — TCP/RESP [Internal]
   Container: "Worker [NestJS]"
-    → dequeues job [BullMQ] → Container: "Redis [Job Queue]"
-    → generates report → External System: "AWS S3"
-    → sends notification → External System: "SendGrid"
+    → dequeues job                  → Container: "Redis [Job Queue]"           — TCP/RESP [Internal]
+    → generates report              → External System: "AWS S3"                — HTTPS/BINARY [Storage]
+    → sends notification            → External System: "SendGrid"              — HTTPS/JSON [Data]
 ```
 
 Note: The Worker is a **separate Container** because it deploys independently (different process, different scaling).
@@ -255,8 +257,8 @@ Note: The Worker is a **separate Container** because it deploys independently (d
 ```
 C2:
   Container: "Backend API [Spring Boot]"
-    → cache read/write [Redis protocol] → Container: "Cache [Redis]"
-    → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+    → cache read/write              → Container: "Cache [Redis]"               — TCP/RESP [Cache]
+    → reads/writes app rows         → Container: "Database [PostgreSQL]"       — JDBC/SQL [Write]
 
 C3 (inside Backend API):
   Component: "ProductController"
@@ -265,9 +267,9 @@ C3 (inside Backend API):
     → checks cache → Component: "CacheManager [Spring Cache + Redis]"
     → on miss, reads from → Component: "ProductRepository"
   Component: "CacheManager [Spring Cache + Redis]"
-    → reads/writes [Redis protocol] → Container: "Cache [Redis]"
+    → reads/writes cache keys       → Container: "Cache [Redis]"               — TCP/RESP [Cache]
   Component: "ProductRepository"
-    → reads/writes [JDBC] → Container: "Database [PostgreSQL]"
+    → reads/writes product rows     → Container: "Database [PostgreSQL]"       — JDBC/SQL [Query]
 ```
 
 ### 5.5 External API Integration
@@ -275,17 +277,17 @@ C3 (inside Backend API):
 ```
 C2:
   Container: "Backend API [NestJS]"
-    → fetches exchange rates [REST/HTTPS] → External System: "Exchange Rate API"
-    → processes payments [REST/HTTPS] → External System: "Stripe"
-    → sends SMS [REST/HTTPS] → External System: "Twilio"
+    → fetches exchange rates        → External System: "Exchange Rate API"     — HTTPS/JSON [Data]
+    → processes payments            → External System: "Stripe"                — HTTPS/JSON [Data]
+    → sends SMS                     → External System: "Twilio"                — HTTPS/JSON [Data]
 
 C3 (inside Backend API):
   Component: "ExchangeRateClient [Axios HTTP Client]"
-    → calls [REST/HTTPS] → External System: "Exchange Rate API"
+    → calls Exchange Rate API       → External System: "Exchange Rate API"     — HTTPS/JSON [Data]
   Component: "StripeClient [Stripe SDK]"
-    → calls [REST/HTTPS] → External System: "Stripe"
+    → calls Stripe                  → External System: "Stripe"                — HTTPS/JSON [Data]
   Component: "TwilioClient [Twilio SDK]"
-    → calls [REST/HTTPS] → External System: "Twilio"
+    → calls Twilio                  → External System: "Twilio"                — HTTPS/JSON [Data]
 ```
 
 ---
@@ -322,7 +324,7 @@ C3 (inside Backend API):
 
 **Why it's wrong**: If the SPA is built, versioned, and deployed independently from the backend (which is almost always the case), it is a separate Container. Omitting it hides a real deployment and communication boundary.
 
-**Fix**: Show the SPA as its own Container: "Customer Portal [React + TypeScript]" with an arrow to the Backend API showing "REST/HTTPS".
+**Fix**: Show the SPA as its own Container: "Customer Portal [React + TypeScript]" with an arrow to the Backend API; the `Rel()` 4th parameter follows the canonical normal form `"HTTPS/JSON [Data]"` per Connection Naming Rule.
 
 ---
 
@@ -400,7 +402,8 @@ Containers:
 
 Total: 10-15 containers
 Arrows: Many (service-to-service, service-to-DB; broker/gateway encoded
-        on edge labels as `Kafka topic: X (async)` / `HTTPS via Kong`)
+        as edge encoding — description `(Kafka topic: X, async)` / `(via Kong)`,
+        protocol `TLS/AVRO [Event]` / `HTTPS/JSON [Data]`)
 Complexity: High
 ```
 

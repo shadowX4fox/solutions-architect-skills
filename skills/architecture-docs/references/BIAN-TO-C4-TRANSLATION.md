@@ -94,8 +94,8 @@ At C2, zoom into the "Banking Platform" System to show its deployable units usin
 | Business Capability (L3) | Container (App) | `Payment Processor [Spring Boot, BIAN V12.0]` |
 | Service Domain (L4) | Container (App) | `Savings Account SD [Spring Boot, BIAN V12.0]` |
 | SD Database | Container (Store) | `Savings Account DB [PostgreSQL 15]` |
-| Event Bus | **Edge label only** | `Kafka topic: domain-events (async)` on producer→consumer `Rel()`. Do NOT emit `Domain Event Bus [Apache Kafka]` as a node. See Infrastructure-as-via Rule (L2). |
-| API Gateway | **Edge label only** | `HTTPS via Kong` on actor/system→service `Rel()`. Exception: gateway with custom architectural logic. |
+| Event Bus | **Edge encoding only** | Description (3rd `Rel()`): `(Kafka topic: domain-events, async)`. Protocol (4th `Rel()`): `"TLS/AVRO [Event]"`. Do NOT emit `Domain Event Bus [Apache Kafka]` as a node. See Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
+| API Gateway | **Edge encoding only** | Description (3rd `Rel()`): `(via Kong)`. Protocol (4th `Rel()`): `"HTTPS/JSON [Data]"`. Exception: gateway with custom architectural logic. |
 | Cache | Container (Store) | `Reference Data Cache [Redis 7]` |
 
 #### BIAN-Specific Labeling Convention
@@ -120,8 +120,8 @@ Non-BIAN containers (databases, caches) use standard labels:
 
 Transit infrastructure (brokers, gateways) does NOT appear as a node at L2 — it lives on the edge label:
 ```
-  Rel(payment_sd, settlement_sd, "Settlement events (async)", "Kafka topic: settlement-events")
-  Rel(channel, savings_sd, "Account inquiry", "HTTPS via Kong")
+  Rel(payment_sd, settlement_sd, "Settlement events (Kafka topic: settlement-events, async)", "TLS/AVRO [Event]")
+  Rel(channel,    savings_sd,    "Account inquiry (via Kong)",                                  "HTTPS/JSON [Data]")
 ```
 
 #### Example C2 — Payments Domain

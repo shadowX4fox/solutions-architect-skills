@@ -151,15 +151,17 @@ C4Context
 
     System_Ext(ext1, "External System", "What it does — Technology")
 
-    Rel(actor1, system, "What flows", "Protocol")
-    Rel(system, ext1, "What flows", "Protocol")
+    Rel(actor1, system, "What flows (via <transit hop if any>, sync/async)", "<PROTOCOL>/<STYLE> [Action Type]")
+    Rel(system, ext1,   "What flows (via <transit hop if any>, sync/async)", "<PROTOCOL>/<STYLE> [Action Type]")
 ```
+
+The 3rd parameter (description) carries human prose: verb, data subject, via-hop, sync/async flag. The 4th parameter (protocol) follows the canonical normal form — see "Connection Naming Rule (L1 + L2)" in Diagram 3 below for the full rule, action-type vocabulary, and protocol/style table.
 
 ### Infrastructure-as-via Rule (L1)
 
-At C4 L1 the system is a single opaque box. Infrastructure that **only forwards traffic** between an actor/system and the system boundary is NOT a separate `System_Ext()` — it collapses into the edge label using a `via` annotation in the 4th `Rel()` parameter.
+At C4 L1 the system is a single opaque box. Infrastructure that **only forwards traffic** between an actor/system and the system boundary is NOT a separate `System_Ext()` — it collapses into the **3rd `Rel()` parameter (description)** as a `(via <hop>)` annotation. The 4th parameter remains the canonical `<PROTOCOL>/<STYLE> [Action Type]` normal form.
 
-**Collapse to edge label** (do NOT declare as `System_Ext()`):
+**Collapse to (via …) in description** (do NOT declare as `System_Ext()`):
 
 - Edge gateways and APIM placed in front of the system (Apigee, Kong, AWS API Gateway, Azure APIM, Cloudflare API Gateway)
 - iPaaS / ESB / integration platforms used purely for transit (Mulesoft, Boomi, Workato)
@@ -171,15 +173,15 @@ At C4 L1 the system is a single opaque box. Infrastructure that **only forwards 
 - Any external system that owns business logic or persistent state — Stripe, SAP, Core Banking, SWIFT, Salesforce, vendor SaaS that the business depends on for an outcome
 - Authoritative data sources / systems of record outside the boundary
 
-**Edge label syntax** (4th `Rel()` parameter):
+**Edge encoding** (description in 3rd parameter, normal form in 4th parameter):
 
 ```
-Rel(actor, system, "Submits payments", "HTTPS via Apigee")
-Rel(system, stripe, "Processes payments", "HTTPS via Mulesoft")
-Rel(actor, system, "Mobile API", "HTTPS via CloudFront → AWS APIGW")
+Rel(actor,  system, "Submits payments (via Apigee)",                "HTTPS/JSON [Data]")
+Rel(system, stripe, "Processes payments (via Mulesoft)",            "HTTPS/JSON [Data]")
+Rel(actor,  system, "Mobile API (via CloudFront → AWS APIGW)",      "HTTPS/JSON [Data]")
 ```
 
-If two transit hops chain (CDN → APIM), join them with `→` in the same label.
+If two transit hops chain (CDN → APIM), join them with `→` inside the description's `(via …)` clause.
 
 ### Color Conventions (C4 standard — built-in)
 
@@ -226,8 +228,8 @@ No `classDef` or manual styling is needed — the Mermaid C4 renderer handles co
 2. **Pure C4 grouping**: Group containers by C4 element type — `Container()` for apps/services, `ContainerDb()` for databases. The element function itself provides visual differentiation (box vs cylinder). Do NOT group by architecture-specific layers/tiers — that belongs in Diagrams 1 and 4. **Transit infrastructure (APIM, brokers, topics, queues, service mesh, load balancers, iPaaS) collapses into edge labels — see "Infrastructure-as-via Rule (L2)" below.** `ContainerQueue()` is reserved for the rare case where an owned/custom broker IS the architectural unit (e.g. an in-house event store)
 3. **External actor outside**: Declared before the boundary
 4. **External systems outside**: Declared after the boundary
-5. **Every relationship has a protocol label**: Use the 4th parameter of `Rel()` — `HTTPS`, `gRPC`, `Kafka`, `JDBC`, etc.
-6. **Sync vs async**: Indicate in the relationship description (3rd parameter) — e.g., "Publishes events (async)" vs "Queries (sync)"
+5. **Every relationship has a normalized protocol label**: The 4th parameter of `Rel()` MUST follow the canonical form `<PROTOCOL>/<STYLE> [Action Type]` — see "Connection Naming Rule (L1 + L2)" below. Examples: `"HTTPS/JSON [Data]"`, `"gRPC/PROTOBUF [Internal]"`, `"TLS/AVRO [Event]"`, `"JDBC/SQL [Query]"`. Do NOT put `via <hop>`, topic names, queue names, or sync/async flags in this field — they belong in the 3rd parameter (description).
+6. **Sync vs async, via/topic context**: Place in the 3rd parameter — e.g., `"Publishes order events (Kafka topic: order-events, async)"`, `"Calls (via Kong)"`, `"Reads order (sync)"`. The 3rd parameter is human-prose; the 4th parameter is machine-readable transport.
 
 ### Template
 
@@ -248,10 +250,10 @@ C4Container
 
     System_Ext(ext, "External System", "Technology")
 
-    Rel(actor, c1, "Uses", "HTTPS via Apigee")
-    Rel(c1, c2, "Publishes order events (async)", "Kafka topic: order-events")
-    Rel(c2, s1, "Reads/Writes", "JDBC")
-    Rel(c2, ext, "Calls", "HTTPS")
+    Rel(actor, c1, "Uses (via Apigee)",                                       "HTTPS/JSON [Data]")
+    Rel(c1, c2,    "Publishes order events (Kafka topic: order-events, async)", "TLS/AVRO [Event]")
+    Rel(c2, s1,    "Reads/Writes order rows",                                  "JDBC/SQL [Write]")
+    Rel(c2, ext,   "Calls payment API",                                        "HTTPS/JSON [Data]")
 ```
 
 ### Infrastructure-as-via Rule (L2)
@@ -273,28 +275,108 @@ At C4 L2 the diagram answers "which deployable units talk to which". **Transit i
 - External systems with their own logic/state — `System_Ext()`
 - An owned/custom broker that IS the architectural unit (in-house event store, custom router) — exceptional use of `ContainerQueue()`
 
-**Edge label syntax** (4th `Rel()` parameter):
+**Edge label encoding**: the 3rd `Rel()` parameter (description) carries the via-hop / topic / queue / async context for human readers; the 4th parameter (protocol) carries the canonical `<PROTOCOL>/<STYLE> [Action Type]` normal form (see "Connection Naming Rule (L1 + L2)" below).
 
 | Pattern | Example |
 |---------|---------|
-| Sync via gateway | `Rel(client, service, "Calls", "HTTPS via Kong")` |
-| Async via topic | `Rel(producer, consumer, "Publishes order events (async)", "Kafka topic: order-events")` |
-| Async via queue | `Rel(producer, consumer, "Settlement requests (async)", "RabbitMQ queue: settlements")` |
-| Multi-hop transit | `Rel(client, service, "Submits payment", "HTTPS via Apigee → AWS APIGW")` |
+| Sync via gateway | `Rel(client, service, "Calls (via Kong)", "HTTPS/JSON [Data]")` |
+| Async via topic | `Rel(producer, consumer, "Publishes order events (Kafka topic: order-events, async)", "TLS/AVRO [Event]")` |
+| Async via queue | `Rel(producer, consumer, "Settlement requests (RabbitMQ queue: settlements, async)", "AMQP/JSON [Event]")` |
+| Multi-hop transit | `Rel(client, service, "Submits payment (via Apigee → AWS APIGW)", "HTTPS/JSON [Data]")` |
 
-**Pub/sub fan-out**: draw one `Rel()` per producer-consumer pair, each labeled with the topic. Do not emit a broker node even when N consumers share a topic — the topic name on each edge is the join key.
+**Pub/sub fan-out**: draw one `Rel()` per producer-consumer pair. The topic name lives in the description (3rd parameter); the 4th parameter is the canonical normal form. Do not emit a broker node even when N consumers share a topic — the topic name on each edge is the join key.
 
 ```
-Rel(orderSvc, paymentSvc,      "Order placed (async)", "Kafka topic: order-events")
-Rel(orderSvc, notificationSvc, "Order placed (async)", "Kafka topic: order-events")
-Rel(orderSvc, analyticsSvc,    "Order placed (async)", "Kafka topic: order-events")
+Rel(orderSvc, paymentSvc,      "Order placed (Kafka topic: order-events, async)", "TLS/AVRO [Event]")
+Rel(orderSvc, notificationSvc, "Order placed (Kafka topic: order-events, async)", "TLS/AVRO [Event]")
+Rel(orderSvc, analyticsSvc,    "Order placed (Kafka topic: order-events, async)", "TLS/AVRO [Event]")
 ```
 
 **Subscriber with no in-scope producer**: model the upstream as `System_Ext("event-source", "...")` and keep the topic on the edge label. Do NOT fall back to a broker node.
 
 **Why**: at L2 the audience asks "what talks to what" — every transit hop on the page costs them attention. Operational fidelity (every topic, queue, partition) lives in **Diagram 4 (Detailed View)** below, where brokers and topics ARE first-class nodes per Rule 3.
 
-### Color Conventions (C4 standard — built-in)
+### Connection Naming Rule (L1 + L2)
+
+The 4th parameter of every `Rel()` MUST follow this strict normal form:
+
+```
+<PROTOCOL>/<STYLE> [Action Type]
+```
+
+- **PROTOCOL** — transport in uppercase: `HTTPS`, `HTTP`, `TLS`, `gRPC`, `WSS` / `WS`, `AMQP`, `MQTT`, `Kafka`, `JDBC`, `MQ/JMS`, `TCP`, `UDP`
+- **STYLE** — payload format or API/serialization style in uppercase: `JSON`, `GRAPHQL`, `REST`, `SOAP`, `XML`, `AVRO`, `BINARY`, `PROTOBUF`, `MSGPACK`, `SQL`, `RESP`, `FORM`, `MULTIPART`, `PLAIN`, `CBOR`
+- **[Action Type]** — closed vocabulary, exactly one of `[Data]`, `[Internal]`, `[Event]`, `[Auth]`, `[Cache]`, `[Stream]`, `[Query]`, `[Write]`, `[Storage]`, `[Telemetry]`
+
+The 3rd parameter (description) carries human prose: the verb, the data subject, the via-hop, the topic / queue name, and the sync/async flag.
+
+#### Action-Type Vocabulary (closed set — reject anything outside this list)
+
+| Tag | Meaning | Typical pairings |
+|---|---|---|
+| `[Data]` | Business data request/response across a trust boundary | front-end → BFF, partner API, public API, external client → service |
+| `[Internal]` | Internal service-to-service call within the system boundary | microservice → microservice, BFF → backend service, orchestrator → domain service |
+| `[Event]` | Async pub/sub event (one-way fire-and-forget or fan-out) | Kafka topic publish, RabbitMQ exchange, SNS topic, EventBridge bus |
+| `[Auth]` | Authentication / authorization / token validation | OIDC introspect, JWT signing-key fetch, IAM attribute query, mTLS handshake |
+| `[Cache]` | Cache read or write | Redis GET/SET, Memcached, distributed in-memory cache |
+| `[Stream]` | Long-lived streaming connection | WebSocket, SSE, gRPC server/bidirectional streaming, Kafka consumer poll loop |
+| `[Query]` | Database / search-index read | SQL SELECT, Elasticsearch query, document-store get, Cypher MATCH |
+| `[Write]` | Database / search-index write (use when distinguishing from `[Query]` in CQRS contexts) | SQL INSERT/UPDATE/DELETE, ES index, document-store put |
+| `[Storage]` | Blob / object storage I/O | S3 PUT/GET, GCS, Azure Blob, MinIO |
+| `[Telemetry]` | Observability emission (logs, metrics, traces) | OTLP, Loki push, Prometheus remote-write, Jaeger span export |
+
+In contexts that don't separate read/write paths, collapse `[Query]` + `[Write]` into `[Internal]` if both are infrastructure-backing calls. Use the granular tags only when the diagram shows separate read/write models (CQRS, read replicas).
+
+#### Protocol / Style Common Pairings
+
+The most common combinations. Architects pick from this when authoring; novel pairings are allowed if they follow `UPPERCASE/UPPERCASE` casing.
+
+| Protocol | Common Styles | Notes |
+|---|---|---|
+| `HTTPS` | `JSON`, `GRAPHQL`, `REST`, `SOAP`, `XML`, `FORM`, `MULTIPART`, `BINARY` | Default external API transport |
+| `HTTP` | `JSON`, `REST`, `FORM`, `PLAIN` | Internal-only or legacy; prefer HTTPS |
+| `TLS` | `AVRO`, `BINARY`, `PROTOBUF`, `MSGPACK` | Encrypted byte stream over TCP without HTTP framing — Kafka with TLS, custom binary protocols |
+| `gRPC` | `PROTOBUF` | Default for service-to-service Protobuf RPC |
+| `WSS` / `WS` | `JSON`, `BINARY`, `MSGPACK` | WebSocket; use `WSS` for production |
+| `AMQP` | `JSON`, `AVRO`, `PROTOBUF` | RabbitMQ classic, Service Bus |
+| `MQTT` | `JSON`, `BINARY`, `CBOR` | IoT / telemetry |
+| `Kafka` | `AVRO`, `JSON`, `PROTOBUF` | When showing Kafka explicitly without TLS framing context |
+| `JDBC` | `SQL` | Almost always paired |
+| `MQ/JMS` | `XML`, `JSON`, `BINARY` | IBM MQ, ActiveMQ |
+| `TCP` | `RESP`, `BINARY`, `PLAIN` | Redis (RESP), custom binary |
+| `UDP` | `BINARY`, `PLAIN` | DNS, syslog, custom telemetry |
+
+#### Worked Examples
+
+```
+Rel(client,    service,  "Calls (via Kong)",                                   "HTTPS/JSON [Data]")
+Rel(web,       bff,      "Submits orders",                                     "HTTPS/GRAPHQL [Data]")
+Rel(svc_a,     svc_b,    "Internal call",                                      "HTTP/REST [Internal]")
+Rel(svc_a,     svc_b,    "Service-to-service",                                 "gRPC/PROTOBUF [Internal]")
+Rel(prod,      cons,     "Order events (Kafka topic: orders, async)",          "TLS/AVRO [Event]")
+Rel(svc,       redis,    "Session lookup",                                     "TCP/RESP [Cache]")
+Rel(svc,       db,       "Order read",                                         "JDBC/SQL [Query]")
+Rel(svc,       s3,       "Document upload",                                    "HTTPS/BINARY [Storage]")
+Rel(bff,       iam,      "Token validation",                                   "HTTPS/JSON [Auth]")
+Rel(client,    ws_svc,   "Live updates",                                       "WSS/JSON [Stream]")
+Rel(svc,       otel,     "Span export",                                        "gRPC/PROTOBUF [Telemetry]")
+```
+
+**Diagram 4 (Detailed View, `graph TB`)** uses the same `<PROTOCOL>/<STYLE> [Action Type]` form on its arrow labels for consistency, modulo Mermaid `graph TB` syntax (no parameter slots — the entire label is one string after `--`):
+
+```
+SVC_A -- "HTTPS/JSON [Data]" --> SVC_B
+PROD -. "TLS/AVRO [Event]" .-> CONS
+```
+
+Anti-patterns the rule rejects:
+
+- `"REST/HTTPS"` — wrong order; protocol is HTTPS, style is REST → `"HTTPS/REST [Data]"` or `"HTTPS/REST [Internal]"`
+- `"Kafka async"` — missing style and action → `"TLS/AVRO [Event]"` (with topic + async in description)
+- `"HTTPS via Kong"` — via belongs in description → 3rd param `"... (via Kong)"`, 4th param `"HTTPS/JSON [Data]"`
+- `"Kafka topic: order-events"` — topic belongs in description → 3rd param `"... (Kafka topic: order-events, async)"`, 4th param `"TLS/AVRO [Event]"`
+- `"HTTPS"` — no style, no action → `"HTTPS/JSON [Data]"` (or whatever fits)
+- `"HTTPS/json [data]"` — wrong casing → uppercase protocol/style, PascalCase action
 
 ### Color Conventions (C4 standard — built-in)
 
@@ -659,7 +741,8 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 - Use `Person()`, `System()`, `System_Ext()` for C4 L1 elements
 - Use `Container()`, `ContainerDb()`, `Container_Boundary()` for C4 L2 elements
 - Use `Rel(from, to, "description", "protocol")` for all relationships
-- Encode transit infra (APIM, brokers, topics, queues, service mesh, iPaaS) on the 4th `Rel()` parameter — `"HTTPS via Kong"`, `"Kafka topic: X (async)"` — per Infrastructure-as-via Rule (Diagram 2 §"L1" / Diagram 3 §"L2"). Do NOT declare transit infra as `Container()`/`ContainerQueue()`/`System_Ext()` nodes
+- The 4th `Rel()` parameter MUST follow the canonical normal form `<PROTOCOL>/<STYLE> [Action Type]` per the Connection Naming Rule (Diagram 3 § "Connection Naming Rule (L1 + L2)") — examples: `"HTTPS/JSON [Data]"`, `"gRPC/PROTOBUF [Internal]"`, `"TLS/AVRO [Event]"`, `"JDBC/SQL [Query]"`. Reject any 4th-parameter string that does not match this form (no `"REST/HTTPS"`, no `"Kafka async"`, no bare `"HTTPS"`, no `"HTTPS via Kong"`)
+- The 3rd `Rel()` parameter (description) carries human prose — verb, data subject, transit-hop `(via Kong)`, topic / queue name `(Kafka topic: X, async)`, sync/async flag — per the Infrastructure-as-via Rule (Diagram 2 § "L1" / Diagram 3 § "L2"). Do NOT declare transit infra as `Container()`/`ContainerQueue()`/`System_Ext()` nodes
 - Use `title` for diagram titles
 - Use `UpdateElementStyle()` for custom colors when needed
 
@@ -669,6 +752,8 @@ Applies to: Diagram 2 (C4 L1 System Context) uses `C4Context`; Diagram 3 (C4 L2 
 - Do not mix `graph TB` syntax (`-->`, `subgraph`, `classDef`) with C4 diagram types
 - Do not use `\n` in labels — use the function parameters for multi-line information
 - Do not use HTML tags in element labels
+- Do not put `via <hop>`, topic / queue names, or `async` flags in the 4th `Rel()` parameter — those belong in the 3rd parameter (description)
+- Do not invent new `[Action Type]` tags — the closed vocabulary is `[Data] [Internal] [Event] [Auth] [Cache] [Stream] [Query] [Write] [Storage] [Telemetry]`
 
 ### Data Flow Diagrams (Sequence Diagrams)
 

@@ -22,7 +22,9 @@ modelObjects:                        # Systems, apps, stores
 
 modelConnections:                    # Relationships between objects
   - id: "conn-kebab-id"             # Unique connection ID
-    name: "Protocol / Description"   # e.g. "REST/HTTPS", "Kafka async"
+    name: "<PROTOCOL>/<STYLE> [Action]"   # canonical normal form per Connection Naming Rule —
+                                          # e.g. "HTTPS/JSON [Data]", "TLS/AVRO [Event]",
+                                          # "gRPC/PROTOBUF [Internal]", "JDBC/SQL [Write]"
     direction: outgoing              # outgoing | bidirectional
     originId: "source-object-id"     # Must reference a modelObject id
     targetId: "target-object-id"     # Must reference a modelObject id
@@ -128,8 +130,8 @@ One tag per canonical type:
 | Container name | `C4Container` `Container()` name param | `docs/components/README.md` Component column |
 | Container type (app/store) | Mermaid function (`Container` vs `ContainerDb` vs `ContainerQueue`) | `docs/components/README.md` Type column |
 | Container technology | `C4Container` technology param | `docs/components/README.md` Technology column |
-| Connection protocol | `Rel()` 4th param | `docs/05-integration-points.md` Protocol column |
-| Connection description | `Rel()` 3rd param | `docs/05-integration-points.md` Integration column |
+| Connection protocol | `Rel()` 4th param (canonical `<PROTOCOL>/<STYLE> [Action]` per Connection Naming Rule in DIAGRAM-GENERATION-GUIDE) | `docs/05-integration-points.md` Protocol column |
+| Connection description | `Rel()` 3rd param (carries verb + via-hop + topic/queue + sync/async flag) | `docs/05-integration-points.md` Integration column |
 | External systems | `C4Context` `System_Ext()` | `docs/05-integration-points.md` external entries |
 
 ---

@@ -290,6 +290,8 @@ CoreSystemA["Core System A<br/>(External)"]
 > **Note**: This section covers data flow **arrows in `graph TB` topology diagrams** (Diagrams 1 and 4). For per-flow **sequence diagrams**, use `sequenceDiagram` format as defined in `references/DIAGRAM-GENERATION-GUIDE.md` → "Data Flow Diagrams — Sequence Diagrams". For C4 diagrams (Diagrams 2 and 3), use native `C4Context` / `C4Container` syntax — see DIAGRAM-GENERATION-GUIDE for templates.
 >
 > **Infrastructure scope differs by diagram type**: C4 L1 and L2 (Diagrams 2 and 3) collapse transit infrastructure (APIM, brokers, topics, queues, service mesh, iPaaS) into edge labels — see `DIAGRAM-GENERATION-GUIDE.md` → "Infrastructure-as-via Rule (L1)" and "(L2)". The Detailed View (Diagram 4, `graph TB` below) is the place where every topic, queue, and broker IS a first-class node — operational fidelity lives here.
+>
+> **Connection-label normal form**: The 4th `Rel()` parameter at L1 / L2 follows the canonical `<PROTOCOL>/<STYLE> [Action Type]` form (e.g. `"HTTPS/JSON [Data]"`, `"TLS/AVRO [Event]"`, `"gRPC/PROTOBUF [Internal]"`) per `DIAGRAM-GENERATION-GUIDE.md` → "Connection Naming Rule (L1 + L2)". Diagram 4 (`graph TB` below) follows the same normal form on its arrow labels — `SVC_A -- "HTTPS/JSON [Data]" --> SVC_B`, `PROD -. "TLS/AVRO [Event]" .-> CONS`. The 3rd parameter (description) carries human prose: verb, via-hop in parentheses, topic / queue + async flag.
 
 ### Synchronous Flows (Solid Arrows)
 

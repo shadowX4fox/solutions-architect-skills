@@ -43,8 +43,8 @@ Therefore, an N-Layer backend is **ONE Container** regardless of how many intern
 | Backend application (all layers) | YES — one Container | Single deployable process |
 | PostgreSQL database | YES — separate Container | Separate process, owns state |
 | Redis cache | YES — separate Container | Separate process, owns state |
-| Kafka / RabbitMQ / SQS / SNS | NO at L2 — **edge label** | Transit infrastructure. Collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: order-events (async)"`). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). Diagram 4 (Detailed View) still renders topics/queues as nodes. Exception: an owned/custom in-house broker that IS the architectural unit may stay as a `ContainerQueue()`. |
-| API Gateway / APIM | NO at L2 — **edge label** | Transit infrastructure. Collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: gateway with custom architectural logic. |
+| Kafka / RabbitMQ / SQS / SNS | NO at L2 — **edge encoding** | Transit infrastructure. Description (3rd `Rel()`): `(Kafka topic: order-events, async)`. Protocol (4th `Rel()`): `"TLS/AVRO [Event]"` (canonical normal form). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). Diagram 4 (Detailed View) still renders topics/queues as nodes. Exception: an owned/custom in-house broker that IS the architectural unit may stay as a `ContainerQueue()`. |
+| API Gateway / APIM | NO at L2 — **edge encoding** | Transit infrastructure. Description (3rd `Rel()`): `(via Kong)`. Protocol (4th `Rel()`): `"HTTPS/JSON [Data]"` (canonical normal form). Exception: gateway with custom architectural logic. |
 | Frontend SPA (if served separately) | YES — separate Container | Separate deployable |
 | Domain Layer | NO | Code module inside the backend |
 | Application Layer | NO | Code module inside the backend |
@@ -109,8 +109,8 @@ At C2, zoom into the System to show its deployable units using pure C4 conventio
 | Frontend SPA | Container (App) | `Web App [React SPA]` |
 | Primary database | Container (Store) | `Order DB [PostgreSQL 15]` |
 | Cache | Container (Store) | `Cache [Redis 7]` |
-| Message broker | **Edge label only** | Collapse into `Rel()` 4th parameter — e.g. `"Kafka topic: order-events (async)"`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
-| API Gateway / APIM | **Edge label only** | Collapse into `Rel()` 4th parameter — e.g. `"HTTPS via Kong"`. |
+| Message broker | **Edge encoding only** | Description (3rd `Rel()`): `(Kafka topic: order-events, async)`. Protocol (4th `Rel()`): `"TLS/AVRO [Event]"`. See Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
+| API Gateway / APIM | **Edge encoding only** | Description (3rd `Rel()`): `(via Kong)`. Protocol (4th `Rel()`): `"HTTPS/JSON [Data]"`. |
 | External systems | External System | `Payment Gateway [Stripe]` |
 
 ### Example C2
@@ -149,8 +149,8 @@ At C2, zoom into the System to show its deployable units using pure C4 conventio
 
 1. **ONE Container for the backend** — all 4/5 layers are inside it
 2. Technology label shows the framework: `[Spring Boot]`, `[NestJS]`, `[ASP.NET Core]`
-3. Database, cache, message broker are separate Containers
-4. Arrow labels show protocol: `SQL/JDBC`, `Redis Protocol`, `REST/HTTPS`, `AMQP`
+3. Database, cache are separate Containers; message broker collapses into edge encoding (Infrastructure-as-via Rule)
+4. Arrow labels follow canonical normal form `<PROTOCOL>/<STYLE> [Action Type]` per Connection Naming Rule (L1 + L2): `JDBC/SQL [Write]`, `TCP/RESP [Cache]`, `HTTPS/REST [Internal]`, `AMQP/JSON [Event]`
 5. Do NOT create containers named "Domain Layer" or "Application Layer"
 
 ---
@@ -211,13 +211,15 @@ Zoom into: Order Service [Spring Boot] Container
 |  +----------+----------+  +----------+----------+               |
 +------------------------------------------------------------------+
               |                          |
-              | SQL                      | Kafka topic: orders (async)
+              | JDBC/SQL [Write]         | TLS/AVRO [Event]
+              | (description: "writes")  | (description: "Kafka topic: orders, async")
               v                          v
      +---------------+          +----------------+
      | Order DB      |          | Inventory Svc  |
      | [PostgreSQL]  |          | [Spring Boot]  |
      +---------------+          +----------------+
-     (broker collapsed onto the edge label per Infrastructure-as-via Rule)
+     (broker collapsed into description per Infrastructure-as-via Rule;
+      protocol field follows Connection Naming Rule normal form)
 ```
 
 ### Variant-Specific C3: Clean Architecture
@@ -294,13 +296,15 @@ Zoom into: Order Service [Spring Boot] Container
 |  +----------+----------+  +----------+----------+               |
 +------------------------------------------------------------------+
               |                          |
-              | SQL                      | Kafka topic: orders (async)
+              | JDBC/SQL [Write]         | TLS/AVRO [Event]
+              | (description: "writes")  | (description: "Kafka topic: orders, async")
               v                          v
      +---------------+          +----------------+
      | Order DB      |          | Inventory Svc  |
      | [PostgreSQL]  |          | [Spring Boot]  |
      +---------------+          +----------------+
-     (broker collapsed onto the edge label per Infrastructure-as-via Rule)
+     (broker collapsed into description per Infrastructure-as-via Rule;
+      protocol field follows Connection Naming Rule normal form)
 ```
 
 ---
@@ -360,9 +364,12 @@ Domain Events flow through an Event Publisher component to an external message b
 ```
 C3 Level:
   Order Aggregate --raises--> OrderPlacedEvent
-  DomainEventDispatcher [Component] --[Kafka topic: order-events (async)]-->
+  DomainEventDispatcher [Component] -- "TLS/AVRO [Event]" -->
                                        Inventory Service (C2 Container — consumer)
-  (broker collapsed onto edge label per Infrastructure-as-via Rule;
+       Rel description: "publishes (Kafka topic: order-events, async)"
+       Rel protocol:    "TLS/AVRO [Event]"
+  (broker collapsed into description per Infrastructure-as-via Rule;
+   protocol field follows Connection Naming Rule normal form;
    InventoryEventListener appears as a C3 component inside Inventory Service)
 ```
 
@@ -399,8 +406,8 @@ C3 Level:
 | Backend (all layers combined) | ONE Container `[Framework]` |
 | Database | Container (Store) `[Technology]` |
 | Cache | Container (Store) `[Technology]` |
-| Message broker | **Edge label only** — `Kafka topic: X (async)` on the producer→consumer `Rel()`. See Infrastructure-as-via Rule (L2). |
-| API Gateway / APIM | **Edge label only** — `HTTPS via Kong`. |
+| Message broker | **Edge encoding only** — description: `(Kafka topic: X, async)`; protocol: `"TLS/AVRO [Event]"`. See Infrastructure-as-via Rule + Connection Naming Rule. |
+| API Gateway / APIM | **Edge encoding only** — description: `(via Kong)`; protocol: `"HTTPS/JSON [Data]"`. |
 | External API | External System |
 | Frontend SPA | Container (App) `[Technology]` |
 
@@ -433,15 +440,27 @@ Component labels:   Name [Stereotype]
                     IOrderRepository [Repository Interface]
                     PostgresOrderRepo [Repository]
 
-Arrow labels:       Protocol or purpose (with `via` / topic for transit infra)
-                    SQL/JDBC
-                    REST/HTTPS
-                    HTTPS via Kong              ← APIM collapsed
-                    Kafka topic: orders (async) ← broker collapsed
-                    RabbitMQ queue: settlements (async)
-                    implements
-                    calls
-                    publishes to
+Arrow labels:       4th `Rel()` parameter follows canonical
+                    `<PROTOCOL>/<STYLE> [Action Type]` form
+                    (Connection Naming Rule, DIAGRAM-GENERATION-GUIDE)
+
+                    JDBC/SQL [Write]            ← DB write
+                    JDBC/SQL [Query]            ← DB read
+                    HTTPS/REST [Internal]       ← internal service-to-service REST
+                    HTTPS/JSON [Data]           ← external/business REST
+                    gRPC/PROTOBUF [Internal]    ← internal service-to-service gRPC
+                    TLS/AVRO [Event]            ← async pub/sub (broker collapsed
+                                                  into 3rd-param description)
+                    AMQP/JSON [Event]           ← RabbitMQ async
+                    TCP/RESP [Cache]            ← Redis
+                    HTTPS/JSON [Auth]           ← token validation
+                    HTTPS/BINARY [Storage]      ← S3 / GCS
+
+                    3rd `Rel()` parameter (description) carries:
+                    - the verb (e.g. "publishes", "calls")
+                    - the via-hop in parentheses (e.g. "(via Kong)")
+                    - the topic / queue + async flag (e.g.
+                      "(Kafka topic: orders, async)")
 ```
 
 ---

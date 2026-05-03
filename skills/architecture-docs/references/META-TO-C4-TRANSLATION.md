@@ -97,10 +97,10 @@ At C2, you **zoom into the Banking Platform System** and show its internal struc
 | Each microservice in Layer 4 | `Container()` — e.g., "Payment Service [Spring Boot]" |
 | Each microservice in Layer 5 | `Container()` — e.g., "Current Account SD [Quarkus]" |
 | Layer 2 BFF services | `Container()` — e.g., "Mobile BFF [Node.js]" |
-| API Gateway | **Edge label only** — collapse into `Rel()` 4th parameter (e.g. `"HTTPS via Kong"`). Exception: keep as `Container()` only when the gateway runs custom architectural logic that is itself a unit of decision (in-house policy engine, complex routing). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
+| API Gateway | **Edge encoding only** — `(via Kong)` in the 3rd `Rel()` parameter (description); 4th parameter follows the canonical `<PROTOCOL>/<STYLE> [Action Type]` form (e.g. `"HTTPS/JSON [Data]"`). Exception: keep as `Container()` only when the gateway runs custom architectural logic that is itself a unit of decision (in-house policy engine, complex routing). See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
 | Transversal services | `Container()` — e.g., "IAM Service [Keycloak]" |
 | Each database per service | `ContainerDb()` — e.g., "Payment DB [PostgreSQL]" |
-| Message broker (Kafka) | **Edge label only** — collapse into `Rel()` 4th parameter (e.g. `"Kafka topic: payment-events (async)"`). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2). |
+| Message broker (Kafka) | **Edge encoding only** — `(Kafka topic: payment-events, async)` in the 3rd `Rel()` parameter (description); 4th parameter is `"TLS/AVRO [Event]"` (or `"Kafka/AVRO [Event]"` when broker is shown explicitly). Do NOT emit `ContainerQueue("Event Bus")`. See DIAGRAM-GENERATION-GUIDE → Infrastructure-as-via Rule (L2) and Connection Naming Rule (L1 + L2). |
 | Cache | `ContainerDb()` — e.g., "Session Cache [Redis]" |
 
 ### C2 Grouping Convention
@@ -117,38 +117,40 @@ The Mermaid C4 renderer visually differentiates the remaining nodes by shape (bo
 
 ### Example C2 Elements
 
+Format note for prose narrative: `description → target — <PROTOCOL>/<STYLE> [Action]`. The em-dash separates the 3rd `Rel()` parameter (left, free prose with via/topic context) from the 4th parameter (right, canonical normal form).
+
 ```
 Container: "Mobile BFF [Node.js + Express]"
-  → routes requests [HTTPS via Kong] → Container: "Transfer Orchestrator [Spring Boot]"
-  → routes requests [HTTPS via Kong] → Container: "Payment Service [Spring Boot]"
-                                       (API Gateway collapsed onto the edge label —
-                                        not a node)
+  → routes requests (via Kong) → Container: "Transfer Orchestrator [Spring Boot]"  — HTTPS/JSON [Data]
+  → routes requests (via Kong) → Container: "Payment Service [Spring Boot]"        — HTTPS/JSON [Data]
+  (API Gateway collapsed into description — not a node)
 
 Container: "Transfer Orchestrator [Spring Boot]"          ← Layer 3
-  → calls [REST/HTTPS] → Container: "Payment Service [Spring Boot]"
-  → calls [REST/HTTPS] → Container: "Account Service [Spring Boot]"
-  → calls [REST/HTTPS] → Container: "Compliance Service [Spring Boot]"
-  → reads/writes saga state [JDBC] → Container: "Orchestration DB [PostgreSQL]"
+  → calls Payment Service        → Container: "Payment Service [Spring Boot]"      — HTTPS/REST [Internal]
+  → calls Account Service        → Container: "Account Service [Spring Boot]"      — HTTPS/REST [Internal]
+  → calls Compliance Service     → Container: "Compliance Service [Spring Boot]"   — HTTPS/REST [Internal]
+  → reads/writes saga state      → Container: "Orchestration DB [PostgreSQL]"      — JDBC/SQL [Write]
 
 Container: "Payment Service [Spring Boot]"                ← Layer 4
-  → calls [gRPC] → Container: "Payment Order SD [Quarkus]"
-  → publishes events [Kafka topic: payment-events (async)]
+  → calls Payment Order SD                                                          — gRPC/PROTOBUF [Internal]
+       → Container: "Payment Order SD [Quarkus]"
+  → publishes events (Kafka topic: payment-events, async)                           — TLS/AVRO [Event]
        → Container: "Settlement Service [Spring Boot]"
        → Container: "Notification Service [Node.js]"
        → Container: "Audit Log Service [Quarkus]"
-       (broker collapsed — one edge per producer-consumer pair, topic name is the join)
-  → reads/writes [JDBC] → Container: "Payment DB [PostgreSQL]"
+       (broker collapsed into description — one edge per producer-consumer pair, topic name is the join)
+  → reads/writes payment rows    → Container: "Payment DB [PostgreSQL]"             — JDBC/SQL [Write]
 
 Container: "Payment Order SD [Quarkus]"                   ← Layer 5
-  → calls [MQ/JMS] → External System: "Core Banking [AS/400]"
-  → reads/writes [JDBC] → Container: "Payment Domain DB [PostgreSQL]"
+  → calls Core Banking            → External System: "Core Banking [AS/400]"        — MQ/JMS/XML [Internal]
+  → reads/writes domain rows      → Container: "Payment Domain DB [PostgreSQL]"     — JDBC/SQL [Write]
 
 Container: "IAM Service [Keycloak]"                       ← Transversal
-  ← validates tokens [HTTPS via Kong] ← Container: "Mobile BFF [Node.js]"
+  ← validates tokens (via Kong)   ← Container: "Mobile BFF [Node.js]"              — HTTPS/JSON [Auth]
 
 Container: "GL Posting Service [Spring Boot]"             ← Transversal
-  → posts entries [MQ/JMS] → External System: "General Ledger [SAP]"
-  ← called by [REST/HTTPS] ← Container: "Payment Service [Spring Boot]"
+  → posts entries                  → External System: "General Ledger [SAP]"        — MQ/JMS/XML [Internal]
+  ← called by Payment Service      ← Container: "Payment Service [Spring Boot]"     — HTTPS/REST [Internal]
 ```
 
 ---
@@ -171,23 +173,24 @@ Component: "TransferSagaOrchestrator [Temporal Workflow]"
   → Step 5: notifies → Component: "NotificationClient [Kafka Producer]"
 
 Component: "SagaStateRepository [Spring Data JPA]"
-  → reads/writes [JDBC] → Container: "Orchestration DB [PostgreSQL]"
+  → reads/writes saga rows         → Container: "Orchestration DB [PostgreSQL]"   — JDBC/SQL [Write]
 
 Component: "TransferSagaOrchestrator"
   → persists saga state → Component: "SagaStateRepository"
 
 Component: "PaymentClient [REST Client]"
-  → calls [REST/HTTPS] → Container: "Payment Service [Spring Boot]"
+  → calls Payment Service          → Container: "Payment Service [Spring Boot]"   — HTTPS/REST [Internal]
 
 Component: "AccountClient [REST Client]"
-  → calls [REST/HTTPS] → Container: "Account Service [Spring Boot]"
+  → calls Account Service          → Container: "Account Service [Spring Boot]"   — HTTPS/REST [Internal]
 
 Component: "ComplianceClient [REST Client]"
-  → calls [REST/HTTPS] → Container: "Compliance Service [Spring Boot]"
+  → calls Compliance Service       → Container: "Compliance Service [Spring Boot]" — HTTPS/REST [Internal]
 
 Component: "NotificationClient [Kafka Producer]"
-  → [Kafka topic: notification-events (async)] → Container: "Notification Service [Node.js]"
-  (broker collapsed onto edge label per Infrastructure-as-via Rule)
+  → publishes (Kafka topic: notification-events, async)                            — TLS/AVRO [Event]
+       → Container: "Notification Service [Node.js]"
+  (broker collapsed into description per Infrastructure-as-via Rule)
 ```
 
 ### C3 for a BIAN Service Domain (Layer 5)
@@ -203,19 +206,20 @@ Component: "CurrentAccountService [Domain Service]"
   → uses → Component: "AccountEventPublisher [Kafka Producer]"
 
 Component: "CoreBankingAdapter [Anti-Corruption Layer]"
-  → translates and calls [MQ/JMS] → External System: "Core Banking [AS/400]"
+  → translates and calls Core Banking → External System: "Core Banking [AS/400]"  — MQ/JMS/XML [Internal]
   → caches core responses → Component: "CoreCacheManager [Redis Client]"
 
 Component: "CoreCacheManager [Redis Client]"
-  → reads/writes [Redis protocol] → Container: "Domain Cache [Redis]"
+  → reads/writes session keys     → Container: "Domain Cache [Redis]"             — TCP/RESP [Cache]
 
 Component: "AccountRepository [Data Access]"
-  → reads/writes [JDBC] → Container: "Account Domain DB [PostgreSQL]"
+  → reads/writes account rows     → Container: "Account Domain DB [PostgreSQL]"   — JDBC/SQL [Write]
 
 Component: "AccountEventPublisher [Kafka Producer]"
-  → [Kafka topic: account-events (async)] → Container: "Audit Service [Spring Boot]"
-  → [Kafka topic: account-events (async)] → Container: "Notification Service [Node.js]"
-  (broker collapsed onto edge labels per Infrastructure-as-via Rule;
+  → publishes (Kafka topic: account-events, async)                                 — TLS/AVRO [Event]
+       → Container: "Audit Service [Spring Boot]"
+       → Container: "Notification Service [Node.js]"
+  (broker collapsed into description per Infrastructure-as-via Rule;
    one edge per producer-consumer pair, topic name is the join)
 ```
 
@@ -295,7 +299,7 @@ When the bank uses a SaaS core banking platform (e.g., Mambu, Thought Machine):
 ```
 C1: External System: "Mambu [Core Banking SaaS]"
 C2: Container: "Account SD [Quarkus]"
-      → calls [REST/HTTPS] → External System: "Mambu [Core Banking SaaS]"
+      → calls Mambu             → External System: "Mambu [Core Banking SaaS]"   — HTTPS/REST [Internal]
 ```
 
 The SaaS platform is always an External System — it is not deployed or operated by the bank.
@@ -306,13 +310,13 @@ Transversal services are modeled as regular Containers but visually grouped vert
 
 ```
 C2: Container: "IAM Service [Keycloak]"
-      ← validates tokens [HTTPS via Kong] ← Container: "Web BFF [Node.js]"
-      ← authenticates users ← Container: "Mobile BFF [Node.js]"
+      ← validates tokens (via Kong) ← Container: "Web BFF [Node.js]"               — HTTPS/JSON [Auth]
+      ← authenticates users         ← Container: "Mobile BFF [Node.js]"            — HTTPS/JSON [Auth]
 
     Container: "GL Posting Service [Spring Boot]"
-      ← posts entries ← Container: "Payment Service [Spring Boot]"
-      ← posts entries ← Container: "Lending Service [Spring Boot]"
-      → writes to [JDBC] → Container: "GL Database [PostgreSQL]"
+      ← posts entries               ← Container: "Payment Service [Spring Boot]"   — HTTPS/REST [Internal]
+      ← posts entries               ← Container: "Lending Service [Spring Boot]"   — HTTPS/REST [Internal]
+      → writes ledger entries       → Container: "GL Database [PostgreSQL]"        — JDBC/SQL [Write]
 ```
 
 Transversal Containers have arrows from **multiple layers** — this is what makes them visually vertical.
@@ -323,7 +327,7 @@ Each BIAN SD is a Container at C2. Its internal structure (C3) always includes a
 
 ```
 C2: Container: "Current Account SD [Quarkus]"
-      → calls core [MQ/JMS] → External System: "Core Banking [AS/400]"
+      → calls core              → External System: "Core Banking [AS/400]"        — MQ/JMS/XML [Internal]
 
 C3 (inside Current Account SD):
   Component: "AccountController [REST API]"
@@ -450,10 +454,12 @@ The orchestrator is the **most connected Container** at C2 — it is the hub of 
 │ Layer 6 Data Fabric  │ C2: External System or Container             │
 │ Transversal services │ C2: Containers (vertical grouping)           │
 │ Financial Gateways   │ C1/C2: External System                      │
-│ API Gateway          │ C2: Edge label (`HTTPS via Kong`) — not node │
+│ API Gateway          │ C2: description = `(via Kong)`,              │
+│                      │     protocol = `HTTPS/JSON [Data]` — not node │
 │ Per-service database  │ C2: Container (data store)                  │
-│ Event Bus (Kafka)    │ C2: Edge label (`Kafka topic: X (async)`) — │
-│                      │     not node. Diagram 4 keeps it as a node.  │
+│ Event Bus (Kafka)    │ C2: description = `(Kafka topic: X, async)`, │
+│                      │     protocol = `TLS/AVRO [Event]` — not node │
+│                      │     Diagram 4 keeps it as a node.            │
 │ BIAN SD internals    │ C3: Components (incl. ACL)                   │
 │ Orchestrator internals│ C3: Components (saga steps)                 │
 ├──────────────────────┼──────────────────────────────────────────────┤
