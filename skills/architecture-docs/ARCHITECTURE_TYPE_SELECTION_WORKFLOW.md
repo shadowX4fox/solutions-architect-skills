@@ -908,17 +908,44 @@ Generate any selected optional diagrams using the same Workflow 8 Step 8 rules a
 
 ---
 
-##### Step 7.3: Mandatory Diagram Completeness Audit
+##### Step 7.3: Mandatory Diagram Completeness Audit (BLOCKING)
 
-Run the completeness audit on all mandatory diagrams (scoped version of Workflow 8):
+This is a **blocking gate** — Step 7.4 (Workflow Completion) cannot run until every mandatory diagram is verified present and well-formed. The workflow does **not** print `✅ Architecture creation complete` while any required diagram is missing or fails Pre-Write Validation.
 
-1. Re-read `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`
+Run the audit on all mandatory diagrams:
+
+1. Re-read `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`.
 2. Verify `docs/03-architecture-layers.md` contains all 4 standard diagrams under `## Architecture Diagrams`:
-   - One ASCII code block (Logical View)
-   - Three `mermaid` blocks (C4 L1, C4 L2, Detailed View)
-3. For `docs/04-data-flow-patterns.md`: verify each H3 flow subsection has a `sequenceDiagram` within 30 lines below it
+   - **D1 — Logical View**: one ASCII code block (no `mermaid` language tag) under heading `#### Diagram: Logical View`
+   - **D2 — C4 Level 1 — System Context**: one `mermaid` block under heading `#### Diagram: C4 Level 1 — System Context`
+   - **D3 — C4 Level 2 — Container**: one `mermaid` block under heading `#### Diagram: C4 Level 2 — Container`
+   - **D4 — Detailed View**: one `mermaid` block under heading `#### Diagram: Detailed View`
+3. Verify `docs/04-data-flow-patterns.md` contains a `sequenceDiagram` within 30 lines below each `### [Flow Name] Flow` H3 subsection. The count of `sequenceDiagram` blocks MUST be ≥ the count of H3 flow subsections.
+4. For each Mermaid block (D2, D3, D4, and every Data Flow sequence diagram), verify the Pre-Write Validation rules from Step 7.1 are satisfied — no `<br/>` / `<br>` / HTML tags in labels, no `;` in labels, no emoji, no `|` in node-label text. **A diagram that exists but fails Pre-Write Validation counts as MISSING for the purposes of this gate.**
 
-**If any REQUIRED diagram is missing**: generate it now (do not skip or defer).
+**Audit outcome**:
+
+- **PASS** — all 4 standard diagrams present in `docs/03-architecture-layers.md` AND every H3 flow subsection in `docs/04-data-flow-patterns.md` has its sequence diagram AND every Mermaid block passes Pre-Write Validation. Proceed to Step 7.4.
+- **FAIL — first attempt**: regenerate the missing or invalid diagram(s) per Step 7.1 rules, then re-run this audit from item 1. Do NOT skip, do NOT defer, do NOT proceed to Step 7.4.
+- **FAIL — after second regeneration attempt**: stop the workflow and emit:
+
+  ```
+  ❌ DIAGRAMS_GATE: FAILED
+
+  The mandatory diagram audit could not be satisfied after two regeneration attempts.
+  Missing or invalid:
+    [- list each missing/invalid diagram by name + canonical location]
+
+  The Architecture Type Selection Workflow cannot complete. Resolve the failure manually
+  (consult `references/DIAGRAM-GENERATION-GUIDE.md` and `MERMAID_DIAGRAMS_GUIDE.md`),
+  regenerate the affected diagram(s), and re-invoke `/skill architecture-docs` with the
+  "audit diagrams" trigger to re-run this gate.
+
+  Until DIAGRAMS_GATE passes, ARCHITECTURE.md is in a partial state and downstream
+  skills (compliance, dev-handoff, peer-review, release) MUST refuse to run on it.
+  ```
+
+**No `SKIP DIAGRAMS` override exists**. Unlike the PO Spec Gate at Step 0 (which permits `SKIP PO SPEC` for projects with no Product Owner artifact), every architecture must ship with its mandatory diagrams — they are a delivered artifact of the creation workflow, not a soft prerequisite.
 
 ---
 

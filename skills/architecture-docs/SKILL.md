@@ -141,6 +141,8 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 2. Jump directly to **Workflow 8, Step 1** (Diagram Type Selection)
 3. Do NOT ask which workflow - proceed automatically
 
+**Scope clarification**: Workflow 8 is for **regenerating, updating, or auditing diagrams on an existing ARCHITECTURE.md**. It is NOT how new architectures get their first diagrams — Workflow 1 (initial creation) auto-runs diagram generation as Step 7 (Mandatory Diagram Generation) and will not complete until the BLOCKING DIAGRAMS_GATE in Step 7.3 passes. If the user is creating a new architecture, route to Workflow 1, not Workflow 8.
+
 #### Workflow 9: Migrate to docs/ Structure
 **Triggers:**
 - Keywords: "migrate", "restructure", "split", "reorganize", "convert" + "architecture", "ARCHITECTURE.md"
@@ -167,7 +169,7 @@ Check the user's original message (before `/architecture-docs` was invoked) for 
 #### Other Workflows
 If the user's request matches other documented workflows (1-10), follow their respective trigger patterns.
 
-**Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check), then Step 0.5 (ADR pre-identification) establishes the **ADR Context Block** — a list of ADR candidates derived from PO Spec analysis that is maintained through all creation steps for decision consistency. See ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md for the full flow.
+**Note**: Workflow 1 (new ARCHITECTURE.md creation) starts at Step 0 (PO Spec prerequisite check), then Step 0.5 (ADR pre-identification) establishes the **ADR Context Block** — a list of ADR candidates derived from PO Spec analysis that is maintained through all creation steps for decision consistency. **Workflow 1 always concludes with Step 7 (Mandatory Diagram Generation), which produces the 4 standard diagrams (Logical View ASCII, C4 L1, C4 L2, Detailed View) into `docs/03-architecture-layers.md` and one `sequenceDiagram` per H3 flow subsection into `docs/04-data-flow-patterns.md`. Step 7.3 is a BLOCKING audit gate (DIAGRAMS_GATE) — Workflow 1 does NOT print `✅ Architecture creation complete` until every mandatory diagram is verified present and Pre-Write-Validation-clean. There is no `SKIP DIAGRAMS` override.** See ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md for the full flow.
 
 ### If No Pattern Matches
 

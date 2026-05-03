@@ -1,6 +1,6 @@
 # Solutions Architect Skills
 
-[![Version](https://img.shields.io/badge/version-3.21.7-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
+[![Version](https://img.shields.io/badge/version-3.21.8-blue.svg)](https://github.com/shadowx4fox/solutions-architect-skills/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.com/claude-code)
 
@@ -151,7 +151,7 @@ git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claud
 /plugin list
 ```
 
-You should see `sa-skills v3.21.7` in the list.
+You should see `sa-skills v3.21.8` in the list.
 
 **Important:** Marketplace registration is a security feature — you must explicitly add marketplaces before installing plugins. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed setup instructions.
 
@@ -877,7 +877,26 @@ Where:
 
 ## Roadmap
 
-### v3.21.7 (Current Release) ✅
+### v3.21.8 (Current Release) ✅
+**feat(architecture-docs): promote Step 7.3 to a BLOCKING DIAGRAMS_GATE — Workflow 1 cannot complete with missing or invalid mandatory diagrams; Workflow 8 scope clarified as regen-only**
+
+Before v3.21.8, the Architecture Type Selection Workflow's Step 7 (Mandatory Diagram Generation) said the right things in prose ("This step is not optional"; "do not skip or defer") but Step 7.3 (Mandatory Diagram Completeness Audit) was a soft check — a single re-read of `docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`, a list of what should be there, and an instruction to "generate it now" if anything was missing. There was no blocking declaration, no failure-mode protocol, no metadata-stamped outcome, and no protection against the case where re-generation itself produces a malformed diagram (HTML in labels, semicolon in node text, missing `mermaid` fence). The result: in pathological runs, Step 7.4 ("✅ Architecture creation complete") could print while a Mermaid diagram quietly failed at render time, leaving downstream skills (compliance, dev-handoff, peer-review, release) operating on a partially-illustrated architecture without knowing it. Separately, Workflow 8's trigger block in `SKILL.md` documented its diagram-generation triggers but never positioned itself relative to Workflow 1, so a user invoking `/skill architecture-docs` mid-creation could land in Workflow 8 (regen on a non-existent baseline) instead of Workflow 1 Step 7 (initial generation as part of creation). v3.21.8 closes both gaps.
+
+**Changes:**
+
+- `skills/architecture-docs/ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` — **Step 7.3 promoted to a BLOCKING gate** (renamed `Mandatory Diagram Completeness Audit (BLOCKING)`). Opening sentence states explicitly that Step 7.4 cannot run until every mandatory diagram is verified present and well-formed; the workflow does NOT print `✅ Architecture creation complete` while any required diagram is missing or fails Pre-Write Validation. Audit checks expanded from 3 items to 4: (D1) Logical View ASCII code block under heading `#### Diagram: Logical View`, (D2/D3/D4) one `mermaid` block each under their canonical headings in `docs/03-architecture-layers.md`, plus a `sequenceDiagram` count check in `docs/04-data-flow-patterns.md` (count ≥ H3 flow subsection count), plus a per-block Pre-Write Validation re-scan (no `<br/>` / `<br>` / HTML, no `;` in labels, no emoji, no `|` in node-label text). **A diagram that exists but fails Pre-Write Validation counts as MISSING** for the purposes of the gate. Three explicit outcomes documented: PASS (proceed to Step 7.4), FAIL first attempt (regenerate per Step 7.1 rules and re-run audit from item 1; do not skip / defer / proceed), FAIL after second regeneration attempt (stop the workflow and emit a stamped `❌ DIAGRAMS_GATE: FAILED` block listing every missing/invalid diagram by name + canonical location, instructing the user to consult `references/DIAGRAM-GENERATION-GUIDE.md` and `MERMAID_DIAGRAMS_GUIDE.md`, regenerate, and re-run the gate via the "audit diagrams" trigger; Workflow 1 cannot complete until DIAGRAMS_GATE passes; downstream skills MUST refuse to run on a partial-state ARCHITECTURE.md). **No `SKIP DIAGRAMS` override** — diagrams are a delivered artifact of the creation workflow, not a soft prerequisite (deliberately diverging from the PO Spec Gate's `SKIP PO SPEC` pattern, since unlike PO Spec there is no class of project where mandatory diagrams could be legitimately absent).
+- `skills/architecture-docs/SKILL.md` — Workflow 8 trigger block (line ~144) gains a new **Scope clarification** paragraph stating that Workflow 8 is for regenerating, updating, or auditing diagrams on an existing ARCHITECTURE.md and is NOT how new architectures get their first diagrams; new-architecture creation routes to Workflow 1, whose Step 7 auto-runs diagram generation and won't complete until the BLOCKING DIAGRAMS_GATE in Step 7.3 passes. Workflow 1 Note (line ~172) extended from a one-sentence ADR-Context-Block-only summary to a full guarantee block: Workflow 1 always concludes with Step 7 (Mandatory Diagram Generation) producing the 4 standard diagrams (Logical View ASCII, C4 L1, C4 L2, Detailed View) into `docs/03-architecture-layers.md` and one `sequenceDiagram` per H3 flow subsection into `docs/04-data-flow-patterns.md`; Step 7.3 is the BLOCKING DIAGRAMS_GATE; Workflow 1 does NOT print `✅ Architecture creation complete` until every mandatory diagram is verified present and Pre-Write-Validation-clean; no `SKIP DIAGRAMS` override.
+
+**No code changes.** No agent / TypeScript / hook / setup-permissions / template / config changes. The audit re-uses the Pre-Write Validation rules already documented in Step 7.1 and the canonical diagram headings already documented in Step 7.1; no new permission scopes required. Existing `bun run typecheck` and `bun test` (392 pass / 0 fail) remain green.
+
+**Files**:
+
+- `skills/architecture-docs/ARCHITECTURE_TYPE_SELECTION_WORKFLOW.md` — net +28 lines (Step 7.3 rewrite — PASS / FAIL-first / FAIL-second outcomes + DIAGRAMS_GATE failure block + no-override clause).
+- `skills/architecture-docs/SKILL.md` — net +2 lines (Workflow 8 Scope clarification paragraph + Workflow 1 Note expansion).
+
+---
+
+### v3.21.7 (Previous Release) ✅
 **feat(architecture-docs): Infrastructure-as-via Rule for C4 L1 + L2 diagrams — collapse APIM, brokers, topics, queues onto edge labels**
 
 Before v3.21.7, Workflow 8 of `architecture-docs` rendered transit infrastructure as first-class nodes at every C4 zoom level: API Management / API Gateway became `Container("API Gateway [Kong]")` (and at L1, `System_Ext("Apigee")`); message brokers became `ContainerQueue("Event Bus [Apache Kafka]")`; iPaaS / service mesh / load balancers showed up as their own boxes. The result was a producer→broker→consumer chain (3 nodes / 2 edges per async hop) and a client→APIM→service chain (3 nodes / 2 edges per sync hop) repeated for every interaction, even though the C4 L1/L2 audience (architects, stakeholders) is asking "which **business** component talks to which" — not "which infra it transits through". Pub/sub fan-out compounded the problem: a single Kafka topic with N consumers added 1 broker node + 2N edges where N edges with the topic name on the label would have answered the same question. Operational fidelity (every topic, queue, partition) belongs in **Diagram 4 (Detailed View, `graph TB`)**, which is the diagram SREs actually read — but the C4 L1/L2 templates kept treating it like Diagram 4. v3.21.7 promotes the convention used by experienced architects to a first-class rule.
