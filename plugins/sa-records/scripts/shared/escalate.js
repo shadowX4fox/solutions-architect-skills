@@ -43,25 +43,48 @@ const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(
 const slugify = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'escalation';
 const git = (root, args) => { const r = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : null; };
 const list = (v) => (Array.isArray(v) ? v : v ? [v] : []).map((x) => String(x).trim()).filter(Boolean);
-const yamlList = (v) => `[${list(v).join(', ')}]`;
+// a value that holds what the parser reads as syntax (`#`, `,`, `[`, `]`, `"`, edge spaces) is written JSON-quoted
+const quote = (v) => (/[#,"\[\]]|^\s|\s$/.test(String(v)) ? JSON.stringify(String(v)) : String(v));
+const yamlList = (v) => `[${list(v).map(quote).join(', ')}]`;
 const oneLine = (s) => String(s).replace(/\s*\n\s*/g, ' ').trim();   // a proposal or question item is one bullet
+// render() writes Resolution last, so the section starts at the LAST heading — the request may hold the same line
+const withoutResolution = (body) => { const i = body.lastIndexOf('\n## Resolution\n'); return i < 0 ? body : body.slice(0, i); };
 const cell = (s) => String(s || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
 // ---- the record ------------------------------------------------------------------------------------------------
 const FIELDS = ['id', 'status', 'date', 'architecture', 'route', 'triggers', 'components', 'integrations', 'adrs', 'tdrs', 'requested_by', 'issue', 'resolution', 'closed'];
+// one front-matter value: a JSON-quoted string, a [list] of plain or quoted items, or a plain scalar whose ` #` starts a comment
+const QUOTED = /^"(?:[^"\\]|\\.)*"/;
+function value(raw) {
+  let v = raw.trim();
+  if (v.startsWith('[')) {
+    const items = []; v = v.slice(1);
+    for (;;) {
+      v = v.replace(/^\s+/, '');
+      if (!v || v[0] === ']') break;
+      const q = v.match(QUOTED), m = q ? null : v.match(/^[^,\]]*/);
+      const item = q ? JSON.parse(q[0]) : m[0].trim();
+      if (item) items.push(item);
+      v = v.slice((q || m)[0].length).replace(/^\s+/, '');
+      if (v[0] === ',') v = v.slice(1); else break;
+    }
+    return items;
+  }
+  const q = v.match(QUOTED);
+  return q ? JSON.parse(q[0]) : v.replace(/(?:^|\s+)#.*$/, '').trim();
+}
 function parse(text) {
   const m = text.match(/^---\n([\s\S]*?)\n---\n?/);
   const meta = {};
   if (m) m[1].split('\n').forEach((l) => {
-    const k = l.match(/^([a-z_]+):\s*(.*?)\s*(?:#.*)?$/); if (!k) return;
-    const v = k[2];
-    meta[k[1]] = /^\[.*\]$/.test(v) ? v.slice(1, -1).split(',').map((x) => x.trim()).filter(Boolean) : v;
+    const k = l.match(/^([a-z_]+):\s*(.*)$/); if (!k) return;
+    meta[k[1]] = value(k[2]);
   });
   const title = (text.match(/^# (.+)$/m) || [])[1] || '';
   return { meta, title, body: m ? text.slice(m[0].length) : text };
 }
 function frontmatter(meta) {
-  return '---\n' + FIELDS.map((k) => `${k}: ${Array.isArray(meta[k]) ? yamlList(meta[k]) : meta[k] == null ? '' : meta[k]}`.replace(/\s+$/, '')).join('\n') + '\n---\n';
+  return '---\n' + FIELDS.map((k) => `${k}: ${Array.isArray(meta[k]) ? yamlList(meta[k]) : meta[k] == null || meta[k] === '' ? '' : quote(meta[k])}`.replace(/\s+$/, '')).join('\n') + '\n---\n';
 }
 function records(root) {
   const d = path.join(path.resolve(root), DIR);
@@ -126,7 +149,7 @@ function update(root, id, change, resolutionLine) {
   const r = find(root, id), f = path.join(path.resolve(root), r.file);
   const meta = Object.assign({}, r.meta, change);
   let body = r.body;
-  if (resolutionLine) body = body.replace(/## Resolution\n\n[\s\S]*$/, `## Resolution\n\n- ${resolutionLine}\n`);
+  if (resolutionLine) body = withoutResolution(body).replace(/\n*$/, '\n') + `\n## Resolution\n\n- ${resolutionLine}\n`;
   fs.writeFileSync(f, frontmatter(meta) + body);
   return Object.assign({}, r, { meta });
 }
@@ -176,10 +199,10 @@ function issueBody(rec) {
   const facts = [['Architecture', rec.meta.architecture || '—'], ['Route', ROUTES[rec.meta.route] || rec.meta.route], ['Requested by', rec.meta.requested_by || '—'],
     ['Components', list(rec.meta.components).join(', ') || '—'], ['Integrations', list(rec.meta.integrations).join(', ') || '—'], ['ADRs / TDRs', [...list(rec.meta.adrs), ...list(rec.meta.tdrs)].join(', ') || '—'],
     ['Record', rec.file]];
-  const body = rec.body.replace(/^# .*\n+/, '').replace(/\n## Resolution\n[\s\S]*$/, '\n');
+  const body = withoutResolution(rec.body.replace(/^# .*\n+/, '')) + '\n';
   return ['| | |', '|---|---|', ...facts.map(([k, v]) => `| ${k} | ${cell(v)} |`), '', body.trim(), '', /^ESC-\d+$/.test(rec.meta.id) ? `_Close it with \`escalate.js close <project> ${rec.meta.id} --by <ADR-NNN|TDR-NNN|architecture-vX.Y.Z>\`._` : '_Import it into the architecture repository with `escalate.js import <project> <this issue>`; the import gives it its ESC number._', ''].join('\n');
 }
-// ---- import: an issue filed elsewhere (the MCP server files `[ESC-?] <title>`) becomes a record, numbered here -------
+// ---- import: an issue filed elsewhere (an IDE agent files `[ESC-?] <title>` from the MCP server's preview) becomes a record, numbered here -------
 // an issue as { title, body, url, created, labels }, whatever the host
 function issueRef(ref, r) {
   const m = String(ref).match(/(?:issues|_workitems\/edit|work_items)\/(\d+)/) || String(ref).match(/^#?(\d+)$/);

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.4.2]
+
+### Fixed
+- An escalation record keeps the request whole when it holds a line `## Resolution`: `issueBody()` and `close` take the section from the last such heading, the one `render()` writes, instead of the first (#1).
+- A front matter value with `#`, `,`, `[`, `]` or `"` is written JSON-quoted and read back unchanged: `requested_by: "team #42"` stays `team #42`, and a component named `A, B` stays one component. Records written before keep reading as they did.
+
+### Changed
+- The `/setup` CLAUDE.md block and the docs say an `[ESC-?]` issue is filed by the IDE agent from the MCP server's preview, with the developer's own access; the server holds no token.
+
 ## [10.4.1]
 
 ### Fixed

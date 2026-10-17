@@ -166,3 +166,29 @@ describe('import keeps the text whole', () => {
     rmSync(p, { recursive: true });
   });
 });
+
+describe('the record path keeps the text whole', () => {
+  const rec = (req: any) => { const p = project(); E.create(p, req); const r = E.records(p)[0]; return { p, r }; };
+  test('a request line `## Resolution` does not cut the issue body', () => {
+    const request = 'a\n## Resolution\nb';
+    const { p, r } = rec({ ...REQ, request });
+    const body = E.issueBody({ ...r, meta: { ...r.meta, id: 'ESC-?' }, file: '—' });
+    expect(body).not.toContain('- Pending.');
+    expect(E.requestOf({ title: '[ESC-?] x', body, labels: [] })).toMatchObject({ request, questions: REQ.questions });
+    E.close(p, r.meta.id, { by: 'ADR-101' });
+    const closed = E.records(p)[0];
+    expect(closed.body).toContain('a\n## Resolution\nb');
+    expect(closed.body.match(/\n## Resolution\n/g)!.length).toBe(2);
+    rmSync(p, { recursive: true });
+  });
+  test('a `#` in a scalar and a comma in a list item survive the front matter', () => {
+    const { p, r } = rec({ ...REQ, requested_by: 'team #42', components: ['A, B', 'C'] });
+    expect(r.meta.requested_by).toBe('team #42');
+    expect(r.meta.components).toEqual(['A, B', 'C']);
+    rmSync(p, { recursive: true });
+  });
+  test('an unquoted front matter from an older record still reads, its ` #` a comment', () => {
+    const m = E.parse('---\nid: ESC-001 # first\ncomponents: [A, B]\nrequested_by: ops\n---\n# T\n').meta;
+    expect(m).toMatchObject({ id: 'ESC-001', components: ['A', 'B'], requested_by: 'ops' });
+  });
+});
