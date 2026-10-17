@@ -1,0 +1,116 @@
+<!--
+  Tech Debt / EOL viz — horizontal timeline (today → EOL date per technology).
+  Expected data shape:
+    data.timeline = {
+      today: "2026-05-26",
+      window_months: 36,   // x-axis spans (today - 12mo) to (today + window_months)
+      items: [
+        { technology: "Node.js 18", eol_date: "2025-04-30", runway_months: -13,
+          tier: "T1"|"T2"|"T3", components_using: ["api","worker"] }
+      ]
+    }
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.timeline) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const tl = data.timeline;
+  const items = (tl.items || []).slice().sort((a, b) => (a.runway_months || 0) - (b.runway_months || 0));
+  if (items.length === 0) {
+    root.append("div").attr("class", "viz-empty").text("No T1/T2/T3 technology debt found.");
+    return;
+  }
+
+  const today = new Date(tl.today);
+  const past  = new Date(today); past.setMonth(past.getMonth() - 12);
+  const future = new Date(today); future.setMonth(future.getMonth() + (tl.window_months || 36));
+
+  const rowH = 32, M = { top: 30, right: 30, bottom: 50, left: 250 };
+  const innerW = 760 - M.left - M.right;
+  const innerH = items.length * rowH;
+  const H = innerH + M.top + M.bottom;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${760} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleTime().domain([past, future]).range([0, innerW]);
+  const todayX = x(today);
+
+  const tierColor = {
+    T1: "var(--sev-critical)",
+    T2: "var(--sev-high)",
+    T3: "var(--sev-medium)",
+  };
+
+  // Past-EOL danger band (left of today)
+  g.append("rect").attr("x", 0).attr("y", 0)
+    .attr("width", todayX).attr("height", innerH)
+    .attr("fill", "var(--sev-critical)").attr("fill-opacity", 0.06);
+
+  // Today line
+  g.append("line")
+    .attr("x1", todayX).attr("x2", todayX)
+    .attr("y1", -8).attr("y2", innerH + 8)
+    .attr("stroke", "var(--accent)").attr("stroke-width", 2);
+  g.append("text").attr("x", todayX).attr("y", -12)
+    .attr("text-anchor", "middle").attr("fill", "var(--accent)")
+    .style("font-size", "11px").style("font-weight", "700")
+    .text("Today");
+
+  // Tech labels and bars
+  items.forEach((d, i) => {
+    const y = i * rowH;
+    g.append("text")
+      .attr("x", -8).attr("y", y + 18)
+      .attr("text-anchor", "end").attr("fill", "var(--text-primary)")
+      .style("font-size", "12px").style("font-weight", "600")
+      .text(d.technology.length > 32 ? d.technology.slice(0, 30) + "…" : d.technology);
+
+    let eolX = null;
+    try {
+      const eol = new Date(d.eol_date);
+      eolX = x(eol);
+    } catch (e) { eolX = null; }
+
+    if (eolX != null) {
+      const isPast = eolX < todayX;
+      const x1 = isPast ? eolX : todayX;
+      const x2 = isPast ? todayX : eolX;
+      g.append("rect")
+        .attr("x", x1).attr("y", y + 6)
+        .attr("width", Math.max(2, x2 - x1)).attr("height", rowH - 12)
+        .attr("fill", tierColor[d.tier] || "var(--text-muted)")
+        .attr("fill-opacity", 0.85)
+        .style("cursor", "pointer")
+        .on("mousemove", (e) => {
+          tooltip.style("opacity", 1)
+            .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+            .html(`<strong>${d.technology}</strong><br>EOL: ${d.eol_date} · runway ${d.runway_months}mo<br>${(d.components_using || []).join(", ")}`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
+
+      // EOL marker
+      g.append("circle")
+        .attr("cx", eolX).attr("cy", y + rowH / 2)
+        .attr("r", 4).attr("fill", "#fff")
+        .attr("stroke", tierColor[d.tier] || "var(--text-muted)").attr("stroke-width", 2);
+      g.append("text")
+        .attr("x", eolX + 8).attr("y", y + rowH / 2 + 4)
+        .attr("fill", "var(--text-secondary)").style("font-size", "10px")
+        .text(d.runway_months < 0 ? `${Math.abs(d.runway_months)}mo past EOL` : `${d.runway_months}mo`);
+    }
+  });
+
+  // X axis
+  g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(6));
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  Object.entries(tierColor).forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("color", "var(--text-muted)").text("Bar = runway to vendor EOL · circle = EOL date");
+})();

@@ -1,0 +1,39 @@
+{
+  "name": "sa-skills",
+  "version": "10.1.0",
+  "dependencies": [
+    "sa-records",
+    "sa-requirements",
+    "sa-analysis",
+    "sa-delivery",
+    "sa-visualization"
+  ],
+  "description": "Architecture documentation for Claude Code — creates and maintains ARCHITECTURE.md and docs/, its component index, explorer headers and release lifecycle. 4 skills; installs its dependencies sa-records (ADRs, TDRs), sa-requirements (PO Spec, BIAN alignment), sa-analysis (risk analyses, traceability), sa-delivery (handoff kit, Word export, IcePanel sync, MCP index) and sa-visualization (the 3D command center) — 15 skills in the suite. Compliance contracts and organizational blueprints come with an institution pack.",
+  "author": {
+    "name": "shadowX4fox",
+    "email": "your-email@example.com",
+    "url": "https://github.com/shadowX4fox"
+  },
+  "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "documentation",
+    "enterprise",
+    "templates",
+    "SRE",
+    "security",
+    "cloud",
+    "governance",
+    "technical-writing",
+    "docx",
+    "export",
+    "word",
+    "icepanel",
+    "c4-model",
+    "3d",
+    "three.js",
+    "command-center"
+  ]
+}

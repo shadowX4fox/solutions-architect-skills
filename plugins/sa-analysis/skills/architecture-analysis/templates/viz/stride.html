@@ -1,0 +1,119 @@
+<!--
+  STRIDE viz — per-trust-boundary STRIDE matrix heat map.
+  Expected data shape:
+    data.matrix = {
+      boundaries: [ { id: "TB-01", name: "Internet → API Gateway" } ],
+      categories: [ "S", "T", "R", "I", "D", "E" ],
+      cells: [ { boundary_id: "TB-01", category: "S",
+                 severity: "high"|"medium"|"low"|"pass",
+                 threat_id: "T1-S", threat_desc: "..." } ]
+    }
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.matrix) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const m = data.matrix;
+  const cats = m.categories || ["S", "T", "R", "I", "D", "E"];
+  const catFull = { S: "Spoofing", T: "Tampering", R: "Repudiation", I: "Info Disclosure", D: "DoS", E: "Elevation" };
+  const sevColor = {
+    high:   "var(--sev-critical)",
+    medium: "var(--sev-high)",
+    low:    "var(--sev-medium)",
+    pass:   "var(--sev-pass)",
+    unknown:"var(--text-muted)",
+  };
+
+  // Index for fast lookup
+  const cellMap = new Map();
+  (m.cells || []).forEach(c => cellMap.set(`${c.boundary_id}::${c.category}`, c));
+
+  const M = { top: 50, right: 30, bottom: 30, left: 280 };
+  const cellW = 80, cellH = 38;
+  const innerW = cats.length * cellW;
+  const innerH = m.boundaries.length * cellH;
+  const W = innerW + M.left + M.right, H = innerH + M.top + M.bottom;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  // Header (STRIDE letters)
+  cats.forEach((c, i) => {
+    g.append("rect")
+      .attr("x", i * cellW).attr("y", -28)
+      .attr("width", cellW).attr("height", 24)
+      .attr("fill", "var(--surface-alt)");
+    g.append("text")
+      .attr("x", i * cellW + cellW / 2).attr("y", -10)
+      .attr("text-anchor", "middle")
+      .attr("fill", "var(--text-primary)")
+      .style("font-size", "12px").style("font-weight", "700")
+      .text(`${c} — ${catFull[c] || ""}`);
+  });
+
+  // Boundary labels
+  m.boundaries.forEach((b, i) => {
+    g.append("text")
+      .attr("x", -8).attr("y", i * cellH + cellH / 2 + 4)
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--text-secondary)")
+      .style("font-size", "12px")
+      .text(b.name.length > 36 ? b.name.slice(0, 34) + "…" : b.name);
+    g.append("text")
+      .attr("x", -8).attr("y", i * cellH + cellH / 2 + 18)
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--text-muted)")
+      .style("font-size", "10px")
+      .text(b.id);
+  });
+
+  // Cells
+  m.boundaries.forEach((b, by) => {
+    cats.forEach((c, cx) => {
+      const cell = cellMap.get(`${b.id}::${c}`);
+      const sev = cell ? (cell.severity || "unknown") : "pass";
+      const color = sevColor[sev] || sevColor.unknown;
+      g.append("rect")
+        .attr("x", cx * cellW + 2).attr("y", by * cellH + 2)
+        .attr("width", cellW - 4).attr("height", cellH - 4)
+        .attr("fill", color).attr("fill-opacity", sev === "pass" ? 0.55 : 0.9)
+        .attr("stroke", "#fff").attr("stroke-width", 1)
+        .style("cursor", cell ? "pointer" : "default")
+        .on("mousemove", (e) => {
+          if (!cell) return;
+          tooltip.style("opacity", 1)
+            .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+            .html(`<strong>${cell.threat_id || b.id + "/" + c}</strong> · ${sev}<br>${cell.threat_desc || ""}`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
+
+      if (cell && cell.threat_id) {
+        g.append("text")
+          .attr("x", cx * cellW + cellW / 2).attr("y", by * cellH + cellH / 2 + 4)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#fff")
+          .style("font-size", "10px").style("font-weight", "700")
+          .text(cell.threat_id);
+      } else if (sev === "pass") {
+        g.append("text")
+          .attr("x", cx * cellW + cellW / 2).attr("y", by * cellH + cellH / 2 + 4)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#fff").style("font-size", "12px")
+          .text("✓");
+      }
+    });
+  });
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  [
+    ["High severity",   sevColor.high],
+    ["Medium severity", sevColor.medium],
+    ["Low severity",    sevColor.low],
+    ["Pass (mitigated)", sevColor.pass],
+  ].forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+})();

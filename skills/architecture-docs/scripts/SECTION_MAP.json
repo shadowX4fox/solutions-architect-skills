@@ -1,0 +1,151 @@
+{
+  "schema": "section-map/1",
+  "note": "Which PO Spec sections each architecture section is written from, by the English SECTION anchor every PO Spec heading carries. A section listed here receives exactly those blocks in its payload (cut by anchor, H2 with its H3s or one H3) instead of the whole spec or an outline. Parents, tier, templates and facts come from section-prepare.js SECTIONS. Change the map, not the writer's prompt. An entry may be { \"anchor\", \"mode\": \"outline\" }: the block headings with their first paragraph — the overview lists the use cases by name and one line, the data-flow section is written from the whole block.",
+  "anchors": [
+    "Business Context",
+    "Problem Statement",
+    "Market Context",
+    "Strategic Alignment",
+    "Stakeholders and Users",
+    "Primary Stakeholders",
+    "User Personas",
+    "User Segments",
+    "Impact Analysis",
+    "Business Objectives",
+    "Primary Business Goals",
+    "Success Criteria",
+    "ROI Expectations",
+    "Timeline and Milestones",
+    "Use Cases",
+    "Out of Scope",
+    "User Stories",
+    "User Experience Requirements",
+    "Performance Expectations",
+    "Usability Requirements",
+    "Accessibility Requirements",
+    "Cross-Platform Consistency",
+    "User Journey Mapping",
+    "Business Constraints",
+    "Budget Constraints",
+    "Timeline Constraints",
+    "Regulatory and Compliance Requirements",
+    "Integration Constraints",
+    "Technology Constraints",
+    "Operational Constraints",
+    "Resource Constraints",
+    "Success Metrics and KPIs",
+    "Business KPIs",
+    "User Experience Metrics",
+    "Adoption Metrics",
+    "Leading and Lagging Indicators",
+    "Measurement Approach",
+    "Appendix",
+    "Assumptions",
+    "Risks",
+    "Open Questions",
+    "Aspirations",
+    "Sync Log",
+    "References"
+  ],
+  "sections": {
+    "1": {
+      "po_spec": [
+        "Business Context",
+        "Business Objectives",
+        "Success Metrics and KPIs",
+        "Primary Stakeholders",
+        "User Segments",
+        "Out of Scope",
+        {
+          "anchor": "Use Cases",
+          "mode": "outline"
+        }
+      ]
+    },
+    "3": {
+      "po_spec": [
+        "Business Constraints",
+        "Primary Business Goals",
+        "Strategic Alignment"
+      ]
+    },
+    "4": {
+      "po_spec": [
+        "Integration Constraints",
+        "Technology Constraints",
+        "Operational Constraints",
+        "Out of Scope"
+      ]
+    },
+    "5": {
+      "po_spec": [
+        "Integration Constraints",
+        "Technology Constraints",
+        "Out of Scope",
+        {
+          "anchor": "Use Cases",
+          "mode": "outline"
+        }
+      ]
+    },
+    "6": {
+      "po_spec": [
+        "Use Cases",
+        "Performance Expectations",
+        "User Journey Mapping"
+      ]
+    },
+    "7": {
+      "po_spec": [
+        "Integration Constraints",
+        "Regulatory and Compliance Requirements",
+        "Out of Scope"
+      ]
+    },
+    "8": {
+      "po_spec": [
+        "Technology Constraints",
+        "Budget Constraints",
+        "Timeline Constraints",
+        "Resource Constraints"
+      ]
+    },
+    "9": {
+      "po_spec": [
+        "Regulatory and Compliance Requirements",
+        "User Segments",
+        "Risks"
+      ]
+    },
+    "10": {
+      "po_spec": [
+        "Performance Expectations",
+        "User Experience Metrics",
+        "Business KPIs",
+        "Adoption Metrics",
+        "User Segments"
+      ]
+    },
+    "11": {
+      "po_spec": [
+        "Operational Constraints",
+        "Timeline Constraints",
+        "Measurement Approach",
+        "Cross-Platform Consistency",
+        "Leading and Lagging Indicators"
+      ]
+    },
+    "12": {
+      "po_spec": []
+    },
+    "13": {
+      "po_spec": [
+        "Risks",
+        "Assumptions",
+        "Open Questions",
+        "Timeline and Milestones"
+      ]
+    }
+  },
+  "sizing": "Measured on the reference project (90 KB PO Spec, 2026-09-09): S1 136 → 66 KB against section-prepare's whole-spec payload; S6 carries Use Cases whole (~30 KB) because the flows are written from them and the outline made the writer go read the spec anyway; User Stories left out of S6 and Use Cases out of S5 (the flows map them) after a first cut put S6 at 66 KB and S5 at 93 KB. First editor run (8.31.0): S1 lacked the use cases, the writer flagged it and the orchestrator read the PO Spec itself to repair — so S1 now carries Use Cases as an outline."
+}

@@ -1,0 +1,111 @@
+<!--
+  Latency Budget viz — per-flow stacked horizontal bar with SLO ceiling line.
+  Expected data shape:
+    data.flows = [
+      {
+        name: "Notification Send",
+        slo_ms: 500,
+        hops: [
+          { component: "Gateway",  role: "gateway", p95_ms: 20,  status: "within"|"tight"|"over"|"untracked" }
+        ]
+      }
+    ]
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !Array.isArray(data.flows) || data.flows.length === 0) {
+    d3.select("#viz").append("div").attr("class", "viz-empty")
+      .text("No end-to-end SLO or flow data documented — see Documentation Gaps.");
+    return;
+  }
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const flows = data.flows;
+  const maxAll = d3.max(flows, f => Math.max(f.slo_ms || 0, d3.sum(f.hops || [], h => h.p95_ms || 0))) * 1.1;
+
+  const statusColor = {
+    within:    "var(--sev-pass)",
+    tight:     "var(--sev-medium)",
+    over:      "var(--sev-critical)",
+    untracked: "var(--text-muted)",
+  };
+
+  const flowH = 60, gap = 18, M = { top: 20, right: 60, bottom: 30, left: 200 };
+  const innerW = 760 - M.left - M.right;
+  const H = M.top + M.bottom + flows.length * (flowH + gap);
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${760} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleLinear().domain([0, maxAll]).range([0, innerW]);
+
+  flows.forEach((flow, fi) => {
+    const yTop = fi * (flowH + gap);
+    const totalMs = d3.sum((flow.hops || []), h => h.p95_ms || 0);
+    const overBudget = totalMs > (flow.slo_ms || Infinity);
+
+    // Flow label
+    g.append("text")
+      .attr("x", -8).attr("y", yTop + 18)
+      .attr("text-anchor", "end").attr("fill", "var(--text-primary)")
+      .style("font-size", "13px").style("font-weight", "600")
+      .text(flow.name);
+    g.append("text")
+      .attr("x", -8).attr("y", yTop + 34)
+      .attr("text-anchor", "end").attr("fill", "var(--text-muted)")
+      .style("font-size", "11px")
+      .text(`SLO ${flow.slo_ms || "—"}ms · total ${totalMs}ms ${overBudget ? "❌ OVER" : "✓"}`);
+
+    // Stacked segments
+    let acc = 0;
+    (flow.hops || []).forEach((hop, hi) => {
+      const w = x(hop.p95_ms || 0) - x(0);
+      g.append("rect")
+        .attr("x", x(acc)).attr("y", yTop + 6)
+        .attr("width", w).attr("height", 24)
+        .attr("fill", statusColor[hop.status] || "var(--accent)")
+        .attr("fill-opacity", 0.9)
+        .attr("stroke", "#fff").attr("stroke-width", 1)
+        .style("cursor", "pointer")
+        .on("mousemove", (e) => {
+          tooltip.style("opacity", 1)
+            .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+            .html(`<strong>${hop.component}</strong> (${hop.role || "—"})<br>p95: ${hop.p95_ms || "—"}ms · ${hop.status}`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
+      if (w > 40) {
+        g.append("text")
+          .attr("x", x(acc) + w / 2).attr("y", yTop + 22)
+          .attr("text-anchor", "middle").attr("fill", "#fff")
+          .style("font-size", "10px").style("font-weight", "600")
+          .text(`${hop.component.slice(0, 12)} ${hop.p95_ms}ms`);
+      }
+      acc += hop.p95_ms || 0;
+    });
+
+    // SLO ceiling line
+    if (flow.slo_ms) {
+      g.append("line")
+        .attr("x1", x(flow.slo_ms)).attr("x2", x(flow.slo_ms))
+        .attr("y1", yTop).attr("y2", yTop + 44)
+        .attr("stroke", "var(--accent)").attr("stroke-width", 2)
+        .attr("stroke-dasharray", "3,3");
+      g.append("text")
+        .attr("x", x(flow.slo_ms) + 4).attr("y", yTop + 12)
+        .attr("fill", "var(--accent)").style("font-size", "10px").style("font-weight", "700")
+        .text(`SLO ${flow.slo_ms}ms`);
+    }
+  });
+
+  // Bottom axis
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${flows.length * (flowH + gap) - gap + 6})`)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(d => d + "ms"));
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  Object.entries(statusColor).forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+})();

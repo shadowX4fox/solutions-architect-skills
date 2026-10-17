@@ -1,0 +1,111 @@
+<!--
+  Cost Hotspots viz — Pareto chart (sorted cost bars + cumulative-% line).
+  Expected data shape:
+    data.pareto = [
+      { component: "Confluent Kafka", monthly_cost_usd: 2100, vendor: "Confluent",
+        category: "P"|"O"|"V" }
+    ]
+  Components are pre-sorted by cost descending in the agent's render code,
+  but this viz re-sorts defensively.
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !Array.isArray(data.pareto)) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const items = data.pareto
+    .filter(d => d.monthly_cost_usd != null && d.monthly_cost_usd > 0)
+    .sort((a, b) => b.monthly_cost_usd - a.monthly_cost_usd);
+
+  if (items.length === 0) {
+    root.append("div").attr("class", "viz-empty").text("No quantified cost data documented.");
+    return;
+  }
+
+  const total = d3.sum(items, d => d.monthly_cost_usd);
+  let running = 0;
+  items.forEach(d => { running += d.monthly_cost_usd; d._cumPct = (running / total) * 100; });
+
+  const M = { top: 30, right: 70, bottom: 90, left: 80 };
+  const W = 760, H = 420;
+  const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleBand().domain(items.map(d => d.component)).range([0, innerW]).padding(0.18);
+  const yCost = d3.scaleLinear().domain([0, d3.max(items, d => d.monthly_cost_usd) * 1.05]).range([innerH, 0]);
+  const yPct  = d3.scaleLinear().domain([0, 100]).range([innerH, 0]);
+
+  const catColor = {
+    P: "var(--sev-critical)",
+    O: "var(--sev-high)",
+    V: "var(--sev-info)",
+  };
+
+  // 80% guide line
+  g.append("line")
+    .attr("x1", 0).attr("x2", innerW)
+    .attr("y1", yPct(80)).attr("y2", yPct(80))
+    .attr("stroke", "var(--sev-medium)").attr("stroke-dasharray", "4,3");
+  g.append("text")
+    .attr("x", innerW - 4).attr("y", yPct(80) - 4)
+    .attr("text-anchor", "end").attr("fill", "var(--sev-medium)")
+    .style("font-size", "11px").style("font-weight", "600")
+    .text("80% Pareto line");
+
+  // Bars
+  g.selectAll(".bar").data(items).join("rect")
+    .attr("x", d => x(d.component)).attr("y", d => yCost(d.monthly_cost_usd))
+    .attr("width", x.bandwidth())
+    .attr("height", d => innerH - yCost(d.monthly_cost_usd))
+    .attr("fill", d => catColor[d.category] || "var(--accent)")
+    .attr("fill-opacity", 0.85)
+    .style("cursor", "pointer")
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.component}</strong><br>$${d3.format(",.0f")(d.monthly_cost_usd)}/mo · ${d.vendor || "—"}<br>cumulative: ${d._cumPct.toFixed(1)}%`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  // Cumulative line
+  const line = d3.line().x(d => x(d.component) + x.bandwidth() / 2).y(d => yPct(d._cumPct));
+  g.append("path").datum(items)
+    .attr("fill", "none").attr("stroke", "var(--accent)").attr("stroke-width", 2.5).attr("d", line);
+
+  g.selectAll(".cum-pt").data(items).join("circle")
+    .attr("cx", d => x(d.component) + x.bandwidth() / 2)
+    .attr("cy", d => yPct(d._cumPct))
+    .attr("r", 3.5).attr("fill", "var(--accent)");
+
+  // Axes
+  g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .attr("transform", "rotate(-35)").attr("text-anchor", "end")
+    .attr("dx", "-6px").attr("dy", "6px");
+  g.append("g").attr("class", "axis")
+    .call(d3.axisLeft(yCost).ticks(5).tickFormat(d => "$" + d3.format(",.0f")(d)));
+  g.append("g").attr("class", "axis").attr("transform", `translate(${innerW},0)`)
+    .call(d3.axisRight(yPct).ticks(5).tickFormat(d => d + "%"));
+
+  g.append("text").attr("class", "axis-label")
+    .attr("transform", "rotate(-90)").attr("x", -innerH / 2).attr("y", -60)
+    .attr("text-anchor", "middle").text("MONTHLY COST (USD)");
+  g.append("text").attr("class", "axis-label")
+    .attr("transform", "rotate(90)").attr("x", innerH / 2).attr("y", -innerW - 50)
+    .attr("text-anchor", "middle").text("CUMULATIVE %");
+
+  // Footer total
+  root.append("div").attr("class", "viz-legend")
+    .html(
+      `<span><span class="swatch" style="background:${catColor.P}"></span>Pareto hotspot (P)</span>` +
+      `<span><span class="swatch" style="background:${catColor.O}"></span>Over-provisioning (O)</span>` +
+      `<span><span class="swatch" style="background:${catColor.V}"></span>Vendor concentration (V)</span>` +
+      `<span style="margin-left:16px"><strong>Total documented:</strong> $${d3.format(",.0f")(total)}/mo</span>`
+    );
+})();

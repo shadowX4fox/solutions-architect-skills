@@ -1,0 +1,673 @@
+# Query-to-Section Mapping Guide
+
+This guide maps common architectural questions to ARCHITECTURE.md sections for the Informational Query Workflow (Workflow 7).
+
+## Purpose
+
+When users ask questions about the architecture, this guide helps identify which ARCHITECTURE.md section(s) contain the answer, enabling context-efficient loading and accurate citations.
+
+> Section numbers ≠ file prefix numbers. Resolve every section through the table in `SKILL.md` → "Section number vs file prefix" (S9 Security = `docs/07-*`; `docs/09-*` = S11).
+
+## How to Use This Guide
+
+1. **Classify the user's question** by identifying the main topic (authentication, scaling, components, etc.)
+2. **Consult the relevant section mapping** below to find which ARCHITECTURE.md section contains the answer
+3. **Load the identified section(s)** — read the corresponding `docs/NN-name.md` file directly (see **Source File** in each section below)
+4. **Extract the answer** and provide citations by file path
+
+---
+
+## Section 1 (S1+S2): Executive Summary + System Overview
+
+**Source File:** `docs/01-system-overview.md`
+
+**Answers queries about**:
+- Overall system purpose and value
+- High-level architecture overview
+- Key business metrics (users, transactions, availability)
+- Strategic alignment
+- Business value and ROI
+
+**Example questions**:
+- "What does this system do?"
+- "What's the overall architecture?"
+- "What are the key metrics?"
+- "What business value does this provide?"
+- "How many users/transactions does the system support?"
+- "What's the system availability SLA?"
+
+
+**Subsections to check**:
+- Business Value
+- Key Metrics (TPS, latency, availability, concurrent jobs)
+- High-level architecture description
+
+---
+
+## Section 2 (S1+S2): System Overview
+
+**Source File:** `docs/01-system-overview.md` _(combined with Section 1 in the same file)_
+
+**Answers queries about**:
+- Problem being solved (Section 2.1)
+- Solution approach (Section 2.2)
+- Design drivers and constraints (Section 2.2.1)
+- User personas and use cases (Section 2.3)
+- Business context and requirements
+
+**Example questions**:
+- "What problem does this solve?"
+- "Who are the users?"
+- "What are the key use cases?"
+- "What drove the architectural design?"
+- "What are the design constraints?"
+- "What are the primary user scenarios?"
+
+
+**Subsections to check**:
+- 2.1 Problem Statement
+- 2.2 Solution Overview
+- 2.2.1 Design Drivers (Value Delivery, Scale, Impacts)
+- 2.3 Primary Use Cases
+
+---
+
+## Section 3 (S3): Architecture Principles
+
+**Source File:** `docs/02-architecture-principles.md`
+
+**Answers queries about**:
+- Guiding architectural principles
+- Design philosophy and approach
+- Trade-offs and priorities
+- Architectural values and standards
+
+**Example questions**:
+- "What principles guide the architecture?"
+- "How do you approach [scalability/security/resilience]?"
+- "What's the architectural philosophy?"
+- "What trade-offs were made in the design?"
+- "What are the core architectural values?"
+- "Why was [principle X] chosen?"
+
+
+**Required principles** (in order):
+1. Separation of Concerns
+2. High Availability
+3. Scalability First
+4. Security by Design
+5. Observability
+6. Resilience
+7. Simplicity
+8. Cloud-Native
+9. Open Standards
+10. Decouple Through Events (optional - selective async patterns)
+
+**Subsections to check**:
+- Each principle has: Description, Implementation, Trade-offs
+
+---
+
+## Section 4 (S4): Architecture Layers
+
+**Source File:** `docs/03-architecture-layers.md`
+
+**Answers queries about**:
+- Architectural layers and their responsibilities
+- Layer interactions and dependencies
+- Deployment architecture
+- Environment structure (dev, staging, prod)
+- Cloud provider and regions
+- Infrastructure deployment model
+- Network topology
+
+**Example questions**:
+- "Where is this deployed?"
+- "What cloud provider do you use?"
+- "How are environments structured?"
+- "What are the architectural layers?"
+- "How do layers interact?"
+- "What's the deployment model?"
+- "What regions are used?"
+
+
+**Architecture Type Variations**:
+- **Microservices (Recommended)**: Service mesh, API Gateway, microservices catalog, cloud-native patterns
+- **ENTERPRISE**: 5 layers (Channels → Experience → Process → Domain Services → Systems of Record & Data) plus cross-cutting capabilities
+- **3-Tier**: 3 tiers (Presentation → Application → Data)
+- **N-Layer**: DDD, Clean Architecture, or Hexagonal patterns
+
+**Subsections to check**:
+- Layer definitions and responsibilities
+- Cloud infrastructure details
+- Environment configuration
+- BIAN alignment (for ENTERPRISE architecture, optional)
+
+---
+
+## Section 5 (S5): Component Details
+
+**Source File:** `docs/components/README.md` (index) + `docs/components/NN-<component-name>.md` (one file per component)
+
+**Answers queries about**:
+- Individual components and services
+- Component responsibilities
+- Inter-component communication
+- Component architecture patterns
+- Service catalog
+
+**Example questions**:
+- "What components make up the system?"
+- "How does [component X] work?"
+- "What does the [service name] do?"
+- "What are the responsibilities of [component]?"
+- "How do components communicate?"
+- "What services are in the system?"
+
+
+**Subsections to check**:
+- Component subsections (### 5.1, 5.2, etc.)
+- Each component typically has:
+  - Purpose
+  - Responsibilities
+  - Technologies
+  - Dependencies
+  - Communication patterns
+
+---
+
+## Section 6 (S6): Data Flow Patterns
+
+**Source File:** `docs/04-data-flow-patterns.md`
+
+**Answers queries about**:
+- How data moves through the system
+- Data pipelines and transformations
+- Event flows and messaging
+- Data synchronization patterns
+- Request/response flows
+- Data processing workflows
+
+**Example questions**:
+- "How does data flow through the system?"
+- "What happens when [event X] occurs?"
+- "How is data transformed?"
+- "How do you handle [data type] processing?"
+- "What's the flow for [use case]?"
+- "How is data synchronized between [A] and [B]?"
+
+
+**Note**: This section is **optional** for simple systems. If omitted, sections are renumbered (7→6, 8→7, etc.)
+
+**Subsections to check**:
+- Data flow diagrams (often Mermaid)
+- Event flows
+- Pipeline descriptions
+- Transformation logic
+
+---
+
+## Section 7 (S7): Integration Points
+
+**Source File:** `docs/05-integration-points.md`
+
+**Answers queries about**:
+- External system integrations
+- APIs consumed or provided
+- Third-party services
+- Integration patterns and protocols
+- API endpoints and contracts
+- Data exchange formats
+
+**Example questions**:
+- "What external systems do you integrate with?"
+- "What APIs does this expose?"
+- "How do you integrate with [system X]?"
+- "What third-party services are used?"
+- "What integration patterns do you use?"
+- "How do you communicate with [external system]?"
+
+
+**Subsections to check**:
+- External system integrations (subsection per integration)
+- API catalog (exposed APIs)
+- Integration protocols (REST, GraphQL, SOAP, etc.)
+- Data formats (JSON, XML, Protobuf)
+- Authentication for integrations
+
+---
+
+## Section 8 (S8): Technology Stack
+
+**Source File:** `docs/06-technology-stack.md`
+
+**Answers queries about**:
+- Programming languages and frameworks
+- Databases and data stores
+- Tools and libraries
+- Infrastructure technologies
+- Versions and dependencies
+- Build and deployment tools
+
+**Example questions**:
+- "What technologies do you use?"
+- "What's the tech stack?"
+- "What database do you use?"
+- "What programming language is this?"
+- "What version of [technology] do you use?"
+- "What frameworks are you using?"
+
+
+**Common subsections**:
+- Languages (e.g., Java 17, Python 3.11)
+- Frameworks (e.g., Spring Boot, React)
+- Databases (e.g., PostgreSQL, Redis, Elasticsearch)
+- Infrastructure (e.g., Kubernetes, Docker)
+- Tools (e.g., Jenkins, Terraform)
+- Monitoring (e.g., Prometheus, Grafana)
+
+**Subsections to check**:
+- Backend stack
+- Frontend stack (if applicable)
+- Data tier
+- DevOps tools
+- Monitoring and observability tools
+
+---
+
+## Section 9 (S9): Security Architecture
+
+**Source File:** `docs/07-security-architecture.md` _(file prefix 07, NOT 09 — see disambiguation warning above)_
+
+**Answers queries about**:
+- Authentication and authorization
+- Security controls and measures
+- Encryption approaches (at rest, in transit)
+- Compliance requirements (GDPR, SOC2, PCI-DSS)
+- Security monitoring and incident response
+- Vulnerability management
+- Access control mechanisms
+
+**Example questions**:
+- "How do you handle authentication?"
+- "What security measures are in place?"
+- "How is data encrypted?"
+- "What compliance standards do you follow?"
+- "How do you manage access control?"
+- "What's the security architecture?"
+- "How do you detect security threats?"
+
+
+**Subsections to check**:
+- Authentication & Authorization
+- Data Encryption (at rest and in transit)
+- Compliance (GDPR, SOC2, etc.)
+- Security monitoring and logging
+- Threat detection
+- Vulnerability management
+
+---
+
+## Section 10 (S10): Scalability & Performance
+
+**Source File:** `docs/08-scalability-and-performance.md`
+
+**Answers queries about**:
+- Performance targets (latency, throughput)
+- Scalability approach (horizontal, vertical)
+- SLAs and availability targets
+- Capacity planning
+- Load balancing strategies
+- Caching strategies
+- Auto-scaling policies
+
+**Example questions**:
+- "How does this scale?"
+- "What are the performance targets?"
+- "What's the availability SLA?"
+- "How many requests can it handle?"
+- "How do you handle load?"
+- "What's the capacity planning approach?"
+- "How do you ensure high availability?"
+
+
+**Subsections to check**:
+- Performance requirements (latency, TPS)
+- Scalability strategy
+- Throughput targets
+- Capacity planning tables
+- Auto-scaling configuration
+- Load balancing approach
+- Caching layers
+
+**Note**: Often contains duplicate metrics from Section 1 Executive Summary. Check for consistency.
+
+---
+
+## Section 11 (S11): Operational Considerations
+
+**Source File:** `docs/09-operational-considerations.md` _(file prefix 09 = S11, NOT Section 9)_
+
+**Answers queries about**:
+- Monitoring and observability
+- Logging and tracing
+- Backup and recovery
+- Incident management
+- Deployment procedures
+- Runbooks and operational procedures
+- Alerting and on-call
+
+**Example questions**:
+- "How is this monitored?"
+- "What's the backup strategy?"
+- "How do you handle incidents?"
+- "How do you deploy changes?"
+- "What observability tools do you use?"
+- "How do you troubleshoot issues?"
+- "What's the disaster recovery plan?"
+
+
+**Subsections to check**:
+- Monitoring and observability
+- Logging strategy
+- Backup and recovery
+- Incident management
+- Deployment procedures
+- Runbooks
+- Disaster recovery
+
+---
+
+## Section 12 (S12): Architecture Decision Records (ADRs)
+
+**Source File:** `adr/README.md` (index) + `adr/ADR-NNN-<title>.md` (one file per ADR)
+
+**Answers queries about**:
+- Why specific technologies were chosen
+- Architectural trade-offs and rationale
+- Decision history and context
+- Alternatives considered
+- Key architectural choices
+
+**Example questions**:
+- "Why did you choose [technology X]?"
+- "What were the trade-offs for [decision Y]?"
+- "Why this approach over [alternative]?"
+- "What alternatives were considered?"
+- "What's the rationale for [architectural decision]?"
+- "What key decisions were made?"
+
+
+**Subsections to check**:
+- ADR entries (each ADR has: Title, Status, Context, Decision, Consequences)
+- References to separate ADR files (if using external ADR documents)
+
+**ADR Format**:
+```markdown
+### ADR-XXX: [Decision Title]
+
+**Status**: [Accepted | Rejected | Deprecated | Superseded]
+**Date**: YYYY-MM-DD
+**Deciders**: [Names/Roles]
+
+**Context**: Why was this decision needed?
+**Decision**: What was decided?
+**Consequences**: What are the impacts (positive and negative)?
+**Alternatives Considered**: What other options were evaluated?
+```
+
+---
+
+## Section 13 (S13): Risks and Technical Debt
+
+**Source File:** `docs/10-risks-and-technical-debt.md` (auto-created from the Section 13 template in `ARCHITECTURE_DOCUMENTATION_GUIDE.md` when missing during Workflow 1 / Workflow 9)
+
+**Answers queries about**:
+- Architectural risks (likelihood, impact, mitigation)
+- Technical debt items and their status
+- Accepted compromises and their owners
+- Open / Planned / In Progress / Resolved / Won't Fix debt
+- Mitigation plans
+
+**Example questions**:
+- "What technical debt do we have?"
+- "What are the known risks?"
+- "Who owns TDR-NNN?"
+- "What debt is currently open?"
+- "What risks are not yet mitigated?"
+
+**Subsections to check**:
+- 13.1 Risks (likelihood / impact / mitigation table)
+- 13.2 Technical Debt (TDR summary table linking into `/tdr/`)
+
+**Note**: This section is a *summary* view. Full TDRs live at `/tdr/TDR-NNN-*.md` and are managed by the `technical-debt-records` skill — link out rather than duplicate.
+
+---
+
+## Multi-Section Query Scenarios
+
+Some questions require information from **multiple sections**. Here are common multi-section scenarios:
+
+### Scenario 1: Security + Integrations
+
+**Question**: "How does authentication work with external systems?"
+
+**Sections to load**:
+- Section 9 (Security Architecture → Authentication)
+- Section 7 (Integration Points → External Systems)
+
+**Answer should synthesize**:
+- Authentication mechanism from Section 9
+- How external integrations use that authentication from Section 7
+
+---
+
+### Scenario 2: Technology Stack + Deployment
+
+**Question**: "What's the backend tech stack and how is it deployed?"
+
+**Sections to load**:
+- Section 8 (Technology Stack → Backend)
+- Section 4 (Architecture Layers → Cloud Infrastructure)
+
+**Answer should synthesize**:
+- Technologies used from Section 8
+- Deployment environment and approach from Section 4
+
+---
+
+### Scenario 3: Components + Data Flow
+
+**Question**: "How does the [Component X] process data?"
+
+**Sections to load**:
+- Section 5 (Component Details → Component X)
+- Section 6 (Data Flow Patterns)
+
+**Answer should synthesize**:
+- Component responsibilities from Section 5
+- Data processing flow from Section 6
+
+---
+
+### Scenario 4: Performance + Scalability + Operations
+
+**Question**: "How do you ensure the system meets performance SLAs?"
+
+**Sections to load**:
+- Section 10 (Scalability & Performance → SLAs)
+- Section 11 (Operational Considerations → Monitoring)
+- Section 3 (Architecture Principles → High Availability)
+
+**Answer should synthesize**:
+- Performance targets from Section 10
+- Monitoring approach from Section 11
+- Architectural principles supporting SLAs from Section 3
+
+---
+
+## Edge Cases and Ambiguous Queries
+
+### Edge Case 1: Generic "How does it work?" Questions
+
+**Question**: "How does the system work?"
+
+**Strategy**: Too broad - load Section 1 (Executive Summary) for high-level overview, then ask clarifying questions.
+
+**Response template**:
+```
+[Provide high-level summary from Section 1]
+
+Would you like me to dive deeper into:
+- Specific components (Section 5)?
+- Data flows (Section 6)?
+- Technology stack (Section 8)?
+- Security architecture (Section 9)?
+```
+
+---
+
+### Edge Case 2: Cross-Cutting Concerns
+
+**Question**: "How do you handle errors?"
+
+**Multiple possible sections**:
+- Section 3 (Architecture Principles → Resilience)
+- Section 6 (Data Flow Patterns → Error handling flows)
+- Section 11 (Operational Considerations → Monitoring & Alerting)
+
+**Strategy**: Load all relevant sections, synthesize a comprehensive answer covering principles, implementation, and operations.
+
+---
+
+### Edge Case 3: Versioning and Change History
+
+**Question**: "What changed in the last update?"
+
+**Strategy**: ARCHITECTURE.md typically doesn't track change history. Suggest:
+- Check version control system (git log)
+- Review Section 12 (ADRs) for recent decisions
+- Check CHANGELOG.md (`docs/CHANGELOG.md`) for Added/Changed/Superseded entries per release
+
+---
+
+### Edge Case 4: Future Plans and Roadmap
+
+**Question**: "What's planned for the future?"
+
+**Strategy**: ARCHITECTURE.md documents **current state**, not future plans.
+
+**Response template**:
+```
+ARCHITECTURE.md documents the current architecture. Future plans are typically maintained in:
+- Product roadmap documents
+- Architecture Decision Records (Section 12) with status "Proposed"
+- Separate planning documents
+
+Would you like me to help document a proposed architectural change in Section 12 as an ADR?
+```
+
+---
+
+## Query Classification Decision Tree
+
+Use this decision tree to quickly classify user queries:
+
+```
+User Question
+│
+├─ Mentions "problem", "why build this" → S2 (docs/01-system-overview.md)
+├─ Mentions "principle", "approach", "philosophy" → S3 (docs/02-architecture-principles.md)
+├─ Mentions "layer", "tier", "deployment", "cloud" → S4 (docs/03-architecture-layers.md)
+├─ Mentions "component", "service", "module" → S5 (docs/components/)
+├─ Mentions "flow", "pipeline", "event", "transform" → S6 (docs/04-data-flow-patterns.md)
+├─ Mentions "integration", "API", "external", "third-party" → S7 (docs/05-integration-points.md)
+├─ Mentions "technology", "database", "language", "framework" → S8 (docs/06-technology-stack.md)
+├─ Mentions "security", "authentication", "encryption", "compliance" → S9 (docs/07-security-architecture.md)
+├─ Mentions "scale", "performance", "SLA", "capacity" → S10 (docs/08-scalability-and-performance.md)
+├─ Mentions "monitoring", "backup", "incident", "deployment" → S11 (docs/09-operational-considerations.md)
+├─ Mentions "risk", "tech debt", "technical debt", "TDR", "compromise", "deferred work" → S13 (docs/10-risks-and-technical-debt.md)
+├─ Mentions "why choose", "trade-off", "decision", "alternative" → Section 12 (ADRs)
+└─ Generic "what is", "overview", "summary" → Section 1 (Executive Summary)
+```
+
+---
+
+## Best Practices for Query-to-Section Mapping
+
+**DO:**
+- ✅ Start with the most specific section first
+- ✅ Load additional sections if the first doesn't fully answer the question
+- ✅ Consider cross-section queries for complex questions
+- ✅ Resolve Section N → file path using the canonical S1–S12 mapping in ARCHITECTURE_DOCUMENTATION_GUIDE.md before reading
+- ✅ Read the target `docs/NN-*.md` file in full — no offset/limit needed (files are 50–400 lines)
+- ✅ Synthesize multi-section answers clearly
+
+**DON'T:**
+- ❌ Load all sections for broad questions (start with Section 1, then drill down)
+- ❌ Assume file prefix number equals section number (e.g., Section 9 ≠ `docs/09-*`; it is `docs/07-security-architecture.md`)
+- ❌ Mix documented content with assumptions
+- ❌ Skip citations when answering from ARCHITECTURE.md
+- ❌ Load full document when 1-2 sections suffice
+
+---
+
+## Example Query Mapping Workflow
+
+**User Question**: "What authentication method do we use and how is it deployed?"
+
+**Step 1: Classify Query**
+- Primary topic: Authentication → S9 (Security Architecture)
+- Secondary topic: Deployment → S4 (Architecture Layers)
+
+**Step 2: Resolve S-prefix to file paths**
+
+Using the canonical S1–S12 → file mapping (see ARCHITECTURE_DOCUMENTATION_GUIDE.md):
+- S9 → `docs/07-security-architecture.md`  (file prefix 07, NOT 09)
+- S4 → `docs/03-architecture-layers.md`
+
+**Step 3: Read the primary file in full**
+```
+Read(file_path="docs/07-security-architecture.md")
+```
+
+No offset/limit — files are 50–400 lines and designed to be read whole.
+
+**Step 4: Extract authentication details**
+- Found under `## Authentication & Authorization`: OAuth 2.0, JWT tokens, MFA for admins
+
+**Step 5: Read the secondary file in full**
+```
+Read(file_path="docs/03-architecture-layers.md")
+```
+
+**Step 6: Extract deployment details**
+- Found under `## Cloud Infrastructure`: AWS ECS containers, auto-scaling groups
+
+**Step 7: Synthesize answer with file-path citations**
+```
+The system uses OAuth 2.0 for authentication with JWT tokens for API access.
+Multi-factor authentication (MFA) is required for administrative users.
+
+The authentication service is deployed as a containerized microservice on AWS ECS
+with auto-scaling enabled for high availability.
+
+**Sources**:
+- [Authentication & Authorization](docs/07-security-architecture.md#authentication--authorization)
+- [Cloud Infrastructure](docs/03-architecture-layers.md#cloud-infrastructure)
+```
+
+**Why no offsets?** A `docs/NN-*.md` file holds one section and is typically small enough to read whole. Reading in full is cheaper than computing offsets, and the file path + header anchor is the canonical citation format. (This is a load-strategy observation, not a size limit — there is no file line cap; see `references/PROSE_STYLE.md` § Length targets.)
+
+---
+
+## Summary
+
+This guide enables efficient, context-optimized answers to user questions by:
+
+1. **Mapping questions to specific sections** (avoiding full document loads)
+2. **Providing clear section targets** (minimizing guesswork)
+3. **Supporting multi-section queries** (for complex questions)
+4. **Handling edge cases** (ambiguous or out-of-scope queries)
+
+Use this guide in conjunction with **Workflow 7: Informational Query** (in SKILL.md) for complete implementation details.

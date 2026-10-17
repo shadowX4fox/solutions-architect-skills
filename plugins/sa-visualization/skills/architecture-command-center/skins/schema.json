@@ -1,0 +1,176 @@
+{
+  "$comment": "The closed palette every command-center skin defines, in every mode it declares. Generated sections: tokens.required. A skin may add private tokens used only by its own skin.css.",
+  "groups": [
+    {
+      "id": "fonts",
+      "description": "The three type families: interface text, headings and block names, figures and codes.",
+      "tokens": {
+        "--font-ui": "interface text",
+        "--font-head": "headings, block names",
+        "--font-mono": "figures, ids, codes"
+      }
+    },
+    {
+      "id": "surface",
+      "description": "The page and its panels.",
+      "tokens": {
+        "--bg": "page background",
+        "--panel": "panel fill",
+        "--panel-border": "panel and divider lines",
+        "--label-bg": "a stage label's backing",
+        "--chip": "a chip or a pressed control's fill",
+        "--focus": "keyboard focus, the selected accent",
+        "--glow": "the glow of a pressed control (transparent for none)"
+      }
+    },
+    {
+      "id": "ink",
+      "description": "Text, from strongest to weakest.",
+      "tokens": {
+        "--ink": "primary text",
+        "--ink-2": "secondary text",
+        "--ink-3": "hints, axis labels"
+      }
+    },
+    {
+      "id": "floor",
+      "description": "The floors the model stands on.",
+      "tokens": {
+        "--floor-owned": "a floor the organization owns",
+        "--floor-ext": "an external floor",
+        "--floor-edge": "a floor's outline and layer names",
+        "--grid": "the floor grid",
+        "--boundary": "the system boundary line"
+      }
+    },
+    {
+      "id": "block",
+      "description": "The blocks (containers, instances, actors).",
+      "tokens": {
+        "--block-owned": "an owned container",
+        "--block-ext": "an external system's container",
+        "--block-actor": "an actor outside the architecture",
+        "--block-node": "an infrastructure node slab",
+        "--block-hover": "the hovered block's tint",
+        "--outline": "block outlines"
+      }
+    },
+    {
+      "id": "zones",
+      "description": "Zones on the Logical view and groups on the Physical view.",
+      "tokens": {
+        "--zone-1": "external-system zone, tint 1",
+        "--zone-2": "external-system zone, tint 2",
+        "--zone-3": "external-system zone, tint 3",
+        "--zone-4": "external-system zone, tint 4",
+        "--zone-5": "external-system zone, tint 5",
+        "--plot": "an owned zone with no tint",
+        "--grp-cloud-1": "Physical group — the organization's cloud, tone 1",
+        "--grp-cloud-2": "Physical group — the organization's cloud, tone 2",
+        "--grp-prem-1": "Physical group — the organization's own datacenters, tone 1",
+        "--grp-prem-2": "Physical group — own datacenters, tone 2",
+        "--grp-ext-1": "Physical group — a third party, tone 1",
+        "--grp-ext-2": "Physical group — a third party, tone 2"
+      }
+    },
+    {
+      "id": "severity",
+      "description": "Analysis findings by residual severity.",
+      "tokens": {
+        "--sev-critical": "critical",
+        "--sev-high": "high",
+        "--sev-medium": "medium",
+        "--sev-low": "low",
+        "--sev-info": "informational",
+        "--sev-context": "context: an endpoint or zone a finding does not name"
+      }
+    },
+    {
+      "id": "routes",
+      "description": "Logical route families (the walkthrough's phase kinds).",
+      "tokens": {
+        "--c-local": "local",
+        "--c-online": "online",
+        "--c-async": "asynchronous",
+        "--c-control": "control",
+        "--c-batch": "batch",
+        "--c-neutral": "unclassified",
+        "--c-warn": "a warning on a route"
+      }
+    },
+    {
+      "id": "simulation",
+      "description": "Load simulation heat.",
+      "tokens": {
+        "--sim-ok": "headroom",
+        "--sim-warn": "at the limit",
+        "--sim-crit": "saturated",
+        "--sim-grey": "no traffic",
+        "--sim-pending": "loaded but unsized",
+        "--sim-info": "informational figure",
+        "--sim-emit": "where traffic starts"
+      }
+    },
+    {
+      "id": "paths",
+      "description": "Physical path classes.",
+      "tokens": {
+        "--p-private": "private network",
+        "--p-peering": "peering",
+        "--p-vpn": "VPN",
+        "--p-mesh": "service mesh",
+        "--p-direct": "direct connection",
+        "--p-public": "public internet"
+      }
+    },
+    {
+      "id": "light",
+      "description": "The 3D scene's light and shadow.",
+      "tokens": {
+        "--light-ground": "the hemisphere light's ground colour",
+        "--shadow": "contact shadows under blocks"
+      }
+    },
+    {
+      "id": "elevation",
+      "description": "Depth on the page: shadows under panels and what dims the page behind a dialog.",
+      "tokens": {
+        "--shadow-ui": "drop shadows under panels, cards and toasts",
+        "--scrim": "the page behind a dialog, around the photo frame, gauge troughs"
+      }
+    }
+  ],
+  "optional": {
+    "--label-plate": "a plated label's backing (falls back to --label-bg)",
+    "--select": "the selection accent (falls back to --focus)",
+    "--floor-line": "the 3D floor outline (falls back to --floor-edge)",
+    "--bg-core": "the projector backdrop's centre — required when engine.projector",
+    "--bg-mid": "the projector backdrop's middle ring — required when engine.projector",
+    "--accent-2": "the projector's second ring and a neon panel's second accent (falls back to --floor-edge)"
+  },
+  "engine": {
+    "required": [
+      "blockOpacity",
+      "selfLit",
+      "outlines",
+      "grid",
+      "floorOpacity",
+      "floorEdgeOpacity",
+      "scan",
+      "flicker",
+      "additive",
+      "projector",
+      "select",
+      "light"
+    ],
+    "optional": [
+      "gridOpacity",
+      "parallelGrid",
+      "floorOpacityPhysical"
+    ]
+  },
+  "looks": {
+    "neon": "game ranks (LV S · A · B …), banner words, a typed codec",
+    "flat": "priorities (P1 … P5), plain captions"
+  }
+}

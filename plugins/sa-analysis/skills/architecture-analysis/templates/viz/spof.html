@@ -1,0 +1,113 @@
+<!--
+  SPOF viz — Impact × Likelihood scatter heat map (3×3 grid)
+  Expected data shape:
+    data.heatmap = [
+      { id: "C1", label: "Azure East US Region",
+        impact: 3, likelihood: 2, tier: "critical" | "degradation" | "operational",
+        scenario: "Regional outage", ... }
+    ]
+  Impact and likelihood are integers 1..3 (LOW=1, MEDIUM=2, HIGH=3).
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !Array.isArray(data.heatmap)) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const W = 720, H = 420, M = { top: 30, right: 30, bottom: 60, left: 70 };
+  const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleLinear().domain([0.5, 3.5]).range([0, innerW]);
+  const y = d3.scaleLinear().domain([0.5, 3.5]).range([innerH, 0]);
+
+  // Background risk-zone shading (low/med/high)
+  const zoneColor = d3.scaleLinear()
+    .domain([0, 9])
+    .range(["#f0fdf4", "#fee2e2"]);
+  for (let xi = 1; xi <= 3; xi++) {
+    for (let yi = 1; yi <= 3; yi++) {
+      g.append("rect")
+        .attr("x", x(xi - 0.5)).attr("y", y(yi + 0.5))
+        .attr("width", x(xi + 0.5) - x(xi - 0.5))
+        .attr("height", y(yi - 0.5) - y(yi + 0.5))
+        .attr("fill", zoneColor(xi * yi))
+        .attr("stroke", "var(--border)").attr("stroke-width", 0.5);
+    }
+  }
+
+  // Axes
+  const xLabels = ["", "LOW", "MEDIUM", "HIGH"];
+  const yLabels = ["", "LOW", "MEDIUM", "HIGH"];
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickValues([1, 2, 3]).tickFormat(d => xLabels[d]));
+  g.append("g").attr("class", "axis")
+    .call(d3.axisLeft(y).tickValues([1, 2, 3]).tickFormat(d => yLabels[d]));
+
+  g.append("text").attr("class", "axis-label")
+    .attr("x", innerW / 2).attr("y", innerH + 42).attr("text-anchor", "middle")
+    .text("LIKELIHOOD →");
+  g.append("text").attr("class", "axis-label")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -innerH / 2).attr("y", -50).attr("text-anchor", "middle")
+    .text("IMPACT →");
+
+  // Jitter to avoid overlap in same cell
+  const cellGroups = d3.group(data.heatmap, d => `${d.impact}-${d.likelihood}`);
+  const placed = [];
+  cellGroups.forEach((items, key) => {
+    const n = items.length;
+    items.forEach((d, i) => {
+      const angle = (2 * Math.PI * i) / Math.max(n, 1);
+      const r = n > 1 ? 28 : 0;
+      placed.push({
+        ...d,
+        cx: x(d.likelihood) + Math.cos(angle) * r,
+        cy: y(d.impact) + Math.sin(angle) * r,
+      });
+    });
+  });
+
+  const tierColor = {
+    critical:    "var(--sev-critical)",
+    degradation: "var(--sev-high)",
+    operational: "var(--sev-low)",
+  };
+
+  const node = g.selectAll(".finding").data(placed).join("g").attr("class", "finding");
+  node.append("circle")
+    .attr("cx", d => d.cx).attr("cy", d => d.cy)
+    .attr("r", 18)
+    .attr("fill", d => tierColor[d.tier] || "var(--text-muted)")
+    .attr("fill-opacity", 0.9)
+    .attr("stroke", "#fff").attr("stroke-width", 2)
+    .style("cursor", "pointer")
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.id}</strong> · ${d.label || ""}<br>${d.scenario || ""}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+  node.append("text")
+    .attr("x", d => d.cx).attr("y", d => d.cy + 4)
+    .attr("text-anchor", "middle")
+    .attr("class", "node-label")
+    .attr("fill", "#fff")
+    .text(d => d.id);
+
+  // Legend
+  const legend = root.append("div").attr("class", "viz-legend");
+  [
+    ["Critical (full outage)", "var(--sev-critical)"],
+    ["Degradation (partial / silent)", "var(--sev-high)"],
+    ["Operational (deploy / observability)", "var(--sev-low)"],
+  ].forEach(([label, color]) => {
+    legend.append("span").html(`<span class="swatch" style="background:${color}"></span>${label}`);
+  });
+})();

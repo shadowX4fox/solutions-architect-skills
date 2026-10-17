@@ -1,0 +1,61 @@
+# A local architecture index to test an architecture against while writing it: the MCP server with its file engine
+# (no Qdrant), embedding through Ollama. publish-index.js --up starts it and picks the Ollama; by hand:
+#
+#   docker compose -f <this file> up -d --build          GPU: the host's Ollama (the default)
+#   SA_INDEX_OLLAMA=http://ollama:11434 docker compose -f <this file> --profile cpu up -d --build
+#                                                        CPU: an Ollama container, when the host has none
+#   docker compose -f <this file> down                   stop; add -v to drop the bundles, the vectors and the model
+#
+# The server is built from its own repository (SA_INDEX_SERVER_REF picks the branch, tag or commit). The file engine
+# keeps the vectors with the bundles (/data/index/vectors-<dimensions>.bin in the bundles volume), so a restart
+# re-embeds nothing.
+#
+# By default the server embeds through the host's Ollama, which uses the machine's GPU when it has one (ROCm or CUDA):
+# about twenty chunks a second, against about one on a CPU. The host's Ollama must listen beyond localhost so the
+# container reaches it (OLLAMA_HOST=0.0.0.0; on Linux a systemd override of ollama.service). The model is pulled into
+# it on the first start. The cpu profile runs Ollama in a container instead. Another embedding model: SA_INDEX_MODEL,
+# with its dimensions and prompts (the server's README). Docker Compose 2.20 or later.
+name: sa-architecture-index
+
+services:
+  server:
+    build:
+      context: https://github.com/shadowX4fox/solutions-architect-knowledge-base.git#${SA_INDEX_SERVER_REF:-main}
+    image: sa-architecture-index-server:local
+    ports:
+      - "${SA_INDEX_PORT:-8080}:8080"
+    environment:
+      ARCHINDEX_STORE: file
+      # the base URL a pack part's download_url is built from (get_build_pack); unset, no download_url is listed
+      ARCHINDEX_PUBLIC_URL: ${SA_INDEX_PUBLIC_URL:-http://localhost:${SA_INDEX_PORT:-8080}}
+      OLLAMA_BASE_URL: ${SA_INDEX_OLLAMA:-http://host.docker.internal:11434}
+      ARCHINDEX_EMBEDDING_MODEL: ${SA_INDEX_MODEL:-qwen3-embedding:0.6b}
+      SPRING_AI_OLLAMA_INIT_PULLMODELSTRATEGY: when_missing
+      SPRING_AI_OLLAMA_INIT_TIMEOUT: 30m
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - bundles:/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      retries: 90
+      start_period: 30s
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: [cpu]
+    volumes:
+      - models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      retries: 30
+
+volumes:
+  bundles:
+  models:

@@ -1,0 +1,181 @@
+{
+  "lens": "vendor-lockin",
+  "slug": "VENDOR-LOCKIN",
+  "specFile": "VENDOR_LOCKIN.md",
+  "title": {
+    "en": "Vendor Lock-in Analysis",
+    "es": "Análisis de Dependencia de Proveedor"
+  },
+  "typeLabel": "Vendor Lock-in",
+  "vizTitle": "Vendor Concentration Treemap",
+  "topN": 5,
+  "idForms": "L1-01, L2-01",
+  "docs": [
+    "docs/06-technology-stack.md",
+    "docs/05-integration-points.md",
+    "docs/09-operational-considerations.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Vendor Concentration",
+      "level": 2,
+      "title": {
+        "en": "Vendor Concentration",
+        "es": "Concentración por Proveedor"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Vendor",
+        "Component Count",
+        "% of Architecture",
+        "Lock Tier Distribution"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one row per vendor over every classified component; Lock Tier Distribution as \"3 L1, 2 L2, 1 L3\"; a vendor at ≥ 60 % is HIGH CONCENTRATION RISK"
+    },
+    {
+      "key": "Locked Capabilities",
+      "level": 2,
+      "title": {
+        "en": "Locked Capabilities (L1)",
+        "es": "Capacidades Bloqueadas (L1)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component / Capability",
+        "Vendor",
+        "Proprietary Surface",
+        "Exit Path",
+        "Exit Cost"
+      ],
+      "id": "^L1-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "L1 items, L1-01 … sequential; Exit Path = alternative standard or competitor, \"None identified\" if absent; Exit Cost = High / Medium / Low"
+    },
+    {
+      "key": "Lock-prone Capabilities",
+      "level": 2,
+      "title": {
+        "en": "Lock-prone Capabilities (L2)",
+        "es": "Capacidades Propensas al Bloqueo (L2)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component / Capability",
+        "Vendor",
+        "Open Standard Used",
+        "Vendor Extension",
+        "Migration Risk"
+      ],
+      "id": "^L2-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "L2 items, L2-01 … sequential; Migration Risk = High / Medium / Low"
+    },
+    {
+      "key": "Portable Components",
+      "level": 2,
+      "title": {
+        "en": "Portable Components (L3)",
+        "es": "Componentes Portables (L3)"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Component",
+        "Standard",
+        "Alternative Provider(s)"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "notable L3 items only, never every portable component"
+    },
+    {
+      "key": "Exit Cost Ranking",
+      "level": 2,
+      "title": {
+        "en": "Exit Cost Ranking",
+        "es": "Ranking de Costo de Salida"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Vendor",
+        "Exit Cost",
+        "Blocking Factor"
+      ],
+      "id": "^L[12]-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every L1 + L2 item sorted by exit cost descending, keyed by its existing id — never renumbered",
+      "repeatsIds": true
+    },
+    {
+      "key": "Vendor Lock-in Heat Map",
+      "level": 2,
+      "title": {
+        "en": "Vendor Lock-in Heat Map",
+        "es": "Mapa de Calor de Dependencia de Proveedor"
+      },
+      "kind": "heatmap",
+      "axes": {
+        "x": {
+          "label": "STRATEGIC IMPORTANCE",
+          "lo": "LOW",
+          "hi": "HIGH",
+          "n": 3
+        },
+        "y": {
+          "label": "LOCK SEVERITY",
+          "lo": "LOW (L3)",
+          "hi": "HIGH (L1)",
+          "n": 3
+        }
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "one entry per L-id: y = lock severity (3 = L1), x = strategic importance (critical user-facing path = HIGH)"
+    },
+    {
+      "key": "Top 5 Portability Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Portability Recommendations",
+        "es": "Cinco Recomendaciones de Portabilidad"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto Resumen"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

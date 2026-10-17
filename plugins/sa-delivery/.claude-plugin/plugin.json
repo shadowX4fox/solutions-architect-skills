@@ -1,0 +1,13 @@
+{
+  "name": "sa-delivery",
+  "version": "10.1.0",
+  "description": "Artifacts handed to other teams and tools: the four-part development handoff kit (System Runtime View, Cross-Cutting Standards, Interface Contracts, Component Specifications with validated OpenAPI / AsyncAPI / GraphQL / Avro / DDL / Protobuf / Redis assets), Word exports (stakeholder briefing and reference, handoff kit), organizational blueprints and the IcePanel C4 sync. Reads the architecture through sa-skills, which installs it as a dependency.",
+  "author": {
+    "name": "shadowX4fox",
+    "url": "https://github.com/shadowX4fox"
+  },
+  "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "license": "MIT",
+  "keywords": ["handoff", "openapi", "asyncapi", "docx", "export", "blueprint", "icepanel", "c4"]
+}

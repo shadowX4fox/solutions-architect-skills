@@ -1,0 +1,95 @@
+<!--
+  Data Sensitivity viz — Sankey diagram of PII flow from sources to sinks.
+  Requires d3-sankey (loaded by the shared skeleton).
+  Expected data shape:
+    data.sankey = {
+      nodes: [ { name: "Client", tier: "S4" }, { name: "PostgreSQL", tier: "S1" } ],
+      links: [ { source: 0, target: 1, value: 1, encrypted: true|false, label: "POST /notifications" } ]
+    }
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.sankey ||
+      !Array.isArray(data.sankey.nodes) || data.sankey.nodes.length === 0) {
+    d3.select("#viz").append("div").attr("class", "viz-empty")
+      .text("No sensitive data flows documented — see Data Inventory below.");
+    return;
+  }
+  if (typeof d3.sankey !== "function") {
+    d3.select("#viz").append("div").attr("class", "viz-empty")
+      .text("d3-sankey plugin failed to load — flow diagram unavailable.");
+    return;
+  }
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const W = 760, H = 460;
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+
+  const tierColor = {
+    S1: "var(--sev-critical)",
+    S2: "var(--sev-high)",
+    S3: "var(--sev-medium)",
+    S4: "var(--sev-low)",
+    Unknown: "var(--text-muted)",
+  };
+
+  const sankey = d3.sankey()
+    .nodeWidth(18)
+    .nodePadding(14)
+    .extent([[20, 20], [W - 20, H - 30]]);
+
+  // Deep clone so sankey can mutate
+  const graph = {
+    nodes: data.sankey.nodes.map(d => ({ ...d })),
+    links: data.sankey.links.map(d => ({ ...d })),
+  };
+  const { nodes, links } = sankey(graph);
+
+  // Links
+  svg.append("g").attr("fill", "none").selectAll("path").data(links).join("path")
+    .attr("d", d3.sankeyLinkHorizontal())
+    .attr("stroke", d => d.encrypted ? "var(--sev-pass)" : "var(--sev-critical)")
+    .attr("stroke-opacity", 0.45)
+    .attr("stroke-width", d => Math.max(1.5, d.width))
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.source.name} → ${d.target.name}</strong><br>${d.label || ""}<br>${d.encrypted ? "🔒 encrypted" : "⚠️ UNENCRYPTED"}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  // Nodes
+  const node = svg.append("g").selectAll("g").data(nodes).join("g")
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.name}</strong><br>sensitivity: ${d.tier || "—"}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  node.append("rect")
+    .attr("x", d => d.x0).attr("y", d => d.y0)
+    .attr("width", d => d.x1 - d.x0).attr("height", d => Math.max(2, d.y1 - d.y0))
+    .attr("fill", d => tierColor[d.tier] || "var(--text-muted)")
+    .attr("stroke", "#fff").attr("stroke-width", 1);
+
+  node.append("text")
+    .attr("x", d => d.x0 < W / 2 ? d.x1 + 6 : d.x0 - 6)
+    .attr("y", d => (d.y0 + d.y1) / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", d => d.x0 < W / 2 ? "start" : "end")
+    .attr("fill", "var(--text-primary)")
+    .style("font-size", "11px").style("font-weight", "600")
+    .text(d => `${d.name} ${d.tier ? "[" + d.tier + "]" : ""}`);
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  Object.entries(tierColor).forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("color", "var(--sev-pass)")
+    .html(`<span class="swatch" style="background:var(--sev-pass)"></span>encrypted edge`);
+  legend.append("span").style("color", "var(--sev-critical)")
+    .html(`<span class="swatch" style="background:var(--sev-critical)"></span>unencrypted edge`);
+})();

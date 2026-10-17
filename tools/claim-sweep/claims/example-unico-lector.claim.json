@@ -1,0 +1,27 @@
+{
+  "id": "example-unico-lector",
+  "nota": "Ejemplo sintético: nombres inventados, corpus escrito por tools/claim-sweep/claim-sweep.test.ts (los fixtures apuntan a ese corpus). Un claim real vive fuera del repo — claims/*.claim.json está ignorado salvo este ejemplo.",
+  "titulo": "La colección de cierres dejó de tener un solo lector (ejemplo)",
+  "hi": 0.65,
+  "hi_nota": "el corte se mide con --verify contra los fixtures; 0.65 es el del ejemplo, no una regla",
+  "question": "¿Este pasaje afirma, como estado vigente de la arquitectura, que el `Servicio de Conciliación Nocturna` es el ÚNICO lector de la colección de cierres del `Cache de Saldos` — o, equivalentemente, que esa colección no tiene ningún otro lector?",
+  "criteria": {
+    "true": "El pasaje sostiene la unicidad de LECTOR: dice que ese servicio es su único lector, su «escritor y lector único», que la lee «solo» él, o que la colección no tiene «ningún lector externo». Cuenta también si lo afirma en una celda de tabla bajo una cabecera «Lector».",
+    "false": "Cualquier otro caso. En particular es NO cuando: (a) el pasaje sólo afirma unicidad de ESCRITOR, que es una invariante distinta; (b) niega o corrige la unicidad de lector («dejó de ser el único lector», «suma un segundo lector»); (c) habla de otra colección o de otro almacén; (d) menciona lectura y escritura sin afirmar exclusividad de nadie."
+  },
+  "dirs": ["docs", "adr"],
+  "patterns": {
+    "recall": [["escritor", "escrib", "lector", "lee "], ["colecci[oó]n de cierres", "Servicio de Conciliaci[oó]n Nocturna"]],
+    "subject": ["Servicio de Conciliaci[oó]n Nocturna"],
+    "object": ["colecci[oó]n de cierres"],
+    "quantifier": ["\\b[uú]nic[oa]s?\\b", "ning[uú]n (otro )?lector", "un solo lector", "\\bsolo\\b"],
+    "negation": ["dej[oó] de ser", "ya no (es|son)", "segundo lector", "dos lectores"]
+  },
+  "fixtures": [
+    { "file": "docs/06-cache-de-saldos.md", "line": 7,  "label": 1, "nota": "celda bajo la cabecera Lector: ningún lector externo" },
+    { "file": "docs/06-cache-de-saldos.md", "line": 11, "label": 1, "nota": "INV-02: escritor y lector único" },
+    { "file": "adr/ADR-107-cierres.md",     "line": 5,  "label": 1, "nota": "la escribe y la lee solo él" },
+    { "file": "docs/06-cache-de-saldos.md", "line": 15, "label": 0, "nota": "control: unicidad de ESCRITOR, los canales leen" },
+    { "file": "adr/ADR-107-cierres.md",     "line": 9,  "label": 0, "nota": "control: la enmienda niega la unicidad de lector" }
+  ]
+}

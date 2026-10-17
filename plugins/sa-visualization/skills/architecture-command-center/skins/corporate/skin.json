@@ -1,0 +1,113 @@
+{
+  "id": "corporate",
+  "order": 3,
+  "name": {
+    "en": "Corporate",
+    "es": "Corporativo"
+  },
+  "hint": {
+    "en": "Neutral business palette, light — slate and teal",
+    "es": "Paleta neutra de negocio, clara — pizarra y verde azulado"
+  },
+  "look": "flat",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+  ],
+  "engine": {
+    "blockOpacity": 1,
+    "selfLit": false,
+    "outlines": false,
+    "grid": false,
+    "parallelGrid": 0.9,
+    "floorOpacity": 0.05,
+    "floorOpacityPhysical": 0.015,
+    "floorEdgeOpacity": 0.85,
+    "scan": false,
+    "flicker": false,
+    "additive": false,
+    "projector": false,
+    "select": "aura",
+    "light": {
+      "hemi": [
+        0.95,
+        0.7
+      ],
+      "sun": [
+        0.7,
+        0.85
+      ]
+    }
+  },
+  "modes": {
+    "light": {
+      "--font-ui": "\"Nunito Sans\", \"Helvetica Neue\", Arial, sans-serif",
+      "--font-head": "\"Nunito Sans\", \"Helvetica Neue\", Arial, sans-serif",
+      "--font-mono": "\"IBM Plex Mono\", ui-monospace, monospace",
+      "--bg": "#f4f6f8",
+      "--panel": "#ffffff",
+      "--panel-border": "#dfe4ea",
+      "--ink": "#1c2b45",
+      "--ink-2": "#4a5874",
+      "--ink-3": "#7b879b",
+      "--floor-owned": "#dbe5f1",
+      "--floor-ext": "#ece8e0",
+      "--floor-edge": "#9aa7b9",
+      "--grid": "#cdd5e0",
+      "--boundary": "#1c2b45",
+      "--block-owned": "#2d4f7f",
+      "--block-ext": "#a9b0bc",
+      "--block-actor": "#c4882b",
+      "--block-node": "#4a5874",
+      "--block-hover": "#e3ebf6",
+      "--outline": "#1c2b45",
+      "--zone-1": "#7f93b8",
+      "--zone-2": "#a3a9b6",
+      "--zone-3": "#7fb59a",
+      "--zone-4": "#6f7d9d",
+      "--zone-5": "#d39a6a",
+      "--plot": "#cfd6e2",
+      "--grp-cloud-1": "#1f4e9c",
+      "--grp-cloud-2": "#4a74b8",
+      "--grp-prem-1": "#1f7a6a",
+      "--grp-prem-2": "#3f9584",
+      "--grp-ext-1": "#9a7d3c",
+      "--grp-ext-2": "#857c6e",
+      "--sev-critical": "#db2222",
+      "--sev-high": "#f65b00",
+      "--sev-medium": "#c79100",
+      "--sev-low": "#2f7abf",
+      "--sev-info": "#6f7d9d",
+      "--sev-context": "#c7cfe1",
+      "--c-local": "#299846",
+      "--c-online": "#2f7abf",
+      "--c-async": "#f65b00",
+      "--c-control": "#db2222",
+      "--c-batch": "#6f7d9d",
+      "--c-neutral": "#6f7d9d",
+      "--c-warn": "#db2222",
+      "--sim-ok": "#61b679",
+      "--sim-warn": "#f76800",
+      "--sim-crit": "#db2222",
+      "--sim-grey": "#bec7db",
+      "--sim-pending": "#7b5cc4",
+      "--sim-info": "var(--c-online)",
+      "--sim-emit": "#2f7abf",
+      "--p-private": "#299846",
+      "--p-peering": "#2f7abf",
+      "--p-vpn": "#f65b00",
+      "--p-mesh": "#7b5cc4",
+      "--p-direct": "#0f8f8a",
+      "--p-public": "#db2222",
+      "--label-bg": "rgba(255,255,255,.92)",
+      "--chip": "#eef1f5",
+      "--focus": "#1f8a8a",
+      "--glow": "transparent",
+      "--brand": "#1f8a8a",
+      "--select": "#1f8a8a",
+      "--light-ground": "#8899aa",
+      "--shadow": "#0b1530",
+      "--shadow-ui": "#1c2b45",
+      "--scrim": "#0b1220"
+    }
+  }
+}

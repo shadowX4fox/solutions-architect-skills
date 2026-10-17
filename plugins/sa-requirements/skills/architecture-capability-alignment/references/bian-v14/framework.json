@@ -1,0 +1,16 @@
+{
+  "id": "BIAN",
+  "name": "BIAN Service Landscape v14.0.0",
+  "industry": "banking",
+  "source": "BIAN",
+  "source_url": "https://bian.org",
+  "license": "taxonomy as published; API descriptions Apache-2.0 (LICENSE-BIAN-APIS)",
+  "index": "llms-bian.txt",
+  "files": "^BIAN-v14-\\d-.*\\.md$",
+  "levels": { "area": "Business Area", "domain": "Business Domain", "unit": "Service Domain" },
+  "headings": { "area": "Business Area", "domain": "Business Domain", "unit": "Service Domain" },
+  "id_label": "BIAN id",
+  "noun": "banking",
+  "report": "BIAN_ALIGNMENT.md",
+  "counts": { "areas": 8, "domains": 43, "units": 341 }
+}

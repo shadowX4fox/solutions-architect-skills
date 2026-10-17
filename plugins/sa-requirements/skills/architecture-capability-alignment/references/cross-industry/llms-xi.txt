@@ -1,0 +1,299 @@
+# Cross-Industry Capability Map
+
+> Complete index of the 223 cross-industry Capabilities of Turbo EA Capabilities, arranged under 41 Capability Groups and 9 Domains. This file is the index: use it to answer questions that need a *complete* answer — every Capability in a Domain or Capability Group, or where a named Capability sits in the hierarchy. Descriptions and the finer capabilities each one includes live in the 9 per-Domain files linked below.
+
+The map organises business capability that any enterprise has, whatever its industry, as a three-level chain: a Domain (the catalogue's macro capability, an executive grouping) contains Capability Groups (its L1 capabilities), which contain Capabilities (L2). A Capability is the unit an initiative is aligned to; the L3 capabilities beneath it are listed by name on its **Includes.** line.
+
+Counts: 9 Domains, 41 Capability Groups, 223 Capabilities, 893 included (L3) capabilities.
+
+Entry format in the Capabilities section below: `[Capability](file#anchor): Domain > Capability Group · catalogue id`.
+
+Every name, id and description is as published by Turbo EA Capabilities at commit `6774bf2ac45a1718d74f05b8b55ed85574f29499`, converted from YAML to Markdown. Licence: CC BY 4.0 (LICENSE-TURBO-EA); attribution and third-party notices in NOTICE. Credit: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities, CC BY 4.0.
+
+## Domains
+
+- [Enterprise Governance & Risk](XI-1-enterprise-governance-and-risk.md): id `MC-10` · 8 Capability Groups · 40 Capabilities. Capability Groups: Strategic Management; Corporate Governance; Enterprise Risk Management; Compliance Management; Internal Audit Management; Legal Management; Business Continuity Management; Business Architecture Management.
+- [Corporate Finance](XI-2-corporate-finance.md): id `MC-20` · 5 Capability Groups · 27 Capabilities. Capability Groups: Financial Management; Treasury Management; Tax Management; Financial Planning & Analysis; Investor Relations Management.
+- [Human Capital](XI-3-human-capital.md): id `MC-30` · 1 Capability Group · 9 Capabilities. Capability Groups: Human Capital Management.
+- [Customer & Commercial](XI-4-customer-and-commercial.md): id `MC-40` · 5 Capability Groups · 27 Capabilities. Capability Groups: Marketing Management; Sales Management; Customer Relationship Management; Customer Service Management; Pricing Management.
+- [Supply Chain & Procurement](XI-5-supply-chain-and-procurement.md): id `MC-50` · 4 Capability Groups · 22 Capabilities. Capability Groups: Procurement Management; Supplier Management; Supply Chain Management; Inventory Management.
+- [Technology & Information](XI-6-technology-and-information.md): id `MC-60` · 3 Capability Groups · 20 Capabilities. Capability Groups: Information Technology Management; Information & Data Management; Cybersecurity Management.
+- [Workplace & Facilities](XI-7-workplace-and-facilities.md): id `MC-70` · 2 Capability Groups · 9 Capabilities. Capability Groups: Facilities Management; Corporate Real Estate Management.
+- [Quality, Innovation & Knowledge](XI-8-quality-innovation-and-knowledge.md): id `MC-80` · 9 Capability Groups · 48 Capabilities. Capability Groups: Quality Management; Health, Safety & Environment Management; Sustainability Management; Innovation Management; Research & Development Management; Product Lifecycle Management; Knowledge Management; Intellectual Property Management; Corporate Communications Management.
+- [Project, Change & Process](XI-9-project-change-and-process.md): id `MC-90` · 4 Capability Groups · 21 Capabilities. Capability Groups: Project & Portfolio Management; Change Management; Transformation Management; Business Process Management.
+
+## Capability Groups
+
+Each entry lists its complete set of Capabilities.
+
+- [Strategic Management](XI-1-enterprise-governance-and-risk.md#capability-group-strategic-management): Enterprise Governance & Risk · `BC-100` · 5 Capabilities: Strategic Planning; Strategy Execution Management; Corporate Development Management; Strategic Portfolio Management; Business Model Management.
+- [Corporate Governance](XI-1-enterprise-governance-and-risk.md#capability-group-corporate-governance): Enterprise Governance & Risk · `BC-110` · 5 Capabilities: Board & Committee Management; Shareholder & Equity Management; Corporate Secretarial Management; Subsidiary & Entity Management; Delegation & Authority Management.
+- [Enterprise Risk Management](XI-1-enterprise-governance-and-risk.md#capability-group-enterprise-risk-management): Enterprise Governance & Risk · `BC-120` · 5 Capabilities: Risk Framework & Appetite Management; Risk Identification & Assessment; Risk Treatment Management; Risk Monitoring & Reporting; Corporate Insurance Management.
+- [Compliance Management](XI-1-enterprise-governance-and-risk.md#capability-group-compliance-management): Enterprise Governance & Risk · `BC-130` · 5 Capabilities: Regulatory Compliance Management; Policy Management; Ethics & Conduct Management; Anti-Bribery & Corruption Management; Privacy & Data Protection Management.
+- [Internal Audit Management](XI-1-enterprise-governance-and-risk.md#capability-group-internal-audit-management): Enterprise Governance & Risk · `BC-140` · 4 Capabilities: Audit Planning Management; Audit Execution Management; Audit Findings & Remediation Management; Audit Quality Assurance.
+- [Legal Management](XI-1-enterprise-governance-and-risk.md#capability-group-legal-management): Enterprise Governance & Risk · `BC-150` · 5 Capabilities: Contract Management; Litigation & Dispute Management; Corporate & Commercial Law; Regulatory Legal Affairs; Legal Operations Management.
+- [Business Continuity Management](XI-1-enterprise-governance-and-risk.md#capability-group-business-continuity-management): Enterprise Governance & Risk · `BC-160` · 4 Capabilities: Business Continuity Planning; Disaster Recovery Management; Crisis Management; Resilience Testing & Exercises.
+- [Business Architecture Management](XI-1-enterprise-governance-and-risk.md#capability-group-business-architecture-management): Enterprise Governance & Risk · `BC-170` · 7 Capabilities: Business Architecture Governance; Business Capability Modeling; Value Stream Modeling; Operating Model Design; Business Information Modeling; Business Architecture Repository Management; Business Architecture Roadmap and Transition Planning.
+- [Financial Management](XI-2-corporate-finance.md#capability-group-financial-management): Corporate Finance · `BC-200` · 7 Capabilities: General Ledger Management; Accounts Payable Management; Accounts Receivable Management; Fixed Asset Accounting; Cost Accounting Management; Financial Reporting Management; Statutory & Regulatory Reporting.
+- [Treasury Management](XI-2-corporate-finance.md#capability-group-treasury-management): Corporate Finance · `BC-210` · 6 Capabilities: Cash Management; Liquidity Management; Funding & Debt Management; Foreign Exchange Management; Interest Rate Risk Management; Bank Relationship Management.
+- [Tax Management](XI-2-corporate-finance.md#capability-group-tax-management): Corporate Finance · `BC-220` · 5 Capabilities: Direct Tax Management; Indirect Tax Management; Transfer Pricing Management; Tax Reporting & Compliance; Tax Planning & Advisory.
+- [Financial Planning & Analysis](XI-2-corporate-finance.md#capability-group-financial-planning-and-analysis): Corporate Finance · `BC-230` · 5 Capabilities: Budgeting Management; Forecasting Management; Management Reporting; Performance Analysis Management; Business Case Management.
+- [Investor Relations Management](XI-2-corporate-finance.md#capability-group-investor-relations-management): Corporate Finance · `BC-240` · 4 Capabilities: Capital Markets Communication; Earnings Cycle Management; Shareholder Engagement Management; Analyst Relations Management.
+- [Human Capital Management](XI-3-human-capital.md#capability-group-human-capital-management): Human Capital · `BC-300` · 9 Capabilities: Talent Acquisition Management; Talent Management; Compensation & Benefits Management; Learning & Development Management; Workforce Planning Management; Employee Experience Management; HR Operations Management; Employee & Labour Relations; Diversity, Equity & Inclusion Management.
+- [Marketing Management](XI-4-customer-and-commercial.md#capability-group-marketing-management): Customer & Commercial · `BC-400` · 7 Capabilities: Marketing Strategy Management; Brand Management; Market Intelligence Management; Demand Generation Management; Marketing Operations Management; Digital Marketing Management; Content Marketing Management.
+- [Sales Management](XI-4-customer-and-commercial.md#capability-group-sales-management): Customer & Commercial · `BC-410` · 7 Capabilities: Sales Strategy Management; Account Management; Opportunity & Pipeline Management; Quote & Configuration Management; Sales Operations Management; Channel Sales Management; Sales Performance Management.
+- [Customer Relationship Management](XI-4-customer-and-commercial.md#capability-group-customer-relationship-management): Customer & Commercial · `BC-420` · 4 Capabilities: Customer Data Management; Customer Segmentation Management; Customer Lifecycle Management; Loyalty & Retention Management.
+- [Customer Service Management](XI-4-customer-and-commercial.md#capability-group-customer-service-management): Customer & Commercial · `BC-430` · 5 Capabilities: Customer Inquiry Management; Complaints & Issue Management; Contact Centre Operations Management; Self-Service Management; Customer Feedback Management.
+- [Pricing Management](XI-4-customer-and-commercial.md#capability-group-pricing-management): Customer & Commercial · `BC-440` · 4 Capabilities: Pricing Strategy Management; Price List Management; Discount & Promotion Management; Price Realisation & Compliance Management.
+- [Procurement Management](XI-5-supply-chain-and-procurement.md#capability-group-procurement-management): Supply Chain & Procurement · `BC-500` · 6 Capabilities: Sourcing Management; Procurement Contract Management; Purchase Order Management; Procure-to-Pay Operations Management; Procurement Category Management; Procurement Spend Analysis Management.
+- [Supplier Management](XI-5-supply-chain-and-procurement.md#capability-group-supplier-management): Supply Chain & Procurement · `BC-510` · 5 Capabilities: Supplier Onboarding Management; Supplier Performance Management; Supplier Risk Management; Supplier Development Management; Supplier Relationship Management.
+- [Supply Chain Management](XI-5-supply-chain-and-procurement.md#capability-group-supply-chain-management): Supply Chain & Procurement · `BC-520` · 6 Capabilities: Demand Planning Management; Supply Planning Management; Sales & Operations Planning Management; Order Fulfilment Management; Logistics Operations Management; Supply Chain Risk Management.
+- [Inventory Management](XI-5-supply-chain-and-procurement.md#capability-group-inventory-management): Supply Chain & Procurement · `BC-530` · 5 Capabilities: Stock Level Management; Replenishment Management; Inventory Allocation Management; Inventory Accuracy Management; Slow-Moving & Obsolete Stock Management.
+- [Information Technology Management](XI-6-technology-and-information.md#capability-group-information-technology-management): Technology & Information · `BC-600` · 8 Capabilities: IT Strategy & Architecture Management; IT Portfolio & Demand Management; IT Service Management; IT Operations Management; IT Infrastructure Management; IT Application Management; IT Vendor Management; IT Financial Management.
+- [Information & Data Management](XI-6-technology-and-information.md#capability-group-information-and-data-management): Technology & Information · `BC-610` · 6 Capabilities: Data Governance Management; Master Data Management; Data Quality Management; Data Architecture Management; Analytics & BI Management; Artificial Intelligence Management.
+- [Cybersecurity Management](XI-6-technology-and-information.md#capability-group-cybersecurity-management): Technology & Information · `BC-620` · 6 Capabilities: Security Strategy & Governance Management; Identity & Access Management; Threat Detection & Response Management; Vulnerability Management; Security Architecture Management; Security Awareness Management.
+- [Facilities Management](XI-7-workplace-and-facilities.md#capability-group-facilities-management): Workplace & Facilities · `BC-700` · 5 Capabilities: Workplace Services Management; Hard Facilities Management; Soft Facilities Management; Space Management; Facilities Health & Safety Management.
+- [Corporate Real Estate Management](XI-7-workplace-and-facilities.md#capability-group-corporate-real-estate-management): Workplace & Facilities · `BC-710` · 4 Capabilities: Real Estate Strategy & Portfolio Management; Real Estate Acquisition & Disposal Management; Lease Administration Management; Workplace Strategy Management.
+- [Quality Management](XI-8-quality-innovation-and-knowledge.md#capability-group-quality-management): Quality, Innovation & Knowledge · `BC-720` · 6 Capabilities: Quality Strategy & Policy Management; Quality Assurance Management; Quality Control Management; Non-Conformance Management; Continuous Improvement Management; Customer Quality Management.
+- [Health, Safety & Environment Management](XI-8-quality-innovation-and-knowledge.md#capability-group-health-safety-and-environment-management): Quality, Innovation & Knowledge · `BC-730` · 5 Capabilities: Occupational Health Management; Safety Management; Environmental Management; Incident & Investigation Management; HSE Compliance & Reporting.
+- [Sustainability Management](XI-8-quality-innovation-and-knowledge.md#capability-group-sustainability-management): Quality, Innovation & Knowledge · `BC-740` · 5 Capabilities: ESG Strategy & Reporting Management; Climate & Carbon Management; Circular Economy Management; Sustainable Sourcing Management; Sustainability Stakeholder Engagement.
+- [Innovation Management](XI-8-quality-innovation-and-knowledge.md#capability-group-innovation-management): Quality, Innovation & Knowledge · `BC-800` · 5 Capabilities: Idea & Opportunity Management; Innovation Portfolio Management; Innovation Incubation & Acceleration; Corporate Venturing Management; Open Innovation Management.
+- [Research & Development Management](XI-8-quality-innovation-and-knowledge.md#capability-group-research-and-development-management): Quality, Innovation & Knowledge · `BC-810` · 5 Capabilities: Research Management; Applied Development Management; Experimentation & Prototyping Management; R&D Portfolio Management; Technology Roadmap Management.
+- [Product Lifecycle Management](XI-8-quality-innovation-and-knowledge.md#capability-group-product-lifecycle-management): Quality, Innovation & Knowledge · `BC-820` · 7 Capabilities: Product Concept Management; Product Design Management; Product Specification Management; Product Configuration & Variant Management; Product Release & Launch Management; Product Performance & Feedback Management; Product End-of-Life Management.
+- [Knowledge Management](XI-8-quality-innovation-and-knowledge.md#capability-group-knowledge-management): Quality, Innovation & Knowledge · `BC-830` · 4 Capabilities: Knowledge Capture Management; Knowledge Curation & Taxonomy Management; Knowledge Sharing & Collaboration Management; Best Practice Management.
+- [Intellectual Property Management](XI-8-quality-innovation-and-knowledge.md#capability-group-intellectual-property-management): Quality, Innovation & Knowledge · `BC-840` · 5 Capabilities: Patent Portfolio Management; Trademark Management; Copyright & Trade Secret Management; IP Licensing Management; IP Defence & Enforcement.
+- [Corporate Communications Management](XI-8-quality-innovation-and-knowledge.md#capability-group-corporate-communications-management): Quality, Innovation & Knowledge · `BC-850` · 6 Capabilities: Internal Communications Management; External Communications Management; Public Relations Management; Media Relations Management; Crisis Communications Management; Stakeholder Communications Management.
+- [Project & Portfolio Management](XI-9-project-change-and-process.md#capability-group-project-and-portfolio-management): Project, Change & Process · `BC-900` · 6 Capabilities: Portfolio Management; Programme Management; Project Management; Project Governance Management; PMO Operations Management; Demand & Capacity Management.
+- [Change Management](XI-9-project-change-and-process.md#capability-group-change-management): Project, Change & Process · `BC-910` · 4 Capabilities: Change Strategy Management; Change Stakeholder Engagement Management; Change Communications & Training Management; Change Adoption & Reinforcement Management.
+- [Transformation Management](XI-9-project-change-and-process.md#capability-group-transformation-management): Project, Change & Process · `BC-920` · 4 Capabilities: Transformation Programme Management; Transformation Governance Management; Benefits Realisation Management; Transformation Office Operations.
+- [Business Process Management](XI-9-project-change-and-process.md#capability-group-business-process-management): Project, Change & Process · `BC-930` · 7 Capabilities: Process Architecture and Governance; Process Modeling and Documentation; Process Performance Measurement; Process Mining and Discovery; Process Optimization and Redesign; Process Automation Governance; Process Risk and Control Management.
+
+## Capabilities
+
+- [Strategic Planning](XI-1-enterprise-governance-and-risk.md#capability-strategic-planning): Enterprise Governance & Risk > Strategic Management · `BC-100.10`
+- [Strategy Execution Management](XI-1-enterprise-governance-and-risk.md#capability-strategy-execution-management): Enterprise Governance & Risk > Strategic Management · `BC-100.20`
+- [Corporate Development Management](XI-1-enterprise-governance-and-risk.md#capability-corporate-development-management): Enterprise Governance & Risk > Strategic Management · `BC-100.30`
+- [Strategic Portfolio Management](XI-1-enterprise-governance-and-risk.md#capability-strategic-portfolio-management): Enterprise Governance & Risk > Strategic Management · `BC-100.40`
+- [Business Model Management](XI-1-enterprise-governance-and-risk.md#capability-business-model-management): Enterprise Governance & Risk > Strategic Management · `BC-100.50`
+- [Board & Committee Management](XI-1-enterprise-governance-and-risk.md#capability-board-and-committee-management): Enterprise Governance & Risk > Corporate Governance · `BC-110.10`
+- [Shareholder & Equity Management](XI-1-enterprise-governance-and-risk.md#capability-shareholder-and-equity-management): Enterprise Governance & Risk > Corporate Governance · `BC-110.20`
+- [Corporate Secretarial Management](XI-1-enterprise-governance-and-risk.md#capability-corporate-secretarial-management): Enterprise Governance & Risk > Corporate Governance · `BC-110.30`
+- [Subsidiary & Entity Management](XI-1-enterprise-governance-and-risk.md#capability-subsidiary-and-entity-management): Enterprise Governance & Risk > Corporate Governance · `BC-110.40`
+- [Delegation & Authority Management](XI-1-enterprise-governance-and-risk.md#capability-delegation-and-authority-management): Enterprise Governance & Risk > Corporate Governance · `BC-110.50`
+- [Risk Framework & Appetite Management](XI-1-enterprise-governance-and-risk.md#capability-risk-framework-and-appetite-management): Enterprise Governance & Risk > Enterprise Risk Management · `BC-120.10`
+- [Risk Identification & Assessment](XI-1-enterprise-governance-and-risk.md#capability-risk-identification-and-assessment): Enterprise Governance & Risk > Enterprise Risk Management · `BC-120.20`
+- [Risk Treatment Management](XI-1-enterprise-governance-and-risk.md#capability-risk-treatment-management): Enterprise Governance & Risk > Enterprise Risk Management · `BC-120.30`
+- [Risk Monitoring & Reporting](XI-1-enterprise-governance-and-risk.md#capability-risk-monitoring-and-reporting): Enterprise Governance & Risk > Enterprise Risk Management · `BC-120.40`
+- [Corporate Insurance Management](XI-1-enterprise-governance-and-risk.md#capability-corporate-insurance-management): Enterprise Governance & Risk > Enterprise Risk Management · `BC-120.50`
+- [Regulatory Compliance Management](XI-1-enterprise-governance-and-risk.md#capability-regulatory-compliance-management): Enterprise Governance & Risk > Compliance Management · `BC-130.10`
+- [Policy Management](XI-1-enterprise-governance-and-risk.md#capability-policy-management): Enterprise Governance & Risk > Compliance Management · `BC-130.20`
+- [Ethics & Conduct Management](XI-1-enterprise-governance-and-risk.md#capability-ethics-and-conduct-management): Enterprise Governance & Risk > Compliance Management · `BC-130.30`
+- [Anti-Bribery & Corruption Management](XI-1-enterprise-governance-and-risk.md#capability-anti-bribery-and-corruption-management): Enterprise Governance & Risk > Compliance Management · `BC-130.40`
+- [Privacy & Data Protection Management](XI-1-enterprise-governance-and-risk.md#capability-privacy-and-data-protection-management): Enterprise Governance & Risk > Compliance Management · `BC-130.50`
+- [Audit Planning Management](XI-1-enterprise-governance-and-risk.md#capability-audit-planning-management): Enterprise Governance & Risk > Internal Audit Management · `BC-140.10`
+- [Audit Execution Management](XI-1-enterprise-governance-and-risk.md#capability-audit-execution-management): Enterprise Governance & Risk > Internal Audit Management · `BC-140.20`
+- [Audit Findings & Remediation Management](XI-1-enterprise-governance-and-risk.md#capability-audit-findings-and-remediation-management): Enterprise Governance & Risk > Internal Audit Management · `BC-140.30`
+- [Audit Quality Assurance](XI-1-enterprise-governance-and-risk.md#capability-audit-quality-assurance): Enterprise Governance & Risk > Internal Audit Management · `BC-140.40`
+- [Contract Management](XI-1-enterprise-governance-and-risk.md#capability-contract-management): Enterprise Governance & Risk > Legal Management · `BC-150.10`
+- [Litigation & Dispute Management](XI-1-enterprise-governance-and-risk.md#capability-litigation-and-dispute-management): Enterprise Governance & Risk > Legal Management · `BC-150.20`
+- [Corporate & Commercial Law](XI-1-enterprise-governance-and-risk.md#capability-corporate-and-commercial-law): Enterprise Governance & Risk > Legal Management · `BC-150.30`
+- [Regulatory Legal Affairs](XI-1-enterprise-governance-and-risk.md#capability-regulatory-legal-affairs): Enterprise Governance & Risk > Legal Management · `BC-150.40`
+- [Legal Operations Management](XI-1-enterprise-governance-and-risk.md#capability-legal-operations-management): Enterprise Governance & Risk > Legal Management · `BC-150.50`
+- [Business Continuity Planning](XI-1-enterprise-governance-and-risk.md#capability-business-continuity-planning): Enterprise Governance & Risk > Business Continuity Management · `BC-160.10`
+- [Disaster Recovery Management](XI-1-enterprise-governance-and-risk.md#capability-disaster-recovery-management): Enterprise Governance & Risk > Business Continuity Management · `BC-160.20`
+- [Crisis Management](XI-1-enterprise-governance-and-risk.md#capability-crisis-management): Enterprise Governance & Risk > Business Continuity Management · `BC-160.30`
+- [Resilience Testing & Exercises](XI-1-enterprise-governance-and-risk.md#capability-resilience-testing-and-exercises): Enterprise Governance & Risk > Business Continuity Management · `BC-160.40`
+- [Business Architecture Governance](XI-1-enterprise-governance-and-risk.md#capability-business-architecture-governance): Enterprise Governance & Risk > Business Architecture Management · `BC-170.10`
+- [Business Capability Modeling](XI-1-enterprise-governance-and-risk.md#capability-business-capability-modeling): Enterprise Governance & Risk > Business Architecture Management · `BC-170.20`
+- [Value Stream Modeling](XI-1-enterprise-governance-and-risk.md#capability-value-stream-modeling): Enterprise Governance & Risk > Business Architecture Management · `BC-170.30`
+- [Operating Model Design](XI-1-enterprise-governance-and-risk.md#capability-operating-model-design): Enterprise Governance & Risk > Business Architecture Management · `BC-170.40`
+- [Business Information Modeling](XI-1-enterprise-governance-and-risk.md#capability-business-information-modeling): Enterprise Governance & Risk > Business Architecture Management · `BC-170.50`
+- [Business Architecture Repository Management](XI-1-enterprise-governance-and-risk.md#capability-business-architecture-repository-management): Enterprise Governance & Risk > Business Architecture Management · `BC-170.60`
+- [Business Architecture Roadmap and Transition Planning](XI-1-enterprise-governance-and-risk.md#capability-business-architecture-roadmap-and-transition-planning): Enterprise Governance & Risk > Business Architecture Management · `BC-170.70`
+- [General Ledger Management](XI-2-corporate-finance.md#capability-general-ledger-management): Corporate Finance > Financial Management · `BC-200.10`
+- [Accounts Payable Management](XI-2-corporate-finance.md#capability-accounts-payable-management): Corporate Finance > Financial Management · `BC-200.20`
+- [Accounts Receivable Management](XI-2-corporate-finance.md#capability-accounts-receivable-management): Corporate Finance > Financial Management · `BC-200.30`
+- [Fixed Asset Accounting](XI-2-corporate-finance.md#capability-fixed-asset-accounting): Corporate Finance > Financial Management · `BC-200.40`
+- [Cost Accounting Management](XI-2-corporate-finance.md#capability-cost-accounting-management): Corporate Finance > Financial Management · `BC-200.50`
+- [Financial Reporting Management](XI-2-corporate-finance.md#capability-financial-reporting-management): Corporate Finance > Financial Management · `BC-200.60`
+- [Statutory & Regulatory Reporting](XI-2-corporate-finance.md#capability-statutory-and-regulatory-reporting): Corporate Finance > Financial Management · `BC-200.70`
+- [Cash Management](XI-2-corporate-finance.md#capability-cash-management): Corporate Finance > Treasury Management · `BC-210.10`
+- [Liquidity Management](XI-2-corporate-finance.md#capability-liquidity-management): Corporate Finance > Treasury Management · `BC-210.20`
+- [Funding & Debt Management](XI-2-corporate-finance.md#capability-funding-and-debt-management): Corporate Finance > Treasury Management · `BC-210.30`
+- [Foreign Exchange Management](XI-2-corporate-finance.md#capability-foreign-exchange-management): Corporate Finance > Treasury Management · `BC-210.40`
+- [Interest Rate Risk Management](XI-2-corporate-finance.md#capability-interest-rate-risk-management): Corporate Finance > Treasury Management · `BC-210.50`
+- [Bank Relationship Management](XI-2-corporate-finance.md#capability-bank-relationship-management): Corporate Finance > Treasury Management · `BC-210.60`
+- [Direct Tax Management](XI-2-corporate-finance.md#capability-direct-tax-management): Corporate Finance > Tax Management · `BC-220.10`
+- [Indirect Tax Management](XI-2-corporate-finance.md#capability-indirect-tax-management): Corporate Finance > Tax Management · `BC-220.20`
+- [Transfer Pricing Management](XI-2-corporate-finance.md#capability-transfer-pricing-management): Corporate Finance > Tax Management · `BC-220.30`
+- [Tax Reporting & Compliance](XI-2-corporate-finance.md#capability-tax-reporting-and-compliance): Corporate Finance > Tax Management · `BC-220.40`
+- [Tax Planning & Advisory](XI-2-corporate-finance.md#capability-tax-planning-and-advisory): Corporate Finance > Tax Management · `BC-220.50`
+- [Budgeting Management](XI-2-corporate-finance.md#capability-budgeting-management): Corporate Finance > Financial Planning & Analysis · `BC-230.10`
+- [Forecasting Management](XI-2-corporate-finance.md#capability-forecasting-management): Corporate Finance > Financial Planning & Analysis · `BC-230.20`
+- [Management Reporting](XI-2-corporate-finance.md#capability-management-reporting): Corporate Finance > Financial Planning & Analysis · `BC-230.30`
+- [Performance Analysis Management](XI-2-corporate-finance.md#capability-performance-analysis-management): Corporate Finance > Financial Planning & Analysis · `BC-230.40`
+- [Business Case Management](XI-2-corporate-finance.md#capability-business-case-management): Corporate Finance > Financial Planning & Analysis · `BC-230.50`
+- [Capital Markets Communication](XI-2-corporate-finance.md#capability-capital-markets-communication): Corporate Finance > Investor Relations Management · `BC-240.10`
+- [Earnings Cycle Management](XI-2-corporate-finance.md#capability-earnings-cycle-management): Corporate Finance > Investor Relations Management · `BC-240.20`
+- [Shareholder Engagement Management](XI-2-corporate-finance.md#capability-shareholder-engagement-management): Corporate Finance > Investor Relations Management · `BC-240.30`
+- [Analyst Relations Management](XI-2-corporate-finance.md#capability-analyst-relations-management): Corporate Finance > Investor Relations Management · `BC-240.40`
+- [Talent Acquisition Management](XI-3-human-capital.md#capability-talent-acquisition-management): Human Capital > Human Capital Management · `BC-300.10`
+- [Talent Management](XI-3-human-capital.md#capability-talent-management): Human Capital > Human Capital Management · `BC-300.20`
+- [Compensation & Benefits Management](XI-3-human-capital.md#capability-compensation-and-benefits-management): Human Capital > Human Capital Management · `BC-300.30`
+- [Learning & Development Management](XI-3-human-capital.md#capability-learning-and-development-management): Human Capital > Human Capital Management · `BC-300.40`
+- [Workforce Planning Management](XI-3-human-capital.md#capability-workforce-planning-management): Human Capital > Human Capital Management · `BC-300.50`
+- [Employee Experience Management](XI-3-human-capital.md#capability-employee-experience-management): Human Capital > Human Capital Management · `BC-300.60`
+- [HR Operations Management](XI-3-human-capital.md#capability-hr-operations-management): Human Capital > Human Capital Management · `BC-300.70`
+- [Employee & Labour Relations](XI-3-human-capital.md#capability-employee-and-labour-relations): Human Capital > Human Capital Management · `BC-300.80`
+- [Diversity, Equity & Inclusion Management](XI-3-human-capital.md#capability-diversity-equity-and-inclusion-management): Human Capital > Human Capital Management · `BC-300.90`
+- [Marketing Strategy Management](XI-4-customer-and-commercial.md#capability-marketing-strategy-management): Customer & Commercial > Marketing Management · `BC-400.10`
+- [Brand Management](XI-4-customer-and-commercial.md#capability-brand-management): Customer & Commercial > Marketing Management · `BC-400.20`
+- [Market Intelligence Management](XI-4-customer-and-commercial.md#capability-market-intelligence-management): Customer & Commercial > Marketing Management · `BC-400.30`
+- [Demand Generation Management](XI-4-customer-and-commercial.md#capability-demand-generation-management): Customer & Commercial > Marketing Management · `BC-400.40`
+- [Marketing Operations Management](XI-4-customer-and-commercial.md#capability-marketing-operations-management): Customer & Commercial > Marketing Management · `BC-400.50`
+- [Digital Marketing Management](XI-4-customer-and-commercial.md#capability-digital-marketing-management): Customer & Commercial > Marketing Management · `BC-400.60`
+- [Content Marketing Management](XI-4-customer-and-commercial.md#capability-content-marketing-management): Customer & Commercial > Marketing Management · `BC-400.70`
+- [Sales Strategy Management](XI-4-customer-and-commercial.md#capability-sales-strategy-management): Customer & Commercial > Sales Management · `BC-410.10`
+- [Account Management](XI-4-customer-and-commercial.md#capability-account-management): Customer & Commercial > Sales Management · `BC-410.20`
+- [Opportunity & Pipeline Management](XI-4-customer-and-commercial.md#capability-opportunity-and-pipeline-management): Customer & Commercial > Sales Management · `BC-410.30`
+- [Quote & Configuration Management](XI-4-customer-and-commercial.md#capability-quote-and-configuration-management): Customer & Commercial > Sales Management · `BC-410.40`
+- [Sales Operations Management](XI-4-customer-and-commercial.md#capability-sales-operations-management): Customer & Commercial > Sales Management · `BC-410.50`
+- [Channel Sales Management](XI-4-customer-and-commercial.md#capability-channel-sales-management): Customer & Commercial > Sales Management · `BC-410.60`
+- [Sales Performance Management](XI-4-customer-and-commercial.md#capability-sales-performance-management): Customer & Commercial > Sales Management · `BC-410.70`
+- [Customer Data Management](XI-4-customer-and-commercial.md#capability-customer-data-management): Customer & Commercial > Customer Relationship Management · `BC-420.10`
+- [Customer Segmentation Management](XI-4-customer-and-commercial.md#capability-customer-segmentation-management): Customer & Commercial > Customer Relationship Management · `BC-420.20`
+- [Customer Lifecycle Management](XI-4-customer-and-commercial.md#capability-customer-lifecycle-management): Customer & Commercial > Customer Relationship Management · `BC-420.30`
+- [Loyalty & Retention Management](XI-4-customer-and-commercial.md#capability-loyalty-and-retention-management): Customer & Commercial > Customer Relationship Management · `BC-420.40`
+- [Customer Inquiry Management](XI-4-customer-and-commercial.md#capability-customer-inquiry-management): Customer & Commercial > Customer Service Management · `BC-430.10`
+- [Complaints & Issue Management](XI-4-customer-and-commercial.md#capability-complaints-and-issue-management): Customer & Commercial > Customer Service Management · `BC-430.20`
+- [Contact Centre Operations Management](XI-4-customer-and-commercial.md#capability-contact-centre-operations-management): Customer & Commercial > Customer Service Management · `BC-430.30`
+- [Self-Service Management](XI-4-customer-and-commercial.md#capability-self-service-management): Customer & Commercial > Customer Service Management · `BC-430.40`
+- [Customer Feedback Management](XI-4-customer-and-commercial.md#capability-customer-feedback-management): Customer & Commercial > Customer Service Management · `BC-430.50`
+- [Pricing Strategy Management](XI-4-customer-and-commercial.md#capability-pricing-strategy-management): Customer & Commercial > Pricing Management · `BC-440.10`
+- [Price List Management](XI-4-customer-and-commercial.md#capability-price-list-management): Customer & Commercial > Pricing Management · `BC-440.20`
+- [Discount & Promotion Management](XI-4-customer-and-commercial.md#capability-discount-and-promotion-management): Customer & Commercial > Pricing Management · `BC-440.30`
+- [Price Realisation & Compliance Management](XI-4-customer-and-commercial.md#capability-price-realisation-and-compliance-management): Customer & Commercial > Pricing Management · `BC-440.40`
+- [Sourcing Management](XI-5-supply-chain-and-procurement.md#capability-sourcing-management): Supply Chain & Procurement > Procurement Management · `BC-500.10`
+- [Procurement Contract Management](XI-5-supply-chain-and-procurement.md#capability-procurement-contract-management): Supply Chain & Procurement > Procurement Management · `BC-500.20`
+- [Purchase Order Management](XI-5-supply-chain-and-procurement.md#capability-purchase-order-management): Supply Chain & Procurement > Procurement Management · `BC-500.30`
+- [Procure-to-Pay Operations Management](XI-5-supply-chain-and-procurement.md#capability-procure-to-pay-operations-management): Supply Chain & Procurement > Procurement Management · `BC-500.40`
+- [Procurement Category Management](XI-5-supply-chain-and-procurement.md#capability-procurement-category-management): Supply Chain & Procurement > Procurement Management · `BC-500.50`
+- [Procurement Spend Analysis Management](XI-5-supply-chain-and-procurement.md#capability-procurement-spend-analysis-management): Supply Chain & Procurement > Procurement Management · `BC-500.60`
+- [Supplier Onboarding Management](XI-5-supply-chain-and-procurement.md#capability-supplier-onboarding-management): Supply Chain & Procurement > Supplier Management · `BC-510.10`
+- [Supplier Performance Management](XI-5-supply-chain-and-procurement.md#capability-supplier-performance-management): Supply Chain & Procurement > Supplier Management · `BC-510.20`
+- [Supplier Risk Management](XI-5-supply-chain-and-procurement.md#capability-supplier-risk-management): Supply Chain & Procurement > Supplier Management · `BC-510.30`
+- [Supplier Development Management](XI-5-supply-chain-and-procurement.md#capability-supplier-development-management): Supply Chain & Procurement > Supplier Management · `BC-510.40`
+- [Supplier Relationship Management](XI-5-supply-chain-and-procurement.md#capability-supplier-relationship-management): Supply Chain & Procurement > Supplier Management · `BC-510.50`
+- [Demand Planning Management](XI-5-supply-chain-and-procurement.md#capability-demand-planning-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.10`
+- [Supply Planning Management](XI-5-supply-chain-and-procurement.md#capability-supply-planning-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.20`
+- [Sales & Operations Planning Management](XI-5-supply-chain-and-procurement.md#capability-sales-and-operations-planning-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.30`
+- [Order Fulfilment Management](XI-5-supply-chain-and-procurement.md#capability-order-fulfilment-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.40`
+- [Logistics Operations Management](XI-5-supply-chain-and-procurement.md#capability-logistics-operations-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.50`
+- [Supply Chain Risk Management](XI-5-supply-chain-and-procurement.md#capability-supply-chain-risk-management): Supply Chain & Procurement > Supply Chain Management · `BC-520.60`
+- [Stock Level Management](XI-5-supply-chain-and-procurement.md#capability-stock-level-management): Supply Chain & Procurement > Inventory Management · `BC-530.10`
+- [Replenishment Management](XI-5-supply-chain-and-procurement.md#capability-replenishment-management): Supply Chain & Procurement > Inventory Management · `BC-530.20`
+- [Inventory Allocation Management](XI-5-supply-chain-and-procurement.md#capability-inventory-allocation-management): Supply Chain & Procurement > Inventory Management · `BC-530.30`
+- [Inventory Accuracy Management](XI-5-supply-chain-and-procurement.md#capability-inventory-accuracy-management): Supply Chain & Procurement > Inventory Management · `BC-530.40`
+- [Slow-Moving & Obsolete Stock Management](XI-5-supply-chain-and-procurement.md#capability-slow-moving-and-obsolete-stock-management): Supply Chain & Procurement > Inventory Management · `BC-530.50`
+- [IT Strategy & Architecture Management](XI-6-technology-and-information.md#capability-it-strategy-and-architecture-management): Technology & Information > Information Technology Management · `BC-600.10`
+- [IT Portfolio & Demand Management](XI-6-technology-and-information.md#capability-it-portfolio-and-demand-management): Technology & Information > Information Technology Management · `BC-600.20`
+- [IT Service Management](XI-6-technology-and-information.md#capability-it-service-management): Technology & Information > Information Technology Management · `BC-600.30`
+- [IT Operations Management](XI-6-technology-and-information.md#capability-it-operations-management): Technology & Information > Information Technology Management · `BC-600.40`
+- [IT Infrastructure Management](XI-6-technology-and-information.md#capability-it-infrastructure-management): Technology & Information > Information Technology Management · `BC-600.50`
+- [IT Application Management](XI-6-technology-and-information.md#capability-it-application-management): Technology & Information > Information Technology Management · `BC-600.60`
+- [IT Vendor Management](XI-6-technology-and-information.md#capability-it-vendor-management): Technology & Information > Information Technology Management · `BC-600.70`
+- [IT Financial Management](XI-6-technology-and-information.md#capability-it-financial-management): Technology & Information > Information Technology Management · `BC-600.80`
+- [Data Governance Management](XI-6-technology-and-information.md#capability-data-governance-management): Technology & Information > Information & Data Management · `BC-610.10`
+- [Master Data Management](XI-6-technology-and-information.md#capability-master-data-management): Technology & Information > Information & Data Management · `BC-610.20`
+- [Data Quality Management](XI-6-technology-and-information.md#capability-data-quality-management): Technology & Information > Information & Data Management · `BC-610.30`
+- [Data Architecture Management](XI-6-technology-and-information.md#capability-data-architecture-management): Technology & Information > Information & Data Management · `BC-610.40`
+- [Analytics & BI Management](XI-6-technology-and-information.md#capability-analytics-and-bi-management): Technology & Information > Information & Data Management · `BC-610.50`
+- [Artificial Intelligence Management](XI-6-technology-and-information.md#capability-artificial-intelligence-management): Technology & Information > Information & Data Management · `BC-610.60`
+- [Security Strategy & Governance Management](XI-6-technology-and-information.md#capability-security-strategy-and-governance-management): Technology & Information > Cybersecurity Management · `BC-620.10`
+- [Identity & Access Management](XI-6-technology-and-information.md#capability-identity-and-access-management): Technology & Information > Cybersecurity Management · `BC-620.20`
+- [Threat Detection & Response Management](XI-6-technology-and-information.md#capability-threat-detection-and-response-management): Technology & Information > Cybersecurity Management · `BC-620.30`
+- [Vulnerability Management](XI-6-technology-and-information.md#capability-vulnerability-management): Technology & Information > Cybersecurity Management · `BC-620.40`
+- [Security Architecture Management](XI-6-technology-and-information.md#capability-security-architecture-management): Technology & Information > Cybersecurity Management · `BC-620.50`
+- [Security Awareness Management](XI-6-technology-and-information.md#capability-security-awareness-management): Technology & Information > Cybersecurity Management · `BC-620.60`
+- [Workplace Services Management](XI-7-workplace-and-facilities.md#capability-workplace-services-management): Workplace & Facilities > Facilities Management · `BC-700.10`
+- [Hard Facilities Management](XI-7-workplace-and-facilities.md#capability-hard-facilities-management): Workplace & Facilities > Facilities Management · `BC-700.20`
+- [Soft Facilities Management](XI-7-workplace-and-facilities.md#capability-soft-facilities-management): Workplace & Facilities > Facilities Management · `BC-700.30`
+- [Space Management](XI-7-workplace-and-facilities.md#capability-space-management): Workplace & Facilities > Facilities Management · `BC-700.40`
+- [Facilities Health & Safety Management](XI-7-workplace-and-facilities.md#capability-facilities-health-and-safety-management): Workplace & Facilities > Facilities Management · `BC-700.50`
+- [Real Estate Strategy & Portfolio Management](XI-7-workplace-and-facilities.md#capability-real-estate-strategy-and-portfolio-management): Workplace & Facilities > Corporate Real Estate Management · `BC-710.10`
+- [Real Estate Acquisition & Disposal Management](XI-7-workplace-and-facilities.md#capability-real-estate-acquisition-and-disposal-management): Workplace & Facilities > Corporate Real Estate Management · `BC-710.20`
+- [Lease Administration Management](XI-7-workplace-and-facilities.md#capability-lease-administration-management): Workplace & Facilities > Corporate Real Estate Management · `BC-710.30`
+- [Workplace Strategy Management](XI-7-workplace-and-facilities.md#capability-workplace-strategy-management): Workplace & Facilities > Corporate Real Estate Management · `BC-710.40`
+- [Quality Strategy & Policy Management](XI-8-quality-innovation-and-knowledge.md#capability-quality-strategy-and-policy-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.10`
+- [Quality Assurance Management](XI-8-quality-innovation-and-knowledge.md#capability-quality-assurance-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.20`
+- [Quality Control Management](XI-8-quality-innovation-and-knowledge.md#capability-quality-control-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.30`
+- [Non-Conformance Management](XI-8-quality-innovation-and-knowledge.md#capability-non-conformance-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.40`
+- [Continuous Improvement Management](XI-8-quality-innovation-and-knowledge.md#capability-continuous-improvement-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.50`
+- [Customer Quality Management](XI-8-quality-innovation-and-knowledge.md#capability-customer-quality-management): Quality, Innovation & Knowledge > Quality Management · `BC-720.60`
+- [Occupational Health Management](XI-8-quality-innovation-and-knowledge.md#capability-occupational-health-management): Quality, Innovation & Knowledge > Health, Safety & Environment Management · `BC-730.10`
+- [Safety Management](XI-8-quality-innovation-and-knowledge.md#capability-safety-management): Quality, Innovation & Knowledge > Health, Safety & Environment Management · `BC-730.20`
+- [Environmental Management](XI-8-quality-innovation-and-knowledge.md#capability-environmental-management): Quality, Innovation & Knowledge > Health, Safety & Environment Management · `BC-730.30`
+- [Incident & Investigation Management](XI-8-quality-innovation-and-knowledge.md#capability-incident-and-investigation-management): Quality, Innovation & Knowledge > Health, Safety & Environment Management · `BC-730.40`
+- [HSE Compliance & Reporting](XI-8-quality-innovation-and-knowledge.md#capability-hse-compliance-and-reporting): Quality, Innovation & Knowledge > Health, Safety & Environment Management · `BC-730.50`
+- [ESG Strategy & Reporting Management](XI-8-quality-innovation-and-knowledge.md#capability-esg-strategy-and-reporting-management): Quality, Innovation & Knowledge > Sustainability Management · `BC-740.10`
+- [Climate & Carbon Management](XI-8-quality-innovation-and-knowledge.md#capability-climate-and-carbon-management): Quality, Innovation & Knowledge > Sustainability Management · `BC-740.20`
+- [Circular Economy Management](XI-8-quality-innovation-and-knowledge.md#capability-circular-economy-management): Quality, Innovation & Knowledge > Sustainability Management · `BC-740.30`
+- [Sustainable Sourcing Management](XI-8-quality-innovation-and-knowledge.md#capability-sustainable-sourcing-management): Quality, Innovation & Knowledge > Sustainability Management · `BC-740.40`
+- [Sustainability Stakeholder Engagement](XI-8-quality-innovation-and-knowledge.md#capability-sustainability-stakeholder-engagement): Quality, Innovation & Knowledge > Sustainability Management · `BC-740.50`
+- [Idea & Opportunity Management](XI-8-quality-innovation-and-knowledge.md#capability-idea-and-opportunity-management): Quality, Innovation & Knowledge > Innovation Management · `BC-800.10`
+- [Innovation Portfolio Management](XI-8-quality-innovation-and-knowledge.md#capability-innovation-portfolio-management): Quality, Innovation & Knowledge > Innovation Management · `BC-800.20`
+- [Innovation Incubation & Acceleration](XI-8-quality-innovation-and-knowledge.md#capability-innovation-incubation-and-acceleration): Quality, Innovation & Knowledge > Innovation Management · `BC-800.30`
+- [Corporate Venturing Management](XI-8-quality-innovation-and-knowledge.md#capability-corporate-venturing-management): Quality, Innovation & Knowledge > Innovation Management · `BC-800.40`
+- [Open Innovation Management](XI-8-quality-innovation-and-knowledge.md#capability-open-innovation-management): Quality, Innovation & Knowledge > Innovation Management · `BC-800.50`
+- [Research Management](XI-8-quality-innovation-and-knowledge.md#capability-research-management): Quality, Innovation & Knowledge > Research & Development Management · `BC-810.10`
+- [Applied Development Management](XI-8-quality-innovation-and-knowledge.md#capability-applied-development-management): Quality, Innovation & Knowledge > Research & Development Management · `BC-810.20`
+- [Experimentation & Prototyping Management](XI-8-quality-innovation-and-knowledge.md#capability-experimentation-and-prototyping-management): Quality, Innovation & Knowledge > Research & Development Management · `BC-810.30`
+- [R&D Portfolio Management](XI-8-quality-innovation-and-knowledge.md#capability-r-and-d-portfolio-management): Quality, Innovation & Knowledge > Research & Development Management · `BC-810.40`
+- [Technology Roadmap Management](XI-8-quality-innovation-and-knowledge.md#capability-technology-roadmap-management): Quality, Innovation & Knowledge > Research & Development Management · `BC-810.50`
+- [Product Concept Management](XI-8-quality-innovation-and-knowledge.md#capability-product-concept-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.10`
+- [Product Design Management](XI-8-quality-innovation-and-knowledge.md#capability-product-design-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.20`
+- [Product Specification Management](XI-8-quality-innovation-and-knowledge.md#capability-product-specification-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.30`
+- [Product Configuration & Variant Management](XI-8-quality-innovation-and-knowledge.md#capability-product-configuration-and-variant-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.40`
+- [Product Release & Launch Management](XI-8-quality-innovation-and-knowledge.md#capability-product-release-and-launch-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.50`
+- [Product Performance & Feedback Management](XI-8-quality-innovation-and-knowledge.md#capability-product-performance-and-feedback-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.60`
+- [Product End-of-Life Management](XI-8-quality-innovation-and-knowledge.md#capability-product-end-of-life-management): Quality, Innovation & Knowledge > Product Lifecycle Management · `BC-820.70`
+- [Knowledge Capture Management](XI-8-quality-innovation-and-knowledge.md#capability-knowledge-capture-management): Quality, Innovation & Knowledge > Knowledge Management · `BC-830.10`
+- [Knowledge Curation & Taxonomy Management](XI-8-quality-innovation-and-knowledge.md#capability-knowledge-curation-and-taxonomy-management): Quality, Innovation & Knowledge > Knowledge Management · `BC-830.20`
+- [Knowledge Sharing & Collaboration Management](XI-8-quality-innovation-and-knowledge.md#capability-knowledge-sharing-and-collaboration-management): Quality, Innovation & Knowledge > Knowledge Management · `BC-830.30`
+- [Best Practice Management](XI-8-quality-innovation-and-knowledge.md#capability-best-practice-management): Quality, Innovation & Knowledge > Knowledge Management · `BC-830.40`
+- [Patent Portfolio Management](XI-8-quality-innovation-and-knowledge.md#capability-patent-portfolio-management): Quality, Innovation & Knowledge > Intellectual Property Management · `BC-840.10`
+- [Trademark Management](XI-8-quality-innovation-and-knowledge.md#capability-trademark-management): Quality, Innovation & Knowledge > Intellectual Property Management · `BC-840.20`
+- [Copyright & Trade Secret Management](XI-8-quality-innovation-and-knowledge.md#capability-copyright-and-trade-secret-management): Quality, Innovation & Knowledge > Intellectual Property Management · `BC-840.30`
+- [IP Licensing Management](XI-8-quality-innovation-and-knowledge.md#capability-ip-licensing-management): Quality, Innovation & Knowledge > Intellectual Property Management · `BC-840.40`
+- [IP Defence & Enforcement](XI-8-quality-innovation-and-knowledge.md#capability-ip-defence-and-enforcement): Quality, Innovation & Knowledge > Intellectual Property Management · `BC-840.50`
+- [Internal Communications Management](XI-8-quality-innovation-and-knowledge.md#capability-internal-communications-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.10`
+- [External Communications Management](XI-8-quality-innovation-and-knowledge.md#capability-external-communications-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.20`
+- [Public Relations Management](XI-8-quality-innovation-and-knowledge.md#capability-public-relations-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.30`
+- [Media Relations Management](XI-8-quality-innovation-and-knowledge.md#capability-media-relations-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.40`
+- [Crisis Communications Management](XI-8-quality-innovation-and-knowledge.md#capability-crisis-communications-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.50`
+- [Stakeholder Communications Management](XI-8-quality-innovation-and-knowledge.md#capability-stakeholder-communications-management): Quality, Innovation & Knowledge > Corporate Communications Management · `BC-850.60`
+- [Portfolio Management](XI-9-project-change-and-process.md#capability-portfolio-management): Project, Change & Process > Project & Portfolio Management · `BC-900.10`
+- [Programme Management](XI-9-project-change-and-process.md#capability-programme-management): Project, Change & Process > Project & Portfolio Management · `BC-900.20`
+- [Project Management](XI-9-project-change-and-process.md#capability-project-management): Project, Change & Process > Project & Portfolio Management · `BC-900.30`
+- [Project Governance Management](XI-9-project-change-and-process.md#capability-project-governance-management): Project, Change & Process > Project & Portfolio Management · `BC-900.40`
+- [PMO Operations Management](XI-9-project-change-and-process.md#capability-pmo-operations-management): Project, Change & Process > Project & Portfolio Management · `BC-900.50`
+- [Demand & Capacity Management](XI-9-project-change-and-process.md#capability-demand-and-capacity-management): Project, Change & Process > Project & Portfolio Management · `BC-900.60`
+- [Change Strategy Management](XI-9-project-change-and-process.md#capability-change-strategy-management): Project, Change & Process > Change Management · `BC-910.10`
+- [Change Stakeholder Engagement Management](XI-9-project-change-and-process.md#capability-change-stakeholder-engagement-management): Project, Change & Process > Change Management · `BC-910.20`
+- [Change Communications & Training Management](XI-9-project-change-and-process.md#capability-change-communications-and-training-management): Project, Change & Process > Change Management · `BC-910.30`
+- [Change Adoption & Reinforcement Management](XI-9-project-change-and-process.md#capability-change-adoption-and-reinforcement-management): Project, Change & Process > Change Management · `BC-910.40`
+- [Transformation Programme Management](XI-9-project-change-and-process.md#capability-transformation-programme-management): Project, Change & Process > Transformation Management · `BC-920.10`
+- [Transformation Governance Management](XI-9-project-change-and-process.md#capability-transformation-governance-management): Project, Change & Process > Transformation Management · `BC-920.20`
+- [Benefits Realisation Management](XI-9-project-change-and-process.md#capability-benefits-realisation-management): Project, Change & Process > Transformation Management · `BC-920.30`
+- [Transformation Office Operations](XI-9-project-change-and-process.md#capability-transformation-office-operations): Project, Change & Process > Transformation Management · `BC-920.40`
+- [Process Architecture and Governance](XI-9-project-change-and-process.md#capability-process-architecture-and-governance): Project, Change & Process > Business Process Management · `BC-930.10`
+- [Process Modeling and Documentation](XI-9-project-change-and-process.md#capability-process-modeling-and-documentation): Project, Change & Process > Business Process Management · `BC-930.20`
+- [Process Performance Measurement](XI-9-project-change-and-process.md#capability-process-performance-measurement): Project, Change & Process > Business Process Management · `BC-930.30`
+- [Process Mining and Discovery](XI-9-project-change-and-process.md#capability-process-mining-and-discovery): Project, Change & Process > Business Process Management · `BC-930.40`
+- [Process Optimization and Redesign](XI-9-project-change-and-process.md#capability-process-optimization-and-redesign): Project, Change & Process > Business Process Management · `BC-930.50`
+- [Process Automation Governance](XI-9-project-change-and-process.md#capability-process-automation-governance): Project, Change & Process > Business Process Management · `BC-930.60`
+- [Process Risk and Control Management](XI-9-project-change-and-process.md#capability-process-risk-and-control-management): Project, Change & Process > Business Process Management · `BC-930.70`
+
+## Optional
+
+- [Turbo EA Capabilities](https://github.com/vincentmakes/turbo-ea-capabilities): the source catalogue — capability YAML under `catalogue/`, the industry-specific capability maps, value streams and business processes not bundled here.

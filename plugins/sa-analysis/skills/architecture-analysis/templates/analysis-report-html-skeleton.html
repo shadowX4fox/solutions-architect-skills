@@ -1,0 +1,437 @@
+<!--
+  Architecture Analysis HTML Report Skeleton
+  -----------------------------------------------------------------
+  Filled by `architecture-analysis-agent` when output_format == html.
+  Substitution model: simple string-replace of every `{{TOKEN}}` below.
+  The viz template (one of templates/viz/*.html) is inlined into
+  {{VIZ_BLOCK}} and consumes the `data` global emitted by
+  {{ANALYSIS_DATA_JSON}}.
+
+  Tokens (all required, in order they appear below):
+    {{TITLE}}                  — e.g. "SPOF Analysis — Order Alerts Platform v1.2.0"
+    {{ANALYSIS_TYPE_LABEL}}    — e.g. "Single Point of Failure"
+    {{PROJECT_NAME}}           — solution name from H1
+    {{ARCH_VERSION}}           — e.g. "1.2.0"
+    {{ARCH_STATUS}}            — Draft | Released | Deprecated
+    {{ANALYSIS_DATE}}          — YYYY-MM-DD
+    {{HEADER_META_HTML}}       — header <table> rows: source file, analyst, etc.
+    {{EXEC_SUMMARY_HTML}}      — <p> paragraphs for the Executive Summary
+    {{FINDINGS_HTML}}          — one or more <section class="findings-block">
+                                  blocks rendered from the per-analysis spec
+    {{VIZ_TITLE}}              — e.g. "Risk Heat Map", "Pareto Cost Chart"
+    {{VIZ_BLOCK}}              — the inlined per-analysis d3 snippet (IIFE body
+                                  WITHOUT outer <script> tags — see templates/viz/*.html)
+    {{RECOMMENDATIONS_HTML}}   — Top-N recommendation cards
+    {{VERDICT_HTML}}           — <p> for Summary Verdict
+    {{GAPS_HTML}}              — <ul> for Documentation Gaps (or "" if none)
+    {{CITATIONS_HTML}}         — <p class="citations"> source-file list
+    {{ANALYSIS_DATA_JSON}}     — single JS literal: const data = { ... };
+                                  Embedded INSIDE the same <script> as {{VIZ_BLOCK}}
+                                  (inside <section id="visualization">) so the viz
+                                  IIFE can read `data` directly via lexical scope.
+                                  Do NOT prefix with `window.` and do NOT split
+                                  across multiple <script> blocks.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<style>
+  :root {
+    /* Corporate palette — muted, print-friendly */
+    --bg:               #f7f8fa;
+    --surface:          #ffffff;
+    --surface-alt:      #f0f2f5;
+    --border:           #d9dde2;
+    --border-strong:    #b3bac3;
+    --text-primary:     #1f2937;
+    --text-secondary:   #4b5563;
+    --text-muted:       #6b7280;
+    --accent:           #1e40af;
+    --accent-soft:      #dbeafe;
+    /* Severity tokens — used by tables, badges, and d3 viz scales */
+    --sev-critical:     #b91c1c;
+    --sev-high:         #d97706;
+    --sev-medium:       #ca8a04;
+    --sev-low:          #65a30d;
+    --sev-info:         #0369a1;
+    --sev-pass:         #15803d;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 40px 80px;
+  }
+
+  /* === Header === */
+  header.report-header {
+    border-bottom: 2px solid var(--border-strong);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  header.report-header .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  header.report-header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  header.report-header table.meta {
+    border-collapse: collapse;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  header.report-header table.meta th {
+    text-align: left;
+    font-weight: 600;
+    padding: 3px 16px 3px 0;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  header.report-header table.meta td {
+    padding: 3px 24px 3px 0;
+  }
+  header.report-header .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .status-badge.released  { background: #dcfce7; color: #166534; }
+  .status-badge.draft     { background: #fef3c7; color: #92400e; }
+  .status-badge.deprecated{ background: #fee2e2; color: #991b1b; }
+
+  /* === Section blocks === */
+  section.report-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  section.report-section > h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  section.report-section > h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 18px 0 8px;
+    color: var(--text-primary);
+  }
+  section.report-section p { margin: 0 0 10px; }
+
+  /* === Tables === */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0 16px;
+  }
+  table.data thead th {
+    text-align: left;
+    background: var(--surface-alt);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 11px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  table.data tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tbody tr:hover { background: var(--surface-alt); }
+  table.data td.id, table.data th.id { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; white-space: nowrap; }
+  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data td code { font-size: 12px; background: var(--surface-alt); padding: 1px 5px; border-radius: 3px; }
+
+  /* === Severity badges (shared) === */
+  .sev {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .sev.critical { background: var(--sev-critical); }
+  .sev.high     { background: var(--sev-high); }
+  .sev.medium   { background: var(--sev-medium); }
+  .sev.low      { background: var(--sev-low); }
+  .sev.info     { background: var(--sev-info); }
+  .sev.pass     { background: var(--sev-pass); }
+  .sev.unknown  { background: var(--text-muted); }
+
+  /* === Severity row hint (left-border accent) === */
+  tr.row-critical td:first-child { border-left: 3px solid var(--sev-critical); }
+  tr.row-high     td:first-child { border-left: 3px solid var(--sev-high); }
+  tr.row-medium   td:first-child { border-left: 3px solid var(--sev-medium); }
+  tr.row-low      td:first-child { border-left: 3px solid var(--sev-low); }
+
+  /* === Recommendation cards === */
+  .recommendation {
+    background: var(--surface-alt);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+  }
+  .recommendation .rec-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .recommendation .rec-num {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .recommendation .rec-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .recommendation .rec-body { font-size: 13px; color: var(--text-secondary); margin: 4px 0; }
+  .recommendation .rec-citation { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  /* === Verdict block === */
+  .verdict {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  /* === Documentation gaps === */
+  ul.gaps {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0;
+  }
+  ul.gaps li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-bottom: 1px dashed var(--border);
+  }
+  ul.gaps li::before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    color: var(--text-muted);
+  }
+  ul.gaps li:last-child { border-bottom: none; }
+
+  /* === Visualization frame === */
+  .viz-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 14px 0 8px;
+    overflow-x: auto;
+  }
+  #viz { min-height: 360px; }
+  .viz-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .viz-legend .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+  .viz-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 40px 0;
+    text-align: center;
+  }
+  .viz-fallback {
+    background: #fef3c7;
+    border-left: 4px solid var(--sev-high);
+    color: #92400e;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  /* === d3 chart common === */
+  svg { font-family: system-ui, sans-serif; }
+  svg text { fill: var(--text-secondary); font-size: 11px; }
+  svg .axis-label { fill: var(--text-secondary); font-size: 11px; font-weight: 600; }
+  svg .axis path, svg .axis line { stroke: var(--border-strong); }
+  svg .axis text { fill: var(--text-muted); font-size: 11px; }
+  svg .grid line { stroke: var(--border); stroke-dasharray: 2,2; }
+  svg .node-label { fill: var(--text-primary); font-size: 11px; font-weight: 600; pointer-events: none; }
+  .tooltip {
+    position: absolute;
+    background: var(--text-primary);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1000;
+    max-width: 280px;
+  }
+
+  /* === Citations footer === */
+  .citations {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    word-break: break-word;
+  }
+  .citations strong { color: var(--text-secondary); }
+
+  footer.report-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* === Print === */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: 100%; padding: 12px; }
+    section.report-section { page-break-inside: avoid; border-color: #aaa; }
+    .viz-frame { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="eyebrow">{{ANALYSIS_TYPE_LABEL}} Analysis</div>
+      <h1>{{TITLE}}</h1>
+      <table class="meta">
+        {{HEADER_META_HTML}}
+      </table>
+    </header>
+
+    <section class="report-section" id="executive-summary">
+      <h2>Executive Summary</h2>
+      {{EXEC_SUMMARY_HTML}}
+    </section>
+
+    <section class="report-section" id="findings">
+      <h2>Findings</h2>
+      {{FINDINGS_HTML}}
+    </section>
+
+    <section class="report-section" id="visualization">
+      <h2>{{VIZ_TITLE}}</h2>
+      <div class="viz-fallback" id="viz-fallback">
+        d3.js failed to load from the CDN — open this file with an internet connection to render the interactive visualization. The tables above contain the same findings.
+      </div>
+      <div class="viz-frame">
+        <div id="viz"></div>
+      </div>
+      <div class="tooltip" id="tooltip"></div>
+      <!--
+        Single <script> block: the embedded data payload and the inlined viz
+        snippet share one lexical scope so the viz can read `const data` directly.
+        Two separate <script> blocks would NOT share const/let — keep this together.
+      -->
+      <script>
+        {{ANALYSIS_DATA_JSON}}
+        {{VIZ_BLOCK}}
+      </script>
+    </section>
+
+    <section class="report-section" id="recommendations">
+      <h2>Top Remediation Recommendations</h2>
+      {{RECOMMENDATIONS_HTML}}
+    </section>
+
+    <section class="report-section" id="verdict">
+      <h2>Summary Verdict</h2>
+      <div class="verdict">{{VERDICT_HTML}}</div>
+    </section>
+
+    <section class="report-section" id="gaps">
+      <h2>Documentation Gaps</h2>
+      {{GAPS_HTML}}
+    </section>
+
+    <footer class="report-footer">
+      {{CITATIONS_HTML}}
+      <div style="margin-top:8px;">Generated by sa-analysis:architecture-analysis · d3.js v7</div>
+    </footer>
+
+  </div>
+
+  <script>
+    // d3 load guard: if the CDN was blocked, surface the fallback notice and skip viz rendering.
+    // (The analysis-data payload lives in the same <script> as the viz IIFE inside
+    //  <section id="visualization"> — see the comment up there for why they share a block.)
+    if (typeof d3 === "undefined") {
+      var fb = document.getElementById("viz-fallback");
+      if (fb) fb.style.display = "block";
+      var viz = document.getElementById("viz");
+      if (viz) viz.innerHTML = '<div class="viz-empty">Visualization unavailable without d3.js.</div>';
+    }
+  </script>
+</body>
+</html>

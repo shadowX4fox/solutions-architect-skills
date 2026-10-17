@@ -1,0 +1,382 @@
+<!--
+  Blast Radius viz — force-directed dependency network + per-scenario cascade trees.
+  Expected data shape:
+    data.graph = {
+      nodes: [ { id: "comp-a", label: "API Gateway", fanout: 8, tier: "S1"|"S2"|"S3"|"S4"|"Isolated" } ],
+      links: [ { source: "comp-a", target: "comp-b", cascade: "Cascading"|"Bulkhead"|"Fail-open"|"Fail-closed" } ]
+    }
+    data.scenarios = [   // optional; rendered as small d3 hierarchy trees if present
+      {
+        title: "Scenario 1: Component A (B1) full failure — short rationale",
+        source_id: "comp-a",
+        tree: {
+          name: "Component A",                 // canonical full name; root carries cascade:"root"
+          cascade: "root",
+          children: [
+            { name: "Consumer B", cascade: "Cascading",
+              children: [ { name: "Consumer C", cascade: "Cascading", children: [] } ] },
+            { name: "Consumer D", cascade: "Bulkhead", children: [] }
+          ]
+        }
+      }
+    ]
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.graph) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const W = 760, H = 480;
+
+  // Layout: side-by-side flex row — SVG on the left, selection panel on the right.
+  // Flex-wraps below the SVG on narrow screens so the panel never pushes the svg
+  // off the page. Self-contained CSS injected once via root.append("style").
+  root.append("style").text(`
+    .main-viz-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    .main-viz-col-svg { flex: 1 1 480px; min-width: 0; }
+    .main-viz-col-panel { flex: 0 0 260px; }
+    @media (max-width: 720px) { .main-viz-col-panel { flex: 1 1 100%; } }
+    .selection-panel { background: var(--surface-alt); border-left: 4px solid var(--accent);
+                       border-radius: 4px; padding: 12px 14px; font-size: 12px;
+                       max-height: 520px; overflow-y: auto; }
+    .selection-panel h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--text-primary);
+                          word-break: break-all; }
+    .selection-panel .panel-meta { margin: 0 0 12px; color: var(--text-muted); font-size: 11px; }
+    .selection-panel .panel-empty { color: var(--text-muted); font-style: italic; margin: 0;
+                                    line-height: 1.45; }
+    .selection-panel .panel-section { margin-bottom: 12px; }
+    .selection-panel .panel-section:last-child { margin-bottom: 0; }
+    .selection-panel .panel-section h5 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase;
+                                         letter-spacing: 0.6px; color: var(--text-secondary);
+                                         font-weight: 600; }
+    .selection-panel ul { margin: 0; padding: 0; list-style: none; }
+    .selection-panel li { padding: 4px 0; border-bottom: 1px dashed var(--border);
+                          font-family: ui-monospace, "SF Mono", Menlo, monospace;
+                          font-size: 11px; color: var(--text-primary);
+                          display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .selection-panel li:last-child { border-bottom: none; }
+    .selection-panel li .item-name { word-break: break-all; flex: 1 1 auto; min-width: 0; }
+    .selection-panel li .cascade-tag { flex: 0 0 auto; font-size: 9px; padding: 1px 5px;
+                                       border-radius: 2px; color: #fff; text-transform: uppercase;
+                                       letter-spacing: 0.4px; font-family: system-ui, sans-serif; }
+    .selection-panel li.empty-row { font-style: italic; color: var(--text-muted);
+                                    font-family: system-ui, sans-serif; }
+  `);
+
+  const mainRow = root.append("div").attr("class", "main-viz-row");
+  const svgCol = mainRow.append("div").attr("class", "main-viz-col-svg");
+  const panelCol = mainRow.append("div").attr("class", "main-viz-col-panel");
+
+  const PANEL_EMPTY = '<p class="panel-empty">Click a node in the network to see its 1-hop vicinity (upstream callers + downstream consumers).</p>';
+  const panel = panelCol.append("div").attr("class", "selection-panel").html(PANEL_EMPTY);
+
+  const svg = svgCol.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("width", "100%").style("height", "auto");
+
+  // Arrowhead marker (lives in <defs>, outside the viewport so it stays valid at any zoom level)
+  svg.append("defs").append("marker")
+    .attr("id", "arrow").attr("viewBox", "0 -5 10 10")
+    .attr("refX", 18).attr("refY", 0)
+    .attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
+    .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "var(--border-strong)");
+
+  // Zoomable viewport — all link + node groups go inside this <g>, which receives
+  // the transform from d3.zoom() applied to the svg below.
+  const viewport = svg.append("g").attr("class", "viewport");
+
+  const tierColor = {
+    S1: "var(--sev-critical)",
+    S2: "var(--sev-high)",
+    S3: "var(--sev-medium)",
+    S4: "var(--sev-low)",
+    Isolated: "var(--sev-pass)",
+  };
+  const cascadeStyle = {
+    Cascading:    { stroke: "var(--sev-critical)", width: 2.5, dash: "" },
+    "Fail-closed":{ stroke: "var(--sev-high)",     width: 2,   dash: "" },
+    "Fail-open":  { stroke: "var(--sev-low)",      width: 1.5, dash: "4,3" },
+    Bulkhead:     { stroke: "var(--sev-pass)",     width: 1.5, dash: "4,3" },
+  };
+
+  const nodes = data.graph.nodes.map(d => ({ ...d }));
+  const links = data.graph.links.map(d => ({ ...d }));
+
+  const sim = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(90).strength(0.6))
+    .force("charge", d3.forceManyBody().strength(-260))
+    .force("center", d3.forceCenter(W / 2, H / 2))
+    .force("collide", d3.forceCollide().radius(d => 8 + Math.sqrt((d.fanout || 1) * 12)));
+
+  const link = viewport.append("g").selectAll("line").data(links).join("line")
+    .attr("stroke", d => (cascadeStyle[d.cascade] || cascadeStyle.Cascading).stroke)
+    .attr("stroke-width", d => (cascadeStyle[d.cascade] || cascadeStyle.Cascading).width)
+    .attr("stroke-dasharray", d => (cascadeStyle[d.cascade] || cascadeStyle.Cascading).dash)
+    .attr("marker-end", "url(#arrow)");
+
+  const node = viewport.append("g").selectAll("g").data(nodes).join("g")
+    .style("cursor", "grab")
+    .call(d3.drag()
+      .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on("end",   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }))
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.label || d.id}</strong><br>tier: ${d.tier || "—"} · fan-out: ${d.fanout || 0}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  node.append("circle")
+    .attr("r", d => 8 + Math.sqrt((d.fanout || 1) * 12))
+    .attr("fill", d => tierColor[d.tier] || "var(--text-muted)")
+    .attr("stroke", "#fff").attr("stroke-width", 1.5);
+  node.append("text")
+    .attr("class", "node-label")
+    .attr("dy", d => 8 + Math.sqrt((d.fanout || 1) * 12) + 12)
+    .attr("text-anchor", "middle")
+    .text(d => d.label || d.id);
+
+  sim.on("tick", () => {
+    link
+      .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+
+  // Pan + zoom on the canvas. Node-drag still works because d3.drag() stops
+  // propagation on mousedown before d3.zoom() sees it. Wheel zooms, left-click
+  // drag on empty space pans, scaleExtent clamps to 30%–400%.
+  svg.call(
+    d3.zoom()
+      .scaleExtent([0.3, 4])
+      .filter((event) => !event.button)
+      .on("zoom", (event) => viewport.attr("transform", event.transform))
+  );
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Click-to-highlight: clicking a node dims everything except that node and
+  // its 1-hop neighbors (both upstream callers and downstream consumers).
+  // Click the same node again, or click empty canvas, to reset.
+  //
+  // Build the undirected adjacency map from the ORIGINAL data (string-keyed
+  // source/target), not from `links` after d3.forceLink mutates the references
+  // to node objects. The map maps nodeId → Set of nodeIds including itself.
+  // ────────────────────────────────────────────────────────────────────────────
+  const neighbors = new Map(data.graph.nodes.map(n => [n.id, new Set([n.id])]));
+  data.graph.links.forEach(l => {
+    if (neighbors.has(l.source) && neighbors.has(l.target)) {
+      neighbors.get(l.source).add(l.target);
+      neighbors.get(l.target).add(l.source);
+    }
+  });
+
+  let selectedId = null;
+  const DIM_NODE = 0.18, DIM_EDGE = 0.12;
+  const linkEndId = (end) => (typeof end === "object") ? end.id : end;
+
+  // Lookup tables for the panel render path.
+  const nodeById = new Map(data.graph.nodes.map(n => [n.id, n]));
+  const cascadeTagColor = {
+    Cascading: "var(--sev-critical)",
+    "Fail-closed": "var(--sev-high)",
+    "Fail-open": "var(--sev-low)",
+    Bulkhead: "var(--sev-pass)",
+  };
+  const escapeHtml = (s) => String(s || "").replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]);
+
+  function renderPanelList(items) {
+    if (items.length === 0) {
+      return '<li class="empty-row">(none)</li>';
+    }
+    return items.map(it => {
+      const n = nodeById.get(it.id);
+      const label = escapeHtml(n ? (n.label || n.id) : it.id);
+      const tag = it.cascade
+        ? `<span class="cascade-tag" style="background:${cascadeTagColor[it.cascade] || "var(--text-muted)"}">${escapeHtml(it.cascade)}</span>`
+        : "";
+      return `<li><span class="item-name">${label}</span>${tag}</li>`;
+    }).join("");
+  }
+
+  function updateHighlight() {
+    if (selectedId === null) {
+      node.style("opacity", 1);
+      link.style("opacity", 1);
+      node.select("circle").attr("stroke", "#fff").attr("stroke-width", 1.5);
+      panel.html(PANEL_EMPTY);
+      return;
+    }
+    const keep = neighbors.get(selectedId) || new Set([selectedId]);
+    node.style("opacity", d => keep.has(d.id) ? 1 : DIM_NODE);
+    link.style("opacity", l =>
+      (keep.has(linkEndId(l.source)) && keep.has(linkEndId(l.target))) ? 1 : DIM_EDGE
+    );
+    node.select("circle")
+      .attr("stroke", d => d.id === selectedId ? "var(--accent)" : "#fff")
+      .attr("stroke-width", d => d.id === selectedId ? 3 : 1.5);
+
+    // Build per-direction neighbor lists from the original (string-keyed) links.
+    const upstream = [];   // edge target === selected → source is a caller
+    const downstream = []; // edge source === selected → target is a consumer
+    data.graph.links.forEach(l => {
+      const sid = linkEndId(l.source), tid = linkEndId(l.target);
+      if (tid === selectedId) upstream.push({ id: sid, cascade: l.cascade });
+      if (sid === selectedId) downstream.push({ id: tid, cascade: l.cascade });
+    });
+
+    const sel = nodeById.get(selectedId);
+    const selLabel = escapeHtml(sel ? (sel.label || sel.id) : selectedId);
+    const selMeta = sel
+      ? `tier ${escapeHtml(sel.tier || "—")} · fan-out ${sel.fanout != null ? sel.fanout : 0}`
+      : "";
+
+    panel.html(`
+      <h4>${selLabel}</h4>
+      <p class="panel-meta">${selMeta}</p>
+      <div class="panel-section">
+        <h5>Upstream callers (${upstream.length})</h5>
+        <ul>${renderPanelList(upstream)}</ul>
+      </div>
+      <div class="panel-section">
+        <h5>Downstream consumers (${downstream.length})</h5>
+        <ul>${renderPanelList(downstream)}</ul>
+      </div>
+    `);
+  }
+
+  // Node click toggles selection. `event.defaultPrevented` filters out the
+  // click event that fires at the end of a drag (d3.drag calls preventDefault).
+  // stopPropagation prevents the svg-background click handler below from
+  // immediately clearing the selection we just set.
+  node.on("click", (event, d) => {
+    if (event.defaultPrevented) return;
+    event.stopPropagation();
+    selectedId = (selectedId === d.id) ? null : d.id;
+    updateHighlight();
+  });
+
+  // Canvas-background click clears selection. `defaultPrevented` filters out
+  // the click event that fires at the end of a pan-zoom (d3.zoom calls
+  // preventDefault during the gesture).
+  svg.on("click", (event) => {
+    if (event.defaultPrevented) return;
+    if (selectedId === null) return;
+    selectedId = null;
+    updateHighlight();
+  });
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  [
+    ["S1 Catastrophic", tierColor.S1], ["S2 High", tierColor.S2],
+    ["S3 Medium", tierColor.S3],       ["S4 Low", tierColor.S4],
+    ["Isolated", tierColor.Isolated],
+  ].forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("margin-left", "16px").style("color", "var(--text-muted)")
+    .text("solid edge = cascading · dashed = bulkhead / fail-open · click a node to highlight its 1-hop neighbors (names listed in the side panel) · click canvas to reset · drag canvas to pan · scroll to zoom · drag a node to reposition");
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Per-scenario cascade trees — one small d3 hierarchy diagram per top-severity
+  // source node. Driven by `data.scenarios`; absent payload = no scenarios block.
+  // Each diagram is standalone (screenshottable in isolation) and uses the same
+  // severity color tokens as the main network for visual consistency.
+  // ────────────────────────────────────────────────────────────────────────────
+  if (Array.isArray(data.scenarios) && data.scenarios.length > 0) {
+    // Inject self-contained CSS so the viz stays portable across the skeleton.
+    root.append("style").text(`
+      .scenarios-section { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+      .scenarios-section > h3 { font-size: 14px; font-weight: 600; color: var(--text-primary);
+                                margin: 0 0 12px; }
+      .scenario-card { background: var(--surface-alt); border-left: 4px solid var(--sev-high);
+                       border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; }
+      .scenario-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+      .scenario-card .scenario-caption { margin: 0 0 8px; font-size: 11px; color: var(--text-muted); }
+      .scenario-card svg { display: block; margin-top: 6px; max-width: 100%; height: auto; }
+      .scenario-card .tree-node text { fill: var(--text-primary); font-size: 11px; font-weight: 500; }
+      .scenario-card .tree-node circle { stroke: #fff; stroke-width: 1.5px; cursor: pointer; }
+    `);
+
+    const sec = root.append("div").attr("class", "scenarios-section");
+    sec.append("h3").text("Cascade Paths — Top Worst Scenarios");
+
+    const cascadeIsRed = (status) =>
+      status === "Cascading" || status === "Fail-closed";
+
+    data.scenarios.forEach((scenario) => {
+      const card = sec.append("div").attr("class", "scenario-card");
+      card.append("h4").text(scenario.title || "(untitled scenario)");
+      if (scenario.caption) {
+        card.append("p").attr("class", "scenario-caption").text(scenario.caption);
+      }
+      if (!scenario.tree) return;
+
+      // Compute layout. Width grows with depth; height grows with leaf count.
+      const hroot = d3.hierarchy(scenario.tree);
+      const leafCount = Math.max(hroot.leaves().length, 1);
+      const depth = hroot.height + 1;
+      const W2 = 720, leftPad = 180, rightPad = 40;
+      const innerW = W2 - leftPad - rightPad;
+      const rowH = 32;
+      const H2 = Math.max(180, leafCount * rowH + 60);
+      const innerH = H2 - 40;
+
+      const svg2 = card.append("svg")
+        .attr("viewBox", `0 0 ${W2} ${H2}`)
+        .attr("preserveAspectRatio", "xMinYMin meet");
+
+      d3.tree().size([innerH, innerW])(hroot);
+
+      const g2 = svg2.append("g").attr("transform", `translate(${leftPad / 2},20)`);
+
+      // Edges: cascade-status colored, dashed when contained.
+      g2.selectAll(".s-link").data(hroot.links()).join("path")
+        .attr("class", "s-link")
+        .attr("fill", "none")
+        .attr("stroke", d => cascadeIsRed(d.target.data.cascade) ? "var(--sev-critical)" : "var(--sev-pass)")
+        .attr("stroke-width", 1.8)
+        .attr("stroke-dasharray", d => cascadeIsRed(d.target.data.cascade) ? "" : "4,3")
+        .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+      // Nodes
+      const tnode = g2.selectAll(".tree-node").data(hroot.descendants()).join("g")
+        .attr("class", "tree-node")
+        .attr("transform", d => `translate(${d.y},${d.x})`)
+        .on("mousemove", (e, d) => {
+          tooltip.style("opacity", 1)
+            .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+            .html(`<strong>${d.data.name}</strong><br>${d.data.cascade === "root" ? "FAILED SOURCE" : d.data.cascade || "—"}`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
+
+      tnode.append("circle")
+        .attr("r", d => d.depth === 0 ? 8 : 5)
+        .attr("fill", d => {
+          if (d.depth === 0) return "var(--sev-critical)";
+          return cascadeIsRed(d.data.cascade) ? "var(--sev-critical)" : "var(--sev-pass)";
+        });
+
+      tnode.append("text")
+        .attr("dx", d => d.children && d.children.length ? -10 : 10)
+        .attr("dy", d => d.depth === 0 ? 3 : 4)
+        .attr("text-anchor", d => d.children && d.children.length ? "end" : "start")
+        .text(d => {
+          const n = d.data.name || "";
+          return n.length > 36 ? n.slice(0, 34) + "…" : n;
+        });
+    });
+
+    // Compact scenario legend
+    const sLegend = sec.append("div").attr("class", "viz-legend")
+      .style("margin-top", "0").style("padding-top", "8px");
+    sLegend.append("span")
+      .html(`<span class="swatch" style="background:var(--sev-critical)"></span>cascading (failure propagates)`);
+    sLegend.append("span")
+      .html(`<span class="swatch" style="background:var(--sev-pass)"></span>contained (bulkhead / fail-open)`);
+    sLegend.append("span").style("color", "var(--text-muted)")
+      .text("each tree is rooted at the failed source node");
+  }
+})();

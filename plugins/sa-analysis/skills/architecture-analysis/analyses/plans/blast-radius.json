@@ -1,0 +1,173 @@
+{
+  "lens": "blast-radius",
+  "slug": "BLAST-RADIUS",
+  "specFile": "BLAST_RADIUS.md",
+  "title": {
+    "en": "Blast Radius Analysis",
+    "es": "Análisis de Radio de Impacto"
+  },
+  "typeLabel": "Blast Radius",
+  "vizTitle": "Dependency Network — Blast Cascade",
+  "topN": 5,
+  "idForms": "B1, B2",
+  "docs": [
+    "docs/05-integration-points.md",
+    "docs/09-operational-considerations.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "High-Blast Components",
+      "level": 3,
+      "title": {
+        "en": "High-Blast Components",
+        "es": "Componentes de Alto Radio de Impacto"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Tier",
+        "Direct Consumers",
+        "Indirect Consumers",
+        "Total Blast Fan-out",
+        "Cascade Risk",
+        "Bulkhead Present"
+      ],
+      "id": "^B\\d{1,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "components with total blast fan-out > 3, ordered by fan-out descending; B1, B2 … in that order; Tier S1–S4; Cascade Risk = Cascading / Bulkhead / Fail-open / Fail-closed; the renderer adds the ⚡ SPOF+Blast marker from the latest SPOF report — do not write it"
+    },
+    {
+      "key": "Isolated Components",
+      "level": 3,
+      "title": {
+        "en": "Isolated Components",
+        "es": "Componentes Aislados"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Component",
+        "Type",
+        "Why Isolated"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "components whose failure is fully contained (fan-out 0 or Isolated tier)"
+    },
+    {
+      "key": "Cascade Paths",
+      "level": 3,
+      "title": {
+        "en": "Cascade Paths — Top 3 Worst Scenarios",
+        "es": "Rutas de Cascada — Los 3 Peores Escenarios"
+      },
+      "kind": "blocks",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one block per scenario (the three highest-severity source nodes): title, prose, a `flowchart TB` Mermaid fence with :::cascading and :::contained classes and the two classDef lines"
+    },
+    {
+      "key": "MTTR Estimate",
+      "level": 3,
+      "title": {
+        "en": "MTTR Estimate by Component",
+        "es": "MTTR Estimado por Componente"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Component",
+        "Failure Type",
+        "Estimated MTTR",
+        "Source"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "RTO / MTTR per component where docs/09 or an ADR documents it; [NOT DOCUMENTED] otherwise"
+    },
+    {
+      "key": "Bulkhead Recommendations",
+      "level": 3,
+      "title": {
+        "en": "Bulkhead Recommendations",
+        "es": "Recomendaciones de Mampara"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Recommended Pattern",
+        "Trade-off",
+        "ADR Reference"
+      ],
+      "id": "^B\\d{1,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one row per High-Blast component without a bulkhead, keyed by its existing B-id (the same finding, never renumbered); pattern = circuit breaker / async queue / timeout + fallback",
+      "repeatsIds": true
+    },
+    {
+      "key": "Heat Map",
+      "level": 2,
+      "title": {
+        "en": "Heat Map",
+        "es": "Mapa de Calor"
+      },
+      "kind": "heatmap",
+      "axes": {
+        "x": {
+          "label": "CASCADE RISK",
+          "lo": "BULKHEADED",
+          "hi": "CASCADING",
+          "n": 4
+        },
+        "y": {
+          "label": "FAN-OUT",
+          "lo": "LOW",
+          "hi": "HIGH",
+          "n": 4
+        }
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "4×4: y = 1-hop fan-out (1 = 0–1 … 4 = ≥ 5), x = cascade risk (1 = fully bulkheaded … 4 = fully cascading); one entry per B-id"
+    },
+    {
+      "key": "Top Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Remediation Recommendations",
+        "es": "Top 5 Recomendaciones de Remediación"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

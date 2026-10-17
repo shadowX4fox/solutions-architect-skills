@@ -1,0 +1,82 @@
+<!--
+  Vendor Lock-in viz — treemap of vendor concentration, colored by lock tier.
+  Expected data shape (d3 hierarchy-ready):
+    data.treemap = {
+      name: "All",
+      children: [
+        { name: "Microsoft Azure",
+          children: [
+            { name: "L1 Locked",    items: [{ id: "L1-01", label: "..." }, ...], value: 5 },
+            { name: "L2 Lock-prone",items: [...], value: 3 },
+            { name: "L3 Portable",  items: [...], value: 2 }
+          ]
+        }
+      ]
+    }
+  value = number of components in that (vendor, tier) cell.
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.treemap) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const W = 760, H = 460;
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+
+  const tierColor = {
+    "L1 Locked":     "var(--sev-critical)",
+    "L2 Lock-prone": "var(--sev-high)",
+    "L3 Portable":   "var(--sev-pass)",
+  };
+
+  const hroot = d3.hierarchy(data.treemap)
+    .sum(d => d.value || 0)
+    .sort((a, b) => b.value - a.value);
+
+  d3.treemap().size([W, H]).paddingTop(22).paddingInner(2).round(true)(hroot);
+
+  // Vendor group rects (depth=1)
+  svg.selectAll(".vendor").data(hroot.descendants().filter(d => d.depth === 1)).join("g")
+    .each(function(d) {
+      const grp = d3.select(this);
+      grp.append("rect")
+        .attr("x", d.x0).attr("y", d.y0)
+        .attr("width", d.x1 - d.x0).attr("height", d.y1 - d.y0)
+        .attr("fill", "var(--surface-alt)")
+        .attr("stroke", "var(--border-strong)").attr("stroke-width", 1);
+      grp.append("text")
+        .attr("x", d.x0 + 6).attr("y", d.y0 + 15)
+        .attr("fill", "var(--text-primary)")
+        .style("font-size", "12px").style("font-weight", "700")
+        .text(d.data.name);
+    });
+
+  // Tier leaves (depth=2)
+  const leaves = svg.selectAll(".tier").data(hroot.descendants().filter(d => d.depth === 2 && d.value > 0)).join("g");
+  leaves.append("rect")
+    .attr("x", d => d.x0).attr("y", d => d.y0)
+    .attr("width", d => d.x1 - d.x0).attr("height", d => d.y1 - d.y0)
+    .attr("fill", d => tierColor[d.data.name] || "var(--text-muted)")
+    .attr("fill-opacity", 0.85)
+    .style("cursor", "pointer")
+    .on("mousemove", (e, d) => {
+      const items = (d.data.items || []).map(i => i.id + " " + i.label).join("<br>");
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.parent.data.name} · ${d.data.name}</strong><br>count: ${d.value}<br>${items}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  leaves.append("text")
+    .attr("x", d => d.x0 + 6).attr("y", d => d.y0 + 16)
+    .attr("fill", "#fff").style("font-size", "11px").style("font-weight", "600")
+    .text(d => `${d.data.name.split(" ")[0]} (${d.value})`);
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  Object.entries(tierColor).forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("color", "var(--text-muted)").text("Box area = component count per (vendor, tier)");
+})();

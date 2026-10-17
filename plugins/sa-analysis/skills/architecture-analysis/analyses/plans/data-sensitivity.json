@@ -1,0 +1,205 @@
+{
+  "lens": "data-sensitivity",
+  "slug": "DATA-SENSITIVITY",
+  "specFile": "DATA_SENSITIVITY.md",
+  "title": {
+    "en": "Data Sensitivity & Flow Analysis",
+    "es": "Análisis de Sensibilidad y Flujo de Datos"
+  },
+  "typeLabel": "Data Sensitivity & Flow",
+  "vizTitle": "Sensitive Data Flow (Sankey)",
+  "topN": 5,
+  "idForms": "G1-01 … G5-01",
+  "docs": [
+    "docs/07-security-architecture.md",
+    "docs/05-integration-points.md",
+    "docs/09-operational-considerations.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Data Inventory",
+      "level": 2,
+      "title": {
+        "en": "Data Inventory",
+        "es": "Inventario de Datos"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Store / Queue / Cache",
+        "Type",
+        "Sensitivity Tier",
+        "Tags",
+        "Contains (examples)",
+        "Encryption at Rest",
+        "Encryption in Transit",
+        "Retention Policy",
+        "Source"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every store, queue, cache and log target; Tier S1–S4 / Unknown; Tags = the design-language Data Classification / Data Category values under governed mode, else —; Encryption = Documented / Not Documented / None; Retention = period or [NOT DOCUMENTED]"
+    },
+    {
+      "key": "Sensitive Data Flow Map",
+      "level": 2,
+      "title": {
+        "en": "Sensitive Data Flow Map",
+        "es": "Mapa de Flujos de Datos Sensibles"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Flow",
+        "Step",
+        "From",
+        "To",
+        "Protocol",
+        "Carries Sensitive Data?",
+        "Encryption in Transit",
+        "Gap"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every flow that touches an S1 or S2 store, flattened: one row per hop with the flow name in the first column (the spec draws one table per flow); Gap = G1–G5 or None"
+    },
+    {
+      "key": "Sensitive Flow Diagrams",
+      "level": 2,
+      "title": {
+        "en": "Sensitive Flow Diagrams",
+        "es": "Diagramas de Flujos Sensibles"
+      },
+      "kind": "blocks",
+      "omitWhenEmpty": true,
+      "htmlOmit": true,
+      "note": "one `sequenceDiagram` Mermaid block per top-3 S1 flow, every arrow labelled with its protocol and whether it is encrypted"
+    },
+    {
+      "key": "Encryption Gaps",
+      "level": 2,
+      "title": {
+        "en": "Encryption Gaps (G1 + G2)",
+        "es": "Brechas de Cifrado (G1 + G2)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Gap",
+        "Data Store / Flow",
+        "Sensitivity",
+        "Protocol / Storage",
+        "Missing Control",
+        "Source"
+      ],
+      "id": "^G[12]-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "G1 (S1 over unencrypted transport) and G2 (S1 stored without encryption at rest); G1-01 … / G2-01 … sequential within gap"
+    },
+    {
+      "key": "Retention Gaps",
+      "level": 2,
+      "title": {
+        "en": "Retention Gaps (G3)",
+        "es": "Brechas de Retención (G3)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Data Store",
+        "Documented Retention",
+        "Retention Limit",
+        "Overage",
+        "Source"
+      ],
+      "id": "^G3-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "retention above the documented retention limit; G3-01 … sequential"
+    },
+    {
+      "key": "Cross-Boundary Leakage",
+      "level": 2,
+      "title": {
+        "en": "Cross-Boundary Leakage (G4)",
+        "es": "Fuga entre Fronteras de Confianza (G4)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Data Store / Flow",
+        "From Zone",
+        "To Zone",
+        "Sensitivity",
+        "Authorizing Decision",
+        "Source"
+      ],
+      "id": "^G4-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "S1 data crossing a trust boundary with no ADR or security decision authorizing it; G4-01 … sequential"
+    },
+    {
+      "key": "Heat Map",
+      "level": 2,
+      "title": {
+        "en": "Data Sensitivity Heat Map",
+        "es": "Mapa de Calor de Sensibilidad"
+      },
+      "kind": "heatmap",
+      "axes": {
+        "x": {
+          "label": "CONTROL COVERAGE",
+          "lo": "FULL",
+          "hi": "NONE",
+          "n": 3
+        },
+        "y": {
+          "label": "SENSITIVITY",
+          "lo": "S4 - PUBLIC",
+          "hi": "S1 - RESTRICTED",
+          "n": 3
+        }
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "one entry per G-id: y = sensitivity (3 = S1), x = control coverage (1 = FULL, 3 = NONE)"
+    },
+    {
+      "key": "Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Data Protection Recommendations",
+        "es": "Top 5 Recomendaciones de Protección del Dato"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto de Protección del Dato"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

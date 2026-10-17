@@ -1,0 +1,47 @@
+[
+  { "id": "c01", "where": "Business Objectives", "text": "Reduce order capture time from 12 minutes to 4 minutes by Q2 2027.", "label": "ok" },
+  { "id": "c02", "where": "Business Objectives", "text": "Reducir el tiempo de alta de pedidos de 12 a 4 minutos antes del segundo trimestre de 2027.", "label": "ok" },
+  { "id": "c03", "where": "UC-01 Capture an order › step 2", "text": "The system shows the customer's open orders within 2 seconds.", "label": "ok" },
+  { "id": "c04", "where": "UC-01 Capture an order › step 1", "text": "The clerk selects the customer from the search results.", "label": "ok" },
+  { "id": "c05", "where": "UC-02 Consultar pedido › paso 3", "text": "El sistema muestra el estado del pedido: Capturado, En preparación o Entregado.", "label": "ok" },
+  { "id": "c06", "where": "UC-03 Notify the customer › step 2", "text": "The system sends the confirmation by SMS and by email.", "label": "ok" },
+  { "id": "c07", "where": "Business Constraints", "text": "Integration · Must call the payments core through its published REST API in release 1.", "label": "ok" },
+  { "id": "c08", "where": "Restricciones de Negocio", "text": "Presupuesto · USD 250.000 para la versión 1.", "label": "ok" },
+  { "id": "c09", "where": "User Experience Requirements", "text": "95% of order searches return results in under 1 second at 200 concurrent clerks.", "label": "ok" },
+  { "id": "c10", "where": "Requisitos de Experiencia de Usuario", "text": "La aplicación cumple WCAG 2.2 nivel AA en las pantallas de alta y consulta de pedidos.", "label": "ok" },
+  { "id": "c11", "where": "Success Metrics & KPIs", "text": "Order abandonment drops from 18% to 8% within six months of launch.", "label": "ok" },
+  { "id": "c12", "where": "UC-04 Adding a channel › acceptance 1", "text": "Adding the WhatsApp channel in 2027 takes one team at most 4 weeks, without changing the order API.", "label": "ok" },
+  { "id": "c13", "where": "UC-02 Track an order › outcome", "text": "The order is stored with status Captured and a confirmation number is shown to the clerk.", "label": "ok" },
+  { "id": "c14", "where": "UC-05 Anular pedido › flujo alternativo 1", "text": "Si el pedido ya fue despachado, el sistema rechaza la anulación y muestra el mensaje 'Pedido despachado: no se puede anular'.", "label": "ok" },
+  { "id": "c15", "where": "Business Objectives", "text": "Support 3 regional branches (North, Central and Coastal) at launch.", "label": "ok" },
+  { "id": "c16", "where": "Restricciones de Negocio", "text": "Regulatorio · Los datos de clientes se conservan 7 años según la Resolución de Retención 2024-117.", "label": "ok" },
+
+  { "id": "c17", "where": "Business Objectives", "text": "The platform must be able to connect to other systems.", "label": "named" },
+  { "id": "c18", "where": "Restricciones de Integración", "text": "Debe integrarse con los sistemas de terceros que el negocio defina.", "label": "named" },
+  { "id": "c19", "where": "UC-06 Report sales › step 4", "text": "The system shares the report with the relevant areas.", "label": "named" },
+  { "id": "c20", "where": "Business Constraints", "text": "Must expose the order data to any platform that needs it.", "label": "named" },
+  { "id": "c21", "where": "UC-07 Exportar pedidos › paso 2", "text": "El sistema envía los pedidos a las áreas correspondientes.", "label": "named" },
+
+  { "id": "c22", "where": "UC-03 Notify the customer › step 2", "text": "The system sends the confirmation by SMS, email, etc.", "label": "closed" },
+  { "id": "c23", "where": "Requisitos de Experiencia de Usuario", "text": "Disponible en web, móvil, entre otros canales.", "label": "closed" },
+  { "id": "c24", "where": "Business Objectives", "text": "Serve all branches, such as North and Central.", "label": "closed" },
+  { "id": "c25", "where": "UC-08 Pagar pedido › paso 3", "text": "El cliente paga con tarjeta, transferencia y otros medios.", "label": "closed" },
+  { "id": "c26", "where": "Success Metrics & KPIs", "text": "Track adoption across web, mobile and future channels.", "label": "closed" },
+
+  { "id": "c27", "where": "Business Objectives", "text": "In the future, the solution should allow adding loyalty points.", "label": "dated" },
+  { "id": "c28", "where": "Objetivos de Negocio", "text": "Más adelante se podrá extender a la venta de seguros.", "label": "dated" },
+  { "id": "c29", "where": "Business Constraints", "text": "Eventually, migrate the order history to the new data platform.", "label": "dated" },
+  { "id": "c30", "where": "Restricciones Tecnológicas", "text": "En una fase posterior se reemplazará el motor de reglas actual.", "label": "dated" },
+
+  { "id": "c31", "where": "UC-02 Track an order › step 1", "text": "The system processes the request appropriately.", "label": "observable" },
+  { "id": "c32", "where": "UC-05 Anular pedido › casos borde", "text": "El sistema maneja los errores adecuadamente.", "label": "observable" },
+  { "id": "c33", "where": "Business Constraints", "text": "The new module must integrate well with the existing order flow.", "label": "observable" },
+  { "id": "c34", "where": "UC-09 Devolver pedido › paso 2", "text": "El sistema actualiza la información según corresponda.", "label": "observable" },
+  { "id": "c35", "where": "UC-10 Close the day › alternative flow 1", "text": "If something fails, the system handles it as needed.", "label": "observable" },
+
+  { "id": "c36", "where": "Business Objectives", "text": "The solution must be scalable and highly available.", "label": "measurable" },
+  { "id": "c37", "where": "Requisitos de Experiencia de Usuario", "text": "La aplicación debe ser rápida, intuitiva y fácil de usar.", "label": "measurable" },
+  { "id": "c38", "where": "Business Constraints", "text": "The architecture must be flexible and secure.", "label": "measurable" },
+  { "id": "c39", "where": "Objetivos de Negocio", "text": "Tener una plataforma moderna, robusta y escalable.", "label": "measurable" },
+  { "id": "c40", "where": "User Experience Requirements", "text": "Searches must be fast for every clerk.", "label": "measurable" }
+]

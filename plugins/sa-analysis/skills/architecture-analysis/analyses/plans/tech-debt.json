@@ -1,0 +1,172 @@
+{
+  "lens": "tech-debt",
+  "slug": "TECH-DEBT",
+  "specFile": "TECH_DEBT.md",
+  "title": {
+    "en": "Tech Debt / EOL Analysis",
+    "es": "Análisis de Deuda Técnica y Fin de Vida"
+  },
+  "typeLabel": "Tech Debt / EOL",
+  "vizTitle": "Technology EOL Timeline",
+  "topN": 5,
+  "idForms": "T1-01 … T5-01, DEP-01, AD-01",
+  "docs": [
+    "docs/06-technology-stack.md",
+    "docs/10-risks-and-technical-debt.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Technology Currency Table",
+      "level": 2,
+      "title": {
+        "en": "Technology Currency Table",
+        "es": "Tabla de Vigencia Tecnológica"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Tier",
+        "Technology",
+        "Documented Version",
+        "EOL / End-of-Support Date",
+        "Runway (months)",
+        "Component(s) using it",
+        "Source",
+        "Validation"
+      ],
+      "id": "^T[1-5]-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one row per technology, T<tier>-NN sequential within tier (T4 rows too), sorted by runway ascending; Validation = ✅ web-validated / ⚠️ corrected via WebSearch — was: … / ℹ️ doc value (vendor: …) / ⏵ WebSearch inconclusive / ⏵ WebSearch unavailable"
+    },
+    {
+      "key": "EOL Hotlist",
+      "level": 2,
+      "title": {
+        "en": "EOL Hotlist",
+        "es": "Lista Urgente de Fin de Vida"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Tier",
+        "Technology",
+        "Version",
+        "EOL Date",
+        "Runway",
+        "Risk"
+      ],
+      "id": "^T[12]-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "the T1 and T2 rows again, keyed by their existing ids; Risk = CRITICAL (T1) / HIGH (T2)",
+      "repeatsIds": true
+    },
+    {
+      "key": "Deprecated SDK Scan",
+      "level": 2,
+      "title": {
+        "en": "Deprecated SDK / Library Scan",
+        "es": "Barrido de SDK y Librerías Obsoletas"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Technology / SDK",
+        "Context (quoted phrase)",
+        "Replacement",
+        "Source"
+      ],
+      "id": "^DEP-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "every doc-flagged deprecated / legacy / sunset mention; DEP-01 … sequential; Replacement = the planned successor or [NOT DOCUMENTED]"
+    },
+    {
+      "key": "Architectural Debt",
+      "level": 2,
+      "title": {
+        "en": "Architectural Debt",
+        "es": "Deuda Arquitectónica"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "ADR",
+        "Title",
+        "Status",
+        "Superseded By",
+        "Replacement Implemented?",
+        "Risk"
+      ],
+      "id": "^AD-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "ADRs Deprecated or Superseded whose replacement is not implemented; AD-01 … sequential; Replacement Implemented? = Yes / No / Partial"
+    },
+    {
+      "key": "Debt Heat Map",
+      "level": 2,
+      "title": {
+        "en": "Debt Heat Map",
+        "es": "Mapa de Calor de Deuda"
+      },
+      "kind": "heatmap",
+      "axes": {
+        "x": {
+          "label": "REMEDIATION EFFORT",
+          "lo": "LOW",
+          "hi": "HIGH",
+          "n": 3
+        },
+        "y": {
+          "label": "SEVERITY",
+          "lo": "T3 / UNKNOWN",
+          "hi": "T1 / EOL NOW",
+          "n": 3
+        }
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "one entry per T1 / T2 / T3 id: y = severity (3 = T1), x = remediation effort (1 = version bump, 3 = re-architecture)"
+    },
+    {
+      "key": "Top 5 Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Modernization Recommendations",
+        "es": "Top 5 Recomendaciones de Modernización"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

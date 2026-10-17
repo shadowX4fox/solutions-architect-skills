@@ -1,0 +1,779 @@
+{
+ "project": "Order Desk",
+ "version": "1.2.0",
+ "status": "Released",
+ "architectureType": "Microservices",
+ "language": "en",
+ "sources": "ARCHITECTURE.md · docs/03-architecture-layers.md · docs/components/** · docs/04-data-flow-patterns.md · docs/05-integration-points.md — scene-from-docs.js",
+ "allDescription": "5 containers on the documented layers, 2 external system(s) and 2 use case(s). Pick a use case or a route to follow the data.",
+ "layers": [
+  {
+   "n": 1,
+   "name": "Channel",
+   "owned": true
+  },
+  {
+   "n": 2,
+   "name": "Edge",
+   "owned": true
+  },
+  {
+   "n": 3,
+   "name": "Services",
+   "owned": true
+  },
+  {
+   "n": 4,
+   "name": "Data",
+   "owned": true
+  },
+  {
+   "n": 5,
+   "name": "Partners",
+   "owned": false
+  }
+ ],
+ "systems": [
+  {
+   "id": "order-desk",
+   "name": "Order Desk",
+   "owned": true
+  },
+  {
+   "id": "fraud-screen",
+   "name": "Fraud Screen",
+   "owned": false
+  },
+  {
+   "id": "payments-hub",
+   "name": "Payments Hub",
+   "owned": false
+  }
+ ],
+ "nodes": [
+  {
+   "id": "web-app",
+   "name": "Web App",
+   "layer": 1,
+   "system": "order-desk",
+   "kind": "app",
+   "tech": "React",
+   "internal": "CHL0001",
+   "adrs": [
+    "ADR-101"
+   ],
+   "note": "Web App does one thing. It does it for the desk."
+  },
+  {
+   "id": "api-gateway",
+   "name": "API Gateway",
+   "layer": 2,
+   "system": "order-desk",
+   "kind": "gateway",
+   "tech": "Kong",
+   "adrs": [
+    "ADR-101"
+   ],
+   "note": "API Gateway does one thing. It does it for the desk."
+  },
+  {
+   "id": "order-service",
+   "name": "Order Service",
+   "layer": 3,
+   "system": "order-desk",
+   "kind": "service",
+   "tech": "Spring Boot",
+   "adrs": [
+    "ADR-101"
+   ],
+   "note": "Order Service does one thing. It does it for the desk."
+  },
+  {
+   "id": "order-db",
+   "name": "Order DB",
+   "layer": 4,
+   "system": "order-desk",
+   "kind": "store",
+   "tech": "PostgreSQL",
+   "adrs": [
+    "ADR-101"
+   ],
+   "note": "Order DB does one thing. It does it for the desk."
+  },
+  {
+   "id": "outbox-relay",
+   "name": "Outbox Relay",
+   "layer": 3,
+   "system": "order-desk",
+   "kind": "worker",
+   "tech": "Kafka Connect",
+   "adrs": [
+    "ADR-101"
+   ],
+   "note": "Outbox Relay does one thing. It does it for the desk."
+  },
+  {
+   "id": "hub-api",
+   "name": "Hub API",
+   "layer": 5,
+   "system": "payments-hub",
+   "kind": "gateway",
+   "tech": "Azure APIM"
+  },
+  {
+   "id": "hub-ledger",
+   "name": "Hub Ledger",
+   "layer": 5,
+   "system": "payments-hub",
+   "kind": "store",
+   "tech": "Oracle"
+  },
+  {
+   "id": "fraud-screen",
+   "name": "Fraud Screen",
+   "layer": 5,
+   "system": "fraud-screen",
+   "kind": "service",
+   "tech": ""
+  },
+  {
+   "id": "device-guard",
+   "name": "Device Guard",
+   "layer": 1,
+   "system": "actor",
+   "kind": "actor",
+   "tech": ""
+  }
+ ],
+ "edges": [
+  {
+   "a": "web-app",
+   "b": "api-gateway",
+   "routes": [
+    "online"
+   ],
+   "label": "HTTPS/JSON · I-01"
+  },
+  {
+   "a": "api-gateway",
+   "b": "order-service",
+   "routes": [
+    "online"
+   ],
+   "label": "HTTPS/JSON · I-02"
+  },
+  {
+   "a": "order-service",
+   "b": "hub-api",
+   "routes": [
+    "control",
+    "async",
+    "online"
+   ],
+   "label": "HTTPS/JSON · I-03",
+   "jump": true
+  },
+  {
+   "a": "order-service",
+   "b": "order-db",
+   "routes": [
+    "online",
+    "async"
+   ],
+   "label": "JDBC · I-04"
+  },
+  {
+   "a": "web-app",
+   "b": "device-guard",
+   "routes": [
+    "local"
+   ],
+   "label": "Embedded SDK · I-05"
+  },
+  {
+   "a": "api-gateway",
+   "b": "fraud-screen",
+   "routes": [
+    "neutral"
+   ],
+   "label": "HTTPS · I-06",
+   "jump": true
+  },
+  {
+   "a": "hub-api",
+   "b": "hub-ledger",
+   "routes": [
+    "control",
+    "online"
+   ],
+   "label": "JDBC"
+  },
+  {
+   "a": "outbox-relay",
+   "b": "order-db",
+   "routes": [
+    "async"
+   ],
+   "label": ""
+  },
+  {
+   "a": "hub-api",
+   "b": "outbox-relay",
+   "routes": [
+    "async"
+   ],
+   "label": "Kafka",
+   "jump": true
+  },
+  {
+   "a": "order-db",
+   "b": "hub-ledger",
+   "routes": [
+    "batch"
+   ],
+   "label": "",
+   "dashed": true
+  }
+ ],
+ "routes": [
+  {
+   "id": "local",
+   "name": "Local read",
+   "color": "local",
+   "desc": "Phases: 1 Device check"
+  },
+  {
+   "id": "online",
+   "name": "Online request path",
+   "color": "online",
+   "desc": "Phases: 2 Submit order · 6 Fan-out read · 7 Relay skipped · 8 Plural"
+  },
+  {
+   "id": "async",
+   "name": "Events and replication",
+   "color": "async",
+   "desc": "Phases: 4 Settlement"
+  },
+  {
+   "id": "control",
+   "name": "Control and lifecycle",
+   "color": "control",
+   "desc": "Phases: 3 Authorize payment"
+  },
+  {
+   "id": "batch",
+   "name": "Batch, off the critical path",
+   "color": "batch",
+   "desc": "Phases: 5 Nightly reconcile"
+  }
+ ],
+ "phases": {
+  "1": {
+   "name": "Device check",
+   "budget": "",
+   "kind": "local",
+   "path": [
+    [
+     "device-guard",
+     "web-app"
+    ]
+   ],
+   "extra": []
+  },
+  "2": {
+   "name": "Submit order",
+   "budget": "≤ 800 ms",
+   "kind": "online",
+   "path": [
+    [
+     "web-app",
+     "api-gateway"
+    ],
+    [
+     "api-gateway",
+     "order-service"
+    ],
+    [
+     "order-service",
+     "order-db"
+    ]
+   ],
+   "extra": []
+  },
+  "3": {
+   "name": "Authorize payment",
+   "budget": "≤ 1.5 s",
+   "kind": "control",
+   "path": [
+    [
+     "order-service",
+     "hub-api"
+    ],
+    [
+     "hub-api",
+     "hub-ledger"
+    ]
+   ],
+   "extra": []
+  },
+  "4": {
+   "name": "Settlement",
+   "budget": "",
+   "kind": "async",
+   "path": [
+    [
+     "hub-api",
+     "outbox-relay"
+    ],
+    [
+     "hub-api",
+     "order-service"
+    ],
+    [
+     "outbox-relay",
+     "order-db"
+    ]
+   ],
+   "extra": [
+    [
+     "order-service",
+     "order-db"
+    ]
+   ]
+  },
+  "5": {
+   "name": "Nightly reconcile",
+   "budget": "",
+   "kind": "batch",
+   "path": [
+    [
+     "order-db",
+     "hub-ledger"
+    ]
+   ],
+   "extra": []
+  },
+  "6": {
+   "name": "Fan-out read",
+   "budget": "",
+   "kind": "online",
+   "path": [
+    [
+     "order-service",
+     "order-db"
+    ],
+    [
+     "order-service",
+     "hub-api"
+    ]
+   ],
+   "extra": []
+  },
+  "7": {
+   "name": "Relay skipped",
+   "budget": "",
+   "kind": "online",
+   "path": [
+    [
+     "web-app",
+     "api-gateway"
+    ],
+    [
+     "api-gateway",
+     "order-service"
+    ]
+   ],
+   "extra": []
+  },
+  "8": {
+   "name": "Plural",
+   "budget": "",
+   "kind": "online",
+   "path": [
+    [
+     "hub-api",
+     "hub-ledger"
+    ]
+   ],
+   "extra": []
+  }
+ },
+ "useCases": [
+  {
+   "id": "UC-01",
+   "code": "1",
+   "name": "Place an order",
+   "target": "≤ 2 s end to end",
+   "phases": [
+    1,
+    2,
+    3
+   ],
+   "desc": "Payment moves to the hub.",
+   "adrs": [
+    "ADR-101",
+    "ADR-102"
+   ]
+  },
+  {
+   "id": "FLOW-2",
+   "code": "2",
+   "name": "Settle",
+   "target": "≤ 30 s end to end",
+   "phases": [
+    4,
+    2
+   ]
+  }
+ ],
+ "capacity": {
+  "unit": "rps",
+  "threshold": 0.7,
+  "demand": [],
+  "fanout": [],
+  "instances": [
+   {
+    "container": "web-app",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "api-gateway",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "order-service",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "order-db",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "outbox-relay",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "hub-api",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "hub-ledger",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   },
+   {
+    "container": "fraud-screen",
+    "nodes": [],
+    "replicas": null,
+    "maxReplicas": null,
+    "capacityPerReplica": null,
+    "capacityPerReplicaSessions": null,
+    "requestsPerTransaction": null,
+    "documentedDemand": null,
+    "documentedSessions": null,
+    "requestSize": null,
+    "responseSize": null,
+    "sessionTransfer": null,
+    "flags": []
+   }
+  ],
+  "gaps": [
+   {
+    "useCase": "UC-01",
+    "field": "demand",
+    "says": "docs/08 not found"
+   },
+   {
+    "useCase": "FLOW-2",
+    "field": "demand",
+    "says": "docs/08 not found"
+   },
+   {
+    "container": "web-app",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "api-gateway",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "order-service",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "order-db",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "outbox-relay",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "hub-api",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "hub-ledger",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   },
+   {
+    "container": "fraud-screen",
+    "field": "capacity",
+    "says": "no Capacity table in the descriptor"
+   }
+  ],
+  "scenarios": [],
+  "pricing": {}
+ },
+ "thesis": "A worked example: an order-taking system whose every name is invented.",
+ "deployment": {
+  "description": "Production in one cloud region: an edge gateway in the DMZ, the services in a cluster, the store in a restricted subnet.",
+  "derivedFrom": "docs/03-architecture-layers.md § Diagram: C4 Level 2 — Container",
+  "tiers": [
+   {
+    "n": 1,
+    "name": "Public",
+    "owned": false
+   },
+   {
+    "n": 2,
+    "name": "DMZ"
+   },
+   {
+    "n": 3,
+    "name": "Internal"
+   },
+   {
+    "n": 4,
+    "name": "Restricted"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "browser",
+    "name": "Customer browser",
+    "kind": "client",
+    "tier": 1,
+    "owned": false,
+    "trustZone": "Public",
+    "jurisdiction": "Multi",
+    "tech": "Evergreen browsers",
+    "note": "Not deployed by the organization: a release reaches it on the next page load."
+   },
+   {
+    "id": "region",
+    "name": "Cloud region (primary)",
+    "kind": "region",
+    "trustZone": "Internal",
+    "jurisdiction": "US",
+    "resilience": "Active",
+    "note": "One region; a second one is a documented gap."
+   },
+   {
+    "id": "edge",
+    "name": "Edge gateway",
+    "kind": "device",
+    "tier": 2,
+    "parent": "region",
+    "trustZone": "DMZ",
+    "tech": "WAF · TLS termination",
+    "note": "Terminates TLS and applies rate limits before the cluster."
+   },
+   {
+    "id": "cluster",
+    "name": "Order Desk cluster",
+    "kind": "cluster",
+    "tier": 3,
+    "parent": "region",
+    "tech": "Kubernetes",
+    "resilience": "Active",
+    "note": "Three zones; the services scale on CPU."
+   },
+   {
+    "id": "ns-desk",
+    "name": "namespace order-desk",
+    "kind": "namespace",
+    "tier": 3,
+    "parent": "cluster"
+   },
+   {
+    "id": "data",
+    "name": "Data subnet",
+    "kind": "zone",
+    "tier": 4,
+    "parent": "region",
+    "trustZone": "Restricted",
+    "note": "Reachable from the cluster only."
+   },
+   {
+    "id": "pg",
+    "name": "Managed PostgreSQL",
+    "kind": "managed",
+    "tier": 4,
+    "parent": "data",
+    "owned": false,
+    "resilience": "Warm-Standby",
+    "tech": "PostgreSQL 16",
+    "note": "Provider-managed; one standby in another zone."
+   },
+   {
+    "id": "hub",
+    "name": "Payments Hub (partner)",
+    "kind": "managed",
+    "tier": 1,
+    "owned": false,
+    "trustZone": "Public",
+    "jurisdiction": "US",
+    "note": "Operated by the partner; reached over the public internet with mutual TLS."
+   }
+  ],
+  "instances": [
+   {
+    "container": "web-app",
+    "node": "browser",
+    "replicas": "one per session",
+    "note": "Static assets served from the edge."
+   },
+   {
+    "container": "api-gateway",
+    "node": "ns-desk",
+    "replicas": "2–6 (HPA)"
+   },
+   {
+    "container": "order-service",
+    "node": "ns-desk",
+    "replicas": "3–10 (HPA)"
+   },
+   {
+    "container": "outbox-relay",
+    "node": "ns-desk",
+    "replicas": "1",
+    "note": "Single consumer: ordering matters more than throughput."
+   },
+   {
+    "container": "order-db",
+    "node": "pg",
+    "replicas": "primary + 1 standby"
+   },
+   {
+    "container": "hub-api",
+    "node": "hub",
+    "replicas": "Not documented"
+   }
+  ],
+  "paths": [
+   {
+    "a": "browser",
+    "b": "edge",
+    "transport": "TLS:443",
+    "pathClass": "Public Internet",
+    "auth": "OAuth2"
+   },
+   {
+    "a": "edge",
+    "b": "cluster",
+    "transport": "TLS:443",
+    "pathClass": "Peering",
+    "auth": "mTLS"
+   },
+   {
+    "a": "ns-desk",
+    "b": "pg",
+    "transport": "TLS:5432",
+    "pathClass": "Private Link",
+    "auth": "Client certificate"
+   },
+   {
+    "a": "cluster",
+    "b": "hub",
+    "transport": "TLS:443",
+    "pathClass": "Public Internet",
+    "auth": "mTLS",
+    "crossBorder": "No"
+   }
+  ]
+ }
+}

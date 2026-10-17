@@ -1,0 +1,48 @@
+# Architecture index — Azure Pipelines. Copy to azure-pipelines/architecture-index.yml in the architecture's repository and
+# create the pipeline from it. Variable group `architecture-index`: SA_INDEX_PROJECT_KEY, SA_INDEX_SERVER, SA_INDEX_MCP_URL
+# (optional) and the secret SA_INDEX_TOKEN.
+# No path filter: it would also have to hold for the tag pushes, so every push to main runs and the script publishes only
+# when the architecture equals its release tag (phase 2, the kit) — any other run is a draft and is skipped.
+trigger:
+  branches:
+    include: [main]
+  tags:
+    include: ['architecture-v*']
+
+pr: none
+
+parameters:
+  - name: draft
+    displayName: Publish a draft (the architecture differs from its release tag)
+    type: boolean
+    default: false
+
+variables:
+  - group: architecture-index
+  - name: SA_PLUGIN_REF
+    value: v8.149.0
+  - name: SA_PLUGIN_REPO
+    value: https://github.com/shadowx4fox/solutions-architect-skills.git
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0                    # the release tag and its tree
+    fetchTags: true
+  - bash: |
+      curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
+      echo "##vso[task.prependpath]$HOME/.bun/bin"
+    displayName: Install Bun
+  - bash: |
+      git clone --quiet --depth 1 --branch "$SA_PLUGIN_REF" "$SA_PLUGIN_REPO" "$(Agent.TempDirectory)/sa-ci"
+      SA_SKILLS_DIR="$(Agent.TempDirectory)/sa-ci" bash "$(Agent.TempDirectory)/sa-ci/plugins/sa-delivery/skills/architecture-index-export/ci/publish-index.sh" .
+    displayName: Export, check and publish the index bundle
+    env:
+      SA_INDEX_TOKEN: $(SA_INDEX_TOKEN)   # a secret is mapped explicitly
+      SA_INDEX_ALLOW_DRAFT: ${{ lower(parameters.draft) }}
+      SA_INDEX_ARTIFACT: $(Build.ArtifactStagingDirectory)/architecture-index.tgz
+  - publish: $(Build.ArtifactStagingDirectory)
+    artifact: architecture-index
+    condition: and(succeeded(), eq(variables['SA_INDEX_BUILT'], 'true'))   # a skipped draft leaves nothing to keep

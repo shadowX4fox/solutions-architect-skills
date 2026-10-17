@@ -1,0 +1,126 @@
+/* holo: Mega Man X capsule hologram over a holodeck grid, in the Mega Man DO palette — cyan fading
+     to indigo on deep navy, a white · red · blue signature stripe. Cyan is the system, amber is what it
+     consumes, pink is an actor. */
+[data-skin="holo"] .famall[aria-pressed="true"] { box-shadow: 0 0 10px var(--glow); }
+[data-skin="holo"] .fam[aria-pressed="true"] .led { box-shadow: 0 0 6px var(--c); }
+[data-skin="holo"] .ucbar button[aria-pressed="true"] { text-shadow: none; box-shadow: 0 0 10px var(--glow); }
+[data-skin="holo"] .desc .tl button[aria-pressed="true"] { box-shadow: 0 0 10px var(--c); }
+[data-skin="holo"] .codec { --cut: 12px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); border: 1px solid color-mix(in srgb, var(--m) 70%, transparent); border-left-width: 1px;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--m) 6%, transparent) 2px 3px), color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--m) 30%, transparent), inset 0 0 22px color-mix(in srgb, var(--m) 10%, transparent); }
+[data-skin="holo"] .codec .cface { width: 62px; height: 62px; padding: 3px; border: 1px solid color-mix(in srgb, var(--m) 55%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--m) 16%, transparent), transparent 70%); }
+[data-skin="holo"] .codec .face { filter: drop-shadow(0 0 5px var(--m)); }
+[data-skin="holo"] .codec .chead { text-transform: uppercase; letter-spacing: .14em; }
+[data-skin="holo"] .codec .chead .ch { display: inline; font: 500 10px var(--font-mono); color: var(--m); opacity: .8; }
+[data-skin="holo"] .codec .chead b { text-shadow: 0 0 8px var(--m); }
+[data-skin="holo"] .codec .cline { font-family: var(--font-mono); font-size: 12.5px; text-shadow: 0 0 4px color-mix(in srgb, var(--m) 40%, transparent); }
+[data-skin="holo"] .codec .static { display: block; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.22) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 2px, transparent 2px 5px); mix-blend-mode: screen; }
+@media (prefers-reduced-motion: no-preference) { [data-skin="holo"] .codec.open { animation: cinholo .34s steps(6) both; } [data-skin="holo"] .codec.open .static { animation: cstatic .5s steps(5) both; } }
+[data-skin="holo"] #radial .ri { box-shadow: 0 0 12px rgba(13,204,255,.18), inset 0 0 10px rgba(13,204,255,.06); text-transform: uppercase; letter-spacing: .05em; font-size: 9.5px; }
+[data-skin="holo"] #radial .ri .g { text-shadow: 0 0 8px currentColor; }
+[data-skin="holo"] #radial .hub { border-color: var(--floor-edge); box-shadow: 0 0 18px rgba(13,204,255,.22), inset 0 0 16px rgba(13,204,255,.12); }
+[data-skin="holo"] .lens::before { background: repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--floor-edge) 5%, transparent) 2px 3px), linear-gradient(180deg, color-mix(in srgb, var(--floor-edge) 7%, var(--chip)), var(--chip)), var(--bg); }
+[data-skin="holo"] .lens[aria-pressed="true"]::before { background: repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--focus) 8%, transparent) 2px 3px), linear-gradient(180deg, color-mix(in srgb, var(--focus) 22%, var(--chip)), color-mix(in srgb, var(--focus) 6%, var(--chip))), var(--bg); }
+[data-skin="holo"] .lens[aria-pressed="true"] .ct { text-shadow: 0 0 8px var(--glow); }
+/* holo: amber is the skin's focus and an external system's colour, and too close to High and Medium; on the analysis rail the
+     pressed lens and the "all" filters take the system cyan, so every warm colour there is a severity */
+[data-skin="holo"] :is(.lenses, .fseg) { --focus: var(--floor-edge); }
+[data-skin="holo"] .fseg button[aria-pressed="true"] { box-shadow: 0 0 10px color-mix(in srgb, var(--c, var(--focus)) 60%, transparent); }
+[data-skin="holo"] .hud, [data-skin="holo"] .hudcam { --on: var(--floor-edge); }
+[data-skin="holo"] .hud .sw button[aria-pressed="true"] { box-shadow: 0 0 12px var(--glow); text-shadow: none; }
+[data-skin="holo"] .hud, [data-skin="holo"] .hudcam { box-shadow: inset 0 1px 0 color-mix(in srgb, var(--on) 55%, transparent), 0 0 14px rgba(13,204,255,.08); backdrop-filter: blur(5px); }
+[data-skin="holo"] #dock-bar { --on: var(--floor-edge); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--on) 55%, transparent); }
+[data-skin="holo"] #dock-bar::before { display: none; }
+/* ---- holo chrome: HUD panels with corner brackets, glowing type, CRT scanlines and a vignette.
+     Everything is layered on the same markup; nothing here is required by the atlas skin. */
+[data-skin="holo"] .card { box-shadow: 0 0 14px rgba(13,204,255,.10), inset 0 0 24px rgba(13,204,255,.05); backdrop-filter: blur(5px); }
+/* Chamfered cards, Mega Man DO: the top-left and bottom-right corners are cut, a stroke runs along each cut and
+     brackets hold the other two. A toolbar (.bar) keeps its square box — its drawers open outside it. */
+[data-skin="holo"] .card:not(.bar) { --cut: 16px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+[data-skin="holo"] .card::before {
+    content: ""; position: absolute; inset: -1px; pointer-events: none;
+    --b: linear-gradient(var(--floor-edge), var(--floor-edge));
+    background: var(--b) top right / 14px 2px, var(--b) top right / 2px 14px,
+                var(--b) bottom left / 14px 2px, var(--b) bottom left / 2px 14px;
+    background-repeat: no-repeat;
+  }
+[data-skin="holo"] .card:not(.bar)::before {
+    inset: 0;
+    --d: linear-gradient(to bottom right, transparent calc(50% - 1.5px), var(--floor-edge) calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+    --e: linear-gradient(to bottom right, transparent calc(50% - 1.5px), var(--accent-2) calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+    background: var(--d) top left / var(--cut) var(--cut), var(--e) bottom right / var(--cut) var(--cut),
+                var(--b) top right / 14px 2px, var(--b) top right / 2px 14px,
+                linear-gradient(var(--accent-2), var(--accent-2)) bottom left / 14px 2px, linear-gradient(var(--accent-2), var(--accent-2)) bottom left / 2px 14px;
+    background-repeat: no-repeat;
+  }
+/* The signature stripe: under the title bar, and a short one after every card title */
+[data-skin="holo"] .top::after { content: ""; position: absolute; left: 20px; bottom: 2px; width: min(280px, 40vw); height: 3px; background: var(--stripe); opacity: .9; pointer-events: none; }
+[data-skin="holo"] .card h2::after { content: ""; display: inline-block; width: 22px; height: 2px; margin-left: 8px; vertical-align: middle; background: var(--stripe); }
+[data-skin="holo"] .seg button[aria-pressed="true"] { background: linear-gradient(90deg, color-mix(in srgb, var(--floor-edge) 22%, transparent), color-mix(in srgb, var(--accent-2) 22%, transparent)); }
+[data-skin="holo"] .card h2 { color: var(--floor-edge); letter-spacing: .22em; font-weight: 700; text-shadow: 0 0 8px var(--glow); }
+[data-skin="holo"] .card h2::before { content: "// "; color: var(--ink-3); }
+[data-skin="holo"] .monitor .compass .needle { filter: drop-shadow(0 0 3px var(--glow)); }
+[data-skin="holo"] .top h1 { text-transform: uppercase; letter-spacing: .08em; font-weight: 700; text-shadow: 0 0 12px var(--glow), 0 0 2px var(--ink); }
+[data-skin="holo"] .top .meta { color: var(--ink-2); text-transform: uppercase; letter-spacing: .06em; }
+[data-skin="holo"] .seg, [data-skin="holo"] .views button { border-color: var(--panel-border); }
+[data-skin="holo"] .seg button[aria-pressed="true"], [data-skin="holo"] .item[aria-pressed="true"], [data-skin="holo"] .step[aria-pressed="true"] { box-shadow: inset 0 0 12px rgba(13,204,255,.18); text-shadow: 0 0 6px var(--glow); }   /* the layer selector stays quiet: the stage carries the focus cue */
+[data-skin="holo"] #layer-btns button[aria-pressed="true"] { box-shadow: inset 0 0 8px rgba(13,204,255,.08); text-shadow: none; }
+[data-skin="holo"] .item .t, [data-skin="holo"] .inspector h3 { text-shadow: 0 0 6px var(--glow); }
+[data-skin="holo"] .inspector h3 { text-transform: uppercase; letter-spacing: .05em; font-size: 16px; }
+[data-skin="holo"] .badge { text-shadow: 0 0 6px currentColor; }
+[data-skin="holo"] .chip { border: 1px solid var(--panel-border); }
+[data-skin="holo"] .lbl { color: var(--ink); text-shadow: 0 0 6px var(--glow), 0 0 1px var(--bg); letter-spacing: .04em; }
+/* 8.78.0: a block's name in the hologram sits on a faint backing — with every route lit, the paths and outlines behind crossed the letters and three stacked names read as one (their boxes never overlapped); the padding stays the label's own, so the collision pass places exactly what it did */
+/* 8.84.0: a name plate no longer hides the blocks behind it. The backing is thin glass and the legibility moves onto the glyphs — a
+     tight dark halo under the cyan glow — so a block of the floor below stays visible through its neighbour's name */
+[data-skin="holo"] .lbl.node:not(.plate) { background: rgba(4, 10, 28, .22); box-shadow: none; text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 1px 4px var(--bg), 0 0 8px var(--glow); }
+[data-skin="holo"] .lbl.node.dim:not(.plate) { background: rgba(4, 10, 28, .45); box-shadow: none; }
+[data-skin="holo"] .lbl.plate { --label-plate: rgba(4, 10, 28, .42); text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 1px 4px var(--bg); }
+/* 8.84.1: a badge carries dark glyphs on its own colour — the plate's dark halo smudged them (B16 · S on red read as a red blot) */
+[data-skin="holo"] .lbl .fb { text-shadow: none; letter-spacing: .03em; }
+[data-skin="holo"] .lbl.dim { opacity: .42; }
+[data-skin="holo"] .lbl.layer { color: var(--floor-edge); text-transform: uppercase; letter-spacing: .14em; }
+[data-skin="holo"] .lbl.edge { color: var(--ink-2); background: rgba(4,10,28,.55); }
+[data-skin="holo"] .lbl.warn { color: var(--c-warn); }
+[data-skin="holo"] .lbl.actor { color: var(--block-actor); text-shadow: 0 0 8px rgba(225,6,104,.65); }
+[data-skin="holo"] .info-btn { text-transform: uppercase; letter-spacing: .14em; color: var(--floor-edge); text-shadow: 0 0 6px var(--glow); }
+[data-skin="holo"] .modal h3 { text-transform: uppercase; letter-spacing: .05em; font-size: 16px; text-shadow: 0 0 6px var(--glow); }
+[data-skin="holo"] .modal dt { color: var(--floor-edge); letter-spacing: .18em; }
+[data-skin="holo"] .alia .eyebrow b { text-shadow: 0 0 8px var(--focus); }
+[data-skin="holo"] .alia .status.brain { text-shadow: 0 0 6px var(--focus); }
+[data-skin="holo"] .mark { filter: drop-shadow(0 0 4px var(--focus)); }
+[data-skin="holo"] .legend .sq { box-shadow: 0 0 6px var(--glow); }
+[data-skin="holo"] .legend .ln { box-shadow: 0 0 6px var(--c); }
+/* ---- holo, after the Mega Man DO site (8.83.7) — buttons: cut top-right and bottom-left corners with a 1 px edge that follows
+     the cut (the edge is the button's own fill, the face an inset layer — the lens technique), a tab on the top edge and a
+     hatch at the bottom right. */
+[data-skin="holo"] :is(.info-btn, .modal button.close, .alia .dockbtn) {
+    --cut: 7px; --edge: color-mix(in srgb, var(--floor-edge) 62%, transparent); position: relative; isolation: isolate;
+    border: 0 !important; background: var(--edge); padding: 5px 14px 6px 12px;
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+[data-skin="holo"] :is(.info-btn, .modal button.close, .alia .dockbtn)::before {
+    content: ""; position: absolute; inset: 1px; z-index: -1; pointer-events: none;
+    clip-path: polygon(0 0, calc(100% - var(--cut) + .5px) 0, 100% calc(var(--cut) - .5px), 100% 100%, calc(var(--cut) - .5px) 100%, 0 calc(100% - var(--cut) + .5px));
+    background: repeating-linear-gradient(-60deg, color-mix(in srgb, var(--floor-edge) 50%, transparent) 0 1.5px, transparent 1.5px 4px) right 7px bottom 2px / 22px 3px no-repeat,
+                linear-gradient(180deg, color-mix(in srgb, var(--floor-edge) 16%, var(--bg)), color-mix(in srgb, var(--accent-2) 12%, var(--bg)));
+  }
+[data-skin="holo"] :is(.info-btn, .modal button.close, .alia .dockbtn)::after { content: ""; position: absolute; top: 0; left: 12px; width: 16px; height: 3px; background: var(--floor-edge); pointer-events: none; }
+[data-skin="holo"] :is(.info-btn, .modal button.close, .alia .dockbtn):hover { --edge: var(--floor-edge); color: var(--ink); text-shadow: 0 0 8px var(--glow); }
+[data-skin="holo"] .sim-pill { --edge: var(--sim-warn); }
+[data-skin="holo"] .sim-pill::after { background: var(--sim-warn); }
+[data-skin="holo"] .modal .actions { border-top-color: transparent; background: var(--dot) 12px 0 / 6px 6px no-repeat, var(--dot) calc(100% - 12px) 0 / 6px 6px no-repeat, var(--wire) 15px 2.5px / calc(100% - 30px) 1px no-repeat, var(--panel); }
+[data-skin="holo"] :is(.inspector .grp-h, .inspector .vfl-h, .inspector .vsum + .sub) { border-bottom: 0; padding-bottom: 6px; background: var(--dot) 0 100% / 6px 6px no-repeat, var(--dot) 100% 100% / 6px 6px no-repeat, var(--wire) 3px calc(100% - 2.5px) / calc(100% - 6px) 1px no-repeat; }
+[data-skin="holo"] .monitor dl { padding-top: 9px; background: var(--dot) 0 0 / 6px 6px no-repeat, var(--dot) 100% 0 / 6px 6px no-repeat, var(--wire) 3px 2.5px / calc(100% - 6px) 1px no-repeat; }
+[data-skin="holo"] .alert-ic, [data-skin="holo"] .hopchip .ic {
+    flex: none; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; border-radius: 50%; clip-path: none;
+    background: var(--focus); color: var(--bg); font: 700 12px var(--font-head); line-height: 1; box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--focus), 0 0 10px var(--focus);
+  }
+[data-skin="holo"] .hopchip .ic { width: 15px; height: 15px; font-size: 10px; margin-left: 3px; }
+[data-skin="holo"] #stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 1px, transparent 1px 3px),
+                radial-gradient(ellipse at center, transparent 70%, rgba(0,0,0,.3) 100%);
+    animation: crt 6s linear infinite;
+  }
+@media (prefers-reduced-motion: reduce) { [data-skin="holo"] #stage::after { animation: none; } }

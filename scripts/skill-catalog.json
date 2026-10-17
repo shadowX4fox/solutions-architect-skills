@@ -1,0 +1,145 @@
+{
+  "$comment": "One category per skill. `needs` is what a project must hold for the skill to start; `standalone` is true when that list does not include ARCHITECTURE.md. `depends_on` is every other skill whose files this skill loads (code, data) or whose scripts its instructions run; `optional_depends_on` the ones it runs without — never loaded by code, and every instruction line that invokes one says \"optional\" and what happens without it. Both are held to the tree by scripts/check-skill-catalog.ts, so a new cross-skill coupling fails `bun run check` until it is declared here. `bun scripts/check-skill-catalog.ts --report` prints the files behind each edge: the inventory for splitting the plugin by category. `agents` maps every agents/**/*.md to the skill that dispatches it; its invocations count as that skill's edges.",
+  "categories": {
+    "intake": "Business input before any architecture exists — the PO Spec and its BIAN mapping.",
+    "records": "Decision and debt records — ADRs and TDRs, kept in adr/ and tdr/.",
+    "authoring": "Writing and maintaining ARCHITECTURE.md and docs/ — the core the other categories read.",
+    "governance": "Checks over a written architecture — compliance contracts, risk analyses, requirement coverage.",
+    "delivery": "Artifacts handed to other teams and tools — handoff kit, Word export, blueprints, IcePanel.",
+    "visualization": "Interactive views of the architecture."
+  },
+  "skills": {
+    "architecture-readiness": {
+      "category": "intake",
+      "plugin": "sa-requirements",
+      "standalone": true,
+      "needs": [],
+      "note": "Workflow 6 (PO Spec sync) needs ARCHITECTURE.md.",
+      "depends_on": []
+    },
+    "architecture-capability-alignment": {
+      "category": "intake",
+      "plugin": "sa-requirements",
+      "standalone": true,
+      "needs": ["PRODUCT_OWNER_SPEC.md"],
+      "note": "The judge and the DOM / CAP registry are sa-skills'; without them the alignment is ranked by term overlap and carries no Diagram ID Segments.",
+      "depends_on": [],
+      "optional_depends_on": ["architecture-docs"]
+    },
+    "architecture-definition-record": {
+      "category": "records",
+      "plugin": "sa-records",
+      "standalone": true,
+      "needs": [],
+      "note": "Catalog mode (.sa-skills/adr-catalog.json) maintains the institutional catalog itself. Generating ADRs from an architecture needs architecture-docs.",
+      "depends_on": [],
+      "optional_depends_on": ["architecture-docs"]
+    },
+    "technical-debt-records": {
+      "category": "records",
+      "plugin": "sa-records",
+      "standalone": true,
+      "needs": [],
+      "depends_on": [],
+      "optional_depends_on": ["architecture-docs"]
+    },
+    "architecture-docs": {
+      "category": "authoring",
+      "standalone": true,
+      "needs": ["PRODUCT_OWNER_SPEC.md", "BIAN_ALIGNMENT.md", "HLD"],
+      "note": "Workflow 1 creates ARCHITECTURE.md from the three gates; every other workflow needs it.",
+      "depends_on": ["architecture-component-guardian", "architecture-explorer-headers"],
+      "optional_depends_on": ["architecture-command-center", "technical-debt-records", "architecture-readiness"]
+    },
+    "architecture-lifecycle": {
+      "category": "authoring",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md", "git"],
+      "note": "Status, release check, release, tag recovery, deprecation — lifecycle.js; a release is the tag architecture-v{version}, so a project outside git cannot be released.",
+      "depends_on": ["architecture-docs", "architecture-component-guardian"]
+    },
+    "architecture-component-guardian": {
+      "category": "authoring",
+      "standalone": false,
+      "needs": ["docs/components/"],
+      "internal": true,
+      "depends_on": ["architecture-docs", "architecture-explorer-headers"]
+    },
+    "architecture-explorer-headers": {
+      "category": "authoring",
+      "standalone": false,
+      "needs": ["docs/"],
+      "internal": true,
+      "depends_on": []
+    },
+    "architecture-analysis": {
+      "category": "governance",
+      "plugin": "sa-analysis",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md"],
+      "depends_on": [],
+      "optional_depends_on": ["architecture-command-center"]
+    },
+    "architecture-traceability": {
+      "category": "governance",
+      "plugin": "sa-analysis",
+      "standalone": false,
+      "needs": ["PRODUCT_OWNER_SPEC.md", "ARCHITECTURE.md"],
+      "depends_on": []
+    },
+    "architecture-dev-handoff": {
+      "category": "delivery",
+      "plugin": "sa-delivery",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md", "docs/05-integration-points.md"],
+      "depends_on": [],
+      "optional_depends_on": []
+    },
+    "architecture-index-export": {
+      "category": "delivery",
+      "plugin": "sa-delivery",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md"],
+      "note": "Build packs need a handoff kit of the same architecture version (handoffs/); without one the bundle carries the chunks and the ledger only.",
+      "depends_on": ["architecture-dev-handoff"]
+    },
+    "architecture-docs-export": {
+      "category": "delivery",
+      "plugin": "sa-delivery",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md"],
+      "depends_on": []
+    },
+    "architecture-icepanel-sync": {
+      "category": "delivery",
+      "plugin": "sa-delivery",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md"],
+      "depends_on": []
+    },
+    "architecture-command-center": {
+      "category": "visualization",
+      "plugin": "sa-visualization",
+      "standalone": false,
+      "needs": ["ARCHITECTURE.md"],
+      "depends_on": []
+    }
+  },
+  "agents": {
+    "plugins/sa-records/agents/generators/adr-writer.md": "architecture-definition-record",
+    "plugins/sa-analysis/agents/reviewers/architecture-analysis-agent.md": "architecture-analysis",
+    "agents/generators/segment-runner.md": "architecture-docs",
+    "agents/reviewers/principle-quality-reviewer.md": "architecture-docs",
+    "agents/reviewers/worksheet-judge.md": "architecture-docs",
+    "plugins/sa-requirements/agents/generators/acceptance-test-writer.md": "architecture-readiness",
+    "plugins/sa-delivery/agents/generators/ekonte-generator.md": "architecture-dev-handoff",
+    "plugins/sa-delivery/agents/generators/settei-generator.md": "architecture-dev-handoff",
+    "plugins/sa-delivery/agents/generators/seam-generator.md": "architecture-dev-handoff",
+    "plugins/sa-delivery/agents/generators/cutsheet-generator.md": "architecture-dev-handoff",
+    "plugins/sa-delivery/agents/generators/handoff-asset-generator.md": "architecture-dev-handoff",
+    "plugins/sa-delivery/agents/generators/docs-export-generator.md": "architecture-docs-export"
+  },
+  "plugins": {
+    "sa-ux": { "cadence": "independent", "optional": true, "why": "a UX layer of Claude Code mods: installed by whoever wants it, never as a dependency, and released on the mods' own cadence" }
+  }
+}

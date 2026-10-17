@@ -1,0 +1,39 @@
+{
+  "name": "sa-skills",
+  "version": "10.1.0",
+  "description": "Claude Code plugin for architecture documentation",
+  "type": "module",
+  "workspaces": [
+    "tools/docgen"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check:frontmatter": "bun scripts/check-skill-frontmatter.ts",
+    "check:agents": "bun scripts/check-agent-structure.ts",
+    "check:lazyload": "bun scripts/check-lazyload-sizes.ts",
+    "check:encoding": "bun scripts/check-text-encoding.ts",
+    "check:catalog": "bun scripts/check-skill-catalog.ts",
+    "check:generic": "bun scripts/check-generic.ts",
+    "check": "bun run typecheck && bun run check:frontmatter && bun run check:agents && bun run check:lazyload && bun run check:encoding && bun run check:catalog && bun run check:generic && bun run bundle:check && bun test",
+    "bundle:handoff-agent": "bun tools/bundle-handoff-agent.ts",
+    "bundle:check": "bun tools/bundle-handoff-agent.ts --check"
+  },
+  "dependencies": {
+    "@redocly/openapi-core": "^2.57.0",
+    "avsc": "^5.7.9",
+    "graphql": "^16.14.2",
+    "libpg-query": "^18.1.5",
+    "node-sql-parser": "^5.4.0",
+    "protobufjs": "^8.8.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "bun-types": "^1.3.11",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

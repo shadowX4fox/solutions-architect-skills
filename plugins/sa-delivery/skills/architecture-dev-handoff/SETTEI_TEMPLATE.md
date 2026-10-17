@@ -1,0 +1,176 @@
+# Cross-Cutting Standards — [PROJECT_NAME]
+
+<!-- managed by sa-skills:architecture-dev-handoff — do not edit manually -->
+<!-- TEMPLATE_VERSION: 4.3.1 -->
+| Field | Value |
+|-------|-------|
+| Version | [SETTEI_VERSION] |
+| Applies to | All services in scope of [PROJECT_NAME] |
+| Architecture Version | [ARCHITECTURE_VERSION] |
+| Generated | [GENERATION_DATE] |
+
+### Role Quick Index <!-- SECTION: Role Quick Index -->
+
+| Audience | Read first in this document |
+|----------|-----------------------------|
+| **Architect** | All sections + Deviations table |
+| **Dev** | Error semantics · Versioning · Idempotency · Resilience defaults |
+| **QA** | Idempotency · Observability · Data |
+| **Ops / SRE** | Observability · Resilience defaults · Data |
+
+Full-kit reading order across the four handoff documents is in `handoffs/README.md`.
+
+Global rules that apply to every service. Each rule is **referenced**
+from every Component Specification — never restated. Restating causes drift; drift
+causes incoherence.
+
+Every rule below is normative (MUST / SHOULD / MAY) and links to its
+source: an institutional ADR (e.g. `ADR-018`). Rules without a
+citation are marked `[NOT DOCUMENTED]` and cannot be enforced.
+
+---
+
+## Error semantics <!-- SECTION: Error semantics -->
+
+[ERROR_SEMANTICS_RULES]
+
+<!--
+Rule template:
+- **MUST** [rule statement]
+  → per [ADR-NNN](../adr/ADR-NNN-slug.md)
+
+Sourced from: institutional ADRs on error envelopes, retry classification and error mapping.
+
+Typical rules to look for:
+- Error envelope shape (RFC 7807 vs custom)
+- Retryable vs terminal classification
+- Client-visible vs internal error mapping
+- Server-side error masking rules
+-->
+
+---
+
+## Versioning <!-- SECTION: Versioning -->
+
+[VERSIONING_RULES]
+
+<!--
+Sourced from: institutional ADRs on versioning, deprecation and breaking changes.
+
+Typical rules:
+- Contract versioning scheme (semver, date-based, MAJOR-only)
+- Breaking change definition
+- Deprecation window and notification path
+-->
+
+---
+
+## Identity and authorisation <!-- SECTION: Identity and authorisation -->
+
+[IDENTITY_RULES]
+
+<!--
+Sourced from: institutional ADRs on identity, mTLS, OAuth and service-to-service authorisation.
+
+Typical rules:
+- Token propagation across hops (mTLS, JWT, OAuth)
+- Service-to-service authentication
+- Delegation vs impersonation rules
+- Anonymous access boundary
+-->
+
+---
+
+## Idempotency <!-- SECTION: Idempotency -->
+
+[IDEMPOTENCY_RULES]
+
+<!--
+Sourced from: institutional ADRs on idempotency keys and duplicate delivery.
+
+Typical rules:
+- Default idempotency posture (e.g., all mutating operations idempotent
+  on client-supplied key)
+- Key format, retention window, collision behaviour
+- Exemptions (which endpoints MAY be non-idempotent and why)
+-->
+
+---
+
+## Observability conventions <!-- SECTION: Observability conventions -->
+
+[OBSERVABILITY_RULES]
+
+<!--
+Sourced from: institutional ADRs on tracing, correlation ids and structured logging.
+
+Typical rules:
+- Trace propagation standard (W3C tracecontext, B3, X-Correlation-Id)
+- Required RED/USE metrics and naming
+- Log structure (JSON Lines, mandatory fields, PII redaction)
+- Correlation identifier lifecycle
+-->
+
+---
+
+## Data <!-- SECTION: Data -->
+
+[DATA_RULES]
+
+<!--
+Sourced from: institutional ADRs on classification, PII, retention and encryption.
+
+Typical rules:
+- Classification and handling tiers (public / internal / confidential / PII)
+- Retention defaults per tier
+- PII boundaries and what may cross them
+- At-rest and in-transit encryption defaults
+-->
+
+---
+
+## Resilience defaults <!-- SECTION: Resilience defaults -->
+
+[RESILIENCE_RULES]
+
+<!--
+Sourced from: institutional ADRs on timeouts, retries, backoff and circuit breakers.
+
+Typical rules:
+- Timeout, retry, backoff defaults
+- Circuit breaker posture (per-dependency vs shared)
+- Bulkhead / concurrency limits
+- Fail-open vs fail-closed defaults per data classification
+-->
+
+---
+
+## Deviations <!-- SECTION: Deviations -->
+
+A service MAY deviate only via a recorded, dated, expiring exception.
+Never a silent local departure.
+
+| Service | Rule | Deviation | Rationale | Expiry | Record |
+|---------|------|-----------|-----------|-------:|--------|
+[DEVIATIONS_TABLE_ROWS or "| — | — | No deviations recorded. | — | — | — |"]
+
+<!--
+Row template:
+| [component-slug] | [rule reference e.g. ADR-018] | [what the service does differently] | [why the exception is necessary] | [YYYY-MM-DD] | [link to ADR or ticket] |
+
+Deviations without an expiry date are treated as expired on next audit.
+-->
+
+---
+
+## Return Path <!-- SECTION: Return Path -->
+
+Rules challenge process — see [`SYSTEM_RUNTIME_VIEW.md § Return Path`](SYSTEM_RUNTIME_VIEW.md#return-path).
+This document is amended only via a new institutional ADR that supersedes the
+prior rule; the amendment triggers regeneration of this file on the next
+`architecture-dev-handoff` run.
+
+---
+
+*Generated by `sa-skills:architecture-dev-handoff` on [GENERATION_DATE]*
+*Sources: institutional ADRs 001–100*

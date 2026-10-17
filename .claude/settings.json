@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(cp *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(python3 *)",
+      "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/*)",
+      "Read(.cache/sa-skills/**)",
+      "Write(.cache/sa-skills/**)",
+      "Agent(sa-delivery:generators:docs-export-generator)",
+      "Agent(sa-delivery:generators:ekonte-generator)",
+      "Agent(sa-delivery:generators:settei-generator)",
+      "Agent(sa-delivery:generators:seam-generator)",
+      "Agent(sa-delivery:generators:cutsheet-generator)",
+      "Agent(sa-delivery:generators:handoff-asset-generator)",
+      "Agent(sa-analysis:reviewers:architecture-analysis-agent)",
+      "Agent(sa-skills:reviewers:principle-quality-reviewer)"
+    ]
+  },
+  "env": {
+    "USE_BUILTIN_RIPGREP": "0"
+  }
+}

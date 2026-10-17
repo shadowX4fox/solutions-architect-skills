@@ -1,0 +1,72 @@
+{
+  "// MARKETPLACE REGISTRATION": "Register the shadowx4fox marketplace to install plugins",
+  "extraKnownMarketplaces": {
+    "shadowx4fox-solution-architect-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "shadowX4fox/solutions-architect-skills"
+      }
+    }
+  },
+
+  "// PLUGIN INSTALLATION": "Enable the solutions-architect-skills plugin",
+  "enabledPlugins": {
+    "sa-skills@shadowx4fox-solution-architect-marketplace": true,
+    "sa-records@shadowx4fox-solution-architect-marketplace": true,
+    "sa-requirements@shadowx4fox-solution-architect-marketplace": true,
+    "sa-analysis@shadowx4fox-solution-architect-marketplace": true,
+    "sa-delivery@shadowx4fox-solution-architect-marketplace": true,
+    "sa-visualization@shadowx4fox-solution-architect-marketplace": true
+  },
+
+  "// PERMISSIONS": "Required for the plugin's sub-agents — plugin agents cannot use permissionMode frontmatter",
+  "// BASH": "bun (covers ALL shell needs since v3.21.0 — date/mkdir/rm replaced by scripts/{today,ensure-dir,remove-glob}.ts; OS-agnostic, no POSIX-shell dependency). git clone + git -C .cache/sa-skills/adr-catalog: architecture-definition-record Workflows 6 and 9 clone the institutional ADR catalog from its git URL into that fixed project-local path and refresh it there; the path is fixed precisely so the grant stays this narrow — no other git invocation is pre-granted.",
+  "// FILE ACCESS": "Read/Write .cache/sa-skills/** (project-local staging — handoff payloads, icepanel JSON; OS-agnostic, no /tmp dependency), Read/Write visualizations/* (architecture-command-center scene JSON + HTML)",
+  "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
+  "// AGENTS": "Grants use the role-scoped form sa-skills:<role>:<agent> (generators / builders / reviewers / validators) — the flat sa-skills:<agent> form predates v3.28.7 and no longer matches what the skills spawn. universal architecture-explorer (Haiku navigator, v3.16.0) + 2 reviewers (architecture-analysis, principle-quality) + 5 Ekonte handoff generators + handoff-context-builder + docs export. An institution pack that adds agents documents its own grants.",
+  "permissions": {
+    "allow": [
+      "Bash(bun *)",
+      "Bash(rg *)",
+      "Bash(git clone *)",
+      "Bash(git -C .cache/sa-skills/adr-catalog *)",
+      "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
+      "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
+      "Read(**/skills/architecture-dev-handoff/SKILL.md)",
+      "Read(.cache/sa-skills/**)",
+      "Edit(.cache/sa-skills/**)",
+      "Agent(sa-analysis:reviewers:architecture-analysis-agent)",
+      "Agent(sa-skills:reviewers:principle-quality-reviewer)",
+      "Agent(sa-delivery:generators:ekonte-generator)",
+      "Agent(sa-delivery:generators:settei-generator)",
+      "Agent(sa-delivery:generators:seam-generator)",
+      "Agent(sa-skills:generators:segment-runner)",
+      "Agent(sa-records:generators:adr-writer)",
+      "Agent(sa-delivery:generators:cutsheet-generator)",
+      "Agent(sa-delivery:generators:handoff-asset-generator)",
+      "Agent(sa-delivery:generators:docs-export-generator)",
+      "Edit(exports/*)",
+      "Read(exports/*)",
+      "Edit(analysis/*)",
+      "Read(analysis/*)",
+      "Edit(visualizations/*)",
+      "Read(visualizations/*)",
+      "Edit(handoffs/**)",
+      "Read(handoffs/**)",
+      "Edit(handoffs/.manifest.json)",
+      "Read(handoffs/.manifest.json)",
+      "Edit(BIAN_ALIGNMENT.md)",
+      "Read(BIAN_ALIGNMENT.md)",
+      "WebSearch"
+    ]
+  },
+
+  "// HOOKS — 8.100.1+: the routing hook is declared by the plugin": "sa-skills ships hooks/hooks.json: a UserPromptSubmit hook that runs ${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.sh, which Claude Code resolves to the installed version on every load. When the project root contains ARCHITECTURE.md, a prompt the user typed gets the routing context; elsewhere it prints nothing. No hook belongs in this file: /setup removes any sa-skills routing hook it finds here (the absolute cache paths it wrote up to 8.100.0 went stale on every plugin update) — except on Windows without Git Bash, where hooks run in PowerShell and /setup writes the .ps1 wrapper by the marketplace clone's path.",
+
+  "// USAGE NOTES": [
+    "1. Copy this file to your project: cp .claude/settings.json.example /path/to/your/project/.claude/settings.json",
+    "2. Remove the comment fields (lines starting with '//')",
+    "3. Restart Claude Code to load the marketplace and plugin",
+    "4. Verify installation: /plugin list"
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "lens": "cost-hotspots",
+  "slug": "COST-HOTSPOTS",
+  "specFile": "COST_HOTSPOTS.md",
+  "title": {
+    "en": "Cost Hotspots Analysis",
+    "es": "Análisis de Puntos Calientes de Costo"
+  },
+  "typeLabel": "Cost Hotspots",
+  "vizTitle": "Pareto Cost Concentration",
+  "topN": 5,
+  "idForms": "P-01, Q-01, O-01",
+  "docs": [
+    "docs/09-operational-considerations.md",
+    "docs/06-technology-stack.md",
+    "docs/05-integration-points.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Pareto Cost Table",
+      "level": 3,
+      "title": {
+        "en": "Pareto Cost Table",
+        "es": "Tabla de Pareto de Costo"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component / Service",
+        "Monthly Cost",
+        "Data Quality",
+        "Vendor",
+        "Cumulative %",
+        "Category"
+      ],
+      "id": "^P-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every Q1 + Q2 item ranked by USD/month descending (the id is the rank); Cumulative % runs; Category = P / O / V; the spec's 80 % separator row is drawn by the renderer — never put it in the rows"
+    },
+    {
+      "key": "Qualitative Cost Mentions",
+      "level": 3,
+      "title": {
+        "en": "Qualitative Cost Mentions",
+        "es": "Menciones Cualitativas de Costo"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Cost Mention",
+        "Source",
+        "Recommended Action"
+      ],
+      "id": "^Q-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "Q3 items that could not be ranked"
+    },
+    {
+      "key": "Over-Provisioning Candidates",
+      "level": 3,
+      "title": {
+        "en": "Over-Provisioning Candidates",
+        "es": "Candidatos a Sobredimensionamiento"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Current Provisioning",
+        "Utilization (documented)",
+        "ADR",
+        "Estimated Monthly Waste"
+      ],
+      "id": "^O-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "O-classified components with evidence; [NOT DOCUMENTED] for utilization where absent"
+    },
+    {
+      "key": "Vendor Concentration Summary",
+      "level": 3,
+      "title": {
+        "en": "Vendor Concentration Summary",
+        "es": "Concentración por Proveedor"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Vendor / Provider",
+        "Monthly Cost",
+        "% of Total"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "documented USD/month by vendor, a final \"Total documented\" row at 100 %; a vendor above 60 % is the V flag"
+    },
+    {
+      "key": "ADR-Driven Cost Decisions",
+      "level": 3,
+      "title": {
+        "en": "ADR-Driven Cost Decisions",
+        "es": "Decisiones de Costo Registradas en ADR"
+      },
+      "kind": "inventory",
+      "columns": [
+        "ADR",
+        "Decision",
+        "Cost Impact",
+        "Annual Saving or Spend",
+        "Risk Introduced"
+      ],
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "cost figures an ADR cites explicitly"
+    },
+    {
+      "key": "Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Right-Sizing Recommendations",
+        "es": "Cinco Recomendaciones de Ajuste de Capacidad"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

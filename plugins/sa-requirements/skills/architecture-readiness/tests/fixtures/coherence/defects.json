@@ -1,0 +1,135 @@
+[
+  {
+    "id": "en-agentic",
+    "base": "clean-en.md",
+    "expect": "label-mismatch",
+    "find": "Order Desk gives clerks a screen to capture and validate orders,",
+    "replace": "Order Desk is an agentic order assistant: AI agents capture and validate orders,"
+  },
+  {
+    "id": "en-online-goal",
+    "base": "clean-en.md",
+    "expect": "objective-unserved",
+    "find": "3. Halve the calls customers make to ask for their order status by Q4 2027.\n",
+    "replace": "3. Halve the calls customers make to ask for their order status by Q4 2027.\n4. Grow online orders placed by customers to 30% of all orders by Q4 2027.\n"
+  },
+  {
+    "id": "en-no-call-metric",
+    "base": "clean-en.md",
+    "expect": "objective-unmeasured",
+    "find": "| Order status calls per week | 400 | 200 |\n",
+    "replace": ""
+  },
+  {
+    "id": "en-vague-rules",
+    "base": "clean-en.md",
+    "expect": "untestable",
+    "find": "1. The system checks that every product code exists in the product catalog.\n2. The system checks that each requested quantity does not exceed the stock the product catalog records for that product.\n3. The system reads the customer's invoices from the billing system and checks that none has status Unpaid with a due date more than 30 days past.\n\n**Alternative Flows**:\n- If a product code does not exist, the order keeps status Captured and the system shows \"Unknown product code\" next to the line.\n- If a quantity exceeds stock, the order keeps status Captured and the system shows the stock the product catalog records for that product next to the line.\n- If the customer has an overdue unpaid invoice, the order keeps status Captured and the system shows \"Customer has an overdue invoice\".\n\n",
+    "replace": "1. The system applies the applicable validation rules to the order.\n\n**Alternative Flows**:\n- If a rule fails, the system shows an appropriate message.\n\n"
+  },
+  {
+    "id": "en-newsletter",
+    "base": "clean-en.md",
+    "expect": "use-case-unanchored",
+    "find": "### Out of Scope <!-- SECTION: Out of Scope -->",
+    "replace": "### UC-06: Export customers to the newsletter\n\n**Description**: Marketing exports the customers who ordered this month to the newsletter tool.\n\n**Actors**: Marketing analyst\n\n**Trigger**: The analyst selects Export this month's customers.\n\n**Primary Flow**:\n1. The system writes a CSV file with each customer's name and email.\n\n**Postconditions**: The CSV file is downloaded by the analyst.\n\n**Acceptance Criteria**:\n- The file lists every customer with an order in the current month.\n\n### Out of Scope <!-- SECTION: Out of Scope -->"
+  },
+  {
+    "id": "es-omnicanal",
+    "base": "clean-es.md",
+    "expect": "label-mismatch",
+    "find": "Agenda de Citas permite a los pacientes reservar",
+    "replace": "Agenda de Citas es una solución omnicanal que permite a los pacientes reservar"
+  },
+  {
+    "id": "es-recordatorio-vago",
+    "base": "clean-es.md",
+    "expect": "untestable",
+    "find": "**Disparador**: Faltan 24 horas para una cita en estado Reservada.\n\n**Flujo principal**:\n1. El sistema envía un SMS al teléfono móvil del paciente con la fecha, la hora y un enlace para cancelar.",
+    "replace": "**Disparador**: Se acerca la fecha de una cita.\n\n**Flujo principal**:\n1. El sistema envía un recordatorio con la anticipación adecuada por el canal de preferencia del paciente."
+  },
+  {
+    "id": "es-sin-metrica-llamadas",
+    "base": "clean-es.md",
+    "expect": "objective-unmeasured",
+    "find": "| Llamadas diarias a recepción | 300 | 120 |\n",
+    "replace": ""
+  },
+  {
+    "id": "es-con-ia",
+    "base": "clean-es.md",
+    "expect": "label-mismatch",
+    "find": "y les envía un recordatorio por SMS.",
+    "replace": "y les envía un recordatorio por SMS, con un asistente de inteligencia artificial que guía la reserva."
+  },
+  {
+    "id": "en-no-confirmation-sms",
+    "base": "clean-en.md",
+    "expect": "trigger-unproduced",
+    "find": "5. The system sends the customer an order confirmation SMS with the order number and a link to the tracking page.\n",
+    "replace": ""
+  },
+  {
+    "id": "es-estado-atendida",
+    "base": "clean-es.md",
+    "expect": "state-unset",
+    "find": "con su estado: Reservada o Cancelada.",
+    "replace": "con su estado: Reservada, Cancelada o Atendida."
+  },
+  {
+    "id": "en-sms-out-of-scope",
+    "base": "clean-en.md",
+    "expect": "contradiction",
+    "find": "- Online ordering by customers.\n",
+    "replace": "- Online ordering by customers.\n- SMS messages to customers.\n"
+  },
+  {
+    "id": "en-no-customer-access",
+    "base": "clean-en.md",
+    "expect": "contradiction",
+    "find": "- The tracking page works on mobile phones without installing an app.\n",
+    "replace": "- The tracking page works on mobile phones without installing an app.\n- Customers cannot see the status of their orders online.\n"
+  },
+  {
+    "id": "es-cancelar-por-telefono",
+    "base": "clean-es.md",
+    "expect": "contradiction",
+    "find": "- La agenda del día se consulta desde los computadores de recepción.\n",
+    "replace": "- La agenda del día se consulta desde los computadores de recepción.\n- Las citas solo se cancelan llamando a recepción.\n"
+  },
+  {
+    "id": "es-cancelar-siempre",
+    "base": "clean-es.md",
+    "expect": "contradiction",
+    "find": "con la fecha, la hora y un enlace para cancelar.",
+    "replace": "con la fecha, la hora y un enlace para cancelar la cita en cualquier momento antes de su hora."
+  },
+  {
+    "id": "en-kpi-target",
+    "base": "clean-en.md",
+    "expect": "numbers-disagree",
+    "find": "| Average order capture time | 12 minutes | 4 minutes |",
+    "replace": "| Average order capture time | 12 minutes | 6 minutes |"
+  },
+  {
+    "id": "en-halve-wrong",
+    "base": "clean-en.md",
+    "expect": "numbers-disagree",
+    "find": "| Order status calls per week | 400 | 200 |",
+    "replace": "| Order status calls per week | 400 | 300 |"
+  },
+  {
+    "id": "es-meta-distinta",
+    "base": "clean-es.md",
+    "expect": "numbers-disagree",
+    "find": "| Inasistencias | 20% | 8% |",
+    "replace": "| Inasistencias | 20% | 12% |"
+  },
+  {
+    "id": "en-capture-slower",
+    "base": "clean-en.md",
+    "expect": "use-case-misses-target",
+    "find": "- An order with three products is captured in under 4 minutes.",
+    "replace": "- An order with three products is captured in under 6 minutes."
+  }
+]

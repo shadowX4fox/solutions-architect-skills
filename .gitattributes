@@ -1,0 +1,50 @@
+# Line endings are decided here, not by each contributor's core.autocrlf.
+#
+# Why this file exists: without it, correctness depends on local git config.
+# The repository's blobs are LF today only because contributors happen to run
+# core.autocrlf=true; a contributor with autocrlf=false on Windows would commit
+# CRLF, and a CRLF shebang (`#!/bin/bash\r`) makes Linux report
+# "bad interpreter: No such file or directory". These rules make the outcome
+# the same on every machine regardless of how git is configured locally.
+#
+# `text` means "store LF in the repository". `eol=` controls only what lands in
+# the working tree on checkout — so these rules do not rewrite existing blobs.
+
+* text=auto eol=lf
+
+# Shell scripts: LF everywhere, including a Windows working tree. A CR in the
+# shebang line breaks the script on Linux, macOS and WSL.
+*.sh   text eol=lf
+
+# Windows-only batch wrappers: CRLF in the working tree. cmd.exe tolerates LF
+# for simple scripts but is unreliable with it around labels, goto, and
+# parenthesized if-blocks — and these files never run anywhere else.
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# PowerShell parses LF correctly on both Windows PowerShell 5.1 and pwsh.
+*.ps1  text eol=lf
+
+# Binary — never convert. None are tracked today; these guard future additions,
+# because a single CRLF substitution inside a binary corrupts it silently.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.eot  binary
+*.docx binary
+*.xlsx binary
+
+# Notes carried over from the previous version of this file:
+# - No generated files: compliance-generator.md is hand-maintained, so nothing
+#   here is marked linguist-generated.
+# - agents/configs/*.json are the source of truth for domain-specific values.
+#   (The old note pointed at agents/base/configs/, a path that no longer exists.)

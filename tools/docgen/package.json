@@ -1,0 +1,19 @@
+{
+  "name": "sa-docgen",
+  "version": "1.0.0",
+  "description": "Solution Architecture Word (.docx) and PDF Document Generator",
+  "main": "generate-doc.js",
+  "dependencies": {
+    "docx": "^8.5.0"
+  },
+  "//optionalDependencies": "pdfmake backs the PDF path only. generate-doc.js requires render-pdf.js lazily, inside the `format === 'pdf'` branch, so an install without pdfmake keeps a fully working Word path and fails with a clear message only if --format pdf is asked for. Listing it as a plain dependency made that defensive code unreachable through the documented install.",
+  "optionalDependencies": {
+    "pdfmake": "^0.2.10",
+    "@mermaid-js/mermaid-cli": "^11.4.2"
+  },
+  "//mermaid": "@mermaid-js/mermaid-cli is an optionalDependency, not a plain one: it pulls Puppeteer, and a machine that cannot build it must still get a working Word path. `bun install` at the repo root puts the mmdc shim in node_modules/.bin, where render-mermaid.js finds it with no configuration. Bun does NOT run Puppeteer's post-install browser download, so a browser is the remaining piece — `bun scripts/setup-docgen.ts` reports both and prints what to do. Without mmdc every Mermaid block still exports, as monospace source.",
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

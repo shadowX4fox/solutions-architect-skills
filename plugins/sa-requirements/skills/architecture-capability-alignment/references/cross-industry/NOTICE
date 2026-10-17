@@ -1,0 +1,106 @@
+Turbo EA Capabilities — Reference Business Architecture Catalogue
+Copyright (c) 2026 Vincent Verdet — Turbo EA, and contributors.
+
+Dual-licensed: the catalogue content and documentation under CC BY 4.0 (see
+LICENSE); the tooling — scripts, schemas, site source, Python modules, Claude
+skills — under the MIT License (see LICENSE-CODE). The authoritative
+path-by-path mapping is in LICENSING.md.
+
+When you share or adapt the catalogue, CC BY 4.0 requires you to credit:
+
+    Turbo EA Capabilities by Vincent Verdet — Turbo EA,
+    https://github.com/vincentmakes/turbo-ea-capabilities, CC BY 4.0
+
+You must also indicate if you made changes. The same attribution string is
+served in dist/api/version.json for programmatic consumers.
+
+This product includes references to and attribution-based use of third-party
+frameworks. Inclusion of an attribution below does not imply endorsement by
+the framework owner. This NOTICE applies regardless of which side of the
+licence split a file falls on, and CC BY 4.0 § 3(a)(1) requires you to retain
+it when redistributing the catalogue.
+
+================================================================================
+Cross-Industry business processes — generated from BC + VS
+================================================================================
+
+The Cross-Industry business-process tree (`BP-1000`..`BP-1160` under
+`catalogue/processes/`, one BP1 per Cross-Industry value stream) is generated
+from this catalogue's own Business Capability (BC) and Value Stream (VS)
+artefacts via the `/generate-process` skill. BP1 names follow each value
+stream's bookend pattern (Order-to-Cash, Hire-to-Retire, Procure-to-Pay,
+Idea-to-Market, Plan-to-Inventory, Prospect-to-Customer, Opportunity-to-Order,
+Issue-to-Resolution, Record-to-Report, Acquire-to-Retire, Strategy-to-Execution,
+Risk-to-Mitigation, Audit-to-Action, ESG-to-Disclosure, Crisis-to-Recovery,
+Threat-to-Mitigation, Discover-to-Automate). Names, descriptions, structure,
+and `realizes_capability_ids` are authored in this repository; no third-party
+process taxonomy drives the Cross-Industry layer.
+
+================================================================================
+APQC Process Classification Framework® (PCF)
+================================================================================
+
+"Process Classification Framework®" and "PCF®" are registered trademarks of
+APQC (American Productivity & Quality Center, https://www.apqc.org/).
+
+APQC PCF is cited in this catalogue in two ways:
+
+  1. Industry-specific BP1 files (`BP-130`..`BP-490`, except `BP-370` which is
+     no longer used) anchor on APQC's industry PCFs (Banking, Healthcare
+     Provider, Health Insurance Payor, Life Sciences, Education, Utilities,
+     Aerospace and Defense, Retail, Automotive, Consumer Products, Petroleum
+     Upstream/Downstream) alongside other domain frameworks. Each affected
+     node carries a `framework_refs` entry that pins the corresponding APQC
+     PCF code (e.g. `{framework: APQC-PCF, external_id: "8.1", version:
+     "7.2.x"}`).
+
+  2. Cross-Industry BP nodes (`BP-1000`..`BP-1160`) may carry an APQC PCF
+     entry in `framework_refs[]` as a secondary cross-walk where the mapping
+     is structurally honest. APQC PCF does not drive Cross-Industry naming or
+     structure — that role belongs to the BC + VS catalogues in this
+     repository.
+
+For the canonical APQC PCF documentation, see:
+
+    https://www.apqc.org/process-frameworks
+
+================================================================================
+Other reference frameworks (cited but not redistributed)
+================================================================================
+
+Capability and process records may include `framework_refs` entries that
+cross-walk to additional industry and operational frameworks. None of these
+frameworks are redistributed by this project; entries cite their identifiers
+only, with attribution to the respective owners of each:
+
+  - BIAN — Banking Industry Architecture Network Service Landscape
+  - TM Forum eTOM / Frameworx — telecommunications operations map
+  - ITIL® — IT service management practices (AXELOS / PeopleCert)
+  - SCOR® / DCOR — Supply Chain / Design Chain Operations Reference (ASCM)
+  - COBIT® — IT governance framework (ISACA)
+  - SHRM-BoCK — SHRM Body of Competency and Knowledge
+  - ISO 55000 — asset management
+  - ISO 31000 — risk management
+  - COSO ERM — Committee of Sponsoring Organizations Enterprise Risk
+    Management framework
+  - TOGAF® — The Open Group Architecture Framework
+  - BIZBOK® — Business Architecture Body of Knowledge (Business Architecture
+    Guild®)
+  - ACORD — insurance reference architecture
+  - ICMM — International Council on Mining and Metals lifecycle stages
+
+The full machine-readable list of recognised frameworks is the `framework`
+enum in `schema/business-process.schema.json`.
+
+================================================================================
+This bundle
+================================================================================
+
+Bundled from https://github.com/vincentmakes/turbo-ea-capabilities at commit 6774bf2ac45a1718d74f05b8b55ed85574f29499: the Cross-Industry
+layer of the capability catalogue only (catalogue/_macro-capabilities.yaml and the
+Cross-Industry L1 files). Changes made: the YAML was converted to Markdown (one file
+per macro capability, an index llms-xi.txt and framework.json); macro capabilities are
+titled "Domain", L1 "Capability Group", L2 "Capability", and L3 capabilities are listed
+by name only. Names, ids and descriptions are unchanged apart from whitespace. Value
+streams, business processes, industry-specific capabilities and translations are not
+included. Converted by build-turbo-ea-corpus.js (sa-requirements).

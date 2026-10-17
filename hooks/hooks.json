@@ -1,0 +1,39 @@
+{
+  "description": "sa-skills hooks, declared by the plugin so the path follows the installed version. UserPromptSubmit: when the project has ARCHITECTURE.md, a prompt the user typed gets the skill routing table. PreToolUse / PostToolUse on Write | Edit (8.115.0): the prose contract on the new lines of an architecture document — a BLOCKING lexical rule denies the write under an enforcing project, length and form warnings come back as context in the same turn.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/prose-hook.sh\" pre",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/prose-hook.sh\" post",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

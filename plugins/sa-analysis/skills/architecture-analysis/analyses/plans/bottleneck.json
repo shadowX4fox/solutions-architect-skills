@@ -1,0 +1,177 @@
+{
+  "lens": "bottleneck",
+  "slug": "BOTTLENECK",
+  "specFile": "BOTTLENECK.md",
+  "title": {
+    "en": "Bottleneck Analysis",
+    "es": "Análisis de Cuellos de Botella"
+  },
+  "typeLabel": "Bottleneck",
+  "vizTitle": "Capacity Headroom by Component",
+  "topN": 5,
+  "idForms": "B1-01, B2-01, B3-01, B4-01",
+  "docs": [
+    "docs/08-scalability-and-performance.md",
+    "docs/05-integration-points.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Top Chokepoints",
+      "level": 3,
+      "title": {
+        "en": "Top Chokepoints",
+        "es": "Cuellos de Botella Principales"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Tier",
+        "Component",
+        "Max RPS / Limit",
+        "Current HPA",
+        "Fan-in Count",
+        "Bottleneck Reason",
+        "ADR Reference"
+      ],
+      "id": "^B[12]-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "B1 then B2, within a tier by fan-in descending; ids B1-01, B1-02 … / B2-01 … sequential within tier; [NOT DOCUMENTED] where the limit or HPA is absent"
+    },
+    {
+      "key": "Scaling Risk Components",
+      "level": 3,
+      "title": {
+        "en": "Scaling Risk Components",
+        "es": "Componentes con Riesgo de Escalado"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Tier",
+        "Component",
+        "Scale Blocker",
+        "Fan-in Count",
+        "Recommendation"
+      ],
+      "id": "^B[34]-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "B3 (scaling risk) and B4 (fan-in ≥ 3 without backpressure); ids B3-01 … / B4-01 … sequential within tier"
+    },
+    {
+      "key": "Capacity Headroom Summary",
+      "level": 3,
+      "title": {
+        "en": "Capacity Headroom Summary",
+        "es": "Resumen de Holgura de Capacidad"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Component",
+        "Current Load (est.)",
+        "Max Capacity",
+        "Headroom %",
+        "Risk Level"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one row per component with documented figures; Headroom % = (max − current) / max × 100; headroom < 30 % is a near-term risk; [NOT DOCUMENTED] where absent"
+    },
+    {
+      "key": "Capacity Headroom",
+      "level": 3,
+      "title": {
+        "en": "Capacity Headroom by Component",
+        "es": "Holgura de Capacidad por Componente"
+      },
+      "kind": "chart",
+      "from": "Capacity Headroom Summary",
+      "chart": {
+        "label": "Component",
+        "value": "Headroom %",
+        "unit": "%",
+        "title": "Capacity Headroom by Component (estimated)"
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "drawn by the renderer from Capacity Headroom Summary; a non-numeric value prints as its text"
+    },
+    {
+      "key": "Fan-in Convergence Points",
+      "level": 3,
+      "title": {
+        "en": "Fan-in Convergence Points",
+        "es": "Puntos de Convergencia de Fan-in"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Upstream Callers (count)",
+        "Backpressure Mechanism",
+        "Risk"
+      ],
+      "id": "^B4-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "the B4 components again, keyed by their existing B4 id — the same finding, listed twice, never renumbered",
+      "repeatsIds": true
+    },
+    {
+      "key": "ADR-Driven Bottlenecks",
+      "level": 3,
+      "title": {
+        "en": "ADR-Driven Bottlenecks",
+        "es": "Cuellos de Botella Introducidos por ADR"
+      },
+      "kind": "inventory",
+      "columns": [
+        "ADR",
+        "Decision",
+        "Bottleneck Introduced",
+        "Current Risk"
+      ],
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "bottlenecks an architectural decision introduced (cache removed, replicas reduced)"
+    },
+    {
+      "key": "Top 5 Scaling Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Scaling Recommendations",
+        "es": "Top 5 Recomendaciones de Escalado"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto Resumen"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

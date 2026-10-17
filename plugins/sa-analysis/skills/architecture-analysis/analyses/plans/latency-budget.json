@@ -1,0 +1,113 @@
+{
+  "lens": "latency-budget",
+  "slug": "LATENCY-BUDGET",
+  "specFile": "LATENCY_BUDGET.md",
+  "title": {
+    "en": "Latency Budget Analysis",
+    "es": "Análisis de Presupuesto de Latencia"
+  },
+  "typeLabel": "Latency Budget",
+  "vizTitle": "Per-Flow Latency Budget",
+  "topN": 5,
+  "idForms": "OB-01, TL-01",
+  "docs": [
+    "docs/08-scalability-and-performance.md",
+    "docs/05-integration-points.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Per-Flow Budget Breakdown",
+      "level": 3,
+      "title": {
+        "en": "Per-Flow Budget Breakdown",
+        "es": "Desglose de Presupuesto por Flujo"
+      },
+      "kind": "blocks",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "one block per user-facing flow: title \"Flow: <name> — SLO: <p95 ms>\", a table with columns Hop # | Component | Role | p95 (ms) | % of SLO | Status (Within Budget / Tight / Over Budget / Untracked) and a TOTAL footer row, and the ASCII budget bar as text"
+    },
+    {
+      "key": "Hops Over Budget",
+      "level": 3,
+      "title": {
+        "en": "Hops Over Budget",
+        "es": "Saltos Fuera de Presupuesto"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Flow",
+        "Hop #",
+        "Component",
+        "p95 (ms)",
+        "Proportional Share (ms)",
+        "Overage (ms)",
+        "Severity"
+      ],
+      "id": "^OB-\\d{2,3}$",
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every hop classified Over Budget across all flows; OB-01 … sequential; Severity HIGH (> 50 % of share) / MEDIUM (20–50 %) / LOW (< 20 %)"
+    },
+    {
+      "key": "Tail-Latency Hotspots",
+      "level": 3,
+      "title": {
+        "en": "Tail-Latency Hotspots",
+        "es": "Puntos Calientes de Latencia de Cola"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Flow(s)",
+        "p95 (ms)",
+        "p99 (ms)",
+        "p99/p95 Ratio",
+        "Risk"
+      ],
+      "id": "^TL-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "hops with both p95 and p99 documented and p99/p95 > 3×; Risk HIGH (> 5×) / MEDIUM (3–5×)"
+    },
+    {
+      "key": "Top 5 Remediation Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Latency Recommendations",
+        "es": "Top 5 Recomendaciones de Latencia"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto Resumido"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

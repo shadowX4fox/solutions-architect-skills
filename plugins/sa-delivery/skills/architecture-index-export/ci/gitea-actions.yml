@@ -1,0 +1,47 @@
+# Architecture index — Gitea Actions. Copy to .gitea/workflows/architecture-index.yml in the architecture's repository.
+# Repository variables: SA_INDEX_PROJECT_KEY, SA_INDEX_SERVER, SA_INDEX_MCP_URL (optional). Secret: SA_INDEX_TOKEN.
+# Actions without a host (actions/checkout, oven-sh/setup-bun) are fetched from github.com unless the instance sets
+# [actions].DEFAULT_ACTIONS_URL; on a runner without internet, mirror them and write `uses: https://<mirror>/owner/repo@ref`.
+# The runner label (ubuntu-latest) is the instance's; use the one its runners register.
+name: Architecture index
+
+on:
+  push:
+    tags: ['architecture-v*']        # phase 1: a release — chunks and ledger
+    branches: [main]
+    paths: ['handoffs/**']           # phase 2: the regenerated kit committed — the same version with its build packs
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: Publish a draft (the architecture differs from its release tag)
+        type: boolean
+        default: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Export, check and publish the index bundle
+        run: |
+          git clone --quiet --depth 1 --branch "$SA_PLUGIN_REF" "$SA_PLUGIN_REPO" "$RUNNER_TEMP/sa-ci"
+          SA_SKILLS_DIR="$RUNNER_TEMP/sa-ci" bash "$RUNNER_TEMP/sa-ci/plugins/sa-delivery/skills/architecture-index-export/ci/publish-index.sh" .
+        env:
+          SA_PLUGIN_REF: v8.149.0
+          SA_PLUGIN_REPO: https://github.com/shadowx4fox/solutions-architect-skills.git   # or the instance's mirror
+          SA_INDEX_PROJECT_KEY: ${{ vars.SA_INDEX_PROJECT_KEY }}
+          SA_INDEX_SERVER: ${{ vars.SA_INDEX_SERVER }}
+          SA_INDEX_MCP_URL: ${{ vars.SA_INDEX_MCP_URL }}
+          SA_INDEX_TOKEN: ${{ secrets.SA_INDEX_TOKEN }}
+          SA_INDEX_ALLOW_DRAFT: ${{ inputs.draft || 'false' }}
+          SA_INDEX_ARTIFACT: ${{ runner.temp }}/out/architecture-index.tgz
+      - uses: actions/upload-artifact@v3   # v3: the artifact protocol Gitea serves
+        with:
+          name: architecture-index
+          path: ${{ runner.temp }}/out/architecture-index.tgz
+          if-no-files-found: ignore

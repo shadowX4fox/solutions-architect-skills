@@ -1,0 +1,9 @@
+[data-skin="corporate"] .card { border-radius: 12px; box-shadow: 0 1px 2px color-mix(in srgb, var(--shadow-ui) 6%, transparent), 0 6px 18px color-mix(in srgb, var(--shadow-ui) 7%, transparent); }
+[data-skin="corporate"] .card h2 { color: var(--ink); font-weight: 700; letter-spacing: .08em; }
+[data-skin="corporate"] .card h2::before { content: ""; display: inline-block; width: 4px; height: 1.05em; margin-right: 8px; vertical-align: -2px; border-radius: 2px; background: var(--brand); }
+[data-skin="corporate"] .top h1 { font-weight: 800; letter-spacing: 0; }
+[data-skin="corporate"] .lbl.actor { color: color-mix(in srgb, var(--block-actor) 55%, var(--ink)); }   /* the actor's own colour, darkened to read on white */
+[data-skin="corporate"] .top::after { content: ""; position: absolute; left: 20px; bottom: 2px; width: min(160px, 30vw); height: 4px; border-radius: 2px; background: var(--brand); pointer-events: none; }
+[data-skin="corporate"] :is(.hud, .hudcam, #dock-bar) { clip-path: none; border-radius: 12px; border-right: 1px solid var(--hud-edge); box-shadow: 0 1px 2px color-mix(in srgb, var(--shadow-ui) 6%, transparent), 0 6px 18px color-mix(in srgb, var(--shadow-ui) 7%, transparent); }
+[data-skin="corporate"] .hud .sw, [data-skin="corporate"] .hud .sw button { border-radius: 8px; clip-path: none; }
+[data-skin="corporate"] :is(.seg button, .fseg button, .ucbar button, .famall, .views button)[aria-pressed="true"] { border-radius: 8px; }

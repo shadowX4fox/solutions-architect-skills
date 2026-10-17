@@ -1,0 +1,30 @@
+{
+  "id": "CROSS-INDUSTRY",
+  "name": "Cross-Industry Capability Map",
+  "industry": "cross-industry",
+  "source": "Turbo EA Capabilities",
+  "source_url": "https://github.com/vincentmakes/turbo-ea-capabilities",
+  "commit": "6774bf2ac45a1718d74f05b8b55ed85574f29499",
+  "license": "CC BY 4.0",
+  "attribution": "Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities, CC BY 4.0",
+  "index": "llms-xi.txt",
+  "files": "^XI-\\d+-.*\\.md$",
+  "levels": {
+    "area": "Domain",
+    "domain": "Capability Group",
+    "unit": "Capability"
+  },
+  "headings": {
+    "area": "Domain",
+    "domain": "Capability Group",
+    "unit": "Capability"
+  },
+  "id_label": "Id",
+  "noun": "business",
+  "report": "CAPABILITY_ALIGNMENT.md",
+  "counts": {
+    "areas": 9,
+    "domains": 41,
+    "units": 223
+  }
+}

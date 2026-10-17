@@ -1,0 +1,92 @@
+<!--
+  Coupling viz — chord diagram (fan-in/fan-out between components).
+  Expected data shape:
+    data.coupling = {
+      components: [ { name: "api-gateway", fanin: 3, fanout: 5,
+                      instability: 0.625, klass: ["K1"] } ],
+      matrix: [[0, 1, 0, ...], ...]   // N×N, matrix[i][j] = 1 if i depends on j
+    }
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !data.coupling) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const comps = data.coupling.components || [];
+  const mat = data.coupling.matrix || [];
+  if (comps.length < 2 || mat.length !== comps.length) {
+    root.append("div").attr("class", "viz-empty")
+      .text("Insufficient dependency edges to render a chord diagram.");
+    return;
+  }
+
+  const W = 720, H = 520;
+  const outerR = Math.min(W, H) / 2 - 110;
+  const innerR = outerR - 18;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${W / 2},${H / 2})`);
+
+  const chord = d3.chordDirected().padAngle(0.04).sortSubgroups(d3.descending)(mat);
+
+  const klassColor = (c) => {
+    if (c.klass && c.klass.includes("K3")) return "var(--sev-critical)";
+    if (c.klass && c.klass.includes("K1")) return "var(--sev-high)";
+    if (c.klass && c.klass.includes("K2")) return "var(--sev-medium)";
+    if (c.klass && c.klass.includes("K4")) return "var(--sev-info)";
+    return "var(--accent)";
+  };
+
+  // Arcs (one per component)
+  const arc = d3.arc().innerRadius(innerR).outerRadius(outerR);
+  g.append("g").selectAll("path").data(chord.groups).join("path")
+    .attr("d", arc)
+    .attr("fill", d => klassColor(comps[d.index]))
+    .attr("fill-opacity", 0.9)
+    .attr("stroke", "#fff")
+    .on("mousemove", (e, d) => {
+      const c = comps[d.index];
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${c.name}</strong><br>fan-in: ${c.fanin} · fan-out: ${c.fanout}<br>I = ${c.instability.toFixed(2)}<br>${(c.klass || []).join(", ") || "—"}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  // Ribbons (dependencies)
+  const ribbon = d3.ribbonArrow().radius(innerR - 1);
+  g.append("g").attr("fill-opacity", 0.55).selectAll("path").data(chord).join("path")
+    .attr("d", ribbon)
+    .attr("fill", d => klassColor(comps[d.source.index]))
+    .attr("stroke", "#fff").attr("stroke-width", 0.3);
+
+  // Labels
+  g.append("g").selectAll("text").data(chord.groups).join("text")
+    .each(d => { d.angle = (d.startAngle + d.endAngle) / 2; })
+    .attr("dy", "0.35em")
+    .attr("transform", d => `
+      rotate(${(d.angle * 180 / Math.PI - 90)})
+      translate(${outerR + 8})
+      ${d.angle > Math.PI ? "rotate(180)" : ""}
+    `)
+    .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
+    .attr("fill", "var(--text-primary)")
+    .style("font-size", "11px").style("font-weight", "600")
+    .text(d => {
+      const name = comps[d.index].name;
+      return name.length > 18 ? name.slice(0, 16) + "…" : name;
+    });
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  [
+    ["K1 Critical hub (fan-in ≥ 5)", "var(--sev-high)"],
+    ["K2 Volatile leaf (fan-out ≥ 5)", "var(--sev-medium)"],
+    ["K3 God object", "var(--sev-critical)"],
+    ["K4 In a cycle", "var(--sev-info)"],
+    ["Other",         "var(--accent)"],
+  ].forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("color", "var(--text-muted)").text("Ribbons = directed dependency (A → B)");
+})();

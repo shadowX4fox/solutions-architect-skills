@@ -1,0 +1,116 @@
+<!--
+  Bottleneck viz — horizontal capacity-headroom bar chart.
+  Expected data shape:
+    data.headroom = [
+      { component: "PostgreSQL Primary", headroom_pct: 32, tier: "B1"|"B2"|"B3"|"B4"|"adequate"|"undocumented",
+        max_capacity: "...", current_load: "...", note: "Near limit" }
+    ]
+  Components with no headroom data should still appear with headroom_pct: null
+  and tier: "undocumented" to keep them visible.
+-->
+(function () {
+  if (typeof d3 === "undefined" || !data || !Array.isArray(data.headroom)) return;
+  const root = d3.select("#viz");
+  root.html("");
+  const tooltip = d3.select("#tooltip");
+
+  const rows = data.headroom.slice().sort((a, b) => {
+    if (a.headroom_pct == null) return 1;
+    if (b.headroom_pct == null) return -1;
+    return a.headroom_pct - b.headroom_pct;
+  });
+
+  const rowH = 30, M = { top: 30, right: 90, bottom: 50, left: 220 };
+  const innerW = 760 - M.left - M.right;
+  const innerH = rows.length * rowH;
+  const W = innerW + M.left + M.right;
+  const H = innerH + M.top + M.bottom;
+
+  const svg = root.append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("width", "100%").style("height", "auto");
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleLinear().domain([0, 100]).range([0, innerW]);
+
+  // Danger band 0-20%
+  g.append("rect").attr("x", 0).attr("y", 0)
+    .attr("width", x(20)).attr("height", innerH)
+    .attr("fill", "var(--sev-critical)").attr("fill-opacity", 0.08);
+
+  // Grid
+  g.append("g").attr("class", "grid").selectAll("line")
+    .data(x.ticks(5)).join("line")
+    .attr("x1", d => x(d)).attr("x2", d => x(d))
+    .attr("y1", 0).attr("y2", innerH);
+
+  // Y axis (component labels)
+  rows.forEach((d, i) => {
+    g.append("text")
+      .attr("x", -8).attr("y", i * rowH + rowH / 2 + 4)
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--text-secondary)")
+      .style("font-size", "12px")
+      .text(d.component.length > 28 ? d.component.slice(0, 26) + "…" : d.component);
+  });
+
+  const tierColor = {
+    B1:  "var(--sev-critical)",
+    B2:  "var(--sev-high)",
+    B3:  "var(--sev-medium)",
+    B4:  "var(--sev-medium)",
+    adequate: "var(--sev-pass)",
+    undocumented: "var(--text-muted)",
+  };
+
+  // Bars
+  const bar = g.selectAll(".bar-row").data(rows).join("g")
+    .attr("class", "bar-row")
+    .attr("transform", (d, i) => `translate(0,${i * rowH + 4})`);
+
+  bar.append("rect")
+    .attr("x", 0).attr("y", 0)
+    .attr("width", d => d.headroom_pct == null ? innerW : x(d.headroom_pct))
+    .attr("height", rowH - 8)
+    .attr("fill", d => d.headroom_pct == null ? "url(#hatch)" : tierColor[d.tier] || "var(--text-muted)")
+    .attr("fill-opacity", d => d.headroom_pct == null ? 0.4 : 0.85)
+    .style("cursor", "pointer")
+    .on("mousemove", (e, d) => {
+      tooltip.style("opacity", 1)
+        .style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px")
+        .html(`<strong>${d.component}</strong><br>tier: ${d.tier}<br>${d.note || ""}`);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0));
+
+  bar.append("text")
+    .attr("x", d => d.headroom_pct == null ? 6 : x(d.headroom_pct) + 6)
+    .attr("y", (rowH - 8) / 2 + 4)
+    .attr("fill", "var(--text-primary)")
+    .style("font-size", "11px").style("font-weight", "600")
+    .text(d => d.headroom_pct == null ? "[NOT DOCUMENTED]" : `${d.headroom_pct}%`);
+
+  // Hatched fill for undocumented
+  const defs = svg.append("defs");
+  defs.append("pattern").attr("id", "hatch")
+    .attr("width", 6).attr("height", 6).attr("patternUnits", "userSpaceOnUse").attr("patternTransform", "rotate(45)")
+    .append("rect").attr("width", 2).attr("height", 6).attr("fill", "var(--text-muted)");
+
+  // X axis
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => d + "%"));
+  g.append("text").attr("class", "axis-label")
+    .attr("x", innerW / 2).attr("y", innerH + 36).attr("text-anchor", "middle")
+    .text("CAPACITY HEADROOM →");
+
+  const legend = root.append("div").attr("class", "viz-legend");
+  [
+    ["B1 Critical chokepoint", tierColor.B1],
+    ["B2 High-risk",           tierColor.B2],
+    ["B3/B4 Scaling risk",     tierColor.B3],
+    ["Adequate",               tierColor.adequate],
+    ["Undocumented",           tierColor.undocumented],
+  ].forEach(([label, color]) => legend.append("span")
+    .html(`<span class="swatch" style="background:${color}"></span>${label}`));
+  legend.append("span").style("color", "var(--text-muted)").text("Red band = headroom < 20%");
+})();

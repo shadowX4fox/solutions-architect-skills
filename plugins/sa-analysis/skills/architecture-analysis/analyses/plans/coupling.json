@@ -1,0 +1,198 @@
+{
+  "lens": "coupling",
+  "slug": "COUPLING",
+  "specFile": "COUPLING.md",
+  "title": {
+    "en": "Coupling / Fan-out Analysis",
+    "es": "Análisis de Acoplamiento"
+  },
+  "typeLabel": "Coupling / Fan-out",
+  "vizTitle": "Component Coupling Chord Diagram",
+  "topN": 5,
+  "idForms": "K1-01, K2-01, K3-01, K4-01",
+  "docs": [
+    "docs/05-integration-points.md"
+  ],
+  "sections": [
+    {
+      "key": "Executive Summary",
+      "level": 2,
+      "title": {
+        "en": "Executive Summary",
+        "es": "Resumen Ejecutivo"
+      },
+      "kind": "summary"
+    },
+    {
+      "key": "Edge Direction Convention",
+      "level": 3,
+      "title": {
+        "en": "Edge Direction Convention",
+        "es": "Convención de Dirección de Arista"
+      },
+      "kind": "text",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "one paragraph: an edge A → B means A depends on B; which sources supplied the edges"
+    },
+    {
+      "key": "Coupling Metrics",
+      "level": 3,
+      "title": {
+        "en": "Coupling Metrics Table",
+        "es": "Métricas de Acoplamiento"
+      },
+      "kind": "inventory",
+      "columns": [
+        "Component",
+        "Scope",
+        "Fan-in (Ca)",
+        "Fan-out (Ce)",
+        "Instability (I)",
+        "Classification"
+      ],
+      "omitWhenEmpty": false,
+      "htmlOmit": false,
+      "note": "every component (internal and external), the payload's derived metrics verbatim; Scope = internal / external; Classification = the K-flags or —"
+    },
+    {
+      "key": "Critical Hubs",
+      "level": 3,
+      "title": {
+        "en": "Critical Hubs (K1)",
+        "es": "Concentradores Críticos (K1)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Fan-in",
+        "Instability (I)",
+        "Dependents (list)"
+      ],
+      "id": "^K1-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "fan-in ≥ 5; K1-01 … sequential"
+    },
+    {
+      "key": "Volatile Leaves",
+      "level": 3,
+      "title": {
+        "en": "Volatile Leaves (K2)",
+        "es": "Hojas Volátiles (K2)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Fan-out",
+        "Instability (I)",
+        "Dependencies (list)"
+      ],
+      "id": "^K2-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "fan-out ≥ 5; K2-01 … sequential"
+    },
+    {
+      "key": "God Objects",
+      "level": 3,
+      "title": {
+        "en": "God Objects (K3)",
+        "es": "Objetos Dios (K3)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Component",
+        "Fan-in",
+        "Fan-out",
+        "Instability (I)",
+        "Risk Narrative"
+      ],
+      "id": "^K3-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "fan-in ≥ 3 and fan-out ≥ 3; K3-01 … sequential; one-sentence risk narrative"
+    },
+    {
+      "key": "Cyclical Dependencies",
+      "level": 3,
+      "title": {
+        "en": "Cyclical Dependencies (K4)",
+        "es": "Dependencias Cíclicas (K4)"
+      },
+      "kind": "table",
+      "columns": [
+        "#",
+        "Cycle Path",
+        "Coupling Type",
+        "Source Citations"
+      ],
+      "id": "^K4-\\d{2,3}$",
+      "omitWhenEmpty": true,
+      "htmlOmit": false,
+      "note": "one row per directed cycle (A → B → C → A), K4-01 … sequential; Coupling Type = Synchronous call / Event / Shared data store / Callback"
+    },
+    {
+      "key": "Cycle Diagrams",
+      "level": 3,
+      "title": {
+        "en": "Cycle Diagrams",
+        "es": "Diagramas de Ciclos"
+      },
+      "kind": "blocks",
+      "omitWhenEmpty": true,
+      "htmlOmit": true,
+      "note": "one `flowchart TB` Mermaid block per K4 cycle"
+    },
+    {
+      "key": "Fan-in / Fan-out Distribution",
+      "level": 3,
+      "title": {
+        "en": "Fan-in / Fan-out Distribution",
+        "es": "Distribución de Fan-in / Fan-out"
+      },
+      "kind": "chart",
+      "from": "Coupling Metrics",
+      "chart": {
+        "label": "Component",
+        "value": "Fan-in (Ca)",
+        "unit": "",
+        "title": "Fan-in Distribution"
+      },
+      "omitWhenEmpty": false,
+      "htmlOmit": true,
+      "note": "drawn by the renderer from Coupling Metrics — one bar per component by fan-in (the spec draws a count histogram; the renderer draws per-component bars)"
+    },
+    {
+      "key": "Top Decoupling Recommendations",
+      "level": 2,
+      "title": {
+        "en": "Top 5 Decoupling Recommendations",
+        "es": "Top 5 Recomendaciones de Desacoplamiento"
+      },
+      "kind": "recommendations",
+      "note": "ordered as the spec asks; every entry names an existing finding id and cites its source file"
+    },
+    {
+      "key": "Summary Verdict",
+      "level": 2,
+      "title": {
+        "en": "Summary Verdict",
+        "es": "Veredicto"
+      },
+      "kind": "verdict"
+    },
+    {
+      "key": "Documentation Gaps",
+      "level": 2,
+      "title": {
+        "en": "Documentation Gaps",
+        "es": "Brechas de Documentación"
+      },
+      "kind": "gaps"
+    }
+  ]
+}

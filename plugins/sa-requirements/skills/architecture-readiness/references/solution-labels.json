@@ -1,0 +1,54 @@
+{
+  "schema": "solution-labels/1",
+  "note": "The solution labels a PO Spec may claim, each with the capability a use case must exercise for the claim to hold. `find` only locates the claim (English and Spanish) — the judge decides, per use case, whether the capability is exercised. A label no use case exercises is a mismatch: drop the label, or add the use cases that need it. Generic by construction: a label here is a kind of solution, never a product or a project's own word. Extend the list when a new kind of claim appears; never add an organization's vocabulary.",
+  "labels": [
+    {
+      "id": "agentic",
+      "name": "Agentic / AI agents",
+      "find": "\\bagentic\\b|\\bag[ée]ntic[oa]s?\\b|\\bAI agents?\\b|\\bagentes? (?:de IA|inteligentes?|aut[óo]nomos?)\\b|\\bautonomous agents?\\b|\\bagente aut[óo]nomo\\b",
+      "capability": "the system itself pursues a goal by planning several steps and acting on other systems through tools — calling their APIs, updating records, sending transactions — without a person approving each step. Answering questions or holding a conversation is not it; neither is a fixed workflow a person triggers step by step."
+    },
+    {
+      "id": "ai-model",
+      "name": "AI-powered / machine learning",
+      "find": "\\bAI[- ]powered\\b|\\bartificial intelligence\\b|\\bmachine learning\\b|\\bML models?\\b|\\binteligencia artificial\\b|\\baprendizaje autom[áa]tico\\b|\\bmodelos? predictivos?\\b|\\bpredictive models?\\b|\\bcon IA\\b|\\bimpulsad[oa] por IA\\b",
+      "capability": "a decision or an output in the flow is produced by a model learned from data — a prediction, a classification, a recommendation, generated text — rather than by fixed rules a person wrote."
+    },
+    {
+      "id": "real-time",
+      "name": "Real-time",
+      "find": "\\breal[- ]time\\b|\\btiempo real\\b|\\binstant[áa]ne[oa]s?\\b|\\binstantaneous(?:ly)?\\b",
+      "capability": "a result reaches its user within seconds of the event that produced it, with no batch, scheduled or overnight step in between."
+    },
+    {
+      "id": "omnichannel",
+      "name": "Omnichannel",
+      "find": "\\bomni[- ]?channel\\b|\\bomnicanal(?:idad)?\\b|\\bmulti[- ]?channel\\b|\\bmulticanal\\b",
+      "capability": "the same journey can be started in one channel and continued or completed in another, with at least two channels named in the use case."
+    },
+    {
+      "id": "self-service",
+      "name": "Self-service",
+      "find": "\\bself[- ]service\\b|\\bautoservicio\\b|\\bautogesti[óo]n\\b",
+      "capability": "the end user completes the whole journey without any staff member acting in it."
+    },
+    {
+      "id": "personalized",
+      "name": "Personalized",
+      "find": "\\bpersonali[sz]ed\\b|\\bpersonali[sz]ation\\b|\\bpersonalizad[oa]s?\\b|\\bpersonalizaci[óo]n\\b|\\btailored\\b",
+      "capability": "what the system shows or does differs per user, based on that user's own data or behaviour."
+    },
+    {
+      "id": "automated",
+      "name": "Fully automated / straight-through",
+      "find": "\\bfully automated\\b|\\bend[- ]to[- ]end automation\\b|\\bstraight[- ]through\\b|\\bzero[- ]touch\\b|\\btotalmente automatizad[oa]s?\\b|\\bsin intervenci[óo]n (?:humana|manual)\\b|\\bautomatizaci[óo]n (?:total|de punta a punta)\\b",
+      "capability": "the process runs from its trigger to its outcome with no manual step by staff."
+    },
+    {
+      "id": "offline",
+      "name": "Offline-capable",
+      "find": "\\boffline(?:[- ]first)?\\b|\\bsin conexi[óo]n\\b|\\bfuera de l[íi]nea\\b",
+      "capability": "the user can complete the journey while the device has no network connection, and the result is reconciled when the connection returns."
+    }
+  ]
+}

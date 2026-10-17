@@ -1,0 +1,4 @@
+{
+ "note": "check-generic.ts — a hash per (file, reference-project name) present before the check; never names a project. Entries only leave.",
+ "hashes": []
+}
