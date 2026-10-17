@@ -143,6 +143,8 @@ Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client — VS
 | "Build this service." | `get_build_pack`, `get_build_instructions`, `get_build_part` |
 | "What changed since I built it?" | `what_changed` |
 
+![Claude Code asking Alia from a console about the Order Service](docs/images/command-center/mcp-console.webp)
+
 CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and Azure Pipelines examples); while you
 write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
 

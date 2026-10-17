@@ -353,6 +353,10 @@ claude mcp add --transport http alia https://alia-mcp.internal/mcp --header "Aut
 
 ## The tools
 
+![Claude Code asking Alia from a console: three MCP tool calls, then the Order Service — what it owns, who calls it, its latency budget, and the gaps the architecture leaves open](images/command-center/mcp-console.webp)
+
+*A real `claude -p` session against a local Alia server holding the synthetic Order Desk draft.*
+
 | Tool | Answers from | Ask, for example |
 |---|---|---|
 | `list_projects` | store | "Which architectures and versions does the server hold?" |
