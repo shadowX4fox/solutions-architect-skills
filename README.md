@@ -84,7 +84,14 @@ Installing `sa-skills` brings the other five plugins (`sa-records`, `sa-requirem
 /sa-skills:setup
 ```
 
-It grants the permissions the skills need, installs the export toolchain and checks the judge. Then just ask:
+It grants the permissions the skills need, sets up the judge and checks the export toolchain. Word / PDF export and the
+handoff kit's contract checks also need the plugin's npm packages, installed once:
+
+```bash
+cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)" && bun install
+```
+
+Then just ask:
 
 ```text
 Elicit the requirements for a parcel-tracking service   → architecture-readiness
@@ -181,6 +188,7 @@ Fifteen skills in six categories. **Standalone** means the skill starts without 
 | [Installation](docs/INSTALLATION.md) | Install, permissions, upgrades, Bun per OS, context7, VS Code |
 | [Quick start](docs/QUICK_START.md) | A first architecture, end to end |
 | [Workflow guide](docs/WORKFLOW_GUIDE.md) | Every phase and what it produces |
+| [Alia](docs/ALIA.md) | The 3D command center and the architecture MCP server |
 | [Institution packs](docs/INSTITUTION_PACKS.md) | Adding an organization's standards, frameworks, types and skins |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common problems and fixes |
 | [Design notes](docs/DESIGN_NOTES.md) | Why the rules are what they are — with the measurements |

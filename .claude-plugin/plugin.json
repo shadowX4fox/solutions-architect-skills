@@ -8,7 +8,7 @@
     "sa-delivery",
     "sa-visualization"
   ],
-  "description": "Architecture documentation for Claude Code — creates and maintains ARCHITECTURE.md and docs/, its component index, explorer headers and release lifecycle. 4 skills; installs its dependencies sa-records (ADRs, TDRs), sa-requirements (PO Spec, BIAN alignment), sa-analysis (risk analyses, traceability), sa-delivery (handoff kit, Word export, IcePanel sync, MCP index) and sa-visualization (the 3D command center) — 15 skills in the suite. Compliance contracts and organizational blueprints come with an institution pack.",
+  "description": "Architecture documentation for Claude Code — creates and maintains ARCHITECTURE.md and docs/, its component index, explorer headers and release lifecycle, with every gate as code. Installs sa-records (ADRs, TDRs), sa-requirements (PO Spec, capability alignment), sa-analysis (risk analyses, traceability), sa-delivery (handoff kit, Word export, IcePanel sync, MCP index) and sa-visualization (the 3D command center with Alia) — 15 skills in the suite. An organization adds its own standards through an institution pack.",
   "author": {
     "name": "shadowX4fox",
     "email": "your-email@example.com",

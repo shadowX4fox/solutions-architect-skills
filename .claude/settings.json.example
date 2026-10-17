@@ -23,7 +23,7 @@
   "// BASH": "bun (covers ALL shell needs since v3.21.0 — date/mkdir/rm replaced by scripts/{today,ensure-dir,remove-glob}.ts; OS-agnostic, no POSIX-shell dependency). git clone + git -C .cache/sa-skills/adr-catalog: architecture-definition-record Workflows 6 and 9 clone the institutional ADR catalog from its git URL into that fixed project-local path and refresh it there; the path is fixed precisely so the grant stays this narrow — no other git invocation is pre-granted.",
   "// FILE ACCESS": "Read/Write .cache/sa-skills/** (project-local staging — handoff payloads, icepanel JSON; OS-agnostic, no /tmp dependency), Read/Write visualizations/* (architecture-command-center scene JSON + HTML)",
   "// PLUGIN READ": "Skills read templates and guides from the plugin marketplace cache",
-  "// AGENTS": "Grants use the role-scoped form sa-skills:<role>:<agent> (generators / builders / reviewers / validators) — the flat sa-skills:<agent> form predates v3.28.7 and no longer matches what the skills spawn. universal architecture-explorer (Haiku navigator, v3.16.0) + 2 reviewers (architecture-analysis, principle-quality) + 5 Ekonte handoff generators + handoff-context-builder + docs export. An institution pack that adds agents documents its own grants.",
+  "// AGENTS": "Grants use the form <plugin>:<role>:<agent>. Without a grant, every sub-agent call prompts: the section and segment writers, the ADR writer, the Layer 2 principle reviewer, the worksheet judge (each judge worksheet), the acceptance-test writer, the analysis agent and the handoff and export generators.",
   "permissions": {
     "allow": [
       "Bash(bun *)",
@@ -37,6 +37,8 @@
       "Edit(.cache/sa-skills/**)",
       "Agent(sa-analysis:reviewers:architecture-analysis-agent)",
       "Agent(sa-skills:reviewers:principle-quality-reviewer)",
+      "Agent(sa-skills:reviewers:worksheet-judge)",
+      "Agent(sa-requirements:generators:acceptance-test-writer)",
       "Agent(sa-delivery:generators:ekonte-generator)",
       "Agent(sa-delivery:generators:settei-generator)",
       "Agent(sa-delivery:generators:seam-generator)",
@@ -57,6 +59,8 @@
       "Read(handoffs/.manifest.json)",
       "Edit(BIAN_ALIGNMENT.md)",
       "Read(BIAN_ALIGNMENT.md)",
+      "Edit(CAPABILITY_ALIGNMENT.md)",
+      "Read(CAPABILITY_ALIGNMENT.md)",
       "WebSearch"
     ]
   },

@@ -1,1163 +1,449 @@
-# Complete Workflow Guide
+# Workflow Guide
 
-Comprehensive guide to the four-phase architecture documentation workflow using Solutions Architect Skills.
+The full lifecycle of an architecture with Solutions Architect Skills: what each phase needs, what it produces, which
+checks hold it, and the phrases that start it. For a guided first run, read [QUICK_START.md](QUICK_START.md) first.
 
-> **Prerequisites**: Ensure the `sa-skills` plugin is installed from the `shadowx4fox-solution-architect-marketplace` marketplace. It declares `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery` and `sa-visualization` as dependencies, so a fresh install brings all six plugins. See [Installation Guide](INSTALLATION.md).
+Examples use an invented parcel-tracking service, **ParcelPath** (`Tracking API`, `Scan Ingest`, `Shipment Store`,
+`Notification Service`, the external `Carrier Network`).
 
-This guide covers the complete four-phase architecture workflow provided by this Claude Code plugin.
+**Contents:** [Lifecycle](#the-lifecycle-at-a-glance) · [Requirements](#phase-1--requirements) ·
+[Capability alignment](#phase-15--capability-alignment) · [Architecture](#phase-2--the-architecture) ·
+[Gates](#the-gates-as-code) · [ADRs and TDRs](#decisions-and-debt--adrs-and-tdrs) ·
+[Release](#versioning-and-release) · [Governance](#governance--analysis-and-traceability) · [Delivery](#delivery) ·
+[Visualization](#visualization) · [Compliance](#phase-3--compliance) · [Language](#documentation-language) ·
+[Trigger phrases](#trigger-phrases)
 
-For background on Claude Code plugins, see [official documentation](https://docs.anthropic.com/claude/docs/claude-code-plugins).
+## The lifecycle at a glance
 
----
-
-## Table of Contents
-
-1. [Workflow Overview](#workflow-overview)
-2. [Phase 1: Architecture Readiness](#phase-1-architecture-readiness)
-3. [Phase 2: Architecture Documentation](#phase-2-architecture-documentation)
-4. [Phase 3: Compliance Documentation](#phase-3-compliance-documentation)
-5. [Phase 4: Development Handoff](#phase-4-development-handoff)
-6. [Phase 5: Architecture Index](#phase-5-architecture-index)
-7. [Integration Patterns](#integration-patterns)
-8. [Best Practices](#best-practices)
-9. [Advanced Usage](#advanced-usage)
-
----
-
-## Workflow Overview
-
-The Solutions Architect Skills workflow follows a sequential four-phase approach, each owned by a different role:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Phase 1: Business Requirements (Product Owner)             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ architecture-readiness skill (sa-requirements)      │   │
-│  │ Output: PRODUCT_OWNER_SPEC.md                       │   │
-│  └─────────────────────────────────────────────────────┘   │
-└──────────────────────┬──────────────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Phase 2: Technical Architecture (Architecture Team)        │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ architecture-docs skill (sa-skills)                 │   │
-│  │ Output: ARCHITECTURE.md                             │   │
-│  └─────────────────────────────────────────────────────┘   │
-└──────────────────────┬──────────────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Phase 3: Compliance Documentation (Compliance Team)        │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ the compliance plugin of an institution pack,       │   │
-│  │ when the organization has one                       │   │
-│  └─────────────────────────────────────────────────────┘   │
-└──────────────────────┬──────────────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Phase 4: Development Handoff (Dev Team)                    │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ architecture-dev-handoff skill (sa-delivery)        │   │
-│  │ Output: handoffs/ (handoff kit + assets)             │   │
-│  └─────────────────────────────────────────────────────┘   │
-└──────────────────────┬──────────────────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Phase 5: Architecture Index (CI → MCP server → IDEs)       │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ architecture-index-export skill (sa-delivery)       │   │
-│  │ Output: sa-index/1 bundle — chunks, ledger, packs   │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+  PO["PO Spec<br/>architecture-readiness"] --> CAP["Capability alignment<br/>optional framework"]
+  CAP --> DOCS["ARCHITECTURE.md + docs/<br/>architecture-docs"]
+  DOCS <--> REC["adr/ + tdr/<br/>sa-records"]
+  DOCS --> LIFE["Release + tag<br/>architecture-lifecycle"]
+  DOCS --> GOV["analysis/ + traceability<br/>sa-analysis"]
+  GOV --> KIT["handoffs/<br/>architecture-dev-handoff"]
+  KIT --> IDX["MCP bundle<br/>architecture-index-export"]
+  DOCS --> CC["3D model<br/>architecture-command-center"]
+  LIFE -.->|"PO Spec sync"| PO
 ```
 
-> **Gate between Phase 1 and Phase 2**: `architecture-capability-alignment` (`sa-requirements`) aligns the PO Spec to the project's
-> declared capability framework (`BIAN_ALIGNMENT.md` or `CAPABILITY_ALIGNMENT.md`) and is **mandatory** before a new
-> `ARCHITECTURE.md` is created, once a framework is declared.
-> See Phase 2 for the full list of creation gates.
-
-### Key Principles
-
-1. **Sequential Flow:** Each phase builds on the previous phase's output
-2. **Role Separation:** Clear ownership (PO → Architects → Compliance → Dev; Compliance when the organization has a compliance plugin)
-3. **Single Source of Truth:** ARCHITECTURE.md drives every downstream artifact
-4. **Traceability:** Full audit trail from requirements → architecture → handoff
-5. **Automation:** Minimize manual work through skill automation
-
----
-
-## Phase 1: Architecture Readiness
-
-**Owner:** Product Owner
-**Skill:** `architecture-readiness` (plugin `sa-requirements` — installable alone for a Product Owner with no architecture yet)
-**Output:** `PRODUCT_OWNER_SPEC.md`
-
-### Purpose
-
-Document business requirements before technical architecture design. This phase ensures:
-- Clear business justification
-- Defined user needs
-- Measurable success criteria
-- Identified constraints and risks
-
-### When to Use
-
-- **New Projects:** Before architecture design begins
-- **Feature Additions:** Major new functionality requiring architecture changes
-- **System Redesign:** Modernization or re-platforming efforts
-- **Stakeholder Alignment:** Clarifying business context for technical teams
-
-### Workflow Steps
-
-#### Step 1: Activate Skill
-
-```
-/skill sa-requirements:architecture-readiness
-```
-
-#### Step 2: Create New PO Spec
-
-The skill guides you through 8 sections:
-
-##### 1. Business Context
-**Purpose:** Why this project exists
-
-**What to document:**
-- Problem statement
-- Business drivers (cost reduction, revenue growth, compliance, etc.)
-- Current state vs. desired state
-- Strategic alignment
-
-**Example:**
-```markdown
-## 1. Business Context
-
-### Problem Statement
-Manual job scheduling across 15 servers is error-prone and time-consuming.
-Operations team spends 20 hours/week managing cron jobs.
-
-### Business Drivers
-- Reduce operational overhead by 80% (16 hours/week savings)
-- Improve reliability from 95% to 99.9%
-- Enable self-service for dev teams
-- Compliance requirement: audit trail for all job executions
-```
-
-##### 2. Stakeholders & Users
-**Purpose:** Who will use the system and who is affected by it
-
-**What to document:**
-- Primary users (roles, responsibilities, technical level)
-- Secondary users
-- Administrators
-- Stakeholders
-- User personas (demographics, goals, pain points)
-
-**Example:**
-```markdown
-## 2. Stakeholders & Users
-
-### Primary: DevOps Engineer
-- **Role:** Manages batch jobs for applications
-- **Technical Level:** High (Python, shell scripting, CI/CD)
-- **Daily Tasks:** Schedule jobs, monitor executions, debug failures
-- **Pain Points:** No centralized view, manual cron management
-
-### Secondary: Application Developer
-- **Role:** Creates batch scripts for data processing
-- **Technical Level:** Medium (knows Python, unfamiliar with ops)
-- **Needs:** Simple job submission, execution status visibility
-```
-
-##### 3. Use Cases
-**Purpose:** What users need to accomplish
-
-**What to document:**
-- Primary use cases (most important workflows)
-- Secondary use cases
-- Edge cases or exceptions
-
-**Example:**
-```markdown
-## 3. Use Cases
-
-### UC-1: Schedule Recurring Job
-**Actor:** DevOps Engineer
-**Description:** Schedule a Python script to run daily at 2 AM
-**Frequency:** 10-15 times/day
-**Success Criteria:** Job runs within 1 minute of scheduled time
-
-### UC-2: Monitor Job Execution
-**Actor:** Application Developer
-**Description:** View status of submitted jobs (running, success, failed)
-**Frequency:** 50+ times/day
-**Success Criteria:** Real-time status updates, <3 second page load
-```
-
-##### 4. User Stories
-**Purpose:** Specific requirements in user voice
-
-**Format:** As a [role], I want [capability], so that [benefit]
-
-**Example:**
-```markdown
-## 4. User Stories
-
-### Must Have (Priority 1)
-- As a DevOps Engineer, I want to schedule jobs using cron syntax, so that I can migrate existing cron jobs easily
-- As an Application Developer, I want to see job execution history, so that I can debug failures
-- As a System Administrator, I want audit logs of all job submissions, so that I can meet compliance requirements
-
-### Should Have (Priority 2)
-- As a DevOps Engineer, I want to chain jobs with dependencies, so that I can orchestrate complex workflows
-- As a Developer, I want email notifications on job failures, so that I can respond quickly to issues
-```
-
-##### 5. Success Criteria
-**Purpose:** How to measure project success
-
-**What to document:**
-- Quantitative metrics (numbers, percentages, time)
-- Qualitative goals
-- Acceptance criteria
-
-**Example:**
-```markdown
-## 5. Success Criteria
-
-### Quantitative
-- **Reliability:** 99.9% job execution success rate
-- **Performance:** Job submission < 100ms, status query < 500ms
-- **Adoption:** 80% of teams migrated within 3 months
-- **Operational Savings:** Reduce manual work from 20h/week to 4h/week
-
-### Qualitative
-- Users rate system 4+ out of 5 for ease of use
-- Zero compliance audit findings related to job scheduling
-- Positive feedback from operations team on reduced cognitive load
-```
-
-##### 6. Constraints & Assumptions
-**Purpose:** Known limitations and dependencies
-
-**What to document:**
-- Technical constraints (must use existing infrastructure)
-- Business constraints (budget, timeline, resources)
-- Regulatory constraints (compliance, security)
-- Assumptions about users, systems, data
-
-**Example:**
-```markdown
-## 6. Constraints & Assumptions
-
-### Technical Constraints
-- Must integrate with existing Active Directory for authentication
-- Jobs must run on existing Kubernetes cluster (AKS)
-- Python 3.9+ runtime only (no support for Python 2.x)
-
-### Business Constraints
-- Budget: $50K for development, $10K/year operational costs
-- Timeline: MVP in 3 months, full rollout in 6 months
-- Team: 2 developers, 1 QA, part-time architect
-
-### Assumptions
-- Users are familiar with cron syntax
-- Job scripts are idempotent and can be retried
-- Average job duration < 1 hour
-```
-
-##### 7. Risks
-**Purpose:** Potential issues to mitigate
-
-**What to document:**
-- Technical risks (complexity, dependencies)
-- Business risks (adoption, ROI)
-- Operational risks (support, scalability)
-- Mitigation strategies
-
-**Example:**
-```markdown
-## 7. Risks
-
-### Risk 1: Low Adoption
-- **Probability:** Medium
-- **Impact:** High (ROI depends on adoption)
-- **Mitigation:** Onboarding support, migration automation, success stories
-
-### Risk 2: Kubernetes Cluster Capacity
-- **Probability:** Low
-- **Impact:** High (job execution failures)
-- **Mitigation:** Capacity planning, auto-scaling, priority queues
-```
-
-##### 8. Next Steps
-**Purpose:** Handoff to architecture team
-
-**What to document:**
-- Ready for architecture phase (Yes/No)
-- Open questions for architects
-- Required decisions or approvals
-
-**Example:**
-```markdown
-## 8. Next Steps
-
-### Readiness Assessment
-**Status:** Ready for architecture handoff (Score: 8.5/10)
-
-### Open Questions for Architecture Team
-1. Should we use off-the-shelf job scheduler (Airflow, Temporal) or build custom?
-2. How to handle long-running jobs (>1 hour)?
-3. Storage strategy for job execution logs?
-
-### Required Approvals
-- Budget approval: Pending (finance review)
-- Security review: Scheduled for next week
-```
-
-#### Step 3: Review Readiness Score
-
-The skill calculates a weighted score based on section completeness:
-
-| Section | Weight (pts) | Priority |
-|---------|-------------|----------|
-| 4. Use Cases | 2.5 | HIGH |
-| 7. Business Constraints | 2.0 | HIGH |
-| 3. Business Objectives | 1.5 | HIGH |
-| 1. Business Context | 1.0 | MEDIUM |
-| 6. UX Requirements | 1.0 | MEDIUM |
-| 8. Success Metrics & KPIs | 1.0 | MEDIUM |
-| 2. Stakeholders & Users | 0.5 | LOW |
-| 5. User Stories | 0.5 | LOW |
-| **Total** | **10.0** | |
-
-**Interpretation:**
-- **9.0-10.0:** Excellent - Ready for architecture
-- **7.5-8.9:** Good - Ready with minor clarifications
-- **6.0-7.4:** Fair - Needs more detail in some areas
-- **<6.0:** Poor - Not ready for architecture handoff
-
-#### Step 4: Iterate if Needed
-
-If score < 7.5, revisit sections with low scores and add more detail.
-
-### Output: PRODUCT_OWNER_SPEC.md
-
-**File size:** Typically 1,500-2,500 lines
-**Format:** Markdown with 8 clearly labeled sections
-**Usage:** Input to Phase 2 (architecture-docs skill)
-
----
-
-## Phase 2: Architecture Documentation
-
-**Owner:** Architecture Team
-**Skill:** `architecture-docs`
-**Input:** `PRODUCT_OWNER_SPEC.md` (optional but recommended)
-**Output:** `ARCHITECTURE.md` + `docs/` (the 13 sections) + `adr/`
-
-### Purpose
-
-Translate business requirements into technical architecture design. This phase ensures:
-- Clear technical design decisions
-- Documented components and integration points
-- Technology stack alignment with standards
-- Architecture Decision Records (ADRs) for key choices
-
-### When to Use
-
-- **New Systems:** Initial architecture documentation
-- **Major Changes:** Significant redesign or re-architecture
-- **Maintenance:** Keep documentation current
-- **Architecture Reviews:** Prepare for governance reviews
-
-### Selecting Architecture Type
-
-**Critical Decision**: Choose the architecture type that determines Section 4 and Section 5 structure.
-
-**5 Supported Architecture Types**:
-
-#### 1. ENTERPRISE (5-Layer Enterprise, default)
-**Best for**: Large enterprise platforms, complex integrations
-**Structure**: Channels → Experience → Process → Domain Services → Systems of Record & Data (cross-cutting: Integration, Identity & Security, Observability, Shared Platform Services)
-**When to use**: 5+ external integrations, enterprise platforms; also the default when in doubt
-**Template**: `templates/SECTION_4_ENTERPRISE.md`
-
-#### 2. 3-Tier (Classic Web Application)
-**Best for**: Web applications, REST APIs, standard CRUD systems
-**Structure**: Presentation → Application/Business Logic → Data
-**When to use**: Straightforward web apps, familiar patterns, low-to-moderate complexity
-**Template**: `templates/SECTION_4_3TIER.md`
-
-#### 3. Microservices (Cloud-Native)
-**Best for**: Cloud-native distributed systems, event-driven architectures
-**Structure**: API Gateway, Service Mesh, Event Bus, independent services
-**When to use**: Independent scaling, multiple teams, polyglot environments, fault isolation
-**Template**: `templates/SECTION_4_MICROSERVICES.md`
-
-#### 4. N-Layer (DDD/Clean Architecture)
-**Best for**: Domain-Driven Design, Hexagonal Architecture, testable systems
-**Structure**: Flexible (4-Layer DDD, 5-Layer Extended, Clean Architecture concentric)
-**When to use**: Complex domain logic, dependency inversion, framework-free core
-**Template**: `templates/SECTION_4_NLAYER_PATTERNS.md`
-
-#### 5. BIAN (Full BIAN v14.0.0)
-**Best for**: Banking systems built on the BIAN Service Landscape
-**Structure**: Channels → BIAN Business Scenarios → BIAN Business Capabilities → BIAN Service Domains → Core Systems
-**When to use**: Full BIAN certification, service domains as the unit of design
-**Template**: `templates/SECTION_4_BIAN.md`
-
-**Decision Tree**:
-```
-Does your system have 5+ external integrations AND regulatory compliance?
-  → YES: ENTERPRISE Architecture
-
-Is your system a distributed cloud-native application with independent services?
-  → YES: Microservices Architecture
-
-Are you implementing Domain-Driven Design or Clean Architecture?
-  → YES: N-Layer Architecture
-
-Is your system a standard web application or API?
-  → YES: 3-Tier Architecture
-
-Is it a banking system that must certify against BIAN?
-  → YES: BIAN Architecture
-```
-
-**Detailed Guide**: See `ARCHITECTURE_TYPE_SELECTOR.md` for comparison matrix and selection criteria.
-
----
-
-### Workflow Steps
-
-#### Step 1: Activate Skill
-
-```
-/skill sa-skills:architecture-docs
-```
-
-#### Step 2: Create ARCHITECTURE.md
-
-Creation runs the four gates (language, PO Spec, capability alignment, HLD), asks for the
-architecture type and the systems, then writes the 13 sections — one file each under
-`docs/`, with `ARCHITECTURE.md` as the versioned index:
-
-| # | Section | File |
-|---|---------|------|
-| 1–2 | Executive Summary, System Overview | `docs/01-system-overview.md` |
-| 3 | Architecture Principles | `docs/02-architecture-principles.md` |
-| 4 | Architecture Layers + the four standard diagrams | `docs/03-architecture-layers.md` |
-| 5 | Components (C4 L1 systems, L2 containers) | `docs/components/` |
-| 6 | Data Flow Patterns | `docs/04-data-flow-patterns.md` |
-| 7 | Integration Points | `docs/05-integration-points.md` |
-| 8 | Technology Stack | `docs/06-technology-stack.md` |
-| 9 | Security Architecture | `docs/07-security-architecture.md` |
-| 10 | Scalability & Performance | `docs/08-scalability-and-performance.md` |
-| 11 | Operational Considerations | `docs/09-operational-considerations.md` |
-| 12 | ADRs | `adr/` |
-| 13 | Risks and Technical Debt | `docs/10-risks-and-technical-debt.md` |
-
-Every file opens with an `<!-- EXPLORER_HEADER -->` block, and every structural heading carries
-an English anchor (`<!-- SECTION: … -->`) so the gates read the document in either language.
-Creation stops at four checkpoints; `continue the architecture` resumes it in a fresh session.
-
-The examples below show what each section holds.
-
-##### Section 1: Executive Summary
-
-**Purpose:** High-level overview for executives and stakeholders
-
-**Content:**
-- 3-5 sentence summary
-- Key metrics (SLA, capacity, scale)
-- Design Drivers (Value Delivery %, Scale, Impacts)
-- Architecture diagram (high-level)
-
-**Example:**
-```markdown
-## Section 1: Executive Summary
-
-Job Scheduling Platform enables 500 users to automate batch jobs with 99.9% reliability.
-System handles 450 transactions/second (job submissions + status queries) with 3-second
-latency target. Architecture follows microservices pattern deployed on Azure Kubernetes
-Service with PostgreSQL (jobs) and Redis (caching).
-
-### Design Drivers
-- **Value Delivery:** 85% (high business value)
-- **Scale:** 450 TPS peak, 38M transactions/month
-- **Impacts:** 4 core components, 7 technologies, 3 external integrations
-```
-
-##### Section 2: System Overview
-
-**Purpose:** Context and scope
-
-**Content:**
-- Problem statement
-- Solution approach
-- In-scope / out-of-scope
-- Stakeholders
-- Success criteria (from PO Spec)
-
-##### Section 3: Architecture Principles
-
-**Purpose:** Guiding principles for all design decisions
-
-**Content (9 mandatory + 1 optional):**
-
-1. **Separation of Concerns** - Modular design, single responsibility
-2. **High Availability** - 99.9%+ uptime, redundancy
-3. **Scalability First** - Horizontal scaling, stateless design
-4. **Security by Design** - Zero trust, encryption, least privilege
-5. **Observability** - Metrics, logs, traces (3 pillars)
-6. **Resilience** - Circuit breakers, retries, graceful degradation
-7. **Simplicity** - Favor simplicity over cleverness
-8. **Cloud-Native** - Container-first, managed services
-9. **Open Standards** - Industry standards over proprietary
-10. **Event-Driven** (Optional) - Asynchronous communication
-
-**Format for each:**
-```markdown
-### 3.1 Separation of Concerns
-**Definition:** Each component has single, well-defined responsibility
-**Rationale:** Improves maintainability, testability, team autonomy
-**Implementation:**
-- Scheduler Service: Only handles job scheduling logic
-- Executor Service: Only executes jobs
-- No cross-concern dependencies
-**Trade-offs:** More services to manage vs simpler components
-```
-
-##### Section 4: Architecture Layers
-
-**Purpose:** Define the layered architecture model with visual diagrams
-
-**Content (Architecture-Type Specific)**:
-- **ENTERPRISE**: 5 layers (Channels → Experience → Process → Domain Services → Systems of Record & Data) plus cross-cutting capabilities
-- **3-Tier**: 3 tiers (Presentation → Application/Business Logic → Data)
-- **Microservices**: Service mesh topology with infrastructure components
-- **N-Layer**: Custom layers with dependency rules (4-Layer DDD, 5-Layer Extended, or Clean Architecture)
-
-**Interactive Mermaid Diagram**:
-- Color-coded components (Blue=Orchestrators, Orange=Workers, Green=Query, Purple=Events, Teal=Domain, Gray=Gateway)
-- Data flow visualization (solid arrows=synchronous REST/gRPC, dashed arrows=asynchronous events)
-- Security protocols (OAuth 2.0 + JWT, mTLS, TLS 1.2+, SASL)
-- Renders automatically in GitHub/GitLab
-
-**Templates**:
-- ENTERPRISE: `templates/SECTION_4_ENTERPRISE.md`
-- 3-Tier: `templates/SECTION_4_3TIER.md`
-- Microservices: `templates/SECTION_4_MICROSERVICES.md`
-- N-Layer: `templates/SECTION_4_NLAYER_PATTERNS.md`
-
-**Comprehensive Guide**: See `MERMAID_DIAGRAMS_GUIDE.md` for diagram creation, color schemes, and update instructions.
-
-##### Section 5: System Components
-
-**Purpose:** Detailed component design
-
-**Content (for each component):**
-- Name and purpose
-- Responsibilities
-- Interfaces (APIs, events)
-- Technology stack
-- Data model
-- Scalability approach
-
-**Example:**
-```markdown
-### 5.1 Scheduler Service
-
-**Purpose:** Manage job schedules and trigger executions
-
-**Responsibilities:**
-- Accept job submissions via REST API
-- Store job definitions in PostgreSQL
-- Evaluate cron expressions every minute
-- Trigger Executor Service for due jobs
-- Track job execution status
-
-**Interfaces:**
-- REST API: `/api/v1/jobs` (CRUD operations)
-- Event Bus: Publishes `JobTriggered` events
-
-**Technology:**
-- Java 17, Spring Boot 3.2
-- PostgreSQL 15 for job storage
-- Redis for distributed locks
-
-**Scalability:**
-- Horizontal scaling: 3+ replicas behind load balancer
-- Stateless design enables easy scaling
-- Leader election for cron evaluation (only one active)
-```
-
-##### Section 6: Data Flow
-
-**Purpose:** How data moves through the system
-
-**Content:**
-- Data flow diagrams
-- Key workflows (happy path + error scenarios)
-- Data transformations
-- Message formats
-
-##### Section 7: Integration Points
-
-**Purpose:** External dependencies and APIs
-
-**Content (for each integration):**
-- External system name and purpose
-- Integration pattern (REST, SOAP, messaging, batch)
-- Authentication method
-- Data exchanged
-- SLA/dependencies
-- Error handling
-
-**Example:**
-```markdown
-### 7.1 Active Directory Integration
-
-**Purpose:** User authentication and authorization
-
-**Integration Pattern:** LDAP + REST API
-- LDAP: User authentication (port 636, LDAPS)
-- REST API: Group membership queries (Graph API)
-
-**Authentication:** Service account with read-only permissions
-
-**Data Exchange:**
-- Input: Username, password
-- Output: User DN, group memberships
-
-**Dependencies:**
-- Availability: 99.95% (AD SLA)
-- Latency: <200ms for auth, <500ms for group queries
-
-**Error Handling:**
-- Cache group memberships for 1 hour
-- Fallback to local admin account for emergencies
-```
-
-##### Section 8: Technology Stack
-
-**Purpose:** All technologies used
-
-**Content:**
-- Languages and versions
-- Frameworks and versions
-- Databases
-- Infrastructure (containers, orchestration)
-- Tools (build, test, monitoring)
-- Libraries (with versions)
-
-**Example:**
-```markdown
-## Section 8: Technology Stack
-
-### 8.1 Backend
-- **Language:** Java 17 (LTS)
-- **Framework:** Spring Boot 3.2.0
-- **Build Tool:** Maven 3.9.5
-- **Testing:** JUnit 5.10, Mockito 5.5, Spring Test
-- **Code Quality:** SonarQube 10.2
-
-### 8.2 Data Layer
-- **Relational Database:** PostgreSQL 15.4 (Azure Database for PostgreSQL)
-- **Caching:** Redis 7.2 (Azure Cache for Redis)
-- **Migration Tool:** Flyway 9.22
-
-### 8.3 Infrastructure
-- **Container Runtime:** Docker 24.0+
-- **Orchestration:** Azure Kubernetes Service (AKS) 1.28
-- **Deployment:** Helm 3.13
-- **Service Mesh:** Istio 1.19 (optional for advanced scenarios)
-
-### 8.4 Observability
-- **Metrics:** Prometheus 2.47, Grafana 10.1
-- **Logging:** Azure Log Analytics
-- **APM:** Application Insights
-- **Distributed Tracing:** OpenTelemetry
-
-### 8.5 CI/CD
-- **Source Control:** Git, GitHub
-- **CI Platform:** GitHub Actions
-- **CD Platform:** Azure DevOps Pipelines
-- **Artifact Repository:** Azure Container Registry
-
-### 8.6 Libraries
-1. Spring Boot Starter Web 3.2.0
-2. Spring Boot Starter Data JPA 3.2.0
-3. Spring Boot Starter Security 3.2.0
-4. Spring Boot Starter Actuator 3.2.0
-5. Micrometer Prometheus 1.12
-6. Lombok 1.18.30
-7. Apache Commons Lang 3.13
-8. Jackson 2.15
-9. HikariCP 5.0.1 (connection pooling)
-10. Quartz Scheduler 2.3.2
-```
-
-**Note:** Section 8 is read by the Tech Debt/EOL, Vendor Lock-in and Cost Hotspots analyses; give every technology a version.
-
-##### Section 9: Security
-
-**Purpose:** Security architecture and controls
-
-**Content:**
-- Authentication methods
-- Authorization model (RBAC, ABAC)
-- Encryption (at rest, in transit)
-- API security
-- Secrets management
-- Compliance requirements
-
-##### Section 10: Performance
-
-**Purpose:** Performance requirements and capacity planning
-
-**Content:**
-- SLAs (availability, latency, throughput)
-- Capacity plan (current and projected)
-- Scalability approach
-- Performance testing results
-
-**Example:**
-```markdown
-## Section 10: Performance Requirements
-
-### 10.1 Service Level Agreement (SLA)
-
-**Availability:** 99.9% uptime
-- **Downtime Allowance:** 43.2 minutes/month
-- **Measurement:** Rolling 30-day window
-- **Exclusions:** Planned maintenance windows (notified 7 days in advance)
-
-**Latency:**
-- **Job Submission:** p95 < 100ms, p99 < 250ms
-- **Status Query:** p95 < 50ms, p99 < 100ms
-- **Job Execution Trigger:** <1 minute from scheduled time
-
-**Throughput:**
-- **Design Capacity:** 450 TPS (transactions per second)
-  - Job submissions: 100 TPS
-  - Status queries: 300 TPS
-  - Job completions: 50 TPS
-- **Peak Capacity:** 1,000 TPS (2.2x design capacity)
-
-### 10.2 Capacity Planning
-
-**Current State:**
-- Users: 500
-- Jobs/day: 10,000 (avg 115 per hour)
-- Peak: 500 jobs/hour (8-9 AM)
-
-**Projected Growth:**
-- Year 1: 750 users, 15,000 jobs/day
-- Year 2: 1,000 users, 25,000 jobs/day
-- Year 3: 1,500 users, 40,000 jobs/day
-
-**Scalability Approach:**
-- Horizontal pod autoscaling (HPA) based on CPU/memory
-- Scale scheduler from 3 to 10 replicas
-- Database read replicas for query scaling
-```
-
-##### Section 11: Operations
-
-**Purpose:** How to run and maintain the system
-
-**Content:**
-- Monitoring and alerting
-- Logging strategy
-- Backup and recovery (RTO/RPO)
-- Disaster recovery
-- Incident management
-- Capacity planning
-
-##### Section 12: Architecture Decision Records (ADRs)
-
-**Purpose:** Document key architecture decisions
-
-**Content:** Individual ADR documents for each major decision
-
-**Writer:** the ADR files under `adr/` are written by `sa-records:architecture-definition-record` and the Technical Debt Records under `tdr/` by `sa-records:technical-debt-records` — both ship in the `sa-records` plugin.
-
-**ADR Template:**
-```markdown
-### ADR-001: Use PostgreSQL for Job Storage
-
-**Status:** Accepted
-**Date:** 2025-11-15
-**Deciders:** Architecture Team, DevOps Team
-
-**Context:**
-Need persistent storage for job definitions, schedules, and execution history.
-Require ACID guarantees for job state transitions.
-
-**Decision:**
-Use PostgreSQL 15 as primary data store for all job-related data.
-
-**Alternatives Considered:**
-1. **MongoDB:** NoSQL flexibility but weaker ACID guarantees
-2. **Azure SQL Database:** More expensive, lock-in to Azure
-3. **MySQL:** Similar to PostgreSQL but weaker JSON support
-
-**Rationale:**
-- ACID transactions critical for job state consistency
-- JSON column type for flexible job parameters
-- Strong community support and operational expertise
-- Cost-effective on Azure (PostgreSQL Flexible Server)
-- pg_cron extension for native cron evaluation
-
-**Consequences:**
-✅ **Positive:**
-- Strong data consistency guarantees
-- Rich querying with JSON support
-- Cost-effective (~$200/month for standard tier)
-
-❌ **Negative:**
-- Scaling reads requires read replicas (added complexity)
-- Schema migrations need careful planning
-
-**Compliance:**
-- Aligns with organizational authorized database catalog
-```
-
-#### Step 3: Validate Architecture
-
-Every write runs its gates by code:
-
-- **Explorer headers** — `explorer-cli.ts check` (blocking)
-- **Prose** — `prose-check.js` (blocking lexical rules; report-only until the project is stamped `PROSE_STYLE: v1`)
-- **Principles** — `principle-check.js` (Layer 1) and the `principle-quality-reviewer` (Layer 2)
-- **Diagrams** — `mermaid-check.js` and `label-check.js`; data flows — `flow-compose.js` and `flow-check.js`
-- **Integrations** — `integration-check.js` holds `docs/05` to the label grammar and the HLD
-- **Budgets** — `docs-stats.js` reports sizes and the shapes that inflate a corpus
-
-A finding names a file and a line; the fix is an edit at that line.
-
-#### Step 4: Edit and release
-
-Edit through the skill (Workflow 2) so the gates run on what changed. `release my architecture`
-(`architecture-lifecycle`) moves the version from Draft to Released, writes `docs/CHANGELOG.md` and tags
-`architecture-v<version>`.
-
-### Output
-
-**Files:** `ARCHITECTURE.md` (index, version, `DOC_LANGUAGE`), `docs/` (13 sections + `components/`), `adr/`
-**Usage:** Input to Phase 3 (an institution pack's compliance plugin, when present) and Phase 4 (handoff, export)
-
----
-
-## Phase 3: Compliance Documentation
-
-**Owner:** Compliance Team
-
-Compliance contracts are organization-specific. The base ships no compliance skill, contracts or scoring: they come from the compliance plugin an [institution pack](INSTITUTION_PACKS.md) installs, when the organization has one. The phase keeps its place in the workflow; its commands are that plugin's.
-
----
-
-## Integration Patterns
-
-### Pattern 1: Sequential Waterfall
-
-Traditional sequential approach where each phase completes before the next begins.
-
-```
-PO Spec (Complete) → ARCHITECTURE.md (Complete) → Handoff Kit (Generate)
-```
-
-**When to use:**
-- New projects
-- Well-defined requirements
-- Formal governance process
-
-**Benefits:**
-- Clear phase boundaries
-- Complete documentation before handoff
-- Full traceability
-
-### Pattern 2: Iterative Refinement
-
-Iterate on ARCHITECTURE.md and regenerate the downstream artifacts as needed.
-
-```
-ARCHITECTURE.md v1 → Analyses v1 → Review Feedback
-    ↓
-ARCHITECTURE.md v2 → Analyses v2 → Improved Completeness
-    ↓
-ARCHITECTURE.md v3 → Analyses v3 → Final (>90% complete)
-```
-
-**When to use:**
-- Complex systems
-- Evolving requirements
-- Continuous improvement
-
-**Benefits:**
-- Progressive refinement
-- Early risk feedback
-- Higher final quality
-
-### Pattern 3: Presentation and Exploration
-
-A communication layer over the Phase 2 output. None of these skills is a gate and none writes to `ARCHITECTURE.md`, `docs/` or `adr/`; each reads the architecture and produces an artifact for a specific audience.
-
-```
-ARCHITECTURE.md + docs/ (Phase 2 complete)
-    ├─▶ architecture-command-center      → visualizations/*.html   (stakeholders: logical + physical views, boundary, use-case walkthroughs)
-    └─▶ architecture-docs-export  → SA-<name>.docx          (committees: role-routed briefing + reference)
-```
-
-**When to use:**
-- Presenting the architecture to a committee, a Product Owner or a new team
-- After Workflow 8 (diagrams) or a release (`architecture-lifecycle`) — regenerate so the audience sees the current version
-- When the Mermaid diagrams in `docs/03` and `docs/04` answer "what connects to what" but not "where does each container live" or "how does a use case travel the layers"
-
-**Benefits:**
-- Zero risk to the source of truth — read-only skills, regenerable output
-- One artifact per audience instead of one document for everyone
-- The release receipt (`architecture-lifecycle`) names these as stale after every version bump
-
----
-
-## Best Practices
-
-### 1. Start Early
-
-- Create PO Spec before architecture work begins
-- Ensures alignment between business and technical teams
-- Reduces rework and misalignment
-
-### 2. Maintain Single Source of Truth
-
-- `ARCHITECTURE.md` + `docs/` are the authoritative source
-- Handoffs, analyses and exports are generated from them
-- Edit the architecture through the skill, then regenerate what depends on it
-
-### 3. Run long workflows in a fresh session
-
-- Creation and the handoff kit each carry a large working set
-- Creation stops at checkpoints — `continue the architecture` resumes it
-- The facts ledger (`arch-facts.js`) answers names and ids without reopening the documents
-
-### 4. Iterate on Completeness
-
-- A first generation leaves `[NOT DOCUMENTED]` markers where the architecture is silent
-- Close them in the section they point at
-- Regenerate the affected artifacts
-
-### 5. Validate Stack Early
-
-- The Tech Debt/EOL analysis flags versions past end of life
-- Fix stack issues before the handoff kit
-- Record exceptions as ADRs and the debt as TDRs (`sa-records`)
-
-### 6. Version Control
-
-- Track all three document types in Git
-- Tag versions for audit trail
-- Include generation dates in filenames
-
-### 7. Automate Regeneration
-
-- Set up CI/CD to republish the architecture index on each release
-- Ensure documentation stays current
-- Reduce manual maintenance
-
-### 8. Leverage Interactive Diagrams
-
-**Mermaid Advantages**:
-- Use Mermaid diagrams in Section 4 instead of ASCII art
-- Interactive visualization (zoom, pan) in GitHub/GitLab
-- Maintainable text-based format (easy updates)
-- Professional appearance with color-coding
-
-**Standard Color Scheme**:
-- Blue: Orchestrators and entry points
-- Orange: Worker microservices and executors
-- Green: Query services and CQRS read models
-- Purple: Event streaming (Kafka topics, message queues)
-- Teal: Domain services and business logic
-- Gray: Infrastructure (API Gateway, load balancers)
-
-**How to Update**:
-1. Locate Mermaid diagram in Section 4
-2. Update component definitions or data flows
-3. Validate rendering in GitHub preview or https://mermaid.live/
-4. Update legend to reflect changes
-
-**Full Guide**: `MERMAID_DIAGRAMS_GUIDE.md` includes templates, examples, and step-by-step instructions for all architecture types.
-
----
-
-## Advanced Usage
-
-### Custom Workflow Variations
-
-#### Variation 1: Skip PO Spec for Small Projects
-
-For minor features or small projects, skip Phase 1 and start directly with ARCHITECTURE.md.
-
-```
-Business Context (informal) → ARCHITECTURE.md → Handoff Kit
-```
-
-### Integration with Other Tools
-
-#### Git Workflow
+**One rule runs through all of it:** the model writes, code checks. Every gate below is a script; a document either
+passes or the script names the file and line to fix. The fix is an edit at that line, not a rewrite.
+
+## Phase 1 — Requirements
+
+**Skill:** `architecture-readiness` (plugin `sa-requirements`, installable alone for a Product Owner).
+**Produces:** `PRODUCT_OWNER_SPEC.md` and `exports/PO-SPEC-<slug>.pdf`.
+
+| Mode | Say | Result |
+|---|---|---|
+| Elicitation | `elicit requirements` | An interview, section by section, then a scored spec |
+| Async intake | `business context intake` (a ticket, email or document) | `PO_SPEC_GAP_REPORT.md` with a ready-to-send message; a draft spec only at score ≥ 7.5 |
+| Evaluation | `evaluate PO spec` | The score, the failing requirements and the questions that fix them |
+
+The spec has eight sections: Business Context, Stakeholders & Users, Business Objectives, Use Cases, User Stories, UX
+Requirements, Business Constraints, Success Metrics & KPIs. Three checks decide readiness:
+
+- **Score** — weighted completeness, 0–10. **≥ 7.5** is ready for the architecture team.
+- **Checkability** (`po-spec-checkability.js`) — every requirement must be testable by someone who was not in the
+  room: *named, closed, dated, observable, measured*. Use cases are checked part by part. A failing requirement costs
+  its section 25%; a failure in Use Cases, Objectives, Constraints or Metrics caps the score at 7.4. A wish that is not
+  yet checkable goes to **Appendix → Aspirations**.
+- **Coherence** (`po-spec-coherence.js`) — can it be built as written? An objective no use case serves or no metric
+  measures, a state no use case sets, a trigger nothing produces, two statements that cannot both hold, and one
+  acceptance test per use case (Given / When / Then) that names any fact the spec never gives. Figures that do not fit
+  together are warnings.
+
+The spec is written in the language the interview is held in and stays **business only**: no containers, protocols or
+ADR ids.
+
+### Keeping the PO Spec in step — PO Spec sync
+
+When the architecture evolves, say `update the PO spec` (or `sync PO spec`). `po-spec-delta.js` collects by code what
+changed since the spec's `<!-- ARCHITECTURE_SYNC: <version> (<date>) -->` marker — changelog entries, the ADRs and
+TDRs they name, use cases the flows serve that the spec lacks, retired integrations. Each change with a business effect
+becomes a proposal in business language; **the Product Owner approves item by item**; the spec is stamped, re-scored
+and its PDF re-rendered. Nothing is rewritten silently.
+
+## Phase 1.5 — Capability alignment
+
+**Skill:** `architecture-capability-alignment` (`sa-requirements`).
+Maps the PO Spec onto the capability framework the project declares, before design begins.
+
+| Framework | Levels | Report |
+|---|---|---|
+| `BIAN` — banking | 8 Business Areas › 43 Business Domains › 341 Service Domains (v14.0.0, as published) | `BIAN_ALIGNMENT.md` |
+| `CROSS-INDUSTRY` — any industry | 9 Domains › 41 Capability Groups › 223 Capabilities (Turbo EA, CC BY 4.0) | `CAPABILITY_ALIGNMENT.md` |
+| A pack's framework | Its own levels | `CAPABILITY_ALIGNMENT.md` |
+| `none` | — | — |
+
+Declare once per project — Workflow 1 asks when nothing is declared:
 
 ```bash
-# Feature branch for architecture work
-git checkout -b feature/job-scheduler-arch
-
-# Create/update documents
-/skill sa-skills:architecture-docs
-git add ARCHITECTURE.md
-git commit -m "docs: Initial architecture for job scheduler"
-
-# Create PR
-git push origin feature/job-scheduler-arch
+bun <plugin_dir>/scripts/shared/frameworks.js --project .                     # list, and show what is declared
+bun <plugin_dir>/scripts/shared/frameworks.js --declare CROSS-INDUSTRY --project .
 ```
 
----
+The choice lives in `.sa-skills/project.json`; an institution pack may set an organization default. Once a framework
+is declared, creating an architecture waits for its report (no skip); with `none` there is no gate. The report's
+summary and impacted capabilities become **Section 1.5** of `docs/01-system-overview.md`. A BIAN report also lists the
+published BIAN semantic APIs in scope.
 
-## Troubleshooting
+## Phase 2 — The architecture
 
-### Common Issues
+**Skill:** `architecture-docs` (plugin `sa-skills`). **Produces:** `ARCHITECTURE.md` (a navigation index with the
+version) and one file per section under `docs/`.
 
-#### Issue: Low Completeness (<70%)
+| Section | File | Section | File |
+|---|---|---|---|
+| 1–2 Executive Summary, System Overview | `docs/01-system-overview.md` | 8 Technology Stack | `docs/06-technology-stack.md` |
+| 3 Architecture Principles | `docs/02-architecture-principles.md` | 9 Security Architecture | `docs/07-security-architecture.md` |
+| 4 Architecture Layers + diagrams | `docs/03-architecture-layers.md` | 10 Scalability & Performance | `docs/08-scalability-and-performance.md` |
+| 5 Components | `docs/components/` | 11 Operational Considerations | `docs/09-operational-considerations.md` |
+| 6 Data Flow Patterns | `docs/04-data-flow-patterns.md` | 12 ADRs | `adr/` |
+| 7 Integration Points | `docs/05-integration-points.md` | 13 Risks and Technical Debt | `docs/10-risks-and-technical-debt.md` |
+| References | `docs/11-references.md` | | |
 
-**Cause:** The architecture does not document what the requirements ask
+Section numbers and file prefixes do not align: "Section 9" is `docs/07-…`.
 
-**Solution:**
-1. Run `architecture-traceability` and read the `Not Covered` and `Partial` rows
-2. Find the section file each gap points at (`docs/NN-*.md`)
-3. Add the content through `architecture-docs`
-4. Regenerate the affected artifacts
+### Workflow 1 — Create
 
-#### Issue: Technology Past End of Life
+Say `create the architecture`. The entry gates run first, checked together by `gates-check.js`:
 
-**Cause:** One or more technology+version pairs in Section 8 (`docs/06-technology-stack.md`) are end-of-life
-
-**Solution:**
-1. Run the Tech Debt/EOL analysis (`architecture-analysis`)
-2. Either:
-   - Upgrade to a supported version
-   - Record the exception as a project ADR (`adr/`, ADR-101+) and the debt as a TDR
-3. Re-run the analysis
-
-#### Issue: Metric Inconsistency
-
-**Cause:** Metrics in Executive Summary don't match Section 10
-
-**Solution:**
-1. Skill will flag inconsistencies
-2. Update either Executive Summary or Section 10 to match
-3. Skill recalculates Design Drivers
-
----
-
-## Phase 4: Development Handoff
-
-The Dev Team receives implementable specifications. Phase 4 produces the **four-part Service Handoff Kit**
-for the engineers who will build the system.
-
-```
-/skill sa-delivery:architecture-dev-handoff
-```
-
-### What it produces
-
-| Artifact | Scope | Contents |
+| Step | Gate | Skippable |
 |---|---|---|
-| `handoffs/SYSTEM_RUNTIME_VIEW.md` | One per run | Whole-system storyboard: flows with per-hop budget decomposition, edge rationale, failure posture |
-| `handoffs/CROSS_CUTTING_STANDARDS.md` | One per run | Institution-wide rules synthesized from institutional ADRs — every rule cites its ADR |
-| `handoffs/interfaces/<upstream>→<downstream>.md` | One per adjacent service pair | Interaction contract, entry/exit state, mutual assumptions, failure semantics, ownership |
-| `handoffs/components/NN-<slug>.md` | One per C4 L2 component | Intent and constraint — deliberately **not** execution |
-| `handoffs/assets/NN-<slug>/` | Per component | OpenAPI, AsyncAPI, GraphQL SDL, DDL, Avro / Protobuf schemas, Redis key schema, C4 descriptor — each validated by `contract-check.js` |
+| 0.1 | **Language** — `en` or `es`, stamped as `<!-- DOC_LANGUAGE: xx -->` | No |
+| 0.2 | **PO Spec** — found, or created now: elicitation, async intake, inline context, or `SKIP PO SPEC` | Yes |
+| 0.3 | **Capability alignment** — the declared framework's report | No while a framework is declared; skipped with the PO Spec |
+| 0.4 | **HLD** — Mermaid (`.mmd`, `.mermaid`, a `.md` with mermaid fences) preferred; PDF, PNG, SVG accepted | No; skipped with the PO Spec |
+| 0.6 | **ADR Context Block** — the decisions the design will need, confirmed by you | — |
+| 0.65 | **Institutional ADR catalog** — imported into `adr/` if the organization keeps one | — |
 
-Each of the four documents opens with a fixed `### Role Quick Index`, and
-`handoffs/README.md` renders a whole-kit reading order across Dev / QA / Ops / Architect.
+A PDF, PNG or SVG HLD is transcribed once into `<name>.hld.mmd` beside it, box by box and arrow by arrow; every later
+step reads the transcription. An inbound HLD is not held to the house diagram style.
 
-### Scope
+**Architecture type.** `arch-types.js` lists the types on offer — the five built in, plus any an institution pack adds:
 
-**C4 Level 2 (Container) components only.** L1 system descriptors describe boundaries, not
-implementable units, and are excluded.
-
-### Prerequisites
-
-- **Hard block:** `docs/05-integration-points.md` must exist.
-- **Warnings** (sections are marked `[NOT DOCUMENTED]` rather than blocking): missing
-  `analysis/LATENCY_BUDGET-*.md` or `analysis/BLAST_RADIUS-*.md`.
-
-Re-runs skip unchanged parts via `handoffs/.manifest.json`; `--force` regenerates all four.
-
----
-
-## Phase 5: Architecture Index
-
-Developers get the released architecture inside their IDE (VS Code, JetBrains or any MCP client): they ask it
-questions while they work, and build one microservice from its spec. The plugin exports a bundle; a separate
-MCP server, Alia (Spring AI, Qdrant or its `file` engine, Qwen3-Embedding 0.6B on Ollama), loads it.
-
-```
-/skill sa-delivery:architecture-index-export
-```
-
-### What it produces
-
-| Part | Contents |
+| Type | Choose when |
 |---|---|
-| `chunks.jsonl` | One chunk per unit of meaning, a context line first, ids stable across releases — what the server embeds for search |
-| `ledger.json` | The facts ledger — what the exact tools answer from |
-| `buildpacks/<slug>/` | Per container: spec, interface contracts, assets byte for byte, flows and budgets, governing ADRs, open questions, an ordered plan and `BUILD.md`, the IDE agent's instructions |
-| `changes.json` | With `--previous`: what changed for each container since that bundle, `action_required` where code must move |
+| `ENTERPRISE` (default) | Channels → Experience → Process → Domain Services → Systems of Record, any industry |
+| `MICROSERVICES` | Independently deployable services, each owning its data, behind a gateway and an event backbone |
+| `3-TIER` | One web application with one database |
+| `N-LAYER` | One deployable organised as DDD / clean / hexagonal layers |
+| `BIAN` | Banking services modelled on BIAN Service Domains throughout |
 
-### The release sequence
+**The collection.** Step 4.9 saves every answer to `.cache/sa-skills/collect.json` and asks the last questions at once:
+the checkpoint mode, the status of the ADRs to write (`Proposed` by default), and any optional diagrams.
 
-1. **Release the architecture** (`/release-architecture`): the tag `architecture-v<version>`. CI publishes the chunks
-   and the ledger; search goes live.
-2. **Regenerate the handoff kit** (`generate dev handoff`) and commit `handoffs/`. CI publishes the same version
-   again, now with its build packs.
+**Segments and checkpoints.** The writing is split so each segment starts with a clear context. The four checkpoints
+come after the collection · after Sections 1+2, 13, 4, 5 · after 8, 3, 6 · after the rest and `ARCHITECTURE.md`.
 
-A build pack needs a kit of exactly the architecture's version: until the kit is regenerated, the components are
-listed as skipped (`kit-version <old>`), and `lifecycle.js status` lists the kit as stale. A run whose architecture
-differs from its tag is a draft and is not published.
+- **Manual** — the create stops at each checkpoint. Run `/clear`, then `continue the architecture`. One receipt
+  (`resume-prepare.js`) carries the state; the gates and questions never run again.
+- **Automatic** — segments 2–4 run one after another, each in a `segment-runner` sub-agent.
 
-### CI
+Each section is written from a **payload** cut by code (`section-prepare.js`): the guide's block for that section, the
+type's templates, the inputs it takes, its parent sections in outline and the facts it cites. Then:
 
-Copy one example from `plugins/sa-delivery/skills/architecture-index-export/ci/` into the architecture's repository —
-`github-actions.yml`, `gitea-actions.yml` or `azure-pipelines.yml` — and set the project key, the server URL and a
-token. Each runs `publish-index.sh` with the plugin pinned to a release tag.
+- **Step 5.7 — Content Hygiene Gate**: explorer headers, prose and size budgets over everything written.
+- **Step 6 — ADRs**: each confirmed decision becomes `adr/ADR-101…` through the ADR skill.
+- **Step 7 — Diagrams**: the four standard diagrams and the data-flow sequences (below), plus any optional ones —
+  infrastructure, high availability, performance, integration, security.
 
-### In the microservice repository
+**Result:** version `1.0.0`, status Draft.
 
-The agent writes `.architecture.json` (server, project, component, architecture version), follows `BUILD.md`, asks
-about every open question rather than filling it, and calls `what_changed` when a new architecture version is released.
+### Workflow 2 — Edit
 
----
+Ask for the change in plain words: `update the latency target of the track parcel flow to 300 ms`. The skill reads the
+**facts ledger** first (`arch-facts.js` → `.cache/sa-skills/facts.json`: components, ADRs, integrations, flows,
+phases, releases — collected once by code), anchors on the parent sections and matching ADRs, edits the target at the
+lines that change, runs the post-write checks on what changed and lists the downstream sections and artifacts the
+change affects. A change to Section 3 runs the principle gate in full.
 
-## Summary
+Component files, the component index and C4 restructuring go through **`architecture-component-guardian`**
+(`add component <X>`, `remove component <X>`, `sync component index`, `migrate to C4`) — the only writer of
+`docs/components/README.md`.
 
-The four-phase workflow provides a complete, traceable path from business requirements to
-implementable specifications:
+### Workflow 8 — Diagrams
 
-1. **Phase 1 (Readiness):** Product Owner documents business context and requirements
-2. **Phase 1.5 (Capability Alignment):** Governance maps the spec onto the declared capability framework — BIAN Service Landscape v14.0.0 (8 Business Areas · 43 Business Domains · 341 Service Domains), the cross-industry map, or a pack's — a gate before Phase 2 once a framework is declared
-3. **Phase 2 (Docs):** Architecture Team translates requirements into technical design
-4. **Phase 3 (Compliance):** Compliance Team, with the compliance plugin of an institution pack when the organization has one
-5. **Phase 4 (Handoff):** Dev Team receives the four-part handoff kit
-6. **Phase 5 (Index):** CI publishes the release to the architecture MCP server; developers ask it and build from its packs
+`generate my architecture diagrams` (or `update diagrams`) writes, all in Mermaid:
 
-**Key Success Factors:**
-- Sequential flow with clear handoffs
-- Single source of truth (ARCHITECTURE.md)
-- Automatic validation and gap detection
-- Iterative refinement for high completeness (>90%)
+- `docs/03-architecture-layers.md` — Logical View (`flowchart TB`, a band per layer), C4 System Context, C4 Container,
+  Detailed View;
+- `docs/04-data-flow-patterns.md` — one `sequenceDiagram` per phase, and one end-to-end sequence per use case, derived.
 
-For more information:
-- [Quick Start Guide](QUICK_START.md) - 5-minute tutorial
-- [Installation Guide](INSTALLATION.md) - Setup instructions
-- [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
+The Logical and Detailed views share one fixed four-role palette: `zone`, `unit`, `store`, `ext`. Each phase of a flow
+is drawn **once**; `flow-compose.js` builds every use case's end-to-end sequence from the phases it declares. Diagrams
+that no documented flow backs are discarded.
+
+### Workflow 9 — Migrate to `docs/`
+
+`migrate my architecture` (or `split ARCHITECTURE.md`) turns a single-file architecture into the `docs/` layout:
+extracts the sections, rewrites `ARCHITECTURE.md` as the index, adds heading anchors and stamps `DOC_LANGUAGE`. The
+source language is preserved. An older multi-file layout missing a section file gets it scaffolded first (the layout
+gate).
+
+### Workflow 12 — Restyle
+
+`restyle architecture` (or `/restyle-architecture`, with `--dry-run`, `--file <glob>`, `--force`) applies the prose
+style to an architecture written before it: staged fixes, safest first, never dropping a fact, then stamps
+`<!-- PROSE_STYLE: v1 -->`. From then on the prose rules **block** instead of only reporting. `--dry-run` is the plan.
+
+**Also:** questions (`what is our authentication approach?` — the explorer locates passages by code, the answer cites
+files) · `review my architecture` (a conformance review) · `regenerate explorer headers` (backfills the
+`<!-- EXPLORER_HEADER -->` block — key concepts, technologies, components, scope, ADRs — every file carries after its H1).
+
+## The gates, as code
+
+Every script ships in the plugin and runs with `bun`, inside the workflows or on its own in CI.
+
+| Script | Checks | Blocks? |
+|---|---|---|
+| `prose-check.js` | The prose contract: no template boilerplate, filler, narration about the document itself, hedges, marketing register or first person; sentence and paragraph length; tables before prose. Judgement rules go to the judge | Lexical rules block once the project carries `PROSE_STYLE: v1`; report-only before. Length and form are warnings |
+| `principle-check.js` | Section 3, Layer 1: the nine core principles (a tenth for event-driven designs) in order, each with Description, Implementation and Trade-offs; system-specific implementation, at least three quantified trade-offs that are costs, not open items; an ADR reference; no platitudes or placeholders | Yes |
+| `principle-quality-reviewer` | Section 3, Layer 2: decision rules vs outcomes, honest trade-offs, contradictions, ADR alignment. Writes the review stamp a release needs | Yes, at release |
+| `flow-check.js` | `docs/04` states each flow twice — its phases and its sequence — and the two agree; every flow has a `**Phases**:` line | Yes |
+| `flow-compose.js --check` | The derived end-to-end sequences match the phase panels | Yes |
+| `mermaid-check.js` | Every Mermaid block: no `;` in a label, no HTML tags or emoji, balanced quotes, the palette on Diagrams 1 and 4, and a real render when mermaid-cli is installed | Yes |
+| `label-check.js` | Connection labels against a design language standard's grammar and action types | **Governed mode** only — when an institution pack supplies a standard. In **fallback mode** it is skipped and says so |
+| `integration-check.js` | Each `docs/05` integration's protocol cell (blocking in governed mode), and each HLD edge against the inventory — missing, reversed, not in the HLD (warnings) | Partly |
+| `docs-stats.js` | Size budgets per file and the shapes that bloat a corpus: a principle over budget, a risk row that argues instead of linking, a component described outside its file, ADR/TDR sections over their word budgets | Shape budgets block once stamped; file sizes are warnings |
+| `explorer-cli.ts check` | One `EXPLORER_HEADER` right after the H1, known keys only, components and ADRs that exist | Yes |
+
+Hooks on `Write` and `Edit` run the lexical prose rules on the new lines of an architecture document as they are
+written: in a stamped project a banned phrase is refused at the moment of writing, and length warnings come back in
+the same turn.
+
+## Decisions and debt — ADRs and TDRs
+
+Both skills ship in `sa-records`. Each is the only writer of its folder.
+
+### ADRs — `architecture-definition-record`
+
+`ADR-001` … `ADR-100` are **institutional** (organization-wide, imported into the project); `ADR-101` and up are the
+**project's** own.
+
+| Say | Does |
+|---|---|
+| `create ADR` | One ADR, interactively |
+| `update ADR status` · `supersede ADR` · `amend ADR` | Status changes, replacement, amendment |
+| `list ADRs` · `regenerate ADR index` | The inventory; `adr/README.md`, derived by code |
+| `compact ADRs` | Rewrites a verbose ADR to the decision in force, within its word budget |
+| `import institutional ADRs` | Clones a catalog from a git URL into `adr/` and pins it in `adr/.institutional-catalog.json` |
+| `sync institutional ADRs` | Re-pulls the catalog, classifies every change and propagates its impact into the architecture |
+
+Institutional ADRs are copies in the project, never referenced by an outside path — every check resolves them on disk.
+
+**Catalog mode.** A repository that maintains the institutional catalog itself carries `.sa-skills/adr-catalog.json`
+and no `ARCHITECTURE.md`. There the skill amends an ADR in place, every language edition in the same change, and
+measures every ADR with `catalog-check.js`. Install `sa-records` alone for such a repository.
+
+### TDRs — `technical-debt-records`
+
+A TDR records an architectural compromise, not a bug. Say `record technical debt`, `update TDR status`, `list TDRs` or
+`check TDRs`. Each record has exactly one of five statuses, always in English:
+
+```mermaid
+flowchart LR
+  O["Open"] --> IP["In Progress"]
+  P["Planned"] --> IP
+  P --> O
+  IP --> R["Resolved"]
+  O --> W["Won't Fix"]
+```
+
+Nothing goes straight to `Resolved`; every move is a dated History note. `Planned` needs a target date, `In Progress` a
+named owner. `tdr-check.js --move TDR-NNN "<status>"` accepts a transition or names the path it must take.
+
+## Versioning and release
+
+**Skill:** `architecture-lifecycle` (`sa-skills`). A release is a **git tag**: the project must be a git repository.
+`ARCHITECTURE.md` carries `<!-- ARCHITECTURE_VERSION: 1.2.0 -->`, `ARCHITECTURE_STATUS` and `ARCHITECTURE_RELEASED`;
+every component file carries `**Component Version:**`, `**Architecture Version:**` and `**Last Updated:**`.
+
+| Command (`lifecycle.js`) | Say | Does |
+|---|---|---|
+| `status` | `architecture status` | The state, the changes since the tag with their bump, and every downstream artifact built from an older version |
+| `check` | `release readiness` | Every gate once; names the blocking ones with their fix |
+| `plan` · `apply` | `release my architecture` | Plan: gates, change list, recommended bump, draft changelog entry. Apply: writes the version, component versions and `docs/CHANGELOG.md`; commits only `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`; tags and pushes |
+| `recover` | `recover architecture tag` | Restores a missing tag |
+| `deprecate` | `deprecate architecture` | Marks the architecture Deprecated |
+
+`release my architecture` (or `/release-architecture`) runs plan and apply, asking one question: the bump. By default
+it pushes a `release/architecture-v<version>` branch for a pull request; `--direct` commits and tags on the current
+branch. A gate can be waived only explicitly, with a reason written into the changelog (`--waive <gate>:<reason>`).
+
+**States** are derived, never stored: `draft`, `changed`, `released`, `untagged`, `deprecated`, `no-git`.
+
+**Semver**, recommended by code from the change list:
+
+| Bump | When |
+|---|---|
+| MAJOR | Something a consumer relied on is gone or the structure changed — a system added or removed; a container, integration, flow or section removed; the type changed |
+| MINOR | Something added or a decision moved — a container, ADR, TDR, integration, flow, phase or section added; a container renamed or retyped; an ADR's status |
+| PATCH | Text changed, structure did not |
+
+The tag is `architecture-v{version}`, and it is the only baseline: a correction is a new PATCH release. Handoffs,
+analyses and exports state the architecture version they were cut from, so `status` can name the stale ones.
+
+### Delivery increments
+
+One target design, delivered in pieces. A `Delivery Increments` table in `docs/01` (`Increment | Use Cases | Target`)
+assigns **use cases** to increments. `increments.js` derives each slice — flows, phases, containers and integrations,
+cumulative, with what is new. Never assign a container by hand: move a use case. `release increment 2` releases one piece (`lifecycle.js plan --increment
+2`); its gates block only on findings inside the slice, and the changelog entry and tag record the delivery scope.
+
+**Temporary elements** — a stopgap one increment needs and a later one replaces — declare their window and the TDR
+that records the compromise: `**Delivery Increments:** 1–2 · TDR-104` in a component file, or an `Increments` column
+in `docs/05`. Releasing an increment after the window is blocked (`retire-pending`) until the element is retired.
+
+## Governance — analysis and traceability
+
+Both skills ship in `sa-analysis`.
+
+### Analysis — `architecture-analysis`
+
+Say `run architecture analysis` (or a lens by name, or `all analyses`). Pick lenses, then Markdown or interactive HTML.
+
+| Lens | Looks for | Report |
+|---|---|---|
+| SPOF | Single points of failure | `analysis/SPOF-<date>.md` |
+| Blast Radius | Downstream cascade per component | `analysis/BLAST-RADIUS-<date>.md` |
+| Bottleneck | Throughput chokepoints, capacity headroom | `analysis/BOTTLENECK-<date>.md` |
+| Cost Hotspots | Cost concentration, over-provisioning | `analysis/COST-HOTSPOTS-<date>.md` |
+| STRIDE | Threats per trust boundary | `analysis/STRIDE-<date>.md` |
+| Vendor Lock-in | Portability risk, exit cost | `analysis/VENDOR-LOCKIN-<date>.md` |
+| Latency Budget | Per-hop budget against each flow's target | `analysis/LATENCY-BUDGET-<date>.md` |
+| Tech Debt / EOL | Technology currency, deprecated SDKs | `analysis/TECH-DEBT-<date>.md` |
+| Coupling | Fan-in, fan-out, instability, cycles | `analysis/COUPLING-<date>.md` |
+| Data Sensitivity | Personal-data flows, encryption and retention gaps | `analysis/DATA-SENSITIVITY-<date>.md` |
+| Security Posture | One checklist merging STRIDE and Data Sensitivity | Markdown only |
+
+Code computes the dependency graph, latency sums and load model; the model classifies; `check-report.js` holds every
+report to the findings contract. Each finding has an id (`C1`, `B1`, `T1-S`, `OB-01` …), a mitigation column and a
+residual severity — the ids the command center lights up.
+
+### Traceability — `architecture-traceability`
+
+`check requirements coverage` compares every PO Spec use case with the architecture and writes
+`TRACEABILITY_REPORT.md`: each requirement `Covered`, `Partial` or `Not Covered`, with its evidence. With delivery
+increments declared, coverage is reported per increment.
+
+## Delivery
+
+All four skills ship in `sa-delivery`.
+
+### Handoff kit — `architecture-dev-handoff`
+
+`generate dev handoff` writes the **Service Handoff Kit** for C4 Level 2 containers (systems are boundaries, not units):
+
+| Part | File | Contents |
+|---|---|---|
+| System Runtime View | `handoffs/SYSTEM_RUNTIME_VIEW.md` | Every flow with its per-hop budget, edge rationale, failure posture |
+| Cross-Cutting Standards | `handoffs/CROSS_CUTTING_STANDARDS.md` | Rules every service follows, each citing an institutional ADR |
+| Interface Contract | `handoffs/interfaces/<upstream>→<downstream>.md` | Per adjacent pair: the interaction, entry and exit state, mutual assumptions, failure semantics, ownership |
+| Component Specification | `handoffs/components/NN-<slug>.md` | Per container: intent and constraints — deliberately not the implementation |
+
+**Assets** per container in `handoffs/assets/NN-<slug>/` — OpenAPI, AsyncAPI, GraphQL SDL, Avro, DDL, Protobuf, a Redis
+key schema — each validated by `contract-check.js`: it parses, the structure holds against its spec (Redocly for
+OpenAPI 3.1 and AsyncAPI 3.0, graphql-js, avsc, SQL parsers per engine, protobufjs), and every operation, channel,
+field and table is one the architecture documents. Nothing is invented.
+
+**Security obligations** per container (`security.md`, by code): who may call it and with what authentication — an
+interface with none documented fails closed —, the security principle, the STRIDE findings on its boundaries, the
+sensitive data it handles. A specification without one fails the kit gate.
+
+`kit-check.js` gates the whole kit — markers, placeholders, every Mermaid block, the architecture version on every
+part. `docs/05-integration-points.md` is required; missing latency or blast-radius analyses become `[NOT DOCUMENTED]`
+markers. Flags: `--force`, `--parallelism`, `--seam-parallelism`, `--asset-parallelism` (default 4, max 8). Run it in a
+fresh session.
+
+### Word export — `architecture-docs-export`
+
+`export architecture to Word` writes, on demand, `exports/SA-<name>.docx` — a role-routed stakeholder briefing: one page
+first, a section per role, decisions pending last — its companion `exports/SA-<name>-reference.docx` with the detail it
+cites, and `exports/ADR-NNN-<title>.docx` per ADR.
+
+`export handoff to Word` exports the kit. Mermaid diagrams render as pictures when mermaid-cli is installed (`/sa-skills:setup`
+checks it), otherwise as source.
+
+### IcePanel — `architecture-icepanel-sync`
+
+`sync to IcePanel` writes `icepanel-sync/c4-model.yaml` (a C4 import) and `icepanel-sync/sync-report.md`. With
+`ICEPANEL_API_KEY` and `ICEPANEL_LANDSCAPE_ID` set it also compares against the landscape and reports drift
+(`IcePanel drift check`).
+
+### Architecture index — `architecture-index-export`
+
+`export architecture index` turns the architecture into an `sa-index/1` bundle for an architecture MCP server: every
+section, flow, integration, ADR and TDR as a searchable chunk, the facts ledger, and a **build pack** per container
+covered by a handoff kit of the same version — spec, security obligations, interface contracts, assets byte for byte,
+budgets, open questions, an ordered build plan. A developer's IDE can then ask the architecture and build one service
+from its pack.
+
+- `publish-index.js <project> --up` publishes a draft to a local server in Docker, to try while writing.
+- CI publishes each release: copy `ci/github-actions.yml`, `ci/gitea-actions.yml` or `ci/azure-pipelines.yml` from the
+  skill. The tag publishes chunks and ledger; committing the regenerated kit publishes the build packs.
+
+The server side is Alia — see [ALIA.md](ALIA.md).
+
+## Visualization
+
+**Skill:** `architecture-command-center` (`sa-visualization`). Say `command center` (or `3D view`, `physical view`).
+
+It writes `visualizations/architecture-command-center.scene.json` and `.html` — one self-contained page, regenerated
+in place. A floor per layer, a block per container, routes per integration; Logical and Physical views; use-case
+walkthroughs phase by phase; analysis findings on the stage; a load simulation from the documented capacity and demand;
+an increment filter when increments are declared; skins `holo`, `atlas`, `corporate` or your own. **Alia**, the
+navigator, answers from a dossier of the architecture baked into the page. It never edits a document. See
+[ALIA.md](ALIA.md).
+
+## Phase 3 — Compliance
+
+Compliance contracts are organization-specific, so the base ships none. An organization that has its own compliance
+questions ships them as a plugin of its **institution pack**, which reads the architecture like any other skill; no
+skill in the base reads what it writes. See [INSTITUTION_PACKS.md](INSTITUTION_PACKS.md).
+
+## Documentation language
+
+- Skill files, templates and instructions are English. **The documents written into your project** are in the language
+  chosen at Step 0.1: `en` or `es`.
+- `<!-- DOC_LANGUAGE: es -->` near the top of `ARCHITECTURE.md` is the one authority; every skill reads it.
+- Every structural heading carries an English anchor, so every check reads both languages:
+  `## 1. Resumen Ejecutivo <!-- SECTION: Executive Summary -->`.
+
+- **Never translated:** ADR/TDR ids, status values (`Proposed`, `Open`, `Covered`…), the literal `Not documented`,
+  table column headers, filenames, marker names, Mermaid keywords, and the identifiers of the documented system —
+  API paths, fields, topics, tables. The handoff assets copy those verbatim, so a Spanish field name becomes a Spanish
+  contract.
+
+## Trigger phrases
+
+Typing one of these starts the matching skill directly. Slash names work too (`/<plugin>:<skill>`).
+
+| Say | Skill | Does |
+|---|---|---|
+| `elicit requirements` · `PO spec` · `business context intake` · `evaluate PO spec` | `architecture-readiness` | Write or score the PO Spec |
+| `update the PO spec` · `sync PO spec` · `align PO spec with the architecture` | `architecture-readiness` | PO Spec sync |
+| `capability alignment` · `cross-industry capability map` · `map to BIAN` · `BIAN alignment` | `architecture-capability-alignment` | Align the spec to the declared framework |
+| `create the architecture` | `architecture-docs` | Workflow 1 |
+| `continue the architecture` · `resume the architecture` · `continúa la arquitectura` | `architecture-docs` | Resume a create after a checkpoint |
+| `generate my architecture diagrams` · `update diagrams` | `architecture-docs` | Workflow 8 |
+| `migrate my architecture` · `split ARCHITECTURE.md` | `architecture-docs` | Workflow 9 |
+| `restyle architecture` · `apply prose style` · `/restyle-architecture` | `architecture-docs` | Workflow 12 |
+| `add component <X>` · `remove component <X>` · `sync component index` · `migrate to C4` | `architecture-component-guardian` | The component index |
+| `regenerate explorer headers` · `/regenerate-explorer-headers` | `architecture-explorer-headers` | Backfill headers |
+| `release my architecture` · `/release-architecture` · `architecture status` · `release readiness` · `recover architecture tag` · `deprecate architecture` | `architecture-lifecycle` | Versioning and release |
+| `create ADR` · `update ADR status` · `supersede ADR` · `list ADRs` · `compact ADRs` · `import institutional ADRs` · `sync institutional ADRs` | `architecture-definition-record` | ADRs |
+| `record technical debt` · `update TDR status` · `list TDRs` · `check TDRs` | `technical-debt-records` | TDRs |
+| `run architecture analysis` · `SPOF analysis` · `STRIDE threat model` · `security posture` · `all analyses` | `architecture-analysis` | Risk analyses |
+| `check requirements coverage` · `traceability report` · `PO spec coverage` | `architecture-traceability` | `TRACEABILITY_REPORT.md` |
+| `generate dev handoff` · `component handoff for <X>` · `interface contracts` | `architecture-dev-handoff` | The handoff kit |
+| `export architecture to Word` · `export handoff to Word` · `stakeholder briefing` | `architecture-docs-export` | `.docx` files |
+| `sync to IcePanel` · `IcePanel drift check` · `C4 model sync` | `architecture-icepanel-sync` | C4 import and drift |
+| `export architecture index` · `export build packs` · `test the architecture index` | `architecture-index-export` | The MCP bundle |
+| `command center` · `3D view` · `physical view` · `onboard to architecture` | `architecture-command-center` | The 3D model |
+
+**Release is not export.** "Release my architecture" bumps the version and tags it (`architecture-lifecycle`);
+"export my architecture to Word" writes `.docx` files (`architecture-docs-export`).

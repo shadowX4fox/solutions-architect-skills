@@ -1,27 +1,112 @@
-# Installation Guide
+# Installation
 
-Complete guide to installing the Solutions Architect Skills plugin for Claude Code.
+This guide takes you from nothing to a project ready for its first architecture: requirements, the install, the
+one-time setup per project, institution packs, the judge, updates and a final check. For a first architecture after
+that, see [QUICK_START.md](QUICK_START.md). If something goes wrong, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
-## Step 1 — Install the full suite
+## 1. Requirements
 
-The suite is six plugins from one marketplace: **sa-skills** (architecture, component index),
-**sa-records** (ADRs, TDRs), **sa-requirements** (the PO Spec and its capability alignment — BIAN for banking, a cross-industry map, or a pack's framework), **sa-analysis** (risk analyses, traceability),
-**sa-delivery** (handoff kit, Word export, IcePanel) and **sa-visualization** (the 3D command center).
-Installing sa-skills installs the other five. What belongs to one organization (its design language, compliance
-contracts, brand) ships separately as an [institution pack](INSTITUTION_PACKS.md). Requires [Bun](#installing-bun).
+| Tool | Needed for | Required |
+|---|---|---|
+| [Claude Code](https://claude.com/claude-code) | Running the skills | Yes |
+| [Bun](https://bun.sh) ≥ 1.0 | Every script the skills run (Node.js is not supported) | Yes |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`) | Every search the skills run through Bash | Yes |
+| git | Releasing an architecture (a release is a git tag) and importing an ADR catalog | For those workflows |
+| A Chrome / Chromium browser | Mermaid diagrams rendered as pictures in Word and PDF exports | Optional |
+| Docker and Ollama | Running the architecture MCP server locally | Optional |
 
-**From a terminal:**
+### Install Bun
+
+**macOS and Linux** (also inside WSL2 or Git Bash on Windows):
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+bun --version          # 1.0.0 or later
+```
+
+Homebrew: `brew install oven-sh/bun/bun`.
+
+**Windows (PowerShell or cmd).** With Node.js installed, the npm route avoids execution-policy and proxy issues:
+
+```powershell
+npm install -g bun
+```
+
+Without Node.js, use the official installer (needs the `RemoteSigned` or `Unrestricted` execution policy):
+
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+
+If `bun` is not found afterwards, open a new terminal (on Windows, sign out and back in) so the updated `PATH` applies.
+
+### Install ripgrep
+
+`brew install ripgrep` · `sudo apt-get install ripgrep` · `sudo dnf install ripgrep` · `winget install BurntSushi.ripgrep.MSVC`.
+`/sa-skills:setup` checks for it and prints the right command for your machine.
+
+## 2. Install the plugins
 
 ```bash
 claude plugin marketplace add shadowX4fox/solutions-architect-skills
 claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin list   # sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery, sa-visualization — all ✔ enabled
 ```
 
-Then, in Claude Code: `/reload-plugins`, and `/sa-skills:setup` once in each project (permissions, `.gitignore`,
-`CLAUDE.md` pointers, docgen and judge checks).
+Then, in a running Claude Code session, run `/reload-plugins` (or restart Claude Code).
 
-**Or paste this into another Claude Code instance** — it installs, repairs what is missing and verifies:
+Installing `sa-skills` installs the five plugins it depends on. The suite is six plugins from one marketplace:
+
+| Plugin | What it does |
+|---|---|
+| `sa-skills` | Writes and maintains `ARCHITECTURE.md` and `docs/`, the component index, explorer headers and releases |
+| `sa-records` | Architecture Decision Records (ADRs) and Technical Debt Records (TDRs) |
+| `sa-requirements` | The Product Owner Specification (PO Spec) and its capability alignment (BIAN, cross-industry or your own) |
+| `sa-analysis` | Ten risk and design analyses (SPOF, STRIDE, latency …) and PO Spec coverage |
+| `sa-delivery` | The developer handoff kit, Word exports, the IcePanel sync and the MCP index |
+| `sa-visualization` | The 3D Architecture Command Center |
+
+You can install part of the suite on its own: `sa-records` for a repository that maintains an institutional ADR
+catalog, `sa-requirements` for a Product Owner.
+
+### User scope or project scope
+
+| Scope | Flag | Use it when |
+|---|---|---|
+| User | `--scope user` | You work on architectures in many projects. One install serves all of them. |
+| Project | `--scope project` | One repository should pin the plugins for everyone who clones it. The choice is written into that project's `.claude/settings.json`. |
+
+A project-scope install takes precedence over the user-scope one inside that project. Use the same scope for every
+plugin of the suite, and pass the same flag when you update or uninstall.
+
+### Optional: sa-ux
+
+`sa-ux` is a small UX layer drawn inside Claude Code: next-step prompts computed from the project's files, shown above
+the prompt box. It reads what the skills write and never edits a document. It needs a Claude Code build with
+function-hook mods.
+
+```bash
+claude plugin install sa-ux@shadowx4fox-solution-architect-marketplace --scope user
+```
+
+### Install the npm packages
+
+Claude Code's plugin install does not run `bun install`. The Word / PDF export and the handoff kit's contract checks
+need the plugin's npm packages, so install them once in the plugin directory (and again after each update):
+
+```bash
+cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)"
+bun install
+```
+
+`plugin-root.ts` prints the directory of the installed `sa-skills` (see [§ 8](#8-verify-the-install)). Packages load
+only at the version the plugin pins. A missing one is refused with this same command, never fetched at another version.
+
+For Mermaid pictures in exports, `bun install` also brings mermaid-cli. It still needs a browser. Install one with
+`bunx puppeteer browsers install chrome`, or point `PUPPETEER_EXECUTABLE_PATH` at a Chrome already on the machine.
+
+### Install from another Claude Code instance
+
+Paste this into Claude Code. It installs, repairs what is missing and verifies:
 
 ```text
 Install the Solutions Architect Skills suite for me, from a shell (the `claude` CLI):
@@ -29,958 +114,190 @@ Install the Solutions Architect Skills suite for me, from a shell (the `claude` 
    `claude plugin marketplace add shadowX4fox/solutions-architect-skills`; if it does, run
    `claude plugin marketplace update shadowx4fox-solution-architect-marketplace`.
 2. If `claude plugin list` does not show sa-skills@shadowx4fox-solution-architect-marketplace, run
-   `claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user` (it brings sa-records,
-   sa-requirements, sa-analysis, sa-delivery, sa-visualization). If it does, run `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`
-   for each of sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery and sa-visualization — an update touches only the plugin it names.
-3. Run `claude plugin list`. For any "Dependency <name>@… is not installed", run
-   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; if sa-adr is listed, run
-   `claude plugin uninstall sa-adr@shadowx4fox-solution-architect-marketplace` (it was renamed sa-records).
-   Repeat until all five show ✔ enabled.
-4. Run `bun --version`; if Bun is missing, tell me the install command for my OS and stop.
-5. Report the five plugins with their versions, then tell me to run /reload-plugins and, in each project, /sa-skills:setup.
+   `claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user`. If it does, run
+   `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user` for each of sa-skills,
+   sa-records, sa-requirements, sa-analysis, sa-delivery and sa-visualization (an update touches only the plugin it names).
+3. Run `claude plugin list`. For every "Dependency <name>@… is not installed", run
+   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`.
+   Repeat until all six plugins show as enabled.
+4. Run `bun --version` and `rg --version`. If either is missing, tell me the install command for my OS and stop.
+5. Run `cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)" && bun install`.
+6. Report the six plugins with their versions, then tell me to run /reload-plugins and, in each project, /sa-skills:setup.
 ```
 
-Only part of the suite: `sa-records` alone for an institutional ADR catalog repository, `sa-requirements` alone for a
-Product Owner — `claude plugin install <plugin>@shadowx4fox-solution-architect-marketplace --scope user`.
+## 3. Set up each project
 
-The rest of this guide covers each step in detail — requirements, permissions, verification, upgrades.
+Open Claude Code in the project directory and run once:
 
-## System Requirements
-
-### Supported Platforms
-- **macOS** (10.15 Catalina or later)
-- **Linux** (Ubuntu 20.04+, Fedora 34+, or equivalent)
-- **Windows** (10/11 with WSL2 recommended)
-
-### Prerequisites
-- **Claude Code** (latest version)
-- **Bun** (v1.0.0 or later) - **REQUIRED** — every script the skills run is a `bun` command
-- **Terminal/Shell** access
-- **Internet connection** (for downloading release)
-- **~2 MB disk space** for plugin files
-
-### Installing Bun
-
-**Bun is required** for the skills to function properly. It powers the architecture reader, the gates, the payload cutters and renderers, and document export.
-
-#### macOS & Linux
-
-```bash
-# Install Bun
-curl -fsSL https://bun.sh/install | bash
-
-# Verify installation
-bun --version
+```text
+/sa-skills:setup
 ```
 
-Expected output: `1.0.0` or later
+The command is safe to re-run: it adds what is missing and never removes your own entries. Its steps:
 
-#### Windows (native cmd / PowerShell)
-
-**Recommended — npm global install** (most reliable on every Windows version):
-
-```powershell
-npm install -g bun
-```
-
-This requires Node.js. The npm global install sidesteps the PowerShell execution-policy restrictions, corporate proxy issues, and signed-script enforcement that occasionally trip the official `irm` one-liner in enterprise environments. Because npm is already trusted in your PowerShell profile if Node.js is installed, no additional permission prompts are needed.
-
-**Alternative — official PowerShell installer:**
-
-```powershell
-powershell -c "irm bun.sh/install.ps1 | iex"
-```
-
-Use this when Node.js is not installed and you don't want to install it just for Bun. Note: requires PowerShell execution policy `RemoteSigned` or `Unrestricted` (default in interactive PowerShell sessions, but corporate Group Policy may force `Restricted`).
-
-**Verify** (either path):
-
-```powershell
-bun --version
-```
-
-Expected: `1.0.0` or later. If `bun` is not on PATH after install, sign out and back in so the user PATH update takes effect.
-
-#### Windows + WSL2 or Git Bash
-
-Use the macOS/Linux instructions above. The plugin works identically inside WSL2 or Git Bash because both expose a POSIX userland — `curl -fsSL https://bun.sh/install | bash` is the standard install command in either environment.
-
-#### Alternative: Using Package Managers
-
-**macOS (Homebrew):**
-```bash
-brew install oven-sh/bun/bun
-```
-
-**Linux (Snap):**
-```bash
-sudo snap install bun-js
-```
-
-**Windows (npm)** — see the recommended path above; `npm install -g bun` is the preferred Windows-native install.
-
-**Verify Installation:**
-```bash
-# Check Bun is accessible
-which bun
-# Output: /home/username/.bun/bin/bun (or similar)
-
-# Test Bun works
-bun --version
-# Output: 1.x.x
-```
-
-**Learn More:**
-- [Official Bun Installation Guide](https://bun.sh/docs/installation)
-- [Bun Documentation](https://bun.sh/docs)
-
----
-
-### Why Bun is Required
-
-Bun is the one runtime of every script the skills run — `node` is not supported. Most workflow steps are code, not model passes:
-
-1. **The architecture reader** — the component facts, the facts ledger, the explorer and its header gate (`scripts/shared/`)
-2. **The gates** — prose, principle, diagram (`mermaid-check.js`, `label-check.js`), flow and integration checks that run after every write
-3. **The payload cutters and renderers** — section payloads for Workflow 1, analysis payloads and `render-analysis.js`, the handoff kit, the command center scene, the SA export assembler
-4. **The judge** (`scripts/judge.js`) — every semantic verdict a script asks
-5. **Document export** — `tools/docgen` (Word, PDF, Mermaid pictures)
-6. **The cross-platform helpers** (`scripts/today.ts`, `ensure-dir.ts`, `remove-glob.ts`) — dates, directories and file operations without POSIX shell-outs
-
-The routing hook (UserPromptSubmit) does not need Bun — it is native shell / cmd / PowerShell.
-
-**Without Bun installed**, every skill step that runs a script fails with:
-```
-Error: bun command not found
-```
-
----
-
-## Permissions Setup
-
-> **Required for the skills' agents.**
-
-Claude Code plugin agents cannot use `permissionMode` frontmatter (it is silently ignored). You must grant Bash and Agent permissions in your project's `.claude/settings.json`.
-
-**Why these permissions are needed:**
-- `Bash(bun *)` — every script the skills run (date stamps, directories and file operations included) is a `bun` command
-- `Bash(rg *)` — every search instruction the skills hand the model is an `rg` command
-- `Bash(git clone *)`, `Bash(git -C .cache/sa-skills/adr-catalog *)` — the institutional ADR catalog import and sync clone and refresh the catalog at that fixed project-local path, and nowhere else
-- `Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)`, `Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)` — skills read their templates and guides from the installed plugins
-- `Read(.cache/sa-skills/**)`, `Edit(.cache/sa-skills/**)` — agents stage handoff payloads, and IcePanel JSON snapshots in this project-local cache dir. Path is project-relative (no `//` prefix), so the same permission entry works identically on Linux, macOS, Windows native, WSL, and Git Bash. The dir is auto-gitignored by `setup-gitignore.ts`
-- `Read`/`Edit` on `exports/*`, `analysis/*`, `visualizations/*`, `handoffs/**`, `BIAN_ALIGNMENT.md`, `CAPABILITY_ALIGNMENT.md` — the output locations of exports, analysis reports, command-center scenes, handoff kit and capability alignment
-- `Read(**/skills/architecture-dev-handoff/SKILL.md)` — the skills locate each other's guides by pattern
-- `Agent(<plugin>:<role>:<agent>)` — allows Claude to spawn the sub-agents without manual approval prompts. Agents are addressed by the plugin that ships them and their role (`generators`, `reviewers`): `sa-skills:…` for the architecture, handoff and export agents, `sa-records:generators:*` for the ADR agents
-- `WebSearch` — the analysis agent looks up technology end-of-life dates
-
-> **Important**: Three permission format rules:
-> 1. Use `Bash(command *)` with a **space** (e.g. `Bash(bun *)`). The `*` wildcard matches across `/` path separators so absolute paths work. The `:*` colon syntax is legacy/deprecated.
-> 2. Use project-relative paths whenever possible (e.g. `Read(.cache/sa-skills/**)`) — they are OS-agnostic. A single leading `/` is treated as relative to the project root; the `//` double-slash prefix is only needed for true absolute paths and is rarely required by sa-skills as of the project-local cache migration.
-> 3. File rules are `Read(path)` and `Edit(path)` only. `Read` covers every file-reading tool (Read, Glob, Grep) and `Edit` every file-editing tool (Edit, Write). Claude Code ignores a `Write(path)` or `Glob(path)` rule and warns at startup; `/setup` rewrites any it finds (8.118.3).
-
-### Add Permissions to Your Project Settings
-
-Create or update `.claude/settings.json` in your project root:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(bun *)",
-      "Bash(rg *)",
-      "Bash(git clone *)",
-      "Bash(git -C .cache/sa-skills/adr-catalog *)",
-      "Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)",
-      "Read(~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/**)",
-      "Read(**/skills/architecture-dev-handoff/SKILL.md)",
-      "Read(.cache/sa-skills/**)",
-      "Edit(.cache/sa-skills/**)",
-      "Agent(sa-analysis:reviewers:architecture-analysis-agent)",
-      "Agent(sa-skills:reviewers:principle-quality-reviewer)",
-      "Agent(sa-delivery:generators:ekonte-generator)",
-      "Agent(sa-delivery:generators:settei-generator)",
-      "Agent(sa-delivery:generators:seam-generator)",
-      "Agent(sa-skills:generators:segment-runner)",
-      "Agent(sa-records:generators:adr-writer)",
-      "Agent(sa-delivery:generators:cutsheet-generator)",
-      "Agent(sa-delivery:generators:handoff-asset-generator)",
-      "Agent(sa-delivery:generators:docs-export-generator)",
-      "Edit(exports/*)",
-      "Read(exports/*)",
-      "Edit(analysis/*)",
-      "Read(analysis/*)",
-      "Edit(visualizations/*)",
-      "Read(visualizations/*)",
-      "Edit(handoffs/**)",
-      "Read(handoffs/**)",
-      "Edit(handoffs/.manifest.json)",
-      "Read(handoffs/.manifest.json)",
-      "Edit(BIAN_ALIGNMENT.md)",
-      "Read(BIAN_ALIGNMENT.md)",
-      "WebSearch"
-    ]
-  }
-}
-```
-
-> The list above is kept in sync with `.claude/settings.json.example` in the plugin repo,
-> which is what `/sa-skills:setup` merges for you. Prefer running that command over
-> copying this block by hand.
-
-If the file already exists, merge the `permissions.allow` array with any existing entries.
-
-**Restart Claude Code** after saving to apply the permissions.
-
----
-
-## Understanding Marketplaces & Plugins
-
-**What is a Marketplace?**
-
-A Claude Code Marketplace is a catalog repository containing metadata about available plugins. You add a marketplace once, then can discover and install any plugins listed in it.
-
-**What is a Plugin?**
-
-A Claude Code Plugin is a set of skills, agents and tools that extend Claude Code's functionality. The `shadowx4fox-solution-architect-marketplace` publishes six plugins (and the optional `sa-ux`), 15 skills and 12 sub-agents between them:
-
-| Plugin | Version | Ships |
-|---|---|---|
-| `sa-skills` | 10.1.0 | Architecture authoring, the component index, explorer headers, the judge and docgen — depends on the other five |
-| `sa-records` | 10.1.0 | ADRs (including catalog mode for an institutional ADR catalog) and TDRs |
-| `sa-requirements` | 10.1.0 | The Product Owner Specification (`architecture-readiness`) and its BIAN alignment (`architecture-capability-alignment`: BIAN, the cross-industry map, or a pack's framework) |
-| `sa-analysis` | 10.1.0 | The ten risk analyses and the Security Posture (`architecture-analysis`), and PO Spec coverage (`architecture-traceability`) — reads the architecture through sa-skills |
-| `sa-delivery` | 10.1.0 | The four-part handoff kit and its validated assets (`architecture-dev-handoff`), Word exports (`architecture-docs-export`), the IcePanel sync (`architecture-icepanel-sync`) and the MCP index bundle with build packs (`architecture-index-export`) — reads the architecture through sa-skills, renders through its `tools/docgen`, validates contracts with its npm packages |
-| `sa-visualization` | 10.1.0 | The 3D Architecture Command Center (`architecture-command-center`) — Alia, findings on the stage, the load simulation — reads the architecture through sa-skills |
-
-Skills are invoked by the plugin that ships them: `sa-skills:architecture-docs`, `sa-records:architecture-definition-record`, `sa-records:technical-debt-records`, `sa-requirements:architecture-readiness`, `sa-requirements:architecture-capability-alignment`, `sa-analysis:architecture-analysis`, `sa-analysis:architecture-traceability`, `sa-delivery:architecture-dev-handoff`, `sa-delivery:architecture-docs-export`, `sa-delivery:architecture-icepanel-sync`, `sa-delivery:architecture-index-export`, `sa-visualization:architecture-command-center`.
-
-**Learn More:**
-- [Claude Code Marketplace Documentation](https://docs.anthropic.com/claude/docs/claude-code-marketplaces)
-- [Plugin Development Guide](https://docs.anthropic.com/claude/docs/claude-code-plugins)
-
----
-
-## Installation Methods
-
-### Method 1: Using Claude Code Marketplace (Recommended)
-
-This is the easiest and official method for installing plugins in Claude Code.
-
-#### Step 1: Register Marketplace (One-Time Setup)
-
-**IMPORTANT:** Marketplace registration is a manual security step. You must explicitly register the marketplace before installing plugins.
-
-**Option A: Using Command (Quick)**
-
-In Claude Code, run:
-
-```
-/plugin marketplace add shadowX4fox/solutions-architect-skills
-```
-
-This registers the `shadowx4fox-solution-architect-marketplace` which is hosted in this plugin repository.
-
-**Option B: Using Settings File (Project Configuration)**
-
-Create or update `.claude/settings.json` in your project:
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "shadowx4fox-solution-architect-marketplace": {
-      "source": {
-        "source": "github",
-        "repo": "shadowX4fox/solutions-architect-skills"
-      }
-    }
-  }
-}
-```
-
-Restart Claude Code after adding the marketplace.
-
-**Verify Marketplace Registration:**
-
-```
-/plugin marketplace list
-```
-
-You should see `shadowx4fox-solution-architect-marketplace` in the list.
-
-#### Step 2: Install Plugin
-
-After registering the marketplace, install the plugin:
-
-```
-/plugin install sa-skills@shadowx4fox-solution-architect-marketplace
-```
-
-`sa-skills` declares `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery` and `sa-visualization` as dependencies, so this one install brings all six plugins.
-
-**OR** enable in your project's `.claude/settings.json`:
-
-```json
-{
-  "enabledPlugins": {
-    "sa-skills@shadowx4fox-solution-architect-marketplace": true,
-    "sa-records@shadowx4fox-solution-architect-marketplace": true,
-    "sa-requirements@shadowx4fox-solution-architect-marketplace": true,
-    "sa-analysis@shadowx4fox-solution-architect-marketplace": true,
-    "sa-delivery@shadowx4fox-solution-architect-marketplace": true,
-    "sa-visualization@shadowx4fox-solution-architect-marketplace": true
-  }
-}
-```
-
-Claude Code will automatically install the plugins.
-
-**Installing one plugin alone** — two roles do not need the architecture plugin:
-
-| Who | Install | What works |
-|---|---|---|
-| A Product Owner, before any architecture exists | `/plugin install sa-requirements@shadowx4fox-solution-architect-marketplace` | `sa-requirements:architecture-readiness` — elicit, score and write the PO Spec; `sa-requirements:architecture-capability-alignment` — map it onto a capability framework (BIAN, cross-industry, a pack's) |
-| An institutional ADR catalog repository (no `ARCHITECTURE.md`) | `/plugin install sa-records@shadowx4fox-solution-architect-marketplace` | `sa-records:architecture-definition-record` in catalog mode, and `sa-records:technical-debt-records` |
-
-Their optional steps that use sa-skills' tools — prose checks, the PO Spec distribution PDF (rendered by `tools/docgen`), the PO Spec sync with the architecture — warn or skip when sa-skills is absent, and capability alignment, whose judge is sa-skills', ranks by term overlap instead and says so. `sa-analysis`, `sa-delivery` and `sa-visualization` are not installed alone: they need sa-skills at runtime (the judge and the architecture reader).
-
-#### Step 3: Verify Installation
-
-```bash
-claude plugin list
-```
-
-You should see six plugins from the marketplace, each `✔ enabled`, among them:
-```
-  ❯ sa-records@shadowx4fox-solution-architect-marketplace
-    Version: 10.1.0
-    …
-  ❯ sa-requirements@shadowx4fox-solution-architect-marketplace
-    Version: 10.1.0
-    …
-  ❯ sa-skills@shadowx4fox-solution-architect-marketplace
-    Version: 10.1.0
-    …
-```
-
-A plugin that shows `✘ failed to load — Dependency "<name>@…" is not installed` is missing a dependency: install the plugin it names.
-
-`claude plugin details sa-skills@shadowx4fox-solution-architect-marketplace` lists a plugin's skills, agents and commands.
-
-**Advantages:**
-- Official Claude Code installation method
-- No manual file operations needed
-- Integrated with Claude Code plugin system
-- Automatic update discovery
-- Secure: Explicit marketplace registration required
-
-**Note:** The marketplace is hosted within the plugin repository at `.claude-plugin/marketplace.json`. This is a security feature - users must explicitly trust and add marketplaces before installing plugins from them.
-
----
-
-### Method 2: Direct Git Clone
-
-> **Legacy layout.** A clone into `~/.claude/plugins/solutions-architect-skills/` predates the four-plugin marketplace: it is not recorded in Claude Code's install registry, so neither the dependency resolution nor `plugin-root.ts` (which every skill uses to find its plugin) sees it. Use Method 1 unless you are working on the plugin itself.
-
-Clone the repository directly to your plugins directory.
-
-#### Step 1: Clone Repository
-
-```bash
-git clone https://github.com/shadowX4fox/solutions-architect-skills.git ~/.claude/plugins/solutions-architect-skills
-```
-
-This clones the repository directly to the correct location.
-
-#### Step 2: Restart Claude Code
-
-Completely restart Claude Code to load the new plugin.
-
-#### Step 3: Verify Installation
-
-In Claude Code, run:
-
-```
-/plugin list
-```
-
-You should see `sa-skills` at version 10.1.0.
-
-**To Update Later:**
-```bash
-cd ~/.claude/plugins/solutions-architect-skills
-git pull origin main
-# Restart Claude Code
-```
-
-**Advantages:**
-- No ZIP download or extraction needed
-- Easy to update with `git pull`
-- Maintains Git connection for contributors
-
----
-
-### Method 3: Download from GitHub Releases
-
-> **Legacy layout.** The ZIP installs into the same `~/.claude/plugins/solutions-architect-skills/` layout as Method 2, with the same limits. The ZIP carries the three dependency plugins under `plugins/`, but nothing installs them as plugins. Use Method 1 unless you have no access to GitHub from Claude Code.
-
-Download and install from a release ZIP file.
-
-#### Step 1: Download Release Package
-
-Visit the [releases page](https://github.com/shadowx4fox/solutions-architect-skills/releases) and download the latest version:
-
-Set `VERSION` to the tag you are installing — the current release is `10.1.0`:
-
-```bash
-VERSION=10.1.0
-
-# Using wget
-wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v${VERSION}/solutions-architect-skills-v${VERSION}.zip
-
-# Or using curl
-curl -LO https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v${VERSION}/solutions-architect-skills-v${VERSION}.zip
-```
-
-#### Step 2: Extract the ZIP File
-
-```bash
-unzip solutions-architect-skills-v${VERSION}.zip
-```
-
-This creates a `solutions-architect-skills/` directory with all plugin files.
-
-#### Step 3: Install to Claude Code Plugins Directory
-
-```bash
-# Create plugins directory if it doesn't exist
-mkdir -p ~/.claude/plugins
-
-# Move plugin to Claude plugins directory
-mv solutions-architect-skills ~/.claude/plugins/
-```
-
-#### Step 4: Restart Claude Code
-
-Completely restart Claude Code to load the new plugin.
-
-#### Step 5: Verify Installation
-
-In Claude Code, run:
-
-```
-/plugin list
-```
-
-You should see `sa-skills` at version 10.1.0.
-
-**Advantages:**
-- Familiar download and extract process
-- Works without Git installed
-- Official release packages
-- Includes SHA256 checksum for verification
-
----
-
-## Verification Checklist
-
-After installation, verify all prerequisites and skills are available:
-
-### 1. Verify Bun Installation
-
-**IMPORTANT:** Check Bun is installed before using the plugin:
-
-```bash
-bun --version
-```
-
-**Expected output:**
-- `1.0.0` or later
-
-**If Bun is not installed:**
-- See [Installing Bun](#installing-bun) section above
-- No skill will work without Bun
-
-### 2. Check Plugin Installation
-
-```bash
-claude plugin list
-```
-
-**Expected output:**
-- Six plugins from `shadowx4fox-solution-architect-marketplace`, each `✔ enabled` at 10.1.0: `sa-skills`, `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery` and `sa-visualization` (the plugin ids are `sa-*`; the repository is `solutions-architect-skills`)
-- A plugin installed alone (`sa-requirements` or `sa-records`) appears by itself
-
-### 3. Verify Architecture Readiness Skill
-
-```
-/skill sa-requirements:architecture-readiness
-```
-
-**Expected behavior:**
-- Skill activates successfully
-- You see prompts about creating Product Owner Specifications
-
-### 4. Verify Architecture Docs Skill
-
-```
-/skill sa-skills:architecture-docs
-```
-
-**Expected behavior:**
-- Skill activates successfully
-- You see prompts about ARCHITECTURE.md creation
-
-### 5. Check Plugin Contents and Location
-
-List what each plugin ships:
-
-```bash
-claude plugin details sa-skills@shadowx4fox-solution-architect-marketplace
-claude plugin details sa-records@shadowx4fox-solution-architect-marketplace
-```
-
-Each plugin is installed to `~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/<plugin>/<version>/`. Print the directory in use for a plugin (read from Claude Code's install registry; honours `CLAUDE_CONFIG_DIR`):
-
-```bash
-bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts                          # sa-skills
-bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-records
-```
-
-It warns on stderr when a newer version is on the machine than the one the session loaded.
-
-### 6. Verify the Export Toolchain
-
-Word and PDF export rest on four packages, and three of them fail quietly — the export succeeds and
-the deliverable is degraded. Run the report from the sa-skills plugin directory:
-
-```bash
-cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)"
-bun install                     # installs docx, pdfmake and mermaid-cli
-bun scripts/setup-docgen.ts
-```
-
-**Expected:**
-```
-Export toolchain (tools/docgen):
-
-  ✓ docx (Word output) — installed
-  ✓ pdfmake (PDF output) — installed
-  ✓ mermaid-cli (diagrams as pictures) — …/node_modules/.bin/mmdc
-  ✓ browser for Puppeteer (end-to-end render) — rendered a 244×348 PNG
-
-  Every diagram in an export renders as a picture.
-```
-
-| Line | Meaning when it is `⬜` |
+| Step | What it does |
 |---|---|
-| `docx` | **no `.docx` export at all** — this one is required |
-| `pdfmake` | `--format pdf` fails; the automatic PO Spec distribution PDF is skipped with a warning |
-| `mermaid-cli` | every diagram exports as monospace source instead of a picture |
-| browser | `mmdc` is installed but cannot render — diagrams still export as source |
+| 1–4. Permissions | Merges the plugin's `.claude/settings.json.example` into the project's `.claude/settings.json`: permission grants, the enabled plugins and the marketplace. Grants for retired agents are removed and reported. |
+| 5. `CLAUDE.md` | Writes a marked block into `CLAUDE.md` telling Claude where the architecture lives (`docs/`, `docs/components/`, `adr/`, `handoffs/`). Re-runs replace only that block. |
+| 6. `.gitignore` | Adds `exports/`, `.cache/sa-skills/`, `CLAUDE.md` and `.claude/settings.json`. If one of those files is already tracked, it prints the `git rm --cached` command. |
+| 7. Export toolchain | Reports `docx`, `pdfmake`, mermaid-cli and the browser, and renders one test diagram. A report, not a gate: only a missing `docx` fails. |
+| 8. ripgrep | Reports `rg` and PCRE2 support. When a system `rg` exists, sets `USE_BUILTIN_RIPGREP=0` in the project settings so Claude Code's Grep tool uses it too. |
+| 9. The judge | Writes `SA_JUDGE=agent` into the project settings when no scope sets it, and reports the engine in force (see [§ 5](#5-the-judge)). |
+| 10. Contract validators | Validates a sample OpenAPI, AsyncAPI, GraphQL, Avro, DDL and Protobuf contract. **Required** for the handoff kit; the fix is `bun install` in the plugin directory. |
+| 11. Institution packs | Lists the packs found and what each provides (see [§ 4](#4-institution-packs)). Informational. |
+| 12. Restart | Reminds you to restart Claude Code so the settings load. |
 
-`pdfmake` and `@mermaid-js/mermaid-cli` are `optionalDependencies`, so `bun install` fetches them and
-a machine that cannot build one still gets a working Word path. **Bun does not run Puppeteer's
-post-install browser download**, so the browser is the one piece `bun install` cannot supply:
+`.claude/settings.json` is gitignored on purpose: it holds each developer's own settings. Every developer runs
+`/sa-skills:setup` on their own machine.
 
-```bash
-bunx puppeteer browsers install chrome
-# …or point at a browser already on the machine:
-export PUPPETEER_EXECUTABLE_PATH="C:/Program Files/Google/Chrome/Application/chrome.exe"
-```
+### The permissions it grants
 
-The browser line is a **real render**, not a presence check — an `mmdc` that resolves and cannot reach
-a browser passes any lookup and fails on the first export. `/setup` runs this report at Step 7.
+Plugin agents cannot raise their own permissions, so the grants live in the project settings:
 
-Treat the last two lines as required on any machine that produces stakeholder briefings: the Solution
-Architecture briefing opens on a single C4 Level 1 diagram, and a reader who gets `flowchart TB` in
-Courier New gets nothing.
+| Group | Grants | Why |
+|---|---|---|
+| Shell | `Bash(bun *)`, `Bash(rg *)` | Every script is a `bun` command; every search is `rg` |
+| git | `Bash(git clone *)`, `Bash(git -C .cache/sa-skills/adr-catalog *)` | Importing and refreshing an institutional ADR catalog, in one fixed folder |
+| Plugin files | `Read(~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/**)` and the matching `cache/**` path | Skills read their own templates and guides |
+| Scratch | `Read` / `Edit` on `.cache/sa-skills/**` | Payloads, the facts ledger, judge worksheets |
+| Outputs | `Read` / `Edit` on `exports/*`, `analysis/*`, `visualizations/*`, `handoffs/**`, `BIAN_ALIGNMENT.md` | Where the skills write |
+| Agents | `Agent(…)` for the ten sub-agents the skills dispatch | Section writers, reviewers, handoff generators, the export translator |
+| Web | `WebSearch` | Looking up facts such as end-of-life dates |
 
-### 8. Detect ripgrep
+Anything else asks you first, as Claude Code normally does.
 
-Every search instruction the plugin hands the model is an `rg` command run through Bash, and
-Claude Code's built-in Grep tool ships its own ripgrep unless `USE_BUILTIN_RIPGREP=0` points it at
-the one on PATH. `/sa-skills:setup` Step 8 runs the report and configures the project from it:
+## 4. Institution packs
 
-```bash
-bun scripts/setup-ripgrep.ts /path/to/your/project/.claude/settings.json
-```
+The base plugins are generic. What belongs to one organization ships as an **institution pack**: a separate plugin,
+usually from that organization's private marketplace, with an `sa-pack.json` at its root. A pack can add a design
+language standard for diagrams, a licensed reference model, capability frameworks, architecture types, brand skins
+for the command center and default settings. The base finds installed packs on its own.
 
-**Expected:**
-```
-ripgrep
-  ✅ ripgrep on PATH: /usr/bin/rg — ripgrep 14.1.0
-  ✅ PCRE2 in ripgrep: PCRE2 10.42 is available (JIT is available)
-  ✅ Grep tool binary: USE_BUILTIN_RIPGREP=0 written to the project settings — the Grep tool uses /usr/bin/rg. Scopes — …
-  ✅ Bash(rg *) in project permissions: present
-```
-
-With no ripgrep on PATH the first line carries the install command for your package manager
-(`sudo apt-get install ripgrep`, `brew install ripgrep`, `winget install BurntSushi.ripgrep.MSVC`, …),
-nothing is written, and the skills' searches fail with `rg: command not found` until it is there —
-the built-in Grep tool keeps working on the bundled binary either way. A value already set at user
-scope (`~/.claude/settings.json`) or in the project is reported and never overridden. `--dry-run`
-reports without writing, `--json` is the structured form, `--strict` makes a missing ripgrep a
-non-zero exit for CI.
-
-## Troubleshooting
-
-### Issue: Bun Not Found
-
-**Symptom:** A skill step fails with `bun: command not found`
-
-**Solutions:**
-
-1. **Install Bun:**
-   ```bash
-   curl -fsSL https://bun.sh/install | bash
-   ```
-
-2. **Add Bun to PATH (if installed but not found):**
-   ```bash
-   # Add to ~/.bashrc, ~/.zshrc, or ~/.profile
-   export BUN_INSTALL="$HOME/.bun"
-   export PATH="$BUN_INSTALL/bin:$PATH"
-
-   # Reload shell configuration
-   source ~/.bashrc  # or ~/.zshrc
-   ```
-
-3. **Verify Bun installation:**
-   ```bash
-   which bun
-   bun --version
-   ```
-
-4. **Restart terminal:**
-   - Close and reopen terminal
-   - Verify `bun --version` works
-
-### Issue: Bun Installed But Not Working
-
-**Symptom:** `bun --version` shows version but a skill step fails
-
-**Solutions:**
-
-1. **Test Bun directly** with a one-line script:
-   ```bash
-   bun -e 'console.log("ok")'
-   ```
-
-2. **Check that sa-skills is installed** — the other plugins need it at runtime (the judge and the architecture reader):
-   ```bash
-   claude plugin list
-   ```
-
-3. **Reinstall Bun:**
-   ```bash
-   curl -fsSL https://bun.sh/install | bash
-   ```
-
-### Issue: Plugin Not Appearing in List
-
-**Symptom:** `claude plugin list` doesn't show `sa-skills` (or one of `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery`, `sa-visualization`), or shows it `✘ failed to load`
-
-**Solutions:**
-
-1. **Verify the marketplace is registered:**
-   ```bash
-   claude plugin marketplace list
-   ```
-   - `shadowx4fox-solution-architect-marketplace` must appear; if not, follow Method 1 Step 1
-
-2. **Install what is missing:**
-   ```bash
-   claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
-   ```
-   - `✘ failed to load — Dependency "<name>@…" is not installed` names the plugin to install: `claude plugin install <name>@shadowx4fox-solution-architect-marketplace` with the same scope
-
-3. **Reload or restart Claude Code:**
-   - Run `/reload-plugins` in the running session, or close all Claude Code windows/instances and restart
-
-### Issue: Skills Not Activating
-
-**Symptom:** `/skill architecture-readiness` doesn't work
-
-**Solutions:**
-
-1. **Verify the plugin that ships the skill is installed** — `architecture-readiness` ships in `sa-requirements`:
-   ```bash
-   claude plugin details sa-requirements@shadowx4fox-solution-architect-marketplace
-   ```
-
-2. **Try the full skill name** (the plugin that ships it, then the skill):
-   ```
-   /skill sa-requirements:architecture-readiness
-   ```
-
-3. **Reinstall the plugin:**
-   ```bash
-   claude plugin uninstall sa-requirements@shadowx4fox-solution-architect-marketplace
-   claude plugin install sa-requirements@shadowx4fox-solution-architect-marketplace
-   ```
-   then `/reload-plugins`
-
-### Issue: Permission Denied Errors
-
-**Symptom:** Errors when running skills or generating documents
-
-**Solutions:**
-
-1. **Check the permission grants** — a prompt or a denial on a Bash, Read, Write or Agent call means the grant is missing from `.claude/settings.json`; run `/sa-skills:setup`, which merges the grants from `.claude/settings.json.example` (see [Permissions Setup](#permissions-setup))
-
-2. **Fix output directory permissions:**
-   ```bash
-   # If generating documents in the current directory
-   chmod 755 .
-   ```
-
-### Issue: Agents Prompt for Permission
-
-**Symptom:** A skill prompts you to approve Bash commands or agent spawning for each agent.
-
-**Cause:** Plugin agents cannot use `permissionMode: bypassPermissions` in frontmatter — it is silently ignored by Claude Code. Bash and Agent permissions must be granted via `.claude/settings.json`.
-
-**Solution:** Run `/sa-skills:setup`, or create or update `.claude/settings.json` in your project root with the full permissions block from the [Permissions Setup](#permissions-setup) section above. Then restart Claude Code.
-
----
-
-### Issue: Old Version Persisting
-
-**Symptom:** Plugin still shows old version after update
-
-**Solutions:**
-
-1. **Update each plugin by name** — `claude plugin update` updates only the plugin it names (see [Upgrading to New Version](#upgrading-to-new-version))
-
-2. **Reload the session:** a running session keeps the version it loaded at startup; run `/reload-plugins` or restart Claude Code
-
-3. **Check which copy a skill resolves:** `plugin-root.ts` (see [Verification Checklist](#verification-checklist) step 5) prints the directory in use and warns when a newer version is on the machine. A project-scope install overrides the user-scope one for that project — update it with `--scope project`
-
-## Uninstallation
-
-To remove the plugins, uninstall each by name (sa-skills first, since it depends on the other five):
+Install a pack like any plugin:
 
 ```bash
-claude plugin uninstall sa-skills@shadowx4fox-solution-architect-marketplace
-claude plugin uninstall sa-analysis@shadowx4fox-solution-architect-marketplace
-claude plugin uninstall sa-delivery@shadowx4fox-solution-architect-marketplace
-claude plugin uninstall sa-visualization@shadowx4fox-solution-architect-marketplace
-claude plugin uninstall sa-requirements@shadowx4fox-solution-architect-marketplace
-claude plugin uninstall sa-records@shadowx4fox-solution-architect-marketplace
+claude plugin marketplace add <your organization's marketplace repository>
+claude plugin install <pack-name>@<marketplace> --scope user     # or --scope project, in one repository
 ```
 
-Pass `--scope project` for a project-scope install. For the legacy direct-clone or ZIP layout, remove `~/.claude/plugins/solutions-architect-skills` instead.
+To see what is in force, run these from the project directory, where `<sa_skills_dir>` is the output of `plugin-root.ts`:
 
-Verify removal:
 ```bash
-claude plugin list
+bun <sa_skills_dir>/scripts/shared/packs.js         # the packs found and what each provides
+bun <sa_skills_dir>/scripts/shared/frameworks.js    # the capability frameworks available and the one declared
+bun <sa_skills_dir>/scripts/shared/arch-types.js    # the architecture types available, the default marked
 ```
 
-No `sa-*` plugin from `shadowx4fox-solution-architect-marketplace` should appear.
+With no pack installed, `packs.js` prints something like:
 
-## Upgrading to New Version
+```text
+sa-skills 10.1.0 · no institution pack
+  design language: none (fallback mode)
+  BIAN landscape:  base — …/architecture-capability-alignment/references/bian-v14
+```
 
-### Marketplace upgrade (recommended)
+No pack is a normal, fully working setup. "Fallback mode" means diagrams use the standard Mermaid and C4 formats with
+no organization-specific labelling rules. The base ships two capability frameworks (BIAN and CROSS-INDUSTRY) and five
+architecture types (Enterprise, Microservices, 3-Tier, N-Layer, BIAN). A project declares its framework once:
 
-`claude plugin update` updates **only the plugin it names**: it neither updates the installed dependencies nor installs a
-dependency a new version adds. Update each plugin by name, with the scope it was installed at:
+```bash
+bun <sa_skills_dir>/scripts/shared/frameworks.js --declare <id|none> --project .
+```
+
+Writing a pack, and the full contract: [INSTITUTION_PACKS.md](INSTITUTION_PACKS.md).
+
+## 5. The judge
+
+Some checks need a judgement that code cannot make, for example which component a name in a sentence refers to.
+Each such question goes through one judge, `scripts/judge.js`. The engine is set with `SA_JUDGE`:
+
+| Engine | How it answers | Needs |
+|---|---|---|
+| `agent` (default) | Writes a worksheet under `.cache/sa-skills/judge/`. The session hands it to a small sub-agent and re-runs the command. Nothing leaves the machine. | Nothing |
+| `typesafe` | Jev, over the TypeSafe API | `TYPESAFE_API_KEY` |
+| `clef` | Cloudflare's Clef on Workers AI | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` |
+
+An item no judge has answered is reported as **undecided**, never guessed. The two API engines send the judged items
+off the machine, so choosing one is your decision. Keep API keys in your shell profile (`~/.bashrc`, `~/.zshrc`),
+above any "not interactive" guard, and **never** in a versioned file such as `.claude/settings.json`.
+`/sa-skills:setup` (Step 9) reports what is in force; `bun <sa_skills_dir>/scripts/setup-judge.ts .` runs that report alone.
+
+## 6. Update and uninstall
+
+### Update
+
+`claude plugin update` updates **only the plugin it names**. Update the marketplace, then each plugin, with the scope
+you installed at:
 
 ```bash
 claude plugin marketplace update shadowx4fox-solution-architect-marketplace
-claude plugin update sa-skills@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin update sa-records@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin update sa-requirements@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin update sa-analysis@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin update sa-delivery@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin update sa-visualization@shadowx4fox-solution-architect-marketplace --scope user
+for p in sa-skills sa-records sa-requirements sa-analysis sa-delivery sa-visualization; do
+  claude plugin update "$p@shadowx4fox-solution-architect-marketplace" --scope user
+done
 claude plugin list
 ```
 
-Use `--scope project` for a project-scope install. Then:
+Then:
 
-1. **Install any dependency the list names as missing.** If `claude plugin list` shows sa-skills as
-   `✘ failed to load — Dependency "<name>@shadowx4fox-solution-architect-marketplace" is not installed`, run
-   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace` with the same scope — `sa-records`
-   (a dependency since 8.97.0), `sa-requirements` (since 8.98.0), `sa-analysis` (since 8.125.0), `sa-delivery` (since 8.128.0), `sa-visualization` (since 8.129.0).
-2. **Coming from 8.96.0**, uninstall `sa-adr`, which 8.97.0 renamed `sa-records`:
-   `claude plugin uninstall sa-adr@shadowx4fox-solution-architect-marketplace`.
-3. **Coming from 8.99.0 or earlier**, BIAN alignment now ships in `sa-requirements` (`sa-requirements:architecture-capability-alignment`):
-   the `sa-requirements` update above is what brings it — sa-skills 8.100.0 no longer carries it.
-   **Coming from 8.124.0 or earlier**, the analyses and traceability ship in `sa-analysis`
-   (`sa-analysis:architecture-analysis`, `sa-analysis:architecture-traceability`): install it as in step 1.
-   **Coming from 8.127.0 or earlier**, the handoff kit, the Word export and the IcePanel sync ship in
-   `sa-delivery` (`sa-delivery:architecture-dev-handoff`, `…:architecture-docs-export`, `…:architecture-icepanel-sync`): install it as in step 1. `bun install` stays in sa-skills' directory — the contract checks load their validators from there.
-   **Coming from 8.128.0 or earlier**, the command center ships in `sa-visualization`
-   (`sa-visualization:architecture-command-center`): install it as in step 1.
-4. Run `/reload-plugins`, then `/setup`, which updates the agent permission grants.
+1. **Install any new dependency.** An update does not install a dependency that a new version adds. If
+   `claude plugin list` shows `Dependency "<name>@…" is not installed`, run
+   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace` with the same scope.
+2. **Re-run `bun install`** in the plugin directory ([§ 2](#install-the-npm-packages)). Each version is a new directory.
+3. **Reload.** A running session keeps the version it loaded at startup. Run `/reload-plugins` or restart Claude Code.
+4. **Re-run `/sa-skills:setup`** in each project, so the permission grants match the new version.
 
-### ZIP upgrade (legacy layout)
+What changed in each release: [CHANGELOG.md](../CHANGELOG.md).
 
-1. **Download new version:**
-   ```bash
-   VERSION=10.1.0   # the release you are upgrading to
-   wget https://github.com/shadowx4fox/solutions-architect-skills/releases/download/v${VERSION}/solutions-architect-skills-v${VERSION}.zip
-   ```
+### Uninstall
 
-2. **Backup current configuration (optional):**
-   ```bash
-   cp -r ~/.claude/plugins/solutions-architect-skills ~/.claude/plugins/solutions-architect-skills-backup
-   ```
-
-3. **Remove old version:**
-   ```bash
-   rm -rf ~/.claude/plugins/solutions-architect-skills
-   ```
-
-4. **Install new version:**
-   ```bash
-   unzip solutions-architect-skills-v${VERSION}.zip
-   mv solutions-architect-skills ~/.claude/plugins/
-   ```
-
-5. **Restart Claude Code**
-
-6. **Verify new version:**
-   ```
-   /plugin list
-   ```
-
-### Version-Specific Upgrade Notes
-
-Check [CHANGELOG.md](../CHANGELOG.md) for version-specific upgrade instructions and breaking changes.
-
-## Platform-Specific Notes
-
-Installed plugins live under `~/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/<plugin>/<version>/`, and the marketplace clone under `~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/` (under `$CLAUDE_CONFIG_DIR/plugins/` when that variable is set).
-
-### macOS
-
-- Plugin directory: `~/.claude/plugins/`
-- No additional dependencies required
-- Works on Apple Silicon (M1/M2) and Intel Macs
-
-### Linux
-
-- Plugin directory: `~/.claude/plugins/`
-- Ensure `unzip` is installed for the ZIP method: `sudo apt install unzip` (Ubuntu/Debian)
-- If using Snap version of Claude Code, plugin directory may differ
-
-### Windows (WSL2)
-
-- Use WSL2 for best compatibility
-- Plugin directory: `~/.claude/plugins/` (within WSL)
-- Windows native path: `\\wsl$\Ubuntu\home\<username>\.claude\plugins\`
-
-## Advanced Configuration
-
-### Custom Installation Location
-
-The two subsections below apply to the legacy direct-clone / ZIP layout only; a marketplace install's location is managed by Claude Code (set `CLAUDE_CONFIG_DIR` to move the whole config directory).
-
-If you need to install to a custom location:
-
-1. **Install to custom directory:**
-   ```bash
-   mkdir -p /path/to/custom/location
-   mv solutions-architect-skills /path/to/custom/location/
-   ```
-
-2. **Create symlink:**
-   ```bash
-   ln -s /path/to/custom/location/solutions-architect-skills ~/.claude/plugins/solutions-architect-skills
-   ```
-
-3. **Restart Claude Code**
-
-### Multiple Environments
-
-To use different versions in different environments:
+Uninstall `sa-skills` first, since it depends on the others:
 
 ```bash
-# Development environment
-ln -s ~/dev/solutions-architect-skills-dev ~/.claude/plugins/solutions-architect-skills
-
-# Production environment
-ln -s ~/prod/solutions-architect-skills-v8.99.0 ~/.claude/plugins/solutions-architect-skills
+for p in sa-skills sa-analysis sa-delivery sa-visualization sa-requirements sa-records; do
+  claude plugin uninstall "$p@shadowx4fox-solution-architect-marketplace"
+done
 ```
 
-Switch by changing the symlink and restarting Claude Code.
+Uninstall `sa-ux` the same way if you installed it. Add `--scope project` for a project-scope install. Your architecture documents are never touched. The `CLAUDE.md` block,
+the `.gitignore` entries and the grants in `.claude/settings.json` stay until you remove them by hand.
 
-## Getting Help
+## 7. Optional extras
 
-If you encounter issues not covered here:
+### context7
 
-1. **Check Troubleshooting Guide:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-2. **Review Examples:** [examples/](../examples/) directory
-3. **Search Issues:** [GitHub Issues](https://github.com/shadowx4fox/solutions-architect-skills/issues)
-4. **Open New Issue:** Provide detailed error messages and system info
-
-## Next Steps
-
-After successful installation:
-
-1. **Read Quick Start:** [QUICK_START.md](QUICK_START.md) - the first workflow, step by step
-2. **Learn Workflow:** [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md) - Complete guide
-3. **Explore Examples:** Check `examples/` directory for sample outputs
-
----
-
-**Installation complete!** You're ready to transform your architecture documentation workflow.
-## Optional extras
-
-### Optional: Enable context7
-
-[context7](https://context7.com) provides up-to-date library documentation to improve generated assets (OpenAPI specs, K8s manifests, DDL, etc.). Two skills use it when available:
-
-| Skill | Usage |
-|-------|-------|
-| `architecture-dev-handoff` | Fetches current spec docs (OpenAPI, AsyncAPI, Kubernetes, Protobuf, Avro, DDL, Redis) to validate generated asset syntax |
-| `architecture-docs` | Fetches framework docs for technologies in new component files; presents a Technology Context Brief |
-
-**MCP server setup (recommended):**
-
-Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["@upstash/context7-mcp"]
-    }
-  }
-}
-```
-
-**Alternative — automatic setup via CLI:**
+[context7](https://context7.com) supplies current library documentation. When it is configured, `architecture-docs`
+uses it for the technologies in new component files, and `architecture-dev-handoff` uses it to check the syntax of the
+contracts it generates (OpenAPI, AsyncAPI, Protobuf, Avro, DDL). It informs syntax only: every value still comes from
+your architecture documents. Without it, every skill works the same, with no warning.
 
 ```bash
-npx ctx7 setup --claude
+claude mcp add context7 -- npx -y @upstash/context7-mcp
 ```
 
-This authenticates via OAuth, generates an API key, and configures context7 automatically.
+### VS Code
 
-For headless/remote environments, pass your API key directly:
+| Extension | Why |
+|---|---|
+| [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) | Run the skills from the editor |
+| [Mermaid Chart](https://marketplace.visualstudio.com/items?itemName=MermaidChart.vscode-mermaid-chart) | Live preview of the Mermaid diagrams in `docs/*.md` (the plugin targets Mermaid v11.4.1) |
+
+## 8. Verify the install
 
 ```bash
-npx ctx7 setup --claude --api-key YOUR_API_KEY
+claude plugin list
 ```
 
-Generate your API key at the [context7 dashboard](https://context7.com).
+All six `sa-*` plugins from `shadowx4fox-solution-architect-marketplace` show as enabled, at the same version.
 
-> context7 is fully optional. All skills complete successfully without it — no errors or warnings.
+```bash
+bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts
+```
 
-### Recommended VS Code Setup
+This prints the `sa-skills` directory the skills use, read from Claude Code's install registry (a project-scope
+install first, then user scope). Add `--plugin <name>` for another plugin of the suite, or `--json` for the details. On
+stderr it warns when a newer version is installed than the one in use. Run the `claude plugin update` it suggests, then
+`/reload-plugins`.
 
-For the best experience working with this plugin, install these VS Code extensions:
-
-| Extension | Publisher | Purpose |
-|-----------|-----------|---------|
-| [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) | Anthropic | Run Claude Code skills directly from the editor |
-| [Mermaid Chart](https://marketplace.visualstudio.com/items?itemName=MermaidChart.vscode-mermaid-chart) | Mermaid Chart | Live preview of Mermaid diagrams (v11.4.1) with pan, zoom, and export |
-
-#### Why these extensions?
-
-- **Claude Code** is required to run the plugins' 15 skills from VS Code
-- **Mermaid Chart** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated — supports native C4 diagrams, sequence diagrams, and all diagram types used by this plugin
-
+In Claude Code, `/sa-skills:setup` in a project is the full check: every missing piece it reports names the command that fixes it.
+Then try a first request, such as *"Elicit the requirements for a parcel-tracking service"*, and continue with
+[QUICK_START.md](QUICK_START.md).

@@ -1,354 +1,215 @@
-# Quick Start Guide
+# Quick Start — your first architecture in an afternoon
 
-This tutorial walks you through your first complete architecture documentation workflow — the steps, the commands and what each produces.
+This walkthrough takes one invented initiative, **ParcelPath** — a parcel-tracking service for a delivery company —
+from a Product Owner's idea to a released, versioned architecture with diagrams, a risk analysis, a 3D model and a
+handoff kit for developers. Every step shows what you type, what happens and what you get.
 
-> **Prerequisites**: Step 1 below installs the suite; the [Installation Guide](INSTALLATION.md) covers it in detail.
+```mermaid
+flowchart LR
+  PO["1. PO Spec<br/>PRODUCT_OWNER_SPEC.md"] --> CAP["2. Capability alignment<br/>optional framework"]
+  CAP --> HLD["3. HLD<br/>Mermaid sketch"]
+  HLD --> ARCH["4. Create<br/>ARCHITECTURE.md + docs/"]
+  ARCH --> ANA["5. Analysis<br/>analysis/"]
+  ARCH --> CC["6. Command center<br/>visualizations/"]
+  ARCH --> KIT["7. Handoff kit<br/>handoffs/"]
+  KIT --> REL["8. Release<br/>architecture-v1.0.0"]
+```
 
-This plugin is distributed via the Claude Code marketplace system. See [Claude Code Documentation](https://docs.anthropic.com/claude/docs/claude-code) for general information.
+You talk to Claude Code in plain language; the phrases below are ones the skills listen for. A skill can also be called
+by its slash name, such as `/sa-requirements:architecture-readiness`.
 
----
+## 0. Install and set up
 
-## Step 1 — Install the full suite
-
-The suite is six plugins from one marketplace: **sa-skills** (architecture, component index),
-**sa-records** (ADRs, TDRs), **sa-requirements** (the PO Spec and its capability alignment — BIAN for banking, a cross-industry map, or a pack's framework), **sa-analysis** (risk analyses, traceability),
-**sa-delivery** (handoff kit, Word export, IcePanel) and **sa-visualization** (the 3D command center).
-Installing sa-skills installs the other five. What belongs to one organization ships separately as an
-[institution pack](INSTITUTION_PACKS.md). Requires [Bun](INSTALLATION.md#installing-bun).
-
-**From a terminal:**
+You need [Claude Code](https://claude.com/claude-code) and [Bun](https://bun.sh) ≥ 1.0. Installation, upgrades and
+per-OS notes are in [INSTALLATION.md](INSTALLATION.md). In short:
 
 ```bash
 claude plugin marketplace add shadowX4fox/solutions-architect-skills
 claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
-claude plugin list   # sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery, sa-visualization — all ✔ enabled
 ```
 
-Then, in Claude Code: `/reload-plugins`, and `/sa-skills:setup` once in each project (permissions, `.gitignore`,
-`CLAUDE.md` pointers, docgen and judge checks).
+`sa-skills` brings its five companions (`sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery`,
+`sa-visualization`). In Claude Code run `/reload-plugins`, then `/sa-skills:setup` inside an empty git repository.
 
-**Or paste this into another Claude Code instance** — it installs, repairs what is missing and verifies:
+**What happens:** it merges the permissions the skills need into `.claude/settings.json`, writes a pointer block into
+`CLAUDE.md`, adds `exports/` and `.cache/sa-skills/` to `.gitignore`, checks the Word/PDF export toolchain, ripgrep
+and the API-contract validator, and sets the **judge** — the component that answers the yes/no and multiple-choice
+questions scripts cannot decide by themselves (by default a small Claude sub-agent answers a worksheet).
+
+## 1. Requirements — the PO Spec
 
 ```text
-Install the Solutions Architect Skills suite for me, from a shell (the `claude` CLI):
-1. If `claude plugin marketplace list` does not show shadowx4fox-solution-architect-marketplace, run
-   `claude plugin marketplace add shadowX4fox/solutions-architect-skills`; if it does, run
-   `claude plugin marketplace update shadowx4fox-solution-architect-marketplace`.
-2. If `claude plugin list` does not show sa-skills@shadowx4fox-solution-architect-marketplace, run
-   `claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user` (it brings sa-records,
-   sa-requirements, sa-analysis, sa-delivery and sa-visualization). If it does, run `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`
-   for each of sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery and sa-visualization — an update touches only the plugin it names.
-3. Run `claude plugin list`. For any "Dependency <name>@… is not installed", run
-   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; if sa-adr is listed, run
-   `claude plugin uninstall sa-adr@shadowx4fox-solution-architect-marketplace` (it was renamed sa-records).
-   Repeat until all six show ✔ enabled.
-4. Run `bun --version`; if Bun is missing, tell me the install command for my OS and stop.
-5. Report the six plugins with their versions, then tell me to run /reload-plugins and, in each project, /sa-skills:setup.
+Elicit the requirements for ParcelPath, a parcel-tracking service
 ```
 
-Only part of the suite: `sa-records` alone for an institutional ADR catalog repository, `sa-requirements` alone for a
-Product Owner — `claude plugin install <plugin>@shadowx4fox-solution-architect-marketplace --scope user`.
+**What happens:** `architecture-readiness` interviews the Product Owner across eight sections — Business Context,
+Stakeholders & Users, Business Objectives, Use Cases, User Stories, UX Requirements, Business Constraints, Success
+Metrics. Already have a ticket or an email? Say `async intake` and give the file instead: you get a gap report with a
+ready-to-send message of follow-up questions, and a draft spec only when the material already scores high enough.
 
----
+Two checks decide whether the spec is ready. The **score** (0–10, weighted) asks whether each section is complete —
+**7.5** or more is ready. **Checkability** asks whether someone who was not in the room could test each requirement: it
+must be named, closed, dated, observable and measured.
 
-## Prerequisites
+"Customers see where their parcel is, fast" fails checkability; "a recipient sees the latest scan within 60 seconds of
+the depot scanning it" passes. A failing requirement costs its section points; one in Use Cases, Objectives,
+Constraints or Metrics caps the score at 7.4. Wishes not yet concrete move to **Appendix → Aspirations**. A coherence
+check also finds objectives no use case serves, states nothing sets and statements that cannot both hold.
 
-- Solutions Architect Skills plugins installed ([Installation Guide](INSTALLATION.md)) — `claude plugin list` shows six: `sa-skills`, `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery`, `sa-visualization`. A Product Owner who only writes the PO Spec (Phase 1) can install `sa-requirements` alone
-- Claude Code running
-- A project or system to document
+**You get:** `PRODUCT_OWNER_SPEC.md` and `exports/PO-SPEC-<slug>.pdf` for review.
 
-## The Workflow
+## 2. Capability alignment — pick a framework, or none
 
-### Phase 1: Create Product Owner Specification
+Before design, the PO Spec can be mapped onto an industry capability framework. Two are built in:
 
-The Product Owner (PO) documents business requirements before technical design begins.
+| Framework | For | Report |
+|---|---|---|
+| `BIAN` | Banking (BIAN Service Landscape v14.0.0) | `BIAN_ALIGNMENT.md` |
+| `CROSS-INDUSTRY` | Any industry (Turbo EA capability map, CC BY 4.0) | `CAPABILITY_ALIGNMENT.md` |
+| `none` | No reference model | — |
 
-#### Step 1: Activate Architecture Readiness Skill
+ParcelPath is logistics, so the cross-industry map fits. Ask for it by name — `capability alignment with the
+CROSS-INDUSTRY framework` — or declare it once for the project (`frameworks.js --declare CROSS-INDUSTRY --project .`);
+without a declaration the skill defaults to BIAN, and creating the architecture asks which framework applies.
 
-```
-/skill sa-requirements:architecture-readiness
-```
+**You get:** `CAPABILITY_ALIGNMENT.md` — the domains and capabilities ParcelPath touches, with evidence from the spec.
+Once a framework is declared, creating the architecture waits for this report; with `none` there is no gate.
 
-The skill ships in the `sa-requirements` plugin.
+## 3. The HLD — a high-level sketch
 
-#### Step 2: Create PO Spec
+Creating an architecture needs a High-Level Design. **Mermaid is preferred**: boxes, groups and arrows are stated,
+nothing is guessed from pixels. Save this as `design/hld.mmd`:
 
-When prompted, provide:
-- **Project Name:** E.g., "Job Scheduling Platform"
-- **Business Context:** What problem does this solve?
-- **Target Users:** Who will use this system?
-
-The skill will guide you through the 8-section template:
-
-1. **Business Context** - Why this project exists and the problem being solved
-2. **Stakeholders & Users** - Who are affected by and who will use the system
-3. **Business Objectives** - Measurable goals, ROI expectations, and success criteria
-4. **Use Cases** - What users need to do (primary flows, alternatives, edge cases)
-5. **User Stories** - Specific requirements (As a... I want... So that...)
-6. **UX Requirements** - Performance expectations, usability, accessibility standards
-7. **Business Constraints** - Budget, timeline, compliance, and integration limitations
-8. **Success Metrics & KPIs** - How to measure success post-launch
-
-#### Step 3: Review Readiness Score
-
-The skill calculates a weighted score (0-10):
-- **≥7.5:** Ready for architecture team handoff ✅
-- **<7.5:** Needs more detail before handoff ⚠️
-
-**Output:** `PRODUCT_OWNER_SPEC.md` in your current directory
-
----
-
-### Phase 1.5: Capability Alignment Gate
-
-`architecture-docs` will not create a new `ARCHITECTURE.md` until the PO Spec has been
-mapped onto the capability framework the project declares (BIAN for banking, the
-cross-industry map, or a framework an institution pack provides). Once a framework is
-declared there is **no skip override** — the gate is bypassed only when the PO Spec gate
-itself was skipped, and a project that declares `none` is not gated.
-
-```
-/skill sa-requirements:architecture-capability-alignment [--framework <id>]
+```mermaid
+flowchart TB
+  subgraph Channels
+    APP["Recipient App"]
+  end
+  subgraph Core["ParcelPath"]
+    API["Tracking API"]
+    ING["Scan Ingest"]
+    NOT["Notification Service"]
+    DB[("Shipment Store")]
+  end
+  CAR["Carrier Network"]
+  APP -->|"track parcel"| API
+  API --> DB
+  CAR -->|"scan events"| ING
+  ING --> DB
+  ING --> NOT
+  NOT -->|"push alert"| APP
 ```
 
-**Output:** `BIAN_ALIGNMENT.md` at the project root, mapping the initiative onto the
-BIAN Service Landscape v14.0.0 as published — 8 Business Areas, 43 Business Domains,
-341 Service Domains (another framework writes `CAPABILITY_ALIGNMENT.md` with its own levels). Its Summary, impacted Business Domains and Service Domains, the
-`DOM`/`CAP` Diagram ID Segments and the API Surface are lifted into
-`docs/01-system-overview.md` § 1.5 during architecture creation.
+A PDF, PNG or SVG works too: it is transcribed once into `<name>.hld.mmd` beside it, box by box and arrow by arrow,
+and that transcription is what every later step reads. Your sketch does not have to follow the house diagram style.
 
----
+## 4. Create the architecture
 
-### Phase 2: Create Technical Architecture
-
-The Architecture Team translates PO requirements into technical design.
-
-#### Step 1: Activate Architecture Docs Skill
-
-```
-/skill sa-skills:architecture-docs
+```text
+Create the architecture
 ```
 
-#### Step 1.1: The four creation gates
+**What happens — the gates, in order:**
 
-Creating a new `ARCHITECTURE.md` runs four gates in order. Have their inputs ready or
-the workflow stops:
+1. **Language** — `en` or `es`. Every document is written in it; headings carry English anchors so the checks work in
+   both.
+2. **PO Spec** — found, or created now (elicitation, intake, inline context, or `SKIP PO SPEC`).
+3. **Capability alignment** — the declared framework's report.
+4. **HLD** — the path to `design/hld.mmd`.
 
-| # | Gate | What it asks | Skippable |
-|---|------|--------------|-----------|
-| 0.1 | **Documentation Language** | `en` or `es` — stamped as `<!-- DOC_LANGUAGE: xx -->` and governing every artifact produced in Phases 2–4 | No |
-| 0.2 | **PO Spec** | `PRODUCT_OWNER_SPEC.md`, or inline context scored against the rubric | Yes — `SKIP PO SPEC` |
-| 0.3 | **Capability Alignment** | the declared framework's report (`BIAN_ALIGNMENT.md` or `CAPABILITY_ALIGNMENT.md`, Phase 1.5 above) | Required once a framework is declared (`none` passes); cascades-skip only if the PO Spec gate was skipped |
-| 0.4 | **HLD Intake** | A High-Level Design file — **Mermaid** (`.mmd`, `.mermaid`, or a `.md` with ```mermaid fences) preferred, else PDF, SVG or PNG | No override; same cascade rule |
+Then a list of **ADR candidates** (decisions the design will need — database, messaging, hosting…), a check for an
+institutional ADR catalog, and the **architecture type**:
 
-The HLD anchors Sections 4, 5 and 6 so they reflect upstream design intent rather than
-being reverse-derived from the PO Spec. An inbound HLD is **not** held to the plugin's own
-diagram conventions — hand-drawn node-to-node edges and ad-hoc ids are valid input;
-normalization happens later during diagram generation. A PDF, PNG or SVG is transcribed at the
-gate into `<name>.hld.mmd` beside it — every box, grouping and arrow verbatim — before the
-workflow continues.
+| Type | Choose when |
+|---|---|
+| `ENTERPRISE` (default) | Channels, orchestrated processes and domain services over systems of record — any industry |
+| `MICROSERVICES` | Independently deployable services, each owning its data |
+| `3-TIER` | One web application, one database |
+| `N-LAYER` | One deployable organised as DDD / clean / hexagonal layers |
+| `BIAN` | Banking services modelled on BIAN Service Domains |
 
-#### Step 1.5: Choose Architecture Type
+ParcelPath takes the default, `ENTERPRISE`.
 
-Before creating ARCHITECTURE.md, determine which architecture type fits your system:
+**Checkpoints.** The last question chooses how the writing runs:
 
-**Quick Decision**:
-- **Large enterprise with 5+ integrations?** → ENTERPRISE (5-Layer, default)
-- **Cloud-native with independent services?** → Microservices
-- **Domain-Driven Design approach?** → N-Layer (DDD)
-- **Standard web application?** → 3-Tier
-- **Bank requiring full BIAN certification?** → BIAN
+- **manual** — the create stops four times. Run `/clear`, then `continue the architecture`: the next part resumes from
+  a receipt on disk and never asks the collected questions again.
+- **automatic** — the remaining parts run one after another in sub-agents, without stopping.
 
-**Architecture Types**:
-1. **ENTERPRISE (5-Layer Enterprise, default)**: Enterprise platforms, complex integrations, orchestrated processes over systems of record
-2. **3-Tier (Classic Web)**: Web apps, REST APIs, line-of-business applications
-3. **Microservices (Cloud-Native)**: Distributed systems, event-driven, independent deployability
-4. **N-Layer (DDD/Clean Arch)**: Domain-Driven Design, Hexagonal Architecture, testable design
-5. **BIAN (Full BIAN v14.0.0)**: Banking systems built on the BIAN Service Landscape
+Each section is written, then checked by code (prose, principles, headers, flows, integrations). A finding names a
+file and a line, and the fix is an edit at that line.
 
-See [Architecture Type Selector](../skills/architecture-docs/templates/ARCHITECTURE_TYPE_SELECTOR.md) for detailed comparison and decision tree.
+**You get:** `ARCHITECTURE.md` (the index, version 1.0.0 Draft), the 13 sections as `docs/01-system-overview.md` …
+`docs/11-references.md`, one file per system and container in `docs/components/` with its `README.md` index, and the
+project decisions `adr/ADR-101…`.
 
-#### Step 2: Create ARCHITECTURE.md
+The **diagrams** come at the end of the create: the Logical View, C4 System Context, C4 Container and Detailed View in
+`docs/03-architecture-layers.md`, and a sequence diagram per phase in `docs/04-data-flow-patterns.md`, from which each
+use case's end-to-end sequence is derived. Later, `generate my architecture diagrams` regenerates them.
 
-The skill asks for the architecture type (from Step 1.5) and the systems the HLD names, then
-writes the 13 sections as one file each under `docs/`, with `ARCHITECTURE.md` as the index:
+## 5. A first analysis
 
-| # | Section | File |
-|---|---------|------|
-| 1–2 | Executive Summary, System Overview | `docs/01-system-overview.md` |
-| 3 | Architecture Principles (9 core principles) | `docs/02-architecture-principles.md` |
-| 4 | Architecture Layers + the four standard diagrams | `docs/03-architecture-layers.md` |
-| 5 | Components — one file each | `docs/components/` |
-| 6 | Data Flow Patterns — phases, flows, sequence diagrams | `docs/04-data-flow-patterns.md` |
-| 7 | Integration Points | `docs/05-integration-points.md` |
-| 8 | Technology Stack | `docs/06-technology-stack.md` |
-| 9 | Security Architecture | `docs/07-security-architecture.md` |
-| 10 | Scalability & Performance | `docs/08-scalability-and-performance.md` |
-| 11 | Operational Considerations | `docs/09-operational-considerations.md` |
-| 12 | ADRs — written by `sa-records:architecture-definition-record` | `adr/` |
-| 13 | Risks and Technical Debt — TDRs via `sa-records:technical-debt-records` | `docs/10-risks-and-technical-debt.md` |
-
-Every section runs its gates by code after it is written (explorer headers, prose, principles,
-Mermaid, connection labels, flows).
-
-#### Step 3: Continue after a checkpoint
-
-Creation stops at four checkpoints so each segment starts in a clear session. In a fresh
-session, type `continue the architecture` — the skill resumes from its receipt without asking
-the collection questions again. Choose **automatic checkpoints** at the end of the collection
-to run the remaining segments in sub-agents without stopping.
-
-**Output:** `ARCHITECTURE.md` + `docs/` + `adr/`, version `1.0.0` Draft. `release my architecture`
-(`architecture-lifecycle`) releases it and tags `architecture-v1.0.0`.
-
----
-
-### Phase 3: Compliance Documentation
-
-Compliance contracts are organization-specific: they come from the compliance plugin an [institution pack](INSTITUTION_PACKS.md) installs, when the organization has one. The base ships none, so this phase has no command here.
-
----
-
-## Example: Job Scheduling Platform
-
-Let's walk through a real example.
-
-### Example Phase 1: PO Spec
-
-```
-/skill sa-requirements:architecture-readiness
+```text
+SPOF analysis
 ```
 
-**Input:**
-- Project: Job Scheduling Platform
-- Context: Automate recurring batch jobs for 500 internal users
-- Users: DevOps engineers, System administrators
-- Use Case: Schedule Python/shell scripts to run at specific times
-- Success: 99.9% job execution reliability, <5 min setup time
+**What happens:** `architecture-analysis` offers ten lenses — SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE,
+Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity — plus a Security Posture checklist, and asks
+for Markdown or interactive HTML. Graph metrics, latency sums and capacity come from code; the model classifies.
 
-**Output:** `PRODUCT_OWNER_SPEC.md` with score 8.5/10 (Ready for handoff)
+**You get:** `analysis/SPOF-<date>.md` — every finding with an id (`C1`, `D2`…), the component it concerns and its
+mitigation. For ParcelPath, expect `Shipment Store` to be the first suspect.
 
-### Example Phase 2: ARCHITECTURE.md
+## 6. The command center
 
-```
-/skill sa-skills:architecture-docs
+```text
+command center
 ```
 
-**Key Sections:**
-- **Executive Summary:** Job scheduling platform for 450 TPS, 99.9% SLA
-- **Technology Stack:** Java 17, Spring Boot 3.2, PostgreSQL, Redis, AKS
-- **Components:** Scheduler Service, Executor Service, Job Store, Notification Service
-- **Integration:** Active Directory (LDAP), SMTP, Monitoring (Prometheus)
+**You get:** `visualizations/architecture-command-center.html` — one self-contained file. Each layer is a floor, each
+container a block, each integration a route. Play a use case phase by phase, switch to the Physical view, light up
+the SPOF findings on their blocks, run a load simulation, and ask **Alia**, the navigator, about any section or decision.
+More in [ALIA.md](ALIA.md).
 
-**Output:** `ARCHITECTURE.md` + `docs/` (13 sections) + `adr/`
+## 7. The handoff kit
 
----
-
-## Workflow Tips
-
-### Best Practices
-
-1. **Start with PO Spec:** Always begin with business requirements
-2. **Navigate from `ARCHITECTURE.md`:** it indexes the `docs/` section files and the components
-3. **Validate Early:** Read the gate results after every write
-4. **Iterate:** Edit through the skill (Workflow 2) so the gates run, then regenerate the affected downstream artifacts
-
-### Common Commands
-
-```bash
-# Activate specific skill (plugin:skill)
-/skill sa-requirements:architecture-readiness
-/skill sa-skills:architecture-docs
-
-# List installed plugins (sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery, sa-visualization)
-claude plugin list
-
-# Get help
-/help
+```text
+generate dev handoff
 ```
 
-### Architecture Visualization
+**What happens:** `architecture-dev-handoff` writes a four-part kit for the people who build the system. It needs
+`docs/05-integration-points.md`; latency and blast-radius figures come from the analyses and are marked
+`[NOT DOCUMENTED]` when those have not run.
 
-**Mermaid Diagrams** (`docs/03-architecture-layers.md` and `docs/04-data-flow-patterns.md`):
-- Four standard diagrams — Logical View, C4 L1 System Context, C4 L2 Container, Detailed View — plus one sequence diagram per phase and one wire sequence per use case
-- The Logical and Detailed views use one fixed four-role palette: `zone` (bands), `unit` (containers), `store` (data stores), `ext` (external systems)
-- Render in GitHub/GitLab and VS Code with no extra tooling; `generate my architecture diagrams` regenerates them
-- See [DIAGRAM-GENERATION-GUIDE.md](../skills/architecture-docs/references/DIAGRAM-GENERATION-GUIDE.md)
+**You get:**
 
-**Interactive model**: `command center` builds a 3D model of the architecture (`visualizations/*.html`) — a floor per layer, use-case walkthroughs, analysis findings and a load simulation.
+| File | For |
+|---|---|
+| `handoffs/SYSTEM_RUNTIME_VIEW.md` | The whole system in motion — flows, per-hop budgets |
+| `handoffs/CROSS_CUTTING_STANDARDS.md` | Rules every service follows, each citing its ADR |
+| `handoffs/interfaces/<up>→<down>.md` | One contract per pair of adjacent services |
+| `handoffs/components/NN-<slug>.md` | One specification per container — intent and constraints |
+| `handoffs/assets/NN-<slug>/` | OpenAPI, AsyncAPI, DDL… validated against the docs, plus `security.md` |
 
-### File Organization
+## 8. Release
 
-Recommended project structure:
-
-```
-my-project/
-├── PRODUCT_OWNER_SPEC.md          # Business requirements
-├── BIAN_ALIGNMENT.md               # BIAN capability mapping
-├── ARCHITECTURE.md                 # Index + version
-├── docs/                           # The 13 sections + components/
-├── adr/                            # Architecture decision records
-└── tdr/                            # Technical debt records
+```text
+release my architecture
 ```
 
-### Time Estimates
+**What happens:** `architecture-lifecycle` runs every gate once, shows what changed and recommends a version bump (a
+first release keeps `1.0.0`), writes `docs/CHANGELOG.md`, commits only the architecture files and tags
+`architecture-v1.0.0`. By default it pushes a `release/architecture-v1.0.0` branch for a pull request; `--direct`
+commits on the current branch. A release needs git.
 
-- **PO Spec:** an interactive elicitation — its length depends on how much context you bring
-- **Architecture creation:** several sessions; run each segment in a fresh session, or choose automatic checkpoints
+`architecture status` tells you later where the architecture stands and which artifacts — the kit, the analyses, the
+3D model — were built from an older version.
 
----
+## Where next
 
-## Quick Reference
-
-### Phase 1: Architecture Readiness
-- **Command:** `/skill sa-requirements:architecture-readiness`
-- **Plugin:** `sa-requirements` (installable alone)
-- **Output:** `PRODUCT_OWNER_SPEC.md`
-- **Owner:** Product Owner
-- **Focus:** Business requirements only (no technical details)
-
-### Phase 2: Architecture Docs
-- **Command:** `/skill sa-skills:architecture-docs`
-- **Plugin:** `sa-skills`
-- **Output:** `ARCHITECTURE.md` + `docs/` + `adr/`
-- **Owner:** Architecture Team
-- **Focus:** Technical design, components, decisions
-- **Architecture Types:** ENTERPRISE (5-Layer), 3-Tier, Microservices, N-Layer (DDD), BIAN, plus any an institution pack adds (`scripts/shared/arch-types.js` lists them)
-- **Diagrams:** four standard Mermaid diagrams in Section 4 (`docs/03`), sequence diagrams in Section 6 (`docs/04`)
-
-### Phase 3: Compliance Documentation
-- **Command:** none in the base — the compliance plugin an [institution pack](INSTITUTION_PACKS.md) installs, when the organization has one
-- **Owner:** Compliance Team
-- **Focus:** Organizational standards adherence
-
----
-
-## Next Steps
-
-Now that you've completed your first workflow:
-
-1. **Customize:** Tailor templates to your organization's standards
-2. **Learn More:** Read [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md) for advanced usage
-3. **Explore Examples:** Check `/examples/` directory for realistic samples
-4. **Share:** Distribute the handoff kit and the Word exports to stakeholders
-
----
-
-## Troubleshooting
-
-### Skills Not Working?
-
-1. Verify the plugins are installed: `claude plugin list` shows `sa-skills`, `sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery` and `sa-visualization`, each `✔ enabled`; a `✘ failed to load — Dependency … is not installed` line names a plugin to install
-2. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-3. Restart Claude Code
-
-### Need Help?
-
-- [Installation Guide](INSTALLATION.md) - Setup issues
-- [Workflow Guide](WORKFLOW_GUIDE.md) - Detailed usage
-- [Troubleshooting](TROUBLESHOOTING.md) - Common problems
-- [GitHub Issues](https://github.com/shadowx4fox/solutions-architect-skills/issues) - Report bugs
-
----
-
-**Congratulations!** You've completed your first architecture documentation workflow. You're now ready to document production systems with professional architecture documentation.
+- [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md) — every phase, gate and phrase in detail
+- [ALIA.md](ALIA.md) — the 3D navigator and the architecture MCP server for your IDE
+- [INSTITUTION_PACKS.md](INSTITUTION_PACKS.md) — add your organization's standards, frameworks and types
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — when something does not work
+- Change one thing and see the gates run: `update the latency target of the track parcel flow to 300 ms`, then
+  `release my architecture` again.

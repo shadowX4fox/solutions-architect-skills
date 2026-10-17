@@ -1,7 +1,7 @@
 {
   "name": "sa-requirements",
   "version": "10.1.0",
-  "description": "Product Owner requirements: elicit, score and write the Product Owner Specification (PRODUCT_OWNER_SPEC.md) and map it onto the BIAN Service Landscape v14.0.0 (BIAN_ALIGNMENT.md) before any architecture exists, and keep the spec in step with the architecture afterwards. For Product Owners; installed on its own, or as a dependency of sa-skills.",
+  "description": "Product Owner requirements: elicit, score and write the Product Owner Specification (PRODUCT_OWNER_SPEC.md) and align it to the capability framework the project declares — BIAN (BIAN_ALIGNMENT.md), the cross-industry map or a pack's (CAPABILITY_ALIGNMENT.md) — before any architecture exists.",
   "author": {
     "name": "shadowX4fox",
     "url": "https://github.com/shadowX4fox"
