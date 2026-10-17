@@ -6,7 +6,7 @@ Capacity tables, a demand row and three small analysis reports so that Analysis 
 ```bash
 SKILL=plugins/sa-visualization/skills/architecture-command-center
 OUT=$(mktemp -d)
-bun $SKILL/examples/screenshots/build-showcase.ts $PWD/$SKILL $OUT/proj
+bun scripts/docs-screenshots/build-showcase.ts $PWD/$SKILL $OUT/proj
 SCENE=$OUT/proj/visualizations/architecture-command-center.scene.json
 bun $SKILL/scripts/scene-from-docs.js $OUT/proj --base $SCENE --out $SCENE
 bun $SKILL/scripts/dossier.js $OUT/proj $SCENE --write
@@ -14,7 +14,7 @@ bun $SKILL/scripts/render.js $SCENE $OUT/showcase.html
 bun $SKILL/scripts/render.js $SCENE $OUT/showcase-atlas.html --theme atlas
 bun $SKILL/scripts/render.js $SCENE $OUT/showcase-corporate.html --theme corporate
 # a Chrome binary, e.g. Puppeteer's: bunx puppeteer browsers install chrome
-bun $SKILL/examples/screenshots/capture.ts <chrome> docs/images/command-center \
+bun scripts/docs-screenshots/capture.ts <chrome> docs/images/command-center \
   "$OUT/showcase.html::logical=;physical=v;analysis=v;simulation=v" "$OUT/showcase.html::alia=a" \
   "$OUT/showcase-atlas.html::atlas=" "$OUT/showcase-corporate.html::corporate="
 ```
@@ -33,7 +33,7 @@ bun plugins/sa-delivery/skills/architecture-index-export/scripts/publish-index.j
 # the session, from an empty folder
 echo '{"mcpServers":{"alia":{"type":"http","url":"http://localhost:8091/mcp"}}}' > mcp.json
 claude -p "<question>" --mcp-config mcp.json --strict-mcp-config --allowedTools mcp__alia --output-format stream-json --verbose > run.jsonl
-bun $SKILL/examples/screenshots/console-html.ts run.jsonl "<question>" console.html
-bun $SKILL/examples/screenshots/capture-page.ts <chrome> console.html docs/images/command-center/mcp-console.webp 1200
+bun scripts/docs-screenshots/console-html.ts run.jsonl "<question>" console.html
+bun scripts/docs-screenshots/capture-page.ts <chrome> console.html docs/images/command-center/mcp-console.webp 1200
 docker compose -p sa-demo -f plugins/sa-delivery/skills/architecture-index-export/local/compose.yaml down -v
 ```
