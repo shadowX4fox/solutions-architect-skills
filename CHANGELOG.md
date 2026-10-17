@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.4.0]
+
+Escalations filed from the IDE through the architecture MCP server come into the architecture repository.
+
+### Added
+- `escalate.js import <project> <issue number|URL>`: reads an escalation issue from GitHub, GitLab, Gitea or Azure DevOps — filed by the MCP server as `[ESC-?] <title>`, or by another clone — and writes its record with the next ESC number (or the issue's own, when free), the request, triggers, evidence, proposal and questions read back from the body; an issue already imported is refused.
+- `escalate.js retitle <project> ESC-NNN`: shows the issue's new title `[ESC-NNN] …`; `--apply` changes it on the host, after the user's yes.
+
+### Changed
+- An issue body with no ESC number ends with the import instruction instead of the close command.
+
 ## [10.3.0]
 
 Architecture edits confirm first instead of entering plan mode, a RUN team's routine writes go ahead on their own, and what needs an architect becomes an escalation on the project's git host.

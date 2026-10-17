@@ -91,3 +91,49 @@ describe('the git host', () => {
     rmSync(p, { recursive: true });
   });
 });
+
+describe('import', () => {
+  const filed = () => {   // an issue as the plugin renders it, the way the MCP server's port files it: `[ESC-?]`, no record yet
+    const p = project(); E.create(p, REQ); const rec = E.records(p)[0];
+    const body = E.issueBody({ ...rec, meta: { ...rec.meta, id: 'ESC-?' }, file: '—' });
+    rmSync(p, { recursive: true });
+    return { n: 41, title: `[ESC-?] ${REQ.title}`, body, url: 'https://github.com/org/arch/issues/41', created: '2026-10-18T09:00:00Z', labels: ['architecture-escalation', 'tier-1', 'trigger:security-iam', 'trigger:new-integration'] };
+  };
+  test('a server-filed issue says it is numbered on import', () => {
+    expect(filed().body).toContain('escalate.js import <project> <this issue>');
+  });
+  test('reads the request back out of the body, field for field', () => {
+    const r = E.requestOf(filed());
+    expect(r).toMatchObject({ title: REQ.title, request: REQ.request, triggers: REQ.triggers, evidence: REQ.evidence, proposal: REQ.proposal, questions: REQ.questions,
+      components: REQ.components, integrations: REQ.integrations, adrs: REQ.adrs, tdrs: [], requested_by: REQ.requested_by, route: 'tier-1', architecture: 'architecture-v1.4.0' });
+  });
+  test('numbers it here, links the issue, refuses it twice; keeps an issue\'s own free number', () => {
+    const p = project(); E.create(p, { ...REQ, title: 'Local one' });
+    const r = E.importIssue(p, filed());
+    expect(r).toMatchObject({ id: 'ESC-002', renamed: true, title: `[ESC-002] ${REQ.title}` });
+    const rec = E.records(p).find((x: any) => x.meta.id === 'ESC-002');
+    expect(rec.meta).toMatchObject({ status: 'Open', date: '2026-10-18', issue: 'https://github.com/org/arch/issues/41', triggers: ['security-iam', 'new-integration'] });
+    expect(readFileSync(join(p, rec.file), 'utf8')).toContain('| security-iam | docs/07-security-architecture.md:88 — mTLS between services; the change adds a shared secret |');
+    expect(() => E.importIssue(p, filed())).toThrow(/already ESC-002/);
+    const own = { ...filed(), title: `[ESC-007] ${REQ.title}`, url: 'https://github.com/org/arch/issues/42' };
+    expect(E.importIssue(p, own)).toMatchObject({ id: 'ESC-007', renamed: false });
+    rmSync(p, { recursive: true });
+  });
+  test('an Azure DevOps description comes back from its HTML; a body that is no escalation is refused', () => {
+    const p = project(); const i = filed();
+    const az = { ...i, body: '<pre>' + i.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>', labels: ['architecture-escalation', 'tier-1'] };
+    expect(E.requestOf({ ...az, body: az.body.replace(/^<pre>|<\/pre>$/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') }).triggers).toEqual(['security-iam', 'new-integration']);
+    expect(() => E.importIssue(p, { ...i, body: 'Please fix the login page.', labels: [] })).toThrow(/does not read as an escalation/);
+    rmSync(p, { recursive: true });
+  });
+  test('the retitle is a plan per host until applied', () => {
+    const p = project(); git(p, 'remote', 'add', 'origin', 'git@github.com:org/arch.git');
+    expect(E.retitlePlan(p, 41, '[ESC-002] T').argv).toEqual(['gh', 'issue', 'edit', '41', '-R', 'org/arch', '--title', '[ESC-002] T']);
+    expect(E.retitlePlan(p, 41, 'T', { host: 'gitlab' }).argv.slice(0, 4)).toEqual(['glab', 'issue', 'update', '41']);
+    git(p, 'remote', 'set-url', 'origin', 'https://org@dev.azure.com/org/proj/_git/arch');
+    expect(E.retitlePlan(p, 41, 'T').argv).toEqual(expect.arrayContaining(['az', 'work-item', 'update', '--id', '41']));
+    git(p, 'remote', 'set-url', 'origin', 'https://gitea.example.org/team/arch.git');
+    expect(E.retitlePlan(p, 41, 'T').request).toMatchObject({ method: 'PATCH', url: 'https://gitea.example.org/api/v1/repos/team/arch/issues/41' });
+    rmSync(p, { recursive: true });
+  });
+});

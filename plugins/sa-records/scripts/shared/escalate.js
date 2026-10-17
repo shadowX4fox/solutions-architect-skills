@@ -9,6 +9,8 @@
 //   bun escalate.js new <project> --from <request.json>            write the record; prints its path and id
 //   bun escalate.js issue <project> ESC-NNN [--host <h>] [--type <t>]   the issue it would open — title, labels, body, command
 //   bun escalate.js issue <project> ESC-NNN --create               open it, and write its URL into the record
+//   bun escalate.js import <project> <issue number|URL>      an issue filed elsewhere (`[ESC-?] …`, the MCP server) → the record, numbered here
+//   bun escalate.js retitle <project> ESC-NNN [--apply]          the issue's title to `[ESC-NNN] …` — previewed, changed with --apply
 //   bun escalate.js status <project> ESC-NNN "In Review"
 //   bun escalate.js close <project> ESC-NNN --by <ADR-NNN|TDR-NNN|architecture-vX.Y.Z> [--rejected "<reason>"]
 //   bun escalate.js list <project> [--all] [--json]
@@ -173,8 +175,80 @@ function issueBody(rec) {
     ['Components', list(rec.meta.components).join(', ') || '—'], ['Integrations', list(rec.meta.integrations).join(', ') || '—'], ['ADRs / TDRs', [...list(rec.meta.adrs), ...list(rec.meta.tdrs)].join(', ') || '—'],
     ['Record', rec.file]];
   const body = rec.body.replace(/^# .*\n+/, '').replace(/\n## Resolution\n[\s\S]*$/, '\n');
-  return ['| | |', '|---|---|', ...facts.map(([k, v]) => `| ${k} | ${cell(v)} |`), '', body.trim(), '', `_Close it with \`escalate.js close <project> ${rec.meta.id} --by <ADR-NNN|TDR-NNN|architecture-vX.Y.Z>\`._`, ''].join('\n');
+  return ['| | |', '|---|---|', ...facts.map(([k, v]) => `| ${k} | ${cell(v)} |`), '', body.trim(), '', /^ESC-\d+$/.test(rec.meta.id) ? `_Close it with \`escalate.js close <project> ${rec.meta.id} --by <ADR-NNN|TDR-NNN|architecture-vX.Y.Z>\`._` : '_Import it into the architecture repository with `escalate.js import <project> <this issue>`; the import gives it its ESC number._', ''].join('\n');
 }
+// ---- import: an issue filed elsewhere (the MCP server files `[ESC-?] <title>`) becomes a record, numbered here -------
+// an issue as { title, body, url, created, labels }, whatever the host
+function issueRef(ref, r) {
+  const m = String(ref).match(/(?:issues|_workitems\/edit|work_items)\/(\d+)/) || String(ref).match(/^#?(\d+)$/);
+  if (!m) throw new Error(`"${ref}" is not an issue number or URL`);
+  return Number(m[1]);
+}
+const unhtml = (s) => String(s || '').replace(/^<pre>|<\/pre>$/g, '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p)>/gi, '\n').replace(/<[^>]+>/g, '')
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+async function fetchIssue(root, ref, opts = {}) {
+  const r = remoteOf(root, opts.host), n = issueRef(ref, r);
+  const json = (argv) => { const x = run(argv); if (x.status !== 0) throw new Error(`${argv[0]}: ${(x.stderr || '').trim() || (x.error && x.error.code === 'ENOENT' ? `${argv[0]} is not installed` : 'failed')}`); return JSON.parse(x.stdout); };
+  if (r.host === 'github') { const j = json(['gh', 'issue', 'view', String(n), '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--json', 'title,body,url,createdAt,labels']); return { n, title: j.title, body: j.body, url: j.url, created: j.createdAt, labels: (j.labels || []).map((l) => l.name) }; }
+  if (r.host === 'gitlab') { const j = json(['glab', 'issue', 'view', String(n), '-R', r.web, '--output', 'json']); return { n, title: j.title, body: j.description, url: j.web_url, created: j.created_at, labels: j.labels || [] }; }
+  if (r.host === 'azure') { const j = json(['az', 'boards', 'work-item', 'show', '--id', String(n), '--org', `https://dev.azure.com/${r.org}`, '--output', 'json']); const f = j.fields || {};
+    return { n, title: f['System.Title'], body: unhtml(f['System.Description']), url: (j._links && j._links.html && j._links.html.href) || `https://dev.azure.com/${r.org}/${encodeURIComponent(r.project)}/_workitems/edit/${n}`, created: f['System.CreatedDate'], labels: String(f['System.Tags'] || '').split(';').map((x) => x.trim()).filter(Boolean) }; }
+  const token = process.env.GITEA_TOKEN;
+  if (!token) throw new Error('GITEA_TOKEN is not set');
+  const res = await fetch(`https://${r.server}/api/v1/repos/${r.path}/issues/${n}`, { headers: { Authorization: `token ${token}` } });
+  if (!res.ok) throw new Error(`gitea: HTTP ${res.status}`);
+  const j = await res.json(); return { n, title: j.title, body: j.body, url: j.html_url, created: j.created_at, labels: (j.labels || []).map((l) => l.name) };
+}
+// the request back out of an issue body issueBody() wrote (by the plugin or the server's port of it)
+function requestOf(issue) {
+  const body = String(issue.body || '').replace(/\r\n?/g, '\n');
+  const row = (k) => { const m = body.match(new RegExp(`^\\| ${k.replace(/[/]/g, '\\/')} \\| (.*) \\|$`, 'm')); return m && m[1].trim() !== '—' ? m[1].trim() : ''; };
+  const ids = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
+  const section = (h) => { const m = body.match(new RegExp(`(?:^|\\n)## ${h}\\n\\n([\\s\\S]*?)(?=\\n## |\\n_[A-Z]|$)`)); return m ? m[1].trim() : ''; };
+  const bullets = (t) => t.split('\n').filter((l) => /^- /.test(l)).map((l) => l.slice(2).trim()).filter((l) => !/^(Nothing proposed|None)\.$/.test(l));
+  const why = section('Why it needs an architect');
+  const evidence = why.split('\n').filter((l) => /^\| [a-z-]+ \| /.test(l)).map((l) => { const c = l.slice(2, -2).split(' | '); const t = c[0].trim(), rest = c.slice(1).join(' | ').replace(/\\\|/g, '|').trim();
+    const i = rest.indexOf(' — '); return i >= 0 ? { trigger: t, where: rest.slice(0, i), note: rest.slice(i + 3) } : { trigger: t, where: rest }; });
+  const triggers = [...new Set([...evidence.map((e) => e.trigger), ...(issue.labels || []).filter((l) => /^trigger:/.test(l)).map((l) => l.slice(8))])];
+  const route = (issue.labels || []).find((l) => ROUTES[l]) || (Object.entries(ROUTES).find(([, v]) => row('Route') === v) || [])[0] || 'tier-1';
+  const ar = ids(row('ADRs / TDRs'));
+  return { title: String(issue.title || '').replace(/^\[ESC-(?:\?|\d+)\]\s*/, '').trim(), request: section('Request'), triggers,
+    evidence: evidence.filter((e) => TRIGGERS[e.trigger] && !(e.trigger === 'low-confidence' && e.where === TRIGGERS[e.trigger])), proposal: bullets(section('What the AI would propose \\(not applied\\)')),
+    questions: bullets(section('Open questions for the architect')), components: ids(row('Components')), integrations: ids(row('Integrations')),
+    adrs: ar.filter((x) => /^ADR-/.test(x)), tdrs: ar.filter((x) => /^TDR-/.test(x)), requested_by: row('Requested by'), route, architecture: row('Architecture') };
+}
+// write the record from the issue; the number is the issue's own when it carries a free one, else the next here
+function importIssue(root, issue, opts = {}) {
+  root = path.resolve(root);
+  const dup = records(root).find((x) => x.meta.issue && x.meta.issue === issue.url);
+  if (dup) throw new Error(`${issue.url} is already ${dup.meta.id} (${dup.file})`);
+  const req = requestOf(issue);
+  const errors = validate(req);
+  if (errors.length) { const e = new Error(`the issue does not read as an escalation:\n${errors.join('\n')}`); e.errors = errors; throw e; }
+  const own = (String(issue.title).match(/^\[(ESC-\d+)\]/) || [])[1];
+  const id = own && !records(root).some((x) => x.meta.id === own) ? own : nextId(root);
+  const meta = { id, status: 'Open', date: String(issue.created || '').slice(0, 10) || opts.today || today(), architecture: req.architecture, route: req.route, triggers: req.triggers,
+    components: req.components, integrations: req.integrations, adrs: req.adrs, tdrs: req.tdrs, requested_by: req.requested_by, issue: issue.url || '', resolution: '', closed: '' };
+  const file = path.join(DIR, `${id}-${slugify(req.title)}.md`);
+  fs.mkdirSync(path.join(root, DIR), { recursive: true });
+  fs.writeFileSync(path.join(root, file), frontmatter(meta) + render(meta, req));
+  return { id, file, renamed: own !== id, title: `[${id}] ${req.title}`, warnings: nameWarnings(root, req) };
+}
+// the retitle `[ESC-?]` → `[ESC-NNN]` is a write on the host: shown first, run with --retitle after the user's yes
+function retitlePlan(root, n, title, opts = {}) {
+  const r = remoteOf(root, opts.host);
+  if (r.host === 'github') return { host: r.host, argv: ['gh', 'issue', 'edit', String(n), '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--title', title] };
+  if (r.host === 'gitlab') return { host: r.host, argv: ['glab', 'issue', 'update', String(n), '-R', r.web, '--title', title] };
+  if (r.host === 'azure') return { host: r.host, argv: ['az', 'boards', 'work-item', 'update', '--id', String(n), '--org', `https://dev.azure.com/${r.org}`, '--title', title, '--output', 'none'] };
+  return { host: r.host, request: { method: 'PATCH', url: `https://${r.server}/api/v1/repos/${r.path}/issues/${n}`, body: { title } } };
+}
+async function retitle(root, n, title, opts = {}) {
+  const p = retitlePlan(root, n, title, opts);
+  if (p.argv) { const x = run(p.argv); if (x.status !== 0) throw new Error(`${p.argv[0]}: ${(x.stderr || '').trim() || 'failed'}`); return p; }
+  const res = await fetch(p.request.url, { method: 'PATCH', headers: { Authorization: `token ${process.env.GITEA_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(p.request.body) });
+  if (!res.ok) throw new Error(`gitea: HTTP ${res.status}`); return p;
+}
+
 const htmlOf = (md) => `<pre>${md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
 
 // what `issue` would run — one plan per host, the body in a file beside the cache
@@ -224,7 +298,7 @@ async function createIssue(root, id, opts = {}) {
   return { id: p.id, host: p.host, url, note };
 }
 
-module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue };
+module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue, requestOf, importIssue, fetchIssue, retitlePlan, retitle };
 
 // ---- CLI ---------------------------------------------------------------------------------------------------------
 if (require.main === module) {
@@ -248,6 +322,16 @@ if (require.main === module) {
           console.log(p.argv ? `command: ${p.argv.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}` : `request: ${p.request.method} ${p.request.url} (token ${p.request.token})`);
           console.log(`nothing was opened — after the user's yes: escalate.js issue ${root} ${p.id} --create`);
         }
+      } else if (cmd === 'import') {
+        const issue = await fetchIssue(root, pos[0], { host: opt('--host') });
+        const r = importIssue(root, issue);
+        console.log(`${r.id} written: ${r.file} (from ${issue.url})`); r.warnings.forEach((w) => console.error('⚠ ' + w));
+        if (r.renamed) console.log(`the issue still reads "${issue.title}" — show the retitle (escalate.js retitle ${root} ${r.id}) and run it with --apply after the user's yes`);
+      } else if (cmd === 'retitle') {
+        const rec = find(root, pos[0]); if (!rec.meta.issue) throw new Error(`${rec.meta.id} has no issue`);
+        const title = `[${rec.meta.id}] ${rec.title.replace(/^ESC-\d+\s+—\s+/, '')}`, n = issueRef(rec.meta.issue);
+        if (a.includes('--apply')) { await retitle(root, n, title, { host: opt('--host') }); console.log(`${rec.meta.issue} → ${title}`); }
+        else { const p = retitlePlan(root, n, title, { host: opt('--host') }); console.log(`RETITLE PREVIEW — ${rec.meta.issue}\ntitle: ${title}\n${p.argv ? `command: ${p.argv.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}` : `request: ${p.request.method} ${p.request.url}`}\nnothing was changed — after the user's yes: escalate.js retitle ${root} ${rec.meta.id} --apply`); }
       } else if (cmd === 'status') { const r = setStatus(root, pos[0], pos[1]); console.log(`${r.meta.id}: ${r.meta.status}`); }
       else if (cmd === 'close') { const r = close(root, pos[0], { by: opt('--by'), rejected: a.includes('--rejected') ? (opt('--rejected') || '') : undefined }); console.log(`${r.meta.id}: ${r.meta.status}${r.meta.resolution ? ` by ${r.meta.resolution}` : ''}${r.meta.issue ? ` — close the issue too: ${r.meta.issue}` : ''}`); }
       else if (cmd === 'list') {
