@@ -20,6 +20,8 @@ const { spawnSync } = require('child_process');
 const { exportIndex, checkBundle } = require('./export-index.js');
 
 const COMPOSE = path.join(__dirname, '..', 'local', 'compose.yaml');
+// the server built from its repository instead of the published image, when SA_INDEX_SERVER_REF names a branch or commit
+const COMPOSE_SOURCE = path.join(__dirname, '..', 'local', 'compose.source.yaml');
 const CONFIG = path.join('.sa-skills', 'index.json');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -66,15 +68,16 @@ async function chooseOllama({ env = process.env, platform = process.platform, ga
 }
 const cpuRoute = (why) => ({ url: CPU_OLLAMA, cpu: true, note: `embeddings: an Ollama container on the CPU, about one chunk a second (${why})` });
 
-// docker compose up for the local server, then wait for its health: the first start builds the image and pulls the model
+// docker compose up for the local server, then wait for its health: the first start pulls the image and the model
 async function up(server, log, timeoutS) {
   const port = (new URL(server).port) || '8080';
   const ver = spawnSync('docker', ['compose', 'version'], { encoding: 'utf8' });
   if (ver.status !== 0) throw Object.assign(new Error('Docker with the compose plugin is needed to start the local server (docker compose version failed)'), { code: 3 });
   const ollama = await chooseOllama();
   log(ollama.note);
-  const args = ['compose', '-f', COMPOSE, ...(ollama.cpu ? ['--profile', 'cpu'] : []), 'up', '-d', '--build'];
-  log(`starting the local server: docker ${args.join(' ')} (the first start builds the server and pulls the model — minutes)`);
+  const source = !!process.env.SA_INDEX_SERVER_REF;
+  const args = ['compose', '-f', COMPOSE, ...(source ? ['-f', COMPOSE_SOURCE] : []), ...(ollama.cpu ? ['--profile', 'cpu'] : []), 'up', '-d', ...(source ? ['--build'] : [])];
+  log(`starting the local server: docker ${args.join(' ')} (${source ? `built from ${process.env.SA_INDEX_SERVER_REF} — minutes` : 'the first start pulls the image and the model'})`);
   const r = spawnSync('docker', args, { stdio: 'inherit', env: { ...process.env, SA_INDEX_PORT: port, SA_INDEX_OLLAMA: ollama.url } });
   if (r.status !== 0) throw Object.assign(new Error('docker compose up failed'), { code: 3 });
   const end = Date.now() + timeoutS * 1000;
@@ -103,7 +106,7 @@ async function publish(root, opts = {}) {
   const st = settings(root, opts);
   if (!(await healthy(st.server))) {
     if (opts.up && isLocal(st.server)) await up(st.server, log, opts.upTimeout || 1800);
-    else throw Object.assign(new Error(`no architecture index server answers at ${st.server}. Start the local one: bun ${path.relative(process.cwd(), __filename)} ${path.relative(process.cwd(), root) || '.'} --up  (or docker compose -f ${COMPOSE} up -d --build)`), { code: 3 });
+    else throw Object.assign(new Error(`no architecture index server answers at ${st.server}. Start the local one: bun ${path.relative(process.cwd(), __filename)} ${path.relative(process.cwd(), root) || '.'} --up  (or docker compose -f ${COMPOSE} up -d)`), { code: 3 });
   }
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'sa-index-publish-'));
   try {

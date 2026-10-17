@@ -1,12 +1,15 @@
 # A local architecture index to test an architecture against while writing it: the MCP server with its file engine
 # (no Qdrant), embedding through Ollama. publish-index.js --up starts it and picks the Ollama; by hand:
 #
-#   docker compose -f <this file> up -d --build          GPU: the host's Ollama (the default)
-#   SA_INDEX_OLLAMA=http://ollama:11434 docker compose -f <this file> --profile cpu up -d --build
+#   docker compose -f <this file> up -d                  GPU: the host's Ollama (the default)
+#   SA_INDEX_OLLAMA=http://ollama:11434 docker compose -f <this file> --profile cpu up -d
 #                                                        CPU: an Ollama container, when the host has none
 #   docker compose -f <this file> down                   stop; add -v to drop the bundles, the vectors and the model
 #
-# The server is built from its own repository (SA_INDEX_SERVER_REF picks the branch, tag or commit). The file engine
+# The server is the image its repository's CI publishes, ghcr.io/shadowx4fox/alia-mcp-server, at a pinned version
+# (SA_INDEX_SERVER_TAG; `edge` is main). To run a branch or a commit instead, build it from source with the override
+# beside this file: docker compose -f <this file> -f compose.source.yaml up -d --build (SA_INDEX_SERVER_REF picks the
+# branch, tag or commit; publish-index.js --up does this when SA_INDEX_SERVER_REF is set). The file engine
 # keeps the vectors with the bundles (/data/index/vectors-<dimensions>.bin in the bundles volume), so a restart
 # re-embeds nothing.
 #
@@ -19,9 +22,7 @@ name: sa-architecture-index
 
 services:
   server:
-    build:
-      context: https://github.com/shadowX4fox/solutions-architect-knowledge-base.git#${SA_INDEX_SERVER_REF:-main}
-    image: sa-architecture-index-server:local
+    image: ghcr.io/shadowx4fox/alia-mcp-server:${SA_INDEX_SERVER_TAG:-0.1.0}
     ports:
       - "${SA_INDEX_PORT:-8080}:8080"
     environment:
@@ -47,7 +48,7 @@ services:
       start_period: 30s
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:${SA_INDEX_OLLAMA_TAG:-0.35.1}
     profiles: [cpu]
     volumes:
       - models:/root/.ollama

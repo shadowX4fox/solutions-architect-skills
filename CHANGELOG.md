@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.4.4]
+
+### Changed
+- `publish-index.js --up` runs the MCP server from the image its CI publishes, `ghcr.io/shadowx4fox/alia-mcp-server`, pinned at `0.1.0` (`SA_INDEX_SERVER_TAG` picks another; `edge` is main), instead of building it from source: the first start pulls in seconds where the build took minutes, and every machine runs the same server. `SA_INDEX_SERVER_REF=<branch|commit>` still builds one from source, through `local/compose.yaml` plus the new `local/compose.source.yaml`.
+- Embeddings still go through the host's Ollama, its GPU, by default; the `cpu` profile's Ollama container is pinned at `0.35.1` (`SA_INDEX_OLLAMA_TAG`) instead of `latest`.
+
+### Upgrade
+- A local server started before keeps its bundles (the `bundles` volume): the next `--up` replaces the container with the published image.
+
 ## [10.4.3]
 
 ### Fixed

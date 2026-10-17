@@ -1,0 +1,8 @@
+# Builds the MCP server from its repository instead of pulling the published image — for a branch or a commit the
+# image does not carry yet. Used with compose.yaml, never alone:
+#   SA_INDEX_SERVER_REF=<branch|tag|commit> docker compose -f compose.yaml -f compose.source.yaml up -d --build
+services:
+  server:
+    build:
+      context: https://github.com/shadowX4fox/solutions-architect-knowledge-base.git#${SA_INDEX_SERVER_REF:-main}
+    image: sa-architecture-index-server:${SA_INDEX_SERVER_REF:-main}

@@ -317,7 +317,7 @@ bun <plugin_dir>/skills/architecture-index-export/scripts/publish-index.js <proj
 The script exports the bundle as a draft, checks it, posts it to the server's draft slot and waits until search is ready.
 `--up` starts a local server when nothing answers at `http://localhost:8080`:
 
-- `local/compose.yaml` builds the Alia server from its repository in Docker (Compose 2.20 or later) with the `file`
+- `local/compose.yaml` runs the Alia server from its published image (`ghcr.io/shadowx4fox/alia-mcp-server`, pinned; `SA_INDEX_SERVER_REF` builds a branch from source) in Docker (Compose 2.20 or later) with the `file`
   engine: no Qdrant, vectors on disk, so a restart re-embeds nothing. The first start takes minutes.
 - It embeds through **the host's Ollama** — the GPU when there is one, about twenty chunks a second; on Linux Ollama must
   listen beyond localhost (`OLLAMA_HOST=0.0.0.0`). Otherwise it says so and starts the **`cpu` profile**'s Ollama
