@@ -163,7 +163,7 @@ Gate comment `architecture-docs` will embed:
 | Input | Source |
 |---|---|
 | Business requirements | `[PO Spec filename]` |
-| Capability model | BIAN Service Landscape v14.0.0, bundled at `[bian_landscape_dir]/` (an institution pack's, else the copy the base carries) |
+| Capability model | BIAN Service Landscape v14.0.0, bundled at `[bian_dir]/` (an institution pack's, else the copy the base carries) |
 | Role definitions, examples of use, API links | The same corpus, quoted verbatim |
 | `DOM` / `CAP` codes | `[design_language_dir]/bian-registry.json` — the SA Design Language Standard's closed registry (optional: absent, the block is omitted) |
 

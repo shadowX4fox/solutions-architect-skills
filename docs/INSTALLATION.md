@@ -191,7 +191,7 @@ bun <sa_skills_dir>/scripts/shared/arch-types.js    # the architecture types ava
 With no pack installed, `packs.js` prints something like:
 
 ```text
-sa-skills 10.1.0 · no institution pack
+sa-skills 10.2.0 · no institution pack
   design language: none (fallback mode)
   BIAN landscape:  base — …/architecture-capability-alignment/references/bian-v14
 ```

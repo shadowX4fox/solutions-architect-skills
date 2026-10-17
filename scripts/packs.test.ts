@@ -43,8 +43,8 @@ describe('discovery', () => {
     rmSync(d, { recursive: true });
   });
   test('two packs providing one kind: the first wins, with a warning', () => {
-    const a = makePack('sa-pack-a', { provides: { bianLandscape: 'b' } }, { 'b/llms-bian.txt': 'x' }), b = makePack('sa-pack-b', { provides: { bianLandscape: 'b' } }, { 'b/llms-bian.txt': 'x' });
-    const r = P.assetPath('bian-landscape', opts([a, b]));
+    const a = makePack('sa-pack-a', { provides: { designLanguage: 'dl' } }, { 'dl/llms-rules.txt': 'x' }), b = makePack('sa-pack-b', { provides: { designLanguage: 'dl' } }, { 'dl/llms-rules.txt': 'x' });
+    const r = P.assetPath('design-language', opts([a, b]));
     expect(r.from).toBe('sa-pack-a'); expect(r.warnings.join()).toMatch(/provided by sa-pack-a and sa-pack-b/);
     [a, b].forEach((d) => rmSync(d, { recursive: true }));
   });

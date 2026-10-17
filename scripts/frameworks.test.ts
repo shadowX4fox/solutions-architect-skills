@@ -46,3 +46,25 @@ describe('a pack', () => {
     [d, p].forEach((x) => rmSync(x, { recursive: true }));
   });
 });
+
+describe('a pack\'s BIAN', () => {
+  test('replaces the open corpus by id — the registry, --dir and the alignment loader all read the pack\'s', () => {
+    const d = mkdtempSync(join(tmpdir(), 'sa-pack-bian-')), b = join(d, 'frameworks', 'BIAN');
+    mkdirSync(b, { recursive: true });
+    writeFileSync(join(d, 'sa-pack.json'), JSON.stringify({ name: 'sa-pack-acme', version: '1.0.0', base: `>=${major}.0.0 <${major + 1}.0.0`, provides: { frameworks: 'frameworks' }, defaults: { framework: 'BIAN' } }));
+    const base = F.frameworks({ env: '', noRegistry: true }).frameworks.BIAN;
+    writeFileSync(join(b, 'framework.json'), readFileSync(join(base.dir, 'framework.json'), 'utf8'));
+    writeFileSync(join(b, 'llms-bian.txt'), 'index');
+    writeFileSync(join(b, 'BIAN-v14-1-customers.md'), '# BIAN Service Landscape v14.0.0 — Business Area: Customers\n\n## Business Domain: Sales\n\n### Service Domain: Customer Offer\n\n**BIAN id:** `1`\n\n**What it does.** The full licensed role definition.\n');
+    withPacks([d], () => {
+      const f = F.frameworks().frameworks.BIAN;
+      expect(f).toMatchObject({ from: 'sa-pack-acme', dir: b });
+      const r = Bun.spawnSync(['bun', join(import.meta.dir, 'shared', 'frameworks.js'), '--dir', 'bian'], { stdout: 'pipe', env: process.env });
+      expect(r.stdout.toString().trim()).toBe(b);
+      const cp = require('../plugins/sa-requirements/skills/architecture-capability-alignment/scripts/capability-prepare.js');
+      const c = cp.loadCorpus(cp.frameworkOf(tmpdir(), 'BIAN'));
+      expect(c.areas[0].domains[0].services[0].what).toBe('The full licensed role definition.');
+    });
+    rmSync(d, { recursive: true });
+  });
+});

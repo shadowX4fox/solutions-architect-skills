@@ -81,7 +81,7 @@ For each layer, document the following information:
 7. **Channels** - Information providers, cross-channel, channel-specific, distribution and servicing scenarios
 8. **Business Development** - Marketing, product management, solution development, channel management, knowledge, models and analytics scenarios
 
-Source: [bian_landscape_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
+Source: [bian_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
 
 **Components**:
 - Business Scenario Orchestrator: [Description - e.g., Workflow engine coordinating BIAN Business Areas]

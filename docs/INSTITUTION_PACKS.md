@@ -10,8 +10,9 @@ marketplace. Install the base, then the pack; the base finds the pack, never the
 - **No design language standard.** Every skill runs in fallback mode until a pack provides one.
 - **The open BIAN corpus**: the full taxonomy (8 Business Areas, 43 Business Domains, 341 Service Domains, ids, API links),
   each Service Domain described by its published API's own description (Apache License 2.0, BIAN's semantic API repository) —
-  257 of them; the Service Landscape's role definitions and examples of use are © BIAN and are not bundled. A pack's full
-  landscape replaces it, and BIAN alignment then judges every Service Domain.
+  257 of them; the Service Landscape's role definitions and examples of use are © BIAN and are not bundled. A pack
+  whose `frameworks` folder carries a `BIAN` framework — the organization's licensed landscape — replaces it, and BIAN
+  alignment then judges every Service Domain.
 - **Three skins** (`holo`, `atlas`, a neutral `corporate`).
 - **Two capability frameworks** for the alignment gate — `BIAN` (banking) and `CROSS-INDUSTRY` (the Turbo EA cross-industry
   map, CC BY 4.0). The gate is mandatory only once a framework is declared (`.sa-skills/project.json`, or a pack's
@@ -30,10 +31,9 @@ A plugin whose root carries `sa-pack.json`:
 {
   "name": "sa-pack-acme",
   "version": "1.0.0",
-  "base": ">=9.1.0 <10.0.0",
+  "base": ">=10.2.0 <11.0.0",
   "provides": {
     "designLanguage": "design-language",
-    "bianLandscape": "bian",
     "skins": "skins",
     "architectureTypes": "architecture-types",
     "frameworks": "frameworks"
@@ -60,9 +60,8 @@ A plugin whose root carries `sa-pack.json`:
 | Key | The folder holds | Proof it is that folder |
 |-----|------------------|-------------------------|
 | `designLanguage` | The design language standard in the layout `architecture-docs` reads (`llms-rules.txt`, `llms-mermaid.txt`, `llms-full.txt`, `rules-registry.json`, `bian-registry.json`, `es/`, `bian/`) | `llms-rules.txt` |
-| `bianLandscape` | The BIAN Service Landscape corpus `architecture-capability-alignment` reads (`llms-bian.txt` and the area files) | `llms-bian.txt` |
 | `architectureTypes` | Architecture types, one folder each: `type.json` (`id`, `name`, `summary`, `files` — `section4`, `section5` (or null), `reference`, `c4` — and `matrix`, the principle gate's rows: principle number → phrases one of which its Implementation or Trade-offs must name) and the four Markdown files it names. A type with a built-in's id replaces it. `bun <sa_skills_dir>/scripts/shared/arch-types.js` lists what is in force | each `type.json` and its files |
-| `frameworks` | Capability frameworks, one folder each: `framework.json` (`id`, `name`, `industry`, `index`, `files` — the area files' pattern —, `levels` / `headings` — the names of its three levels —, `id_label`, `noun`, `report`, `license`, `attribution`) and the corpus it describes, in the shape of the base's `references/bian-v14/`. `bun <sa_skills_dir>/scripts/shared/frameworks.js` lists what is in force | each `framework.json` and its index file |
+| `frameworks` | Capability frameworks, one folder each: `framework.json` (`id`, `name`, `industry`, `index`, `files` — the area files' pattern —, `levels` / `headings` — the names of its three levels —, `id_label`, `noun`, `report`, `license`, `attribution`) and the corpus it describes, in the shape of the base's `references/bian-v14/`. A framework with a built-in's id replaces it: an organization's licensed BIAN Service Landscape is a `BIAN` folder here, its `framework.json` the base's with the pack's `license`. `bun <sa_skills_dir>/scripts/shared/frameworks.js` lists what is in force | each `framework.json` and its index file |
 | `skins` | Command center skins, one folder each (`skin.json`, `skin.css`) — see `plugins/sa-visualization/skills/architecture-command-center/skins/README.md` | each `skin.json` |
 
 ## How the base finds packs
@@ -83,7 +82,7 @@ bun <sa_skills_dir>/scripts/shared/packs.js                      # what is found
 bun <sa_skills_dir>/scripts/shared/packs.js --path design-language   # the folder in force, or nothing (exit 1)
 ```
 
-Skill instructions name these folders `[design_language_dir]` and `[bian_landscape_dir]`; with neither a pack nor
+Skill instructions name these folders `[design_language_dir]` (`packs.js --path design-language`) and `[bian_dir]` (`frameworks.js --dir BIAN`); with neither a pack nor
 a base copy, the skills run in fallback mode, as they always have when the standard is absent.
 
 ## Installing

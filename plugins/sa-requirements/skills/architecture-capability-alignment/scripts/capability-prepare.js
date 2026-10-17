@@ -51,7 +51,7 @@ const JUDGE = SA_SKILLS ? require(path.join(SA_SKILLS, 'scripts', 'judge.js')) :
 // the BIAN landscape and the design language's DOM / CAP registry: an institution pack's, else the base's own (scripts/shared/packs.js);
 // without sa-skills, the corpus bundled beside this skill
 const PACKS = SA_SKILLS ? require(path.join(SA_SKILLS, 'scripts', 'shared', 'packs.js')) : null;
-const SKILL = path.join(__dirname, '..'), CORPUS = (PACKS && PACKS.bianLandscapeDir()) || path.join(SKILL, 'references', 'bian-v14');
+const SKILL = path.join(__dirname, '..'), CORPUS = path.join(SKILL, 'references', 'bian-v14');   // BIAN's open corpus — the registry may name a pack's instead
 // the capability framework (sa-skills' scripts/shared/frameworks.js): BIAN by default — the corpus above, its wording and
 // its report unchanged — or another framework's corpus, described by its framework.json (levels, id label, report file)
 const FRAMEWORKS = SA_SKILLS ? require(path.join(SA_SKILLS, 'scripts', 'shared', 'frameworks.js')) : null;
@@ -61,7 +61,7 @@ function frameworkOf(root, id) {
   if (want === 'NONE') throw new Error('the project declares no capability framework — nothing to align (declare one with frameworks.js --declare <id>)');
   const all = FRAMEWORKS ? FRAMEWORKS.frameworks({ project: root }).frameworks : { BIAN: local(CORPUS), 'CROSS-INDUSTRY': local(path.join(SKILL, 'references', 'cross-industry')) };
   const F = all[want]; if (!F) throw new Error(`unknown framework ${want} — one of ${Object.keys(all).join(', ')}`);
-  return Object.assign({ headings: { area: 'Business Area', domain: 'Business Domain', unit: 'Service Domain' }, id_label: 'BIAN id', noun: 'banking' }, F, want === 'BIAN' ? { dir: CORPUS } : {});
+  return Object.assign({ headings: { area: 'Business Area', domain: 'Business Domain', unit: 'Service Domain' }, id_label: 'BIAN id', noun: 'banking' }, F);
 }
 const DL = PACKS ? PACKS.designLanguageDir() : null;
 const REGISTRY = DL ? path.join(DL, 'bian-registry.json') : null;  // optional: the Design Language Standard's DOM / CAP codes; absent, no Diagram ID Segments

@@ -3,8 +3,8 @@
 // (architecture-docs Workflow 1 Step 0.3, the alignment skill). Each is a corpus in one shape — areas › domains › units,
 // one Markdown file per area, `**What it does.**` per unit — described by its `framework.json` (id, name, industry, the
 // three level names, the report file, licence). The base ships two: BIAN (banking) and CROSS-INDUSTRY (Turbo EA
-// Capabilities, CC BY 4.0). An institution pack adds its own under `provides.frameworks` (one folder per framework), and a
-// pack's `bianLandscape` replaces the base's BIAN corpus (scripts/shared/packs.js).
+// Capabilities, CC BY 4.0). An institution pack adds its own under `provides.frameworks` (one folder per framework); a
+// pack framework with a built-in's id replaces it — an organization's licensed BIAN Service Landscape replaces the open corpus.
 //
 // A project declares its framework once, in `.sa-skills/project.json` (`{ "framework": "BIAN" | "<id>" | "none" }`);
 // otherwise an institution pack's `defaults.framework`; otherwise a BIAN_ALIGNMENT.md (or the older ENTERPRISE_ALIGNMENT.md) at the root means BIAN (the
@@ -12,6 +12,7 @@
 //
 //   bun frameworks.js [--project <dir>] [--json]       the frameworks available and the one declared
 //   bun frameworks.js --declare <id|none> --project <dir>   record the project's choice
+//   bun frameworks.js --dir <id> [--project <dir>]          the folder of a framework's corpus in force (a pack's, else the base's)
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -34,12 +35,8 @@ function load(dir, descriptorDir, source) {
 // every framework available here: { id → descriptor + dir + from (base or the pack) }
 function frameworks(opts = {}) {
   const out = {}, warnings = [];
-  let bianPack = null, dirs = [];
-  try { const a = packs().assetPath('bian-landscape', opts); if (a.from && a.from !== 'base') bianPack = a; } catch (e) { bianPack = null; }
-  Object.entries(BUILTIN).forEach(([id, dir]) => {
-    const f = id === 'BIAN' && bianPack ? load(bianPack.path, dir, bianPack.from) : load(dir, null, 'base');
-    if (f) out[id] = f;
-  });
+  let dirs = [];
+  Object.entries(BUILTIN).forEach(([id, dir]) => { const f = load(dir, null, 'base'); if (f) out[id] = f; });
   try { dirs = packs().findPacks(opts).packs.filter((p) => p.manifest.provides.frameworks).map((p) => ({ name: p.name, dir: path.resolve(p.dir, p.manifest.provides.frameworks) })).filter((x) => fs.existsSync(x.dir)); } catch (e) { dirs = []; }
   dirs.forEach(({ name, dir }) => fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).forEach((e) => {
     const f = load(path.join(dir, e.name), null, name);
@@ -76,6 +73,7 @@ module.exports = { BUILTIN, NONE, frameworks, normId, declared, declare, forProj
 if (require.main === module) {
   const a = process.argv.slice(2), opt = (f) => { const i = a.indexOf(f); return i >= 0 ? a[i + 1] : undefined; };
   const root = opt('--project') || process.cwd(), opts = { project: root };
+  if (a.includes('--dir')) { const id = normId(opt('--dir'), opts), f = id && frameworks(opts).frameworks[id]; if (!f) { console.error(`unknown framework ${opt('--dir')}`); process.exit(1); } console.log(f.dir); process.exit(0); }
   if (a.includes('--declare')) { try { console.log(declare(root, opt('--declare'), opts)); process.exit(0); } catch (e) { console.error(e.message); process.exit(2); } }
   const { frameworks: f, warnings } = frameworks(opts), d = declared(root, opts);
   if (a.includes('--json')) { console.log(JSON.stringify({ declared: d, frameworks: Object.values(f).map((x) => ({ id: x.id, name: x.name, industry: x.industry, report: x.report, from: x.from })), warnings }, null, 2)); process.exit(0); }

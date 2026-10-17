@@ -100,7 +100,7 @@ For each component in your system, document using the template below. **Group co
 [1-2 sentence description of what this business scenario orchestrates]
 
 **BIAN Business Area Mapping**:
-- **Primary BIAN Business Area**: [From the 8 BIAN Business Areas — Source: [bian_landscape_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).]
+- **Primary BIAN Business Area**: [From the 8 BIAN Business Areas — Source: [bian_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).]
 - **Official BIAN Reference**: [Link to BIAN v14.0.0 Business Area definition]
 - **BIAN Business Domains Involved**: [List of Business Domains from Layer 3]
 

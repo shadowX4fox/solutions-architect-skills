@@ -105,7 +105,7 @@ This reference describes the **BIAN 5-Layer Architecture** — a layered model d
 | 7 | **Channels** | Party authentication, contact handling, servicing, branch and ATM operations |
 | 8 | **Business Development** | Product design and directory, campaigns, models and analytics |
 
-Source: [bian_landscape_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
+Source: [bian_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
 
 **Key Responsibilities**:
 - Orchestrate multi-step business scenarios across BIAN Business Areas
@@ -273,7 +273,7 @@ Every BIAN-compliant Service Domain must document these metadata fields:
 | # | Field | Description | Example |
 |---|-------|-------------|---------|
 | 1 | **SD Name** | Official BIAN Service Domain name | Savings Account |
-| 2 | **BIAN id** | Numeric id from `[bian_landscape_dir]/llms-bian.txt` | 42877 |
+| 2 | **BIAN id** | Numeric id from `[bian_dir]/llms-bian.txt` | 42877 |
 | 3 | **BIAN Version** | BIAN specification version | v14.0.0 |
 | 4 | **Business Area** | Parent BIAN Business Area | Products |
 | 5 | **Business Domain** | Parent BIAN Business Domain | Loans and Deposits |
@@ -473,7 +473,7 @@ The complete BIAN v14.0.0 landscape is available at: [bian.org/servicelandscape-
 | Business Development | Marketing And Development, Product Management, Solution Development, Channel Management, Intelectual Property And Knowledge, Models And Analytics | 58 |
 | **Total** | **43 domains** | **341 SDs** |
 
-Source: [bian_landscape_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
+Source: [bian_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
 
 ### Commonly Used Service Domains
 

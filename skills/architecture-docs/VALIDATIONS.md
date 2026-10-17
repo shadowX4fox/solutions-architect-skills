@@ -844,7 +844,7 @@ If matches found → **WARNING**: Domain layer should be framework-free.
   - Customers
   - Channels
   - Business Development
-  - Source: [bian_landscape_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
+  - Source: [bian_dir]/llms-bian.txt (index; open one per-area file only for the areas in scope).
 - Business scenarios organized by BIAN Business Area
 - BIAN Business Area mapping table present
 - BIAN v14.0.0 reference URL included

@@ -75,7 +75,7 @@ What it emits: a third classification level (Service Domain), BIAN's own publish
 
 This skill ships in the **sa-requirements** plugin, with the PO Spec it reads (`sa-skills` depends on it and installs
 it). `[plugin_dir]` is its install: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-requirements`.
-`[sa_skills_dir]` is sa-skills' (the same command without `--plugin`). `[bian_landscape_dir]` is the BIAN Service Landscape in force — `bun [sa_skills_dir]/scripts/shared/packs.js --path bian-landscape` (an institution pack's, else the copy the base carries); without sa-skills, `[plugin_dir]/references/bian-v14`. `[design_language_dir]` is the Design Language Standard in force — `bun [sa_skills_dir]/scripts/shared/packs.js --path design-language` prints it (an institution pack's — the base carries none) or prints nothing and exits 1: **fallback mode**. Two pieces of this workflow are sa-skills': the
+`[sa_skills_dir]` is sa-skills' (the same command without `--plugin`). `[bian_dir]` is the BIAN Service Landscape in force — `bun [sa_skills_dir]/scripts/shared/frameworks.js --dir BIAN` (an institution pack's BIAN framework, else the open corpus the base carries); without sa-skills, `[plugin_dir]/references/bian-v14`. Another framework's folder: `frameworks.js --dir <id>`. `[design_language_dir]` is the Design Language Standard in force — `bun [sa_skills_dir]/scripts/shared/packs.js --path design-language` prints it (an institution pack's — the base carries none) or prints nothing and exits 1: **fallback mode**. Two pieces of this workflow are sa-skills': the
 judge (`scripts/judge.js`) that decides every claim, and the Design Language Standard's `bian-registry.json` (the
 `DOM` / `CAP` codes). `capability-prepare.js` finds sa-skills itself (`--sa-skills`, `SA_SKILLS_DIR`, the install registry).
 Without it the report is still written — every claim undecided, nothing ranked in its place, and it says no judge was
@@ -88,7 +88,7 @@ available — and carries no Diagram ID Segments.
 | `SKILL.md` | This file — entry point and workflow |
 | `BIAN_ALIGNMENT_TEMPLATE.md` | Output template (BIAN's report shape; another framework uses the same sections with its own level names, without Diagram ID Segments and API Surface) — Summary, Diagram ID Segments, per-Area analysis (8 sub-sections), API Surface, Next Steps |
 | `ANALYSIS_METHODOLOGY.md` | How to extract business capabilities from the PO Spec and classify at each of the three BIAN levels — the "What vs. How" rule, altitude judgement, evidence citation |
-| `[bian_landscape_dir]/` | The bundled BIAN Service Landscape v14.0.0, byte-for-byte as published. `llms-bian.txt` is the index and the default load; the 8 area files are read on demand, one at a time. See its `README.md` for the load contract. |
+| `[bian_dir]/` | The bundled BIAN Service Landscape v14.0.0, byte-for-byte as published. `llms-bian.txt` is the index and the default load; the 8 area files are read on demand, one at a time. See its `README.md` for the load contract. |
 
 ---
 
@@ -115,11 +115,11 @@ If multiple matches, list them and ask the user to select one.
 
 ### Step 2 — Load the BIAN Index
 
-Read `[bian_landscape_dir]/llms-bian.txt` — 431 lines carrying every Business Area, every Business Domain with its complete Service Domain list, and every Service Domain with its path, BIAN id and API specification URL.
+Read `[bian_dir]/llms-bian.txt` — 431 lines carrying every Business Area, every Business Domain with its complete Service Domain list, and every Service Domain with its path, BIAN id and API specification URL.
 
 There is **no model-resolution step and no override path**. The corpus is bundled, always present, and identical for every project. If `llms-bian.txt` is missing the plugin install is corrupted: abort with *"Bundled BIAN corpus missing from plugin. Reinstall sa-requirements."*
 
-**Do not read the area files yet.** They are opened in Step 6, only for Business Areas already classified 🟢 or 🟡. Reading all eight is a defect — see `[bian_landscape_dir]/README.md` § Load contract.
+**Do not read the area files yet.** They are opened in Step 6, only for Business Areas already classified 🟢 or 🟡. Reading all eight is a defect — see `[bian_dir]/README.md` § Load contract.
 
 **Step 2.2 — The shortlist by code (2026-09-21).** After Step 3 has produced the capability list, save it as
 `.cache/sa-skills/bian/brief.json` — `{ problem, objectives, use_cases: [{ id, name, description, actors }], regulatory_and_integration_constraints, out_of_scope }`, **written in English whatever `doc_language` is** (it is an internal artifact, never delivered; the report keeps `doc_language` and quotes BIAN verbatim as before) — and run
@@ -210,7 +210,7 @@ Per impacted Business Domain, capture: **status**, **one-line rationale**, **PO 
 
 For each 🟢 / 🟡 Business Domain, identify the Service Domains the initiative realizes or consumes.
 
-**Read the area file now** — `[bian_landscape_dir]/BIAN-v14-N-<area>.md` — **one at a time, only for 🟢 / 🟡 areas.** Never read all eight.
+**Read the area file now** — `[bian_dir]/BIAN-v14-N-<area>.md` — **one at a time, only for 🟢 / 🟡 areas.** Never read all eight.
 
 Per impacted Service Domain, capture:
 
