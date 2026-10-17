@@ -19,6 +19,6 @@ Until that marker is stamped, the Content Hygiene Gate runs this project in `rep
 findings print, nothing blocks. That is deliberate — a legacy architecture must never be forced
 into a rewrite by an unrelated one-line edit.
 
-**Plan mode**: a restyle is update intent under the project's plan-first rule. In plan mode, run the
-`--dry-run` report and present it through `ExitPlanMode`; the approval replaces the skill's Step 2 prompt.
-`--dry-run` by itself is read-only and needs no plan.
+**Confirmation, no plan mode**: a restyle is update intent under the project's confirm-first rule. The
+`--dry-run` report is the change set and the skill's Step 2 prompt is the approval; nothing is written before it.
+`--dry-run` by itself is read-only and needs no confirmation.

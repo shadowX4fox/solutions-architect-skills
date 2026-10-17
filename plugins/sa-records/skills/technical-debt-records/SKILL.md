@@ -108,6 +108,8 @@ Retired tags migrate on sight, with a History note naming the old tag:
 
 ## Workflow
 
+Confirm before writing: every doubt is asked, then the record (or the move) is shown and approved. **RUN-team exception** — `bun [plugin_dir]/scripts/shared/support.js <project_root>` prints `Tier 0` (the project declares `"support": "run"` and has an `architecture-v*` tag): a workaround recorded as a new TDR and a status move `--move` accepts are written without the approval when nothing is in doubt, and reported after. A crossed escalation trigger (the script lists them) writes nothing to the architecture: it becomes an escalation record and, after the user's yes, an issue on the git host (`escalate.js`, the project CLAUDE.md § RUN teams), then stop.
+
 Create:
 
 1. `ls tdr/` for the next ID. No `tdr/` → create it and seed the index.

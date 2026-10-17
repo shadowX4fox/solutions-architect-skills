@@ -89,6 +89,23 @@ describe("lifecycle — git, direct", () => {
     expect(git("tag", "-l", "architecture-v*")).toBe("architecture-v1.0.0\narchitecture-v1.1.0");
   });
 
+  test("escalations closed since the last release go into the entry; open ones are reported, never blocking", () => {
+    repo(); release({ direct: true });
+    const esc = (id: string, status: string, closed: string, resolution: string, title: string) => w(`escalations/${id}-x.md`,
+      `---\nid: ${id}\nstatus: ${status}\ndate: 2026-10-01\narchitecture: architecture-v1.0.0\nroute: tier-1\ntriggers: [security-iam]\nresolution: ${resolution}\nclosed: ${closed}\n---\n# ${id} — ${title}\n`);
+    esc("ESC-001", "Resolved", "2000-01-01", "ADR-101", "Before the last release");
+    esc("ESC-002", "Resolved", "2099-01-01", "ADR-102", "Hub API mTLS");
+    esc("ESC-003", "Rejected", "2099-01-02", "", "Not an architecture change");
+    esc("ESC-004", "In Review", "", "", "Still with the architect");
+    w("docs/01-system-overview.md", "# System Overview\n\nOther text.\n");
+    const p = L.plan(ROOT, { skipGates: true });
+    expect(p.escalations).toEqual({ closed: ["ESC-002", "ESC-003"], open: [{ id: "ESC-004", status: "In Review", route: "tier-1", issue: null }] });
+    const entry = r(p.entry_file);
+    expect(entry).toContain("- ESC-002 resolved by ADR-102: Hub API mTLS");
+    expect(entry).toContain("- ESC-003 rejected: Not an architecture change");
+    expect(entry).not.toContain("ESC-001");
+  });
+
   test("a plan the architecture moved past is refused; nothing changed means no release", () => {
     repo(); release({ direct: true });
     expect(L.plan(ROOT, { skipGates: true }).reason).toMatch(/nothing changed since v1\.0\.0/);

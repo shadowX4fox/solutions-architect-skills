@@ -50,6 +50,12 @@
    - Individual `docs/` files are small enough to read in full
    - `Read(file_path="docs/07-security-architecture.md")`  — no offset/limit needed
 
+3.5. **Confirm the change (BLOCKING — the edit runs without plan mode)**
+   Nothing is written before the user approves it — except, in a RUN-team project past its first release (`bun [plugin_dir]/scripts/shared/support.js <project_root>` prints `Tier 0`), a wording, typo or link fix that changes no fact, when nothing is in doubt: it is written and reported. A crossed escalation trigger (the script lists them) writes nothing to the architecture: it becomes an escalation record and, after the user's yes, an issue on the git host (`escalate.js`, the project CLAUDE.md § RUN teams), then stop.
+   - **Doubts first.** Anything the request leaves open — which file or section, which value, which component (by canonical name), whether a figure in S1 Key Metrics moves with it, how far the change reaches — is asked with `AskUserQuestion`, every doubt in one call, each with the options the documents support. Never resolve a doubt by guessing.
+   - **The change set.** Show, per file, the lines before → after (a new block in full), the downstream files Step 5.5 will offer (the Reverse Dependency Table row), and the principles and ADRs the change bears on; then one approval question (approve · revise). A revision is shown again and asked again.
+   - **Only what was approved is written.** A gate or audit finding on the approved lines (Section 3 gate, Checks A–I) is fixed at its line and reported when the fix keeps their meaning; a fix that changes a value or meaning, touches another line, or adds a file is asked first. Downstream files keep Phase 2's own approval.
+
 4. **Edit the target file directly**
    - Use the Edit tool on the specific `docs/NN-name.md` file — **surgically**: the number of tokens used to edit a file is best minimized, so when it will not affect the end result, edit at the lines that change rather than rewrite the file. A `Write` of the whole document is for a file that does not exist yet or whose greater part changes; for anything else it costs the output tokens of the whole file and regresses what already passed (8.31.1: a rewritten principle lost the cost noun its gate had accepted)
    - **Do NOT edit ARCHITECTURE.md** unless you are adding a new section/file to the navigation table

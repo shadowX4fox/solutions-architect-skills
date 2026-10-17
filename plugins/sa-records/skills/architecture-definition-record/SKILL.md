@@ -411,6 +411,8 @@ Next steps:
 
 **Objective**: Guided interview → writes a complete `adr/ADR-XXX-title.md`.
 
+**Confirm before writing**: the ADR is shown and approved before it is written. **RUN-team exception** — `bun [plugin_dir]/scripts/shared/support.js <project_root>` prints `Tier 0`: a project ADR (101+) with status `Proposed` is written without the approval when nothing is in doubt, and reported after; `Accepted` and every institutional ADR still need the user. A crossed escalation trigger (the script lists them) writes nothing to the architecture: it becomes an escalation record and, after the user's yes, an issue on the git host (`escalate.js`, the project CLAUDE.md § RUN teams), then stop.
+
 #### Step 2.1: Determine Scope and Next ADR Number
 
 **Step 2.1a — Ask scope** (default = User/Project):

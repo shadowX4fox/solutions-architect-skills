@@ -50,6 +50,7 @@ const { collect } = require(P('scripts', 'shared', 'arch-facts.js'));
 const increments = require(P('scripts', 'shared', 'increments.js'));
 const { readReview } = require(P('skills', 'architecture-docs', 'scripts', 'principle-check.js'));
 const { rotate } = require(P('skills', 'architecture-docs', 'scripts', 'changelog-rotate.js'));
+const escalate = require(P('scripts', 'shared', 'escalate.js'));
 
 const ARCH_PATHS = ['ARCHITECTURE.md', 'docs', 'adr', 'tdr'];
 const TAG = (v) => `architecture-v${v}`;
@@ -396,11 +397,16 @@ function plan(root, opts = {}) {
   if (draftEntry) sections = sectionsOf(draftEntry.body);
   if (cl.unreleased) Object.entries(sectionsOf(cl.unreleased.body)).forEach(([k, ls]) => { sections[k] = (sections[k] || []).concat(ls); });
   st.changes.forEach((i) => { sections[i.section] = sections[i.section] || []; if (!sections[i.section].some((l) => l.includes(i.text))) sections[i.section].push(`- ${i.text}`); });
+  // escalations (RUN teams, escalate.js): the ones closed since the last release go into the entry, the open ones are reported
+  const since = first ? null : (git(root, ['log', '-1', '--format=%cs', TAG(st.version)]).out || null);
+  const closedEsc = escalate.closedSince(root, since), openEsc = escalate.open(root);
+  closedEsc.forEach((r) => { sections.Changed = sections.Changed || []; sections.Changed.push(`- ${r.meta.id} ${r.meta.status === 'Rejected' ? 'rejected' : `resolved by ${r.meta.resolution}`}: ${r.title.replace(/^ESC-\d+\s+—\s+/, '')}`); });
   let entry = renderSections(sections) || (facts.architecture.language === 'es' ? '### Changed\n- Versión inicial.' : '### Changed\n- Initial release.');
   const piece = opts.increment ? increments.slices(facts).increments.find((x) => x.id === String(opts.increment)) : null;
   if (piece) entry = `${scopeLine(piece, facts.architecture.language)}\n\n${entry}`;
   const p = { ok: true, project_root: root, created: opts.today || localToday(), from: st.version, first, recommended: first ? null : (st.recommended || 'patch'), baseline: st.baseline,
-    fingerprint: fingerprint(root), increment: piece ? { id: piece.id, use_cases: piece.use_cases, containers: piece.containers, new_containers: piece.new.containers, integrations: piece.integrations } : null, changes: st.changes, unreleased: cl.lines, gates: g, blocking: blocking(g).map((x) => x.id), waived: g.filter((x) => x.status === 'waived').map((x) => ({ gate: x.id, reason: x.reason })) };
+    fingerprint: fingerprint(root), increment: piece ? { id: piece.id, use_cases: piece.use_cases, containers: piece.containers, new_containers: piece.new.containers, integrations: piece.integrations } : null, changes: st.changes, unreleased: cl.lines, gates: g, blocking: blocking(g).map((x) => x.id), waived: g.filter((x) => x.status === 'waived').map((x) => ({ gate: x.id, reason: x.reason })),
+    escalations: { closed: closedEsc.map((r) => r.meta.id), open: openEsc.map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, issue: r.meta.issue || null })) } };
   const dir = path.join(root, '.cache', 'sa-skills', 'lifecycle'); fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'plan.json'), JSON.stringify(p, null, 1) + '\n');
   fs.writeFileSync(path.join(dir, 'entry.md'), entry + '\n');
@@ -552,6 +558,8 @@ function renderPlan(p) {
   o.push(`gates (${p.blocking.length ? `BLOCKED by ${p.blocking.join(', ')}` : 'clear'}):`, renderGates(p.gates));
   if (p.changes.length) { o.push(`changes (${p.changes.length}):`); p.changes.forEach((c) => o.push(`  ${c.section.padEnd(10)} ${c.bump.padEnd(5)} ${c.text}`)); }
   if (p.unreleased.length) o.push(`[Unreleased]: ${p.unreleased.length} hand-written line(s) carried into the entry`);
+  if (p.escalations && p.escalations.closed.length) o.push(`escalations closed since the last release, in the entry: ${p.escalations.closed.join(', ')}`);
+  if (p.escalations && p.escalations.open.length) o.push(`escalations still open (not blocking): ${p.escalations.open.map((e) => `${e.id} ${e.status} ${e.route}`).join(', ')}`);
   o.push(`entry: ${p.entry_file} — polish the lines if needed, then: lifecycle.js apply <root> [--bump major|minor|patch] [--direct]`);
   return o.join('\n');
 }

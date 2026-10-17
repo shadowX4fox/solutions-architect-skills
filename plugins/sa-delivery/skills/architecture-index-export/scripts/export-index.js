@@ -15,6 +15,8 @@
 //                      named, not embedded. `id` is stable across versions (a UUID from the project, the file and the
 //                      anchor path), `content_hash` is the text's, so a server re-embeds only what changed.
 //   ledger.json        the facts ledger (arch-facts.js) as is — what the exact tools answer from
+//   (manifest.support) RUN-team support: the mode `.sa-skills/project.json` declares, whether Tier 0 applies, the Tier 0 writes,
+//                      the escalation triggers by id, the routes and the open escalations (escalations/ESC-NNN-*.md)
 //   buildpacks/<slug>/ one per container the handoff kit covers: pack.json (parts, ordered build plan, flows and budgets,
 //                      interfaces both ways, governing ADRs, open questions), the files byte for byte, and BUILD.md — the
 //                      instructions an IDE agent follows, from templates/BUILD.md (`--server` puts the MCP URL in its binding)
@@ -34,6 +36,15 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 const { fromSaSkills } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'sa-skills.js'));   // sa-delivery reads the architecture through sa-skills
 const { collect } = require(fromSaSkills('scripts', 'shared', 'arch-facts.js'));
+
+// RUN-team support and escalations (sa-records, re-exported by sa-skills): the policy an MCP server applies and the open queue
+const support = require(fromSaSkills('scripts', 'shared', 'support.js'));
+const escalate = require(fromSaSkills('scripts', 'shared', 'escalate.js'));
+function supportOf(root) {
+  const s = support.supportOf(root);
+  return { mode: s.support, tier0: s.tier0, released: s.released, tier0_writes: s.tier0 ? support.TIER0 : [], triggers: escalate.TRIGGERS, routes: escalate.ROUTES,
+    escalations_open: escalate.open(root).map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, triggers: r.meta.triggers || [], components: r.meta.components || [], title: r.title.replace(/^ESC-\d+\s+—\s+/, ''), issue: r.meta.issue || null })) };
+}
 
 const SCHEMA = 'sa-index/1';
 const MAX_CHARS = 24000;                 // ~6K tokens: a unit above it is cut at paragraph boundaries
@@ -338,7 +349,7 @@ function exportIndex(root, opts = {}) {
   const byKind = {}; chunks.forEach((c) => { byKind[c.meta.kind] = (byKind[c.meta.kind] || 0) + 1; });
   const manifest = { schema: SCHEMA, generator: 'sa-delivery:architecture-index-export', generator_version: pluginVersion(), generated_at: new Date().toISOString(),
     project: { key, name: a.name || key }, architecture: { version: a.version, status: a.status || null, released: a.released || null, language: a.language || 'en', type: a.type || null },
-    channel, git,
+    channel, git, support: supportOf(root),
     embedding: { unit: 'chunk', max_chars: MAX_CHARS, text_field: 'text', id_field: 'id', hash_field: 'content_hash' },
     counts: { chunks: chunks.length, by_kind: byKind, buildpacks: packs.packs.length, skipped: packs.skipped.length },
     buildpacks: packs.packs.map((p) => ({ component: p.slug, path: `buildpacks/${p.slug}/pack.json`, parts: p.parts, open_questions: p.open_questions })),

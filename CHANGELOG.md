@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.3.0]
+
+Architecture edits confirm first instead of entering plan mode, a RUN team's routine writes go ahead on their own, and what needs an architect becomes an escalation on the project's git host.
+
+### Added
+- RUN-team support (Tier 0): a project declares `"support": "run"` in `.sa-skills/project.json` (`scripts/shared/support.js --declare run`). Once it has an `architecture-v*` tag, four writes go ahead without the change-set approval when nothing is in doubt: a workaround recorded as a TDR, a TDR status move, a project ADR in `Proposed`, a doc fix that changes no fact.
+- Escalation triggers: a new external integration, a data classification change, cross-domain impact, a security or IAM change, regulatory or audit scope, a new technology or vendor, low AI confidence. A crossed trigger writes nothing to the architecture.
+- `scripts/shared/escalate.js`: an escalation record, `escalations/ESC-NNN-<slug>.md` (status, triggers with evidence, route `tier-1` / `tier-2`, components, the change proposed and not applied, questions, resolution), and the issue it becomes on the project's git host — GitHub, GitLab, Gitea or Azure DevOps, read from `origin` — previewed first and opened only with `--create` after the user's yes; `status`, `close --by <ADR|TDR|release>`, `list`.
+- `lifecycle.js plan`: the escalations closed since the last release go into the entry; open ones are reported, never blocking.
+- The index bundle's `manifest.json` carries `support`: the mode, whether Tier 0 applies, the Tier 0 writes, the triggers by id, the routes and the open escalations.
+
+### Changed
+- Architecture edits run without plan mode: every doubt is asked (`AskUserQuestion`), the change set is shown before → after and approved before any write — the CLAUDE.md block `/setup` writes, `EDIT_WORKFLOW.md` step 3.5, the TDR and ADR skills, the prose restyle's Step 2. `tdr/` joins the confirmed paths. Re-run `/setup` in a project to refresh its CLAUDE.md block.
+
 ## [10.2.0]
 
 An organization's BIAN is a capability framework like any other: one generic way for a pack to bring a reference model.

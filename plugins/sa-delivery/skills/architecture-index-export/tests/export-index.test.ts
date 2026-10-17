@@ -276,6 +276,20 @@ describe("export-index — channel and bundle", () => {
     expect(exportIndex(P, { kitCheck: clean }).manifest).toMatchObject({ channel: "draft", git: { dirty: true } });   // uncommitted kit
   });
 
+  test("the manifest carries the RUN-team policy and the open escalations; the record never makes the bundle a draft", () => {
+    const env = { ...process.env, GIT_CEILING_DIRECTORIES: BASE, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
+    const git = (...a: string[]) => spawnSync("git", a, { cwd: P, env, encoding: "utf8" });
+    expect(exportIndex(P, { kitCheck: clean }).manifest.support).toMatchObject({ mode: null, tier0: false, tier0_writes: [], escalations_open: [] });
+    w(".sa-skills/project.json", JSON.stringify({ support: "run" }));
+    git("init", "-q"); git("add", "-A"); git("commit", "-qm", "release"); git("tag", "architecture-v1.3.0");
+    w("escalations/ESC-001-hub-api-secret.md", "---\nid: ESC-001\nstatus: Open\ndate: 2026-10-17\narchitecture: architecture-v1.3.0\nroute: tier-1\ntriggers: [security-iam]\ncomponents: [Hub API]\nissue:\n---\n# ESC-001 — Hub API secret\n");
+    const m = exportIndex(P, { kitCheck: clean }).manifest;
+    expect(m.channel).toBe("released");
+    expect(m.support).toMatchObject({ mode: "run", tier0: true, released: "architecture-v1.3.0", tier0_writes: ["tdr-workaround", "tdr-status", "adr-proposed", "doc-fix"] });
+    expect(Object.keys(m.support.triggers)).toEqual(["new-integration", "data-classification", "cross-domain", "security-iam", "regulatory", "new-technology", "low-confidence"]);
+    expect(m.support.escalations_open).toEqual([{ id: "ESC-001", status: "Open", route: "tier-1", triggers: ["security-iam"], components: ["Hub API"], title: "Hub API secret", issue: null }]);
+  });
+
   test("the check finds an edited file and an edited chunk; a folder that holds no bundle is never overwritten", () => {
     const { out } = exportIndex(P, { kitCheck: clean });
     writeFileSync(join(out, "buildpacks/hub-api/spec.md"), "edited\n");

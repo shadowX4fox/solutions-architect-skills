@@ -12,10 +12,10 @@ prints its findings and blocks nothing. Without that, the first one-line edit to
 would trigger a rewrite the user never asked for. Migration happens when the user chooses it, or at
 release (`architecture-lifecycle`), and not before.
 
-**Plan mode.** A restyle rewrites existing content in every file, so it **is update intent** under the
-consumer project's plan-first rule (`/setup`'s CLAUDE.md block). The plan is Steps 1–2 — the dry-run
-report — presented through `ExitPlanMode`; the approval stands in for Step 2's confirmation prompt.
-`--dry-run` alone writes nothing and needs no plan.
+**Confirmation, no plan mode.** A restyle rewrites existing content in every file, so it **is update
+intent** under the consumer project's confirm-first rule (`/setup`'s CLAUDE.md block). The change set is
+Steps 1–2 — the dry-run report — and Step 2's confirmation prompt is the approval; any doubt the report
+leaves (a fact with no kept link, a split's target) is asked there. `--dry-run` alone writes nothing.
 
 **The fact rule: never drop a fact from the corpus.** A sentence may be deleted from one document when
 the fact it carries is stated where the kept link points — and a script confirms it
