@@ -187,6 +187,12 @@ describe('the record path keeps the text whole', () => {
     expect(r.meta.components).toEqual(['A, B', 'C']);
     rmSync(p, { recursive: true });
   });
+  test('requested_by is trimmed, so the issue row is what 10.4.1 wrote', () => {
+    const { p, r } = rec({ ...REQ, requested_by: '\u00a0 Payments RUN team  ' });
+    expect(r.meta.requested_by).toBe('Payments RUN team');
+    expect(E.issueBody(r)).toContain('| Requested by | Payments RUN team |');
+    rmSync(p, { recursive: true });
+  });
   test('an unquoted front matter from an older record still reads, its ` #` a comment', () => {
     const m = E.parse('---\nid: ESC-001 # first\ncomponents: [A, B]\nrequested_by: ops\n---\n# T\n').meta;
     expect(m).toMatchObject({ id: 'ESC-001', components: ['A', 'B'], requested_by: 'ops' });

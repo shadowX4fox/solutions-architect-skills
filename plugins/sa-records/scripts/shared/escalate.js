@@ -138,7 +138,7 @@ function create(root, req, opts = {}) {
   const id = nextId(root);
   const tag = (git(root, ['tag', '-l', 'architecture-v*', '--sort=-v:refname']) || '').split('\n').filter(Boolean)[0] || '';
   const meta = { id, status: 'Open', date: opts.today || today(), architecture: tag, route: req.route || 'tier-1', triggers: list(req.triggers),
-    components: list(req.components), integrations: list(req.integrations), adrs: list(req.adrs), tdrs: list(req.tdrs), requested_by: req.requested_by || '', issue: '', resolution: '', closed: '' };
+    components: list(req.components), integrations: list(req.integrations), adrs: list(req.adrs), tdrs: list(req.tdrs), requested_by: String(req.requested_by || '').trim(), issue: '', resolution: '', closed: '' };
   const file = path.join(DIR, `${id}-${slugify(req.title)}.md`);
   fs.mkdirSync(path.join(root, DIR), { recursive: true });
   fs.writeFileSync(path.join(root, file), frontmatter(meta) + render(meta, req));

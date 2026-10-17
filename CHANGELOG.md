@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.4.3]
+
+### Fixed
+- `escalate.js new` trims `requested_by`, as it already trimmed every list item: since 10.4.2 a value padded with spaces was quoted with them and reached the issue's fact row padded, so the issue body differed from 10.4.1 (#1).
+
 ## [10.4.2]
 
 ### Fixed
