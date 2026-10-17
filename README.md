@@ -19,13 +19,33 @@ script with tests, so a document either passes or names the line to fix.
 
 ## Contents
 
-- [Why](#why) · [What you get](#what-you-get) · [Quick start](#quick-start)
+- [Showcase](#showcase) · [Why](#why) · [What you get](#what-you-get) · [Quick start](#quick-start)
 - [Meet Alia](#meet-alia) — the 3D navigator and the architecture MCP server
 - [Any industry, any organization](#any-industry-any-organization)
 - [Skill Categories](#skill-categories) · [Documentation](#documentation)
 - [Get involved](#get-involved) · [Acknowledgments](#acknowledgments)
 
 ---
+
+## Showcase
+
+<p align="center">
+  <img src="docs/images/command-center/logical.webp" alt="The command center: the synthetic Order Desk architecture in 3D, the Place an order use case lit phase by phase" width="100%">
+  <br><em>The command center — every layer a floor, every container a block, a use case walked phase by phase with its latency budget.</em>
+</p>
+
+<table>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/images/command-center/physical.webp" alt="Physical view: regions, the cluster, the managed database and the partner service"><br><b>Physical view</b> — where each container runs.</td>
+    <td width="50%" valign="top"><img src="docs/images/command-center/analysis.webp" alt="Analysis mode: each component in the colour of its worst finding"><br><b>Analysis</b> — SPOFs, blast radius and coupling on the blocks they concern.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/images/command-center/simulation.webp" alt="Simulation: documented demand against documented capacity, Order DB breaks first at x1.25"><br><b>Simulation</b> — documented load against documented capacity: what breaks first.</td>
+    <td width="50%" valign="top"><img src="docs/images/command-center/mcp-console.webp" alt="Claude Code asking Alia over MCP about the Order Service"><br><b>Alia over MCP</b> — Claude Code asking the architecture from a console.</td>
+  </tr>
+</table>
+
+All screenshots come from the synthetic *Order Desk* example — see [docs/ALIA.md](docs/ALIA.md).
 
 ## Why
 
@@ -111,7 +131,6 @@ prompts, an architecture radar) — `claude plugin install sa-ux@shadowx4fox-sol
 
 ### In the command center — a 3D model of your architecture
 
-![The command center: the synthetic Order Desk architecture in 3D, the "Place an order" use case lit](docs/images/command-center/logical.webp)
 
 `/sa-visualization:architecture-command-center` renders the documented architecture as one self-contained HTML file: a
 floor per layer, every C4 container a block, every integration a route. Alia walks you through it.
@@ -143,7 +162,6 @@ Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client — VS
 | "Build this service." | `get_build_pack`, `get_build_instructions`, `get_build_part` |
 | "What changed since I built it?" | `what_changed` |
 
-![Claude Code asking Alia from a console about the Order Service](docs/images/command-center/mcp-console.webp)
 
 CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and Azure Pipelines examples); while you
 write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
