@@ -926,3 +926,61 @@ After successful installation:
 ---
 
 **Installation complete!** You're ready to transform your architecture documentation workflow.
+## Optional extras
+
+### Optional: Enable context7
+
+[context7](https://context7.com) provides up-to-date library documentation to improve generated assets (OpenAPI specs, K8s manifests, DDL, etc.). Two skills use it when available:
+
+| Skill | Usage |
+|-------|-------|
+| `architecture-dev-handoff` | Fetches current spec docs (OpenAPI, AsyncAPI, Kubernetes, Protobuf, Avro, DDL, Redis) to validate generated asset syntax |
+| `architecture-docs` | Fetches framework docs for technologies in new component files; presents a Technology Context Brief |
+
+**MCP server setup (recommended):**
+
+Add to your Claude Code MCP settings (`~/.claude.json` or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+**Alternative — automatic setup via CLI:**
+
+```bash
+npx ctx7 setup --claude
+```
+
+This authenticates via OAuth, generates an API key, and configures context7 automatically.
+
+For headless/remote environments, pass your API key directly:
+
+```bash
+npx ctx7 setup --claude --api-key YOUR_API_KEY
+```
+
+Generate your API key at the [context7 dashboard](https://context7.com).
+
+> context7 is fully optional. All skills complete successfully without it — no errors or warnings.
+
+### Recommended VS Code Setup
+
+For the best experience working with this plugin, install these VS Code extensions:
+
+| Extension | Publisher | Purpose |
+|-----------|-----------|---------|
+| [Claude Code for VS Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code) | Anthropic | Run Claude Code skills directly from the editor |
+| [Mermaid Chart](https://marketplace.visualstudio.com/items?itemName=MermaidChart.vscode-mermaid-chart) | Mermaid Chart | Live preview of Mermaid diagrams (v11.4.1) with pan, zoom, and export |
+
+#### Why these extensions?
+
+- **Claude Code** is required to run the plugins' 15 skills from VS Code
+- **Mermaid Chart** lets you validate architecture diagrams (`docs/*.md`) in real-time as they are generated — supports native C4 diagrams, sequence diagrams, and all diagram types used by this plugin
+
