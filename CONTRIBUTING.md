@@ -1,6 +1,8 @@
 # Contributing
 
-Issues and pull requests are welcome.
+Pull requests are welcome. Questions, ideas and show-and-tell go to
+[Discussions](https://github.com/shadowX4fox/solutions-architect-skills/discussions); bugs go to
+[Issues](https://github.com/shadowX4fox/solutions-architect-skills/issues).
 
 ## Setup
 

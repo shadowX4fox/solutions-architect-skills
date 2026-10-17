@@ -200,8 +200,10 @@ Each skill's full reference is its `SKILL.md` (`skills/<name>/` or `plugins/<plu
 
 This is a community project, and every kind of help counts — a bug report from a real run is worth as much as code.
 
-- **Try it and tell us.** Open an [issue](https://github.com/shadowX4fox/solutions-architect-skills/issues) with what you
-  ran, what you expected and what happened.
+- **Ask, share, propose.** Questions, ideas and what you built go to
+  [Discussions](https://github.com/shadowX4fox/solutions-architect-skills/discussions).
+- **Report a bug.** Open an [issue](https://github.com/shadowX4fox/solutions-architect-skills/issues) with what you ran,
+  what you expected and what happened.
 - **Bring your industry.** A capability framework for telecom, insurance, health or the public sector — as a pack, or
   bundled when its licence allows it ([docs/INSTITUTION_PACKS.md](docs/INSTITUTION_PACKS.md)).
 - **Add an architecture type**, a handoff asset format, an analysis lens, a command-center skin.

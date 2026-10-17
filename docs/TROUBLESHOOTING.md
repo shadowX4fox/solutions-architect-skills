@@ -287,7 +287,8 @@ Run the gate alone with `bun <sa_skills_dir>/plugins/sa-delivery/skills/architec
 
 ## Still stuck?
 
-Open an issue at [github.com/shadowX4fox/solutions-architect-skills/issues](https://github.com/shadowX4fox/solutions-architect-skills/issues). Include:
+Not sure it is a bug? Ask in [Discussions](https://github.com/shadowX4fox/solutions-architect-skills/discussions) (Q&A).
+For a bug, open an issue at [github.com/shadowX4fox/solutions-architect-skills/issues](https://github.com/shadowX4fox/solutions-architect-skills/issues). Include:
 
 - What you ran (the request or command) and what you expected.
 - The exact error or finding, with the script's output.
