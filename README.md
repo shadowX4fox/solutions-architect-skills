@@ -111,6 +111,8 @@ prompts, an architecture radar) — `claude plugin install sa-ux@shadowx4fox-sol
 
 ### In the command center — a 3D model of your architecture
 
+![The command center: the synthetic Order Desk architecture in 3D, the "Place an order" use case lit](docs/images/command-center/logical.webp)
+
 `/sa-visualization:architecture-command-center` renders the documented architecture as one self-contained HTML file: a
 floor per layer, every C4 container a block, every integration a route. Alia walks you through it.
 

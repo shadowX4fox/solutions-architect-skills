@@ -14,6 +14,10 @@ synthetic order-taking system with a container named **Hub API**.
 
 # Part 1 — The command center
 
+![The Logical view: a floor per layer, a block per container, the "Place an order" use case lit phase by phase](images/command-center/logical.webp)
+
+*The synthetic Order Desk example in the default `holo` skin — the Logical view, walking the "Place an order" use case.*
+
 ## What it renders
 
 The command center turns the written architecture into a model you can orbit, pan, filter and click. The Mermaid
@@ -54,6 +58,8 @@ review checklist: each line is a documentation finding or an overrides entry.
 
 ## Logical and Physical views
 
+![The Physical view: where each container runs — regions, the cluster, the managed database and the partner SaaS](images/command-center/physical.webp)
+
 - **Logical** — the C4 model: containers on layers, connections by route and phase.
 - **Physical** — the deployment: instances on nodes (region › cluster › namespace, appliances, managed services, the
   customer's device), stacked by trust-zone tier, joined by undirected paths in transport form (`TLS:443`) by Path Class.
@@ -76,6 +82,8 @@ carries *new in N*, a temporary one *until N · TDR-NNN*. The slices come from c
 
 ## Analysis mode — findings on the stage
 
+![Analysis mode: every component painted with its worst finding — Order DB critical, Hub API high](images/command-center/analysis.webp)
+
 When `analysis/` holds reports from `sa-analysis:architecture-analysis` (SPOF, Blast Radius, STRIDE, Bottleneck …), the
 view ring gains **Analysis**, with one entry per report.
 
@@ -91,6 +99,8 @@ view ring gains **Analysis**, with one entry per report.
 - `holo` ranks findings `LV S · A · B · C · D`; `atlas` and `corporate` state priorities `P1 … P5`.
 
 ## Simulation mode — load against capacity
+
+![Simulation mode: documented demand against documented capacity — Order DB breaks first, at ×1.25](images/command-center/simulation.webp)
 
 Open it with `s`, or Alia's *Load simulation* chip. It runs on the Physical view and asks one question: **with the
 documented demand, what breaks first?**
@@ -153,6 +163,8 @@ labelled an assumption. A receiver with no sizes makes its paths pending, never 
 
 ## Ask Alia
 
+![Alia's index: what the scene has on file — components, integrations, sections, analyses, the load simulation](images/command-center/alia.webp)
+
 Header button **Alia**, or the `a` key. She answers at two speeds and always says which one answered.
 
 | Speed | Works in | Answers from |
@@ -170,6 +182,10 @@ With the channel open, she can answer *"how does an order reach the ledger?"* by
 on the stage. Her voice (browser speech synthesis) is off until switched on in Settings.
 
 ## Skins
+
+| `atlas` | `corporate` |
+|---|---|
+| ![The atlas skin](images/command-center/atlas.webp) | ![The corporate skin](images/command-center/corporate.webp) |
 
 | Skin | Look |
 |---|---|

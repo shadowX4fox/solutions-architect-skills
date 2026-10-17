@@ -1,0 +1,20 @@
+// a showcase project for the docs' screenshots: the synthetic Order Desk fixture, plus capacity, demand and analysis reports
+import { mkdirSync, writeFileSync, copyFileSync } from "fs";
+import { join, dirname } from "path";
+const [skill, root] = process.argv.slice(2);
+const { FILES } = require(join(skill, "tests", "order-desk.fixture.ts"));
+const w = (rel: string, s: string) => { mkdirSync(dirname(join(root, rel)), { recursive: true }); writeFileSync(join(root, rel), s); };
+for (const [k, v] of Object.entries(FILES)) w(k, v as string);
+const cap = (per: number, rep: number, max: number) => `\n\n## Capacity <!-- LABEL: Capacity -->\n\n| Metric | Value | Unit | Source |\n|---|---|---|---|\n| capacity_per_replica | ${per} | rps | Load test, 2026-09 |\n| replicas | ${rep} | count | Deployment manifest |\n| max_replicas | ${max} | count | Autoscaler policy |\n| request_size | 2 | KB | API contract |\n| response_size | 6 | KB | API contract |\n`;
+const add = (rel: string, s: string) => w(rel, (FILES[rel] as string) + s);
+add("docs/components/order-desk/01-web-app.md", cap(400, 3, 8));
+add("docs/components/order-desk/02-api-gateway.md", cap(600, 2, 6));
+add("docs/components/order-desk/03-order-service.md", cap(150, 3, 6));
+add("docs/components/order-desk/04-order-db.md", cap(300, 1, 1));
+add("docs/components/order-desk/05-outbox-relay.md", cap(200, 2, 4));
+w("docs/08-scalability-and-performance.md", `# Scalability and Performance\n\n### Demand <!-- LABEL: Demand by Use Case -->\n\n| Use Case | Value | Unit | Peak factor | Source |\n|---|---|---|---|---|\n| UC-01 | 240 | rps | 2 | Marketing forecast, holiday peak |\n`);
+w("analysis/SPOF-2026-10-01.md", `# SPOF\n## 2. Findings\n### 2.1 Critical SPOFs\n| # | Component | Failure Scenario | Impact | Current Mitigation |\n|---|---|---|---|---|\n| **C1** | \`Order DB\` | Single primary lost | Orders cannot be placed | None |\n| C2 | Hub API | Payments hub unavailable | Settlement stops | Retry with backoff |\n`);
+w("analysis/BLAST-RADIUS-2026-10-01.md", `# Blast Radius\n## 2. Findings\n### 2.1 High-Blast Components\n| # | Component | Tier | Direct Consumers | Cascade Risk | Bulkhead Present |\n|---|---|---|---|---|---|\n| B1 ⚡ | \`Order DB\` (SPOF C1) | **S1** | Order Service, Outbox Relay | Cascading | No |\n| B2 | API Gateway | S2 | Web App | Fail-closed | Yes |\n`);
+w("analysis/COUPLING-2026-10-01.md", `# Coupling\n## 2. Coupling Metrics Table\n| # | Component | Fan-in (Ca) | Fan-out (Ce) | Instability (I) | Classification | Source |\n|---|---|---|---|---|---|---|\n| 1 | Order Service | 2 | 3 | 0.60 | — | docs/05 |\n## 4. Volatile Leaves (K2)\n| # | Component | Fan-out | Instability (I) | Dependencies (list) |\n|---|---|---|---|---|\n| K2-01 | Web App | 1 | 1.00 | API Gateway |\n`);
+mkdirSync(join(root, "visualizations"), { recursive: true });
+copyFileSync(join(skill, "examples", "order-desk.scene.json"), join(root, "visualizations", "architecture-command-center.scene.json"));
