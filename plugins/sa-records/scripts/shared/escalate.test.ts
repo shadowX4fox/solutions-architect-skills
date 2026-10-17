@@ -119,11 +119,9 @@ describe('import', () => {
     expect(E.importIssue(p, own)).toMatchObject({ id: 'ESC-007', renamed: false });
     rmSync(p, { recursive: true });
   });
-  test('an Azure DevOps description comes back from its HTML; a body that is no escalation is refused', () => {
-    const p = project(); const i = filed();
-    const az = { ...i, body: '<pre>' + i.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>', labels: ['architecture-escalation', 'tier-1'] };
-    expect(E.requestOf({ ...az, body: az.body.replace(/^<pre>|<\/pre>$/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') }).triggers).toEqual(['security-iam', 'new-integration']);
-    expect(() => E.importIssue(p, { ...i, body: 'Please fix the login page.', labels: [] })).toThrow(/does not read as an escalation/);
+  test('a body that is no escalation is refused', () => {
+    const p = project();
+    expect(() => E.importIssue(p, { ...filed(), body: 'Please fix the login page.', labels: ['architecture-escalation'] })).toThrow(/does not read as an escalation/);
     rmSync(p, { recursive: true });
   });
   test('the retitle is a plan per host until applied', () => {
@@ -134,6 +132,37 @@ describe('import', () => {
     expect(E.retitlePlan(p, 41, 'T').argv).toEqual(expect.arrayContaining(['az', 'work-item', 'update', '--id', '41']));
     git(p, 'remote', 'set-url', 'origin', 'https://gitea.example.org/team/arch.git');
     expect(E.retitlePlan(p, 41, 'T').request).toMatchObject({ method: 'PATCH', url: 'https://gitea.example.org/api/v1/repos/team/arch/issues/41' });
+    rmSync(p, { recursive: true });
+  });
+});
+
+describe('import keeps the text whole', () => {
+  const round = (req: any) => { const p = project(); E.create(p, req); const rec = E.records(p)[0]; rmSync(p, { recursive: true });
+    return E.requestOf({ title: `[ESC-?] ${req.title}`, body: E.issueBody({ ...rec, meta: { ...rec.meta, id: 'ESC-?' }, file: '—' }) + '\n<!-- sa-escalation-preview: 3f2a -->\n', labels: ['architecture-escalation'] }); };
+  test('a request with a heading, an underscore line and a fence comes back verbatim', () => {
+    const request = 'We need:\n\n## Context\nThe ledger posts at night.\n_Note_: urgent.\n```js\nx()\n```\n## Why it needs an architect\nnot a marker here';
+    expect(round({ ...REQ, request }).request).toBe(request);
+  });
+  test('a proposal or question item with a line break is one bullet, flattened', () => {
+    const r = round({ ...REQ, proposal: ['step one\nstep two'], questions: ['first\n## second'] });
+    expect(r.proposal).toEqual(['step one step two']);
+    expect(r.questions).toEqual(['first ## second']);
+  });
+  test('the server\'s fingerprint comment after the body is not read as text', () => {
+    expect(round(REQ).questions).toEqual(REQ.questions);
+  });
+  test('an Azure DevOps description is read back by unhtml()', () => {
+    const p = project(); E.create(p, REQ); const rec = E.records(p)[0]; rmSync(p, { recursive: true });
+    const md = E.issueBody({ ...rec, meta: { ...rec.meta, id: 'ESC-?' }, file: '—' });
+    const html = '<pre>' + md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+    expect(E.unhtml(html)).toBe(md);
+    expect(E.requestOf({ title: 'x', body: E.unhtml(html), labels: [] }).evidence).toEqual(REQ.evidence);
+  });
+  test('an issue with neither the label nor an [ESC-…] title is refused unless forced', () => {
+    const p = project(); const rec0 = (() => { const q = project(); E.create(q, REQ); const r = E.records(q)[0]; rmSync(q, { recursive: true }); return r; })();
+    const issue = { title: REQ.title, body: E.issueBody({ ...rec0, meta: { ...rec0.meta, id: 'ESC-?' }, file: '—' }), url: 'https://github.com/org/arch/issues/9', labels: [] };
+    expect(() => E.importIssue(p, issue)).toThrow(/not an escalation issue/);
+    expect(E.importIssue(p, issue, { force: true }).id).toBe('ESC-001');
     rmSync(p, { recursive: true });
   });
 });

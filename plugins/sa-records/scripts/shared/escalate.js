@@ -44,6 +44,7 @@ const slugify = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowe
 const git = (root, args) => { const r = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : null; };
 const list = (v) => (Array.isArray(v) ? v : v ? [v] : []).map((x) => String(x).trim()).filter(Boolean);
 const yamlList = (v) => `[${list(v).join(', ')}]`;
+const oneLine = (s) => String(s).replace(/\s*\n\s*/g, ' ').trim();   // a proposal or question item is one bullet
 const cell = (s) => String(s || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
 // ---- the record ------------------------------------------------------------------------------------------------
@@ -92,7 +93,8 @@ function nameWarnings(root, req) {
 
 function render(meta, req) {
   const w = [];
-  w.push(`# ${meta.id} — ${req.title}`, '', '## Request', '', String(req.request).trim(), '');
+  const req0 = String(req.request).replace(/\r\n?/g, '\n').trim(), fence = '`'.repeat(Math.max(3, ...(req0.match(/`+/g) || []).map((x) => x.length + 1)));
+  w.push(`# ${meta.id} — ${req.title}`, '', '## Request', '', `${fence}text`, req0, fence, '');   // verbatim: a fence the text cannot close
   w.push('## Why it needs an architect', '', '| Trigger | Evidence |', '|---|---|');
   list(req.triggers).forEach((t) => {
     const ev = (req.evidence || []).filter((e) => e.trigger === t);
@@ -100,8 +102,8 @@ function render(meta, req) {
     ev.forEach((e) => w.push(`| ${t} | ${cell([e.where, e.note].filter(Boolean).join(' — '))} |`));
   });
   w.push('', `**Route**: ${ROUTES[meta.route]}.`, '');
-  w.push('## What the AI would propose (not applied)', '', ...(list(req.proposal).length ? list(req.proposal).map((l) => `- ${l}`) : ['- Nothing proposed.']), '');
-  w.push('## Open questions for the architect', '', ...(list(req.questions).length ? list(req.questions).map((l) => `- ${l}`) : ['- None.']), '');
+  w.push('## What the AI would propose (not applied)', '', ...(list(req.proposal).length ? list(req.proposal).map((l) => `- ${oneLine(l)}`) : ['- Nothing proposed.']), '');
+  w.push('## Open questions for the architect', '', ...(list(req.questions).length ? list(req.questions).map((l) => `- ${oneLine(l)}`) : ['- None.']), '');
   w.push('## Resolution', '', '- Pending.', '');
   return w.join('\n');
 }
@@ -201,10 +203,22 @@ async function fetchIssue(root, ref, opts = {}) {
 }
 // the request back out of an issue body issueBody() wrote (by the plugin or the server's port of it)
 function requestOf(issue) {
-  const body = String(issue.body || '').replace(/\r\n?/g, '\n');
+  const body = '\n' + String(issue.body || '').replace(/\r\n?/g, '\n');
   const row = (k) => { const m = body.match(new RegExp(`^\\| ${k.replace(/[/]/g, '\\/')} \\| (.*) \\|$`, 'm')); return m && m[1].trim() !== '—' ? m[1].trim() : ''; };
   const ids = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
-  const section = (h) => { const m = body.match(new RegExp(`(?:^|\\n)## ${h}\\n\\n([\\s\\S]*?)(?=\\n## |\\n_[A-Z]|$)`)); return m ? m[1].trim() : ''; };
+  // a section runs from its heading to the next marker render() writes — never to a heading or a line the user's text may hold
+  const between = (start, ends) => { const i = body.indexOf(start); if (i < 0) return ''; const from = i + start.length;
+    const to = Math.min(...ends.map((e) => { const j = body.indexOf(e, from); return j < 0 ? body.length : j; })); return body.slice(from, to).trim(); };
+  const TAIL = ['\n## Resolution', '\n_Close it with', '\n_Import it into', '\n<!--'];
+  const section = (h) => ({
+    'Request': (() => { const i = body.indexOf('\n## Request\n'); if (i < 0) return '';   // fenced: the first line equal to the fence closes it
+      const m = body.slice(i + 12).replace(/^\n+/, '').match(/^(`{3,})text\n([\s\S]*?)\n\1(?:\n|$)/);
+      return m ? m[0] : between('\n## Request\n', ['\n## Why it needs an architect\n']); })(),
+    'Why it needs an architect': between('\n## Why it needs an architect\n', ['\n**Route**', '\n## What the AI would propose']),
+    'What the AI would propose (not applied)': between('\n## What the AI would propose (not applied)\n', ['\n## Open questions for the architect']),
+    'Open questions for the architect': between('\n## Open questions for the architect\n', TAIL),
+  })[h] || '';
+  const verbatim = (t) => { const m = t.match(/^(`{3,})text\n([\s\S]*?)\n\1\n?$/); return m ? m[2] : t; };   // 10.3 records carry it unfenced
   const bullets = (t) => t.split('\n').filter((l) => /^- /.test(l)).map((l) => l.slice(2).trim()).filter((l) => !/^(Nothing proposed|None)\.$/.test(l));
   const why = section('Why it needs an architect');
   const evidence = why.split('\n').filter((l) => /^\| [a-z-]+ \| /.test(l)).map((l) => { const c = l.slice(2, -2).split(' | '); const t = c[0].trim(), rest = c.slice(1).join(' | ').replace(/\\\|/g, '|').trim();
@@ -212,8 +226,8 @@ function requestOf(issue) {
   const triggers = [...new Set([...evidence.map((e) => e.trigger), ...(issue.labels || []).filter((l) => /^trigger:/.test(l)).map((l) => l.slice(8))])];
   const route = (issue.labels || []).find((l) => ROUTES[l]) || (Object.entries(ROUTES).find(([, v]) => row('Route') === v) || [])[0] || 'tier-1';
   const ar = ids(row('ADRs / TDRs'));
-  return { title: String(issue.title || '').replace(/^\[ESC-(?:\?|\d+)\]\s*/, '').trim(), request: section('Request'), triggers,
-    evidence: evidence.filter((e) => TRIGGERS[e.trigger] && !(e.trigger === 'low-confidence' && e.where === TRIGGERS[e.trigger])), proposal: bullets(section('What the AI would propose \\(not applied\\)')),
+  return { title: String(issue.title || '').replace(/^\[ESC-(?:\?|\d+)\]\s*/, '').trim(), request: verbatim(section('Request')), triggers,
+    evidence: evidence.filter((e) => TRIGGERS[e.trigger] && !(e.trigger === 'low-confidence' && e.where === TRIGGERS[e.trigger])), proposal: bullets(section('What the AI would propose (not applied)')),
     questions: bullets(section('Open questions for the architect')), components: ids(row('Components')), integrations: ids(row('Integrations')),
     adrs: ar.filter((x) => /^ADR-/.test(x)), tdrs: ar.filter((x) => /^TDR-/.test(x)), requested_by: row('Requested by'), route, architecture: row('Architecture') };
 }
@@ -222,6 +236,7 @@ function importIssue(root, issue, opts = {}) {
   root = path.resolve(root);
   const dup = records(root).find((x) => x.meta.issue && x.meta.issue === issue.url);
   if (dup) throw new Error(`${issue.url} is already ${dup.meta.id} (${dup.file})`);
+  if (!opts.force && !(issue.labels || []).includes('architecture-escalation') && !/^\[ESC-(?:\?|\d+)\]/.test(String(issue.title))) throw new Error('not an escalation issue: no architecture-escalation label and no [ESC-…] title (--force reads it anyway)');
   const req = requestOf(issue);
   const errors = validate(req);
   if (errors.length) { const e = new Error(`the issue does not read as an escalation:\n${errors.join('\n')}`); e.errors = errors; throw e; }
@@ -234,7 +249,7 @@ function importIssue(root, issue, opts = {}) {
   fs.writeFileSync(path.join(root, file), frontmatter(meta) + render(meta, req));
   return { id, file, renamed: own !== id, title: `[${id}] ${req.title}`, warnings: nameWarnings(root, req) };
 }
-// the retitle `[ESC-?]` → `[ESC-NNN]` is a write on the host: shown first, run with --retitle after the user's yes
+// the retitle `[ESC-?]` → `[ESC-NNN]` is a write on the host: shown first, changed with retitle --apply after the user's yes
 function retitlePlan(root, n, title, opts = {}) {
   const r = remoteOf(root, opts.host);
   if (r.host === 'github') return { host: r.host, argv: ['gh', 'issue', 'edit', String(n), '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--title', title] };
@@ -298,7 +313,7 @@ async function createIssue(root, id, opts = {}) {
   return { id: p.id, host: p.host, url, note };
 }
 
-module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue, requestOf, importIssue, fetchIssue, retitlePlan, retitle };
+module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue, requestOf, importIssue, unhtml, fetchIssue, retitlePlan, retitle };
 
 // ---- CLI ---------------------------------------------------------------------------------------------------------
 if (require.main === module) {
@@ -324,7 +339,7 @@ if (require.main === module) {
         }
       } else if (cmd === 'import') {
         const issue = await fetchIssue(root, pos[0], { host: opt('--host') });
-        const r = importIssue(root, issue);
+        const r = importIssue(root, issue, { force: a.includes('--force') });
         console.log(`${r.id} written: ${r.file} (from ${issue.url})`); r.warnings.forEach((w) => console.error('⚠ ' + w));
         if (r.renamed) console.log(`the issue still reads "${issue.title}" — show the retitle (escalate.js retitle ${root} ${r.id}) and run it with --apply after the user's yes`);
       } else if (cmd === 'retitle') {

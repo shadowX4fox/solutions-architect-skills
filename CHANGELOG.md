@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.4.1]
+
+### Fixed
+- `escalate.js import` no longer cuts a request at a line of its own that starts with `## ` or `_`: the request is written in a fence its text cannot close and read back verbatim, and every other section ends at the next marker the renderer writes, never at text the user wrote. A comment after the body (the MCP server's preview fingerprint) is not read as text.
+- A proposal or question item with a line break is written as one bullet, flattened, instead of being cut at the break.
+- `import` refuses an issue with neither the `architecture-escalation` label nor an `[ESC-…]` title; `--force` reads it anyway.
+
 ## [10.4.0]
 
 Escalations filed from the IDE through the architecture MCP server come into the architecture repository.
