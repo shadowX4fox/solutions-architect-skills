@@ -5,7 +5,10 @@ on:
   pull_request:
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      # the docgen check renders a real Mermaid diagram; the runner image ships Chrome
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
