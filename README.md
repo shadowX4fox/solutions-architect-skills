@@ -740,33 +740,7 @@ Skill references live beside each skill: `skills/<skill>/SKILL.md` for sa-skills
 
 ## Examples
 
-### Real-World Example Repository
-
-**[Task Scheduling Platform Example](https://github.com/shadowX4fox/job-platform-example)**
-
-Complete end-to-end demonstration of the four-phase workflow:
-
-**Phase 1: Product Owner Specification**
-- Business requirements and user personas
-- Use cases and success criteria
-- Weighted readiness scoring (8.3/10)
-
-**Phase 2: Technical Architecture (ARCHITECTURE.md)**
-- Multi-file structure: navigation index + `docs/` section files + `docs/components/`
-- Microservices architecture pattern
-- Interactive Mermaid diagrams in `docs/03-architecture-layers.md`
-- Technology stack documentation
-- Complete with metrics, SLOs, and ADRs
-
-**Phase 4: Development Handoff**
-- Per-component handoff documents with deliverable assets
-- Type-specific scaffolded artifacts (OpenAPI, DDL, K8s manifests)
-
-**Repository**: https://github.com/shadowX4fox/job-platform-example
-
----
-
-**Additional Examples in This Repository:**
+**Examples in This Repository:**
 
 The `examples/` directory contains reference templates:
 
@@ -898,11 +872,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- BIAN Service Landscape v14.0.0 taxonomy and published APIs (Apache License 2.0), bundled at `references/bian-v14/`
+- BIAN Service Landscape v14.0.0 taxonomy as published, with the semantic API descriptions (Apache License 2.0), bundled at `references/bian-v14/` — see `NOTICE`
 - Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities, CC BY 4.0 (cross-industry corpus, converted to Markdown; names, ids and descriptions unchanged), bundled at `plugins/sa-requirements/skills/architecture-capability-alignment/references/cross-industry/`
 - Built for [Claude Code](https://claude.com/claude-code) by Anthropic
 - Follows enterprise architecture best practices
 
 ---
 
-**Get Started:** Download the [latest release](https://github.com/shadowX4fox/solutions-architect-skills/releases) and transform your architecture workflow today!
+**Get Started:** see [Installation](docs/INSTALLATION.md).

@@ -1,0 +1,20 @@
+Solutions Architect Skills
+Copyright (c) 2025-2026 shadowx4fox — MIT License (see LICENSE)
+
+This repository bundles third-party material under its own terms:
+
+1. BIAN semantic API descriptions
+   plugins/sa-requirements/skills/architecture-capability-alignment/references/bian-v14/
+   Each Service Domain's one-line description is taken from BIAN's semantic API repository
+   (https://github.com/bian-official/public), licensed under the Apache License 2.0 — see LICENSE-BIAN-APIS
+   in that folder. The names and identifiers of the BIAN Service Landscape v14.0.0 taxonomy are cited as
+   published; BIAN's role definitions and examples of use are © BIAN and are not bundled. BIAN is a trademark
+   of the Banking Industry Architecture Network; this project is not affiliated with or endorsed by BIAN.
+
+2. Turbo EA Capabilities — cross-industry layer
+   plugins/sa-requirements/skills/architecture-capability-alignment/references/cross-industry/
+   Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+   CC BY 4.0 — see LICENSE-TURBO-EA and NOTICE in that folder (the bundled commit and the changes made:
+   converted from YAML to Markdown; names, ids and descriptions unchanged). Not endorsed by Turbo EA or its author.
+
+npm dependencies are installed by `bun install` and carry their own licences.
