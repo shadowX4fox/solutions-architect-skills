@@ -166,6 +166,9 @@ describe("flow-check", () => {
     expect(rules(r)).toEqual(["F-01/phase-absent", "F-02/phase-absent"]);   // the display-name comparison stands, flagged as undecided
     expect(r.flows[0].findings[0].text).toMatch(/it names "Hub", which the sequence does not \(undecided: "Hub" may be another spelling/);
     expect(r.warnings.map((w: any) => w.rule)).not.toContain("participant-alias");
+    const ci = await check(root, { facts: facts(), judge: "agent", undecided: "warn" });   // CI: nobody answers — a finding that stands only on undecided names warns
+    expect(rules(ci)).toEqual([]); expect(ci.status).not.toBe("FAIL");
+    expect(ci.warnings.filter((w: any) => w.rule === "phase-absent-undecided").length).toBe(2);
     // the session answers beside the worksheet: "Hub" is the Hub API, the phase is in the sequence
     const ws = readFileSync(r.worksheet, "utf8"); const out = ws.match(/Write the answers to `([^`]+)`/)![1], hash = ws.match(/"worksheet": "([^"]+)"/)![1];
     const idOf = (cell: string) => ws.split("\n### ").find((b) => b.includes(`"cell": "${cell}"`))!.split("\n")[0].trim();

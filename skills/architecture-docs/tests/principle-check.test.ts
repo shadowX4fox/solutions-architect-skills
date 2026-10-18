@@ -172,6 +172,9 @@ describe("principle-check — Layer 1.5, the lexicon's semantic findings re-read
     const h = await judgeFindings(run(text), TMP, { engine: "agent" });                            // the worksheet is open: nothing re-read, Layer 1 stands
     expect(h.blocking).toBe(2); expect(h.judge.asked).toBe(2); expect(h.judge.downgraded).toEqual([]);
     expect(h.judge.notReRead.length).toBe(2); expect(h.judge.pending.length).toBe(2);
+    const ci = await judgeFindings(run(text), TMP, { engine: "agent", undecided: "warn" });   // CI: nobody answers — the undecided findings warn, nothing blocks
+    expect(ci.blocking).toBe(0); expect(ci.status).toBe("PASS"); expect(ci.judge.notReRead.length).toBe(2);
+    expect(ci.findings.every((f: any) => f.severity === "WARNING" && /undecided warn/.test(f.message))).toBe(true);
     const { layer15 } = require("../scripts/principle-check.js");
     expect(layer15(h.judge)).toContain("not re-read (undecided) — 2 finding(s) stand"); expect(layer15(h.judge)).toContain(h.judge.pending[0]);
     const x = await judgeFindings(run(text), TMP, { engine: "heuristic" });                        // a removed engine: the findings stand, the reason printed

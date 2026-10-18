@@ -1,5 +1,7 @@
 # Architecture index — GitHub Actions. Copy to .github/workflows/architecture-index.yml in the architecture's repository.
 # Repository variables: SA_INDEX_PROJECT_KEY, SA_INDEX_SERVER, SA_INDEX_MCP_URL (optional). Secret: SA_INDEX_TOKEN.
+# With the architecture-lifecycle skill's ci/architecture-release.yml in the repository, phase 1 is its `index` job:
+# delete the `tags` trigger below, or a release is published twice (the server answers the second with 200, unchanged).
 name: Architecture index
 
 on:
@@ -29,7 +31,7 @@ jobs:
           git clone --quiet --depth 1 --branch "$SA_PLUGIN_REF" https://github.com/shadowx4fox/solutions-architect-skills.git "$RUNNER_TEMP/sa-ci"
           SA_SKILLS_DIR="$RUNNER_TEMP/sa-ci" bash "$RUNNER_TEMP/sa-ci/plugins/sa-delivery/skills/architecture-index-export/ci/publish-index.sh" .
         env:
-          SA_PLUGIN_REF: v8.149.0
+          SA_PLUGIN_REF: v10.5.0
           SA_INDEX_PROJECT_KEY: ${{ vars.SA_INDEX_PROJECT_KEY }}
           SA_INDEX_SERVER: ${{ vars.SA_INDEX_SERVER }}
           SA_INDEX_MCP_URL: ${{ vars.SA_INDEX_MCP_URL }}

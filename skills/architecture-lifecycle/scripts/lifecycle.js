@@ -3,10 +3,11 @@
 // since the last release, and the release itself.
 //
 //   bun lifecycle.js status    <project-root> [--json]
-//   bun lifecycle.js check     <project-root> [--no-render] [--waive <gate>:<reason>]… [--json]
+//   bun lifecycle.js check     <project-root> [--no-render] [--waive <gate>:<reason>]… [--undecided warn] [--json]
 //   bun lifecycle.js plan      <project-root> [--increment <id>] [--no-render] [--waive <gate>:<reason>]… [--json]
 //   bun lifecycle.js apply     <project-root> [--bump major|minor|patch] [--direct] [--no-push]
 //                                             [--waive <gate>:<reason>]… [--json]
+//   bun lifecycle.js tag       <project-root> [--no-push] [--json]
 //   bun lifecycle.js recover   <project-root> [--no-push] [--json]
 //   bun lifecycle.js deprecate <project-root> [--by <note>] [--json]
 //   (every subcommand takes --today YYYY-MM-DD)
@@ -29,7 +30,15 @@
 // refuses a plan the architecture has moved past, then writes the metadata, the changelog and the command-center
 // refresh, and publishes: PR mode (default) on `release/architecture-v{version}`, `--direct` on the current branch;
 // with no `origin` remote, direct and local. It commits only the architecture's paths, so the tag holds exactly
-// what the change list describes. Downstream artifacts are reported stale by their own version stamps — compliance
+// what the change list describes. `--direct` tags at once; PR mode tags nothing — a tag on the release branch would
+// publish a release nobody merged (CI publishes the index on the tag), and a squash merge would leave it off the base
+// branch. `tag`, run after the merge (by CI, or by hand), tags the commit on the base branch's first-parent history
+// where the version became Released: the merge commit, the squash commit, or the release commit itself — never HEAD,
+// so a late run still tags exactly what was released. It is idempotent: an existing tag is pushed or left alone.
+//
+// `check --undecided warn` (CI, where no one answers a judge worksheet): a finding that stands only because the judge
+// has not answered it — a principle finding not re-read, a phase-absent whose every name is undecided — is a warning.
+// A finding code decides still blocks. Downstream artifacts are reported stale by their own version stamps — compliance
 // is never read (CLAUDE.md § Compliance is isolated).
 //
 // Delivered in pieces (8.139.0): the target design stays one; a `Delivery Increments` table in docs/01 assigns its use
@@ -260,6 +269,7 @@ function gates(root, facts, opts = {}) {
   const sl = opts.increment ? increments.slices(facts) : null;
   const piece = sl ? sl.increments.find((x) => x.id === String(opts.increment)) : null;
   const inScope = piece ? scopeOf(root, facts, piece) : null;
+  const undecided = opts.undecided === 'warn' ? ['--undecided', 'warn'] : [];
   const list = [
     { id: 'increment', when: !!opts.increment, fn: () => {   // the piece being delivered: every use case served, every flow composed
       const s = sl.increments.find((x) => x.id === String(opts.increment));
@@ -268,7 +278,7 @@ function gates(root, facts, opts = {}) {
       if (errs.length) return { status: 'fail', summary: errs.map((g) => g.text).join(' · ').slice(0, 400), fix: errs.some((g) => g.rule === 'retire-pending') ? 'retire the temporary elements named (strike the docs/05 row; remove component via architecture-component-guardian) and resolve their TDRs' : errs.some((g) => /window-unknown|temporary-no-tdr/.test(g.rule || '')) ? 'fix the temporary element\'s window (`**Delivery Increments:** 1–2 · TDR-NNN`, or the docs/05 Increments cell) and cite an existing TDR' : 'complete docs/04 for the increment\'s use cases (Flow Inventory row, **Phases** line, Phase Catalog), or move the use case to a later increment' };
       return { status: s.gaps.length ? 'warn' : 'pass', summary: `increment ${s.id}: ${s.use_cases.join(', ')} · ${s.containers.length} containers (${s.new.containers.length} new) · ${s.integrations.length} integrations (${s.new.integrations.length} new)${s.gaps.length ? ' · ' + s.gaps.map((g) => g.text).join(' · ') : ''}` };
     } },
-    { id: 'principles', when: !!d02, cmd: [P('skills', 'architecture-docs', 'scripts', 'principle-check.js'), root] },
+    { id: 'principles', when: !!d02, cmd: [P('skills', 'architecture-docs', 'scripts', 'principle-check.js'), root, ...undecided] },
     { id: 'principle-review', when: !!d02, fn: () => {
       const r = readReview(d02);
       if (r.state === 'current') return { status: r.layer2 === 'PASS' ? 'pass' : 'warn', summary: `Layer 2 ${r.layer2} on ${r.date}, principles unchanged since` };
@@ -278,7 +288,7 @@ function gates(root, facts, opts = {}) {
     { id: 'headers', cmd: [P('scripts', 'shared', 'explorer-cli.ts'), 'check', root] },
     { id: 'components', when: exists(path.join(root, 'docs', 'components')), cmd: [P('skills', 'architecture-component-guardian', 'utils', 'component-cli.ts'), 'check', root], fix: 'sync component index (architecture-component-guardian)' },
     { id: 'sequences', when: !!d04, cmd: [P('skills', 'architecture-docs', 'scripts', 'flow-compose.js'), root, '--check'], passIf: /nothing to derive/, fix: 'bun flow-compose.js <root> (derives § End-to-End Wire Sequences)' },   // a docs/04 in the single-flow layout has nothing to derive: not a defect
-    { id: 'flows', when: !!d04, cmd: [P('scripts', 'shared', 'flow-check.js'), root] },
+    { id: 'flows', when: !!d04, cmd: [P('scripts', 'shared', 'flow-check.js'), root, ...undecided] },
     { id: 'diagrams', when: diagramFiles.length > 0, cmd: [P('scripts', 'shared', 'mermaid-check.js'), ...diagramFiles, ...(opts.noRender ? ['--no-render'] : [])] },
     { id: 'labels', when: diagramFiles.length > 0, cmd: [P('skills', 'architecture-docs', 'scripts', 'label-check.js'), ...diagramFiles] },
     { id: 'integrations', when: !!d05, cmd: [P('skills', 'architecture-docs', 'scripts', 'integration-check.js'), root] },
@@ -374,7 +384,7 @@ function status(root, opts = {}) {
   const sl = increments.slices(cur);
   if (sl.increments.length) r.increments = { file: sl.file, list: sl.increments.map((x) => ({ id: x.id, target: x.target, use_cases: x.use_cases, flows: x.flows, containers: x.containers.length, new_containers: x.new.containers, integrations: x.integrations.length, new_integrations: x.new.integrations.length, gaps: x.gaps, released_in: deliveredIn(cl, x.id) })), unassigned: sl.unassigned, duplicates: sl.duplicates, temporary: sl.temporary, temporary_gaps: sl.temporary_gaps };
   r.next = { draft: `release my architecture — first release, v${version}`, changed: `release my architecture — ${r.changes.length} change(s) since v${version}, recommended ${r.recommended || 'patch'}`,
-    untagged: `recover the tag ${TAG(version)} (lifecycle.js recover)`, released: r.downstream.some((d) => d.stale) ? 'refresh the stale downstream artifacts listed' : 'nothing due', deprecated: 'nothing — the architecture is deprecated' }[r.state];
+    untagged: `tag ${TAG(version)} on the commit that released it (lifecycle.js tag) — a release merged through its pull request is tagged after the merge`, released: r.downstream.some((d) => d.stale) ? 'refresh the stale downstream artifacts listed' : 'nothing due', deprecated: 'nothing — the architecture is deprecated' }[r.state];
   // the last status on disk, for readers that cannot run git (sa-ux's next steps)
   try { const d = path.join(root, '.cache', 'sa-skills', 'lifecycle'); fs.mkdirSync(d, { recursive: true }); fs.writeFileSync(path.join(d, 'status.json'), JSON.stringify({ state: r.state, version, changes: r.changes.length, recommended: r.recommended, at: new Date().toISOString() }) + '\n'); } catch { /* read-only project */ }
   return r;
@@ -385,7 +395,7 @@ function plan(root, opts = {}) {
   root = path.resolve(root);
   const st = status(root);
   if (['absent', 'unversioned', 'deprecated', 'no-git'].includes(st.state)) return { ok: false, reason: `state ${st.state} — ${st.next}`, status: st };
-  if (st.state === 'untagged') return { ok: false, reason: `v${st.version} is marked Released but ${TAG(st.version)} is missing — run recover first`, status: st };
+  if (st.state === 'untagged') return { ok: false, reason: `v${st.version} is marked Released but ${TAG(st.version)} is missing — run lifecycle.js tag first (after the release PR is merged)`, status: st };
   const cl = changelog(root);
   const first = st.state === 'draft';
   if (!first && !st.changes.length && !cl.lines.length) return { ok: false, reason: `nothing changed since v${st.version} — no release is due`, status: st };
@@ -506,13 +516,48 @@ function apply(root, opts = {}) {
   const push = !opts.noPush;
   if (channel === 'pr' && push) { const b = git(root, ['push', '-u', 'origin', branch]); result.branch = { name: branch, pushed: b.ok, error: b.ok ? undefined : b.err }; }
   else if (channel === 'pr') result.branch = { name: branch, pushed: false };
-  result.tag = Object.assign({ name: tag }, publishTag(root, tag, message, push));
-  if (channel === 'pr') { result.base = baseBranch; result.compare = githubCompare(origin(root), baseBranch, branch); }
-  if (!result.tag.tag) result.ok = false;
+  if (channel === 'pr') { result.tag = { name: tag, tag: false, deferred: true }; result.base = baseBranch; result.compare = githubCompare(origin(root), baseBranch, branch); }
+  else result.tag = Object.assign({ name: tag }, publishTag(root, tag, message, push));
+  if (!result.tag.tag && !result.tag.deferred) result.ok = false;
   fs.writeFileSync(path.join(dir, 'release.json'), JSON.stringify(result, null, 1) + '\n');
   fs.rmSync(path.join(dir, 'plan.json'), { force: true });
   result.downstream = downstream(root, version, today).filter((d) => d.stale);
   return result;
+}
+
+// ---- tag: a release merged through its pull request — tag the commit that brought it onto this branch
+function releaseCommit(root, version) {
+  const file = `${git(root, ['rev-parse', '--show-prefix']).out}ARCHITECTURE.md`;
+  const shas = git(root, ['log', '--first-parent', '--format=%H', '--', 'ARCHITECTURE.md']).out.split('\n').filter(Boolean);
+  let found = null;
+  for (const sha of shas) {   // newest first: the oldest commit of the run that still declares the version Released
+    const s = git(root, ['show', `${sha}:${file}`]);
+    if (!s.ok || marker(s.out, 'ARCHITECTURE_VERSION') !== version || !/released/i.test(marker(s.out, 'ARCHITECTURE_STATUS') || '')) break;
+    found = sha;
+  }
+  return found;
+}
+function tagRelease(root, opts = {}) {
+  root = path.resolve(root);
+  const st = status(root);
+  if (!st.git || !st.version) return { ok: false, reason: `state ${st.state} — ${st.next}` };
+  if (!/released/i.test(st.declared_status || '')) return { ok: false, reason: `nothing to tag — ARCHITECTURE.md says ${st.declared_status || 'no status'}, not Released` };
+  const tag = TAG(st.version), push = !opts.noPush && !!st.tag.origin;
+  if (st.tag.local) {
+    if (push && st.tag.remote === false) { const p = git(root, ['push', 'origin', tag]); return { ok: p.ok, action: 'push', tag_name: tag, pushed: p.ok, error: p.ok ? undefined : p.err }; }
+    return { ok: true, action: 'none', tag_name: tag, note: 'already tagged' };
+  }
+  if (st.tag.remote) { const f = git(root, ['fetch', 'origin', 'tag', tag, '--no-tags']); return { ok: f.ok, action: 'fetch', tag_name: tag, error: f.ok ? undefined : f.err }; }
+  const sha = releaseCommit(root, st.version);
+  if (!sha) return { ok: false, reason: `no commit on this branch's first-parent history declares v${st.version} Released — merge the release PR first` };
+  const entry = changelog(root).entries.find((e) => e.version === st.version);
+  const message = `Architecture v${st.version} — Released ${st.released || ''}\n\n${entry ? entry.body.trim() : ''}\n`;
+  const t = git(root, ['tag', '-a', tag, sha, '-F', '-'], { input: message });
+  if (!t.ok) return { ok: false, reason: `git tag: ${t.err}` };
+  const at = git(root, ['log', '-1', '--format=%h %s', sha]).out;
+  if (!push) return { ok: true, action: 'tag', tag_name: tag, at, pushed: false, reason: opts.noPush ? '--no-push' : 'no origin remote' };
+  let p; for (let i = 0; i < 3; i++) { p = git(root, ['push', 'origin', tag]); if (p.ok) break; }
+  return { ok: p.ok, action: 'tag', tag_name: tag, at, pushed: p.ok, error: p.ok ? undefined : p.err };
 }
 
 // ---- recover: the document says Released and the tag is missing
@@ -570,7 +615,8 @@ function renderApply(r) {
   o.push(`  ARCHITECTURE.md metadata · ${r.components} component file(s) · docs/CHANGELOG.md${r.rotated.length ? ` (rotated ${r.rotated.join(', ')})` : ''}${r.refreshed.length ? ' · command center refreshed' : ''}`);
   if (r.commit) o.push(`  commit ${r.commit}`);
   if (r.branch) o.push(`  branch ${r.branch.name}: ${r.branch.pushed ? 'pushed' : `not pushed${r.branch.error ? ` — ${r.branch.error}` : ''}`}`);
-  if (r.tag) o.push(`  tag ${r.tag.name}: ${r.tag.tag ? (r.tag.pushed ? 'pushed to origin' : `local only${r.tag.reason ? ` (${r.tag.reason})` : ''}${r.tag.error ? ` — push failed: ${r.tag.error}; run git push origin ${r.tag.name}` : ''}`) : `NOT created — ${r.tag.error}`}`);
+  if (r.tag && r.tag.deferred) o.push(`  tag ${r.tag.name}: after the merge — CI runs lifecycle.js tag, or run it on ${r.base} once the PR is merged`);
+  else if (r.tag) o.push(`  tag ${r.tag.name}: ${r.tag.tag ? (r.tag.pushed ? 'pushed to origin' : `local only${r.tag.reason ? ` (${r.tag.reason})` : ''}${r.tag.error ? ` — push failed: ${r.tag.error}; run git push origin ${r.tag.name}` : ''}`) : `NOT created — ${r.tag.error}`}`);
   if (r.channel === 'pr') o.push(`  open the pull request into ${r.base}: ${r.compare || `from ${r.branch && r.branch.name} in your git host`}`);
   r.waived.forEach((w) => o.push(`  waived ${w.gate}: ${w.reason}`));
   r.notes.forEach((n) => o.push(`  note: ${n}`));
@@ -579,15 +625,16 @@ function renderApply(r) {
   return o.join('\n');
 }
 
-module.exports = { status, plan, apply, recover, deprecate, gates, scopeOf, delta, baseline, downstream, changelog, bumpVersion, recommend, fingerprint, TAG };
+module.exports = { status, plan, apply, tagRelease, releaseCommit, recover, deprecate, gates, scopeOf, delta, baseline, downstream, changelog, bumpVersion, recommend, fingerprint, TAG };
 
 if (require.main === module) {
   const args = process.argv.slice(2);
   const [cmd, rootArg] = args;
   const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };
   const many = (f) => args.flatMap((a, i) => (a === f && args[i + 1] ? [args[i + 1]] : []));
-  if (!cmd || !rootArg || rootArg.startsWith('--')) { console.error('Usage: bun lifecycle.js status|check|plan|apply|recover|deprecate <project-root> [options] — see the header'); process.exit(2); }
-  const opts = { today: opt('--today'), noRender: args.includes('--no-render'), waive: many('--waive'), bump: opt('--bump'), direct: args.includes('--direct'),noPush: args.includes('--no-push'), by: opt('--by'), increment: opt('--increment') };
+  if (!cmd || !rootArg || rootArg.startsWith('--')) { console.error('Usage: bun lifecycle.js status|check|plan|apply|tag|recover|deprecate <project-root> [options] — see the header'); process.exit(2); }
+  const opts = { today: opt('--today'), noRender: args.includes('--no-render'), waive: many('--waive'), bump: opt('--bump'), direct: args.includes('--direct'),noPush: args.includes('--no-push'), by: opt('--by'), increment: opt('--increment'), undecided: opt('--undecided') };
+  if (opts.undecided !== undefined && opts.undecided !== 'warn') { console.error('lifecycle.js: --undecided takes warn'); process.exit(2); }
   const json = args.includes('--json');
   const root = path.resolve(rootArg);
   let r, text, code = 0;
@@ -595,6 +642,7 @@ if (require.main === module) {
   else if (cmd === 'check') { r = gates(root, collect(root), opts); text = `RELEASE GATES (${blocking(r).length ? `BLOCKED by ${blocking(r).map((g) => g.id).join(', ')}` : 'clear'}):\n${renderGates(r)}`; code = blocking(r).length ? 1 : 0; }
   else if (cmd === 'plan') { r = plan(root, opts); text = renderPlan(r); code = r.ok && !r.blocking.length ? 0 : 1; }
   else if (cmd === 'apply') { r = apply(root, opts); text = renderApply(r); code = r.ok ? 0 : 1; }
+  else if (cmd === 'tag') { r = tagRelease(root, opts); text = r.ok ? `TAG: ${r.action === 'none' ? `${r.tag_name} already tagged` : `${r.action} ${r.tag_name}${r.at ? ` at ${r.at}` : ''}${r.pushed ? ' — pushed to origin' : r.pushed === false ? ` — local only${r.reason ? ` (${r.reason})` : ''}` : ''}`}` : `TAG: ${r.reason || r.error}`; code = r.ok ? 0 : 1; }
   else if (cmd === 'recover') { r = recover(root, opts); text = r.ok ? `RECOVER: ${r.action} ${r.tag_name || r.tag}${r.head ? ` at ${r.head}` : ''}${r.pushed === false ? ` — local only${r.error ? `: ${r.error}` : ''}` : ''}` : `RECOVER: ${r.reason || r.error}`; code = r.ok ? 0 : 1; }
   else if (cmd === 'deprecate') { r = deprecate(root, opts); text = r.ok ? `DEPRECATED${r.note ? ` — ${r.note}` : ''} (no tag: a deprecation is metadata)` : r.reason; code = r.ok ? 0 : 1; }
   else { console.error(`lifecycle.js: unknown subcommand ${cmd}`); process.exit(2); }

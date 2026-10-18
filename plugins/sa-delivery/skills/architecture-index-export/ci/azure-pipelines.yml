@@ -20,7 +20,7 @@ parameters:
 variables:
   - group: architecture-index
   - name: SA_PLUGIN_REF
-    value: v8.149.0
+    value: v10.5.0
   - name: SA_PLUGIN_REPO
     value: https://github.com/shadowx4fox/solutions-architect-skills.git
 

@@ -3,6 +3,7 @@
 //
 //   bun principle-check.js <project-root> [--file docs/02-architecture-principles.md] [--type <architecture type id>] [--json]
 //                          [--judge agent|typesafe|clef]   Layer 1.5: every BLOCKING finding of a lexicon-shaped rule re-read by the judge (else SA_JUDGE)
+//                          [--undecided warn]              CI: a finding the judge was asked about and has not answered is a WARNING, not a block
 //                          [--stamp-review PASS|WARNING]   after Layer 2: record its outcome in the file, held to the principles' hash
 //
 // The stamp (8.139.0) is `<!-- PRINCIPLE_REVIEW: <layer2> <date> sha256:<12 hex> -->`, the file's last line. It is written only
@@ -265,7 +266,8 @@ async function judgeFindings(r, root, opts = {}) {
   let engine = opts.engine, engineError = null;
   if (!engine) try { engine = JUDGE.engineInForce(); } catch (e) { if (e.name !== 'JudgeError') throw e; engineError = e.message; }
   const out = { engine: engine || null, asked: 0, downgraded: [], notReRead: [], pending: [], note: engineError };
-  const standing = (rule, f) => out.notReRead.push(`${rule} P${f.principle} L${f.line}`);
+  const standing = (rule, f) => { out.notReRead.push(`${rule} P${f.principle} L${f.line}`);
+    if (opts.undecided === 'warn') { f.severity = 'WARNING'; f.message += ' — undecided (no judge answered): kept as a warning under --undecided warn; answer the worksheet locally'; } };
   const file = path.resolve(root, r.file || 'docs/02-architecture-principles.md');
   if (!fs.existsSync(file)) return Object.assign(r, { judge: out });
   const { principles } = parse(fs.readFileSync(file, "utf8").replace(/\r\n?/g, "\n"));
@@ -286,7 +288,7 @@ async function judgeFindings(r, root, opts = {}) {
       if (S.downgradeWhen(a)) { f.severity = 'WARNING'; f.message += ` — judged otherwise by ${a.by} (${reading}): kept as a warning, not a block`; out.downgraded.push(`${rule} P${f.principle} L${f.line} (${reading})`); } });
   });
   await Promise.all(calls);
-  r.results.forEach((x) => { if (x.result === 'FAIL' && SEMANTIC[x.rule] && !r.findings.some((f) => f.rule === x.rule && f.severity === 'BLOCKING')) { x.result = 'WARN'; x.detail += ` — every finding judged otherwise by ${out.engine}`; } });
+  r.results.forEach((x) => { if (x.result === 'FAIL' && SEMANTIC[x.rule] && !r.findings.some((f) => f.rule === x.rule && f.severity === 'BLOCKING')) { x.result = 'WARN'; x.detail += opts.undecided === 'warn' && out.notReRead.length ? ' — every finding judged otherwise or undecided (--undecided warn)' : ` — every finding judged otherwise by ${out.engine}`; } });
   r.blocking = r.findings.filter((f) => f.severity === 'BLOCKING').length; r.warnings = r.findings.filter((f) => f.severity === 'WARNING').length; r.status = r.blocking ? 'FAIL' : 'PASS';
   return Object.assign(r, { judge: out });
 }
@@ -318,10 +320,11 @@ function stampReview(file, layer2, today) {
 module.exports = { check, judgeFindings, parse, render, layer15, principlesHash, readReview, stampReview, CANON, MATRIX, LEX, SEMANTIC };
 
 if (require.main === module) (async () => {
-  const args = process.argv.slice(2); const root = path.resolve(args.find((a, i) => !a.startsWith('--') && !['--file', '--type', '--judge', '--stamp-review'].includes(args[i - 1])) || '.');
+  const args = process.argv.slice(2); const root = path.resolve(args.find((a, i) => !a.startsWith('--') && !['--file', '--type', '--judge', '--undecided', '--stamp-review'].includes(args[i - 1])) || '.');
   const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };
   let r = check(root, { file: opt('--file'), type: opt('--type') });
-  if (r.blocking) r = await judgeFindings(r, root, { engine: opt('--judge') });   // Layer 1.5: every blocking semantic finding re-read; --judge, else SA_JUDGE; an unanswered one stands, not re-read
+  if (opt('--undecided') !== undefined && opt('--undecided') !== 'warn') { console.error('principle-check: --undecided takes warn'); process.exit(2); }
+  if (r.blocking) r = await judgeFindings(r, root, { engine: opt('--judge'), undecided: opt('--undecided') });   // Layer 1.5: every blocking semantic finding re-read; --judge, else SA_JUDGE; an unanswered one stands, not re-read
   if (args.includes('--json')) console.log(JSON.stringify(r, null, 1)); else { console.log(render(r)); if (r.judge && r.judge.asked) console.log(layer15(r.judge)); }
   const stamp = opt('--stamp-review');
   if (stamp) {

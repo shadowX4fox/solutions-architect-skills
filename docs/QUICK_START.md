@@ -198,9 +198,9 @@ release my architecture
 ```
 
 **What happens:** `architecture-lifecycle` runs every gate once, shows what changed and recommends a version bump (a
-first release keeps `1.0.0`), writes `docs/CHANGELOG.md`, commits only the architecture files and tags
-`architecture-v1.0.0`. By default it pushes a `release/architecture-v1.0.0` branch for a pull request; `--direct`
-commits on the current branch. A release needs git.
+first release keeps `1.0.0`), writes `docs/CHANGELOG.md` and commits only the architecture files. By default it pushes a
+`release/architecture-v1.0.0` branch for a pull request, and the tag `architecture-v1.0.0` is created once the PR is
+merged (`lifecycle.js tag`, which CI can run); `--direct` commits and tags on the current branch. A release needs git.
 
 `architecture status` tells you later where the architecture stands and which artifacts — the kit, the analyses, the
 3D model — were built from an older version.

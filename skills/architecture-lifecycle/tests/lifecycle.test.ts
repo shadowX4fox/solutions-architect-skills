@@ -138,16 +138,48 @@ describe("lifecycle — git, direct", () => {
 });
 
 describe("lifecycle — PR to a remote", () => {
-  test("branch, commit, tag, both pushed; the base branch is kept for the PR", () => {
+  const prRelease = () => {
     repo(); release({ direct: true });
     const remote = join(TMP, "remote.git"); spawnSync("git", ["init", "-q", "--bare", remote]);
-    git("remote", "add", "origin", remote); git("push", "-q", "origin", "main");
+    git("remote", "add", "origin", remote); git("push", "-q", "origin", "main", "architecture-v1.0.0");
     w("adr/ADR-102-hub.md", `# ADR-102: Use the hub\n\n**Status**: Accepted\n**Scope**: Project\n`);
-    const a = release();
+    return { remote, a: release() };
+  };
+  const remoteTags = (remote: string) => spawnSync("git", ["-C", remote, "tag", "-l"], { encoding: "utf8" }).stdout.trim();
+
+  test("branch and commit pushed, no tag: a tag on the release branch would publish a release nobody merged", () => {
+    const { remote, a } = prRelease();
     expect(a).toMatchObject({ ok: true, version: "1.1.0", channel: "pr", base: "main", branch: { name: "release/architecture-v1.1.0", pushed: true } });
-    expect(a.tag).toMatchObject({ tag: true, pushed: true });
+    expect(a.tag).toMatchObject({ name: "architecture-v1.1.0", tag: false, deferred: true });
     expect(git("rev-parse", "--abbrev-ref", "HEAD")).toBe("release/architecture-v1.1.0");
-    expect(spawnSync("git", ["-C", remote, "tag", "-l"], { encoding: "utf8" }).stdout.trim()).toBe("architecture-v1.1.0");
+    expect(remoteTags(remote)).toBe("architecture-v1.0.0");
+    expect(spawnSync("bun", [SCRIPT, "status", ROOT], { encoding: "utf8" }).stdout).toContain("lifecycle.js tag");
+  });
+
+  test("after a merge commit, tag marks the merge — not a later HEAD — pushes it, and a second run does nothing", () => {
+    const { remote } = prRelease();
+    git("checkout", "-q", "main"); git("merge", "-q", "--no-ff", "-m", "Merge release/architecture-v1.1.0", "release/architecture-v1.1.0");
+    const merge = git("rev-parse", "HEAD");
+    w("notes.txt", "later work\n"); git("add", "notes.txt"); git("commit", "-q", "-m", "later work");
+    expect(L.status(ROOT).state).toBe("untagged");
+    const t = L.tagRelease(ROOT, {});
+    expect(t).toMatchObject({ ok: true, action: "tag", tag_name: "architecture-v1.1.0", pushed: true });
+    expect(git("rev-list", "-n", "1", "architecture-v1.1.0")).toBe(merge);
+    expect(remoteTags(remote)).toBe("architecture-v1.0.0\narchitecture-v1.1.0");
+    expect(git("cat-file", "-p", "architecture-v1.1.0")).toContain("Architecture v1.1.0 — Released 2026-10-10");
+    expect(L.status(ROOT).state).toBe("released");
+    expect(L.tagRelease(ROOT, {})).toMatchObject({ ok: true, action: "none" });
+  });
+
+  test("after a squash merge, tag marks the squash commit; before the merge the base branch's version is already tagged", () => {
+    prRelease();
+    git("checkout", "-q", "main");
+    expect(L.tagRelease(ROOT, { noPush: true })).toMatchObject({ ok: true, action: "none", tag_name: "architecture-v1.0.0" });   // main still declares v1.0.0, already tagged
+    git("merge", "-q", "--squash", "release/architecture-v1.1.0"); git("commit", "-q", "-m", "Release architecture v1.1.0 (#7)");
+    const squash = git("rev-parse", "HEAD");
+    const t = L.tagRelease(ROOT, { noPush: true });
+    expect(t).toMatchObject({ ok: true, action: "tag", pushed: false, reason: "--no-push" });
+    expect(git("rev-list", "-n", "1", "architecture-v1.1.0")).toBe(squash);
   });
 });
 
@@ -189,6 +221,14 @@ describe("lifecycle — downstream and gates", () => {
     expect(g.map((y: any) => y.id)).toEqual(expect.arrayContaining(["prose", "headers", "components", "integrations", "budgets", "adr-index"]));
     expect(g.every((y: any) => ["pass", "fail", "warn"].includes(y.status))).toBe(true);
     expect(x.status).toBe(g.some((y: any) => y.status === "fail") ? 1 : 0);
+    const bad = spawnSync("bun", [SCRIPT, "check", ROOT, "--undecided", "block"], { encoding: "utf8" });
+    expect(bad.status).toBe(2); expect(bad.stderr).toContain("--undecided takes warn");
+  }, 120000);
+
+  test("check --undecided warn hands the flag to the two judged gates", () => {
+    w("docs/02-architecture-principles.md", "# Principles\n"); w("docs/04-data-flow-patterns.md", "# Data Flow\n");
+    const g = L.gates(ROOT, require("../../../scripts/shared/arch-facts.js").collect(ROOT), { undecided: "warn", noRender: true });
+    expect(g.filter((y: any) => ["principles", "flows"].includes(y.id)).map((y: any) => y.command)).toEqual([expect.stringMatching(/--undecided warn$/), expect.stringMatching(/--undecided warn$/)]);
   }, 120000);
 });
 

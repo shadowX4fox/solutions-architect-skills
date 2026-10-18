@@ -266,13 +266,14 @@ every component file carries `**Component Version:**`, `**Architecture Version:*
 |---|---|---|
 | `status` | `architecture status` | The state, the changes since the tag with their bump, and every downstream artifact built from an older version |
 | `check` | `release readiness` | Every gate once; names the blocking ones with their fix |
-| `plan` · `apply` | `release my architecture` | Plan: gates, change list, recommended bump, draft changelog entry. Apply: writes the version, component versions and `docs/CHANGELOG.md`; commits only `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`; tags and pushes |
-| `recover` | `recover architecture tag` | Restores a missing tag |
+| `plan` · `apply` | `release my architecture` | Plan: gates, change list, recommended bump, draft changelog entry. Apply: writes the version, component versions and `docs/CHANGELOG.md`; commits only `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`; with `--direct`, tags and pushes |
+| `tag` | — (CI, after a release PR is merged) | Tags the merge or squash commit that brought the release, and pushes it |
+| `recover` | `recover architecture tag` | Restores a tag lost outside the release history |
 | `deprecate` | `deprecate architecture` | Marks the architecture Deprecated |
 
 `release my architecture` (or `/release-architecture`) runs plan and apply, asking one question: the bump. By default
-it pushes a `release/architecture-v<version>` branch for a pull request; `--direct` commits and tags on the current
-branch. A gate can be waived only explicitly, with a reason written into the changelog (`--waive <gate>:<reason>`).
+it pushes a `release/architecture-v<version>` branch for a pull request, tagged once merged (`lifecycle.js tag`, run by
+CI — `ci/architecture-release.yml`); `--direct` commits and tags on the current branch. A gate can be waived only explicitly, with a reason written into the changelog (`--waive <gate>:<reason>`).
 
 **States** are derived, never stored: `draft`, `changed`, `released`, `untagged`, `deprecated`, `no-git`.
 

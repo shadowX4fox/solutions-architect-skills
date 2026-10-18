@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // flow-check.js — docs/04 states every flow twice, and the two statements must agree.
 //
-//   bun flow-check.js <project-root> [--json] [--warn-only] [--judge agent|typesafe|clef]
+//   bun flow-check.js <project-root> [--json] [--warn-only] [--judge agent|typesafe|clef] [--undecided warn]
+//
+// --undecided warn (CI, where no one answers a worksheet): a phase-absent finding whose every absent name is undecided —
+// another spelling the judge has not read yet — is a warning instead of a block. A finding code decides still blocks.
 //
 // A flow is written down in two places. Its block names the phases it runs (`**Phases:** 1 → 2 → 4`),
 // and § End-to-End Wire Sequences draws the whole flow as one `sequenceDiagram` called the *complete*
@@ -149,7 +152,9 @@ async function check(root, opts = {}) {
         const phase = catalog[String(p).toLowerCase()];
         if (!phase || !phase.fence) continue;                       // reported once, under phase-undrawn
         const absent = participants(phase.fence).filter((x) => !have.includes(canonOf(x)));
-        if (absent.length) row.findings.push({ rule: 'phase-absent', line: seq.line,
+        if (absent.length && opts.undecided === 'warn' && absent.every((a) => undecided.has(a))) result.warnings.push({ rule: 'phase-absent-undecided', line: seq.line,
+          text: `phase ${p}${phase.title ? ` (${phase.title})` : ''} — ${absent.map((a) => `"${a}"`).join(', ')} undecided, not found in the end-to-end sequence; kept as a warning (--undecided warn) — answer the judge locally and re-run` });
+        else if (absent.length) row.findings.push({ rule: 'phase-absent', line: seq.line,
           text: `phase ${p}${phase.title ? ` (${phase.title})` : ''} is not in the end-to-end sequence — it names ${absent.map((a) => `"${a}"`).join(', ')}, which the sequence does not${absent.some((a) => undecided.has(a)) ? ` (undecided: ${absent.filter((a) => undecided.has(a)).map((a) => `"${a}"`).join(', ')} may be another spelling of a participant — answer the judge and re-run)` : ''}`,
           why: 'Either the flow does not run that phase and its phase list is long, or the sequence stops short of it. Both are live; the two statements cannot both be right.' });
       }
@@ -205,10 +210,11 @@ function render(r) {
 
 // the CLI, callable from the old path under architecture-docs/scripts/ as well
 async function main(args) {
-  const root = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--judge');
+  const root = args.find((a, i) => !a.startsWith('--') && !['--judge', '--undecided'].includes(args[i - 1]));
   const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };
-  if (!root) { console.error('Usage: bun flow-check.js <project-root> [--json] [--warn-only] [--judge agent|typesafe|clef]'); process.exit(2); }
-  let r; try { r = await check(path.resolve(root), { judge: opt('--judge') }); } catch (e) { console.error('flow-check: ' + e.message); process.exit(2); }
+  if (!root) { console.error('Usage: bun flow-check.js <project-root> [--json] [--warn-only] [--judge agent|typesafe|clef] [--undecided warn]'); process.exit(2); }
+  if (opt('--undecided') !== undefined && opt('--undecided') !== 'warn') { console.error('flow-check: --undecided takes warn'); process.exit(2); }
+  let r; try { r = await check(path.resolve(root), { judge: opt('--judge'), undecided: opt('--undecided') }); } catch (e) { console.error('flow-check: ' + e.message); process.exit(2); }
   console.log(args.includes('--json') ? JSON.stringify(r, null, 1) : render(r));
   process.exit(r.status === 'FAIL' && !args.includes('--warn-only') ? 1 : 0);
 }
