@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.5.2]
+
+### Fixed
+- `ci/architecture-release.yml`'s handoff job failed at once — `claude-code-action` refuses a `push` event (`Unsupported event type: push`). The regeneration is its own workflow, `ci/architecture-handoff.yml` (`workflow_dispatch`, input `tag`), which the release job dispatches with `GITHUB_TOKEN` (a dispatch, unlike a tag push, starts a run); it also runs by hand for any tag.
+
+### Changed
+- The CI examples pin `v10.5.2`.
+
+### Upgrade
+- A repository with 10.5.0's `architecture-release.yml`: copy the new `architecture-release.yml` and `architecture-handoff.yml`.
+
 ## [10.5.1]
 
 ### Fixed

@@ -58,7 +58,7 @@ Exit codes: 1 the bundle failed its check or the server refused it · 3 no serve
 
 ## In CI
 
-`ci/publish-index.sh` is the step every pipeline runs: the plugin at a pinned tag (`SA_PLUGIN_REF`), the previous bundle from the server, the export, `--check`, then `POST` to the server. Examples to copy into the architecture's repository: `ci/github-actions.yml`, `ci/gitea-actions.yml`, `ci/azure-pipelines.yml`; on GitHub, `architecture-lifecycle`'s `ci/architecture-release.yml` chains the tag, phase 1 and the handoff regeneration after a release PR is merged. Each one needs a project key, the server URL and a token.
+`ci/publish-index.sh` is the step every pipeline runs: the plugin at a pinned tag (`SA_PLUGIN_REF`), the previous bundle from the server, the export, `--check`, then `POST` to the server. Examples to copy into the architecture's repository: `ci/github-actions.yml`, `ci/gitea-actions.yml`, `ci/azure-pipelines.yml`; on GitHub, `architecture-lifecycle`'s `ci/architecture-release.yml` chains the tag, phase 1 and the dispatch of the handoff regeneration (`ci/architecture-handoff.yml`) after a release PR is merged. Each one needs a project key, the server URL and a token.
 
 A release publishes twice:
 
