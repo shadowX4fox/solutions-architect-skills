@@ -248,7 +248,12 @@ design language standard, its full BIAN Service Landscape, its capability framew
 see `docs/INSTITUTION_PACKS.md`). The helper lists every pack found for this project, what
 each provides, the design language and BIAN landscape in force (a pack's, else the base's own copy, else **fallback
 mode**), the pack skins, and why any pack was skipped (a `base` range that excludes this version, a pack installed
-twice, two packs providing the same thing).
+twice, two packs providing the same thing). When the project's `.sa-skills/project.json` carries `"packs"`, a
+`project packs:` line names the ones it keeps and the ones it leaves out.
+
+A project outside the organization a user-scope pack belongs to (open source, a client's, a demo) opts out with
+`bun "$plugin_dir/scripts/shared/packs.js" --declare none --project "$PWD"` — run it only when the user
+asks for it.
 
 Display its stdout verbatim. **This step is informational** — no pack is a normal, fully working setup. A `⚠` line
 names what to do: update the pack (`claude plugin update <pack>`), or the base, until the ranges meet.

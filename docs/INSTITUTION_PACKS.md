@@ -73,6 +73,18 @@ A plugin whose root carries `sa-pack.json`:
    marketplace, whose root carries `sa-pack.json`: the user-scope install, and a project- or local-scope install whose
    project is the working directory or an ancestor.
 
+**A project chooses its packs** (10.6.0). A user-scope pack applies to every project on the machine, including one
+outside its organization (an open-source project, a client's, a demo), where its brand skin, design language,
+architecture type and defaults do not belong. `.sa-skills/project.json` — the nearest one at or above the working
+directory — narrows it: `"packs": []`, no pack; `"packs": ["<name>", …]`, only those; the key absent, every pack found.
+The resolver applies it before anything else, so every reader sees the same set, and reports the packs it left out.
+
+```bash
+bun <sa_skills_dir>/scripts/shared/packs.js --declare none         # this project uses no institution pack
+bun <sa_skills_dir>/scripts/shared/packs.js --declare sa-pack-acme # only this one
+bun <sa_skills_dir>/scripts/shared/packs.js --declare all          # the key removed: every pack found
+```
+
 **Precedence, most specific first**: the project, then a pack, then the base's own copy. For skins it is additive —
 the plugin's, then each pack's, then the project's `visualizations/skins/`, a later one replacing an earlier one of
 the same id. Two packs providing the same folder: the first found is used, and `/setup` says so.

@@ -117,7 +117,9 @@ Two GitHub Actions examples to copy into the architecture's repository: `ci/arch
 request touching the architecture runs `check --undecided warn` and gets one comment with the gates and the status;
 `ci/architecture-release.yml` — on the merge of a release PR: `tag`, the index's phase 1 on a runner that reaches the
 server, and a dispatch of `ci/architecture-handoff.yml`, where Claude (`claude-code-action`, which refuses a `push`
-event) regenerates the handoff kit into a pull request — also runnable by hand for any tag. Each file's header lists
+event) regenerates the handoff kit into a pull request — also runnable by hand for any tag; the PR carries the
+version's evidence, the command center regenerated from the documents and its photo-mode picture (`snapshot.js`)
+embedded in the body, best effort. Each file's header lists
 the variables, secrets and repository settings it needs.
 
 ## Recover — a lost tag

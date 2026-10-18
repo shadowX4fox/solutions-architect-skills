@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.6.0]
+
+### Added
+- A project chooses its institution packs: `"packs"` in `.sa-skills/project.json`, the nearest at or above the working directory — `[]` none, `["<name>", …]` only those, absent every pack found. `packs.js` applies it before anything else, so every reader (design language, skins, architecture types, frameworks, defaults) sees the same set; `--declare none|all|<names>` writes it and keeps the file's other keys; `/setup` Step 11 reports the packs kept and left out. A user-scope pack applied to every project on the machine — an open-source or demo project's command center opened in, and embedded, an organization's brand skin.
+- `snapshot.js` (command center): the viewer's photo mode as a PNG from headless Chrome over the DevTools protocol, no dependency — captioned with the project, the version, the view and the date, the caption printed.
+- `ci/architecture-handoff.yml`: the kit's PR carries the version's evidence — the command center regenerated from the documents and its photo-mode picture, committed on the handoff branch and embedded in the PR body at that commit. Best effort: a failure warns and the PR opens without it.
+
+### Fixed
+- The command center's header: the version (`v<version> <status>`) is its own element that never gives way — it shared the meta line, which gives way first, so a long title hid it; the header's buttons keep their width (`min-content`) — a long title pushed the last ones off-screen.
+- The CI examples pin `v10.6.0`.
+
 ## [10.5.3]
 
 ### Added

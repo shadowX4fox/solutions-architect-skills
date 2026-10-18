@@ -1,6 +1,6 @@
 {
   "name": "sa-records",
-  "version": "10.5.3",
+  "version": "10.6.0",
   "description": "Decision and debt records \u2014 ADRs (create, amend, supersede, index; maintain an institutional ADR catalog in catalog mode) and TDRs (technical debt records with a closed status vocabulary). No ARCHITECTURE.md required. Installed on its own, or as a dependency of sa-skills.",
   "author": {
     "name": "shadowX4fox",

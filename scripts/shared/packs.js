@@ -12,7 +12,12 @@
 // separated — development and tests). A pack whose `base` range excludes this base is skipped with a warning. Precedence, most
 // specific first: the project, a pack, the base's own bundled copy.
 //
+// A project outside the organization a user-scope pack belongs to (an open-source one, a client's, a demo) opts out in
+// `.sa-skills/project.json`, the nearest one at or above the project: `"packs": []` — no pack applies; `"packs": ["<name>", …]` —
+// only those; the key absent — every pack found. Every reader resolves through findPacks, so the choice holds for all of them.
+//
 //   bun packs.js [--project <dir>] [--json]               the packs found and what each provides
+//   bun packs.js --declare none|all|<name,…> [--project <dir>]   record the project's packs in .sa-skills/project.json
 //   bun packs.js --path <design-language|skins|architecture-types|frameworks> [--project <dir>]   the folder in force, or nothing (exit 1)
 const fs = require('fs');
 const path = require('path');
@@ -59,9 +64,20 @@ function registryDirs(project, registry) {
   return out;
 }
 
-// The packs that apply here: { name, version, dir, manifest, source }[]; `warnings` for the ones skipped
+// the project's choice: { file, packs: null (the key absent) | string[] } from the nearest .sa-skills/project.json at or above it
+function projectChoice(project) {
+  for (let d = path.resolve(project); ; d = path.dirname(d)) {
+    const f = path.join(d, '.sa-skills', 'project.json');
+    if (fs.existsSync(f)) { const j = read(f) || {}; return { file: f, packs: Array.isArray(j.packs) ? j.packs.map(String) : null }; }
+    if (path.dirname(d) === d) return { file: null, packs: null };
+  }
+}
+
+// The packs that apply here: { name, version, dir, manifest, source }[]; `warnings` for the ones skipped, `excluded` for the ones
+// the project's `packs` key leaves out
 function findPacks(opts = {}) {
-  const project = path.resolve(opts.project || process.cwd()), warnings = [], seen = new Set(), packs = [], bv = baseVersion();
+  const project = path.resolve(opts.project || process.cwd()), warnings = [], seen = new Set(), packs = [], excluded = [], bv = baseVersion();
+  const choice = projectChoice(project);
   const env = (opts.env !== undefined ? opts.env : process.env.SA_PACKS || '').split(path.delimiter).filter(Boolean).map((d) => [path.resolve(d), 'env:SA_PACKS']);
   const reg = opts.noRegistry ? [] : registryDirs(project, opts.registry).map((d) => [d, 'registry']);
   env.concat(reg).forEach(([dir, source]) => {
@@ -69,10 +85,22 @@ function findPacks(opts = {}) {
     const m = read(mf);
     if (!m || !m.name || !m.provides) { warnings.push(`${dir}: sa-pack.json needs "name" and "provides"`); return; }
     if (!satisfies(bv, m.base)) { warnings.push(`${m.name} ${m.version || ''} wants base ${m.base}; this base is ${bv} — skipped`); return; }
+    if (choice.packs && !choice.packs.includes(m.name)) { if (!excluded.includes(m.name)) excluded.push(m.name); return; }
     if (packs.some((p) => p.name === m.name)) { warnings.push(`${m.name}: installed twice — the first found is used (${packs.find((p) => p.name === m.name).dir})`); return; }
     packs.push({ name: m.name, version: m.version || '', dir, manifest: m, source });
   });
-  return { packs, warnings, base: bv };
+  if (choice.packs) choice.packs.filter((n) => !packs.some((p) => p.name === n)).forEach((n) => warnings.push(`${n}: named in ${choice.file} and not installed for this project`));
+  return { packs, warnings, excluded, declared: choice.packs, base: bv };
+}
+
+// record the project's packs: 'none' → [], 'all' → the key removed, else the names; the file's other keys are kept
+function declarePacks(project, value) {
+  const dir = path.join(path.resolve(project || process.cwd()), '.sa-skills'), f = path.join(dir, 'project.json'), j = read(f) || {};
+  const v = String(value || '').trim();
+  if (!v) throw new Error('--declare takes none, all or pack names separated by commas');
+  if (v === 'all') delete j.packs; else j.packs = v === 'none' ? [] : v.split(',').map((x) => x.trim()).filter(Boolean);
+  fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(f, JSON.stringify(j, null, 2) + '\n');
+  return { file: f, packs: j.packs === undefined ? null : j.packs };
 }
 
 // The folder in force for one kind of asset: the first pack that provides it (and whose folder proves it), else the base's own copy,
@@ -97,11 +125,15 @@ const frameworkDirs = additive('frameworks');
 // a pack's defaults, the first pack that states each key
 const defaults = (opts = {}) => findPacks(opts).packs.reduce((d, p) => Object.assign({}, p.manifest.defaults || {}, d), {});
 
-module.exports = { findPacks, assetPath, designLanguageDir, skinDirs, typeDirs, frameworkDirs, defaults, satisfies, BUNDLED };
+module.exports = { findPacks, declarePacks, assetPath, designLanguageDir, skinDirs, typeDirs, frameworkDirs, defaults, satisfies, BUNDLED };
 
 if (require.main === module) {
   const a = process.argv.slice(2), opt = (f) => { const i = a.indexOf(f); return i >= 0 ? a[i + 1] : undefined; };
   const opts = { project: opt('--project') };
+  if (a.includes('--declare')) {
+    try { const r = declarePacks(opts.project, opt('--declare')); console.log(`${r.file}: packs ${r.packs === null ? 'every pack found' : r.packs.length ? r.packs.join(', ') : 'none'}`); process.exit(0); }
+    catch (e) { console.error(e.message); process.exit(2); }
+  }
   if (a.includes('--path')) {
     const kind = opt('--path');
     if (kind === 'skins' || kind === 'architecture-types' || kind === 'frameworks') { const s = ({ skins: skinDirs, 'architecture-types': typeDirs, frameworks: frameworkDirs })[kind](opts); s.forEach((x) => console.log(x.dir)); process.exit(s.length ? 0 : 1); }
@@ -109,10 +141,11 @@ if (require.main === module) {
     const r = assetPath(kind, opts); r.warnings.forEach((w) => console.error('⚠ ' + w));
     if (r.path) { console.log(r.path); process.exit(0); } process.exit(1);
   }
-  const f = findPacks(opts), view = { base: f.base, packs: f.packs.map((p) => ({ name: p.name, version: p.version, source: p.source, dir: p.dir, provides: Object.keys(p.manifest.provides), defaults: p.manifest.defaults || {} })), designLanguage: assetPath('design-language', opts), skins: skinDirs(opts), warnings: f.warnings };
+  const f = findPacks(opts), view = { base: f.base, declared: f.declared, excluded: f.excluded, packs: f.packs.map((p) => ({ name: p.name, version: p.version, source: p.source, dir: p.dir, provides: Object.keys(p.manifest.provides), defaults: p.manifest.defaults || {} })), designLanguage: assetPath('design-language', opts), skins: skinDirs(opts), warnings: f.warnings };
   if (a.includes('--json')) { console.log(JSON.stringify(view, null, 2)); process.exit(0); }
   console.log(`sa-skills ${f.base} · ${f.packs.length ? f.packs.length + ' institution pack(s)' : 'no institution pack'}`);
   f.packs.forEach((p) => console.log(`  ${p.name} ${p.version} (${p.source}) — provides ${Object.keys(p.manifest.provides).join(', ')}`));
+  if (f.declared) console.log(`  project packs:   ${f.declared.length ? f.declared.join(', ') : 'none'} (.sa-skills/project.json)${f.excluded.length ? ' — left out: ' + f.excluded.join(', ') : ''}`);
   console.log(`  design language: ${view.designLanguage.path ? view.designLanguage.from + ' — ' + view.designLanguage.path : 'none (fallback mode)'}`);
   const fw = frameworkDirs(opts); if (fw.length) console.log(`  frameworks: ${fw.map((s) => s.name).join(', ')}`);
   const td = typeDirs(opts); if (td.length) console.log(`  architecture types: ${td.map((s) => s.name).join(', ')}`);

@@ -59,6 +59,56 @@ describe('discovery', () => {
   });
 });
 
+describe('the project chooses its packs (.sa-skills/project.json "packs")', () => {
+  const project = (packs: any) => { const d = mkdtempSync(join(tmpdir(), 'sa-proj-')); mkdirSync(join(d, '.sa-skills')); writeFileSync(join(d, '.sa-skills', 'project.json'), JSON.stringify(packs === undefined ? { support: 'run' } : { support: 'run', packs })); return d; };
+  test('"packs": [] — no pack applies, and every reader sees none', () => {
+    const d = makePack('sa-pack-acme', { provides: { designLanguage: 'dl', skins: 'skins' }, defaults: { theme: 'acme' } }, { 'dl/llms-rules.txt': 'x', 'skins/.keep': '' });
+    const p = project([]), o = { env: d, noRegistry: true, project: p };
+    const r = P.findPacks(o);
+    expect(r.packs).toEqual([]); expect(r.excluded).toEqual(['sa-pack-acme']); expect(r.declared).toEqual([]);
+    expect(P.assetPath('design-language', o).from).not.toBe('sa-pack-acme');
+    expect(P.skinDirs(o)).toEqual([]); expect(P.defaults(o)).toEqual({});
+    [d, p].forEach((x) => rmSync(x, { recursive: true }));
+  });
+  test('"packs": [names] — only those; a name not installed warns', () => {
+    const a = makePack('sa-pack-a', {}), b = makePack('sa-pack-b', {}), p = project(['sa-pack-b', 'sa-pack-gone']);
+    const r = P.findPacks({ env: [a, b].join(':'), noRegistry: true, project: p });
+    expect(r.packs.map((x: any) => x.name)).toEqual(['sa-pack-b']); expect(r.excluded).toEqual(['sa-pack-a']);
+    expect(r.warnings.join()).toMatch(/sa-pack-gone: named in .* not installed/);
+    [a, b, p].forEach((x) => rmSync(x, { recursive: true }));
+  });
+  test('the key absent — every pack; a subfolder of the project reads the same file', () => {
+    const a = makePack('sa-pack-a', {}), p = project(undefined), q = project([]);
+    expect(P.findPacks({ env: a, noRegistry: true, project: p }).packs.map((x: any) => x.name)).toEqual(['sa-pack-a']);
+    mkdirSync(join(q, 'docs'));
+    expect(P.findPacks({ env: a, noRegistry: true, project: join(q, 'docs') }).packs).toEqual([]);
+    [a, p, q].forEach((x) => rmSync(x, { recursive: true }));
+  });
+  test('declarePacks writes the choice and keeps the file\'s other keys', () => {
+    const p = project(undefined);
+    expect(P.declarePacks(p, 'none').packs).toEqual([]);
+    expect(JSON.parse(readFileSync(join(p, '.sa-skills', 'project.json'), 'utf8'))).toEqual({ support: 'run', packs: [] });
+    expect(P.declarePacks(p, 'sa-pack-a, sa-pack-b').packs).toEqual(['sa-pack-a', 'sa-pack-b']);
+    expect(P.declarePacks(p, 'all').packs).toBeNull();
+    expect(JSON.parse(readFileSync(join(p, '.sa-skills', 'project.json'), 'utf8'))).toEqual({ support: 'run' });
+    rmSync(p, { recursive: true });
+  });
+  test('the command center of a project with "packs": [] carries no pack skin', () => {
+    const skin = join(import.meta.dir, '..', 'plugins', 'sa-visualization', 'skills', 'architecture-command-center', 'skins', 'atlas');
+    const pack = makePack('sa-pack-acme', { provides: { skins: 'skins' }, defaults: { theme: 'acme' } });
+    cpSync(skin, join(pack, 'skins', 'acme'), { recursive: true });
+    const j = JSON.parse(readFileSync(join(pack, 'skins', 'acme', 'skin.json'), 'utf8')); j.id = 'acme'; j.order = 9; writeFileSync(join(pack, 'skins', 'acme', 'skin.json'), JSON.stringify(j));
+    const p = project([]), cfg = mkdtempSync(join(tmpdir(), 'sa-cfg-'));
+    mkdirSync(join(p, 'visualizations'));
+    cpSync(join(import.meta.dir, '..', 'plugins', 'sa-visualization', 'skills', 'architecture-command-center', 'examples', 'order-desk.scene.json'), join(p, 'visualizations', 's.json'));
+    const render = join(import.meta.dir, '..', 'plugins', 'sa-visualization', 'skills', 'architecture-command-center', 'scripts', 'render.js');
+    const r = Bun.spawnSync(['bun', render, join(p, 'visualizations', 's.json'), join(p, 'visualizations', 'o.html')], { cwd: p, stdout: 'pipe', stderr: 'pipe', env: Object.assign({}, process.env, { SA_PACKS: pack, CLAUDE_CONFIG_DIR: cfg }) });
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout.toString()).not.toMatch(/theme=acme|pack skins/);
+    [pack, p, cfg].forEach((x) => rmSync(x, { recursive: true }));
+  });
+});
+
 describe('what a pack provides', () => {
   test('skins folders, in the order found, and defaults (the first pack stating a key)', () => {
     const a = makePack('sa-pack-a', { provides: { skins: 'skins' }, defaults: { theme: 'acme', docLanguage: 'es' } }, { 'skins/.keep': '' });
