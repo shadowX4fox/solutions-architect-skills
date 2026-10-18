@@ -87,6 +87,19 @@ describe("adr-link (8.91.0)", () => {
     expect(readFileSync(join(root, ".cache/sa-skills/adr-context.md"), "utf8")).toContain("Status: DECIDED — ADR-104");
   });
 
+  test("a principles file whose Layer 2 stamp was current keeps its review through the relink; a stale stamp stays stale (10.5.1)", () => {
+    const { stamped, readReview } = require("../../../scripts/shared/principle-stamp.js");
+    const F = join(root, "docs/02-architecture-principles.md");
+    writeFileSync(F, stamped(readFileSync(F, "utf8").replace("per ADR-019.", "per ADR-019 y ADR Candidate 1."), "PASS", "2026-10-10"));
+    w("docs/03-architecture-layers.md", "# Capas\n\nVer ADR Candidate 1.\n\n<!-- PRINCIPLE_REVIEW: PASS 2026-10-01 sha256:000000000000 -->\n");
+    w(".cache/sa-skills/adr-ids.json", JSON.stringify({ "1": { id: "ADR-103", file: "adr/ADR-103-a.md" } }));
+    expect(readReview(F).state).toBe("current");
+    link(root, { write: true });
+    expect(readFileSync(F, "utf8")).toContain("per ADR-019 y [ADR-103](../adr/ADR-103-a.md).");
+    expect(readReview(F)).toMatchObject({ state: "current", layer2: "PASS", date: "2026-10-10" });
+    expect(readReview(join(root, "docs/03-architecture-layers.md")).state).toBe("stale");
+  });
+
   test("the bracketed form — Candidato ADR [N], candidatos ADR [N] y [M] — with its status note (8.92.6)", () => {
     w("docs/06-technology-stack.md", "# Stack\n\n| Decisión | ADR |\n|---|---|\n| Réplica | Candidato ADR [1] (DECIDED, Sección 4) |\n| Cifrado | candidatos ADR [1] y [2] |\n| WSS | Candidato ADR [2] (PENDING) |\n");
     expect([...(citations(root).get(2) || [])]).toContain("docs/06-technology-stack.md");

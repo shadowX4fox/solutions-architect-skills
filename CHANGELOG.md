@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.5.1]
+
+### Fixed
+- A Workflow 1 create with project ADRs ended with the principles' Layer 2 stamp stale, so `lifecycle.js check` blocked the first release on `principle-review`: Step 6's `adr-link.js` turns `ADR Candidate N` into `[ADR-NNN](…)` in `docs/02` after the review stamped it. `adr-link.js` now keeps a stamp that was current before the relink (same outcome and date, over the relinked text) — the review read the citation under its candidate number, and the link names the ADR written for that candidate. A stale stamp stays stale.
+
+### Changed
+- The stamp is one module, `plugins/sa-records/scripts/shared/principle-stamp.js`, which `principle-check.js` and `adr-link.js` both require. The CI examples pin `v10.5.1`.
+
+### Upgrade
+- An architecture created before 10.5.1 whose stamp went stale only through the relink needs its Layer 2 review again (or, where the relink is proven the only change, `principle-check.js --stamp-review` with the review's outcome).
+
 ## [10.5.0]
 
 ### Added

@@ -301,21 +301,8 @@ const layer15 = (j) => {
   return s + (j.note ? `\n  note: ${j.note}` : '');
 };
 
-// the Layer 2 stamp — the hash covers the file without its stamp line, CRLF normalized, trailing whitespace trimmed
-const crypto = require('crypto');
-const STAMP_RE = /^<!--\s*PRINCIPLE_REVIEW:\s*(\w+)\s+(\d{4}-\d{2}-\d{2})\s+sha256:([0-9a-f]{12})\s*-->\s*$/m;
-const unstamped = (src) => src.replace(/\r\n?/g, '\n').split('\n').filter((l) => !/^<!--\s*PRINCIPLE_REVIEW:/.test(l)).join('\n').replace(/\s+$/, '');
-const principlesHash = (src) => crypto.createHash('sha256').update(unstamped(src)).digest('hex').slice(0, 12);
-function readReview(file) {
-  if (!fs.existsSync(file)) return { state: 'missing-file' };
-  const src = fs.readFileSync(file, 'utf8'); const m = src.match(STAMP_RE);
-  if (!m) return { state: 'unstamped' };
-  return { state: m[3] === principlesHash(src) ? 'current' : 'stale', layer2: m[1], date: m[2], hash: m[3] };
-}
-function stampReview(file, layer2, today) {
-  const body = unstamped(fs.readFileSync(file, 'utf8'));
-  fs.writeFileSync(file, `${body}\n\n<!-- PRINCIPLE_REVIEW: ${layer2} ${today} sha256:${principlesHash(body)} -->\n`);
-}
+// the Layer 2 stamp — one implementation, in sa-records beside adr-link.js, its other writer
+const { principlesHash, readReview, stampReview } = require(path.join(__dirname, '..', '..', '..', 'plugins', 'sa-records', 'scripts', 'shared', 'principle-stamp.js'));
 
 module.exports = { check, judgeFindings, parse, render, layer15, principlesHash, readReview, stampReview, CANON, MATRIX, LEX, SEMANTIC };
 

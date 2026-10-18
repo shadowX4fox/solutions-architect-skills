@@ -11,6 +11,8 @@
 //   - replaces every citation of a mapped candidate in docs/**/*.md with `[ADR-NNN](<relative path>)`; a citation
 //     naming an unmapped candidate is left as it is and reported
 //   - adds the ids a file now cites to its EXPLORER_HEADER `related_adrs`
+//   - keeps the Layer 2 review stamp of the principles file when it was current before the relink: the review read
+//     the citation under its candidate number, and the link names the ADR written for that candidate
 //   - marks each mapped candidate's line of `.cache/sa-skills/adr-context.md` with its id
 //
 // Without --write it prints what it would change.
@@ -18,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const { CITE, docFiles, loadIds } = require(path.join(__dirname, 'adr-prepare.js'));
+const { restamp } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'principle-stamp.js'));
 
 const read = (p) => fs.readFileSync(p, 'utf8').replace(/\r\n?/g, '\n');
 
@@ -47,6 +50,7 @@ function link(root, opts = {}) {
       const header = rm ? hm[1].replace(/^related_adrs:.*$/m, `related_adrs: ${merged.join(', ')}`) : hm[1] + `related_adrs: ${merged.join(', ')}\n`;
       out = out.replace(hm[1], header);
     }
+    out = restamp(src, out);
     changes.push({ file: f, links: n });
     if (opts.write) fs.writeFileSync(abs, out);
   }
