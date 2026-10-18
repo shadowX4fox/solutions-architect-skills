@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.5.3]
+
+### Added
+- `kit-check.js` holds a kit root to completeness (`kit-incomplete`): `SYSTEM_RUNTIME_VIEW.md`, `CROSS_CUTTING_STANDARDS.md` and a `components/NN-<slug>.md` for every `assets/NN-<slug>/` code rendered. Every other rule held only the files that existed, so a run whose generators never wrote — a headless session that ended while its sub-agents ran — passed with descriptors alone.
+
+### Fixed
+- `ci/architecture-handoff.yml`, from its first runs on a real repository:
+  - the kit's branch is cut from the default branch, after checking that the architecture there equals the tag's — cut from the tag, the push was refused: against the default branch it changed workflow files, which a job token cannot write;
+  - `origin` is pointed back at the job's token before the push — `claude-code-action` points it at its own token and revokes it when it finishes;
+  - the prompt tells Claude the run is headless — sub-agents in the foreground, every result in hand before going on — after a run ended while its eight generators were still writing;
+  - `Bash` unrestricted for Claude: the skill composes shell lines (`cd …; P=…; for …`) no `Bash(<prefix> *)` rule matches, and each denial was a skipped step;
+  - Chrome may start on the runner (`kernel.apparmor_restrict_unprivileged_userns=0`), so the kit gate renders the Mermaid fences instead of failing every one;
+  - Claude's transcript is kept as the `handoff-transcript` artifact (7 days) — the action hides its output.
+- The CI examples pin `v10.5.3`.
+
 ## [10.5.2]
 
 ### Fixed

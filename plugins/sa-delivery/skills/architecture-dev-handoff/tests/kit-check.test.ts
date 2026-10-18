@@ -207,3 +207,14 @@ describe("version-stale and interface-missing — a part held to its architectur
     rmSync(root, { recursive: true, force: true });
   });
 });
+
+describe("kit-check — a kit is complete (10.5.3)", () => {
+  test("a kit root without its shared parts or a component's specification fails kit-incomplete; written, it passes that rule", () => {
+    const K = join(TMP, "kit-complete");
+    rmSync(K, { recursive: true, force: true }); mkdirSync(join(K, "assets", "01-web-app"), { recursive: true }); mkdirSync(join(K, "assets", "02-hub-api"), { recursive: true }); mkdirSync(join(K, "components"), { recursive: true });
+    const incomplete = (r: any) => r.files.flatMap((f: any) => f.findings).filter((x: any) => x.rule === "kit-incomplete").map((x: any) => x.text.split(" ")[0]);
+    expect(incomplete(check([K]))).toEqual(["SYSTEM_RUNTIME_VIEW.md", "CROSS_CUTTING_STANDARDS.md", "components/01-web-app.md", "components/02-hub-api.md"]);
+    ["SYSTEM_RUNTIME_VIEW.md", "CROSS_CUTTING_STANDARDS.md", "components/01-web-app.md", "components/02-hub-api.md"].forEach((n) => writeFileSync(join(K, n), "# x\n"));
+    expect(incomplete(check([K]))).toEqual([]);
+  });
+});

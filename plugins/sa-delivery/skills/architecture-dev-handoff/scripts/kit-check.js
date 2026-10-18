@@ -3,7 +3,8 @@
 //
 //   bun kit-check.js <handoffs_dir | file.md …> [--fix] [--no-render] [--render] [--json] [--lang en|es]
 //
-// A directory argument also holds every assets/*/openapi.yaml and asyncapi.yaml to contract-check.js (parse, structure,
+// A directory argument is a kit: it must carry SYSTEM_RUNTIME_VIEW.md, CROSS_CUTTING_STANDARDS.md and a components/NN-<slug>.md
+// for every assets/NN-<slug>/ (`kit-incomplete`). It also holds every assets/*/openapi.yaml and asyncapi.yaml to contract-check.js (parse, structure,
 // fidelity to the descriptor in the cut-sheet payload, Redocly); its BLOCKING findings fail the kit like any other.
 //
 // Per file: an H1; the managed marker and a TEMPLATE_VERSION marker; no template placeholder left outside
@@ -270,6 +271,15 @@ function check(targets, opts = {}) {
           r.findings.push({ rule: 'security-missing', line: 1, text: `no ${path.relative(d, sec)} rendered by security-obligations.js — run it for this component` }); }
         else { const spec = path.join(cd, n); const miss = interfaceFindings(spec, fs.readFileSync(spec, 'utf8').replace(/\r\n?/g, '\n'), fs.readFileSync(sec, 'utf8'));
           if (miss.length) { const r = result.files.find((x) => x.file === spec) || (result.files.push({ file: spec, findings: [] }), result.files[result.files.length - 1]); miss.forEach((x) => r.findings.push(x)); } } }); }); }
+  // kit-incomplete — a kit root (a directory with assets/) carries the two shared parts and one Component Specification per
+  // component whose assets code rendered (c4-descriptor.js writes assets/NN-<slug>/ for every component in scope). Every
+  // check above holds the files that exist; a run whose generators never wrote (a headless session that ended while its
+  // sub-agents ran) left a kit of descriptors alone, and it passed.
+  dirs.filter((d) => fs.existsSync(path.join(d, 'assets'))).forEach((d) => {
+    const miss = ['SYSTEM_RUNTIME_VIEW.md', 'CROSS_CUTTING_STANDARDS.md'].filter((n) => !fs.existsSync(path.join(d, n)))
+      .concat(fs.readdirSync(path.join(d, 'assets'), { withFileTypes: true }).filter((e) => e.isDirectory() && /^\d+-/.test(e.name)).map((e) => path.join('components', `${e.name}.md`)).sort().filter((n) => !fs.existsSync(path.join(d, n))));
+    if (miss.length) result.files.push({ file: d, findings: miss.map((n) => ({ rule: 'kit-incomplete', line: 1, text: `${n} is missing — the kit has assets for it but the part was never written; regenerate it (generate dev handoff)` })) });
+  });
   if (result.files.some((f) => f.findings.length)) result.status = 'FAIL';
   return result;
 }

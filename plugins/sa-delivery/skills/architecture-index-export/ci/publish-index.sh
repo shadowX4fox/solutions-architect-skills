@@ -14,7 +14,7 @@
 # Environment
 #   SA_INDEX_PROJECT_KEY   required  the project's key on the server — the same on every release, it is part of every chunk id;
 #                                    unset, it is read from .sa-skills/index.json (project_key), which publish-index.js writes
-#   SA_PLUGIN_REF          required  the plugin tag the bundle is built with, e.g. v10.5.2 (pinned: a bundle is reproducible)
+#   SA_PLUGIN_REF          required  the plugin tag the bundle is built with, e.g. v10.5.3 (pinned: a bundle is reproducible)
 #   SA_PLUGIN_REPO         optional  default https://github.com/shadowx4fox/solutions-architect-skills.git (a mirror works)
 #   SA_SKILLS_DIR          optional  a checkout of the plugin at SA_PLUGIN_REF already on the runner — used instead of a clone
 #   SA_INDEX_SERVER        optional  the server's base URL; without it the bundle is built and checked, not published.
@@ -41,7 +41,7 @@ if [ -z "${SA_INDEX_PROJECT_KEY:-}" ] && [ -f "$PROJECT_DIR/.sa-skills/index.jso
   SA_INDEX_PROJECT_KEY=$(bun -e "process.stdout.write(require(process.argv[1]).project_key || '')" "$(cd "$PROJECT_DIR" && pwd)/.sa-skills/index.json")
 fi
 : "${SA_INDEX_PROJECT_KEY:?set SA_INDEX_PROJECT_KEY, or commit .sa-skills/index.json — the key of the project on the server}"
-: "${SA_PLUGIN_REF:?set SA_PLUGIN_REF — the plugin tag to build the bundle with, e.g. v10.5.2}"
+: "${SA_PLUGIN_REF:?set SA_PLUGIN_REF — the plugin tag to build the bundle with, e.g. v10.5.3}"
 SA_PLUGIN_REPO="${SA_PLUGIN_REPO:-https://github.com/shadowx4fox/solutions-architect-skills.git}"
 WORK="${RUNNER_TEMP:-${AGENT_TEMPDIRECTORY:-${TMPDIR:-/tmp}}}/sa-index"
 ARTIFACT="${SA_INDEX_ARTIFACT:-$WORK/bundle.tgz}"
