@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.1]
+
+### Changed
+- **The local index server is pinned to Alia 0.3.0** (`local/compose.yaml`, `SA_INDEX_SERVER_TAG`). `preview_tier0` and `preview_escalation` now accept `supervision: "unattended"`. Unattended, `preview_tier0` renders `tier0.js`'s issue: only the `tier0:<kind>` label, the unattended footer, and no `architecture-tier0` in `file_with`. Closes #9.
+  - `BUILD.md` rule 10 keeps its fallback ("drop that label from `file_with.steps` if the server still lists it"). A team that pins an older server, or reads a shared one that has not upgraded, still needs it.
+
 ## [10.10.0]
 
 ### Added
