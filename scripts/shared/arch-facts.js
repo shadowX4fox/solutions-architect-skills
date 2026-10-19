@@ -10,7 +10,7 @@
 //   components     component-cli's facts — canonical name, slug, level, system, type, technology, internal
 //                  name, header fields, component version, last updated
 //   adrs           adr/ADR-*.md — id, title, status, scope (the explorer's manifest)
-//   tdrs           tdr/TDR-*.md — id, title, status (frontmatter `status:` first, then `## Status`), the initiative line, the driver (McKinsey cause family), the BIAN capability (frontmatter `bian-capability` or `## Capability`)
+//   tdrs           tdr/TDR-*.md — id, title (the H1 without its `TDR-NNN:`, as an ADR's), status (frontmatter `status:` first, then `## Status`), the initiative line, the driver (McKinsey cause family), the BIAN capability (frontmatter `bian-capability` or `## Capability`)
 //   layers         docs/03 § 4.1 table — number, name, containers, inside the boundary
 //   integrations   docs/05 `I-nn` rows — from, to, protocol, pattern, boundary; a struck-through row is retired
 //   phases         docs/04 Phase Catalog rows, the phase block's Hops and Latency budget lines
@@ -113,7 +113,7 @@ function collect(root) {
     const capBody = sectionBody(src, /^##\s+(Capability|Capacidad)\b/i); const capFm = (src.match(/^bian-capability:\s*["']?([^"'\n]*)["']?\s*$/m) || [])[1];
     const capRows = capBody ? tables(capBody).flatMap((tb) => tb.rows).filter((r) => r.length >= 3).map((r) => plain(r[1])).filter(Boolean) : [];
     const capability = (capFm && capFm.trim()) || (capRows.length ? capRows.join(' › ') : (capBody ? plain(capBody.split('\n').map((l) => l.trim()).find((l) => l && !/^[#|>*-]/.test(l)) || '') : '')) || null;
-    tdrs.push({ id: (n.match(/^TDR-\d+/i) || [n])[0].toUpperCase(), file: 'tdr/' + n, title: plain((src.match(/^#\s+(.+)$/m) || ['', n])[1]), status: status || null, initiative: field(src, ['Initiative', 'Iniciativa']), driver: ((src.match(/^driver:\s*([A-Za-z]+)/m) || [])[1] || (field(src, ['Driver']) || '').split(/\s+[—–-]\s+/)[0] || null), capability });
+    tdrs.push({ id: (n.match(/^TDR-\d+/i) || [n])[0].toUpperCase(), file: 'tdr/' + n, title: plain((src.match(/^#\s+(.+)$/m) || ['', n])[1]).replace(/^TDR-\d+\s*[:—–-]\s*/i, ''), status: status || null, initiative: field(src, ['Initiative', 'Iniciativa']), driver: ((src.match(/^driver:\s*([A-Za-z]+)/m) || [])[1] || (field(src, ['Driver']) || '').split(/\s+[—–-]\s+/)[0] || null), capability });
   });
 
   // layers — docs/03 § 4.1

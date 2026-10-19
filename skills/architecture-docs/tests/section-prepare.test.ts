@@ -113,7 +113,7 @@ describe("section-prepare", () => {
     expect(r7.missing).toContain("parent docs/04: not written yet");
     expect(r7.text).toMatch(/\| 1 \| Canal \| Web App \| yes \|/);
     const r13 = prepare(TMP, 13);
-    expect(r13.text).toMatch(/\| TDR-001 \| TDR-001: A debt \| Open \|/);
+    expect(r13.text).toMatch(/\| TDR-001 \| A debt \| Open \|/);
     expect(r13.missing).toEqual([]);
   });
 

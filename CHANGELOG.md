@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.8.1]
+
+### Fixed
+- A TDR's title in the facts ledger carried its id (`TDR-001: …`, from the H1), where an ADR's does not: every reader that prints the id beside the title doubled it — the release's change line and changelog entry (`TDR: TDR-001 — TDR-001: …`), the PO Spec delta, the analysis payload, the Section 13 payload. `arch-facts.js` drops the `TDR-NNN:` prefix, as for ADRs.
+- The CI examples pin `v10.8.1`.
+
 ## [10.8.0]
 
 ### Added

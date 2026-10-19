@@ -9,7 +9,7 @@
       "name": "sa-skills",
       "source": "./",
       "description": "Architecture documentation for Claude Code — creates and maintains ARCHITECTURE.md and docs/, its component index, explorer headers and release lifecycle, with every gate as code. Installs sa-records (ADRs, TDRs), sa-requirements (PO Spec, capability alignment), sa-analysis (risk analyses, traceability), sa-delivery (handoff kit, Word export, IcePanel sync, MCP index) and sa-visualization (the 3D command center with Alia) — 15 skills in the suite. An organization adds its own standards through an institution pack.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }
@@ -18,7 +18,7 @@
       "name": "sa-records",
       "source": "./plugins/sa-records",
       "description": "Decision and debt records on their own: ADRs (including an institutional ADR catalog in catalog mode) and TDRs. A dependency of sa-skills; install it alone for a catalog repository.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }
@@ -27,7 +27,7 @@
       "name": "sa-requirements",
       "source": "./plugins/sa-requirements",
       "description": "Product Owner requirements on their own: elicit, score and write the Product Owner Specification, and align it to a capability framework — BIAN for banking, a cross-industry capability map, or an institution pack's — before any architecture exists. A dependency of sa-skills; install it alone for a Product Owner.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }
@@ -36,7 +36,7 @@
       "name": "sa-analysis",
       "source": "./plugins/sa-analysis",
       "description": "Checks over a written architecture: ten risk and design-characteristics analyses plus the consolidated Security Posture, and the PO Spec coverage report. Reads the architecture through sa-skills; a dependency of sa-skills.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }
@@ -45,7 +45,7 @@
       "name": "sa-delivery",
       "source": "./plugins/sa-delivery",
       "description": "Artifacts handed to other teams and tools: the development handoff kit with validated API and data contracts, Word exports, the IcePanel C4 sync and the architecture MCP index. Reads the architecture through sa-skills; a dependency of sa-skills.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }
@@ -54,7 +54,7 @@
       "name": "sa-visualization",
       "source": "./plugins/sa-visualization",
       "description": "Interactive views of the architecture: the 3D Architecture Command Center with Alia the navigator, findings on the stage, the load simulation and photo mode, as one HTML file. Reads the architecture through sa-skills; a dependency of sa-skills.",
-      "version": "10.8.0",
+      "version": "10.8.1",
       "author": {
         "name": "shadowX4fox"
       }

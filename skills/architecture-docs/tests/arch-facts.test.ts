@@ -53,11 +53,11 @@ describe("arch-facts", () => {
     expect(f.components.find((c: any) => c.slug === "payments-hub").level).toBe("L1");
     expect(f.adrs.map((a: any) => [a.id, a.status, a.scope])).toEqual([["ADR-101", "Accepted", "Project"], ["ADR-102", "Proposed", "Project"]]);
     expect(f.tdrs).toEqual([
-      { id: "TDR-001", file: "tdr/TDR-001-debt.md", title: "TDR-001: A debt", status: "Open — waiver pending.", initiative: null, driver: null, capability: null },
+      { id: "TDR-001", file: "tdr/TDR-001-debt.md", title: "A debt", status: "Open — waiver pending.", initiative: null, driver: null, capability: null },
       // the frontmatter key wins over the body, and a trailing YAML comment is not part of the value
-      { id: "TDR-002", file: "tdr/TDR-002-planned.md", title: "TDR-002: A planned debt", status: "Planned", initiative: null, driver: "Process", capability: null },
+      { id: "TDR-002", file: "tdr/TDR-002-planned.md", title: "A planned debt", status: "Planned", initiative: null, driver: "Process", capability: null },
       // an apostrophe inside the value is not a quote
-      { id: "TDR-003", file: "tdr/TDR-003-wont-fix.md", title: "TDR-003: A permanent debt", status: "Won't Fix", initiative: null, driver: null, capability: null },
+      { id: "TDR-003", file: "tdr/TDR-003-wont-fix.md", title: "A permanent debt", status: "Won't Fix", initiative: null, driver: null, capability: null },
     ]);
     expect(f.layers).toEqual([{ n: 1, name: "Channel", containers: ["Web App"], owned: true }, { n: 2, name: "Partners", containers: ["Hub API"], owned: false }]);
     expect(f.integrations).toEqual([
