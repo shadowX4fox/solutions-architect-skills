@@ -94,6 +94,16 @@ describe("tier0.js", () => {
     expect(T.prepare(ROOT, issue(fix("x", "y", "adr/ADR-101-keep.md"))).reasons).toContain('fields.file "adr/ADR-101-keep.md" is not under docs/');
   });
 
+  test("a TDR write may add its own summary row to the debt section, found by its anchor — and nothing else there", () => {
+    w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Open |\n");
+    git("add", "-A"); git("commit", "-q", "-m", "risks");
+    const p = T.prepare(ROOT, issue(REQ));
+    w(p.file, "x"); w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Open |\n| TDR-002 | Stock cache | Open |\n");
+    expect(T.verify(ROOT, p).problems.filter((x: string) => x.includes("docs/10"))).toEqual([]);
+    w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Resolved |\n| TDR-002 | Stock cache | Open |\n");
+    expect(T.verify(ROOT, p).problems.some((x: string) => /docs\/10-risks\.md: a line that is not TDR-002's summary row changed/.test(x))).toBe(true);
+  });
+
   test("verify holds the written record to the request and to its paths", () => {
     const p = T.prepare(ROOT, issue({ ...REQ, kind: "tdr-status", fields: { tdr: "TDR-001", to: "In Progress", note: "n" } }));
     expect(T.verify(ROOT, p).problems).toContain("nothing was written");

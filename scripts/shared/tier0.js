@@ -159,12 +159,26 @@ function changedPaths(root) {
   const r = spawnSync('git', ['-C', root, 'status', '--porcelain', '--untracked-files=all'], { encoding: 'utf8' });
   return String(r.stdout || '').split('\n').filter(Boolean).map((l) => l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop()).filter((p) => !p.startsWith('.cache/'));
 }
+// the section that carries the TDR summary table (the TDR skill appends its row there): found by its anchor, never by file name
+function debtSection(root) {
+  const d = path.join(root, 'docs'); if (!fs.existsSync(d)) return null;
+  const hit = fs.readdirSync(d).filter((n) => n.endsWith('.md')).find((n) => /<!--\s*SECTION:\s*Risks and Technical Debt\s*-->/.test(read(path.join(d, n))));
+  return hit ? `docs/${hit}` : null;
+}
+// every line the write added or removed in a file, from git
+function changedLines(root, file) {
+  const r = spawnSync('git', ['-C', root, 'diff', '--unified=0', '--', file], { encoding: 'utf8' });
+  return String(r.stdout || '').split('\n').filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l)).map((l) => l.slice(1));
+}
 function verify(root, payload) {
   root = path.resolve(root);
   const problems = [], f = payload.request.fields || {};
-  const allowed = (p) => (payload.kind === 'doc-fix' ? p === payload.file : KINDS[payload.kind].paths.some((d) => p.startsWith(d)));
+  const tdrKind = payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status', debt = tdrKind ? debtSection(root) : null;
+  const allowed = (p) => (payload.kind === 'doc-fix' ? p === payload.file : KINDS[payload.kind].paths.some((d) => p.startsWith(d)) || p === debt);
   const changed = changedPaths(root);
-  changed.filter((p) => !allowed(p)).forEach((p) => problems.push(`${p} changed — a ${payload.kind} writes ${payload.kind === 'doc-fix' ? payload.file : KINDS[payload.kind].paths.join(', ')} only`));
+  changed.filter((p) => !allowed(p)).forEach((p) => problems.push(`${p} changed — a ${payload.kind} writes ${payload.kind === 'doc-fix' ? payload.file : KINDS[payload.kind].paths.concat(debt ? [`${debt} (its summary row)`] : []).join(', ')} only`));
+  // the debt section: the record's own summary row and nothing else
+  if (debt && changed.includes(debt)) changedLines(root, debt).filter((l) => l.trim() && !l.includes(payload.id)).forEach((l) => problems.push(`${debt}: a line that is not ${payload.id}'s summary row changed — ${l.trim().slice(0, 120)}`));
   if (!changed.length) problems.push('nothing was written');
   if (payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status') {
     const c = tdr.check(root), rec = c.records.find((r) => r.id === payload.id);

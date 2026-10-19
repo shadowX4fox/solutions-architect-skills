@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.7.2]
+
+### Fixed
+- `tier0.js verify` refused a correct workaround TDR: the TDR skill appends the record's summary row to the Risks and Technical Debt section (Section 13), and verify allowed `tdr/` only. A TDR write may now change that section — found by its anchor — on lines that carry its own id, and no other line there. The first real Tier 0 run (an issue labelled in a RUN-team repository) wrote the record and was refused for the row.
+- The Tier 0 setup named two labels; the four `tier0:<kind>` labels are required too — `gh issue create --label` fails outright on a missing one, so an IDE's request would not be filed (`architecture-tier0.yml` header, `docs/RUN_TEAMS.md`).
+- The CI examples pin `v10.7.2`.
+
 ## [10.7.1]
 
 ### Changed

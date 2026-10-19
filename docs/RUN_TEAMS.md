@@ -166,7 +166,7 @@ sequenceDiagram
   component name that is not canonical, a status move that is not allowed, `Won't Fix`, and a doc fix whose text is
   not where it says.
 - **The write is checked.** `tier0.js verify` refuses a record that does not match the request, a change outside its
-  folder, and a doc fix that moves any fact of the ledger.
+  folder (a TDR may add or update its own summary row in the Risks and Technical Debt section, and no other line there), and a doc fix that moves any fact of the ledger.
 - **Merge**: with `SA_TIER0_AUTOMERGE=true`, the pull request is merged as soon as the gates pass. Tier 0 needs no
   architect's approval. Without the variable, or when a gate blocks, a team member merges it.
 
@@ -181,7 +181,7 @@ defined by `scripts/shared/tier0.js`. The MCP server's `preview_tier0` renders i
 | The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
 | Variable | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer |
-| Labels | `architecture-tier0`, `tier0-refused`; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>` — an issue whose labels the repository lacks is opened without them, and the `[ESC-…]` title still identifies it |
+| Labels | `architecture-tier0`, `tier0-refused` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: `gh issue create --label` fails outright on a missing one, so the IDE's request would not be filed; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>` — an issue whose labels the repository lacks is opened without them, and the `[ESC-…]` title still identifies it |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |
 
