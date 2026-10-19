@@ -4,7 +4,7 @@
 //
 //   bun lifecycle.js status    <project-root> [--json]
 //   bun lifecycle.js check     <project-root> [--no-render] [--waive <gate>:<reason>]… [--undecided warn] [--json]
-//   bun lifecycle.js plan      <project-root> [--increment <id>] [--no-render] [--waive <gate>:<reason>]… [--json]
+//   bun lifecycle.js plan      <project-root> [--increment <id>] [--resolves ESC-NNN[,…]] [--no-render] [--waive <gate>:<reason>]… [--json]
 //   bun lifecycle.js apply     <project-root> [--bump major|minor|patch] [--direct] [--no-push]
 //                                             [--waive <gate>:<reason>]… [--json]
 //   bun lifecycle.js tag       <project-root> [--no-push] [--json]
@@ -407,16 +407,22 @@ function plan(root, opts = {}) {
   if (draftEntry) sections = sectionsOf(draftEntry.body);
   if (cl.unreleased) Object.entries(sectionsOf(cl.unreleased.body)).forEach(([k, ls]) => { sections[k] = (sections[k] || []).concat(ls); });
   st.changes.forEach((i) => { sections[i.section] = sections[i.section] || []; if (!sections[i.section].some((l) => l.includes(i.text))) sections[i.section].push(`- ${i.text}`); });
-  // escalations (RUN teams, escalate.js): the ones closed since the last release go into the entry, the open ones are reported
-  const since = first ? null : (git(root, ['log', '-1', '--format=%cs', TAG(st.version)]).out || null);
-  const closedEsc = escalate.closedSince(root, since), openEsc = escalate.open(root);
-  closedEsc.forEach((r) => { sections.Changed = sections.Changed || []; sections.Changed.push(`- ${r.meta.id} ${r.meta.status === 'Rejected' ? 'rejected' : `resolved by ${r.meta.resolution}`}: ${r.title.replace(/^ESC-\d+\s+—\s+/, '')}`); });
+  // escalations (RUN teams, escalate.js): the ones closed since the last release and the ones this release resolves
+  // (--resolves, closed by apply in the release commit) go into the entry; the other open ones are reported
+  const closedEsc = closedSinceTag(root, first ? null : TAG(st.version));
+  const openAll = escalate.open(root), resolves = [...new Set((opts.resolves || []).flatMap((x) => String(x).split(',')).map((x) => x.trim().toUpperCase()).filter(Boolean))];
+  const unknown = resolves.filter((id) => !openAll.some((r) => r.meta.id === id));
+  if (unknown.length) return { ok: false, reason: `--resolves ${unknown.join(', ')}: not an open escalation under escalations/`, status: st };
+  const resolving = openAll.filter((r) => resolves.includes(r.meta.id)), openEsc = openAll.filter((r) => !resolves.includes(r.meta.id));
+  const escLine = (r, how) => { sections.Changed = sections.Changed || []; sections.Changed.push(`- ${r.meta.id} ${how}: ${r.title.replace(/^ESC-\d+\s+—\s+/, '')}`); };
+  closedEsc.forEach((r) => escLine(r, r.meta.status === 'Rejected' ? 'rejected' : `resolved by ${r.meta.resolution}`));
+  resolving.forEach((r) => escLine(r, 'resolved by this release'));
   let entry = renderSections(sections) || (facts.architecture.language === 'es' ? '### Changed\n- Versión inicial.' : '### Changed\n- Initial release.');
   const piece = opts.increment ? increments.slices(facts).increments.find((x) => x.id === String(opts.increment)) : null;
   if (piece) entry = `${scopeLine(piece, facts.architecture.language)}\n\n${entry}`;
   const p = { ok: true, project_root: root, created: opts.today || localToday(), from: st.version, first, recommended: first ? null : (st.recommended || 'patch'), baseline: st.baseline,
     fingerprint: fingerprint(root), increment: piece ? { id: piece.id, use_cases: piece.use_cases, containers: piece.containers, new_containers: piece.new.containers, integrations: piece.integrations } : null, changes: st.changes, unreleased: cl.lines, gates: g, blocking: blocking(g).map((x) => x.id), waived: g.filter((x) => x.status === 'waived').map((x) => ({ gate: x.id, reason: x.reason })),
-    escalations: { closed: closedEsc.map((r) => r.meta.id), open: openEsc.map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, issue: r.meta.issue || null })) } };
+    escalations: { closed: closedEsc.map((r) => r.meta.id), resolves: resolving.map((r) => ({ id: r.meta.id, issue: r.meta.issue || null })), open: openEsc.map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, issue: r.meta.issue || null })) } };
   const dir = path.join(root, '.cache', 'sa-skills', 'lifecycle'); fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'plan.json'), JSON.stringify(p, null, 1) + '\n');
   fs.writeFileSync(path.join(dir, 'entry.md'), entry + '\n');
@@ -470,6 +476,16 @@ function publishTag(root, tag, message, push) {
   return { tag: true, pushed: p.ok, error: p.ok ? undefined : p.err };
 }
 
+// closed since the tag: Resolved or Rejected now, open or absent in the tag's tree. Not by date: one closed after the
+// release that resolved it, on the tag's own day, fell between two releases and reached no entry
+function closedSinceTag(root, tag) {
+  return escalate.records(root).filter((r) => r.meta.status === 'Resolved' || r.meta.status === 'Rejected').filter((r) => {
+    if (!tag) return true;
+    const then = git(root, ['show', `${tag}:${r.file.split(path.sep).join('/')}`]);
+    return !then.ok || !/^(Resolved|Rejected)$/.test(String(escalate.parse(then.out).meta.status || ''));
+  });
+}
+
 // ---- apply
 function apply(root, opts = {}) {
   root = path.resolve(root);
@@ -505,9 +521,10 @@ function apply(root, opts = {}) {
   const components = setComponentVersions(root, version);
   writeChangelog(root, version, today, entry, p.first);
   const rotated = rotate(root, { keep: 5 }).rotated || [];
+  const resolved = ((p.escalations || {}).resolves || []).map((e) => { escalate.close(root, e.id, { by: tag, today }); return e; });
   const refreshed = refreshCommandCenter(root);
-  const result = { ok: true, version, from: p.from, first: p.first, bump: p.first && !opts.bump ? null : (bump || 'patch'), date: today, channel, components, rotated, refreshed, waived: waived.map((g) => ({ gate: g.id, reason: g.reason })), notes };
-  const paths = ARCH_PATHS.filter((x) => exists(path.join(root, x)) || git(root, ['ls-files', '--', x]).out).concat(refreshed);
+  const result = { ok: true, version, from: p.from, first: p.first, bump: p.first && !opts.bump ? null : (bump || 'patch'), date: today, channel, components, rotated, refreshed, resolved, waived: waived.map((g) => ({ gate: g.id, reason: g.reason })), notes };
+  const paths = ARCH_PATHS.filter((x) => exists(path.join(root, x)) || git(root, ['ls-files', '--', x]).out).concat(refreshed, resolved.map((e) => escalate.records(root).find((x) => x.meta.id === e.id).file));
   const message = `Architecture v${version} — Released ${today}\n\n${entry}\n`;
   const a = git(root, ['add', '-A', '--', ...paths]); if (!a.ok) return Object.assign(result, { ok: false, reason: `git add: ${a.err}` });
   const c = git(root, ['commit', '-F', '-', '--', ...paths], { input: message });
@@ -604,6 +621,7 @@ function renderPlan(p) {
   if (p.changes.length) { o.push(`changes (${p.changes.length}):`); p.changes.forEach((c) => o.push(`  ${c.section.padEnd(10)} ${c.bump.padEnd(5)} ${c.text}`)); }
   if (p.unreleased.length) o.push(`[Unreleased]: ${p.unreleased.length} hand-written line(s) carried into the entry`);
   if (p.escalations && p.escalations.closed.length) o.push(`escalations closed since the last release, in the entry: ${p.escalations.closed.join(', ')}`);
+  if (p.escalations && (p.escalations.resolves || []).length) o.push(`escalations this release resolves (apply closes them by its tag): ${p.escalations.resolves.map((e) => e.id).join(', ')}`);
   if (p.escalations && p.escalations.open.length) o.push(`escalations still open (not blocking): ${p.escalations.open.map((e) => `${e.id} ${e.status} ${e.route}`).join(', ')}`);
   o.push(`entry: ${p.entry_file} — polish the lines if needed, then: lifecycle.js apply <root> [--bump major|minor|patch] [--direct]`);
   return o.join('\n');
@@ -618,6 +636,7 @@ function renderApply(r) {
   if (r.tag && r.tag.deferred) o.push(`  tag ${r.tag.name}: after the merge — CI runs lifecycle.js tag, or run it on ${r.base} once the PR is merged`);
   else if (r.tag) o.push(`  tag ${r.tag.name}: ${r.tag.tag ? (r.tag.pushed ? 'pushed to origin' : `local only${r.tag.reason ? ` (${r.tag.reason})` : ''}${r.tag.error ? ` — push failed: ${r.tag.error}; run git push origin ${r.tag.name}` : ''}`) : `NOT created — ${r.tag.error}`}`);
   if (r.channel === 'pr') o.push(`  open the pull request into ${r.base}: ${r.compare || `from ${r.branch && r.branch.name} in your git host`}`);
+  (r.resolved || []).forEach((e) => o.push(`  ${e.id} closed by architecture-v${r.version}${e.issue ? ` — ${r.channel === 'pr' ? 'the pull request closes' : 'close'} its issue: ${e.issue}` : ''}`));
   r.waived.forEach((w) => o.push(`  waived ${w.gate}: ${w.reason}`));
   r.notes.forEach((n) => o.push(`  note: ${n}`));
   if (r.downstream && r.downstream.length) { o.push('  now stale:'); r.downstream.forEach((d) => o.push(`    ${d.artifact} (${d.file}) → "${d.command}"`)); }
@@ -633,7 +652,7 @@ if (require.main === module) {
   const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };
   const many = (f) => args.flatMap((a, i) => (a === f && args[i + 1] ? [args[i + 1]] : []));
   if (!cmd || !rootArg || rootArg.startsWith('--')) { console.error('Usage: bun lifecycle.js status|check|plan|apply|tag|recover|deprecate <project-root> [options] — see the header'); process.exit(2); }
-  const opts = { today: opt('--today'), noRender: args.includes('--no-render'), waive: many('--waive'), bump: opt('--bump'), direct: args.includes('--direct'),noPush: args.includes('--no-push'), by: opt('--by'), increment: opt('--increment'), undecided: opt('--undecided') };
+  const opts = { today: opt('--today'), noRender: args.includes('--no-render'), waive: many('--waive'), bump: opt('--bump'), direct: args.includes('--direct'),noPush: args.includes('--no-push'), by: opt('--by'), increment: opt('--increment'), resolves: many('--resolves'), undecided: opt('--undecided') };
   if (opts.undecided !== undefined && opts.undecided !== 'warn') { console.error('lifecycle.js: --undecided takes warn'); process.exit(2); }
   const json = args.includes('--json');
   const root = path.resolve(rootArg);

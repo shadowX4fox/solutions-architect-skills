@@ -94,16 +94,36 @@ describe("lifecycle — git, direct", () => {
     const esc = (id: string, status: string, closed: string, resolution: string, title: string) => w(`escalations/${id}-x.md`,
       `---\nid: ${id}\nstatus: ${status}\ndate: 2026-10-01\narchitecture: architecture-v1.0.0\nroute: tier-1\ntriggers: [security-iam]\nresolution: ${resolution}\nclosed: ${closed}\n---\n# ${id} — ${title}\n`);
     esc("ESC-001", "Resolved", "2000-01-01", "ADR-101", "Before the last release");
-    esc("ESC-002", "Resolved", "2099-01-01", "ADR-102", "Hub API mTLS");
+    git("add", "-A"); git("commit", "-q", "-m", "esc-001"); git("tag", "-f", "-a", "architecture-v1.0.0", "-m", "moved");   // closed in the tag's tree
+    esc("ESC-002", "Resolved", "2000-01-02", "ADR-102", "Hub API mTLS");   // a date before the tag: still since it, by the tree
     esc("ESC-003", "Rejected", "2099-01-02", "", "Not an architecture change");
     esc("ESC-004", "In Review", "", "", "Still with the architect");
     w("docs/01-system-overview.md", "# System Overview\n\nOther text.\n");
     const p = L.plan(ROOT, { skipGates: true });
-    expect(p.escalations).toEqual({ closed: ["ESC-002", "ESC-003"], open: [{ id: "ESC-004", status: "In Review", route: "tier-1", issue: null }] });
+    expect(p.escalations).toEqual({ closed: ["ESC-002", "ESC-003"], resolves: [], open: [{ id: "ESC-004", status: "In Review", route: "tier-1", issue: null }] });
     const entry = r(p.entry_file);
     expect(entry).toContain("- ESC-002 resolved by ADR-102: Hub API mTLS");
     expect(entry).toContain("- ESC-003 rejected: Not an architecture change");
     expect(entry).not.toContain("ESC-001");
+  });
+
+  test("--resolves: the entry names the escalation, apply closes it by the new tag in the release commit", () => {
+    repo(); release({ direct: true });
+    w("escalations/ESC-001-x.md", `---\nid: ESC-001\nstatus: Open\ndate: 2026-10-01\narchitecture: architecture-v1.0.0\nroute: tier-1\ntriggers: [security-iam]\nissue: https://github.com/org/arch/issues/5\nresolution: \nclosed: \n---\n# ESC-001 — Hub API contract empty\n`);
+    git("add", "-A"); git("commit", "-q", "-m", "esc");
+    w("docs/01-system-overview.md", "# System Overview\n\nOther text.\n");
+    expect(L.plan(ROOT, { skipGates: true, resolves: ["ESC-009"] }).reason).toMatch(/--resolves ESC-009: not an open escalation/);
+    const p = L.plan(ROOT, { skipGates: true, resolves: ["esc-001"] });
+    expect(p.escalations.resolves).toEqual([{ id: "ESC-001", issue: "https://github.com/org/arch/issues/5" }]);
+    expect(p.escalations.open).toEqual([]);
+    expect(r(p.entry_file)).toContain("- ESC-001 resolved by this release: Hub API contract empty");
+    const a = L.apply(ROOT, { direct: true, noPush: true, today: "2026-10-20" });
+    expect(a.ok).toBe(true);
+    const rec = r("escalations/ESC-001-x.md");
+    expect(rec).toContain("status: Resolved"); expect(rec).toContain("resolution: architecture-v1.0.1"); expect(rec).toContain("closed: 2026-10-20");
+    expect(git("status", "--porcelain", "--", "escalations")).toBe("");
+    w("docs/01-system-overview.md", "# System Overview\n\nThird text.\n");
+    expect(L.plan(ROOT, { skipGates: true }).escalations.closed).toEqual([]);   // closed in v1.0.1's tree: not again
   });
 
   test("a plan the architecture moved past is refused; nothing changed means no release", () => {

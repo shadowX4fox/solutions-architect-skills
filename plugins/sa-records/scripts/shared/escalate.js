@@ -39,7 +39,8 @@ const HOSTS = ['github', 'gitlab', 'gitea', 'azure'];
 const DIR = 'escalations';
 
 const read = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n?/g, '\n');
-const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+// the local date — the record's dates are the team's day, never UTC's (an issue created at 22:00 −05:00 is that day)
+const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const slugify = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'escalation';
 const git = (root, args) => { const r = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : null; };
 const list = (v) => (Array.isArray(v) ? v : v ? [v] : []).map((x) => String(x).trim()).filter(Boolean);
@@ -265,7 +266,7 @@ function importIssue(root, issue, opts = {}) {
   if (errors.length) { const e = new Error(`the issue does not read as an escalation:\n${errors.join('\n')}`); e.errors = errors; throw e; }
   const own = (String(issue.title).match(/^\[(ESC-\d+)\]/) || [])[1];
   const id = own && !records(root).some((x) => x.meta.id === own) ? own : nextId(root);
-  const meta = { id, status: 'Open', date: String(issue.created || '').slice(0, 10) || opts.today || today(), architecture: req.architecture, route: req.route, triggers: req.triggers,
+  const meta = { id, status: 'Open', date: (issue.created && !isNaN(Date.parse(issue.created)) ? today(new Date(issue.created)) : '') || opts.today || today(), architecture: req.architecture, route: req.route, triggers: req.triggers,
     components: req.components, integrations: req.integrations, adrs: req.adrs, tdrs: req.tdrs, requested_by: req.requested_by, issue: issue.url || '', resolution: '', closed: '' };
   const file = path.join(DIR, `${id}-${slugify(req.title)}.md`);
   fs.mkdirSync(path.join(root, DIR), { recursive: true });

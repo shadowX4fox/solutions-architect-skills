@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.6.3]
+
+### Added
+- `lifecycle.js plan --resolves ESC-NNN[,…]`: an escalation the release answers is named in its entry ("resolved by this release") and `apply` closes it by the new tag in the release commit; the receipt names its issue for the PR's `Closes #N`.
+
+### Fixed
+- An escalation resolved by a release reached no changelog entry: the plan took those closed after the previous tag's date, so one closed after its release, on the tag's day, fell between two releases. The cut-off is the tag's tree: closed now, open or absent at the tag.
+- `escalate.js import` dated the record on the issue's UTC day, so a record could close the day before it opened; it takes the local day, as `close` does.
+- The handoff the release dispatches failed at start: `claude-code-action` refuses `github-actions[bot]`, the actor of a `workflow_dispatch` sent with `GITHUB_TOKEN`. `ci/architecture-handoff.yml` names that bot in `allowed_bots`.
+- `BUILD.md` rule 9 says what `request` carries: the developer's task in their words, never their answer to the preview — the first IDE escalation filed "yes, go ahead" as its request.
+- The CI examples pin `v10.6.3`.
+
 ## [10.6.2]
 
 ### Changed

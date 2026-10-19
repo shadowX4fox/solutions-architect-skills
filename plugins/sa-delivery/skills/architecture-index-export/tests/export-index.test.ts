@@ -179,6 +179,7 @@ describe("export-index — build packs", () => {
     const run = md({});
     expect(run).toContain("9. **What only the architect can answer is escalated, never kept in a local file.**");
     expect(run).toContain('call `preview_escalation(project: "order-desk", …)`');
+    expect(run).toContain("`request`, what the developer asked you to build, in their words — the task that led here, never their answer to a question of yours");
     expect(run).toContain("an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`");
     expect(run).toContain("only after a yes follow `file_with.steps` with the developer's own access, then `record_escalation`");
     expect(run).not.toMatch(/\{\{\w+\}\}/);

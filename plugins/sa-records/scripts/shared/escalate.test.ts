@@ -119,6 +119,13 @@ describe('import', () => {
     expect(E.importIssue(p, own)).toMatchObject({ id: 'ESC-007', renamed: false });
     rmSync(p, { recursive: true });
   });
+  test('the record is dated on the local day the issue was created, never UTC\'s', () => {
+    const p = project(); const created = '2026-10-19T03:00:00Z', d = new Date(created);
+    const local = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    E.importIssue(p, { ...filed(), created });
+    expect(E.records(p)[0].meta.date).toBe(local);
+    rmSync(p, { recursive: true });
+  });
   test('a body that is no escalation is refused', () => {
     const p = project();
     expect(() => E.importIssue(p, { ...filed(), body: 'Please fix the login page.', labels: ['architecture-escalation'] })).toThrow(/does not read as an escalation/);

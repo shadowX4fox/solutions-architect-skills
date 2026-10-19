@@ -80,11 +80,15 @@ edit of the principles voids it; a missing or stale stamp blocks the release —
 
 ## Release — "release my architecture", `/release-architecture`
 
-1. `L plan <project_root> [--increment <id>]` — refuses on `no-git`, `untagged`, `deprecated`, or nothing changed. Otherwise: the gates,
+1. `L plan <project_root> [--increment <id>] [--resolves ESC-NNN[,…]]` — refuses on `no-git`, `untagged`, `deprecated`, or nothing changed. Otherwise: the gates,
    the change list (each line with its bump), the recommended bump, and `.cache/sa-skills/lifecycle/entry.md` — the
    changelog entry: the `[Unreleased]` lines written by hand first, then the change list by code (a first release keeps
    its Draft entry). With `--increment` (asked when the project declares increments and the user did not name one):
    the `increment` gate, and the entry opens on the delivery scope line, which the tag carries too.
+   **Escalations** (`escalations/`, RUN teams): the entry lists those closed since the tag — closed now and open in the
+   tag's tree. One this release answers is named with `--resolves ESC-NNN[,…]` (ask when open escalations are
+   reported and the change answers them): the entry says "resolved by this release" and `apply` closes it by the new
+   tag in the release commit; in PR mode, put `Closes #N` for each issue the receipt names in the PR body.
    The other gates block on what the increment ships: a prose, header, component, flow, integration or budget finding
    located in a component, a docs/05 row or a docs/04 flow or phase outside the slice is printed and does not block
    (`N in increment … (M outside it, not blocking)`, or `warn` when none is inside). Section files, principles, ADRs and
@@ -98,8 +102,8 @@ edit of the principles voids it; a missing or stale stamp blocks the release —
    at the lines, never rewrite it.
 5. `L apply <project_root> [--bump major|minor|patch] [--direct] [--waive <gate>:<reason>]` — refuses if the
    architecture changed after the plan. Writes the `ARCHITECTURE.md` metadata, `**Architecture Version:**` in every
-   component file, the changelog entry (rotated past five), refreshes the command center when a scene exists (optional:
-   architecture-command-center), commits **only** `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`.
+   component file, the changelog entry (rotated past five), closes the `--resolves` escalations, refreshes the command center when a scene exists (optional:
+   architecture-command-center), commits **only** `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/` and those escalation records.
    **PR** (default): `release/architecture-v{version}` branch pushed, compare link printed, **no tag** — the tag comes
    after the merge (`L tag`, step 7). **`--direct`**: commit, tag and push on the current branch. No `origin` → direct,
    local.
