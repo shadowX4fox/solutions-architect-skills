@@ -37,7 +37,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SA_PLUGIN_REF: v10.10.1
+  SA_PLUGIN_REF: v10.10.2
   SA_PLUGIN_REPO: https://github.com/shadowx4fox/solutions-architect-skills.git
 
 jobs:
@@ -61,7 +61,7 @@ jobs:
           AGENTS: ${{ vars.SA_TIER0_AGENTS }}
         run: |
           # a person's key: never an automation account — a bot, or a machine user listed in SA_TIER0_AGENTS — even with
-          # write access; an unattended build agent files its request without the label, and a person puts it (10.10.1)
+          # write access; an unattended build agent files its request without the label, and a person puts it (10.10.2)
           if [ "$SENDER_TYPE" = "Bot" ] || printf '%s\n' $AGENTS | tr ',' '\n' | grep -qixF -- "$SENDER"; then
             echo "::error::$SENDER is an automation account: a person applies architecture-tier0"; exit 1; fi
           role=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$SENDER/permission" --jq .role_name 2>/dev/null || echo none)

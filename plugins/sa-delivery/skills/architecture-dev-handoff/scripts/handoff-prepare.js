@@ -60,6 +60,9 @@ const latest = (dir, re) => { if (!exists(dir)) return null; const f = fs.readdi
 const rel = (from, to) => path.relative(from, to).split(path.sep).join('/');
 // relative while the payload is inside the project — however deep (a seam's folder is one level below the others, and its links
 // came out absolute, so its hash held the checkout path); a payload written outside the project links absolutely
+// the descriptor's **Technical Debt:** line stays out of the payload: § 7's debt table is code's (kit-debt.js), and a release that only
+// records debt must not move the payload — the specification is kept, never sent to the model for it (10.10.2)
+const DEBT_LINE = /^\*\*(?:Technical Debt|Deuda T[ée]cnica):\*\*.*\n?/gim;
 const link = (from, to, root) => { const up = path.relative(root, from); return up.startsWith('..') || path.isAbsolute(up) ? to : rel(from, to); };
 
 /** Every table in a markdown source: { heading, headers, rows (raw lines), start } — heading = nearest heading above. */
@@ -458,7 +461,7 @@ ${relAdrs.length ? relAdrs.map((id) => adrEntry(id, 500, seamDir).replace(/^- (\
   // a docs/05 edge with one end on the component and the other on nothing the architecture models (a team, a person, an
   // unmodelled system) has no Interface Contract; the Component Specification still lists it (8.152.0, kit-check interface-missing)
   const uncontracted = (c) => edges.filter((e) => (e.down && e.down.slug === c.slug && !e.up) || (e.up && e.up.slug === c.slug && !e.down));
-  const cutSheets = selected.map((c) => { const src = compSrc(c); const raw = removeHeader(src).trim(); const a = resolveAssets(c, src);
+  const cutSheets = selected.map((c) => { const src = compSrc(c); const raw = removeHeader(src).trim().replace(DEBT_LINE, ''); const a = resolveAssets(c, src);
     const owner = (src.match(/^\*\*(Owner|Propietario|Equipo)\s*:\*\*\s*(.+)$/im) || [])[2]; const owned = section(src, OWNED_RE);
     const incident = seams.filter((s) => s.edge.upSlug === c.slug || s.edge.downSlug === c.slug);
     const names_ = (p) => norm(`${p.owner_chain} ${p.hops || ''}`).includes(norm(c.name)); const inFlows = new Set();

@@ -571,6 +571,20 @@ Phase 7). Column headers stay English; the cells are in `doc_language` as the as
 Component Specifications whose `CUT_SHEET_RESULT.status != OK` are skipped here — their orphaned assets
 are surfaced separately in Phase 7.
 
+#### Step 5.3b — Technical debt into § 7 (by code)
+
+One Bash call, for **every** component of the kit, REGEN and SKIP alike:
+
+```bash
+bun [plugin_dir]/skills/architecture-dev-handoff/scripts/kit-debt.js <project_root>
+```
+
+It writes `### Technical debt <!-- LABEL: Technical Debt -->` at the end of each specification's § 7 Constraints. The
+table has one row per TDR the descriptor's `**Technical Debt:**` line names (the facts ledger's `tdrs`): the id linked to
+its record, the title and the status. It replaces the table on every run and removes it when the descriptor names
+none. The line stays out of the payload (`handoff-prepare.js`), so a release that only records debt keeps the
+specification and moves only this table. Never write debt into a specification by hand.
+
 ### Phase 6: Update manifest, index, and legacy cleanup
 
 **Step 6.0 — Update the v4 manifest**
@@ -685,6 +699,7 @@ Component Specifications: [N] regenerated, [E] edited ([K] failed, [S] skipped)
   ✎ [component-slug] — edited: [edited_sections][ · restored: …] · assets edited: [names or none]
       Assets: openapi.yaml, ddl.sql
       Gaps recorded: [M] open questions in § 11
+      Technical debt: [TDR ids, or none] (§ 7, by code)
   ⏭ [component-slug] — skipped (unchanged since last generation)
   ✗ [component-slug] — VALIDATION_FAILED: [notes]
 

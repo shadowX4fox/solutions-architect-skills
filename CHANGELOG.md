@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.2]
+
+### Fixed
+- **A component's specification names its technical debt.**
+  - **The defect:** the descriptor's `**Technical Debt:**` line reached the generator inside the raw descriptor, but no template slot or rule asked for it. The demo project's v1.3.0 kit, edited in place, showed the result: one specification gained a sentence on TDR-002 in its § 6, while the other, with the same line, named neither TDR-001 nor TDR-002.
+  - **`scripts/kit-debt.js` (Step 5.3b)** now writes `### Technical debt <!-- LABEL: Technical Debt -->` at the end of § 7 Constraints, by code and for every component of the kit. It has one row per TDR the line names, with the linked id, title and status. The table is replaced on every run and removed when the line names none.
+  - **`handoff-prepare.js` leaves the line out of the payload.** A release that only records debt therefore keeps the specification and sends nothing to the model. The generator is told debt is code's, and never names a TDR.
+
 ## [10.10.1]
 
 ### Changed

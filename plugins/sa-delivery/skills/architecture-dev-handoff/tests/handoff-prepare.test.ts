@@ -198,13 +198,17 @@ describe("handoff-prepare", () => {
         seams, cut_sheets: cuts }));
       // the release: one fact in one descriptor, the version everywhere; and a manifest hash in an older form
       const db = join(G, "docs/components/order-desk/03-order-db.md");
-      writeFileSync(db, rd(db) + "\n**Technical Debt:** TDR-001\n");
+      writeFileSync(db, rd(db) + "\n## Retention\n\nOrders are kept 24 months.\n");
+      // debt recorded on another component is code's (kit-debt.js): it moves no payload
+      const hub = join(G, "docs/components/order-desk/02-hub-api.md");
+      writeFileSync(hub, rd(hub).replace("**Asset Hints:**", "**Technical Debt:** [TDR-001](../../../tdr/TDR-001-x.md)\n**Asset Hints:**"));
       writeFileSync(join(G, "ARCHITECTURE.md"), rd(join(G, "ARCHITECTURE.md")).replace("ARCHITECTURE_VERSION: 1.2.0", "ARCHITECTURE_VERSION: 1.3.0"));
       const m = JSON.parse(rd(join(G, "handoffs/.manifest.json"))); m.cut_sheets["web-app"].payload_hash = "sha256:older-form"; writeFileSync(join(G, "handoffs/.manifest.json"), JSON.stringify(m));
       const r2 = await prepare(G, { components: "all", date: "2026-10-01" });
       const byslug = Object.fromEntries(r2.result.cut_sheets.map((c: any) => [c.slug, c]));
       expect(byslug["order-db"].decision).toBe("REGEN");
-      expect(rd(byslug["order-db"].edit_path)).toMatch(/```diff\n[\s\S]*\+\*\*Technical Debt:\*\* TDR-001/);
+      expect(rd(byslug["order-db"].edit_path)).toMatch(/```diff\n[\s\S]*\+Orders are kept 24 months\./);
+      expect(rd(byslug["hub-api"].payload_path)).not.toContain("Technical Debt");
       expect(existsSync(byslug["order-db"].edit_path.replace(/\.md$/, ".previous.md"))).toBe(true);
       expect(byslug["web-app"]).toMatchObject({ decision: "SKIP" });               // the older hash: re-cut from the tag, the same
       expect(byslug["web-app"].reason).toMatch(/unchanged against architecture-v1\.2\.0/);

@@ -460,6 +460,9 @@ Constraints are backed by a reason (Cross-Cutting Standards rule, ADR, or invari
 Constraints without a reason are drift-in-waiting; either cite one or
 delete the row.
 
+<!-- The component's technical debt is code's: kit-debt.js writes the Technical debt table (LABEL anchor Technical Debt)
+at the end of this section after you. Never write it, and never name a TDR anywhere in the specification. -->
+
 **Mandated:**
 
 [MANDATED_CONSTRAINTS_LIST]
