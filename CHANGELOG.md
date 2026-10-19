@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.3]
+
+### Added
+- **The build pack carries the component's technical debt.**
+  - Each TDR the container's descriptor names on its `**Technical Debt:**` line is a `tdr:TDR-NNN` part under `tdrs/`. It belongs to the plan's specification step, since the specification's § 7 lists it. `pack.json` gains `tdrs`.
+  - Before this, the pack named the debt but did not carry it, so the builder saw only an id.
+
+### Fixed
+- **Links inside a build pack resolve.** A Markdown part linked the documents relative to its place in the architecture repository, so `../../adr/…` and `../../tdr/…` led nowhere inside the pack.
+  - A link whose target travels in the same pack (an ADR, a TDR, an interface, a shared document) is now rewritten to the part's path in the pack, with its `#anchor` kept, and the part's `sha256` is taken afterwards.
+  - Any other link, such as one to `docs/`, stays as written.
+
 ## [10.10.2]
 
 ### Fixed

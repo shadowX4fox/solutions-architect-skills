@@ -234,6 +234,21 @@ function kitCheckDefault(hd) {
   const r = kc.check([hd], { render: false });
   return r.files.filter((f) => f.findings.length).map((f) => ({ file: path.resolve(f.file), findings: f.findings }));
 }
+// a Markdown part links the documents relative to where it lives in the architecture repository; in the pack those links
+// lead nowhere. A link whose target travels in the same pack (an ADR, a TDR, an interface, the shared documents) is rewritten
+// to the part's path in the pack, its #anchor kept; any other link stays as written (10.10.3)
+function relinkParts(dir, parts) {
+  const bySource = new Map(parts.filter((p) => p.source).map((p) => [p.source, p]));
+  for (const p of parts) {
+    if (!/\.md$/i.test(p.path) || !p.source || p.kind === 'asset') continue;
+    const dst = path.join(dir, p.path), src = read(dst);
+    const out = src.replace(/\]\(([^)\s#]+\.md)(#[^)\s]*)?\)/g, (m, target, anchor) => {
+      if (/^[a-z][a-z0-9+.-]*:/i.test(target)) return m;
+      const t = bySource.get(posix(path.normalize(path.join(path.dirname(p.source), target)))); if (!t) return m;
+      return `](${posix(path.relative(path.dirname(p.path), t.path)) || path.basename(t.path)}${anchor || ''})`; });
+    if (out !== src) { fs.writeFileSync(dst, out); const b = Buffer.from(out); p.bytes = b.length; p.sha256 = sha(b); }
+  }
+}
 // the build instructions: templates/BUILD.md with the pack's facts filled in — the rules live in the template, the facts in the pack
 const cell = (s) => String(s == null || s === '' ? '—' : s).replace(/\|/g, '\\|').replace(/\n+/g, ' ');
 const mdTable = (head, rows) => `| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n${rows.map((r) => `| ${r.map(cell).join(' | ')} |`).join('\n')}`;
@@ -278,6 +293,7 @@ function buildPacks(root, facts, outDir, opts = {}) {
   const slugOf = resolver(facts); const phaseComps = new Map((facts.phases || []).map((p) => [p.n, uniq(hopNames(p.hops).map(slugOf))]));
   const adrFile = new Map((facts.adrs || []).map((a) => [a.id, a.file]));
   const adrTitle = new Map((facts.adrs || []).map((a) => [a.id, !a.title ? a.id : a.title.startsWith(a.id) ? a.title : `${a.id}: ${a.title}`]));
+  const tdrById = new Map((facts.tdrs || []).map((t) => [t.id, t]));
   const nameOf = (sl) => ((facts.components || []).find((x) => x.slug === sl) || {}).name || sl;   // canonical names in every title a builder reads
   const covered = new Set(Object.keys(m.cut_sheets || {}));
   comps.filter((c) => !covered.has(c.slug)).forEach((c) => res.skipped.push({ component: c.slug, reason: 'not in the kit' }));
@@ -307,8 +323,12 @@ function buildPacks(root, facts, outDir, opts = {}) {
       .forEach((s) => add(`interface:${s.key}`, 'interface', `Interface Contract: ${nameOf(s.upstream)} → ${nameOf(s.downstream)}`, s.file, path.join('interfaces', path.basename(s.file)), 'interfaces'));
     add('cross-cutting-standards', 'standards', 'Cross-Cutting Standards', shared['cross-cutting-standards'], 'cross-cutting-standards.md', 'standards');
     adrs.forEach((id) => add(`adr:${id}`, 'adr', adrTitle.get(id), path.join(root, adrFile.get(id)), path.join('adrs', path.basename(adrFile.get(id))), 'standards'));
+    // its technical debt (10.10.3): the TDRs its descriptor's **Technical Debt:** line names, read with the specification whose § 7 lists them
+    const tdrs = (c.tdrs || []).filter((id) => tdrById.has(id) && tdrById.get(id).file && fs.existsSync(path.join(root, tdrById.get(id).file)));
+    tdrs.forEach((id) => { const t = tdrById.get(id); add(`tdr:${id}`, 'tdr', t.title ? `${id}: ${t.title}` : id, path.join(root, t.file), path.join('tdrs', path.basename(t.file)), 'spec'); });
     add('runtime-view', 'runtime-view', 'System Runtime View', shared['runtime-view'], 'runtime-view.md', 'flows');
 
+    relinkParts(dir, partsOut);
     const plan = PLAN.map(([step, title], k) => ({ step: k + 1, id: step, title, parts: step === 'acceptance' ? ['spec'] : partsOut.filter((p) => p.step === step).map((p) => p.id) }))
       .filter((s) => s.parts.length || (s.id === 'flows' && flows.length)).map((s, k) => ({ ...s, step: k + 1 }));
     const open_questions = [];
@@ -317,7 +337,7 @@ function buildPacks(root, facts, outDir, opts = {}) {
     const interfaces = seams.map((s) => ({ key: s.key, direction: s.upstream === slug ? 'outbound' : 'inbound', upstream: s.upstream, downstream: s.downstream, upstream_name: nameOf(s.upstream), downstream_name: nameOf(s.downstream), part: `interface:${s.key}` }));
     const pack = { schema: `${SCHEMA}#buildpack`, project: opts.key, architecture_version: version,
       component: { slug, name: c.name, internal_name: c.internal_name || null, type: c.type || null, technology: c.technology || [], system: c.system || null, component_version: c.component_version || null },
-      parts: partsOut.map(({ step, ...p }) => p), plan, flows, interfaces, adrs, open_questions, instructions: 'BUILD.md' };
+      parts: partsOut.map(({ step, ...p }) => p), plan, flows, interfaces, adrs, tdrs, open_questions, instructions: 'BUILD.md' };
     // BUILD.md — the instructions an IDE agent follows, rendered from the pack by code; a part like any other
     const b = Buffer.from(renderBuild({ ...pack, dir }, (facts.architecture || {}).name || opts.key, opts.server, support.supportOf(root).support));
     fs.writeFileSync(path.join(dir, 'BUILD.md'), b);

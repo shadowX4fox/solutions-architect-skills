@@ -218,6 +218,26 @@ describe("export-index — build packs", () => {
   });
 });
 
+describe("export-index — technical debt in the pack", () => {
+  test("the TDRs a container's descriptor names travel as parts, read with the specification; links to a packed part are rewritten to it", () => {
+    const edit = (f: string, from: string, to: string) => w(f, readFileSync(join(P, f), "utf8").replace(from, to));
+    edit("docs/components/desk/02-hub-api.md", "**Component Version:** 1.1.0\n", "**Component Version:** 1.1.0\n**Technical Debt:** [TDR-001](../../../tdr/TDR-001-manual-ledger-fix.md)\n");
+    edit("handoffs/components/02-hub-api.md", "an order books once.", "an order books once.\n\n| [TDR-001](../../tdr/TDR-001-manual-ledger-fix.md#description) | per [ADR-101](../../adr/ADR-101-idempotency-keys.md) | [descriptor](../../docs/components/desk/02-hub-api.md) |");
+    const out = join(BASE, "debt"); rmSync(out, { recursive: true, force: true });
+    exportIndex(P, { out, kitCheck: clean });
+    const pack = JSON.parse(readFileSync(join(out, "buildpacks/hub-api/pack.json"), "utf8"));
+    expect(pack.tdrs).toEqual(["TDR-001"]);
+    expect(pack.parts.find((x: any) => x.id === "tdr:TDR-001")).toMatchObject({ kind: "tdr", title: "TDR-001: Manual ledger fix", path: "tdrs/TDR-001-manual-ledger-fix.md", source: "tdr/TDR-001-manual-ledger-fix.md" });
+    expect(pack.plan.find((x: any) => x.id === "spec").parts).toContain("tdr:TDR-001");
+    const spec = readFileSync(join(out, "buildpacks/hub-api/spec.md"), "utf8");
+    expect(spec).toContain("[TDR-001](tdrs/TDR-001-manual-ledger-fix.md#description)");
+    expect(spec).toContain("[ADR-101](adrs/ADR-101-idempotency-keys.md)");
+    expect(spec).toContain("[descriptor](../../docs/components/desk/02-hub-api.md)");   // not in the pack: as written
+    const part = pack.parts.find((x: any) => x.id === "spec");
+    expect(part.sha256).toBe(require("crypto").createHash("sha256").update(spec).digest("hex"));   // the hash is the bytes served
+  });
+});
+
 describe("export-index — what changed", () => {
   test("the same version twice: a replaced pack is revised, its security obligations are an action, a new server URL in BUILD.md is not", () => {
     const A = join(BASE, "same-a"), B = join(BASE, "same-b"), C = join(BASE, "same-c");
