@@ -122,6 +122,35 @@ function checkRecord(file, src) {
 }
 
 // ── the index ──
+// ── the link back (10.8.0): a component's descriptor names the TDRs in force on it ──
+// `**Technical Debt:** [TDR-001](…) · [TDR-004](…)` after `**Last Updated:**`; the record names the component in
+// `affected-components`. Both directions are held here — WARNING, never blocking: a project adopts the line on its next edit.
+const listOf = (v) => String(v || '').replace(/^\[|\]$/g, '').split(',').map((x) => x.trim().replace(/^(["'])(.*)\1$/, '$2').trim()).filter(Boolean);
+const DEBT_LINE = /^\*\*(?:Technical Debt|Deuda Técnica|Deuda Tecnica):\*\*\s*(.*)$/im;
+function descriptors(root) {
+  const out = [], walk = (rel) => { let es; try { es = fs.readdirSync(path.join(root, rel), { withFileTypes: true }); } catch { return; }
+    es.forEach((e) => { const r = rel + '/' + e.name; if (e.isDirectory()) walk(r); else if (e.name.endsWith('.md') && e.name !== 'README.md') {
+      const src = read(path.join(root, r)), h1 = (src.match(/^# (.+)$/m) || [])[1], m = src.match(DEBT_LINE);
+      if (h1) out.push({ file: r, name: h1.replace(/<!--[\s\S]*?-->/g, '').trim(), ids: m ? [...new Set(m[1].toUpperCase().match(/\bTDR-\d{3,}\b/g) || [])] : [], line: m ? src.slice(0, src.indexOf(m[0])).split('\n').length : 1 }); } }); };
+  walk('docs/components');
+  return out;
+}
+function checkLinks(root, records) {
+  const findings = [], ds = descriptors(root), byId = new Map(records.map((r) => [r.id, r]));
+  const W = (rule, file, line, message) => findings.push({ rule, level: 'WARNING', file, line, message });
+  records.filter((r) => r.status && r.status !== 'Resolved').forEach((r) => r.affected.forEach((name) => {
+    const d = ds.find((x) => x.name === name);
+    if (d && !d.ids.includes(r.id)) W('component-link-missing', d.file, d.line, `${r.id} names ${name} in affected-components; its descriptor does not name ${r.id} — \`**Technical Debt:** [${r.id}](…)\` after \`**Last Updated:**\``);
+  }));
+  ds.forEach((d) => d.ids.forEach((id) => {
+    const r = byId.get(id);
+    if (!r) W('component-link-unknown', d.file, d.line, `${id} has no record under tdr/`);
+    else if (r.status === 'Resolved') W('component-link-resolved', d.file, d.line, `${id} is Resolved — drop it from the Technical Debt line`);
+    else if (!r.affected.includes(d.name)) W('component-link-unmatched', d.file, d.line, `${id} does not name ${d.name} in affected-components`);
+  }));
+  return findings;
+}
+
 function checkIndex(root, records) {
   const findings = [];
   const p = path.join(root, 'tdr', 'README.md');
@@ -149,11 +178,12 @@ function check(root) {
   fs.readdirSync(dir).filter((n) => /^TDR-\d+.*\.md$/i.test(n)).sort().forEach((n) => {
     const file = 'tdr/' + n;
     const r = checkRecord(file, read(path.join(dir, n)));
-    records.push({ id: n.match(/^TDR-\d+/i)[0].toUpperCase(), file, status: r.status });
+    const src = read(path.join(dir, n));
+    records.push({ id: n.match(/^TDR-\d+/i)[0].toUpperCase(), file, status: r.status, affected: listOf(frontmatter(src).keys['affected-components']) });
     findings = findings.concat(r.findings.map((f) => (f.rule === 'structure-localized' && stamped ? { ...f, level: 'BLOCKING' } : f)));
     recordFindings(read(path.join(dir, n)), file, 'tdr').forEach((f) => findings.push({ rule: f.rule, level: stamped ? 'BLOCKING' : 'WARNING', file, line: f.line || 1, message: `${f.where ? f.where + ' — ' : ''}${f.detail}` }));
   });
-  findings = findings.concat(checkIndex(root, records));
+  findings = findings.concat(checkIndex(root, records), checkLinks(root, records));
   return { records, findings, blocking: findings.filter((f) => f.level === 'BLOCKING').length, warnings: findings.filter((f) => f.level === 'WARNING').length };
 }
 
@@ -200,7 +230,7 @@ const render = (r) => {
   return out.join('\n');
 };
 
-module.exports = { check, checkRecord, move, pending, STATUSES, JIRA, RETIRED, MOVES, DRIVERS };
+module.exports = { check, checkRecord, checkLinks, descriptors, move, pending, STATUSES, JIRA, RETIRED, MOVES, DRIVERS };
 
 if (require.main === module) {
   const args = process.argv.slice(2);

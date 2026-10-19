@@ -48,7 +48,8 @@ describe("arch-facts", () => {
     expect(hub).toMatchObject({ name: "Hub API", level: "L2", system: "payments-hub", type: "Gateway", technology: ["Azure APIM"], file_backed: false, component_version: null, last_updated: null, bytes: 0 });
     expect(f.components.find((c: any) => c.slug === "web-app").file_backed).toBe(true);
     const web = f.components.find((c: any) => c.slug === "web-app");
-    expect(web).toMatchObject({ name: "Web App", level: "L2", system: "order-desk", type: "Web Application", technology: ["React"], internal_name: "CHL-web-app", component_version: "1.3.0", last_updated: "2026-09-01", related_adrs: ["ADR-101"] });
+    expect(web).toMatchObject({ name: "Web App", level: "L2", system: "order-desk", type: "Web Application", technology: ["React"], internal_name: "CHL-web-app", component_version: "1.3.0", last_updated: "2026-09-01", related_adrs: ["ADR-101"], tdrs: [] });
+    expect(hub.tdrs).toEqual([]);
     expect(f.components.find((c: any) => c.slug === "payments-hub").level).toBe("L1");
     expect(f.adrs.map((a: any) => [a.id, a.status, a.scope])).toEqual([["ADR-101", "Accepted", "Project"], ["ADR-102", "Proposed", "Project"]]);
     expect(f.tdrs).toEqual([
@@ -75,6 +76,14 @@ describe("arch-facts", () => {
     expect(f.releases).toEqual([{ version: "1.2.0", date: "2026-09-01", note: "(Released)" }, { version: "1.1.0", date: "2026-08-01", note: null }]);
     expect(f.warnings).toEqual([]);
     expect(summary(f)).toBe("facts: 4 docs, 2 systems, 2 containers, 2 ADRs, 3 TDRs, 2 layers, 1 integrations (1 retired), 2 phases, 2 flows, 0 demand rows, 0 capacity tables, 2 diagrams, 2 releases");
+  });
+
+  test("a descriptor's Technical Debt line is the component's tdrs: ids, deduplicated, links and separators dropped (10.8.0)", () => {
+    const f = join(TMP, "docs/components/order-desk/01-web-app.md");
+    const src = readFileSync(f, "utf8");
+    writeFileSync(f, src.replace("**Last Updated:** 2026-09-01\n", "**Last Updated:** 2026-09-01\n**Technical Debt:** [TDR-004](../../../tdr/TDR-004-x.md) · tdr-001 · [TDR-004](y)\n"));
+    expect(collect(TMP).components.find((c: any) => c.name === "Web App").tdrs).toEqual(["TDR-004", "TDR-001"]);
+    writeFileSync(f, src);
   });
 
   test("the CLI writes .cache/sa-skills/facts.json by default and prints one part with --section", () => {

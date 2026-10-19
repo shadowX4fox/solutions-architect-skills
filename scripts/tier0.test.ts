@@ -107,7 +107,9 @@ describe("tier0.js", () => {
     expect(docsProblems()).toContain("docs/10-risks.md has no summary row for TDR-002 — the TDR skill appends one to the Risks and Technical Debt section");
     // the row and the link both ways in the component descriptor: allowed
     w("docs/10-risks.md", risks("| TDR-001 | Polling | Open |\n| TDR-002 | Stock cache | Open |\n"));
-    w(hub, hubSrc + "\n## Known debt\n\n- [TDR-002](../../../tdr/TDR-002-hub-api-caches-the-stock.md) — stock cached 5 minutes\n");
+    // the descriptor's link back is required too
+    expect(docsProblems()).toContain("docs/components/order-desk/01-hub-api.md does not name TDR-002 — the affected component's descriptor carries `**Technical Debt:** [TDR-002](…)` after `**Last Updated:**`");
+    w(hub, hubSrc.replace("**C4 Level:** Container (L2)\n", "**C4 Level:** Container (L2)\n**Technical Debt:** [TDR-002](../../../tdr/TDR-002-hub-api-caches-the-stock.md)\n"));
     expect(docsProblems()).toEqual([]);
     // a change that does not name the record
     w("docs/01-system-overview.md", "# System Overview\n\nThe Order Desk takes orders by phone.\n");

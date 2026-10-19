@@ -166,11 +166,11 @@ sequenceDiagram
   component name that is not canonical, a status move that is not allowed, `Won't Fix`, and a doc fix whose text is
   not where it says.
 - **The write propagates, and is checked.** A record is not one file: the TDR skill links both ways (TDR ↔ affected
-  components, TDR ↔ ADR) and adds its row to the Risks and Technical Debt section; the ADR skill indexes and links.
+  components — the descriptor's `**Technical Debt:**` line —, TDR ↔ ADR) and adds its row to the Risks and Technical Debt section; the ADR skill indexes and links.
   `tier0.js verify` allows that propagation over `docs/` and the project ADRs where every changed hunk names the
   record's id, and refuses an unrelated change, any institutional ADR (001–100), a fact of the ledger outside the
   record's own part (a name, type, technology, integration, flow, figure or another record's status), a new TDR
-  without its Section 13 row, a record that does not match the request, and a doc fix that moves any fact of the ledger.
+  without its Section 13 row or its link from each affected component, a record that does not match the request, and a doc fix that moves any fact of the ledger.
 - **Merge**: with `SA_TIER0_AUTOMERGE=true`, the pull request is merged as soon as the gates pass. Tier 0 needs no
   architect's approval. Without the variable, or when a gate blocks, a team member merges it.
 

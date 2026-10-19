@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.8.0]
+
+### Added
+- **A component names its technical debt.** The TDR skill's "link both ways, TDR ↔ affected components" had no place on the component's side, so each run put the link somewhere else or nowhere. An affected component's descriptor now carries `**Technical Debt:** [TDR-NNN](…) · …` after `**Last Updated:**` — ids only, the compromise stays the record's; the TDR skill writes it with the record and drops the id when the record is `Resolved` (`ARCHITECTURE_DOCUMENTATION_GUIDE.md`, the skill's steps 5 and Update).
+- The facts ledger reads it as each component's `tdrs`.
+- `tdr-check.js` holds both directions — `component-link-missing` (a record in force names a component whose descriptor does not name it back), `component-link-unknown`, `component-link-resolved`, `component-link-unmatched` — as WARNINGs, so an existing project adopts the line on its next edit.
+- Tier 0: a new workaround TDR is refused without the link from each affected component (`tier0.js verify`), and `architecture-tier0.yml`'s prompt names the line. The link is the record's own part of the ledger, so it never counts as another fact moving.
+
+### Changed
+- The CI examples pin `v10.8.0`.
+
 ## [10.7.4]
 
 ### Fixed

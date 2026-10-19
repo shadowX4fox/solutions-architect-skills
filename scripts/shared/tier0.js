@@ -196,6 +196,9 @@ function verify(root, payload) {
   });
   const debt = payload.kind === 'tdr-workaround' ? debtSection(root) : null;
   if (debt && !read(path.join(root, debt)).includes(id)) problems.push(`${debt} has no summary row for ${id} — the TDR skill appends one to the Risks and Technical Debt section`);
+  // and the link back: every affected component with a descriptor names it (`**Technical Debt:**`, 10.8.0)
+  if (payload.kind === 'tdr-workaround') tdr.descriptors(root).filter((d) => list(payload.request.components).includes(d.name) && !d.ids.includes(id))
+    .forEach((d) => problems.push(`${d.file} does not name ${id} — the affected component's descriptor carries \`**Technical Debt:** [${id}](…)\` after \`**Last Updated:**\``));
   if (payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status') {
     const c = tdr.check(root), rec = c.records.find((r) => r.id === id);
     if (!rec) problems.push(`${id} has no record under tdr/`);

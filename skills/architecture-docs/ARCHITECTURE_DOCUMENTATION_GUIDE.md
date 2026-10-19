@@ -532,6 +532,12 @@ Every `ARCHITECTURE.md` carries a **semantic version** (MAJOR.MINOR.PATCH) in th
 
 **Per-component versions** (in `docs/components/**/*.md`): Each component file carries its own `Component Version` alongside the parent `Architecture Version`. See Section 5 for the component header template.
 
+**Technical debt on a component** (10.8.0): a component a TDR in force names in `affected-components` carries
+`**Technical Debt:** [TDR-001](../../../tdr/TDR-001-….md) · [TDR-004](…)` after `**Last Updated:**` — the link back,
+written by the TDR skill with the record and the id dropped when the record is `Resolved`; ids only, the compromise is
+the record's (describe once). The label stays English; `tdr-check.js` holds both directions, and the facts ledger reads
+it as the component's `tdrs`.
+
 **CHANGELOG**: All released versions are documented in `docs/CHANGELOG.md` with Added / Changed / Deprecated / Superseded sections (Keep a Changelog format).
 
 **Git tag (when repo is under version control)**: Each released version MUST be tagged as `architecture-v{version}` (e.g., `architecture-v1.2.0`). The tag is namespaced to distinguish from plugin/app version tags.

@@ -99,6 +99,7 @@ function collect(root) {
     description: f.description || null, internal_name: f.internal_name || null, capacity: f.capacity || null, key_concepts: (f.header && f.header.key_concepts) || [], scope: (f.header && f.header.scope) || null, related_adrs: (f.header && f.header.related_adrs) || [],
     component_version: field(src, ['Component Version', 'Versión del Componente', 'Version del Componente']), last_updated: field(src, ['Last Updated', 'Última Actualización', 'Ultima Actualizacion']),
     delivery: field(src, ['Delivery Increments', 'Incrementos de Entrega']),   // a temporary container's window and TDR (increments.js, 8.140.0)
+    tdrs: [...new Set((field(src, ['Technical Debt', 'Deuda Técnica', 'Deuda Tecnica']) || '').toUpperCase().match(/\bTDR-\d{3,}\b/g) || [])],   // the TDRs in force on it (10.8.0)
     bytes: src ? Buffer.byteLength(src) : 0, file_backed: f.file_backed !== false, warnings: f.warnings || [] }; });
   const systems = components.filter((c) => c.level === 'L1').map((c) => ({ name: c.name, slug: c.slug, file: c.file, type: c.type, owned: /internal/i.test(c.type) || (!/external/i.test(c.type) && components.some((x) => x.level === 'L2' && x.system === c.slug && x.file_backed)), containers: components.filter((x) => x.level === 'L2' && x.system === c.slug).map((x) => x.slug) }));
 

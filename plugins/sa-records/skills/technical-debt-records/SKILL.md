@@ -120,7 +120,7 @@ Create:
    - **Capability**, only with `BIAN_ALIGNMENT.md`: the most significant capability the initiative realizes among those the `affected-components` serve — one. Business Area and Business Domain with `DOM` / `CAP` from the alignment's *Diagram ID Segments* table (🟢 row), Service Domain with BIAN id from that area's table, verbatim; one sentence on why; the one-line form in `bian-capability:`. Without the file, omit section and key.
 3. Title: short, present tense, the compromise not the fix. "IIS gateway transmits credentials in plain HTTP", not "Add TLS to IIS".
 4. Status `Open` unless the user says otherwise; the same word under `## Status` and in `status:`; `target-date:` when `Planned`.
-5. Link both ways: TDR ↔ ADR, TDR ↔ affected components.
+5. Link both ways: TDR ↔ ADR, TDR ↔ affected components — the record names each in `related-adrs` / `affected-components`; each affected component's descriptor carries `**Technical Debt:** [TDR-NNN](<relative link>)` after `**Last Updated:**` (one line, ids joined with ` · `, label English), added to when it exists. `tdr-check.js` reports a missing or stale link (`component-link-*`).
 6. Append the index row, then the summary row in Section 13. When `docs/10-risks-and-technical-debt.md` is missing, do not skip silently — the TDR is written and kept, the row is reported pending, and this block is emitted (`architecture-docs/references/MISSING_SECTION_CONTRACT.md`):
 
    ```
@@ -141,7 +141,7 @@ Create:
 
 Update:
 
-- Run `tdr-check.js --move` first; a refused move is reported with its arrow and nothing is written. Change `## Status` and `status:` together; add the dated History note; rewrite nothing else.
+- Run `tdr-check.js --move` first; a refused move is reported with its arrow and nothing is written. Change `## Status` and `status:` together; add the dated History note; on `Resolved`, drop the id from each affected component's `**Technical Debt:**` line (the line goes when it is empty) and from the Section 13 table; rewrite nothing else.
 - `In Progress` → `**Technical**` names a person or team. `Resolved` → the note links what resolved it. `Won't Fix` → Description and Impact justify the permanent acceptance, the note records the investment decision (who, when).
 - A retired tag on the record or on the quoted Jira card → migrate per the table, say so in the note.
 
@@ -166,7 +166,7 @@ Frontmatter: `status` (required, same as `## Status`), `target-date` (required w
 - [ ] Every field concrete; Impact states consequences
 - [ ] Capability present with `BIAN_ALIGNMENT.md` (one, verbatim), absent otherwise
 - [ ] Owner: Technical named (never "TBD") and Business (P&L)
-- [ ] Index updated; ADR / component links bidirectional
+- [ ] Index updated; ADR / component links bidirectional — each affected component's `**Technical Debt:**` line names it
 - [ ] Within the size budgets; each History note one line
 - [ ] `tdr-check.js <project_root>` exits 0
 

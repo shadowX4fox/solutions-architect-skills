@@ -110,6 +110,25 @@ describe("the index", () => {
   });
 });
 
+describe("the link back from a component (10.8.0)", () => {
+  test("a TDR in force names its component; the descriptor names it back — missing, unknown, resolved and unmatched warn", () => {
+    const r = join(TMP, "links"); rmSync(r, { recursive: true, force: true });
+    const rec = (n: number, status: string, affected: string) => record(n, status, { history: status === "Resolved" ? ["- 2026-05-13: Created. Status: `Open`.", "- 2026-07-01: `In Progress` → `Resolved` — PR #77 merged."] : undefined })
+      .replace("driver: Process\n", `driver: Process\naffected-components: [${affected}]\n`);
+    w(r, "tdr/TDR-001-a.md", rec(1, "Open", '"Hub API", "Order Desk Web"'));
+    w(r, "tdr/TDR-002-b.md", rec(2, "Resolved", "Hub API"));
+    w(r, "tdr/TDR-003-c.md", rec(3, "Open", "Order Desk Web"));
+    w(r, "tdr/README.md", index([["TDR-001", "Open"], ["TDR-002", "Resolved"], ["TDR-003", "Open"]]));
+    const desc = (name: string, line: string) => `# ${name}\n\n**Type:** API\n**Component Version:** 1.0.0\n**Last Updated:** 2026-10-01\n${line}\n## Purpose\n\nx\n`;
+    mkdirSync(join(r, "docs/components/order-desk"), { recursive: true });
+    writeFileSync(join(r, "docs/components/order-desk/01-hub-api.md"), desc("Hub API", "**Technical Debt:** [TDR-001](../../../tdr/TDR-001-a.md) · [TDR-002](x) · [TDR-003](x) · TDR-009\n"));
+    writeFileSync(join(r, "docs/components/order-desk/02-web.md"), desc("Order Desk Web", ""));
+    const got = check(r).findings.filter((f: any) => /^component-link/.test(f.rule)).map((f: any) => `${f.rule} ${f.file.split("/").pop()}:${f.line}`);
+    expect(got.sort()).toEqual(["component-link-missing 02-web.md:1", "component-link-missing 02-web.md:1", "component-link-resolved 01-hub-api.md:6", "component-link-unknown 01-hub-api.md:6", "component-link-unmatched 01-hub-api.md:6"]);
+    expect(check(r).findings.filter((f: any) => /^component-link/.test(f.rule)).every((f: any) => f.level === "WARNING")).toBe(true);
+  });
+});
+
 describe("the arrows", () => {
   test("the four moves are allowed", () => {
     expect(move("Open", "In Progress").ok).toBe(true);
