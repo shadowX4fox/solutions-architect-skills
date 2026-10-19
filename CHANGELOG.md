@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.6.4]
+
+### Changed
+- The local architecture index server (`local/compose.yaml`) pins Alia `0.1.2`: `preview_escalation`'s `request` is what the developer asked to build or change, in their words, never their answer to the preview — the server side of `BUILD.md` rule 9's wording (10.6.3).
+- The CI examples pin `v10.6.4`.
+
 ## [10.6.3]
 
 ### Added
