@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.6.2]
+
+### Changed
+- The local architecture index server (`local/compose.yaml`) pins Alia `0.1.1`: `preview_escalation` and `get_architecture` say that a question blocking the build is escalated like a change that crosses a trigger, and a project without an escalation host gets the questions back for the architects — the server side of `BUILD.md` rule 9 (10.6.1).
+- The CI examples pin `v10.6.2`.
+
 ## [10.6.1]
 
 ### Fixed
