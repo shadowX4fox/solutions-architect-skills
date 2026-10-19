@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.9.1]
+
+### Changed
+- **The local index server is pinned to Alia 0.2.1** (`local/compose.yaml`, `SA_INDEX_SERVER_TAG`). Its `preview_tier0` reads the TDR statuses and drivers from the bundle (`support.tdr_statuses`, `support.tdr_drivers`) and no longer keeps its own copy. Closes #7.
+
 ## [10.9.0]
 
 ### Added
