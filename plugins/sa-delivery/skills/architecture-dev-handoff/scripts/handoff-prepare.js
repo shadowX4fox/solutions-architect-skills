@@ -36,6 +36,7 @@ const { resolveNames, verifyResolutions } = require(fromSaSkills('scripts', 'res
 const { collect } = require(fromSaSkills('scripts', 'shared', 'arch-facts.js'));
 const { removeHeader } = require(fromSaSkills('scripts', 'shared', 'header-detector.ts'));
 const { hashPayload, loadManifest, saveManifest, shouldSkip, restampVersion } = require(path.join(__dirname, '..', 'utils', 'manifest.ts'));
+const { editBaselines } = require(path.join(__dirname, 'kit-edit.js'));
 
 const TEMPLATE_VERSION = '4.3.1', SCHEMA_VERSION = '4';
 const { blocksOf, lint } = require(fromSaSkills('scripts', 'shared', 'mermaid-check.js'));
@@ -57,7 +58,9 @@ const anchor = (h) => plain(h).toLowerCase().replace(/[^\p{L}\p{N} -]/gu, '').re
 const adrIds = (s) => [...new Set((String(s || '').match(/ADR-\d{3}/g) || []))];
 const latest = (dir, re) => { if (!exists(dir)) return null; const f = fs.readdirSync(dir).filter((n) => re.test(n)).sort().reverse()[0]; return f ? path.join(dir, f) : null; };
 const rel = (from, to) => path.relative(from, to).split(path.sep).join('/');
-const link = (from, to) => { const r = rel(from, to); return r.startsWith('../../../../') ? to : r; };
+// relative while the payload is inside the project — however deep (a seam's folder is one level below the others, and its links
+// came out absolute, so its hash held the checkout path); a payload written outside the project links absolutely
+const link = (from, to, root) => { const up = path.relative(root, from); return up.startsWith('..') || path.isAbsolute(up) ? to : rel(from, to); };
 
 /** Every table in a markdown source: { heading, headers, rows (raw lines), start } — heading = nearest heading above. */
 function tables(src) {
@@ -178,7 +181,7 @@ async function prepare(root, opts = {}) {
   const institutional = allAdrs.filter((a) => adrNum(a.id) <= 100).sort((a, b) => adrNum(a.id) - adrNum(b.id));
   report.read.institutional_adrs = institutional.length;
   const adrById = Object.fromEntries(allAdrs.map((a) => [a.id, a]));
-  const adrEntry = (id, cap, from) => { const a = adrById[id]; if (!a) return `- ${id} — ${ND('not on disk under adr/')}`; const ex = adrExcerpt(a, cap); return `- ${id} — ${a.title} — ${a.status || 'Not documented'} — [${a.file}](${link(from, path.join(root, a.file))})\n  ${ex ? ex.replace(/\n/g, '\n  ') : ND('no Decision section in the ADR')}`; };
+  const adrEntry = (id, cap, from) => { const a = adrById[id]; if (!a) return `- ${id} — ${ND('not on disk under adr/')}`; const ex = adrExcerpt(a, cap); return `- ${id} — ${a.title} — ${a.status || 'Not documented'} — [${a.file}](${link(from, path.join(root, a.file), root)})\n  ${ex ? ex.replace(/\n/g, '\n  ') : ND('no Decision section in the ADR')}`; };
 
   // ---- docs/05 blocks: a head (integration-head.js — `**I-nn — title**`, a compound `**I-19 e I-20 — …**`, a retired
   // `**I-11 — retirada**, …` with its body inline) … until the next head / heading; a compound block is registered under each id
@@ -255,7 +258,7 @@ async function prepare(root, opts = {}) {
   const flowHeading = (f) => { const m = src04.match(new RegExp('^(#{1,6})\\s+((?:Flow|Flujo)\\s+' + f.code + '\\s*[—–-].*)$', 'im')); return m ? plain(m[2]) : null; };
   const chain = (f) => { const out = []; f.phases.forEach((n) => { const p = phaseByN[n]; if (!p) return; (p.hops ? plain(p.hops) : p.owner_chain).split(/\s*→\s*/).forEach((x) => { if (x && norm(out[out.length - 1] || '') !== norm(x)) out.push(x); }); }); return out; };
   const flowsMd = (facts.flows || []).map((f) => { const h = flowHeading(f); const ph = f.phases.map((n) => phaseByN[n]).filter(Boolean);
-    return `### F-${String(f.code).padStart(2, '0')} — ${f.name}\n- Trigger: ${f.trigger || 'Not documented'}\n- Path: ${chain(f).join(' → ') || ND('no phases resolve for this flow')}\n- Phases: ${f.phases.length ? f.phases.map((n) => `${n}${phaseByN[n] ? ' (' + phaseByN[n].name + ')' : ''}`).join(' → ') : 'Not documented'}\n- Sequence: ${h && d04 ? `[${rel(root, d04)}#${anchor(h)}](${link(payloadDir, d04)}#${anchor(h)})` : ND('no flow block in docs/04')}\n- Global budget: ${f.latency_target || 'Not documented'}\n- Governed by: ${f.governed_by.length ? f.governed_by.join(', ') : '—'}\n- Failure posture: ${ph.filter((p) => p.failure_mode).map((p) => `phase ${p.n}: ${p.failure_mode}`).join(' · ') || 'Not documented'}${f.delta ? `\n- Delta: ${f.delta}` : ''}\n- Main image:\n\n${mainImage(f)}`; });
+    return `### F-${String(f.code).padStart(2, '0')} — ${f.name}\n- Trigger: ${f.trigger || 'Not documented'}\n- Path: ${chain(f).join(' → ') || ND('no phases resolve for this flow')}\n- Phases: ${f.phases.length ? f.phases.map((n) => `${n}${phaseByN[n] ? ' (' + phaseByN[n].name + ')' : ''}`).join(' → ') : 'Not documented'}\n- Sequence: ${h && d04 ? `[${rel(root, d04)}#${anchor(h)}](${link(payloadDir, d04, root)}#${anchor(h)})` : ND('no flow block in docs/04')}\n- Global budget: ${f.latency_target || 'Not documented'}\n- Governed by: ${f.governed_by.length ? f.governed_by.join(', ') : '—'}\n- Failure posture: ${ph.filter((p) => p.failure_mode).map((p) => `phase ${p.n}: ${p.failure_mode}`).join(' · ') || 'Not documented'}${f.delta ? `\n- Delta: ${f.delta}` : ''}\n- Main image:\n\n${mainImage(f)}`; });
 
   // ---- verbatim table blocks of an analysis report, each under its heading
   const tablesMd = (src, filter) => { const out = []; let last = null; tables(src).filter(filter || (() => true)).forEach((t) => { if (t.heading && t.heading !== last) { out.push(`### ${t.heading}`); last = t.heading; } out.push(renderRows(t, t.rows)); }); return out.join('\n\n'); };
@@ -518,11 +521,26 @@ ${relAdrs.length ? relAdrs.map((id) => adrEntry(id, 500, payloadDir)).join('\n\n
     run: { ekonte_payload_path: runPath, settei_payload_path: runPath, ekonte_payload_hash: runHash, settei_payload_hash: runHash, ekonte_decision: ek.decision, settei_decision: st.decision, ekonte_reason: ek.reason, settei_reason: st.reason },
     seams: seams.map((s) => { const h = hashPayload(s.payload_path, templateVersion); const d = decide({ section: 'seams', edgeKey: s.edge_key, payloadHash: h, outputFileAbsPath: path.join(handoffsDir, 'interfaces', `${s.edge_key}.md`) }); return { edge_key: s.edge_key, edge_id: s.edge.id, integration: s.edge.int.id, payload_path: s.payload_path, payload_hash: h, decision: d.decision, reason: d.reason, seam_file_rel: `interfaces/${s.edge_key}.md`, related_adrs: s.related_adrs }; }),
     cut_sheets: cutSheets.map((x) => { const h = hashPayload(x.payload_path, templateVersion); const nn = String(x.c.index || '').split('.').pop().padStart(2, '0'); const f = `components/${nn}-${x.c.slug}.md`; const d = decide({ section: 'cut_sheets', slug: x.c.slug, payloadHash: h, outputFileAbsPath: path.join(handoffsDir, f) }); return { slug: x.c.slug, name: x.c.name, component_index_position: x.c.index, payload_path: x.payload_path, payload_hash: h, decision: d.decision, reason: d.reason, asset_types: x.asset_types, asset_hints_override: x.hint, doc_language: lang, cut_sheet_file_rel: f, component_version: x.c.component_version || '1.0.0', seams_incident: x.incident }; }) };
+  // edit mode (kit-edit.js, 10.9.0): a REGEN part that exists is edited against the delta of its sources since the release it
+  // was written at — never rewritten in other words; a part whose re-cut payload did not move is kept
+  if (!opts.baseline && !opts.force) {
+    const runV = manifest.run && manifest.run.architecture_version, parts = [], hashMoved = (d) => d.decision === 'REGEN' && d.reason === 'payload hash changed';
+    const runPart = (part, d, file) => { if (hashMoved(d)) parts.push({ key: `run:${part}`, payload_path: runPath, output: path.join(handoffsDir, file), version: runV,
+      set: (e, why) => { if (why) { d.decision = 'SKIP'; d.reason = why; result.run[`${part}_decision`] = 'SKIP'; result.run[`${part}_reason`] = why; } else result.run[`${part}_edit_path`] = e; } }); };
+    runPart('ekonte', ek, 'SYSTEM_RUNTIME_VIEW.md'); runPart('settei', st, 'CROSS_CUTTING_STANDARDS.md');
+    const entryPart = (key, x, file, version) => { if (hashMoved(x)) parts.push({ key, payload_path: x.payload_path, output: path.join(handoffsDir, file), version,
+      set: (e, why) => { if (why) { x.decision = 'SKIP'; x.reason = why; } else x.edit_path = e; } }); };
+    for (const x of result.seams) entryPart(`seam:${x.edge_key}`, x, x.seam_file_rel, runV);
+    for (const x of result.cut_sheets) entryPart(`cut-sheet:${x.slug}`, x, x.cut_sheet_file_rel, (manifest.cut_sheets[x.slug] || {}).architecture_version);
+    const e = await editBaselines(root, { prepare, opts, payloadDir, parts });
+    result.edits = e.edits; result.kept_on_recut = e.skipped;
+  }
   // a kept part is the architecture's at this version too: its Architecture Version row and its manifest entry move by code,
   // with the hash in the stamp-free form — the model rewrites nothing that did not change (10.8.2)
   const restamped = [], keep = (file, entry, hashKeys, hash) => {
     const f = path.join(handoffsDir, file); if (/^\d+\.\d+\.\d+$/.test(archVersion) && fs.existsSync(f)) { const src = fs.readFileSync(f, 'utf8'), out = restampVersion(src, archVersion); if (out !== src) { fs.writeFileSync(f, out); restamped.push(file); } }
     for (const k of hashKeys) entry[k] = hash; if ('architecture_version' in entry && /^\d+\.\d+\.\d+$/.test(archVersion)) entry.architecture_version = archVersion; };
+  if (opts.baseline) return { report, result, edges, payload_dir: payloadDir };
   if (ek.decision === 'SKIP') keep('SYSTEM_RUNTIME_VIEW.md', manifest.run, ['ekonte_hash'], runHash);
   if (st.decision === 'SKIP') keep('CROSS_CUTTING_STANDARDS.md', manifest.run, ['settei_hash'], runHash);
   for (const s of result.seams) if (s.decision === 'SKIP') keep(s.seam_file_rel, manifest.seams[s.edge_key], ['payload_hash'], s.payload_hash);
@@ -534,9 +552,9 @@ ${relAdrs.length ? relAdrs.map((id) => adrEntry(id, 500, payloadDir)).join('\n\n
 }
 
 // ---------- CONTEXT_RESULT as the orchestrator reads it
-const yaml = (r) => { const list = (k, items, fields) => items.length ? `  ${k}:\n${items.map((it) => '    - ' + fields.map((f, i) => `${i ? '      ' : ''}${f}: ${Array.isArray(it[f]) ? '[' + it[f].join(', ') + ']' : it[f]}`).join('\n')).join('\n')}` : `  ${k}: []`;
+const yaml = (r) => { const list = (k, items, fields) => items.length ? `  ${k}:\n${items.map((it) => '    - ' + fields.filter((f) => it[f] !== undefined).map((f, i) => `${i ? '      ' : ''}${f}: ${Array.isArray(it[f]) ? '[' + it[f].join(', ') + ']' : it[f]}`).join('\n')).join('\n')}` : `  ${k}: []`;
   const strs = (k, a) => a.length ? `  ${k}:\n${a.map((w) => `    - "${String(w).replace(/"/g, '\\"')}"`).join('\n')}` : `  ${k}: []`;
-  return `CONTEXT_RESULT:\n  status: ${r.status}\n  payload_dir: ${r.payload_dir}\n  shared_docs_read: ${r.shared_docs_read}\n  analyses_read: ${r.analyses_read}\n  institutional_adrs_read: ${r.institutional_adrs_read}\n${strs('warnings', r.warnings)}\n${strs('edge_cross_check_warnings', r.edge_cross_check_warnings)}\n${strs('unresolved_endpoints', r.unresolved_endpoints)}\n${strs('undecided_endpoints', r.undecided_endpoints)}\n${strs('endpoint_review', r.endpoint_review)}\n  run:\n${Object.entries(r.run).map(([k, v]) => `    ${k}: ${v}`).join('\n')}\n${list('seams', r.seams, ['edge_key', 'payload_path', 'payload_hash', 'decision', 'reason', 'seam_file_rel', 'related_adrs'])}\n${list('cut_sheets', r.cut_sheets, ['slug', 'payload_path', 'payload_hash', 'decision', 'reason', 'asset_types', 'asset_hints_override', 'doc_language', 'cut_sheet_file_rel', 'component_version'])}`; };
+  return `CONTEXT_RESULT:\n  status: ${r.status}\n  payload_dir: ${r.payload_dir}\n  shared_docs_read: ${r.shared_docs_read}\n  analyses_read: ${r.analyses_read}\n  institutional_adrs_read: ${r.institutional_adrs_read}\n${strs('warnings', r.warnings)}\n${strs('edge_cross_check_warnings', r.edge_cross_check_warnings)}\n${strs('unresolved_endpoints', r.unresolved_endpoints)}\n${strs('undecided_endpoints', r.undecided_endpoints)}\n${strs('endpoint_review', r.endpoint_review)}\n  run:\n${Object.entries(r.run).map(([k, v]) => `    ${k}: ${v}`).join('\n')}\n${list('seams', r.seams, ['edge_key', 'payload_path', 'payload_hash', 'decision', 'reason', 'edit_path', 'seam_file_rel', 'related_adrs'])}\n${list('cut_sheets', r.cut_sheets, ['slug', 'payload_path', 'payload_hash', 'decision', 'reason', 'edit_path', 'asset_types', 'asset_hints_override', 'doc_language', 'cut_sheet_file_rel', 'component_version'])}`; };
 
 module.exports = { prepare, tables, section, labelBlock, parseFlowchart, emitFlowchart, TEMPLATE_VERSION, SCHEMA_VERSION };   // exported so a fixture pins the constant, never a literal that a template bump silently invalidates
 
@@ -551,6 +569,8 @@ if (require.main === module) (async () => {
   console.error(`Edges: ${r.edges.length} active (${r.edges.filter((e) => e.style === 'async').length} async)${rp.unresolved_endpoints.length ? ` — ${rp.unresolved_endpoints.length} endpoint(s) not a documented component (edge kept, no seam): ${rp.unresolved_endpoints.join('; ')}` : ''}${rp.undecided_endpoints.length ? ` — ${rp.undecided_endpoints.length} endpoint(s) UNDECIDED (no seam until the judge answers): ${rp.undecided_endpoints.join('; ')}` : ''}`);
   const pn = rp.panels; console.error(`Panels: ${pn.phases} phase sequence diagram(s)${pn.phases_without.length ? ` (phases without one: ${pn.phases_without.join(', ')})` : ''}; ${pn.cuts} cut(s) of ${pn.diagram || 'no container diagram'}${pn.unmatched_nodes.length ? ` — no node labelled: ${pn.unmatched_nodes.join(', ')}` : ''}${pn.undecided_labels.length ? ` — ${pn.undecided_labels.length} node label(s) UNDECIDED (${pn.undecided_labels.join(', ')}; answer ${pn.worksheet || 'the judge worksheet'} and re-run)` : ''}${pn.rejected.length ? ` — REJECTED by the diagram gate: ${pn.rejected.join('; ')}` : ''}`);
   console.error(`Decisions: Runtime View ${R.run.ekonte_decision} (${R.run.ekonte_reason}); Cross-Cutting ${R.run.settei_decision} (${R.run.settei_reason}); seams ${R.seams.filter((s) => s.decision === 'REGEN').length} REGEN / ${R.seams.filter((s) => s.decision === 'SKIP').length} SKIP; components ${R.cut_sheets.filter((s) => s.decision === 'REGEN').length} REGEN / ${R.cut_sheets.filter((s) => s.decision === 'SKIP').length} SKIP`);
+  if ((R.edits || []).length) console.error(`Edit mode — edited in place against the delta since their release: ${R.edits.join(', ')}`);
+  if ((R.kept_on_recut || []).length) console.error(`Kept — the payload re-cut from their release is the same: ${R.kept_on_recut.join(', ')}`);
   if (R.restamped.length) console.error(`Kept, the Architecture Version row restamped by code: ${R.restamped.join(', ')}`);
   if (rp.endpoint_review.length) console.error(`Endpoint review (${rp.endpoint_review.length}):\n${rp.endpoint_review.map((w) => '  - ' + w).join('\n')}`);
   if (rp.warnings.length) console.error(`Warnings (${rp.warnings.length}):\n${rp.warnings.map((w) => '  - ' + w).join('\n')}`);

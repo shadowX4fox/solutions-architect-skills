@@ -1,7 +1,7 @@
 ---
 name: ekonte-generator
 description: Universal System Runtime View generator — produces ONE handoffs/SYSTEM_RUNTIME_VIEW.md per orchestration run from a run-level payload. Contains scope, flows with per-hop budget decomposition, edge rationale, failure posture, and the return-path convention. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
-tools: Read, Write
+tools: Read, Write, Edit
 model: sonnet
 ---
 
@@ -132,6 +132,17 @@ marker. Never leave a raw `[PLACEHOLDER]` token in the output.
 - `ekonte_version`: semver-formatted version string to embed in the
   header (e.g. `4.0.0`). Provided by the orchestrator; matches
   `TEMPLATE_VERSION` unless the run is re-releasing an existing Runtime View.
+- `edit_path` (optional): the edit file — present only in edit mode (§ Edit mode).
+
+## Edit mode
+
+When the prompt carries `edit_path`, the part already exists and only its sources moved. Read the edit file — the delta
+of the payload since the release the part was written at — and the document at the output path, then change **only**
+the sections the delta reaches, with `Edit`: every other section keeps its words and its order. Move the Architecture
+Version and Generated rows to the payload's. The payload stays the reference for what you write, and the template's
+rules hold for every section you change. Return the anchors you changed (`<!-- SECTION: … -->`) as `edited_sections`;
+the orchestrator restores any other section that changed (`kit-edit.js check`). Without `edit_path`, write the whole
+part as the workflow below says.
 
 ## Workflow
 
@@ -193,7 +204,7 @@ corresponding payload value:
 
 ### PHASE 3 — Write the Runtime View
 
-**Single-Write rule**: compute the fully filled document in memory, then
+**Single-Write rule** (edit mode: `Edit`s, § Edit mode): compute the fully filled document in memory, then
 ONE `Write` call to `output_ekonte_path`. Never Edit-per-placeholder.
 
 Then re-Read the file and verify:
@@ -213,12 +224,13 @@ EKONTE_RESULT:
   flows_count: <N>
   edges_count: <N>
   gaps_count: <N>
+  edited_sections: "<anchor,anchor>"   # edit mode only
   validation_notes: "..."
 ```
 
 ## Tool Discipline
 
-Only Read (payload + post-write verify) and Write (single Runtime View file).
+Only Read (payload + post-write verify), Write (single Runtime View file) and Edit (edit mode).
 No Bash, no Grep, no Glob — the payload contains everything you need.
 
 ## Bundled reference: SYSTEM_EKONTE_TEMPLATE.md

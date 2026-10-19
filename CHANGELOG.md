@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.9.0]
+
+### Added
+- **Edit mode for the handoff kit.** A part whose sources changed is edited in place instead of being rewritten in other words.
+  - `handoff-prepare.js` handles each REGEN part that exists and whose payload hash moved. It cuts the payload again from the tree of the release the part was written at (`architecture-v<version>` from the manifest, via `git archive`, with the same plugin and the same judge answers) and compares the two cuts without their stamps.
+  - If they are equal, the part is kept and its version row is restamped. A manifest hashed in an older form therefore costs no regeneration.
+  - If they differ, the part carries `edit_path`: the delta, plus a copy of the previous text under `.cache/sa-skills/handoff-payloads/edit/`.
+  - The generators (Runtime View, Cross-Cutting Standards, Interface Contract, Component Specification, asset) gain `Edit` and an *Edit mode* section. They change only the sections the delta reaches and return `edited_sections` (an asset returns `edited: yes | no`).
+  - `kit-edit.js check --restore` (Step 5.2a) compares each edited part with its previous text section by section, masking dates and the version row, and puts back every section that changed without being declared.
+  - A part is still written whole when there is no tag, no previous file, the template changed, or the delta reaches more than half the payload.
+  - Measured on the demo project's v1.1.1 → v1.2.0 release, which added one TDR: before this release, 14 files rewritten. With it, 6 of 7 parts kept and one Component Specification edited. Its delta is one line, the descriptor's `**Technical Debt:**` link.
+
+### Fixed
+- **A seam payload linked the documents by absolute path.** `link()` switched to an absolute path once the relative one climbed four levels, and the seams' folder sits one level deeper than the other payloads. The seam's hash therefore held the checkout path. Links are now relative whenever the payload is inside the project.
+- `CONTEXT_RESULT` omits a list field that a part does not carry.
+
+### Upgrade
+- No action beyond the usual `SA_PLUGIN_REF` pin. The handoff CI keeps the 10.8.2 prompt (no `--force`).
+
 ## [10.8.2]
 
 ### Fixed

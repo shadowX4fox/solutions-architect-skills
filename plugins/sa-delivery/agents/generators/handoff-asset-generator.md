@@ -1,7 +1,7 @@
 ---
 name: handoff-asset-generator
 description: Universal single-asset generator for Component Development Handoffs — produces ONE deliverable asset file (OpenAPI, GraphQL SDL, DDL, AsyncAPI, Avro/Protobuf schema or Redis key schema) for one C4 L2 component, using a pre-sliced architecture payload. The orchestrator pins the model per Task() call (sonnet). The C4 descriptor is rendered by code (`c4-descriptor.js`), never by this agent. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
-tools: Read, Write
+tools: Read, Write, Edit
 ---
 
 # Component Handoff — Single-Asset Generator
@@ -125,7 +125,17 @@ The orchestrator passes these in the prompt text — read them verbatim:
 - `output_asset_path`: Absolute path where the asset file MUST be written (e.g., `/path/to/project/handoffs/assets/04-inbox-hub/openapi.yaml`). For `avro`, its directory is where you write **one `<RecordName>.avsc` per message**; the basename is ignored. The orchestrator pre-creates the parent directory in Phase 4 of `architecture-dev-handoff/SKILL.md` — do NOT invoke `mkdir` or any bun helper.
 - `component_slug`: Component kebab-case slug (e.g., `inbox-hub`). Returned in `ASSET_RESULT` so the orchestrator can index the result by slug.
 - `doc_language`: `en` or `es`. **Identifiers never localize** — every path, operationId, field, schema, enum value, channel, table and key is the docs' own, verbatim, whatever language the prose is in (never translate one, in either direction: a Spanish identifier in the docs is a finding of `identifier-check.js`, fixed in the docs). **Descriptions follow `doc_language`** — `summary`, `description`, `doc` and comments are written in it. The language also selects the gap marker of a Markdown asset (`[NO DOCUMENTADO — …]` under `es`).
+- `edit_path` (optional): the component's edit file — present only in edit mode (§ Edit mode).
 - `context7_cache_hint`: (optional) A path or inline summary the orchestrator pre-cached in Step 3.2 of the skill workflow. May be omitted entirely. If present, treat as syntax-validation hint only — never inject values from it.
+
+## Edit mode
+
+When the prompt carries `edit_path`, the asset already exists at the output path and only the component's sources
+moved. Read the edit file — the delta of the payload since the release the asset was written at — and the asset. When
+the delta states nothing this asset carries, leave the file as it is and return `edited: no`. Otherwise change only the
+lines the delta reaches, with `Edit`: every other operation, schema, table and comment keeps its text and its order, and
+`operationId`s, field numbers and names never move unless the delta moves them. Return `edited: yes`. Without
+`edit_path`, write the whole asset as the workflow below says.
 
 ## Workflow
 
@@ -715,7 +725,7 @@ Always also apply the shared sections at the top of the bundle (Overview, Asset 
 
 Under `doc_language: es`, a Markdown asset's gap marker is `[NO DOCUMENTADO — agregar a <file>]`.
 
-**Step 2.3**: Write the asset file. Single-Write rule: one `Write` call. Do not use `Edit`-per-placeholder. For `avro`, one `Write` per message file (`<RecordName>.avsc` in the directory of `output_asset_path`).
+**Step 2.3**: Write the asset file. Single-Write rule: one `Write` call. Do not use `Edit`-per-placeholder (edit mode is the exception: § Edit mode). For `avro`, one `Write` per message file (`<RecordName>.avsc` in the directory of `output_asset_path`).
 
 ```
 Write file: [output_asset_path]
@@ -743,6 +753,7 @@ ASSET_RESULT:
     - field: "..."
       recommended_location: "..."
       impact: "..."
+  edited: [yes | no]   # edit mode only
   validation_notes: "[one-line summary or empty]"
 ```
 
@@ -752,11 +763,12 @@ Always return `ASSET_RESULT` — never exit silently. The orchestrator writes ev
 
 ## Tool Discipline
 
-This sub-agent does NOT have access to Bash, Grep, or Glob — only Read and Write. Asset directories are pre-created by the orchestrator (Phase 4 of `architecture-dev-handoff/SKILL.md`); reference content is bundled in this system prompt; the post-generation re-Read uses the standard Read tool.
+This sub-agent does NOT have access to Bash, Grep, or Glob — only Read, Write and Edit (edit mode). Asset directories are pre-created by the orchestrator (Phase 4 of `architecture-dev-handoff/SKILL.md`); reference content is bundled in this system prompt; the post-generation re-Read uses the standard Read tool.
 
 Use only:
 - File reading → **Read tool**
 - File writing → **Write tool**
+- Changing an existing asset in edit mode → **Edit tool**
 
 ## Error Handling
 

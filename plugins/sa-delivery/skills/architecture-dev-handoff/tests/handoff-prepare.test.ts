@@ -5,8 +5,9 @@
  * against the manifest, and the CLI's CONTEXT_RESULT block.
  */
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from "fs";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, mkdtempSync, cpSync } from "fs";
 import { join } from "path";
+import { tmpdir } from "os";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { prepare, parseFlowchart, emitFlowchart, TEMPLATE_VERSION, SCHEMA_VERSION } = require("../scripts/handoff-prepare.js");
@@ -174,6 +175,44 @@ describe("handoff-prepare", () => {
     const r3 = await prepare(TMP, { components: "hub-api", date: "2026-09-08", force: true });
     expect(r3.result.cut_sheets[0]).toMatchObject({ decision: "REGEN", reason: "--force flag set" });
     rmSync(join(TMP, "handoffs"), { recursive: true, force: true });
+  });
+
+  test("a release: a part whose sources did not move is kept and restamped, a part whose sources moved is edited against the delta since its release", async () => {
+    const G = mkdtempSync(join(tmpdir(), "sa-kit-edit-"));
+    const env = { ...process.env, GIT_CEILING_DIRECTORIES: tmpdir(), GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
+    const sh = (...a: string[]) => { const r = Bun.spawnSync(["git", ...a], { cwd: G, env }); if (r.exitCode) throw new Error(r.stderr.toString()); };
+    try {
+      cpSync(TMP, G, { recursive: true, filter: (p: string) => !p.includes(".cache") });
+      sh("init", "-q"); sh("add", "-A"); sh("commit", "-qm", "v1.2.0"); sh("tag", "architecture-v1.2.0");
+      // the kit as written at 1.2.0: every part on disk, its hash in the manifest
+      const r1 = await prepare(G, { components: "all", date: "2026-09-08" });
+      const part = (title: string) => `# ${title}\n\n| Field | Value |\n|---|---|\n| Architecture Version | 1.2.0 |\n| Generated | 2026-09-08 |\n\n## 1. Responsibility <!-- SECTION: Responsibility -->\n\nWhat it does.\n\n## 7. Constraints <!-- SECTION: Constraints -->\n\nNone.\n`;
+      const put = (rel: string) => { mkdirSync(join(G, "handoffs", rel, ".."), { recursive: true }); writeFileSync(join(G, "handoffs", rel), part(rel)); };
+      put("SYSTEM_RUNTIME_VIEW.md"); put("CROSS_CUTTING_STANDARDS.md");
+      const base = { template_version: TEMPLATE_VERSION, schema_version: SCHEMA_VERSION, generated: "2026-09-08T10:00:00.000Z" };
+      const seams: any = {}, cuts: any = {};
+      for (const s of r1.result.seams) { put(s.seam_file_rel); seams[s.edge_key] = { ...base, payload_hash: s.payload_hash, seam_file: s.seam_file_rel, related_adrs: [] }; }
+      for (const c of r1.result.cut_sheets) { put(c.cut_sheet_file_rel); cuts[c.slug] = { ...base, payload_hash: c.payload_hash, architecture_version: "1.2.0", cut_sheet_file: c.cut_sheet_file_rel, assets: [], doc_language: "en" }; }
+      writeFileSync(join(G, "handoffs/.manifest.json"), JSON.stringify({ version: "4", generator: "sa-skills:architecture-dev-handoff", generator_version: "10.8.2",
+        run: { ekonte_hash: r1.result.run.ekonte_payload_hash, ekonte_template_version: TEMPLATE_VERSION, settei_hash: r1.result.run.ekonte_payload_hash, settei_template_version: TEMPLATE_VERSION, schema_version: SCHEMA_VERSION, architecture_version: "1.2.0", generated: base.generated },
+        seams, cut_sheets: cuts }));
+      // the release: one fact in one descriptor, the version everywhere; and a manifest hash in an older form
+      const db = join(G, "docs/components/order-desk/03-order-db.md");
+      writeFileSync(db, rd(db) + "\n**Technical Debt:** TDR-001\n");
+      writeFileSync(join(G, "ARCHITECTURE.md"), rd(join(G, "ARCHITECTURE.md")).replace("ARCHITECTURE_VERSION: 1.2.0", "ARCHITECTURE_VERSION: 1.3.0"));
+      const m = JSON.parse(rd(join(G, "handoffs/.manifest.json"))); m.cut_sheets["web-app"].payload_hash = "sha256:older-form"; writeFileSync(join(G, "handoffs/.manifest.json"), JSON.stringify(m));
+      const r2 = await prepare(G, { components: "all", date: "2026-10-01" });
+      const byslug = Object.fromEntries(r2.result.cut_sheets.map((c: any) => [c.slug, c]));
+      expect(byslug["order-db"].decision).toBe("REGEN");
+      expect(rd(byslug["order-db"].edit_path)).toMatch(/```diff\n[\s\S]*\+\*\*Technical Debt:\*\* TDR-001/);
+      expect(existsSync(byslug["order-db"].edit_path.replace(/\.md$/, ".previous.md"))).toBe(true);
+      expect(byslug["web-app"]).toMatchObject({ decision: "SKIP" });               // the older hash: re-cut from the tag, the same
+      expect(byslug["web-app"].reason).toMatch(/unchanged against architecture-v1\.2\.0/);
+      expect(byslug["hub-api"]).toMatchObject({ decision: "SKIP", reason: "unchanged since last generation" });
+      expect(r2.result.run.ekonte_decision).toBe("SKIP");
+      expect(rd(join(G, "handoffs", byslug["hub-api"].cut_sheet_file_rel))).toContain("| Architecture Version | 1.3.0 |");
+      expect(r2.result.edits).toEqual(["cut-sheet:order-db"]);
+    } finally { rmSync(G, { recursive: true, force: true }); }
   });
 
   test("the CLI prints the CONTEXT_RESULT block on stdout and the review on stderr; --json prints the result object", async () => {

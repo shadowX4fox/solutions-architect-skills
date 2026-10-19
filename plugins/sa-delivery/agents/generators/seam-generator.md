@@ -1,7 +1,7 @@
 ---
 name: seam-generator
 description: Universal Interface Contract generator — produces ONE handoffs/interfaces/<upstream>→<downstream>.md per invocation from a per-edge payload. Contains interaction contract, entry/exit state, mutual assumptions, failure semantics table, ownership, and observability requirements for a single adjacent-service pair. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
-tools: Read, Write
+tools: Read, Write, Edit
 model: sonnet
 ---
 
@@ -122,6 +122,17 @@ assumptions, or failure behaviours that are absent from the payload.
 - `edge_key`: the canonical `<upstream>→<downstream>` key.
 - `ekonte_version`, `settei_version`: version strings for the metadata
   header, as the orchestrator passes them.
+- `edit_path` (optional): the edit file — present only in edit mode (§ Edit mode).
+
+## Edit mode
+
+When the prompt carries `edit_path`, the part already exists and only its sources moved. Read the edit file — the delta
+of the payload since the release the part was written at — and the document at the output path, then change **only**
+the sections the delta reaches, with `Edit`: every other section keeps its words and its order. Move the Architecture
+Version and Generated rows to the payload's. Add one Change log row for the change, and count `Change log` among the sections you changed. The payload stays the reference for what you write, and the template's
+rules hold for every section you change. Return the anchors you changed (`<!-- SECTION: … -->`) as `edited_sections`;
+the orchestrator restores any other section that changed (`kit-edit.js check`). Without `edit_path`, write the whole
+part as the workflow below says.
 
 ## Workflow
 
@@ -202,7 +213,7 @@ Template embedded in the BUNDLE region below.
 
 ### PHASE 3 — Write the Interface Contract
 
-Single-Write. Then re-Read and verify:
+Single-Write (edit mode: `Edit`s, § Edit mode). Then re-Read and verify:
 - No unreplaced `[PLACEHOLDER]` tokens.
 - Failure semantics table has at least the four canonical rows
   (timeout, downstream unavailable, poison message, partial failure);
@@ -220,6 +231,7 @@ SEAM_RESULT:
   seam_file: [output_seam_path]
   related_adrs: [<ADR-NNN>, ...]
   gaps_count: <N>
+  edited_sections: "<anchor,anchor>"   # edit mode only
   validation_notes: "..."
 ```
 
@@ -228,7 +240,7 @@ interface contract (the orchestrator writes them into the manifest entry).
 
 ## Tool Discipline
 
-Only Read (payload + verify) and Write (interface contract). No Bash / Grep /
+Only Read (payload + verify), Write (interface contract) and Edit (edit mode). No Bash / Grep /
 Glob.
 
 ## Bundled reference: SEAM_SPEC_TEMPLATE.md

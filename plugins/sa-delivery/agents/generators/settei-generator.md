@@ -1,7 +1,7 @@
 ---
 name: settei-generator
 description: Universal Cross-Cutting Standards generator (internally the Settei) — produces ONE handoffs/CROSS_CUTTING_STANDARDS.md per orchestration run containing the global rules (error semantics, versioning, identity, idempotency, observability, data, resilience) synthesized from institutional ADRs — never from compliance. Every rule cites its source ADR (ADR-NNN). MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
-tools: Read, Write
+tools: Read, Write, Edit
 model: sonnet
 ---
 
@@ -124,6 +124,17 @@ the payload.
 - `output_settei_path`: absolute path where the Cross-Cutting Standards must be written
   (`/abs/project/handoffs/CROSS_CUTTING_STANDARDS.md`).
 - `settei_version`: semver-formatted version string (e.g. `4.0.0`).
+- `edit_path` (optional): the edit file — present only in edit mode (§ Edit mode).
+
+## Edit mode
+
+When the prompt carries `edit_path`, the part already exists and only its sources moved. Read the edit file — the delta
+of the payload since the release the part was written at — and the document at the output path, then change **only**
+the sections the delta reaches, with `Edit`: every other section keeps its words and its order. Move the Architecture
+Version and Generated rows to the payload's. The payload stays the reference for what you write, and the template's
+rules hold for every section you change. Return the anchors you changed (`<!-- SECTION: … -->`) as `edited_sections`;
+the orchestrator restores any other section that changed (`kit-edit.js check`). Without `edit_path`, write the whole
+part as the workflow below says.
 
 ## Workflow
 
@@ -206,7 +217,7 @@ is the source's choice, not yours.
 
 ### PHASE 3 — Write the Cross-Cutting Standards
 
-Single-Write. Then re-Read and verify:
+Single-Write (edit mode: `Edit`s, § Edit mode). Then re-Read and verify:
 - No unreplaced `[PLACEHOLDER]` tokens.
 - Every rule bullet contains at least one `→ per` citation OR the
   section is marked `[NOT DOCUMENTED — ...]`.
@@ -224,12 +235,13 @@ SETTEI_RESULT:
     - section: "Error semantics"
       recommended_action: "record the decision as an institutional ADR (/sa-records:architecture-definition-record)"
     - ...
+  edited_sections: "<anchor,anchor>"   # edit mode only
   validation_notes: "..."
 ```
 
 ## Tool Discipline
 
-Only Read (payload + verify) and Write (Cross-Cutting Standards). No Bash / Grep / Glob.
+Only Read (payload + verify), Write (Cross-Cutting Standards) and Edit (edit mode). No Bash / Grep / Glob.
 
 ## Bundled reference: SETTEI_TEMPLATE.md
 

@@ -281,6 +281,14 @@ that produces them. It hashes every payload and decides SKIP / REGEN against
 payload's stamps — architecture version, generation date, checkout path — so a release that did not touch a part keeps
 it: the script moves its Architecture Version row and its manifest entry by code (`Kept, … restamped` on stderr). Never
 `--force` a release: the model would rewrite every part in other words, and the kit's diff would hide the release's.
+
+**Edit mode** (10.9.0, `scripts/kit-edit.js`): a REGEN part that exists and whose payload hash moved is not rewritten.
+The script cuts its payload again from the tree of the release the part was written at (`architecture-v<version>` from
+the manifest, same plugin, same judge answers) and compares the two without their stamps. Equal, the part is kept
+(`Kept — the payload re-cut from their release is the same`): a manifest hashed in an older form costs no
+regeneration. Different, the part carries `edit_path` — the delta and a copy of the previous text under
+`.cache/sa-skills/handoff-payloads/edit/` — and its generator edits only what the delta reaches. No tag, no previous
+file, a template change or a delta over half the payload: written whole, no `edit_path`.
 Template version `4.3.1` and schema version `4` are its defaults — pass `--template-version` /
 `--schema-version` only to override.
 
@@ -402,6 +410,7 @@ Each Task carries its own prompt body (see each generator's SKILL for the exact 
 - **seam**: `seam_payload_path`, `output_seam_path`, `edge_key`, `ekonte_version`, `settei_version`.
 - **cut-sheet**: `cut_sheet_payload_path`, `output_cut_sheet_path`, `component_slug`, `component_index_position`, `asset_types`, `ekonte_version`, `settei_version`.
 - **asset**: `payload_path` (the per-component cut-sheet payload), `asset_type`, `output_asset_path`, `component_slug`, `doc_language`, optional `context7_cache_hint`. Set `model: sonnet`.
+- **Edit mode**: a part with `edit_path` (`run.ekonte_edit_path`, `run.settei_edit_path`, a seam's or a component's `edit_path`) passes it in its prompt; each asset of a component in edit mode passes the component's `edit_path`.
 
 #### Step 5.2 — Collect results from all lanes
 
@@ -416,6 +425,20 @@ Each generator returns one of the following blocks:
 Aggregate everything for Phase 6 (manifest updates) and Phase 7 (report). Do NOT abort on any single failure — continue collecting.
 
 **Orphaned assets**: asset Tasks spawn eagerly, so a component whose Component Specification fails to generate may still have asset files on disk. Phase 6 excludes them from the manifest; Phase 7 lists them so the next run regenerates.
+
+#### Step 5.2a — Edit mode: only the sections the delta reached (by code)
+
+For each part written in edit mode, one Bash call each, before the gate:
+
+```bash
+bun [plugin_dir]/skills/architecture-dev-handoff/scripts/kit-edit.js check <part.md> \
+    --previous <edit_path without .md>.previous.md --sections "<edited_sections>" --restore
+```
+
+It compares the part with its previous text section by section (`<!-- SECTION: … -->`; dates and the Architecture
+Version row masked) and puts back the previous text of every section that changed without being declared, printing
+`not declared: … (restored: …)`. Exit 1 is a section added or removed without being declared: treat the part as
+`VALIDATION_FAILED` and re-spawn it once with the line quoted. List what it restored in the Phase 7 report.
 
 #### Step 5.2b — The diagram gate over the written kit
 
@@ -648,15 +671,18 @@ Location: handoffs/
 Shared documents:
   ✓ SYSTEM_RUNTIME_VIEW.md — [flows_count] flows, [edges_count] edges, [gaps_count] gaps
   ✓ CROSS_CUTTING_STANDARDS.md — [rules_count] rules, [citations_count] citations
+  or ✎ edited: [edited_sections][ · restored: …]
   or ⏭ skipped (unchanged since last generation)
 
-Interface contracts: [N] regenerated, [M] skipped, [K] failed
+Interface contracts: [N] regenerated, [E] edited, [M] skipped, [K] failed
   ✓ [edge_key] — related ADRs: ADR-018
+  ✎ [edge_key] — edited: [edited_sections][ · restored: …]
   ⏭ [edge_key] — skipped
   ✗ [edge_key] — VALIDATION_FAILED: [notes]
 
-Component Specifications: [N] regenerated ([K] failed, [S] skipped)
+Component Specifications: [N] regenerated, [E] edited ([K] failed, [S] skipped)
   ✓ [component-slug] — components/NN-<slug>.md
+  ✎ [component-slug] — edited: [edited_sections][ · restored: …] · assets edited: [names or none]
       Assets: openapi.yaml, ddl.sql
       Gaps recorded: [M] open questions in § 11
   ⏭ [component-slug] — skipped (unchanged since last generation)

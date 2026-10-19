@@ -235,9 +235,14 @@ const STAMPS: Array<[RegExp, string]> = [
   [/^generation_date:.*$/gm, "generation_date:"],
   [/^architecture_md_path:.*$/gm, "architecture_md_path:"],   // where the project is checked out, not what it says
 ];
-export function hashPayload(payloadPath: string, templateVersion: string): string {
-  let text = readFileSync(payloadPath, "utf-8");
+/** A payload's text without its stamps — what the hash reads, and what an edit's delta compares. */
+export function stampFree(text: string): string {
   for (const [re, keep] of STAMPS) text = text.replace(re, keep);
+  return text;
+}
+
+export function hashPayload(payloadPath: string, templateVersion: string): string {
+  const text = stampFree(readFileSync(payloadPath, "utf-8"));
   return `sha256:${createHash("sha256").update(text).update(`\n--TEMPLATE--\n${templateVersion}`).digest("hex")}`;
 }
 

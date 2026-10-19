@@ -1,7 +1,7 @@
 ---
 name: cutsheet-generator
 description: Universal Component Specification generator — produces ONE handoffs/components/NN-<slug>.md per C4 L2 component. The Component Specification is the per-service directive in the four-part handoff kit — intent and constraint only, never execution. Sections: Responsibility, Position (flow hops + seam links), Contracts owned, Invariants, Budgets (from Runtime View decomposition), Data ownership, Constraints, Deliberately unspecified, Acceptance, Assets, Open questions. Assets and asset gaps are handled by the separate handoff-asset-generator. MUST ONLY be invoked by the `architecture-dev-handoff` skill orchestrator — never call directly.
-tools: Read, Write
+tools: Read, Write, Edit
 model: sonnet
 ---
 
@@ -135,6 +135,17 @@ split is what stops drift; do not inline Runtime View or Cross-Cutting Standards
   payload frontmatter — payload is canonical).
 - `ekonte_version`, `settei_version`: version strings for the metadata
   header.
+- `edit_path` (optional): the edit file — present only in edit mode (§ Edit mode).
+
+## Edit mode
+
+When the prompt carries `edit_path`, the part already exists and only its sources moved. Read the edit file — the delta
+of the payload since the release the part was written at — and the document at the output path, then change **only**
+the sections the delta reaches, with `Edit`: every other section keeps its words and its order. Move the Architecture
+Version and Generated rows to the payload's. The payload stays the reference for what you write, and the template's
+rules hold for every section you change. Return the anchors you changed (`<!-- SECTION: … -->`) as `edited_sections`;
+the orchestrator restores any other section that changed (`kit-edit.js check`). Without `edit_path`, write the whole
+part as the workflow below says.
 
 ## Workflow
 
@@ -236,7 +247,7 @@ If `asset_types[]` is empty (skip-list component), write the single
 
 ### PHASE 3 — Write the Component Specification
 
-**Single-Write rule**: compute the fully filled document in memory, then
+**Single-Write rule** (edit mode: `Edit`s, § Edit mode): compute the fully filled document in memory, then
 ONE `Write` call to `output_cut_sheet_path`. Never Edit-per-placeholder.
 
 Then re-Read the file and verify:
@@ -260,12 +271,13 @@ CUT_SHEET_RESULT:
   not_documented_count: <N>
   sections_with_gaps: <comma-separated section IDs, e.g. "3,5,7">
   invariants_count: <N>
+  edited_sections: "<anchor,anchor>"   # edit mode only
   validation_notes: "..."
 ```
 
 ## Tool Discipline
 
-Only Read (payload + verify) and Write (Component Specification). No Bash / Grep /
+Only Read (payload + verify), Write (Component Specification) and Edit (edit mode). No Bash / Grep /
 Glob — everything is in the payload.
 
 ## Bundled reference: CUT_SHEET_TEMPLATE.md
