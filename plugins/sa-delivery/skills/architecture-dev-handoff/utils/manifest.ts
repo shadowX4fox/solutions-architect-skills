@@ -17,8 +17,10 @@
  * are auto-migrated by treating their per-slug entries as
  * `cut_sheets[<slug>]` and forcing REGEN on all of them.
  *
- * Hash inputs (unchanged):
- *   sha256( payload_file_bytes + "\n--TEMPLATE--\n" + template_version )
+ * Hash inputs:
+ *   sha256( payload_text_without_stamps + "\n--TEMPLATE--\n" + template_version )
+ * The stamps — architecture_version, **Architecture Version:**, generation_date, architecture_md_path — are left out (10.8.2): a part
+ * unchanged but for them is kept, its version row restamped by code.
  *
  * @module manifest
  */
@@ -221,12 +223,31 @@ export function readTemplateVersion(templatePath: string): string {
   return match[1]!;
 }
 
+/**
+ * The payload's stamps — the architecture version and the date it was cut. A release moves the version in every payload
+ * a run on another day moves the date and another checkout the path, while the part's content is the same: hashed, they made every part REGEN, and
+ * the model rewrote a whole kit in other words for a release that added one record (10.8.2). The hash leaves them out;
+ * a part kept on SKIP gets its Architecture Version row by code (`restampVersion`).
+ */
+const STAMPS: Array<[RegExp, string]> = [
+  [/^architecture_version:.*$/gm, "architecture_version:"],
+  [/^\*\*Architecture Version:\*\*.*$/gm, "**Architecture Version:**"],
+  [/^generation_date:.*$/gm, "generation_date:"],
+  [/^architecture_md_path:.*$/gm, "architecture_md_path:"],   // where the project is checked out, not what it says
+];
 export function hashPayload(payloadPath: string, templateVersion: string): string {
-  const bytes = readFileSync(payloadPath);
-  const h = createHash("sha256");
-  h.update(bytes);
-  h.update(`\n--TEMPLATE--\n${templateVersion}`);
-  return `sha256:${h.digest("hex")}`;
+  let text = readFileSync(payloadPath, "utf-8");
+  for (const [re, keep] of STAMPS) text = text.replace(re, keep);
+  return `sha256:${createHash("sha256").update(text).update(`\n--TEMPLATE--\n${templateVersion}`).digest("hex")}`;
+}
+
+const VERSION_ROW = /^\|\s*(?:\*\*)?(?:Architecture Version|Versi[oó]n de la arquitectura)(?:\*\*)?\s*\|\s*v?\d+\.\d+\.\d+\s*\|/i;
+/** A kept part's Architecture Version row moved to the version it is now part of; the text is otherwise unchanged. */
+export function restampVersion(src: string, version: string): string {
+  return src
+    .split("\n")
+    .map((l) => (VERSION_ROW.test(l) ? l.replace(/(\|[^|]*\|\s*v?)\d+\.\d+\.\d+/, `$1${version}`) : l))
+    .join("\n");
 }
 
 export type SkipDecision = {

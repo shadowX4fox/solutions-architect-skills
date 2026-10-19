@@ -35,7 +35,7 @@ const { fromSaSkills } = require(path.join(__dirname, '..', '..', '..', 'scripts
 const { resolveNames, verifyResolutions } = require(fromSaSkills('scripts', 'resolve-name.js'));
 const { collect } = require(fromSaSkills('scripts', 'shared', 'arch-facts.js'));
 const { removeHeader } = require(fromSaSkills('scripts', 'shared', 'header-detector.ts'));
-const { hashPayload, loadManifest, shouldSkip } = require(path.join(__dirname, '..', 'utils', 'manifest.ts'));
+const { hashPayload, loadManifest, saveManifest, shouldSkip, restampVersion } = require(path.join(__dirname, '..', 'utils', 'manifest.ts'));
 
 const TEMPLATE_VERSION = '4.3.1', SCHEMA_VERSION = '4';
 const { blocksOf, lint } = require(fromSaSkills('scripts', 'shared', 'mermaid-check.js'));
@@ -518,6 +518,17 @@ ${relAdrs.length ? relAdrs.map((id) => adrEntry(id, 500, payloadDir)).join('\n\n
     run: { ekonte_payload_path: runPath, settei_payload_path: runPath, ekonte_payload_hash: runHash, settei_payload_hash: runHash, ekonte_decision: ek.decision, settei_decision: st.decision, ekonte_reason: ek.reason, settei_reason: st.reason },
     seams: seams.map((s) => { const h = hashPayload(s.payload_path, templateVersion); const d = decide({ section: 'seams', edgeKey: s.edge_key, payloadHash: h, outputFileAbsPath: path.join(handoffsDir, 'interfaces', `${s.edge_key}.md`) }); return { edge_key: s.edge_key, edge_id: s.edge.id, integration: s.edge.int.id, payload_path: s.payload_path, payload_hash: h, decision: d.decision, reason: d.reason, seam_file_rel: `interfaces/${s.edge_key}.md`, related_adrs: s.related_adrs }; }),
     cut_sheets: cutSheets.map((x) => { const h = hashPayload(x.payload_path, templateVersion); const nn = String(x.c.index || '').split('.').pop().padStart(2, '0'); const f = `components/${nn}-${x.c.slug}.md`; const d = decide({ section: 'cut_sheets', slug: x.c.slug, payloadHash: h, outputFileAbsPath: path.join(handoffsDir, f) }); return { slug: x.c.slug, name: x.c.name, component_index_position: x.c.index, payload_path: x.payload_path, payload_hash: h, decision: d.decision, reason: d.reason, asset_types: x.asset_types, asset_hints_override: x.hint, doc_language: lang, cut_sheet_file_rel: f, component_version: x.c.component_version || '1.0.0', seams_incident: x.incident }; }) };
+  // a kept part is the architecture's at this version too: its Architecture Version row and its manifest entry move by code,
+  // with the hash in the stamp-free form — the model rewrites nothing that did not change (10.8.2)
+  const restamped = [], keep = (file, entry, hashKeys, hash) => {
+    const f = path.join(handoffsDir, file); if (/^\d+\.\d+\.\d+$/.test(archVersion) && fs.existsSync(f)) { const src = fs.readFileSync(f, 'utf8'), out = restampVersion(src, archVersion); if (out !== src) { fs.writeFileSync(f, out); restamped.push(file); } }
+    for (const k of hashKeys) entry[k] = hash; if ('architecture_version' in entry && /^\d+\.\d+\.\d+$/.test(archVersion)) entry.architecture_version = archVersion; };
+  if (ek.decision === 'SKIP') keep('SYSTEM_RUNTIME_VIEW.md', manifest.run, ['ekonte_hash'], runHash);
+  if (st.decision === 'SKIP') keep('CROSS_CUTTING_STANDARDS.md', manifest.run, ['settei_hash'], runHash);
+  for (const s of result.seams) if (s.decision === 'SKIP') keep(s.seam_file_rel, manifest.seams[s.edge_key], ['payload_hash'], s.payload_hash);
+  for (const x of result.cut_sheets) if (x.decision === 'SKIP') keep(x.cut_sheet_file_rel, manifest.cut_sheets[x.slug], ['payload_hash'], x.payload_hash);
+  if ([ek, st, ...result.seams, ...result.cut_sheets].some((d) => d.decision === 'SKIP')) saveManifest(manifestPath, manifest);
+  result.restamped = restamped;
   fs.writeFileSync(path.join(payloadDir, 'context-result.json'), JSON.stringify(result, null, 1));
   return { report, result, edges, payload_dir: payloadDir };
 }
@@ -540,6 +551,7 @@ if (require.main === module) (async () => {
   console.error(`Edges: ${r.edges.length} active (${r.edges.filter((e) => e.style === 'async').length} async)${rp.unresolved_endpoints.length ? ` — ${rp.unresolved_endpoints.length} endpoint(s) not a documented component (edge kept, no seam): ${rp.unresolved_endpoints.join('; ')}` : ''}${rp.undecided_endpoints.length ? ` — ${rp.undecided_endpoints.length} endpoint(s) UNDECIDED (no seam until the judge answers): ${rp.undecided_endpoints.join('; ')}` : ''}`);
   const pn = rp.panels; console.error(`Panels: ${pn.phases} phase sequence diagram(s)${pn.phases_without.length ? ` (phases without one: ${pn.phases_without.join(', ')})` : ''}; ${pn.cuts} cut(s) of ${pn.diagram || 'no container diagram'}${pn.unmatched_nodes.length ? ` — no node labelled: ${pn.unmatched_nodes.join(', ')}` : ''}${pn.undecided_labels.length ? ` — ${pn.undecided_labels.length} node label(s) UNDECIDED (${pn.undecided_labels.join(', ')}; answer ${pn.worksheet || 'the judge worksheet'} and re-run)` : ''}${pn.rejected.length ? ` — REJECTED by the diagram gate: ${pn.rejected.join('; ')}` : ''}`);
   console.error(`Decisions: Runtime View ${R.run.ekonte_decision} (${R.run.ekonte_reason}); Cross-Cutting ${R.run.settei_decision} (${R.run.settei_reason}); seams ${R.seams.filter((s) => s.decision === 'REGEN').length} REGEN / ${R.seams.filter((s) => s.decision === 'SKIP').length} SKIP; components ${R.cut_sheets.filter((s) => s.decision === 'REGEN').length} REGEN / ${R.cut_sheets.filter((s) => s.decision === 'SKIP').length} SKIP`);
+  if (R.restamped.length) console.error(`Kept, the Architecture Version row restamped by code: ${R.restamped.join(', ')}`);
   if (rp.endpoint_review.length) console.error(`Endpoint review (${rp.endpoint_review.length}):\n${rp.endpoint_review.map((w) => '  - ' + w).join('\n')}`);
   if (rp.warnings.length) console.error(`Warnings (${rp.warnings.length}):\n${rp.warnings.map((w) => '  - ' + w).join('\n')}`);
   if (rp.edge_cross_check_warnings.length) console.error(`Edge cross-check (${rp.edge_cross_check_warnings.length}):\n${rp.edge_cross_check_warnings.map((w) => '  - ' + w).join('\n')}`);

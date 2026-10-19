@@ -277,7 +277,10 @@ docs/05 edge incident on the selection whose two endpoints are documented compon
 `<slug>.md` per selected component, and `context-result.json`. Every payload section is verbatim
 or a rule (PAYLOAD_SCHEMA.md); absent sources render as `[NOT DOCUMENTED — …]` with the command
 that produces them. It hashes every payload and decides SKIP / REGEN against
-`handoffs/.manifest.json` with the same module `manifest-cli.ts` runs; `--force` is honoured.
+`handoffs/.manifest.json` with the same module `manifest-cli.ts` runs; `--force` is honoured. The hash leaves out the
+payload's stamps — architecture version, generation date, checkout path — so a release that did not touch a part keeps
+it: the script moves its Architecture Version row and its manifest entry by code (`Kept, … restamped` on stderr). Never
+`--force` a release: the model would rewrite every part in other words, and the kit's diff would hide the release's.
 Template version `4.3.1` and schema version `4` are its defaults — pass `--template-version` /
 `--schema-version` only to override.
 
@@ -568,7 +571,7 @@ For each successful part, call the appropriate `manifest-cli.ts update-*` subcom
   ```bash
   bun [...]/manifest-cli.ts update-cut-sheet <manifest_path> <slug> <payload_hash> 4.3.1 4 <arch_version> components/NN-<slug>.md <doc_language> <generator_version> "<asset1,asset2,...>"
   ```
-  Filter `<asset1,asset2,...>` to assets whose `ASSET_RESULT.status == OK`. Orphaned assets are excluded — the next run regenerates them.
+  Filter `<asset1,asset2,...>` to assets whose `ASSET_RESULT.status == OK`, plus `c4-descriptor.md` and `security.md`, which code renders (Phase 4). Orphaned assets are excluded — the next run regenerates them.
 
 Failed parts (`VALIDATION_FAILED` / `PAYLOAD_FAILED` / `FAILED`) are NOT written to the manifest, so the next run treats them as needing regen.
 

@@ -10,6 +10,7 @@ import {
   hashPayload,
   loadManifest,
   readTemplateVersion,
+  restampVersion,
   saveManifest,
   shouldSkip,
   updateCutSheetEntry,
@@ -62,6 +63,27 @@ describe("hashPayload", () => {
   test("hash is sha256: prefixed hex", () => {
     const a = writePayload("a", "x");
     expect(hashPayload(a, TEMPLATE_VERSION)).toMatch(/^sha256:[0-9a-f]{64}$/);
+  });
+
+  test("the stamps — version, date, checkout path — do not count; the content does", () => {
+    const body = (v: string, d: string, at: string, fact: string) =>
+      `---\narchitecture_version: ${v}\narchitecture_md_path: ${at}/ARCHITECTURE.md\ngeneration_date: ${d}\n---\n**Architecture Version:** ${v}\n${fact}\n`;
+    const a = writePayload("a", body("1.1.1", "2026-01-02", "/home/me/order-desk", "Port 443"));
+    const b = writePayload("b", body("1.2.0", "2026-03-04", "/runner/work/order-desk", "Port 443"));
+    const c = writePayload("c", body("1.2.0", "2026-03-04", "/runner/work/order-desk", "Port 8443"));
+    expect(hashPayload(a, TEMPLATE_VERSION)).toBe(hashPayload(b, TEMPLATE_VERSION));
+    expect(hashPayload(b, TEMPLATE_VERSION)).not.toBe(hashPayload(c, TEMPLATE_VERSION));
+  });
+});
+
+describe("restampVersion", () => {
+  test("moves the Architecture Version row, in either language, and nothing else", () => {
+    const src = "| Field | Value |\n|---|---|\n| Architecture Version | 1.1.1 |\n| Component Version | 1.1.1 |\n\nArchitecture Version 1.1.1 in prose.";
+    const out = restampVersion(src, "1.2.0");
+    expect(out).toContain("| Architecture Version | 1.2.0 |");
+    expect(out).toContain("| Component Version | 1.1.1 |");
+    expect(out).toContain("Architecture Version 1.1.1 in prose.");
+    expect(restampVersion("| **Versión de la arquitectura** | v1.1.1 |", "1.2.0")).toBe("| **Versión de la arquitectura** | v1.2.0 |");
   });
 });
 

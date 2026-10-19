@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.8.2]
+
+### Fixed
+- **A release no longer rewrites the whole handoff kit.**
+  - Each payload carries its architecture version, generation date and checkout path, and the hash covered them. Every release, every run on another day, and every other checkout therefore made every part REGEN.
+  - The release CI then added `--force`. A release that only added one TDR rewrote 14 files of the kit (about 870 lines), and almost all of it was the same content in other words.
+  - `hashPayload` now leaves those stamps out.
+  - A part whose payload has not changed is kept. `handoff-prepare.js` moves its Architecture Version row and its manifest entry by code (`restampVersion`, both languages), so `kit-check`'s `version-stale` still passes.
+  - `ci/architecture-handoff.yml` no longer asks for `--force`. Measured on a version-only release of the demo project: 0 REGEN out of 7 parts, one line changed per document.
+- **The manifest lists `security.md`** with each component's assets, beside `c4-descriptor.md`. Both are rendered by code, and the Step 6.0 filter dropped `security.md`.
+
+### Upgrade
+- **Hashes in an existing `handoffs/.manifest.json` are in the old form.** The first handoff after this upgrade regenerates every part once. Every later run keeps what did not change.
+- **Projects with the CI workflows:** copy `ci/architecture-handoff.yml` again (its prompt dropped `--force`) and pin `SA_PLUGIN_REF: v10.8.2`.
+
 ## [10.8.1]
 
 ### Fixed
