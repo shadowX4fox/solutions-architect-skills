@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.9.2]
+
+### Fixed
+- **What changed now reports a container's technical debt.** `export-index.js --diff`, and `changes.json` with it, compares each container's `**Technical Debt:**` TDRs in the two ledgers. It reports TDRs added (with title and status), status moves, and TDRs no longer named: `- technical debt: added TDR-001 — … (Open)`.
+  - This counts as a change, but never as `action_required`.
+  - Before this, a release whose only change was a new TDR on a container did not report it. An IDE moving the demo project from 1.1.0 to 1.2.0 never learned of TDR-001.
+  - A bundle written before 10.8.0 reads as having no debt.
+  - The architecture MCP server computes `what_changed` with its own port of this diff, so it needs the same change.
+
 ## [10.9.1]
 
 ### Changed

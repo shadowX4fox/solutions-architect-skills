@@ -428,9 +428,10 @@ function flowsOf(ledger, slug) {
   return (ledger.flows || []).filter((f) => (f.phases || []).some((n) => mine.some((p) => p.n === n))).map((f) => ({ code: f.code, name: f.name, use_cases: f.use_cases, latency_target: f.latency_target, governed_by: f.governed_by || [],
     phases: (f.phases || []).map((n) => mine.find((p) => p.n === n)).filter(Boolean).map((p) => ({ n: p.n, name: p.name, hops: p.hops, latency_budget: p.latency_budget })) }));
 }
+const anyDebt = (d) => !!d && (d.added.length + d.removed.length + d.status.length) > 0;
 function componentChanges(o, n, slug) {
   const oc = (o.ledger.components || []).find((c) => c.slug === slug), nc = (n.ledger.components || []).find((c) => c.slug === slug);
-  const r = { component: slug, name: (nc || oc).name, status: !oc ? 'added' : !nc ? 'removed' : 'present', facts: [], contracts: null, interfaces: null, adrs: null, documents: [], flows: [], integrations: null, sections: null, open_questions: null };
+  const r = { component: slug, name: (nc || oc).name, status: !oc ? 'added' : !nc ? 'removed' : 'present', facts: [], contracts: null, interfaces: null, adrs: null, documents: [], flows: [], integrations: null, sections: null, open_questions: null, technical_debt: null };
   if (oc && nc) for (const k of ['name', 'type', 'technology', 'internal_name', 'component_version', 'system']) if (JSON.stringify(oc[k] ?? null) !== JSON.stringify(nc[k] ?? null)) r.facts.push({ field: k, from: oc[k] ?? null, to: nc[k] ?? null });
   const op = o.packs[slug], np = n.packs[slug];
   // a pack's revision is the sha256 of its pack.json in the manifest — pack.json lists every part's hash, so any part moving moves it
@@ -463,11 +464,17 @@ function componentChanges(o, n, slug) {
   r.integrations = setDiff(ints(o.ledger), ints(n.ledger), (i) => i.id, (a, b) => IF.every((k) => JSON.stringify(a[k] ?? null) === JSON.stringify(b[k] ?? null)));
   const oi = new Map(ints(o.ledger).map((i) => [i.id, i])), ni = new Map(ints(n.ledger).map((i) => [i.id, i]));
   r.integrations.fields = r.integrations.changed.flatMap((id) => IF.filter((k) => JSON.stringify(oi.get(id)[k] ?? null) !== JSON.stringify(ni.get(id)[k] ?? null)).map((k) => ({ integration: id, field: k, from: oi.get(id)[k] ?? null, to: ni.get(id)[k] ?? null })));
+  // its technical debt (10.9.2): the TDRs its descriptor's **Technical Debt:** line names, with their status — the workaround the code
+  // keeps, or the one it may now drop; a bundle written before 10.8.0 carries no `tdrs` and reads as none
+  const debt = (l, c) => { const st = new Map((l.tdrs || []).map((t) => [t.id, t])); return ((c && c.tdrs) || []).map((id) => ({ id, title: (st.get(id) || {}).title || null, status: (st.get(id) || {}).status || null })); };
+  const od = debt(o.ledger, oc), nd = debt(n.ledger, nc);
+  r.technical_debt = { added: nd.filter((t) => !od.some((x) => x.id === t.id)), removed: od.filter((t) => !nd.some((x) => x.id === t.id)),
+    status: nd.flatMap((t) => { const x = od.find((y) => y.id === t.id); return x && x.status !== t.status ? [{ id: t.id, title: t.title, from: x.status, to: t.status }] : []; }) };
   const ch = (b) => b.chunks.filter((c) => (c.meta.components || []).includes(slug));
   const sd = setDiff(ch(o), ch(n), (c) => c.id, (a, b) => a.content_hash === b.content_hash);
   const where = (b, id) => { const c = b.chunks.find((x) => x.id === id); return { file: c.meta.file, title: c.meta.title, kind: c.meta.kind }; };
   r.sections = { added: sd.added.map((id) => where(n, id)), removed: sd.removed.map((id) => where(o, id)), changed: sd.changed.map((id) => where(n, id)) };
-  r.changed = r.status !== 'present' || r.facts.length > 0 || [r.contracts, r.interfaces, r.adrs, r.integrations, r.sections].some((d) => d && anyOf(d)) || r.documents.length > 0 || r.flows.length > 0 || ['added', 'removed'].includes(r.pack) || r.pack_revised || !!(r.open_questions && (r.open_questions.new.length || r.open_questions.resolved.length));
+  r.changed = r.status !== 'present' || r.facts.length > 0 || [r.contracts, r.interfaces, r.adrs, r.integrations, r.sections].some((d) => d && anyOf(d)) || r.documents.length > 0 || r.flows.length > 0 || anyDebt(r.technical_debt) || ['added', 'removed'].includes(r.pack) || r.pack_revised || !!(r.open_questions && (r.open_questions.new.length || r.open_questions.resolved.length));
   // what the developer must act on: the code-facing parts moved — the contracts, an interface or an integration row naming it, its name / type / technology /
   // internal name, a budget, its spec. A component version alone is listed, not an action: it moves with any edit of the descriptor
   r.action_required = r.status === 'removed' || r.facts.some((f) => ['name', 'type', 'technology', 'internal_name'].includes(f.field)) || !!(r.contracts && anyOf(r.contracts)) || !!(r.interfaces && anyOf(r.interfaces)) || anyOf(r.integrations) || r.flows.length > 0 || r.documents.includes('Component Specification') || r.documents.includes('Security Obligations');
@@ -495,6 +502,7 @@ function renderChanges(d) {
     list('contracts', c.contracts); list('interfaces', c.interfaces); list('ADRs', c.adrs); list('integrations', c.integrations);
     ((c.integrations || {}).fields || []).forEach((f) => L.push(`  - ${f.integration} ${f.field}: ${f.from ?? '—'} → ${f.to ?? '—'}`));
     if (c.documents.length) L.push(`- documents: ${c.documents.join(', ')}`);
+    const td = c.technical_debt; if (anyDebt(td)) L.push(`- technical debt: ${[...td.added.map((t) => `added ${t.id}${t.title ? ` — ${t.title}` : ''}${t.status ? ` (${t.status})` : ''}`), ...td.status.map((t) => `${t.id} ${t.from} → ${t.to}`), ...td.removed.map((t) => `no longer names ${t.id}`)].join(' · ')}`);
     c.flows.forEach((f) => L.push(`- flow ${f.flow}. ${f.name}: ${f.change}${f.fields ? ` — ${f.fields.map((x) => `${x.field} ${x.from ?? '—'} → ${x.to ?? '—'}`).join('; ')}` : ''}`));
     if (c.sections && anyOf(c.sections)) L.push(`- sections naming it: ${c.sections.added.length} added, ${c.sections.changed.length} changed, ${c.sections.removed.length} removed — ${[...c.sections.added, ...c.sections.changed].map((x) => x.title).slice(0, 8).join('; ')}`);
     if (c.open_questions) { if (c.open_questions.new.length) L.push(`- new open questions: ${c.open_questions.new.length}`); if (c.open_questions.resolved.length) L.push(`- open questions resolved: ${c.open_questions.resolved.length}`); }

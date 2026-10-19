@@ -238,6 +238,21 @@ describe("export-index — what changed", () => {
     expect(diffBundles(B, C).components.find((c: any) => c.component === "hub-api")).toMatchObject({ pack_revised: true, documents: ["Build instructions"], action_required: false, changed: true });
   });
 
+  test("technical debt: a TDR a container's descriptor starts naming, a status move, one it stops naming — listed, never an action", () => {
+    const bundle = (v: string, names: string[], tdrs: any[]) => ({ m: { project: { key: "order-desk" }, architecture: { version: v } }, packs: {}, chunks: [],
+      ledger: { components: [{ slug: "hub-api", name: "Hub API", level: "L2", tdrs: names }], tdrs } });
+    const A = bundle("1.3.0", ["TDR-001"], [{ id: "TDR-001", title: "Batch settlement", status: "Open" }]);
+    const B = bundle("1.4.0", ["TDR-001", "TDR-002"], [{ id: "TDR-001", title: "Batch settlement", status: "In Progress" }, { id: "TDR-002", title: "Keys never purged", status: "Open" }]);
+    const hub = diffBundles(A, B).components[0];
+    expect(hub.technical_debt).toEqual({ added: [{ id: "TDR-002", title: "Keys never purged", status: "Open" }], removed: [], status: [{ id: "TDR-001", title: "Batch settlement", from: "Open", to: "In Progress" }] });
+    expect(hub).toMatchObject({ changed: true, action_required: false });
+    expect(renderChanges(diffBundles(A, B))).toContain("- technical debt: added TDR-002 — Keys never purged (Open) · TDR-001 Open → In Progress");
+    expect(renderChanges(diffBundles(B, A))).toContain("no longer names TDR-002");
+    // a bundle written before the ledger carried a component's debt reads as none
+    const old = bundle("1.2.0", [], []); delete (old.ledger.components[0] as any).tdrs;
+    expect(diffBundles(old, A).components[0].technical_debt.added.map((t: any) => t.id)).toEqual(["TDR-001"]);
+  });
+
   test("per container between two bundles: contracts, interfaces, facts, budgets, sections, open questions; action required where code must move, with or without a pack", () => {
     const A = join(BASE, "bundle-1.3.0"), B = join(BASE, "bundle-1.4.0");
     rmSync(A, { recursive: true, force: true }); rmSync(B, { recursive: true, force: true });
