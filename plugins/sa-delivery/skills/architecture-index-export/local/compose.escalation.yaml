@@ -1,0 +1,17 @@
+# Where the local server files a project's escalations (the server's archindex.escalation.projects): with it, an IDE agent's
+# preview_escalation returns the issue and the commands that file it with the developer's own access; without it, the
+# server files none and sends the user to the architects. One project per local server:
+#
+#   SA_INDEX_ESCALATION_PROJECT=<project key> SA_INDEX_ESCALATION_REPOSITORY=<owner/repo> \
+#     docker compose -f compose.yaml -f compose.escalation.yaml up -d
+#
+# SA_INDEX_ESCALATION_HOST: github (the default) | gitlab | gitea | azure; SA_INDEX_ESCALATION_SERVER: the host's domain when
+# it is not github.com, gitlab.com or dev.azure.com (Gitea: required). publish-index.js --up adds this file when
+# SA_INDEX_ESCALATION_PROJECT is set.
+services:
+  server:
+    environment:
+      ARCHINDEX_ESCALATION_PROJECTS_0_PROJECT: ${SA_INDEX_ESCALATION_PROJECT:?set SA_INDEX_ESCALATION_PROJECT — the project key}
+      ARCHINDEX_ESCALATION_PROJECTS_0_HOST: ${SA_INDEX_ESCALATION_HOST:-github}
+      ARCHINDEX_ESCALATION_PROJECTS_0_REPOSITORY: ${SA_INDEX_ESCALATION_REPOSITORY:?set SA_INDEX_ESCALATION_REPOSITORY — owner/repo, the project path or organization/project}
+      ARCHINDEX_ESCALATION_PROJECTS_0_SERVER: ${SA_INDEX_ESCALATION_SERVER:-}

@@ -169,6 +169,21 @@ describe("export-index — build packs", () => {
     expect(bare).not.toContain('"server"');   // no URL given: the binding names none rather than a placeholder
   });
 
+  test("BUILD.md rule 9: a blocking question goes to the architect — through the team's channel, or as an escalation on a RUN-team project", () => {
+    const md = (o: any) => readFileSync(join(exportIndex(P, { kitCheck: clean }).out, "buildpacks/hub-api/BUILD.md"), "utf8");
+    const standard = md({});
+    expect(standard).toContain("9. **What only the architect can answer goes to the architect.**");
+    expect(standard).not.toContain("preview_escalation");
+    expect(standard).toContain("a question that blocks the build follows rule 9");
+    w(".sa-skills/project.json", JSON.stringify({ support: "run" }));
+    const run = md({});
+    expect(run).toContain("9. **What only the architect can answer is escalated, never kept in a local file.**");
+    expect(run).toContain('call `preview_escalation(project: "order-desk", …)`');
+    expect(run).toContain("an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`");
+    expect(run).toContain("only after a yes follow `file_with.steps` with the developer's own access, then `record_escalation`");
+    expect(run).not.toMatch(/\{\{\w+\}\}/);
+  });
+
   test("the gate: a failing file skips its component, a failing shared document or another kit version packs nothing, no kit warns", () => {
     let m = exportIndex(P, { kitCheck: () => [{ file: join(P, "handoffs/assets/02-hub-api/openapi.yaml"), findings: [{ rule: "x" }] }] }).manifest;
     expect(m.buildpacks).toEqual([]); expect(m.skipped).toContainEqual({ component: "hub-api", reason: "kit-check fails on handoffs/assets/02-hub-api/openapi.yaml" });

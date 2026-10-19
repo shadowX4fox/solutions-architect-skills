@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.6.1]
+
+### Fixed
+- A build blocked by the architecture never became an escalation. `BUILD.md` rule 9: on a RUN-team project a question only the architect can answer — a contract with nothing to implement, an interface whose authentication is not documented, a `Proposed` decision the code depends on — goes to `preview_escalation` (the questions, the trigger each touches: `security-iam` for authentication, `low-confidence` for a gap no other trigger names, the part and line as evidence, route `tier-1`), the issue shown, filed after the user's yes with `file_with`, then `record_escalation`; on any other project the questions go to the architects through the team's channel. Rule 3 points a blocking question to it. The first IDE build on a RUN-team project stopped and wrote its questions to a local file.
+- The local server could not file escalations: `local/compose.escalation.yaml` sets the server's escalation host for one project (`SA_INDEX_ESCALATION_PROJECT`, `SA_INDEX_ESCALATION_REPOSITORY`, `SA_INDEX_ESCALATION_HOST`, `SA_INDEX_ESCALATION_SERVER`), and `publish-index.js --up` adds it when the project is set.
+- The CI examples pin `v10.6.1`.
+
 ## [10.6.0]
 
 ### Added

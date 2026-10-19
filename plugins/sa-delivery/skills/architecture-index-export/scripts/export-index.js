@@ -232,7 +232,12 @@ function kitCheckDefault(hd) {
 // the build instructions: templates/BUILD.md with the pack's facts filled in — the rules live in the template, the facts in the pack
 const cell = (s) => String(s == null || s === '' ? '—' : s).replace(/\|/g, '\\|').replace(/\n+/g, ' ');
 const mdTable = (head, rows) => `| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n${rows.map((r) => `| ${r.map(cell).join(' | ')} |`).join('\n')}`;
-function renderBuild(pack, projectName, server) {
+// rule 9: what only the architect can answer — an escalation on a RUN-team project (the server previews it, the developer files it), else the team's channel
+function escalationRule(project, mode) {
+  if (mode === 'run') return '9. **What only the architect can answer is escalated, never kept in a local file.** A RUN team maintains this architecture. When an open question blocks the build — a contract with nothing to implement, an interface whose authentication is not documented, a decision still `Proposed` the code depends on — stop that part and call `preview_escalation(project: "' + project + '", …)`: the questions, one per item; the components by canonical name and the `I-nn` integrations concerned; the trigger each one touches from `get_architecture`\'s `support.triggers` (an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`) with its evidence — the part and the line; route `tier-1`. Show the user the issue it returns; only after a yes follow `file_with.steps` with the developer\'s own access, then `record_escalation`. A change to the architecture you would make that crosses a trigger takes the same path. If the server files no escalations for this project, give the user the same questions, each with its part and line, for the architects.';
+  return '9. **What only the architect can answer goes to the architect.** When an open question blocks the build — a contract with nothing to implement, an interface whose authentication is not documented — stop that part and give the user the questions, each with its part and line, for the architects through the team\'s channel; never settle it in code.';
+}
+function renderBuild(pack, projectName, server, mode) {
   const c = pack.component; const part = new Map(pack.parts.map((p) => [p.id, p]));
   // the pack's revision is the sha256 of the pack.json listing this very file, so the export cannot write it: the agent records it from get_build_pack
   const binding = JSON.stringify({ ...(server ? { server } : {}), project: pack.project, component: c.slug, architecture_version: pack.architecture_version, pack_revision: '<pack_revision from get_build_pack>' }, null, 2);
@@ -245,7 +250,8 @@ function renderBuild(pack, projectName, server) {
   const security = inb ? inb[1].trim() : 'None stated for this component.';
   const questions = pack.open_questions.length ? mdTable(['Part', 'Line', 'Question'], pack.open_questions.map((q) => [`\`${q.part}\``, q.line, q.text])) : 'None.';
   const v = { name: c.name, internal_name: c.internal_name ? ` (\`${c.internal_name}\`)` : '', internal_name_rule: c.internal_name ? `, with \`${c.internal_name}\` beside it where an identifier is needed (repository, workload, artifact)` : '',
-    type: c.type || 'component', technology: (c.technology || []).join(', ') || 'technology not stated', project_name: projectName, project: pack.project, slug: c.slug, version: pack.architecture_version, binding, plan, security, interfaces, flows, questions };
+    type: c.type || 'component', technology: (c.technology || []).join(', ') || 'technology not stated', project_name: projectName, project: pack.project, slug: c.slug, version: pack.architecture_version, binding, plan, security, interfaces, flows, questions,
+    escalation_rule: escalationRule(pack.project, mode) };
   return read(path.join(__dirname, '..', 'templates', 'BUILD.md')).replace(/\{\{(\w+)\}\}/g, (m, k) => (k in v ? v[k] : m));
 }
 function buildPacks(root, facts, outDir, opts = {}) {
@@ -304,7 +310,7 @@ function buildPacks(root, facts, outDir, opts = {}) {
       component: { slug, name: c.name, internal_name: c.internal_name || null, type: c.type || null, technology: c.technology || [], system: c.system || null, component_version: c.component_version || null },
       parts: partsOut.map(({ step, ...p }) => p), plan, flows, interfaces, adrs, open_questions, instructions: 'BUILD.md' };
     // BUILD.md — the instructions an IDE agent follows, rendered from the pack by code; a part like any other
-    const b = Buffer.from(renderBuild({ ...pack, dir }, (facts.architecture || {}).name || opts.key, opts.server));
+    const b = Buffer.from(renderBuild({ ...pack, dir }, (facts.architecture || {}).name || opts.key, opts.server, support.supportOf(root).support));
     fs.writeFileSync(path.join(dir, 'BUILD.md'), b);
     pack.parts.unshift({ id: 'instructions', kind: 'instructions', title: 'Build instructions', path: 'BUILD.md', source: null, bytes: b.length, sha256: sha(b) });
     fs.writeFileSync(path.join(dir, 'pack.json'), JSON.stringify(pack, null, 1) + '\n');

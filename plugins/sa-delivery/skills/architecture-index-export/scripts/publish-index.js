@@ -22,6 +22,8 @@ const { exportIndex, checkBundle } = require('./export-index.js');
 const COMPOSE = path.join(__dirname, '..', 'local', 'compose.yaml');
 // the server built from its repository instead of the published image, when SA_INDEX_SERVER_REF names a branch or commit
 const COMPOSE_SOURCE = path.join(__dirname, '..', 'local', 'compose.source.yaml');
+// where the server files one project's escalations, when SA_INDEX_ESCALATION_PROJECT names it (local/compose.escalation.yaml)
+const COMPOSE_ESCALATION = path.join(__dirname, '..', 'local', 'compose.escalation.yaml');
 const CONFIG = path.join('.sa-skills', 'index.json');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -76,7 +78,7 @@ async function up(server, log, timeoutS) {
   const ollama = await chooseOllama();
   log(ollama.note);
   const source = !!process.env.SA_INDEX_SERVER_REF;
-  const args = ['compose', '-f', COMPOSE, ...(source ? ['-f', COMPOSE_SOURCE] : []), ...(ollama.cpu ? ['--profile', 'cpu'] : []), 'up', '-d', ...(source ? ['--build'] : [])];
+  const args = ['compose', '-f', COMPOSE, ...(source ? ['-f', COMPOSE_SOURCE] : []), ...(process.env.SA_INDEX_ESCALATION_PROJECT ? ['-f', COMPOSE_ESCALATION] : []), ...(ollama.cpu ? ['--profile', 'cpu'] : []), 'up', '-d', ...(source ? ['--build'] : [])];
   log(`starting the local server: docker ${args.join(' ')} (${source ? `built from ${process.env.SA_INDEX_SERVER_REF} — minutes` : 'the first start pulls the image and the model'})`);
   const r = spawnSync('docker', args, { stdio: 'inherit', env: { ...process.env, SA_INDEX_PORT: port, SA_INDEX_OLLAMA: ollama.url } });
   if (r.status !== 0) throw Object.assign(new Error('docker compose up failed'), { code: 3 });
