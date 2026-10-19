@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.7.4]
+
+### Fixed
+- A Tier 0 record propagates over the documentation surface, and `tier0.js verify` held it to a list of files. The TDR skill links both ways — TDR ↔ affected components, TDR ↔ ADR — and adds the Section 13 row; the ADR skill indexes and links. Verify now allows that propagation over `docs/` and the project ADRs where every changed hunk names the record's id, and refuses an unrelated change, any institutional ADR (001–100), and a fact of the ledger outside the record's own part (a name, type, technology, integration, flow, figure or another record's status — `factsHash` minus the record's section, taken at `prepare` for every kind). `architecture-tier0.yml`'s prompt states the same limits.
+- The CI examples pin `v10.7.4`.
+
 ## [10.7.3]
 
 ### Fixed

@@ -94,16 +94,32 @@ describe("tier0.js", () => {
     expect(T.prepare(ROOT, issue(fix("x", "y", "adr/ADR-101-keep.md"))).reasons).toContain('fields.file "adr/ADR-101-keep.md" is not under docs/');
   });
 
-  test("a TDR write may add its own summary row to the debt section, found by its anchor — and nothing else there", () => {
-    w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Open |\n");
+  test("a TDR propagates over the docs surface where it names itself; anything else, an institutional ADR or a moved fact is refused", () => {
+    const risks = (rows: string) => `# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n${rows}`;
+    w("docs/10-risks.md", risks("| TDR-001 | Polling | Open |\n"));
+    w("adr/ADR-001-institutional.md", "# ADR-001: Institutional\n\n**Status**: Accepted\n");
     git("add", "-A"); git("commit", "-q", "-m", "risks");
-    const p = T.prepare(ROOT, issue(REQ));
-    w(p.file, "x"); w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Open |\n| TDR-002 | Stock cache | Open |\n");
-    expect(T.verify(ROOT, p).problems.filter((x: string) => x.includes("docs/10"))).toEqual([]);
-    w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Resolved |\n| TDR-002 | Stock cache | Open |\n");
-    expect(T.verify(ROOT, p).problems.some((x: string) => /docs\/10-risks\.md: a line that is not TDR-002's summary row changed/.test(x))).toBe(true);
-    git("checkout", "-q", "docs/10-risks.md");
-    expect(T.verify(ROOT, p).problems).toContain("docs/10-risks.md has no summary row for TDR-002 — the TDR skill appends one to the Risks and Technical Debt section");
+    const p = T.prepare(ROOT, issue(REQ)), hub = "docs/components/order-desk/01-hub-api.md", hubSrc = readFileSync(join(ROOT, hub), "utf8");
+    const tdrFile = readFileSync(join(ROOT, "tdr/TDR-001-polling.md"), "utf8").replace(/TDR-001/g, "TDR-002").replace("Hub API polls the stock", "Hub API caches the stock");
+    w(p.file, tdrFile); w("tdr/README.md", "# TDRs\n\n| ID | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Open |\n| TDR-002 | Stock cache | Open |\n");
+    const docsProblems = () => T.verify(ROOT, p).problems.filter((x: string) => !/^tdr\/|TDR-001|has no record|is Open/.test(x));
+    // missing Section 13 row
+    expect(docsProblems()).toContain("docs/10-risks.md has no summary row for TDR-002 — the TDR skill appends one to the Risks and Technical Debt section");
+    // the row and the link both ways in the component descriptor: allowed
+    w("docs/10-risks.md", risks("| TDR-001 | Polling | Open |\n| TDR-002 | Stock cache | Open |\n"));
+    w(hub, hubSrc + "\n## Known debt\n\n- [TDR-002](../../../tdr/TDR-002-hub-api-caches-the-stock.md) — stock cached 5 minutes\n");
+    expect(docsProblems()).toEqual([]);
+    // a change that does not name the record
+    w("docs/01-system-overview.md", "# System Overview\n\nThe Order Desk takes orders by phone.\n");
+    expect(docsProblems()).toContain("docs/01-system-overview.md: a change that does not name TDR-002 — The Order Desk takes orders by phone.");
+    git("checkout", "-q", "docs/01-system-overview.md");
+    // an institutional ADR, even naming it
+    w("adr/ADR-001-institutional.md", "# ADR-001: Institutional\n\n**Status**: Accepted\n\nSee TDR-002.\n");
+    expect(docsProblems()).toContain("adr/ADR-001-institutional.md changed — an institutional ADR is never edited by a Tier 0 write");
+    git("checkout", "-q", "adr/ADR-001-institutional.md");
+    // a hunk that names the record but moves a fact
+    w(hub, hubSrc.replace("[Go 1.23]", "[Go 1.24] (TDR-002)"));
+    expect(docsProblems().some((x: string) => /a fact of the architecture outside TDR-002's own record moved/.test(x))).toBe(true);
   });
 
   test("verify holds the written record to the request and to its paths", () => {
@@ -113,7 +129,7 @@ describe("tier0.js", () => {
     writeFileSync(f, readFileSync(f, "utf8").replace("status: Open", "status: In Progress").replace("`Open`\n\n**Initiative", "`In Progress`\n\n**Initiative"));
     w("docs/01-system-overview.md", "# System Overview\n\nChanged on the side.\n");
     const v = T.verify(ROOT, p);
-    expect(v.problems).toContain("docs/01-system-overview.md changed — a tdr-status writes tdr/ only");
+    expect(v.problems).toContain("docs/01-system-overview.md: a change that does not name TDR-001 — Changed on the side.");
     expect(v.problems.some((x: string) => /is Open, the request says In Progress/.test(x))).toBe(false);
   });
 });

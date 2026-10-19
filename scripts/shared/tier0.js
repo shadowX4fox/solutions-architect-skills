@@ -11,7 +11,8 @@
 //   bun tier0.js prepare <project> <issue#|url> [--host h]  parse, validate, number; writes .cache/sa-skills/tier0/issue-<n>.json
 //   bun tier0.js prepare <project> --from <issue.json>      the same from an issue saved as { title, body, url, labels }
 //   bun tier0.js apply   <project> <payload.json>           doc-fix only: the replacement, by code
-//   bun tier0.js verify  <project> <payload.json>           the write matches the request and touches nothing else
+//   bun tier0.js verify  <project> <payload.json>           the write matches the request; outside its folder every change names
+//                                                           the record, no institutional ADR moves, no other fact of the ledger moves
 //
 // request.json: { kind, title, request, components: [canonical name], requested_by, architecture, evidence: [{ where, note }],
 //   fields } — fields per kind:
@@ -96,13 +97,15 @@ function requestOf(issue) {
     requested_by: row('Requested by'), architecture: row('Architecture'), evidence, fields, ...(fieldsError ? { fieldsError } : {}) };
 }
 
-// ---- the facts a doc-fix must leave as they were -------------------------------------------------------------------
-// the ledger's structure — names, types, technologies, ids, statuses, integrations, flows, phases, figures — never its prose
+// ---- the facts a Tier 0 write must leave as they were ---------------------------------------------------------------
+// the ledger's structure — names, types, technologies, ids, statuses, integrations, flows, phases, figures — never its prose.
+// A record's own part may move (OWN: a TDR the tdrs, an ADR the adrs and the related_adrs that link it); nothing else may
 const PROSE = new Set(['description', 'scope', 'key_concepts', 'bytes', 'line', 'warnings', 'file', 'generated_at', 'project_root', 'last_updated', 'released']);
-function factsHash(root) {
-  const f = collect(path.resolve(root));
-  const strip = (v) => (Array.isArray(v) ? v.map(strip) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().filter((k) => !PROSE.has(k)).map((k) => [k, strip(v[k])])) : v);
-  const keep = ['architecture', 'systems', 'components', 'adrs', 'tdrs', 'layers', 'integrations', 'phases', 'flows', 'demand', 'increments'];
+const OWN = { 'tdr-workaround': ['tdrs'], 'tdr-status': ['tdrs'], 'adr-proposed': ['adrs', 'related_adrs'], 'doc-fix': [] };
+function factsHash(root, except = []) {
+  const f = collect(path.resolve(root)), skip = new Set([...PROSE, ...except]);
+  const strip = (v) => (Array.isArray(v) ? v.map(strip) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().filter((k) => !skip.has(k)).map((k) => [k, strip(v[k])])) : v);
+  const keep = ['architecture', 'systems', 'components', 'adrs', 'tdrs', 'layers', 'integrations', 'phases', 'flows', 'demand', 'increments'].filter((k) => !skip.has(k));
   return crypto.createHash('sha256').update(JSON.stringify(strip(Object.fromEntries(keep.map((k) => [k, f[k]]))))).digest('hex');
 }
 
@@ -142,6 +145,7 @@ function prepare(root, issue, opts = {}) {
     }
   }
   if (reasons.length) return { ok: false, kind: req.kind, reasons };
+  if (!payload.facts) payload.facts = factsHash(root, OWN[req.kind]);
   const dir = path.join(root, '.cache', 'sa-skills', 'tier0'); fs.mkdirSync(dir, { recursive: true });
   const out = path.join(dir, `issue-${issue.n || 'local'}.json`); fs.writeFileSync(out, JSON.stringify(payload, null, 1) + '\n');
   return Object.assign({ ok: true, payload_file: path.relative(root, out) }, payload);
@@ -165,38 +169,50 @@ function debtSection(root) {
   const hit = fs.readdirSync(d).filter((n) => n.endsWith('.md')).find((n) => /<!--\s*SECTION:\s*Risks and Technical Debt\s*-->/.test(read(path.join(d, n))));
   return hit ? `docs/${hit}` : null;
 }
-// every line the write added or removed in a file, from git
-function changedLines(root, file) {
-  const r = spawnSync('git', ['-C', root, 'diff', '--unified=0', '--', file], { encoding: 'utf8' });
-  return String(r.stdout || '').split('\n').filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l)).map((l) => l.slice(1));
+// the hunks of a write in one file, each the lines it added and removed; an untracked file is one hunk
+function hunks(root, file) {
+  const tracked = spawnSync('git', ['-C', root, 'ls-files', '--error-unmatch', '--', file], { encoding: 'utf8' }).status === 0;
+  if (!tracked) return fs.existsSync(path.join(root, file)) ? [read(path.join(root, file)).split('\n').map((l) => '+' + l)] : [];
+  const out = String(spawnSync('git', ['-C', root, 'diff', '--unified=0', '--', file], { encoding: 'utf8' }).stdout || '').split('\n');
+  const hs = []; out.forEach((l) => { if (l.startsWith('@@')) hs.push([]); else if (hs.length && /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l)) hs[hs.length - 1].push(l); });   // the sign kept: an excerpt shows what was added
+  return hs.filter((h) => h.some((l) => l.slice(1).trim()));
 }
+const institutional = (p) => { const m = p.match(/^adr\/ADR-(\d{3,})/i); return m && Number(m[1]) <= 100; };
+// A record propagates over the documentation surface (the TDR skill links both ways — TDR ↔ affected components, TDR ↔ ADR —
+// and adds its Section 13 row; the ADR skill indexes and links): outside its own folder every hunk names the record's id,
+// no institutional ADR is touched, and the facts ledger moves in the record's own part only
 function verify(root, payload) {
   root = path.resolve(root);
-  const problems = [], f = payload.request.fields || {};
-  const tdrKind = payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status', debt = tdrKind ? debtSection(root) : null;
-  const allowed = (p) => (payload.kind === 'doc-fix' ? p === payload.file : KINDS[payload.kind].paths.some((d) => p.startsWith(d)) || p === debt);
+  const problems = [], f = payload.request.fields || {}, id = payload.id;
+  const home = payload.kind === 'doc-fix' ? null : KINDS[payload.kind].paths[0];
   const changed = changedPaths(root);
-  changed.filter((p) => !allowed(p)).forEach((p) => problems.push(`${p} changed — a ${payload.kind} writes ${payload.kind === 'doc-fix' ? payload.file : KINDS[payload.kind].paths.concat(debt ? [`${debt} (its summary row)`] : []).join(', ')} only`));
-  // the debt section: the record's own summary row and nothing else — and a new TDR's row is there (the skill's step 6)
-  if (debt && payload.kind === 'tdr-workaround' && !read(path.join(root, debt)).includes(payload.id)) problems.push(`${debt} has no summary row for ${payload.id} — the TDR skill appends one to the Risks and Technical Debt section`);
-  if (debt && changed.includes(debt)) changedLines(root, debt).filter((l) => l.trim() && !l.includes(payload.id)).forEach((l) => problems.push(`${debt}: a line that is not ${payload.id}'s summary row changed — ${l.trim().slice(0, 120)}`));
   if (!changed.length) problems.push('nothing was written');
+  changed.forEach((p) => {
+    if (payload.kind === 'doc-fix') { if (p !== payload.file) problems.push(`${p} changed — a doc-fix writes ${payload.file} only`); return; }
+    if (institutional(p)) { problems.push(`${p} changed — an institutional ADR is never edited by a Tier 0 write`); return; }
+    if (p.startsWith(home)) return;
+    if (!/^(docs|adr)\//.test(p)) { problems.push(`${p} changed — a ${payload.kind} writes ${home}, and docs/ or a project ADR where it links ${id}`); return; }
+    hunks(root, p).filter((h) => !h.some((l) => l.includes(id))).forEach((h) => problems.push(`${p}: a change that does not name ${id} — ${(h.find((l) => l[0] === '+' && l.slice(1).trim()) || h.find((l) => l.slice(1).trim()) || '').slice(1).trim().slice(0, 120)}`));
+  });
+  const debt = payload.kind === 'tdr-workaround' ? debtSection(root) : null;
+  if (debt && !read(path.join(root, debt)).includes(id)) problems.push(`${debt} has no summary row for ${id} — the TDR skill appends one to the Risks and Technical Debt section`);
   if (payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status') {
-    const c = tdr.check(root), rec = c.records.find((r) => r.id === payload.id);
-    if (!rec) problems.push(`${payload.id} has no record under tdr/`);
+    const c = tdr.check(root), rec = c.records.find((r) => r.id === id);
+    if (!rec) problems.push(`${id} has no record under tdr/`);
     else {
       const want = payload.kind === 'tdr-status' ? f.to : 'Open';
-      if (rec.status !== want) problems.push(`${payload.id} is ${rec.status}, the request says ${want}`);
+      if (rec.status !== want) problems.push(`${id} is ${rec.status}, the request says ${want}`);
       c.findings.filter((x) => x.level === 'BLOCKING' && (x.file === rec.file || x.file === 'tdr/README.md')).forEach((x) => problems.push(`${x.file}:${x.line} ${x.rule} — ${x.message}`));
     }
   }
   if (payload.kind === 'adr-proposed') {
-    const d = path.join(root, 'adr'), hit = fs.existsSync(d) && fs.readdirSync(d).find((n) => n.toUpperCase().startsWith(payload.id + '-'));
-    if (!hit) problems.push(`${payload.id} has no file under adr/`);
-    else { const src = read(path.join(d, hit)); if (!/^(?:status:\s*Proposed|\*\*Status\*\*:?\s*`?Proposed)/im.test(src)) problems.push(`${payload.id} is not Proposed`); }
-    if (!fs.existsSync(path.join(d, 'README.md')) || !read(path.join(d, 'README.md')).includes(payload.id)) problems.push(`adr/README.md does not list ${payload.id}`);
+    const d = path.join(root, 'adr'), hit = fs.existsSync(d) && fs.readdirSync(d).find((n) => n.toUpperCase().startsWith(id + '-'));
+    if (!hit) problems.push(`${id} has no file under adr/`);
+    else { const src = read(path.join(d, hit)); if (!/^(?:status:\s*Proposed|\*\*Status\*\*:?\s*`?Proposed)/im.test(src)) problems.push(`${id} is not Proposed`); }
+    if (!fs.existsSync(path.join(d, 'README.md')) || !read(path.join(d, 'README.md')).includes(id)) problems.push(`adr/README.md does not list ${id}`);
   }
-  if (payload.kind === 'doc-fix' && factsHash(root) !== payload.facts) problems.push('the fix changed a fact of the architecture — no Tier 0 write; it goes through the architect');
+  if (payload.facts && factsHash(root, OWN[payload.kind]) !== payload.facts) problems.push(payload.kind === 'doc-fix' ? 'the fix changed a fact of the architecture — no Tier 0 write; it goes through the architect'
+    : `a fact of the architecture outside ${id}'s own record moved — a name, type, technology, integration, flow, figure or another record's status; that goes through the architect`);
   return { ok: !problems.length, problems, changed };
 }
 
