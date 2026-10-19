@@ -54,6 +54,14 @@ describe("tier0.js", () => {
     expect(T.requestOf({ ...i, title: "[TDR-004] Hub API caches the stock for 5 minutes" }).title).toBe(REQ.title);
   });
 
+  test("an unattended build agent files without the key: no architecture-tier0 label, the footer says a person applies it; the attended issue is unchanged", () => {
+    const u = issue({ ...REQ, supervision: "unattended" });
+    expect(u.labels).toEqual(["tier0:tdr-workaround"]);
+    expect(u.body).toContain("filed by an unattended build agent: a person reviews it and applies the label `architecture-tier0` — that is the approval");
+    expect(u.body.replace(/_Tier 0[^\n]*_/, "")).toBe(issue(REQ).body.replace(/_Tier 0[^\n]*_/, ""));
+    expect(T.requestOf(u).components).toEqual(REQ.components);
+  });
+
   test("prepare numbers a workaround TDR after the last one and writes the payload", () => {
     const r = T.prepare(ROOT, issue(REQ));
     expect(r).toMatchObject({ ok: true, kind: "tdr-workaround", id: "TDR-002", file: "tdr/TDR-002-hub-api-caches-the-stock-for-5-minutes.md" });

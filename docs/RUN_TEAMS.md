@@ -161,6 +161,8 @@ sequenceDiagram
   with the next release (`what_changed`).
 - **The label is the key.** The workflow runs only when someone who can triage or write puts the
   `architecture-tier0` label. On a public repository anyone may open an issue, and its text reaches Claude.
+  The key is a person's: a label put by a bot, or by an account listed in `SA_TIER0_AGENTS`, is refused even with
+  write access, so an automation account never authorizes its own request.
 - **The IDE's classification is a claim.** `tier0.js prepare` reads the policy again in the architecture repository
   and refuses, with its reasons, a request that is not a Tier 0 write. That covers a kind outside the four, a
   component name that is not canonical, a status move that is not allowed, `Won't Fix`, and a doc fix whose text is
@@ -177,6 +179,47 @@ sequenceDiagram
 The issue format (`[T0-?] <title>`, labels `architecture-tier0` and `tier0:<kind>`, the kind's fields as JSON) is
 defined by `scripts/shared/tier0.js`. The MCP server's `preview_tier0` renders it the same way.
 
+## Who consumes the index
+
+The build packs and the MCP server do not depend on an IDE. Three kinds of consumer read them:
+
+| Consumer | How it reads | A person beside it |
+|---|---|---|
+| **A developer's IDE** | MCP: `get_build_pack`, `what_changed`, `preview_*` | Yes: answers, approves, files with their own access |
+| **An unattended build agent** (a CI job, a platform's agent) | MCP, as the IDE | No: its work ends in a pull request a person reviews |
+| **A deterministic pipeline** (client or migration generation) | Each part's `download_url`, pinned by `pack_revision` | Not needed: it interprets nothing, it copies the contract byte for byte |
+
+An unattended build is declared in the service repository's binding: `"supervision": "unattended"` in
+`.architecture.json`. Without the field, a person attends. `BUILD.md` then changes four things:
+
+| Rule | Attended | Unattended |
+|---|---|---|
+| 3 and 5. A gap, or a choice the standards leave open | Ask; with no answer, a `TODO(architecture)` | A `TODO(architecture)` at once |
+| 4. Security | Fail closed | The same: an agent never opens an interface |
+| 9. Escalation | Preview, the person's yes, filed with their access | Preview, filed with the build's own identity: an escalation writes nothing |
+| 10. Tier 0 | Preview, the person's yes, filed with `architecture-tier0` | `preview_tier0(…, supervision: "unattended")`, filed **without** `architecture-tier0` |
+
+```mermaid
+sequenceDiagram
+  participant B as Build agent (unattended)
+  participant A as Alia (MCP server)
+  participant G as Architecture repository
+  participant S as Service repository
+  participant P as Reviewer
+  B->>A: preview_tier0(supervision unattended)
+  A-->>B: the issue [T0-?] with tier0 kind label only
+  B->>G: the issue filed with the build's own identity
+  B->>A: record_tier0(issue URL)
+  B->>S: pull request listing Architecture requests
+  P->>S: reviews the pull request
+  P->>G: applies architecture-tier0 (the approval)
+  G->>G: architecture-tier0.yml writes it, as for an IDE
+```
+
+The build's pull request lists every `TODO(architecture)` and every issue it filed under **Architecture requests**.
+Its reviewer reads them there and applies `architecture-tier0` to the requests that should be written. The agent never
+applies that label: the workflow refuses a bot, and the accounts listed in `SA_TIER0_AGENTS`.
+
 ## Setting up the repository
 
 | What | Where |
@@ -184,7 +227,7 @@ defined by `scripts/shared/tier0.js`. The MCP server's `preview_tier0` renders i
 | `"support": "run"` and a first release | `.sa-skills/project.json`, `release my architecture` |
 | The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
-| Variable | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer |
+| Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0` |
 | Labels | `architecture-tier0`, `tier0-refused` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: `gh issue create --label` fails outright on a missing one, so the IDE's request would not be filed; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>` — an issue whose labels the repository lacks is opened without them, and the `[ESC-…]` title still identifies it |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |

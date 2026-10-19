@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.0]
+
+### Added
+- **Unattended builds.** The build packs and the MCP server were already readable by any MCP client, but their rules assumed a person: someone who answers, says yes, and files with their own access. Now a build that no person attends declares itself in the service repository's binding: `"supervision": "unattended"` in `.architecture.json`.
+  - **What changes in `BUILD.md`:**
+    - **Rules 3 and 5:** a gap, or a choice the standards leave open, becomes a `TODO(architecture)` at once. Rule 5 previously had no fallback when nobody answered.
+    - **Rule 9:** an escalation is filed with the build's own identity, since an escalation writes nothing.
+    - **Rule 10:** a Tier 0 request goes through `preview_tier0(…, supervision: "unattended")` and is filed **without** `architecture-tier0`. A person applies that label, and that is the approval.
+    - **The pull request:** the work ends in a PR that lists every TODO and every filed issue under *Architecture requests*.
+  - **`tier0.js`:** an unattended request carries only the `tier0:<kind>` label, and its footer says a person applies the key. The attended issue is byte-for-byte unchanged.
+  - **`docs/RUN_TEAMS.md` § Who consumes the index:** the three consumers (an IDE, an unattended build agent, a deterministic pipeline that reads `download_url` pinned by `pack_revision`) and the unattended flow.
+
+### Fixed
+- **The Tier 0 key was a role check only.** An automation account with write access, such as a machine user with a PAT, could label its own request and start a write. `architecture-tier0.yml` now refuses a labeller whose type is `Bot`, and the accounts listed in the new variable `SA_TIER0_AGENTS`, before it reads the role.
+
+### Upgrade
+- **Architecture repositories with the CI workflows:** copy `ci/architecture-tier0.yml` again, pin `SA_PLUGIN_REF: v10.10.0`, and set `SA_TIER0_AGENTS` to the accounts your build agents use. Republish the index so the build packs carry the new rules.
+- **The MCP server** needs `preview_tier0` and `preview_escalation` to accept `supervision`. Until then, an unattended agent drops `architecture-tier0` from `file_with.steps` itself, as `BUILD.md` says.
+
 ## [10.9.3]
 
 ### Changed

@@ -71,7 +71,10 @@ function validate(req) {
 
 // ---- the issue -----------------------------------------------------------------------------------------------------
 const issueTitle = (req) => `[T0-?] ${String(req.title).trim()}`;
-const labelsOf = (req) => [LABEL, `tier0:${req.kind}`];
+// an unattended build agent (`supervision: unattended` in the service's .architecture.json) files without the key: a person
+// reviews the request and applies `architecture-tier0`, and that is the approval — a bot never authorizes itself (10.10.0)
+const unattended = (req) => req.supervision === 'unattended';
+const labelsOf = (req) => (unattended(req) ? [`tier0:${req.kind}`] : [LABEL, `tier0:${req.kind}`]);
 function issueBody(req) {
   const fields = JSON.stringify(req.fields || {}, null, 2), fj = fenceFor(fields), rq = String(req.request || '').replace(/\r\n?/g, '\n').trim(), fr = fenceFor(rq);
   const ev = (req.evidence || []).filter((e) => e && filled(e.where)).map((e) => `- ${e.where}${filled(e.note) ? ` — ${e.note}` : ''}`);
@@ -79,7 +82,9 @@ function issueBody(req) {
     ['Components', list(req.components).join(', ') || '—']];
   return ['| | |', '|---|---|', ...facts.map(([k, v]) => `| ${k} | ${cell(v)} |`), '', '## Request', '', `${fr}text`, rq, fr, '',
     '## Evidence', '', ...(ev.length ? ev : ['- None.']), '', '## Fields', '', `${fj}json`, fields, fj, '',
-    `_Tier 0: the architecture repository writes it once the issue carries the label \`${LABEL}\` (architecture-tier0.yml); a request that is no Tier 0 write is refused there, with the reason._`, '<!-- sa-tier0 -->', ''].join('\n');
+    unattended(req)
+      ? `_Tier 0, filed by an unattended build agent: a person reviews it and applies the label \`${LABEL}\` — that is the approval; the architecture repository then writes it (architecture-tier0.yml), and a request that is no Tier 0 write is refused there, with the reason._`
+      : `_Tier 0: the architecture repository writes it once the issue carries the label \`${LABEL}\` (architecture-tier0.yml); a request that is no Tier 0 write is refused there, with the reason._`, '<!-- sa-tier0 -->', ''].join('\n');
 }
 // the request back out of an issue body issueBody() wrote (by the plugin or the server's port of it)
 function requestOf(issue) {

@@ -186,6 +186,13 @@ describe("export-index — build packs", () => {
     expect(run).toContain('call `preview_tier0(project: "order-desk", kind, …)`');
     expect(run).toContain("only after a yes follow `file_with.steps`, then `record_tier0`");
     expect(standard).not.toContain("preview_tier0");
+    // nobody attending: declared in the binding; questions become TODOs, escalations are filed by the build, a Tier 0 request goes without its key
+    expect(run).toContain('**Nobody attending this build** — a CI job, a platform\'s build agent — is declared in this file: `"supervision": "unattended"`');
+    expect(run).toContain("where the service needs a choice they do not make, ask — with no answer, or nobody attending, a `TODO(architecture)` as in rule 3.");
+    expect(run).toContain("Unattended, nobody says yes: an escalation writes nothing, so follow `file_with.steps` with this build's own identity");
+    expect(run).toContain('Unattended, pass `supervision: "unattended"`: the issue carries no `architecture-tier0` label');
+    expect(run).toContain("Never apply `architecture-tier0` yourself.");
+    expect(standard).toContain("give the user — unattended, your pull request — the questions");
     expect(standard).toMatch(/through the team's channel; never settle it in code\.\n\n## Build plan/);
     expect(run).not.toMatch(/\{\{\w+\}\}/);
   });
