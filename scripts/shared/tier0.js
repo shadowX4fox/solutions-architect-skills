@@ -177,7 +177,8 @@ function verify(root, payload) {
   const allowed = (p) => (payload.kind === 'doc-fix' ? p === payload.file : KINDS[payload.kind].paths.some((d) => p.startsWith(d)) || p === debt);
   const changed = changedPaths(root);
   changed.filter((p) => !allowed(p)).forEach((p) => problems.push(`${p} changed — a ${payload.kind} writes ${payload.kind === 'doc-fix' ? payload.file : KINDS[payload.kind].paths.concat(debt ? [`${debt} (its summary row)`] : []).join(', ')} only`));
-  // the debt section: the record's own summary row and nothing else
+  // the debt section: the record's own summary row and nothing else — and a new TDR's row is there (the skill's step 6)
+  if (debt && payload.kind === 'tdr-workaround' && !read(path.join(root, debt)).includes(payload.id)) problems.push(`${debt} has no summary row for ${payload.id} — the TDR skill appends one to the Risks and Technical Debt section`);
   if (debt && changed.includes(debt)) changedLines(root, debt).filter((l) => l.trim() && !l.includes(payload.id)).forEach((l) => problems.push(`${debt}: a line that is not ${payload.id}'s summary row changed — ${l.trim().slice(0, 120)}`));
   if (!changed.length) problems.push('nothing was written');
   if (payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status') {

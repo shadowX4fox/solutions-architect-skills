@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.7.3]
+
+### Fixed
+- A Tier 0 request merged automatically left its issue open: a merge by `GITHUB_TOKEN` does not run the PR's `Closes #N`. `architecture-tier0.yml` closes the issue itself after the merge, naming the record and the PR.
+- A workaround TDR could reach `main` without its summary row in the Risks and Technical Debt section — the TDR skill's step 6, which one of two real runs skipped. The workflow's prompt names the row, and `tier0.js verify` refuses a new TDR whose row is missing when the section exists.
+- The CI examples pin `v10.7.3`.
+
 ## [10.7.2]
 
 ### Fixed

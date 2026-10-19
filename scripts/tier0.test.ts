@@ -102,6 +102,8 @@ describe("tier0.js", () => {
     expect(T.verify(ROOT, p).problems.filter((x: string) => x.includes("docs/10"))).toEqual([]);
     w("docs/10-risks.md", "# Risks\n\n## 13. Risks and Technical Debt <!-- SECTION: Risks and Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| TDR-001 | Polling | Resolved |\n| TDR-002 | Stock cache | Open |\n");
     expect(T.verify(ROOT, p).problems.some((x: string) => /docs\/10-risks\.md: a line that is not TDR-002's summary row changed/.test(x))).toBe(true);
+    git("checkout", "-q", "docs/10-risks.md");
+    expect(T.verify(ROOT, p).problems).toContain("docs/10-risks.md has no summary row for TDR-002 — the TDR skill appends one to the Risks and Technical Debt section");
   });
 
   test("verify holds the written record to the request and to its paths", () => {
