@@ -5,7 +5,7 @@
 | Where | What it is | Produced by | For |
 |---|---|---|---|
 | **The command center** | An interactive 3D model of the architecture, one self-contained HTML file | `sa-visualization:architecture-command-center` | Architects, product owners, reviewers, new team members |
-| **The MCP server** | The architecture served to IDEs: search, exact facts, build packs | `sa-delivery:architecture-index-export` + the [Alia server](https://github.com/shadowX4fox/solutions-architect-knowledge-base) | Developers and their coding agents |
+| **The MCP server** | The architecture served to IDEs and build agents: search, exact facts, build packs | `sa-delivery:architecture-index-export` + the [Alia server](https://github.com/shadowX4fox/solutions-architect-knowledge-base) | Developers, their coding agents, and unattended build agents |
 
 Both read only what the architecture documents state and write to none of them. Examples use **Order Desk**, a
 synthetic order-taking system with a container named **Hub API**.
@@ -232,12 +232,13 @@ online is always your decision.
 
 # Part 2 — The MCP server
 
-The MCP server hands the architecture to the developer's IDE: search over every section and decision, exact answers
-from the facts ledger, and a **build pack** per component.
+The MCP server hands the architecture to the developer's IDE, or to a build agent that works unattended: search over
+every section and decision, exact answers from the facts ledger, and a **build pack** per component.
 
 ```text
 architecture repo ──tag──▶ CI: export-index.js ──POST /bundles──▶ Alia server ──▶ embeddings (Ollama) + store
-IDE (VS Code · JetBrains · Claude Code) ◀──── MCP, Streamable HTTP /mcp ────┘
+IDE (VS Code · JetBrains · Claude Code) ◀──── MCP, Streamable HTTP /mcp ────┤
+build agent (CI, unattended)            ◀──── MCP, Streamable HTTP /mcp ────┘
 ```
 
 The plugin produces data only. The [Alia server](https://github.com/shadowX4fox/solutions-architect-knowledge-base)
@@ -268,7 +269,7 @@ passes `kit-check.js`. A developer never builds from an outdated or failing kit.
 
 | Part | What it is |
 |---|---|
-| `BUILD.md` | the IDE agent's instructions: the repository binding, eight rules, the build plan, security, interfaces, flows and budgets, open questions, a done list |
+| `BUILD.md` | the agent's instructions: the repository binding, eight rules (ten on a RUN-team project), the build plan, security, interfaces, flows and budgets, open questions, a done list |
 | `spec.md` | the Component Specification: responsibility, contracts, invariants, budgets, acceptance |
 | `security.md` | the **security obligations**, second in the plan: every caller and each interface's authentication, the Security by Design principle, the institutional ADRs, the STRIDE findings and mitigations, data sensitivity flows, security tests |
 | `assets/` | the contracts byte for byte: `openapi.yaml`, `asyncapi.yaml`, `schema.graphql`, `*.avsc`, `ddl.sql`, `schema.proto`, `redis-key-schema.md` |
@@ -396,7 +397,7 @@ moved, with `action_required` only where the code must change. A component versi
 `pack_revision`), then follows the build plan part by part. Contracts are copied **byte for byte** to
 `architecture/<file>` — with `curl` from the part's `download_url` (MCP token, `?pack_revision=`), or from every page of
 `get_build_part` unchanged — and each `sha256` checked; the copies are read-only, and code is generated from them. The
-eight rules:
+rules, eight and two more on a RUN-team project:
 
 | # | Rule |
 |---|---|
@@ -408,6 +409,14 @@ eight rules:
 | 6 | Budgets are requirements — measure the component against its share of each phase |
 | 7 | The stack comes from the team's service template, not from the pack |
 | 8 | Every commit names the architecture version and the `pack_revision` |
+| 9 | *RUN-team project.* What only the architect can answer is escalated (`preview_escalation`), never kept in a local file |
+| 10 | *RUN-team project.* A Tier 0 write (a workaround TDR, a TDR move, a Proposed ADR, a doc fix) is requested (`preview_tier0`), never made in the service repository |
+
+**Unattended builds.** A build that no person attends, such as a CI job or a platform's agent, declares
+`"supervision": "unattended"` in `.architecture.json`. A question then becomes a `TODO(architecture)` at once. An
+escalation is filed with the build's own identity. A Tier 0 request is filed without its key, the `architecture-tier0`
+label, which a person applies. The work ends in a pull request that lists every request. The flow:
+[RUN_TEAMS.md § Who consumes the index](RUN_TEAMS.md#who-consumes-the-index).
 
 On an update, the agent overwrites the copies under `architecture/` first and commits them alone
 (`architecture: contracts <version> (pack_revision <revision>)`), so the IDE and the pull request show the contract diff

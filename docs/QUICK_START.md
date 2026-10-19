@@ -209,6 +209,7 @@ merged (`lifecycle.js tag`, which CI can run); `--direct` commits and tags on th
 
 - [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md) — every phase, gate and phrase in detail
 - [ALIA.md](ALIA.md) — the 3D navigator and the architecture MCP server for your IDE
+- [RUN_TEAMS.md](RUN_TEAMS.md) — once released: Tier 0 writes, escalations and unattended build agents
 - [INSTITUTION_PACKS.md](INSTITUTION_PACKS.md) — add your organization's standards, frameworks and types
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — when something does not work
 - Change one thing and see the gates run: `update the latency target of the track parcel flow to 300 ms`, then

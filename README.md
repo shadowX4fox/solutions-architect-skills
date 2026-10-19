@@ -59,7 +59,9 @@ reach developers as a PDF nobody can query. This project treats the architecture
 - **Versioned like code.** Every architecture carries a semantic version and a git tag; downstream artifacts state the
   version they were cut from, and a release says what changed.
 - **Delivered where people work.** The handoff kit and an MCP index put the right slice of the architecture in each
-  developer's IDE — interfaces, budgets, security obligations, open questions.
+  developer's IDE, or in a build agent that works unattended: interfaces, budgets, security obligations, open questions.
+- **Kept by the team that runs it.** Once released, a RUN team records its workarounds and small decisions itself
+  (Tier 0). Anything that needs an architect becomes an escalation, so the documents never change without someone seeing it.
 
 ## What you get
 
@@ -72,6 +74,10 @@ flowchart LR
   ARCH --> CC["Command center<br/>Alia in 3D"]
   KIT --> IDX["MCP index<br/>Alia server"]
   IDX --> IDE["Developers' IDEs"]
+  IDX --> AGT["Build agents<br/>unattended"]
+  IDX --> PIPE["Pipelines<br/>contracts byte for byte"]
+  IDE -. "Tier 0 · escalations" .-> ARCH
+  AGT -. "requests a person approves" .-> ARCH
 ```
 
 | Stage | Skill | Produces |
@@ -84,6 +90,24 @@ flowchart LR
 | Risk & design | `architecture-analysis`, `architecture-traceability` | Ten analyses (SPOF, blast radius, bottlenecks, cost, STRIDE, vendor lock-in, latency, tech debt, coupling, data sensitivity) and PO Spec coverage |
 | Delivery | `architecture-dev-handoff`, `architecture-docs-export`, `architecture-icepanel-sync`, `architecture-index-export` | The four-part handoff kit with validated OpenAPI / AsyncAPI / GraphQL / Avro / DDL / Protobuf assets, Word briefings, an IcePanel C4 import, the MCP bundle |
 | Visualization | `architecture-command-center` | A navigable 3D model with Alia as guide |
+| Operation | `architecture-lifecycle` CI · `technical-debt-records` · `architecture-definition-record` | Tier 0 writes (a workaround TDR, a TDR move, a Proposed ADR, a doc fix) requested from an IDE or a build agent and written by CI; escalations as records and issues — [docs/RUN_TEAMS.md](docs/RUN_TEAMS.md) |
+
+### Automatic mode
+
+Once a project copies the `ci/` workflows, a release runs without anyone at the keyboard:
+
+1. **The release PR is gated.** Its merge tags `architecture-v<version>` and publishes the index: chunks and ledger.
+2. **The handoff kit is regenerated into a pull request.** It is edited in place: only the parts whose sources moved go to
+   the model, the rest keep their text and their version row moves by code, and each component's technical debt is written
+   into its specification by code.
+3. **Merging that PR publishes the build packs**, and every consumer's `what_changed` reports what moved.
+4. **A Tier 0 request is written, verified and gated**, then merged without an architect (`SA_TIER0_AUTOMERGE`). Its key,
+   the `architecture-tier0` label, is always applied by a person.
+5. **Build agents consume the packs unattended** (`"supervision": "unattended"` in the service's `.architecture.json`).
+   A question becomes a `TODO(architecture)`, a request goes to the architecture repository, and the work ends in a pull
+   request a person reviews.
+
+Who consumes the index, and what changes without a person: [docs/RUN_TEAMS.md](docs/RUN_TEAMS.md#who-consumes-the-index).
 
 Five built-in architecture types — **Enterprise** (the domain-neutral default), Microservices, 3-Tier, N-Layer and BIAN —
 and an organization can add its own.
@@ -145,14 +169,14 @@ floor per layer, every C4 container a block, every integration a route. Alia wal
 
 Read-only by design: it never edits a document; it hands the architect Markdown to paste.
 
-### In the IDE — the architecture as an MCP server
+### In the IDE and in unattended builds — the architecture as an MCP server
 
 `/sa-delivery:architecture-index-export` turns a released architecture into an `sa-index/1` bundle: every section, flow,
 integration, ADR and TDR as a searchable chunk, the facts ledger, and a **build pack** per component — its spec, security
 obligations, interface contracts both ways, assets byte for byte, budgets and an ordered build plan.
 
 The **[Alia architecture server](https://github.com/shadowX4fox/solutions-architect-knowledge-base)** (Spring AI MCP,
-Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client — VS Code, JetBrains, Claude Code:
+Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client: VS Code, JetBrains, Claude Code, or a build agent in CI.
 
 | Ask | Tools |
 |---|---|
@@ -161,11 +185,14 @@ Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client — VS
 | "Walk me through checkout." | `list_flows`, `get_flow` |
 | "Build this service." | `get_build_pack`, `get_build_instructions`, `get_build_part` |
 | "What changed since I built it?" | `what_changed` |
+| "Record this shortcut as technical debt." | `preview_tier0`, `record_tier0` |
+| "This blocks me: ask the architect." | `preview_escalation`, `record_escalation` |
 
 
 CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and Azure Pipelines examples). On GitHub,
 `architecture-lifecycle`'s `ci/` adds the rest of the pipeline: release gates on every pull request, and on the merge of a
-release PR the tag, the index and the handoff kit regenerated by Claude into a pull request. While you write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
+release PR the tag, the index and the handoff kit edited by Claude into a pull request; on a RUN-team project, a Tier 0
+workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN_TEAMS.md)). While you write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
 
 ## Any industry, any organization
 
@@ -212,6 +239,7 @@ Fifteen skills in six categories. **Standalone** means the skill starts without 
 | [Quick start](docs/QUICK_START.md) | A first architecture, end to end |
 | [Workflow guide](docs/WORKFLOW_GUIDE.md) | Every phase and what it produces |
 | [Alia](docs/ALIA.md) | The 3D command center and the architecture MCP server |
+| [RUN teams](docs/RUN_TEAMS.md) | Operating a released architecture: Tier 0 writes, escalations, unattended build agents |
 | [Institution packs](docs/INSTITUTION_PACKS.md) | Adding an organization's standards, frameworks, types and skins |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common problems and fixes |
 | [Design notes](docs/DESIGN_NOTES.md) | Why the rules are what they are — with the measurements |
