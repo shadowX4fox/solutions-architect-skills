@@ -47,7 +47,7 @@ function supportOf(root) {
   // architecture repository checks it again when it writes)
   return { mode: s.support, tier0: s.tier0, released: s.released, tier0_writes: s.tier0 ? support.TIER0 : [], triggers: escalate.TRIGGERS, routes: escalate.ROUTES,
     tier0_kinds: s.tier0 ? Object.fromEntries(Object.entries(tier0.KINDS).map(([k, v]) => [k, { label: support.TIER0_LABEL[k], required: v.required, evidence: v.evidence }])) : {},
-    tdr_moves: s.tier0 ? tier0.TDR_MOVES : {}, tier0_label: tier0.LABEL,
+    tdr_moves: s.tier0 ? tier0.TDR_MOVES : {}, tdr_statuses: s.tier0 ? tier0.TDR_STATUSES : [], tdr_drivers: s.tier0 ? tier0.TDR_DRIVERS : [], tier0_label: tier0.LABEL,
     escalations_open: escalate.open(root).map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, triggers: r.meta.triggers || [], components: r.meta.components || [], title: r.title.replace(/^ESC-\d+\s+—\s+/, ''), issue: r.meta.issue || null })) };
 }
 

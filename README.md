@@ -3,7 +3,7 @@
 **Architecture documentation that stays true to itself — written with Claude Code, checked by code, delivered to the people who build it.**
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-10.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-10.7.1-blue.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-purple.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)

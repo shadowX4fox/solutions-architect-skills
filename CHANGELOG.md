@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.7.1]
+
+### Changed
+- The local architecture index server (`local/compose.yaml`) pins Alia `0.2.0`: `preview_tier0` and `record_tier0`, the server side of Tier 0 from the IDE (`BUILD.md` rule 10, 10.7.0), its `[T0-?]` issue checked byte for byte against `tier0.js`.
+- The bundle's `support` carries `tdr_statuses` and `tdr_drivers` beside `tdr_moves`, so the server reads the TDR vocabulary instead of keeping a copy of `tdr-check.js`'s.
+- The CI examples pin `v10.7.1`.
+
 ## [10.7.0]
 
 ### Added

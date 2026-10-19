@@ -311,6 +311,8 @@ describe("export-index — channel and bundle", () => {
     expect(m.support.tier0_label).toBe("architecture-tier0");
     expect(m.support.tier0_kinds["tdr-status"]).toEqual({ label: "a TDR status move tdr-check.js --move accepts, with its dated History note", required: ["tdr", "to", "note"], evidence: true });
     expect(m.support.tdr_moves.Open).toEqual(["In Progress", "Won't Fix"]);
+    expect(m.support.tdr_statuses).toEqual(["Open", "Planned", "In Progress", "Resolved", "Won't Fix"]);
+    expect(m.support.tdr_drivers).toEqual(["Strategy", "Architecture", "Talent", "Process"]);
     expect(m.support.escalations_open).toEqual([{ id: "ESC-001", status: "Open", route: "tier-1", triggers: ["security-iam"], components: ["Hub API"], title: "Hub API secret", issue: null }]);
   });
 

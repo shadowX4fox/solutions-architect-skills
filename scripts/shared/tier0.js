@@ -185,8 +185,9 @@ function verify(root, payload) {
   return { ok: !problems.length, problems, changed };
 }
 
-const TDR_MOVES = tdr.MOVES;   // the arrows a status move may take, for readers outside the records category
-module.exports = { LABEL, KINDS, TDR_MOVES, validate, issueTitle, labelsOf, issueBody, requestOf, factsHash, prepare, apply, verify };
+// the TDR vocabulary for readers outside the records category (the bundle, so the MCP server keeps no copy)
+const TDR_MOVES = tdr.MOVES, TDR_STATUSES = tdr.STATUSES, TDR_DRIVERS = tdr.DRIVERS;
+module.exports = { LABEL, KINDS, TDR_MOVES, TDR_STATUSES, TDR_DRIVERS, validate, issueTitle, labelsOf, issueBody, requestOf, factsHash, prepare, apply, verify };
 
 if (require.main === module) {
   (async () => {
