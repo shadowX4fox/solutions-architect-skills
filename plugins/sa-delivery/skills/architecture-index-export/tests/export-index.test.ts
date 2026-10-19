@@ -182,6 +182,11 @@ describe("export-index — build packs", () => {
     expect(run).toContain("`request`, what the developer asked you to build, in their words — the task that led here, never their answer to a question of yours");
     expect(run).toContain("an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`");
     expect(run).toContain("only after a yes follow `file_with.steps` with the developer's own access, then `record_escalation`");
+    expect(run).toContain("10. **A Tier 0 write is requested, never made here.**");
+    expect(run).toContain('call `preview_tier0(project: "order-desk", kind, …)`');
+    expect(run).toContain("only after a yes follow `file_with.steps`, then `record_tier0`");
+    expect(standard).not.toContain("preview_tier0");
+    expect(standard).toMatch(/through the team's channel; never settle it in code\.\n\n## Build plan/);
     expect(run).not.toMatch(/\{\{\w+\}\}/);
   });
 
@@ -303,6 +308,9 @@ describe("export-index — channel and bundle", () => {
     expect(m.channel).toBe("released");
     expect(m.support).toMatchObject({ mode: "run", tier0: true, released: "architecture-v1.3.0", tier0_writes: ["tdr-workaround", "tdr-status", "adr-proposed", "doc-fix"] });
     expect(Object.keys(m.support.triggers)).toEqual(["new-integration", "data-classification", "cross-domain", "security-iam", "regulatory", "new-technology", "low-confidence"]);
+    expect(m.support.tier0_label).toBe("architecture-tier0");
+    expect(m.support.tier0_kinds["tdr-status"]).toEqual({ label: "a TDR status move tdr-check.js --move accepts, with its dated History note", required: ["tdr", "to", "note"], evidence: true });
+    expect(m.support.tdr_moves.Open).toEqual(["In Progress", "Won't Fix"]);
     expect(m.support.escalations_open).toEqual([{ id: "ESC-001", status: "Open", route: "tier-1", triggers: ["security-iam"], components: ["Hub API"], title: "Hub API secret", issue: null }]);
   });
 

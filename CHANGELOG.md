@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.7.0]
+
+### Added
+- **Tier 0 from the IDE.** A RUN team's IDE agent works in the service repository, where the four Tier 0 writes do not belong: it requests them. `scripts/shared/tier0.js` is the request's contract — the issue `[T0-?] <title>` (labels `architecture-tier0`, `tier0:<kind>`; the request, the evidence, the kind's fields as JSON) rendered and read back, `prepare` (the policy re-read in the architecture repository: Tier 0 in force, one of the four kinds, every component name canonical, a TDR move along an arrow — `Won't Fix` stays the architect's —, a doc fix's text where it says, the next TDR or ADR id), `apply` (a doc fix, by code) and `verify` (the record matches the request, nothing outside its folder changed, a doc fix leaves the facts ledger as it was).
+- `ci/architecture-tier0.yml`: labelling the issue `architecture-tier0` — by someone who can triage, the key on a public repository — prepares, writes (Claude with the TDR / ADR skills from the payload, or code for a doc fix), verifies, runs the gates and opens `tier0/issue-<n>` with `Closes #<n>`, the issue retitled to the record's id; `SA_TIER0_AUTOMERGE=true` merges it when the gates pass. A refusal is commented on the issue with its reasons and labelled `tier0-refused`.
+- `BUILD.md` rule 10 on a RUN-team project: a shortcut the pack does not state, or a TDR the code resolves, is requested with `preview_tier0` → the user's yes → `file_with` → `record_tier0`, the code marked with the issue's URL until the TDR's id arrives; the bundle's `support` carries `tier0_kinds`, `tdr_moves` and `tier0_label` for the server's preview.
+
+### Changed
+- The CI examples pin `v10.7.0`.
+
 ## [10.6.4]
 
 ### Changed

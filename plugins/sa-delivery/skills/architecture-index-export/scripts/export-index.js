@@ -40,9 +40,14 @@ const { collect } = require(fromSaSkills('scripts', 'shared', 'arch-facts.js'));
 // RUN-team support and escalations (sa-records, re-exported by sa-skills): the policy an MCP server applies and the open queue
 const support = require(fromSaSkills('scripts', 'shared', 'support.js'));
 const escalate = require(fromSaSkills('scripts', 'shared', 'escalate.js'));
+const tier0 = require(fromSaSkills('scripts', 'shared', 'tier0.js'));
 function supportOf(root) {
   const s = support.supportOf(root);
+  // tier0_kinds and tdr_moves: what preview_tier0 checks before the issue is shown (tier0.js is the contract; the
+  // architecture repository checks it again when it writes)
   return { mode: s.support, tier0: s.tier0, released: s.released, tier0_writes: s.tier0 ? support.TIER0 : [], triggers: escalate.TRIGGERS, routes: escalate.ROUTES,
+    tier0_kinds: s.tier0 ? Object.fromEntries(Object.entries(tier0.KINDS).map(([k, v]) => [k, { label: support.TIER0_LABEL[k], required: v.required, evidence: v.evidence }])) : {},
+    tdr_moves: s.tier0 ? tier0.TDR_MOVES : {}, tier0_label: tier0.LABEL,
     escalations_open: escalate.open(root).map((r) => ({ id: r.meta.id, status: r.meta.status, route: r.meta.route, triggers: r.meta.triggers || [], components: r.meta.components || [], title: r.title.replace(/^ESC-\d+\s+—\s+/, ''), issue: r.meta.issue || null })) };
 }
 
@@ -237,6 +242,10 @@ function escalationRule(project, mode) {
   if (mode === 'run') return '9. **What only the architect can answer is escalated, never kept in a local file.** A RUN team maintains this architecture. When an open question blocks the build — a contract with nothing to implement, an interface whose authentication is not documented, a decision still `Proposed` the code depends on — stop that part and call `preview_escalation(project: "' + project + '", …)`: `request`, what the developer asked you to build, in their words — the task that led here, never their answer to a question of yours; the questions, one per item; the components by canonical name and the `I-nn` integrations concerned; the trigger each one touches from `get_architecture`\'s `support.triggers` (an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`) with its evidence — the part and the line; route `tier-1`. Show the user the issue it returns; only after a yes follow `file_with.steps` with the developer\'s own access, then `record_escalation`. A change to the architecture you would make that crosses a trigger takes the same path. If the server files no escalations for this project, give the user the same questions, each with its part and line, for the architects.';
   return '9. **What only the architect can answer goes to the architect.** When an open question blocks the build — a contract with nothing to implement, an interface whose authentication is not documented — stop that part and give the user the questions, each with its part and line, for the architects through the team\'s channel; never settle it in code.';
 }
+function tier0Rule(project, mode) {
+  if (mode !== 'run') return '';
+  return '\n10. **A Tier 0 write is requested, never made here.** Four writes on this architecture need no architect (`get_architecture`\'s `support.tier0_writes`): a workaround recorded as a TDR, a TDR status move, a project ADR in `Proposed`, a doc fix that changes no fact. They belong in the architecture repository, never in this one. When you take a shortcut this pack does not state — a cache, a retry, a stub, a relaxed budget — or your code resolves a TDR, call `preview_tier0(project: "' + project + '", kind, …)`: `request`, the developer\'s task in their words; the components by canonical name; the evidence — this repository, the commit, the file and line; the fields its kind needs (`support.tier0_kinds`; a status move only along `support.tdr_moves`). Show the user the issue it returns; only after a yes follow `file_with.steps`, then `record_tier0`. Mark the code of a workaround with the issue\'s URL, and replace it with the TDR\'s id when `what_changed` brings it. Whatever crosses a trigger is rule 9, never Tier 0.';
+}
 function renderBuild(pack, projectName, server, mode) {
   const c = pack.component; const part = new Map(pack.parts.map((p) => [p.id, p]));
   // the pack's revision is the sha256 of the pack.json listing this very file, so the export cannot write it: the agent records it from get_build_pack
@@ -251,7 +260,7 @@ function renderBuild(pack, projectName, server, mode) {
   const questions = pack.open_questions.length ? mdTable(['Part', 'Line', 'Question'], pack.open_questions.map((q) => [`\`${q.part}\``, q.line, q.text])) : 'None.';
   const v = { name: c.name, internal_name: c.internal_name ? ` (\`${c.internal_name}\`)` : '', internal_name_rule: c.internal_name ? `, with \`${c.internal_name}\` beside it where an identifier is needed (repository, workload, artifact)` : '',
     type: c.type || 'component', technology: (c.technology || []).join(', ') || 'technology not stated', project_name: projectName, project: pack.project, slug: c.slug, version: pack.architecture_version, binding, plan, security, interfaces, flows, questions,
-    escalation_rule: escalationRule(pack.project, mode) };
+    escalation_rule: escalationRule(pack.project, mode), tier0_rule: tier0Rule(pack.project, mode) };
   return read(path.join(__dirname, '..', 'templates', 'BUILD.md')).replace(/\{\{(\w+)\}\}/g, (m, k) => (k in v ? v[k] : m));
 }
 function buildPacks(root, facts, outDir, opts = {}) {

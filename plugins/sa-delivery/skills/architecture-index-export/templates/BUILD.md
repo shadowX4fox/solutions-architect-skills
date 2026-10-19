@@ -22,7 +22,7 @@ When the architecture releases a new version, or this pack is revised within its
 6. **Budgets are requirements.** Each phase this component takes part in has a latency budget; measure the component against its share.
 7. **The stack comes from the team's service template**, not from this pack: the pack states the technology, not the project skeleton, libraries or CI.
 8. **Record the version and the revision.** Every commit that implements this pack names architecture version {{version}} and the `pack_revision` in `.architecture.json`.
-{{escalation_rule}}
+{{escalation_rule}}{{tier0_rule}}
 
 ## Build plan
 

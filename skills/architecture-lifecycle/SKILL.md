@@ -123,7 +123,10 @@ request touching the architecture runs `check --undecided warn` and gets one com
 server, and a dispatch of `ci/architecture-handoff.yml`, where Claude (`claude-code-action`, which refuses a `push`
 event) regenerates the handoff kit into a pull request — also runnable by hand for any tag; the PR carries the
 version's evidence, the command center regenerated from the documents and its photo-mode picture (`snapshot.js`)
-embedded in the body, best effort. Each file's header lists
+embedded in the body, best effort. `ci/architecture-tier0.yml` (RUN teams, 10.7.0): a Tier 0 request an IDE filed
+(`[T0-?]` issue, `scripts/shared/tier0.js`) is written once someone who can triage labels it `architecture-tier0` —
+the policy re-read by `tier0.js prepare`, a doc fix by code and the rest by Claude, `tier0.js verify` and the gates, a
+pull request merged at once with `SA_TIER0_AUTOMERGE=true`; a refusal is commented with its reasons. Each file's header lists
 the variables, secrets and repository settings it needs.
 
 ## Recover — a lost tag
