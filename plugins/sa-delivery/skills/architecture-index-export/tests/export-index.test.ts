@@ -192,6 +192,9 @@ describe("export-index — build packs", () => {
     expect(run).toContain("Unattended, nobody says yes: an escalation writes nothing, so follow `file_with.steps` with this build's own identity");
     expect(run).toContain('Unattended, pass `supervision: "unattended"`: the issue carries no `architecture-tier0` label');
     expect(run).toContain("Never apply `architecture-tier0` yourself.");
+    // a label the repository lacks: the issue is refiled without it and the gap is named, never improvised
+    expect(run).toContain("file it again without the labels it refused — the `[ESC-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request. A change to the architecture");
+    expect(run).toContain("the `[T0-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request: without `architecture-tier0` in the repository nobody can apply the request.");
     expect(standard).toContain("give the user — unattended, your pull request — the questions");
     expect(standard).toMatch(/through the team's channel; never settle it in code\.\n\n## Build plan/);
     expect(run).not.toMatch(/\{\{\w+\}\}/);

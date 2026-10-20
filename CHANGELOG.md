@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.14]
+
+### Fixed
+- **An IDE agent refiles an issue the host refuses for a missing label, by rule.** `gh issue create --label` fails outright when the repository lacks a label. `escalate.js issue --create` already refiled without it, but `BUILD.md` said nothing, and an unattended build improvised the same fallback (an escalation whose repository had no `architecture-escalation`, `tier-1` or `trigger:*`). Rules 9 and 10 now say it: file the issue again without the labels refused — the `[ESC-?]` / `[T0-?]` title identifies it — and name the missing labels beside its URL, to the user or, unattended, in the pull request; rule 10 adds that without `architecture-tier0` nobody can apply the request. `docs/RUN_TEAMS.md` § Setting up the repository says the same.
+
+### Upgrade
+- An architecture repository moves every workflow's `SA_PLUGIN_REF` to `v10.10.14` and republishes its build packs so the server serves the new `BUILD.md`.
+
 ## [10.10.13]
 
 ### Fixed
