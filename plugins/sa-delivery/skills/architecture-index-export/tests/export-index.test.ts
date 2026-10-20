@@ -195,6 +195,14 @@ describe("export-index — build packs", () => {
     // a label the repository lacks: the issue is refiled without it and the gap is named, never improvised
     expect(run).toContain("file it again without the labels it refused — the `[ESC-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request. A change to the architecture");
     expect(run).toContain("the `[T0-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request: without `architecture-tier0` in the repository nobody can apply the request.");
+    // tier0.auto (10.12.0): the listed kinds the build keys itself, a Resolved move after its merge; the rest keep a person's key
+    w(".sa-skills/project.json", JSON.stringify({ support: "run", tier0: { auto: ["tdr-status", "doc-fix"] } }));
+    const auto = md({});
+    expect(auto).toContain("A kind in `support.tier0_auto` — on this architecture `tdr-status`, `doc-fix` — this build keys itself: the issue carries `architecture-tier0`");
+    expect(auto).toContain("A move to `Resolved` names the commit that resolved it as `owner/repo@sha`, already on this repository's default branch");
+    expect(auto).toContain("Any other kind carries no `architecture-tier0` label (drop it from `file_with.steps` if the server lists it): a person applies it");
+    expect(auto).not.toContain("Never apply `architecture-tier0` yourself.");
+    w(".sa-skills/project.json", JSON.stringify({ support: "run" }));
     expect(standard).toContain("give the user — unattended, your pull request — the questions");
     expect(standard).toMatch(/through the team's channel; never settle it in code\.\n\n## Build plan/);
     expect(run).not.toMatch(/\{\{\w+\}\}/);
@@ -393,6 +401,7 @@ describe("export-index — channel and bundle", () => {
     expect(m.support).toMatchObject({ mode: "run", tier0: true, released: "architecture-v1.3.0", tier0_writes: ["tdr-workaround", "tdr-status", "adr-proposed", "doc-fix"] });
     expect(Object.keys(m.support.triggers)).toEqual(["new-integration", "data-classification", "cross-domain", "security-iam", "regulatory", "new-technology", "low-confidence"]);
     expect(m.support.tier0_label).toBe("architecture-tier0");
+    expect(m.support.tier0_auto).toEqual([]);   // none declared: every key is a person's (10.12.0)
     expect(m.support.tier0_kinds["tdr-status"]).toEqual({ label: "a TDR status move tdr-check.js --move accepts, with its dated History note", required: ["tdr", "to", "note"], evidence: true });
     expect(m.support.tdr_moves.Open).toEqual(["In Progress", "Won't Fix"]);
     expect(m.support.tdr_statuses).toEqual(["Open", "Planned", "In Progress", "Resolved", "Won't Fix"]);

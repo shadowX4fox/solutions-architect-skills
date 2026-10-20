@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.12.0]
+
+### Added
+- **A trusted agent keys its own Tier 0 request.** Until now every Tier 0 write waited for a person to apply `architecture-tier0`, so an unattended build could not finish a write on its own. An architecture now lists the kinds an agent may start in `.sa-skills/project.json` — `"tier0": { "auto": [...] }`, a subset of the four or `"all"` (`support.js --declare-auto`) — and the agents it trusts in `SA_TIER0_TRUSTED_AGENTS` (a machine user's login or a GitHub App's `name[bot]`). `architecture-tier0.yml` then accepts the agent's own label on an issue the agent opened that carries the `sa-tier0` marker, at most `SA_TIER0_AUTO_DAILY` (default 10) per agent per 24 hours, labels it `tier0-auto`, and the pull request says no person read the request before the write. Each failed condition is refused on the issue, as for any other key.
+- **`tier0.js prepare --auto`** holds an agent-keyed request to the architecture's `tier0.auto`, and a move to `Resolved` to merged code: every `owner/repo@sha` its evidence names must be on that repository's default branch (GitHub's compare; `SA_TIER0_EVIDENCE_TOKEN` reads a private one). A person's key is not held to it.
+- **The issue format and `BUILD.md` rule 10 follow the policy.** `labelsOf` / `issueBody` (and `tier0.js render --auto <kinds>`) give an unattended request of an auto kind the key and a footer that says it was keyed by the agent; the bundle's `support.tier0_auto` carries the kinds; rule 10 names them, tells the build to key them itself and to request a `Resolved` move once its pull request is merged, and keeps every other kind a person's.
+- **`tier0-auto`**, the seventeenth label `escalate.js labels` checks and creates.
+
+### Upgrade
+- An architecture repository copies `architecture-tier0.yml` again, moves every workflow's `SA_PLUGIN_REF` to `v10.12.0` and runs `escalate.js labels <project> --create` for `tier0-auto`. Nothing changes until it declares `tier0.auto` and sets `SA_TIER0_TRUSTED_AGENTS`. The MCP server renders the issue: until it carries `support.tier0_auto`, rule 10 has the build add the key after filing.
+
 ## [10.11.4]
 
 ### Fixed

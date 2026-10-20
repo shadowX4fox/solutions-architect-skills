@@ -27,4 +27,22 @@ describe('support', () => {
     expect(S.TRIGGERS).toHaveLength(7);
     expect(S.TRIGGERS.some((t: string) => /low AI confidence/.test(t))).toBe(true);
   });
+  test('tier0.auto: the kinds a trusted agent keys itself — declared here, a subset of the four, none by default', () => {
+    const p = mkdtempSync(join(tmpdir(), 'sa-support-auto-'));
+    S.declareSupport(p, 'run');
+    git(p, 'init', '-q'); writeFileSync(join(p, 'ARCHITECTURE.md'), '# A\n'); git(p, 'add', '.'); git(p, 'commit', '-qm', 'x'); git(p, 'tag', 'architecture-v1.0.0');
+    expect(S.supportOf(p).auto).toEqual([]);
+    expect(S.declareAuto(p, 'tdr-status, doc-fix')).toEqual(['tdr-status', 'doc-fix']);
+    expect(S.supportOf(p).auto).toEqual(['tdr-status', 'doc-fix']);
+    expect(S.declareAuto(p, 'all')).toEqual(S.TIER0);
+    expect(JSON.parse(readFileSync(join(p, '.sa-skills', 'project.json'), 'utf8')).tier0).toEqual({ auto: 'all' });
+    expect(S.supportOf(p).auto).toEqual(S.TIER0);
+    expect(() => S.declareAuto(p, 'tdr-status,escalation')).toThrow(/not a Tier 0 kind: escalation/);
+    S.declareAuto(p, 'none');
+    expect(JSON.parse(readFileSync(join(p, '.sa-skills', 'project.json'), 'utf8'))).toEqual({ support: 'run' });
+    // a hand-written unknown kind is dropped, never trusted
+    writeFileSync(join(p, '.sa-skills', 'project.json'), JSON.stringify({ support: 'run', tier0: { auto: ['doc-fix', 'merge-anything'] } }));
+    expect(S.supportOf(p).auto).toEqual(['doc-fix']);
+    rmSync(p, { recursive: true });
+  });
 });

@@ -7,8 +7,11 @@
 // request merges when the gates pass. The IDE's classification is a claim: prepare re-reads the policy here, and a request
 // that is no Tier 0 write — or leaves anything in doubt — is refused with its reasons, never written.
 //
-//   bun tier0.js render  <request.json>                     the issue: title, labels, body (what preview_tier0 returns)
+//   bun tier0.js render  <request.json> [--auto <kinds>]    the issue: title, labels, body (what preview_tier0 returns); --auto
+//                                                           the architecture's tier0.auto, which an unattended request keys itself
 //   bun tier0.js prepare <project> <issue#|url> [--host h]  parse, validate, number; writes .cache/sa-skills/tier0/issue-<n>.json
+//                        [--auto]                           keyed by a trusted agent: its kind must be in tier0.auto, and a move to
+//                                                           Resolved must name a commit merged into its repository's default branch
 //   bun tier0.js prepare <project> --from <issue.json>      the same from an issue saved as { title, body, url, labels }
 //   bun tier0.js apply   <project> <payload.json>           doc-fix only: the replacement, by code
 //   bun tier0.js verify  <project> <payload.json>           the write matches the request; outside its folder every change names
@@ -72,17 +75,22 @@ function validate(req) {
 // ---- the issue -----------------------------------------------------------------------------------------------------
 const issueTitle = (req) => `[T0-?] ${String(req.title).trim()}`;
 // an unattended build agent (`supervision: unattended` in the service's .architecture.json) files without the key: a person
-// reviews the request and applies `architecture-tier0`, and that is the approval — a bot never authorizes itself (10.10.0)
+// reviews the request and applies `architecture-tier0`, and that is the approval — a bot never authorizes itself (10.10.0).
+// A kind the architecture lists in tier0.auto (support.js) is the exception: the agent keys it itself, and the architecture
+// repository accepts that key from an account in SA_TIER0_TRUSTED_AGENTS on an issue it filed (10.12.0)
 const unattended = (req) => req.supervision === 'unattended';
-const labelsOf = (req) => (unattended(req) ? [`tier0:${req.kind}`] : [LABEL, `tier0:${req.kind}`]);
-function issueBody(req) {
+const autoKeyed = (req, auto = []) => unattended(req) && list(auto).includes(req.kind);
+const labelsOf = (req, auto = []) => (unattended(req) && !autoKeyed(req, auto) ? [`tier0:${req.kind}`] : [LABEL, `tier0:${req.kind}`]);
+function issueBody(req, auto = []) {
   const fields = JSON.stringify(req.fields || {}, null, 2), fj = fenceFor(fields), rq = String(req.request || '').replace(/\r\n?/g, '\n').trim(), fr = fenceFor(rq);
   const ev = (req.evidence || []).filter((e) => e && filled(e.where)).map((e) => `- ${e.where}${filled(e.note) ? ` — ${e.note}` : ''}`);
   const facts = [['Architecture', req.architecture || '—'], ['Kind', `\`${req.kind}\` — ${support.TIER0_LABEL[req.kind] || ''}`], ['Requested by', req.requested_by || '—'],
     ['Components', list(req.components).join(', ') || '—']];
   return ['| | |', '|---|---|', ...facts.map(([k, v]) => `| ${k} | ${cell(v)} |`), '', '## Request', '', `${fr}text`, rq, fr, '',
     '## Evidence', '', ...(ev.length ? ev : ['- None.']), '', '## Fields', '', `${fj}json`, fields, fj, '',
-    unattended(req)
+    autoKeyed(req, auto)
+      ? `_Tier 0, filed and keyed by an unattended build agent: this architecture lets a trusted agent start \`${req.kind}\` itself (\`tier0.auto\`), so the architecture repository writes it now (architecture-tier0.yml) and a person reviews it after, in its pull request and the release; a request that is no Tier 0 write is refused there, with the reason._`
+      : unattended(req)
       ? `_Tier 0, filed by an unattended build agent: a person reviews it and applies the label \`${LABEL}\` — that is the approval; the architecture repository then writes it (architecture-tier0.yml), and a request that is no Tier 0 write is refused there, with the reason._`
       : `_Tier 0: the architecture repository writes it once the issue carries the label \`${LABEL}\` (architecture-tier0.yml); a request that is no Tier 0 write is refused there, with the reason._`, '<!-- sa-tier0 -->', ''].join('\n');
 }
@@ -138,6 +146,18 @@ function prepare(root, issue, opts = {}) {
     if (!rec) reasons.push(`${f.tdr} has no record under tdr/`);
     else { const m = tdr.move(rec.status, f.to); if (!m.ok) reasons.push(`${f.tdr}: ${rec.status} → ${f.to} is refused — ${m.reason}`); else Object.assign(payload, { id: f.tdr, file: rec.file, from: rec.status, arrow: m.arrow }); }
   }
+  // keyed by a trusted agent, no person read it: the kind is one the architecture lets an agent start, and "the code resolved
+  // it" is held to the code that shipped — every commit the evidence names is on its repository's default branch
+  if (opts.auto) {
+    payload.auto = true;
+    if (!s.auto || !s.auto.includes(req.kind)) reasons.push(`a trusted agent keyed this request, but \`${req.kind}\` is not in this architecture's tier0.auto (.sa-skills/project.json: ${s.auto && s.auto.length ? s.auto.join(', ') : 'none'}) — a person applies ${LABEL}`);
+    else if (!reasons.length && req.kind === 'tdr-status' && f.to === 'Resolved') {
+      const commits = commitsOf(req.evidence);
+      if (!commits.length) reasons.push(`a move to Resolved keyed by an agent names the commit that resolved it — evidence \`owner/repo@sha\`; none is named`);
+      const merged = opts.merged || mergedOnDefault;
+      commits.forEach((c) => { const r = merged(c); if (!r.ok) reasons.push(`${c.repo}@${c.sha.slice(0, 12)} is not on ${c.repo}'s default branch${r.branch ? ` (${r.branch})` : ''}: ${r.reason} — merge the change, then key the request again`); });
+    }
+  }
   if (!reasons.length && req.kind === 'adr-proposed') { payload.id = nextAdr(root); payload.file = `adr/${payload.id}-${slugify(req.title)}.md`; }
   if (!reasons.length && req.kind === 'doc-fix') {
     const file = path.join(root, f.file);
@@ -154,6 +174,26 @@ function prepare(root, issue, opts = {}) {
   const dir = path.join(root, '.cache', 'sa-skills', 'tier0'); fs.mkdirSync(dir, { recursive: true });
   const out = path.join(dir, `issue-${issue.n || 'local'}.json`); fs.writeFileSync(out, JSON.stringify(payload, null, 1) + '\n');
   return Object.assign({ ok: true, payload_file: path.relative(root, out) }, payload);
+}
+
+// the commits an evidence list names: `owner/repo@sha` (the form preview_tier0 renders), 7 to 40 hex digits
+function commitsOf(evidence) {
+  const seen = new Set();
+  return (evidence || []).flatMap((e) => [...String(e.where || '').matchAll(/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)@([0-9a-f]{7,40})\b/g)])
+    .map((m) => ({ repo: m[1], sha: m[2] })).filter((c) => { const k = `${c.repo}@${c.sha}`; if (seen.has(k)) return false; seen.add(k); return true; });
+}
+// is the commit on the repository's default branch? GitHub's compare: <default>...<sha> is `behind` or `identical` when it is.
+// A private service repository needs a token that reads it (SA_TIER0_EVIDENCE_TOKEN in the workflow)
+const ghRead = (args) => spawnSync('gh', args, { encoding: 'utf8',
+  env: process.env.SA_TIER0_EVIDENCE_TOKEN ? { ...process.env, GH_TOKEN: process.env.SA_TIER0_EVIDENCE_TOKEN } : process.env });
+function mergedOnDefault(c, run = ghRead) {
+  const repo = run(['api', `repos/${c.repo}`, '--jq', '.default_branch']);
+  if (repo.status !== 0) return { ok: false, reason: `the repository could not be read (${(repo.stderr || '').trim().split('\n')[0] || 'gh api failed'})` };
+  const branch = repo.stdout.trim();
+  const cmp = run(['api', `repos/${c.repo}/compare/${branch}...${c.sha}`, '--jq', '.status']);
+  if (cmp.status !== 0) return { ok: false, branch, reason: `the commit could not be compared (${(cmp.stderr || '').trim().split('\n')[0] || 'gh api failed'})` };
+  const st = cmp.stdout.trim();
+  return st === 'behind' || st === 'identical' ? { ok: true, branch } : { ok: false, branch, reason: `${branch} does not contain it (compare: ${st})` };
 }
 
 // ---- apply (doc-fix) and verify -----------------------------------------------------------------------------------
@@ -231,7 +271,7 @@ function verify(root, payload) {
 
 // the TDR vocabulary for readers outside the records category (the bundle, so the MCP server keeps no copy)
 const TDR_MOVES = tdr.MOVES, TDR_STATUSES = tdr.STATUSES, TDR_DRIVERS = tdr.DRIVERS;
-module.exports = { LABEL, KINDS, TDR_MOVES, TDR_STATUSES, TDR_DRIVERS, validate, issueTitle, labelsOf, issueBody, requestOf, factsHash, prepare, apply, verify };
+module.exports = { LABEL, KINDS, TDR_MOVES, TDR_STATUSES, TDR_DRIVERS, validate, issueTitle, labelsOf, issueBody, requestOf, factsHash, prepare, apply, verify, commitsOf, mergedOnDefault };
 
 if (require.main === module) {
   (async () => {
@@ -239,19 +279,20 @@ if (require.main === module) {
     const opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
     try {
       if (cmd === 'render') { const req = JSON.parse(read(a[1])); const e = validate(req); if (e.length) { console.error(e.join('\n')); process.exit(1); }
-        console.log(JSON.stringify({ title: issueTitle(req), labels: labelsOf(req), body: issueBody(req) }, null, 2)); return; }
+        const auto = String(opt('--auto') || '').split(/[\s,]+/).filter(Boolean);
+        console.log(JSON.stringify({ title: issueTitle(req), labels: labelsOf(req, auto), body: issueBody(req, auto) }, null, 2)); return; }
       const root = path.resolve(a[1] || '.');
       if (cmd === 'prepare') {
         const issue = opt('--from') ? JSON.parse(read(opt('--from'))) : await escalate.fetchIssue(root, a[2], { host: opt('--host') });
-        const r = prepare(root, issue, { force: a.includes('--force') });
+        const r = prepare(root, issue, { force: a.includes('--force'), auto: a.includes('--auto') });
         if (a.includes('--json')) console.log(JSON.stringify(r, null, 1));
-        else console.log(r.ok ? `TIER 0: ${r.kind} → ${r.id || r.file}${r.id && r.file ? ` (${r.file})` : ''}${r.arrow ? ` · ${r.arrow}` : ''} · payload ${r.payload_file}` : `TIER 0 refused${r.kind ? ` (${r.kind})` : ''}:\n${r.reasons.map((x) => `- ${x}`).join('\n')}`);
+        else console.log(r.ok ? `TIER 0: ${r.kind} → ${r.id || r.file}${r.id && r.file ? ` (${r.file})` : ''}${r.arrow ? ` · ${r.arrow}` : ''}${r.auto ? ' · keyed by a trusted agent' : ''} · payload ${r.payload_file}` : `TIER 0 refused${r.kind ? ` (${r.kind})` : ''}:\n${r.reasons.map((x) => `- ${x}`).join('\n')}`);
         process.exit(r.ok ? 0 : 1);
       }
       if (cmd === 'apply') { const r = apply(root, JSON.parse(read(a[2]))); console.log(`doc-fix applied: ${r.file}:${r.line}`); return; }
       if (cmd === 'verify') { const r = verify(root, JSON.parse(read(a[2])));
         console.log(r.ok ? `TIER 0 verified: ${r.changed.join(', ')}${r.notes.length ? `\n${r.notes.map((x) => `- ${x}`).join('\n')}` : ''}` : `TIER 0 write refused:\n${r.problems.map((x) => `- ${x}`).join('\n')}`); process.exit(r.ok ? 0 : 1); }
-      console.error('Usage: bun tier0.js render <request.json> | prepare <project> <issue#|url>|--from <issue.json> | apply|verify <project> <payload.json>'); process.exit(2);
+      console.error('Usage: bun tier0.js render <request.json> [--auto <kinds>] | prepare <project> <issue#|url>|--from <issue.json> [--auto] | apply|verify <project> <payload.json>'); process.exit(2);
     } catch (e) { console.error(`tier0.js: ${e.message}`); process.exit(2); }
   })();
 }

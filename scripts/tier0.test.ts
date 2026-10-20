@@ -169,19 +169,21 @@ describe("the workflow's key", () => {
   const indent = lines[from].match(/^\s*/)![0].length;
   const end = lines.findIndex((l, i) => i >= from && l.trim() !== "" && l.match(/^\s*/)![0].length < indent);
   const script = lines.slice(from, end).map((l) => l.slice(indent)).join("\n");
-  const run = (sender: string, type: string, agents: string, role: string) => {
-    const dir = join(TMP, `key-${sender}-${type}`);
+  const run = (sender: string, type: string, agents: string, role: string, more: Record<string, string> = {}) => {
+    const dir = join(TMP, `key-${sender}-${type}-${Object.values(more).join("-").replace(/[^a-z0-9]/gi, "").slice(0, 20)}`);
     mkdirSync(dir, { recursive: true });
     const log = join(dir, "gh.log");
     // like gh before the checkout: an issue command without -R finds no repository on disk and fails
-    writeFileSync(join(dir, "gh"), `#!/bin/bash\necho "$*" >> "${log}"\n[ "$1" = api ] && echo ${role}\n` +
+    writeFileSync(join(dir, "gh"), `#!/bin/bash\necho "$*" >> "${log}"\n[ "$1" = api ] && echo ${role}\n[ "$1 $2" = "issue list" ] && echo ${more.USED || 0}\n` +
       `if [ "$1" = issue ] && [[ " $* " != *" -R acme/order-desk "* ]]; then echo "not a git repository" >&2; exit 1; fi\nexit 0\n`, { mode: 0o755 });
     const r = spawnSync("bash", ["-e", "-c", script], { encoding: "utf8", cwd: dir,
       env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, SENDER: sender, SENDER_TYPE: type, AGENTS: agents,
-             N: "7", RUNNER_TEMP: dir, GITHUB_REPOSITORY: "acme/order-desk" } });
+             N: "7", RUNNER_TEMP: dir, GITHUB_REPOSITORY: "acme/order-desk", GITHUB_OUTPUT: join(dir, "out"), AUTHOR: sender,
+             BODY: "x\n<!-- sa-tier0 -->\n", TRUSTED: "", DAILY: "", ...more } });
+    const out = (() => { try { return readFileSync(join(dir, "out"), "utf8"); } catch { return ""; } })();
     const calls = (() => { try { return readFileSync(log, "utf8"); } catch { return ""; } })();
     const comment = (() => { try { return readFileSync(join(dir, "k.md"), "utf8"); } catch { return ""; } })();
-    return { code: r.status, calls, comment };
+    return { code: r.status, calls, comment, out };
   };
 
   test("an account in SA_TIER0_AGENTS is refused on the issue: a comment, the label off, no tier0-refused", () => {
@@ -202,9 +204,75 @@ describe("the workflow's key", () => {
     expect(r.calls).toContain("--remove-label architecture-tier0");
   });
 
+  test("a trusted agent keys the request it filed: tier0-auto, auto=true for prepare, before any refusal of agents and bots", () => {
+    const r = run("build-bot-user", "User", "build-bot-user", "write", { TRUSTED: "ci-runner build-bot-user" });
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("auto=true");
+    expect(r.calls).toContain("issue edit 7 -R acme/order-desk --add-label tier0-auto");
+    expect(run("svc-builder[bot]", "Bot", "", "none", { TRUSTED: "svc-builder[bot]" }).code).toBe(0);
+  });
+
+  test("a trusted agent never keys another's issue, an issue without the marker, or past its daily limit", () => {
+    const other = run("build-bot-user", "User", "", "write", { TRUSTED: "build-bot-user", AUTHOR: "stranger" });
+    expect(other.code).toBe(1);
+    expect(other.comment).toContain("keys the requests it filed, and #7 was filed by `stranger`");
+    expect(run("build-bot-user", "User", "", "write", { TRUSTED: "build-bot-user", BODY: "please write this" }).comment).toContain("no sa-tier0 marker");
+    const busy = run("build-bot-user", "User", "", "write", { TRUSTED: "build-bot-user", USED: "3", DAILY: "3" });
+    expect(busy.comment).toContain("keyed 3 requests in the last 24 hours, the limit (SA_TIER0_AUTO_DAILY) is 3");
+    expect(busy.calls).not.toContain("--add-label tier0-auto");
+    expect(run("build-bot-user", "User", "", "write", { TRUSTED: "build-bot-user", USED: "9" }).code).toBe(0);
+  });
+
   test("a person who can write goes on, and the issue is not touched", () => {
     const r = run("maintainer", "User", "build-bot-user", "write");
     expect(r.code).toBe(0);
     expect(r.calls).not.toContain("issue ");
+  });
+});
+
+describe("tier0.auto — a trusted agent keys its own request (10.12.0)", () => {
+  const U = { ...REQ, supervision: "unattended" };
+  const declare = (auto: any) => { w(".sa-skills/project.json", JSON.stringify({ support: "run", tier0: { auto } })); git("add", "-A"); git("commit", "-q", "-m", "auto"); };
+  const inProgress = () => { const f = join(ROOT, "tdr/TDR-001-polling.md");
+    writeFileSync(f, readFileSync(f, "utf8").replace("status: Open", "status: In Progress").replace("`Open`\n\n**Initiative", "`In Progress`\n\n**Initiative")); git("commit", "-qam", "wip"); };
+  const resolve = (where: string) => issue({ ...U, kind: "tdr-status", evidence: [{ where, note: "the cache is gone" }], fields: { tdr: "TDR-001", to: "Resolved", note: "paid" } });
+
+  test("the issue of an auto kind carries the key and says no person approved it first; any other kind stays without it", () => {
+    expect(T.labelsOf(U, ["tdr-workaround"])).toEqual(["architecture-tier0", "tier0:tdr-workaround"]);
+    expect(T.labelsOf(U, ["doc-fix"])).toEqual(["tier0:tdr-workaround"]);
+    expect(T.labelsOf(REQ, [])).toEqual(["architecture-tier0", "tier0:tdr-workaround"]);
+    expect(T.issueBody(U, ["tdr-workaround"])).toContain("filed and keyed by an unattended build agent");
+    expect(T.issueBody(U, ["doc-fix"])).toContain("a person reviews it and applies the label");
+  });
+
+  test("prepare --auto refuses a kind the architecture does not list, and accepts one it does", () => {
+    expect(T.prepare(ROOT, issue(U), { auto: true }).reasons[0]).toMatch(/is not in this architecture's tier0.auto \(.sa-skills\/project.json: none\) — a person applies architecture-tier0/);
+    declare(["doc-fix"]);
+    expect(T.prepare(ROOT, issue(U), { auto: true }).reasons[0]).toMatch(/tier0.auto \(.sa-skills\/project.json: doc-fix\)/);
+    declare("all");
+    expect(T.prepare(ROOT, issue(U), { auto: true })).toMatchObject({ ok: true, id: "TDR-002", auto: true });
+    expect(T.prepare(ROOT, issue(U)).auto).toBeUndefined();
+  });
+
+  test("a move to Resolved keyed by an agent names a commit merged into its repository's default branch", () => {
+    declare("all"); inProgress();
+    const merged = (c: any) => (c.sha.startsWith("aaaa") ? { ok: true, branch: "main" } : { ok: false, branch: "main", reason: "main does not contain it (compare: ahead)" });
+    expect(T.prepare(ROOT, resolve("hub-api internal/stock/cache.go:42"), { auto: true, merged }).reasons[0]).toMatch(/names the commit that resolved it — evidence `owner\/repo@sha`; none is named/);
+    expect(T.prepare(ROOT, resolve("acme/hub-api@bbbbbbb1 internal/stock/cache.go:42"), { auto: true, merged }).reasons[0])
+      .toBe("acme/hub-api@bbbbbbb1 is not on acme/hub-api's default branch (main): main does not contain it (compare: ahead) — merge the change, then key the request again");
+    expect(T.prepare(ROOT, resolve("acme/hub-api@aaaaaaa1 internal/stock/cache.go:42"), { auto: true, merged })).toMatchObject({ ok: true, from: "In Progress", auto: true });
+    // a person's key is not held to it: the person read the request
+    expect(T.prepare(ROOT, resolve("hub-api internal/stock/cache.go:42")).ok).toBe(true);
+  });
+
+  test("commitsOf reads owner/repo@sha once each; mergedOnDefault asks GitHub's compare", () => {
+    expect(T.commitsOf([{ where: "acme/hub-api@abc1234 a.go:1" }, { where: "acme/hub-api@abc1234 b.go:2 and acme/web@def56789" }, { where: "hub-api@abc1234" }]))
+      .toEqual([{ repo: "acme/hub-api", sha: "abc1234" }, { repo: "acme/web", sha: "def56789" }]);
+    const gh = (status: string) => (args: string[]) => ({ status: 0, stderr: "", stdout: args[1].includes("/compare/") ? `${status}\n` : "main\n" });
+    const c = { repo: "acme/hub-api", sha: "abc1234" };
+    expect(T.mergedOnDefault(c, gh("behind"))).toEqual({ ok: true, branch: "main" });
+    expect(T.mergedOnDefault(c, gh("identical")).ok).toBe(true);
+    expect(T.mergedOnDefault(c, gh("diverged"))).toEqual({ ok: false, branch: "main", reason: "main does not contain it (compare: diverged)" });
+    expect(T.mergedOnDefault(c, () => ({ status: 1, stdout: "", stderr: "HTTP 404: Not Found" })).reason).toMatch(/could not be read \(HTTP 404/);
   });
 });

@@ -350,8 +350,9 @@ function labelSet() {
     { name: 'architecture-escalation', color: 'B60205', description: 'A RUN-team request that crossed an escalation trigger — for an architect' },
     ...Object.entries(ROUTES).map(([name, d]) => ({ name, color: 'D93F0B', description: `Escalation route: ${d}` })),
     ...Object.entries(TRIGGERS).map(([id, d]) => ({ name: `trigger:${id}`, color: 'FBCA04', description: `Escalation trigger: ${d}` })),
-    { name: 'architecture-tier0', color: '0E8A16', description: 'Put by a person: write this Tier 0 request (the key; a bot or SA_TIER0_AGENTS is refused)' },
+    { name: 'architecture-tier0', color: '0E8A16', description: 'The key: write this Tier 0 request — a person, or a trusted agent on its own (tier0.auto)' },
     { name: 'tier0-refused', color: 'E4E669', description: 'The Tier 0 workflow refused this request — the comment says why' },
+    { name: 'tier0-auto', color: 'BFD4F2', description: 'Keyed by a trusted agent (SA_TIER0_TRUSTED_AGENTS): no person read it before the write' },
     ...TIER0.map((k) => ({ name: `tier0:${k}`, color: 'C2E0C6', description: TIER0_WHAT[k] || `Tier 0 request: ${k}` })),
   ];
 }
