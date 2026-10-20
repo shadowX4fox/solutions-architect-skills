@@ -25,6 +25,7 @@ If no argument is provided, default to `patch`.
    - `.claude-plugin/plugin.json`, `package.json` → `"version": "NEW_VERSION"`
    - `.claude-plugin/marketplace.json` → the `sa-skills`, `sa-records` and `sa-requirements` entries
    - `plugins/sa-records/.claude-plugin/plugin.json`, `plugins/sa-requirements/.claude-plugin/plugin.json`
+   - the CI templates' pin, `SA_PLUGIN_REF: vOLD_VERSION` → `vNEW_VERSION` (`skills/architecture-lifecycle/ci/*.yml`, `plugins/sa-delivery/skills/architecture-index-export/ci/*.yml`): a project copies these files on an upgrade, and a stale pin there runs the old plugin
 5. **Run the full check suite**: `bun run check` (typecheck, frontmatter, agent structure, validator configs, lazy-load sizes, text encoding, bundle, tests). **If it fails, STOP the release** — report the failures and fix them before any commit. Nothing ships that the check chain has not passed.
 6. **Show git status** to review all pending changes (staged and unstaged)
 7. **Stage all modified files** (README.md, CHANGELOG.md, the plugin.json files, marketplace.json, package.json, and any other changed files)
