@@ -103,6 +103,14 @@
       "note": "Build packs need a handoff kit of the same architecture version (handoffs/); without one the bundle carries the chunks and the ledger only.",
       "depends_on": ["architecture-dev-handoff"]
     },
+    "architecture-ci-setup": {
+      "category": "delivery",
+      "plugin": "sa-delivery",
+      "standalone": true,
+      "needs": [],
+      "note": "An architecture repository (ARCHITECTURE.md) or a service repository bound to one (.architecture.json); GitHub Actions only.",
+      "depends_on": ["architecture-index-export", "architecture-lifecycle"]
+    },
     "architecture-docs-export": {
       "category": "delivery",
       "plugin": "sa-delivery",

@@ -3,7 +3,7 @@
 **Architecture documentation that stays true to itself — written with Claude Code, checked by code, delivered to the people who build it.**
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-10.12.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-10.13.0-blue.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-purple.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -88,7 +88,7 @@ flowchart LR
 | Decisions & debt | `architecture-definition-record`, `technical-debt-records` | ADRs and TDRs, including an imported institutional ADR catalog |
 | Release | `architecture-lifecycle` | Status, release gates, changelog, `architecture-v<version>` tags, delivery increments |
 | Risk & design | `architecture-analysis`, `architecture-traceability` | Ten analyses (SPOF, blast radius, bottlenecks, cost, STRIDE, vendor lock-in, latency, tech debt, coupling, data sensitivity) and PO Spec coverage |
-| Delivery | `architecture-dev-handoff`, `architecture-docs-export`, `architecture-icepanel-sync`, `architecture-index-export` | The four-part handoff kit with validated OpenAPI / AsyncAPI / GraphQL / Avro / DDL / Protobuf assets, Word briefings, an IcePanel C4 import, the MCP bundle |
+| Delivery | `architecture-dev-handoff`, `architecture-docs-export`, `architecture-icepanel-sync`, `architecture-index-export`, `architecture-ci-setup` | The four-part handoff kit with validated OpenAPI / AsyncAPI / GraphQL / Avro / DDL / Protobuf assets, Word briefings, an IcePanel C4 import, the MCP bundle, the CI/CD of the architecture and of its service repositories |
 | Visualization | `architecture-command-center` | A navigable 3D model with Alia as guide |
 | Operation | `architecture-lifecycle` CI · `technical-debt-records` · `architecture-definition-record` | Tier 0 writes (a workaround TDR, a TDR move, a Proposed ADR, a doc fix) requested from an IDE or a build agent and written by CI; escalations as records and issues — [docs/RUN_TEAMS.md](docs/RUN_TEAMS.md) |
 
@@ -227,6 +227,7 @@ Fifteen skills in six categories. **Standalone** means the skill starts without 
 | | `architecture-traceability` | sa-analysis | No | PO Spec + `ARCHITECTURE.md` |
 | **Delivery** — for other teams | `architecture-dev-handoff` | sa-delivery | No | `ARCHITECTURE.md` + `docs/05-integration-points.md` |
 | | `architecture-index-export` | sa-delivery | No | `ARCHITECTURE.md` (a handoff kit for build packs) |
+| | `architecture-ci-setup` | sa-delivery | Yes | An architecture repository, or a service repository bound to one |
 | | `architecture-docs-export` | sa-delivery | No | `ARCHITECTURE.md` |
 | | `architecture-icepanel-sync` | sa-delivery | No | `ARCHITECTURE.md` |
 | **Visualization** | `architecture-command-center` | sa-visualization | No | `ARCHITECTURE.md` |

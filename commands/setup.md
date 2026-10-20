@@ -267,8 +267,8 @@ Only when the project is a RUN-team one — `bun "$plugin_dir/scripts/shared/sup
 bun "$plugin_dir/scripts/shared/escalate.js" labels "$PWD"
 ```
 
-It reads `origin` and lists the seventeen labels escalations and Tier 0 requests carry (`architecture-escalation`, `tier-1`,
-`tier-2`, `trigger:<id>`, `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0:<kind>`), `✓` present and `✗` missing. A missing
+It reads `origin` and lists the eighteen labels escalations and Tier 0 requests carry (`architecture-escalation`, `tier-1`,
+`tier-2`, `trigger:<id>`, `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0-waiting`, `tier0:<kind>`), `✓` present and `✗` missing. A missing
 escalation label only leaves issues unfiltered — they are filed without it; a missing `architecture-tier0` means nobody
 can apply a Tier 0 request. Display its stdout verbatim. When any is missing, ask the user before creating them — they are
 written to the git host — and on a yes run it again with `--create`. Azure DevOps needs nothing: a tag is created by its

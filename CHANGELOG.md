@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.13.0]
+
+### Added
+- **`sa-delivery:architecture-ci-setup`**, the sixteenth skill: CI/CD for an architecture and for the service repositories built from it. `scripts/ci-setup.js` has two sides:
+  - `architecture`: the five workflows from the templates, with the plugin's pin and optionally a self-hosted runner (`--runner`), plus the RUN-team policy, the labels, and the repository's variables, secrets and workflow permission, read through `gh`.
+  - `service`: the binding (`.architecture.json`, whose recorded version and pack revision it never touches), the IDE's MCP server (`.mcp.json`, other servers kept) and, unattended, the build and merge workflows, with the settings both repositories need.
+
+  `--write` writes local files only. It never overwrites a workflow that differs from its template unless the file is named in `--replace`, because a team's own changes and an older template look the same to code. It never sets a secret: it prints the command.
+- **The service side of the unattended build**, under `architecture-index-export/ci/service/`:
+  - `architecture-build.yml`: Claude builds from the pack on the `architecture-released` dispatch, with the build's identity (`SA_BUILD_TOKEN`), through the MCP server (`SA_INDEX_MCP_URL`, optionally on a self-hosted runner, `SA_BUILD_RUNS_ON`), and opens a pull request, or none when nothing changed.
+  - `architecture-build-merge.yml`, opt in: merges that pull request once the repository's tests pass, only one opened by `SA_BUILD_AGENT` and only at the tested commit.
+- **`architecture-index.yml` tells the service repositories.** After a released publish with build packs, it dispatches `architecture-released`, with the version, to each repository in `SA_SERVICE_REPOS`, using `SA_DISPATCH_TOKEN`.
+- **A move to `Resolved` waits for its merge.** An agent-keyed request can cite its service pull request as `owner/repo#N`, so a squash merge no longer loses the evidence. `prepare --auto` returns `wait` (exit 3) while the pull request is open or the commit is not on the default branch. The workflow then labels the request `tier0-waiting`, comments once, re-checks it every 30 minutes (a schedule that dispatches the workflow per waiting request), and refuses it after `SA_TIER0_WAIT_DAYS` (default 7), or when the pull request was closed without a merge. `tier0-waiting` is the eighteenth label.
+
+### Changed
+- **The architecture repository keys a trusted agent's request; the agent never applies the label.** 10.12.0 had the build apply `architecture-tier0` itself, against the MCP server's own instruction ("never add the label"), and a build that read both followed the server, so the request waited. `architecture-tier0.yml` now runs on `issues: opened` too. It keys an issue an account in `SA_TIER0_TRUSTED_AGENTS` opened, when the issue carries the `sa-tier0` marker, its kind is in `tier0.auto` (read from the repository) and the daily limit holds, and adds `architecture-tier0` and `tier0-auto`. A kind outside `tier0.auto` gets a comment and waits for a person.
+
+  The key is now a job of its own, so a request that isn't for the workflow ends the run green. `labelsOf` never puts the key on an unattended issue, and BUILD.md rule 10 says so: file a `Resolved` move with its pull request, cite it, and the architecture writes it after the merge. The server needs no change (knowledge-base #30).
+
+### Upgrade
+- An architecture repository runs `ci-setup.js architecture <root>`. It moves every workflow's pin to `v10.13.0`. `architecture-tier0.yml` changed, so it shows as differing from its template: read the diff and replace it with `--replace architecture-tier0.yml`. Then create `tier0-waiting` with `escalate.js labels <root> --create`.
+
 ## [10.12.0]
 
 ### Added

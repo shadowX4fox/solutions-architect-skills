@@ -201,7 +201,7 @@ An unattended build is declared in the service repository's binding: `"supervisi
 | 3 and 5. A gap, or a choice the standards leave open | Ask; with no answer, a `TODO(architecture)` | A `TODO(architecture)` at once |
 | 4. Security | Fail closed | The same: an agent never opens an interface |
 | 9. Escalation | Preview, the person's yes, filed with their access | Preview, filed with the build's own identity: an escalation writes nothing |
-| 10. Tier 0 | Preview, the person's yes, filed with `architecture-tier0` | `preview_tier0(…, supervision: "unattended")`, filed **without** `architecture-tier0` — or keyed by the build itself for a kind in `tier0.auto` |
+| 10. Tier 0 | Preview, the person's yes, filed with `architecture-tier0` | `preview_tier0(…, supervision: "unattended")`, filed **without** `architecture-tier0` — the repository keys a kind in `tier0.auto` |
 
 ```mermaid
 sequenceDiagram
@@ -224,29 +224,55 @@ The build's pull request lists every `TODO(architecture)` and every issue it fil
 Its reviewer reads them there and applies `architecture-tier0` to the requests that should be written. The agent never
 applies that label: the workflow refuses a bot, and the accounts listed in `SA_TIER0_AGENTS`.
 
-### Fully unattended: a trusted agent keys its own request (10.12.0)
+### Fully unattended (10.12.0, 10.13.0)
 
 An architecture can let its build agents start some Tier 0 writes with no person between the request and the merge.
+The agent still never applies `architecture-tier0`: when it opens the issue, the architecture repository keys it.
 Two settings, both in the architecture repository:
 
-- **Which kinds**: `"tier0": { "auto": [...] }` in `.sa-skills/project.json` — a subset of the four, or `"all"`
-  (`support.js <project> --declare-auto all|none|<kind,kind>`). The policy is versioned: changing it is a reviewed
+- **Which kinds**: `"tier0": { "auto": [...] }` in `.sa-skills/project.json`, a subset of the four or `"all"`
+  (`support.js <project> --declare-auto all|none|<kind,kind>`). The policy is versioned, so changing it is a reviewed
   change of its own. The bundle carries it as `support.tier0_auto`, and `BUILD.md` rule 10 names the kinds.
 - **Which agents**: `SA_TIER0_TRUSTED_AGENTS`, a machine user's login or a GitHub App's `name[bot]`.
 
-The key then accepts the agent's own label, under four conditions, each refused on the issue when it fails:
+`architecture-tier0.yml` runs on `issues: opened` as well as on `labeled`. On an issue a trusted agent opened, it
+checks four conditions:
 
 | Condition | Why |
 |---|---|
-| The agent is in `SA_TIER0_TRUSTED_AGENTS` and opened the issue itself | It keys its own requests, never another account's |
+| The author is in `SA_TIER0_TRUSTED_AGENTS` | Only the build agents the architecture trusts |
 | The issue carries the `<!-- sa-tier0 -->` marker `preview_tier0` renders | Only a request the server previewed |
+| Its kind is in `tier0.auto`; `prepare --auto` checks it again | The policy is the architecture's |
 | At most `SA_TIER0_AUTO_DAILY` (default 10) per agent per 24 hours | A runaway agent stops |
-| `tier0.js prepare --auto`: the kind is in `tier0.auto`; a move to `Resolved` names an `owner/repo@sha` on its repository's default branch | The policy is the architecture's; "the code resolved it" is held to code that shipped |
 
-The issue is labelled `tier0-auto`, and the pull request says no person read the request before the write. The
-review moves after the write: the PR, the release entry, and a revert. Escalations never go this way: a crossed
-trigger is always an architect's. A private service repository needs `SA_TIER0_EVIDENCE_TOKEN`, a secret that
-reads it, for the `Resolved` check.
+When they hold, the workflow applies `architecture-tier0` and `tier0-auto` itself and writes the request. A kind
+outside `tier0.auto` gets a comment and waits for a person's label, and a failed limit is refused on the issue. The
+pull request says no person read the request before the write. The review moves after the write: the PR, the release
+entry, and a revert.
+
+**A move to `Resolved` waits for the code.** The build files it with its own pull request and cites it as
+`owner/repo#N`, or a commit as `owner/repo@sha`. `prepare --auto` asks GitHub whether that change is merged into the
+service's default branch:
+
+| The change | The request |
+|---|---|
+| Merged | Written |
+| Open, or a commit not on the default branch yet | Waits: labelled `tier0-waiting`, a comment, re-checked every 30 minutes by the workflow's schedule |
+| A pull request closed without a merge, or still waiting after `SA_TIER0_WAIT_DAYS` (default 7) | Refused |
+
+A private service repository needs `SA_TIER0_EVIDENCE_TOKEN`, a secret that reads it.
+
+**The service side** ships with the plugin under `architecture-index-export/ci/service/`:
+
+- `architecture-index.yml` dispatches `architecture-released` to every repository in `SA_SERVICE_REPOS`, using
+  `SA_DISPATCH_TOKEN`, once a released version's build packs are published.
+- `architecture-build.yml` in the service repository answers that dispatch. Claude builds from the pack with the
+  build's identity (`SA_BUILD_TOKEN`) and opens a pull request, or opens none when nothing changed.
+- `architecture-build-merge.yml`, opt in, merges that pull request once the repository's tests pass, but only one
+  opened by `SA_BUILD_AGENT` and only at the tested commit.
+
+`sa-delivery:architecture-ci-setup` sets up both sides. Escalations never go this way: a crossed trigger is always an
+architect's.
 
 ## Setting up the repository
 
@@ -255,8 +281,8 @@ reads it, for the `Resolved` check.
 | `"support": "run"` and a first release | `.sa-skills/project.json`, `release my architecture` |
 | The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
-| Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS` and `SA_TIER0_AUTO_DAILY` for agents that key their own requests (§ Fully unattended) |
-| Labels | `architecture-tier0`, `tier0-refused`, `tier0-auto` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all seventeen |
+| Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS`, `SA_TIER0_AUTO_DAILY` and `SA_TIER0_WAIT_DAYS` for agents whose requests the repository keys, `SA_SERVICE_REPOS` (with the secret `SA_DISPATCH_TOKEN`) for the service builds (§ Fully unattended) |
+| Labels | `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0-waiting` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all eighteen |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |
 
@@ -265,7 +291,8 @@ reads it, for the `Resolved` check.
 | Command | Does |
 |---|---|
 | `support.js <project> [--declare run\|none]` | The policy: whether Tier 0 applies, and the triggers |
-| `support.js <project> --declare-auto all\|none\|<kinds>` | The kinds a trusted agent keys itself (`tier0.auto`) |
+| `support.js <project> --declare-auto all\|none\|<kinds>` | The kinds the repository keys for a trusted agent (`tier0.auto`) |
+| `ci-setup.js architecture\|service <dir> [--write]` | Both sides' workflows, binding, MCP server and settings, checked and written (`sa-delivery:architecture-ci-setup`) |
 | `escalate.js new <project> --from <request.json>` | Writes the record |
 | `escalate.js issue <project> ESC-NNN [--create]` | The issue, previewed, or opened with `--create` |
 | `escalate.js import <project> <issue>` | An `[ESC-?]` issue filed from the IDE becomes a numbered record |

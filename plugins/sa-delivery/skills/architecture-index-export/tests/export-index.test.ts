@@ -195,13 +195,12 @@ describe("export-index — build packs", () => {
     // a label the repository lacks: the issue is refiled without it and the gap is named, never improvised
     expect(run).toContain("file it again without the labels it refused — the `[ESC-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request. A change to the architecture");
     expect(run).toContain("the `[T0-?]` title identifies it — and name the missing labels beside the issue's URL, to the user or, unattended, in your pull request: without `architecture-tier0` in the repository nobody can apply the request.");
-    // tier0.auto (10.12.0): the listed kinds the build keys itself, a Resolved move after its merge; the rest keep a person's key
+    // tier0.auto (10.13.0): the architecture repository keys the listed kinds, a Resolved move filed with its pull request; the build never keys
     w(".sa-skills/project.json", JSON.stringify({ support: "run", tier0: { auto: ["tdr-status", "doc-fix"] } }));
     const auto = md({});
-    expect(auto).toContain("A kind in `support.tier0_auto` — on this architecture `tdr-status`, `doc-fix` — this build keys itself: the issue carries `architecture-tier0`");
-    expect(auto).toContain("A move to `Resolved` names the commit that resolved it as `owner/repo@sha`, already on this repository's default branch");
-    expect(auto).toContain("Any other kind carries no `architecture-tier0` label (drop it from `file_with.steps` if the server lists it): a person applies it");
-    expect(auto).not.toContain("Never apply `architecture-tier0` yourself.");
+    expect(auto).toContain("never apply `architecture-tier0` yourself. A kind in `support.tier0_auto` — on this architecture `tdr-status`, `doc-fix` — the architecture repository keys itself when this build's identity is one of its trusted agents");
+    expect(auto).toContain("A move to `Resolved` cites, beside the file and line, the pull request that carries the change as `owner/repo#N`: file it with that pull request");
+    expect(auto).not.toContain("the issue carries `architecture-tier0`");
     w(".sa-skills/project.json", JSON.stringify({ support: "run" }));
     expect(standard).toContain("give the user — unattended, your pull request — the questions");
     expect(standard).toMatch(/through the team's channel; never settle it in code\.\n\n## Build plan/);
