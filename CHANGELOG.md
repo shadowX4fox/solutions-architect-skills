@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.11.0]
+
+### Added
+- **`escalate.js labels <project> [--create]`: the labels a RUN-team repository needs, checked and created.** An escalation is filed without a label its repository lacks, so a missing one never showed: every escalation of a measured project went out unlabelled, because nothing created `architecture-escalation`, `tier-1`, `tier-2` or the seven `trigger:<id>`. The command reads `origin` and lists the sixteen labels escalations and Tier 0 requests carry — present or missing, exit 1 on a missing one — and `--create` adds the missing on GitHub, GitLab and Gitea; Azure DevOps creates a tag on its first use. The set is read from the escalation routes and triggers and the Tier 0 kinds, and a test holds it to `tier0.js` and the Tier 0 workflow. `/setup` Step 12 runs it on a RUN-team project and asks before creating; `support.js --declare run` names it as the next step.
+
+### Upgrade
+- A RUN-team repository runs `escalate.js labels <project>` once (or `/setup`), creates the missing labels, and moves every workflow's `SA_PLUGIN_REF` to `v10.11.0`.
+
 ## [10.10.14]
 
 ### Fixed

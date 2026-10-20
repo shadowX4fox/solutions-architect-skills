@@ -258,7 +258,24 @@ asks for it.
 Display its stdout verbatim. **This step is informational** — no pack is a normal, fully working setup. A `⚠` line
 names what to do: update the pack (`claude plugin update <pack>`), or the base, until the ranges meet.
 
-## Step 12 — Final reminder
+## Step 12 — Check a RUN-team repository's labels
+
+Only when the project is a RUN-team one — `bun "$plugin_dir/scripts/shared/support.js" "$PWD" --json` prints
+`"support": "run"`; otherwise skip this step silently. Execute:
+
+```bash
+bun "$plugin_dir/scripts/shared/escalate.js" labels "$PWD"
+```
+
+It reads `origin` and lists the sixteen labels escalations and Tier 0 requests carry (`architecture-escalation`, `tier-1`,
+`tier-2`, `trigger:<id>`, `architecture-tier0`, `tier0-refused`, `tier0:<kind>`), `✓` present and `✗` missing. A missing
+escalation label only leaves issues unfiltered — they are filed without it; a missing `architecture-tier0` means nobody
+can apply a Tier 0 request. Display its stdout verbatim. When any is missing, ask the user before creating them — they are
+written to the git host — and on a yes run it again with `--create`. Azure DevOps needs nothing: a tag is created by its
+first use. A host the script cannot reach (no `gh` / `glab` login, no `GITEA_TOKEN`) is reported and the step ends there;
+it never blocks the setup.
+
+## Step 13 — Final reminder
 
 Print:
 

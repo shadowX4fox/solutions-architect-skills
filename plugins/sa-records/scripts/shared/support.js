@@ -54,7 +54,7 @@ module.exports = { TIER0, TIER0_LABEL, TRIGGERS, supportOf, declareSupport, rele
 if (require.main === module) {
   const a = process.argv.slice(2), root = a.find((x) => !x.startsWith('--')) || process.cwd();
   const i = a.indexOf('--declare');
-  if (i >= 0) { try { console.log(declareSupport(root, a[i + 1])); process.exit(0); } catch (e) { console.error(e.message); process.exit(2); } }
+  if (i >= 0) { try { const v = declareSupport(root, a[i + 1]); console.log(v); if (v === 'run') console.log(`next: the repository's labels — escalate.js labels ${root} (--create adds the missing, after the user's yes)`); process.exit(0); } catch (e) { console.error(e.message); process.exit(2); } }
   const s = supportOf(root);
   if (a.includes('--json')) { console.log(JSON.stringify(Object.assign({}, s, { tier0_writes: s.tier0 ? TIER0 : [], triggers: TRIGGERS }), null, 2)); process.exit(0); }
   console.log(`support: ${s.support || 'standard'} · ${s.reason}`);

@@ -205,3 +205,36 @@ describe('the record path keeps the text whole', () => {
     expect(m).toMatchObject({ id: 'ESC-001', components: ['A', 'B'], requested_by: 'ops' });
   });
 });
+
+describe('labels: what the repository needs before its first issue', () => {
+  const GH = { host: 'github', server: 'github.com', path: 'acme/order-desk', url: 'https://github.com/acme/order-desk.git' };
+  test('the set is every label an escalation or a Tier 0 request carries, each description within GitHub\'s 100 characters', () => {
+    const names = E.labelSet().map((l: any) => l.name);
+    const rec = { meta: { route: 'tier-2', triggers: Object.keys(E.TRIGGERS) } };
+    for (const l of E.labelsOf(rec)) expect(names).toContain(l);
+    expect(names).toContain('tier-1');
+    expect(names).toEqual(expect.arrayContaining(['architecture-tier0', 'tier0-refused', 'tier0:tdr-workaround', 'tier0:tdr-status', 'tier0:adr-proposed', 'tier0:doc-fix']));
+    expect(new Set(names).size).toBe(names.length);
+    for (const l of E.labelSet()) { expect(l.description.length).toBeLessThanOrEqual(100); expect(l.color).toMatch(/^[0-9A-F]{6}$/); }
+  });
+  test('without --create it reports the missing and creates nothing', async () => {
+    const made: string[] = [];
+    const r = await E.labels('.', { remote: GH, list: async () => ['architecture-tier0', 'bug'], make: async (l: any) => { made.push(l.name); } });
+    expect(r.missing).toContain('architecture-escalation');
+    expect(r.missing).not.toContain('architecture-tier0');
+    expect(made).toEqual([]);
+  });
+  test('--create adds only the missing ones', async () => {
+    const made: string[] = [];
+    const have = E.labelSet().map((l: any) => l.name).filter((n: string) => n !== 'trigger:low-confidence' && n !== 'tier-2');
+    const r = await E.labels('.', { remote: GH, create: true, list: async () => have, make: async (l: any) => { made.push(l.name); } });
+    expect(made.sort()).toEqual(['tier-2', 'trigger:low-confidence']);
+    expect(r.created.sort()).toEqual(made);
+    expect(r.missing).toEqual([]);
+  });
+  test('Azure DevOps needs nothing: a tag is created by its first use', async () => {
+    const r = await E.labels('.', { remote: { host: 'azure', url: 'https://dev.azure.com/acme/Desk/_git/desk' }, create: true, list: async () => { throw new Error('not called'); } });
+    expect(r.missing).toEqual([]);
+    expect(r.note).toMatch(/first use/);
+  });
+});

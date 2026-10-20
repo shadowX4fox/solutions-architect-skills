@@ -148,3 +148,14 @@ describe("tier0.js", () => {
     expect(T.verify(ROOT, p).problems.some((x: string) => /states TDR-001/.test(x))).toBe(false);
   });
 });
+
+describe("the Tier 0 labels escalate.js labels creates", () => {
+  test("are the key, the refusal and one per kind — the ones the workflow and the issue format use", () => {
+    const E = require("../plugins/sa-records/scripts/shared/escalate.js");
+    const names = E.labelSet().map((l: any) => l.name);
+    expect(names).toContain(T.LABEL);
+    for (const k of Object.keys(T.KINDS)) expect(names).toContain(`tier0:${k}`);
+    const yml = readFileSync(join(__dirname, "..", "skills", "architecture-lifecycle", "ci", "architecture-tier0.yml"), "utf8");
+    for (const l of (yml.match(/--(?:add|remove)-label ([\w:-]+)/g) || []).map((x) => x.split(" ")[1])) expect(names).toContain(l);
+  });
+});

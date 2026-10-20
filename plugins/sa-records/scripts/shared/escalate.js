@@ -14,6 +14,7 @@
 //   bun escalate.js status <project> ESC-NNN "In Review"
 //   bun escalate.js close <project> ESC-NNN --by <ADR-NNN|TDR-NNN|architecture-vX.Y.Z> [--rejected "<reason>"]
 //   bun escalate.js list <project> [--all] [--json]
+//   bun escalate.js labels <project> [--create] [--host <h>] [--json]   the labels the repository needs (escalations, Tier 0); --create adds the missing
 //
 // request.json: { title, request, triggers: [id], evidence: [{ trigger, where, note }], proposal: [line], questions: [line],
 //   components: [canonical name], integrations: [I-nn], adrs: [ADR-NNN], tdrs: [TDR-NNN], requested_by, route: tier-1|tier-2 }
@@ -337,7 +338,59 @@ async function createIssue(root, id, opts = {}) {
   return { id: p.id, host: p.host, url, note };
 }
 
-module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue, requestOf, importIssue, unhtml, fetchIssue, retitlePlan, retitle };
+// ---- labels: what a RUN-team repository needs before its first issue — the escalation labels and the Tier 0 key -----
+// `gh issue create --label` refuses an issue whose label the repository lacks; the plugin refiles without it, so a missing
+// label never shows until a triager filters by it. Azure DevOps tags are created by their first use: nothing to set up.
+// GitHub caps a label's description at 100 characters.
+function labelSet() {
+  const { TIER0 } = require('./support.js');   // required here: support.js requires this file
+  const TIER0_WHAT = { 'tdr-workaround': 'Tier 0 request: a workaround recorded as a new TDR', 'tdr-status': 'Tier 0 request: a TDR status move',
+    'adr-proposed': 'Tier 0 request: a project ADR (101+) in Proposed', 'doc-fix': 'Tier 0 request: a doc fix that changes no fact' };
+  return [
+    { name: 'architecture-escalation', color: 'B60205', description: 'A RUN-team request that crossed an escalation trigger — for an architect' },
+    ...Object.entries(ROUTES).map(([name, d]) => ({ name, color: 'D93F0B', description: `Escalation route: ${d}` })),
+    ...Object.entries(TRIGGERS).map(([id, d]) => ({ name: `trigger:${id}`, color: 'FBCA04', description: `Escalation trigger: ${d}` })),
+    { name: 'architecture-tier0', color: '0E8A16', description: 'Put by a person: write this Tier 0 request (the key; a bot or SA_TIER0_AGENTS is refused)' },
+    { name: 'tier0-refused', color: 'E4E669', description: 'The Tier 0 workflow refused this request — the comment says why' },
+    ...TIER0.map((k) => ({ name: `tier0:${k}`, color: 'C2E0C6', description: TIER0_WHAT[k] || `Tier 0 request: ${k}` })),
+  ];
+}
+async function hostLabels(r) {
+  const json = (argv) => { const x = run(argv); if (x.status !== 0) throw new Error(`${argv[0]}: ${(x.stderr || '').trim() || (x.error && x.error.code === 'ENOENT' ? `${argv[0]} is not installed` : 'failed')}`); return JSON.parse(x.stdout || '[]'); };
+  if (r.host === 'github') return json(['gh', 'label', 'list', '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--limit', '500', '--json', 'name']).map((l) => l.name);
+  if (r.host === 'gitlab') return json(['glab', 'label', 'list', '-R', r.web, '-F', 'json', '-P', '100']).map((l) => l.name);
+  const token = process.env.GITEA_TOKEN;
+  if (!token) throw new Error('GITEA_TOKEN is not set');
+  const res = await fetch(`https://${r.server}/api/v1/repos/${r.path}/labels?limit=200`, { headers: { Authorization: `token ${token}` } });
+  if (!res.ok) throw new Error(`gitea: HTTP ${res.status}`);
+  return (await res.json()).map((l) => l.name);
+}
+// { host, remote, labels: [{ name, color, description, present }], missing: [name], created: [name] }
+async function labels(root, opts = {}) {
+  const r = opts.remote || remoteOf(root, opts.host), want = labelSet();
+  const out = { host: r.host, remote: r.url, labels: want, missing: [], created: [] };
+  if (r.host === 'azure') { want.forEach((l) => { l.present = true; }); out.note = 'Azure DevOps creates a tag on its first use — nothing to set up'; return out; }
+  const have = new Set(await (opts.list || hostLabels)(r));
+  want.forEach((l) => { l.present = have.has(l.name); });
+  out.missing = want.filter((l) => !l.present).map((l) => l.name);
+  if (!opts.create) return out;
+  const make = opts.make || (async (l) => {
+    if (r.host === 'gitea') {
+      const res = await fetch(`https://${r.server}/api/v1/repos/${r.path}/labels`, { method: 'POST', headers: { Authorization: `token ${process.env.GITEA_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: l.name, color: `#${l.color}`, description: l.description }) });
+      if (!res.ok) throw new Error(`gitea: HTTP ${res.status} creating ${l.name}`); return;
+    }
+    const argv = r.host === 'github'
+      ? ['gh', 'label', 'create', l.name, '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--color', l.color, '--description', l.description]
+      : ['glab', 'label', 'create', '-R', r.web, '-n', l.name, '-c', `#${l.color}`, '-d', l.description];
+    const x = run(argv); if (x.status !== 0) throw new Error(`${argv[0]}: ${(x.stderr || '').trim() || 'failed'} (creating ${l.name})`);
+  });
+  for (const l of want.filter((x) => !x.present)) { await make(l); l.present = true; out.created.push(l.name); }
+  out.missing = [];
+  return out;
+}
+
+module.exports = { TRIGGERS, ROUTES, STATUSES, HOSTS, DIR, parse, records, nextId, validate, create, setStatus, close, open, closedSince, parseRemote, remoteOf, labelsOf, issueTitle, issueBody, issuePlan, createIssue, requestOf, importIssue, unhtml, fetchIssue, retitlePlan, retitle, labelSet, labels };
 
 // ---- CLI ---------------------------------------------------------------------------------------------------------
 if (require.main === module) {
@@ -371,6 +424,13 @@ if (require.main === module) {
         const title = `[${rec.meta.id}] ${rec.title.replace(/^ESC-\d+\s+—\s+/, '')}`, n = issueRef(rec.meta.issue);
         if (a.includes('--apply')) { await retitle(root, n, title, { host: opt('--host') }); console.log(`${rec.meta.issue} → ${title}`); }
         else { const p = retitlePlan(root, n, title, { host: opt('--host') }); console.log(`RETITLE PREVIEW — ${rec.meta.issue}\ntitle: ${title}\n${p.argv ? `command: ${p.argv.map((x) => (/\s/.test(x) ? JSON.stringify(x) : x)).join(' ')}` : `request: ${p.request.method} ${p.request.url}`}\nnothing was changed — after the user's yes: escalate.js retitle ${root} ${rec.meta.id} --apply`); }
+      } else if (cmd === 'labels') {
+        const r = await labels(root, { host: opt('--host'), create: a.includes('--create') });
+        if (a.includes('--json')) { console.log(JSON.stringify(r, null, 2)); return; }
+        console.log(`LABELS — ${r.host} (${r.remote})${r.note ? `\n${r.note}` : ''}`);
+        r.labels.forEach((l) => console.log(`${r.created.includes(l.name) ? '+' : l.present ? '✓' : '✗'} ${l.name.padEnd(30)} ${l.description}`));
+        if (r.created.length) console.log(`${r.created.length} created`);
+        if (r.missing.length) { console.log(`${r.missing.length} missing — escalation issues are opened without them, and without architecture-tier0 nobody can apply a Tier 0 request. Create them: escalate.js labels ${root} --create`); process.exit(1); }
       } else if (cmd === 'status') { const r = setStatus(root, pos[0], pos[1]); console.log(`${r.meta.id}: ${r.meta.status}`); }
       else if (cmd === 'close') { const r = close(root, pos[0], { by: opt('--by'), rejected: a.includes('--rejected') ? (opt('--rejected') || '') : undefined }); console.log(`${r.meta.id}: ${r.meta.status}${r.meta.resolution ? ` by ${r.meta.resolution}` : ''}${r.meta.issue ? ` — close the issue too: ${r.meta.issue}` : ''}`); }
       else if (cmd === 'list') {
@@ -378,7 +438,7 @@ if (require.main === module) {
         if (a.includes('--json')) { console.log(JSON.stringify(rs.map((r) => Object.assign({ title: r.title, file: r.file }, r.meta)), null, 2)); return; }
         if (!rs.length) { console.log(a.includes('--all') ? 'no escalations' : 'no open escalations'); return; }
         rs.forEach((r) => console.log(`${r.meta.id}  ${String(r.meta.status).padEnd(9)} ${String(r.meta.route).padEnd(6)} ${r.meta.date}  ${list(r.meta.triggers).join(',')}  ${r.title.replace(/^ESC-\d+\s+—\s+/, '')}${r.meta.issue ? `  ${r.meta.issue}` : ''}`));
-      } else { console.error('usage: escalate.js new|issue|status|close|list <project> …'); process.exit(2); }
+      } else { console.error('usage: escalate.js new|issue|import|retitle|status|close|list|labels <project> …'); process.exit(2); }
     } catch (e) { console.error(e.message); process.exit(1); }
   })();
 }

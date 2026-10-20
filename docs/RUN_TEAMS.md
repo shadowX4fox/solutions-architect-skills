@@ -230,7 +230,7 @@ applies that label: the workflow refuses a bot, and the accounts listed in `SA_T
 | The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
 | Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0` |
-| Labels | `architecture-tier0`, `tier0-refused` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue |
+| Labels | `architecture-tier0`, `tier0-refused` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all sixteen |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |
 
@@ -246,6 +246,7 @@ applies that label: the workflow refuses a bot, and the accounts listed in `SA_T
 | `escalate.js status <project> ESC-NNN "In Review"` | Marks it taken |
 | `escalate.js close <project> ESC-NNN --by … \| --rejected "…"` | Closes it |
 | `escalate.js list <project> [--all]` | The queue |
+| `escalate.js labels <project> [--create]` | The labels escalations and Tier 0 requests carry, present or missing on `origin`'s host; `--create` adds the missing (`/setup` Step 12 asks first) |
 | `lifecycle.js plan <project> --resolves ESC-NNN` | A release that answers an escalation closes it |
 | `tier0.js render <request.json>` | The `[T0-?]` issue for a request |
 | `tier0.js prepare <project> <issue>` | The policy read again; the payload, or the reasons for a refusal |
