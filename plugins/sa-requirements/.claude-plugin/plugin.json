@@ -1,6 +1,6 @@
 {
   "name": "sa-requirements",
-  "version": "10.11.0",
+  "version": "10.11.1",
   "description": "Product Owner requirements: elicit, score and write the Product Owner Specification (PRODUCT_OWNER_SPEC.md) and align it to the capability framework the project declares — BIAN (BIAN_ALIGNMENT.md), the cross-industry map or a pack's (CAPABILITY_ALIGNMENT.md) — before any architecture exists.",
   "author": {
     "name": "shadowX4fox",

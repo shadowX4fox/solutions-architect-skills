@@ -453,6 +453,14 @@ describe("ci/publish-index.sh", () => {
       refuse = { reason: "packs_missing", packs: ["web-app"] };
       r = await run();
       expect(r.code).toBe(1); expect(r.out).toContain("1.3.0 refused (packs_missing): it leaves out build packs the server holds for this version — web-app");
+      expect(r.out).toContain("regenerate the missing packs or fix the kit (kit-check.js)");
+      posts.pop();
+      // a ledger the plugin writes differently since the publish is no kit to fix: it reaches the server with the next release
+      refuse = { reason: "ledger_differs" };
+      r = await run();
+      expect(r.code).toBe(1); expect(r.out).toContain("1.3.0 refused (ledger_differs): its ledger differs from the released version held");
+      expect(r.out).toContain("the plugin writes them differently since the version was published (SA_PLUGIN_REF moved): what this plugin adds reaches the server with the next architecture release");
+      expect(r.out).not.toContain("regenerate the missing packs");
       refuse = null; posts.pop();
       // a reader instance of the server never publishes: the script names the setting to fix
       reader = true;

@@ -34,6 +34,8 @@
 #                                                            403 a reader instance, which never publishes
 #   A second publish of a released version carries the same chunks, the same ledger and every pack the version holds; it may add
 #   packs and replace them (a pack is replaced when a file's sha256 differs). This script prints the server's answer, never decides it.
+#   A ledger or chunks the plugin writes differently since the publish (a field it learned to derive) are refused the same way: what
+#   that plugin adds to a released version reaches the server with the next architecture release.
 set -euo pipefail
 
 PROJECT_DIR="${1:-.}"
@@ -106,7 +108,12 @@ case "$code" in
   201) echo "publish-index: ${VERSION} published (${CHANNEL})" ;;
   200) echo "publish-index: ${VERSION} updated"; answer 200 | sed 's/^/publish-index: /' || true ;;
   409) if msg=$(answer 409); then echo "publish-index: ${VERSION} ${msg}" >&2; else echo "publish-index: the server answered 409" >&2; cat "$WORK/publish.out" >&2 || true; fi
-       echo "publish-index: a second publish of a released version carries the same chunks, the same ledger and every build pack the server holds — regenerate the missing packs or fix the kit (kit-check.js)" >&2; exit 1 ;;
+       # what to do depends on the reason: a missing pack is fixed here, a ledger or chunks the plugin now writes differently only by a release
+       case "${msg:-}" in
+         *"(ledger_differs)"*|*"(chunks_differ)"*)
+           echo "publish-index: a second publish of a released version carries the same chunks and the same ledger. With the architecture at its tag, the plugin writes them differently since the version was published (SA_PLUGIN_REF moved): what this plugin adds reaches the server with the next architecture release" >&2 ;;
+         *) echo "publish-index: a second publish of a released version carries every build pack the server holds — regenerate the missing packs or fix the kit (kit-check.js)" >&2 ;;
+       esac; exit 1 ;;
   403) echo "publish-index: ${SA_INDEX_SERVER} is a reader instance of the server (archindex.role=reader), which never publishes — point SA_INDEX_SERVER at the writer" >&2
        cat "$WORK/publish.out" >&2 || true; echo >&2; exit 1 ;;
   *)   echo "publish-index: the server answered ${code}" >&2; cat "$WORK/publish.out" >&2 || true; exit 1 ;;

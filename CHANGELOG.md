@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.11.1]
+
+### Fixed
+- **A refused republish of a released version says what to do for its reason.** `publish-index.sh` gave one hint for every 409 — "regenerate the missing packs or fix the kit" — which fits `packs_missing` only. A version republished after the plugin moved (`SA_PLUGIN_REF`) is refused `ledger_differs` when the plugin learned to derive a ledger field since that publish, though the architecture equals its tag; no kit fix helps. The script now says so for `ledger_differs` and `chunks_differ`: what the plugin adds reaches the server with the next architecture release. Accepting a ledger that only extends the one held is asked of the server.
+
+### Upgrade
+- An architecture repository moves every workflow's `SA_PLUGIN_REF` to `v10.11.1`.
+
 ## [10.11.0]
 
 ### Added
