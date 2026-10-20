@@ -164,7 +164,9 @@ sequenceDiagram
 - **The label is the key.** The workflow runs only when someone who can triage or write puts the
   `architecture-tier0` label. On a public repository anyone may open an issue, and its text reaches Claude.
   The key is a person's: a label put by a bot, or by an account listed in `SA_TIER0_AGENTS`, is refused even with
-  write access, so an automation account never authorizes its own request.
+  write access, so an automation account never authorizes its own request. A refused key comments on the issue
+  who applied the label and why it does not count, and takes the label off; the request stands, so it is not
+  labelled `tier0-refused`.
 - **The IDE's classification is a claim.** `tier0.js prepare` reads the policy again in the architecture repository
   and refuses, with its reasons, a request that is not a Tier 0 write. That covers a kind outside the four, a
   component name that is not canonical, a status move that is not allowed, `Won't Fix`, and a doc fix whose text is

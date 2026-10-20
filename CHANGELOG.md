@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.11.3]
+
+### Fixed
+- **A refused Tier 0 key says so on the issue.** `architecture-tier0.yml` refused a label put by an automation account (a bot, or an account in `SA_TIER0_AGENTS`) or by a reader without triage only in the run's log: the label stayed on, so the request looked approved, and no comment said why nothing happened. The key step now comments who applied the label and why it does not count, and takes `architecture-tier0` off; the request stands, so it is not labelled `tier0-refused`. Found by an unattended build's request labelled by an account listed in `SA_TIER0_AGENTS`.
+
+### Upgrade
+- An architecture repository copies `architecture-tier0.yml` again (the key step changed) and moves every workflow's `SA_PLUGIN_REF` to `v10.11.3`.
+
 ## [10.11.2]
 
 ### Changed

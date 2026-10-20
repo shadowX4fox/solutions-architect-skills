@@ -159,3 +159,50 @@ describe("the Tier 0 labels escalate.js labels creates", () => {
     for (const l of (yml.match(/--(?:add|remove)-label ([\w:-]+)/g) || []).map((x) => x.split(" ")[1])) expect(names).toContain(l);
   });
 });
+
+describe("the workflow's key", () => {
+  // the step's script, cut from the template by its indentation, run against a fake gh that logs its calls
+  const yml = readFileSync(join(__dirname, "..", "skills", "architecture-lifecycle", "ci", "architecture-tier0.yml"), "utf8");
+  const lines = yml.split("\n");
+  const at = lines.findIndex((l) => l.includes("- name: The label is the key"));
+  const from = lines.findIndex((l, i) => i > at && /^\s+run: \|$/.test(l)) + 1;
+  const indent = lines[from].match(/^\s*/)![0].length;
+  const end = lines.findIndex((l, i) => i >= from && l.trim() !== "" && l.match(/^\s*/)![0].length < indent);
+  const script = lines.slice(from, end).map((l) => l.slice(indent)).join("\n");
+  const run = (sender: string, type: string, agents: string, role: string) => {
+    const dir = join(TMP, `key-${sender}-${type}`);
+    mkdirSync(dir, { recursive: true });
+    const log = join(dir, "gh.log");
+    writeFileSync(join(dir, "gh"), `#!/bin/bash\necho "$*" >> "${log}"\n[ "$1" = api ] && echo ${role}\nexit 0\n`, { mode: 0o755 });
+    const r = spawnSync("bash", ["-e", "-c", script], { encoding: "utf8",
+      env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, SENDER: sender, SENDER_TYPE: type, AGENTS: agents,
+             N: "7", RUNNER_TEMP: dir, GITHUB_REPOSITORY: "acme/order-desk" } });
+    const calls = (() => { try { return readFileSync(log, "utf8"); } catch { return ""; } })();
+    const comment = (() => { try { return readFileSync(join(dir, "k.md"), "utf8"); } catch { return ""; } })();
+    return { code: r.status, calls, comment };
+  };
+
+  test("an account in SA_TIER0_AGENTS is refused on the issue: a comment, the label off, no tier0-refused", () => {
+    const r = run("build-bot-user", "User", "ci-runner, Build-Bot-User", "write");
+    expect(r.code).toBe(1);
+    expect(r.comment).toContain("`build-bot-user` is an automation account");
+    expect(r.comment).toContain("the request stands");
+    expect(r.calls).toContain("issue comment 7 --body-file");
+    expect(r.calls).toContain("issue edit 7 --remove-label architecture-tier0");
+    expect(r.calls).not.toContain("tier0-refused");
+  });
+
+  test("a bot is refused the same way, and a reader without triage too", () => {
+    expect(run("app[bot]", "Bot", "", "admin").comment).toContain("automation account");
+    const r = run("visitor", "User", "", "read");
+    expect(r.code).toBe(1);
+    expect(r.comment).toContain("`visitor` (read) cannot start a Tier 0 write");
+    expect(r.calls).toContain("--remove-label architecture-tier0");
+  });
+
+  test("a person who can write goes on, and the issue is not touched", () => {
+    const r = run("maintainer", "User", "build-bot-user", "write");
+    expect(r.code).toBe(0);
+    expect(r.calls).not.toContain("issue ");
+  });
+});
