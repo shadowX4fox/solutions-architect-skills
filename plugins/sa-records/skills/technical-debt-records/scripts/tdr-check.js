@@ -151,6 +151,36 @@ function checkLinks(root, records) {
   return findings;
 }
 
+// ── the status the documents state (10.10.10) ──
+// A move rewrites the record, its index row, the Section 13 row and the Technical Debt line; a sentence elsewhere that states
+// the record's status ("… sigue en TDR-001 (In Progress)") is left behind and a closed record reads as live debt. `stale`: a line
+// of ARCHITECTURE.md or docs/** that cites a record next to a status (one of the five, or its Jira tag, set off by brackets,
+// backticks, bold or a table cell) other than the record's — attributed to the nearest id before it. `open`: the other lines
+// citing a closed record (Resolved, Won't Fix) — whether one still calls it debt is a reader's question, so they are listed,
+// never judged here. Changelogs and the Technical Debt line (component-link-*) are left out.
+const CLOSED = new Set(['Resolved', "Won't Fix"]);
+const STATED = new RegExp('(?:^|[(|`*:\\[])\\s*(' + [...STATUSES, ...Object.values(JIRA)].map((x) => x.replace(/'/g, "['’]")).join('|') + ')\\s*(?=$|[)|`*.,;\\]])', 'g');
+function mentions(root, records) {
+  root = path.resolve(root);
+  const byId = new Map(records.map((r) => [r.id, r])), stale = [], open = [], files = [];
+  const walk = (rel) => { let es; try { es = fs.readdirSync(path.join(root, rel), { withFileTypes: true }); } catch { return; } es.forEach((e) => { const r = rel + '/' + e.name; if (e.isDirectory()) walk(r); else if (e.name.endsWith('.md') && !/^CHANGELOG/i.test(e.name)) files.push(r); }); };
+  if (fs.existsSync(path.join(root, 'ARCHITECTURE.md'))) files.push('ARCHITECTURE.md');
+  walk('docs');
+  files.forEach((f) => read(path.join(root, f)).split('\n').forEach((l, i) => {
+    if (/^\s*(<!--|[a-z_]+:\s)/.test(l) || DEBT_LINE.test(l)) return;
+    const ids = [...l.matchAll(/\bTDR-\d{3,}\b/gi)].map((m) => ({ id: m[0].toUpperCase(), at: m.index })).filter((x) => byId.has(x.id));
+    if (!ids.length) return;
+    const said = new Set();
+    [...l.matchAll(STATED)].forEach((m) => {
+      const at = m.index + m[0].indexOf(m[1]), near = ids.filter((x) => x.at < at).pop() || ids[0], r = byId.get(near.id);
+      const st = canon(m[1]) || fromJira(m[1]); said.add(near.id);
+      if (r.status && st !== r.status) stale.push({ id: r.id, file: f, line: i + 1, stated: m[1], status: r.status, text: l.trim().slice(0, 240) });
+    });
+    [...new Set(ids.map((x) => x.id))].filter((id) => !said.has(id) && CLOSED.has(byId.get(id).status)).forEach((id) => open.push({ id, file: f, line: i + 1, status: byId.get(id).status, text: l.trim().slice(0, 240) }));
+  }));
+  return { stale, open };
+}
+
 function checkIndex(root, records) {
   const findings = [];
   const p = path.join(root, 'tdr', 'README.md');
@@ -184,6 +214,7 @@ function check(root) {
     recordFindings(read(path.join(dir, n)), file, 'tdr').forEach((f) => findings.push({ rule: f.rule, level: stamped ? 'BLOCKING' : 'WARNING', file, line: f.line || 1, message: `${f.where ? f.where + ' — ' : ''}${f.detail}` }));
   });
   findings = findings.concat(checkIndex(root, records), checkLinks(root, records));
+  mentions(root, records).stale.forEach((m) => findings.push({ rule: 'status-stale', level: 'WARNING', file: m.file, line: m.line, message: `states ${m.id} as \`${m.stated}\`; the record is \`${m.status}\`` }));
   return { records, findings, blocking: findings.filter((f) => f.level === 'BLOCKING').length, warnings: findings.filter((f) => f.level === 'WARNING').length };
 }
 
@@ -230,12 +261,12 @@ const render = (r) => {
   return out.join('\n');
 };
 
-module.exports = { check, checkRecord, checkLinks, descriptors, move, pending, STATUSES, JIRA, RETIRED, MOVES, DRIVERS };
+module.exports = { check, checkRecord, checkLinks, descriptors, mentions, move, pending, STATUSES, JIRA, RETIRED, MOVES, DRIVERS };
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const root = args.find((a) => !a.startsWith('--') && args[args.indexOf(a) - 1] !== '--move' && args[args.indexOf(a) - 2] !== '--move');
-  if (!root) { console.error('usage: bun tdr-check.js <project-root> [--json] | --move TDR-NNN "<status>"'); process.exit(2); }
+  const root = args.find((a) => !a.startsWith('--') && args[args.indexOf(a) - 1] !== '--move' && args[args.indexOf(a) - 2] !== '--move' && !/^TDR-\d/i.test(a));
+  if (!root) { console.error('usage: bun tdr-check.js <project-root> [--json] | --move TDR-NNN "<status>" | --mentions [TDR-NNN] | --pending'); process.exit(2); }
   const mi = args.indexOf('--move');
   if (mi >= 0) {
     const id = (args[mi + 1] || '').toUpperCase(), to = args[mi + 2] || '';
@@ -247,6 +278,16 @@ if (require.main === module) {
     if (args.includes('--json')) console.log(JSON.stringify(Object.assign({ id, current: cur }, m), null, 1));
     else console.log(m.ok ? `${id}: ${m.arrow} — allowed. ${m.note}.` : `${id}: \`${cur}\` → \`${to}\` refused — ${m.reason}.`);
     process.exit(m.ok ? 0 : 1);
+  }
+  const ni = args.indexOf('--mentions');
+  if (ni >= 0) {
+    const id = /^TDR-\d/i.test(args[ni + 1] || '') ? args[ni + 1].toUpperCase() : '', m = mentions(root, check(root).records), only = (x) => !id || x.id === id;
+    const out = { stale: m.stale.filter(only), open: m.open.filter(only) };
+    if (args.includes('--json')) { console.log(JSON.stringify(out, null, 1)); process.exit(0); }
+    console.log(`TDR_MENTIONS${id ? ' ' + id : ''}: ${out.stale.length} stating another status, ${out.open.length} citing a closed record`);
+    out.stale.forEach((x) => console.log(`  ✗ ${x.file}:${x.line}  ${x.id} stated \`${x.stated}\`, is \`${x.status}\` — ${x.text}`));
+    out.open.forEach((x) => console.log(`  ? ${x.file}:${x.line}  ${x.id} (${x.status}) — ${x.text}`));
+    process.exit(0);
   }
   if (args.includes('--pending')) {
     const p = pending(root);

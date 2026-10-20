@@ -141,5 +141,10 @@ describe("tier0.js", () => {
     const v = T.verify(ROOT, p);
     expect(v.problems).toContain("docs/01-system-overview.md: a change that does not name TDR-001 — Changed on the side.");
     expect(v.problems.some((x: string) => /is Open, the request says In Progress/.test(x))).toBe(false);
+    // a sentence still stating the old status is refused until the write edits it (10.10.10)
+    w("docs/01-system-overview.md", "# System Overview\n\nPolling stays until TDR-001 (Open) is paid.\n");
+    expect(T.verify(ROOT, p).problems.some((x: string) => /docs\/01-system-overview.md:3 states TDR-001 as `Open`, the record is `In Progress`/.test(x))).toBe(true);
+    w("docs/01-system-overview.md", "# System Overview\n\nPolling stays until TDR-001 (In Progress) is paid.\n");
+    expect(T.verify(ROOT, p).problems.some((x: string) => /states TDR-001/.test(x))).toBe(false);
   });
 });

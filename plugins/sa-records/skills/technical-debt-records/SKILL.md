@@ -141,7 +141,7 @@ Create:
 
 Update:
 
-- Run `tdr-check.js --move` first; a refused move is reported with its arrow and nothing is written. Change `## Status` and `status:` together; add the dated History note; on `Resolved`, drop the id from each affected component's `**Technical Debt:**` line (the line goes when it is empty) and from the Section 13 table; rewrite nothing else.
+- Run `tdr-check.js --move` first; a refused move is reported with its arrow and nothing is written. Change `## Status` and `status:` together; add the dated History note; on `Resolved`, drop the id from each affected component's `**Technical Debt:**` line (the line goes when it is empty) and from the Section 13 table; rewrite nothing else. Then `tdr-check.js <project_root> --mentions TDR-NNN`: a line marked ✗ states the old status — edit it to the new one; on a move to `Resolved` or `Won't Fix` the lines marked ? cite a closed record — show them to the user (in Tier 0, the pull request lists them), never rewrite them unasked.
 - `In Progress` → `**Technical**` names a person or team. `Resolved` → the note links what resolved it. `Won't Fix` → Description and Impact justify the permanent acceptance, the note records the investment decision (who, when).
 - A retired tag on the record or on the quoted Jira card → migrate per the table, say so in the note.
 

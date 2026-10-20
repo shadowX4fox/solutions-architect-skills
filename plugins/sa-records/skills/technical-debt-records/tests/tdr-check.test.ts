@@ -7,7 +7,7 @@ import { mkdirSync, rmSync, writeFileSync, readFileSync } from "fs";
 import { join } from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { check, checkRecord, move, pending, STATUSES } = require("../scripts/tdr-check.js");
+const { check, checkRecord, mentions, move, pending, STATUSES } = require("../scripts/tdr-check.js");
 const SCRIPT = join(__dirname, "..", "scripts", "tdr-check.js");
 const EXAMPLE = join(__dirname, "..", "examples", "TDR-001-centralized-log-aggregation.md");
 const TMP = join(__dirname, ".temp-tdr-check");
@@ -126,6 +126,24 @@ describe("the link back from a component (10.8.0)", () => {
     const got = check(r).findings.filter((f: any) => /^component-link/.test(f.rule)).map((f: any) => `${f.rule} ${f.file.split("/").pop()}:${f.line}`);
     expect(got.sort()).toEqual(["component-link-missing 02-web.md:1", "component-link-missing 02-web.md:1", "component-link-resolved 01-hub-api.md:6", "component-link-unknown 01-hub-api.md:6", "component-link-unmatched 01-hub-api.md:6"]);
     expect(check(r).findings.filter((f: any) => /^component-link/.test(f.rule)).every((f: any) => f.level === "WARNING")).toBe(true);
+  });
+});
+
+describe("the status the documents state (10.10.10)", () => {
+  test("a line stating another status than the record is stale; other lines citing a closed record are listed; the debt line and changelogs are not read", () => {
+    const r = join(TMP, "mentions"); rmSync(r, { recursive: true, force: true });
+    w(r, "tdr/TDR-001-a.md", record(1, "Resolved", { history: ["- 2026-05-13: Created. Status: `Open`.", "- 2026-07-01: `In Progress` → `Resolved` — PR #77 merged."] }));
+    w(r, "tdr/TDR-002-b.md", record(2, "In Progress"));
+    w(r, "tdr/README.md", index([["TDR-001", "Resolved"], ["TDR-002", "In Progress"]]));
+    mkdirSync(join(r, "docs/components"), { recursive: true });
+    writeFileSync(join(r, "docs/08-scale.md"), ["# Scale", "", "- The window stays in [TDR-001](../tdr/TDR-001-a.md) (In Progress).", "- Retries: see TDR-002 (`In Progress`) and TDR-001 (EN CURSO).",
+      "- Cache: one node; debt in TDR-001.", "- Open questions name TDR-002 only.", "| [TDR-001](x) | A debt | Resolved | team |", ""].join("\n"));
+    writeFileSync(join(r, "docs/components/01-hub.md"), "# Hub API\n\n**Technical Debt:** [TDR-001](x)\n");
+    writeFileSync(join(r, "docs/CHANGELOG.md"), "# Changelog\n\n- TDR-001 (Open) recorded.\n");
+    const m = mentions(r, check(r).records);
+    expect(m.stale.map((x: any) => `${x.id} ${x.line} ${x.stated}`)).toEqual(["TDR-001 3 In Progress", "TDR-001 4 EN CURSO"]);
+    expect(m.open.map((x: any) => `${x.id} ${x.line}`)).toEqual(["TDR-001 5"]);
+    expect(check(r).findings.filter((f: any) => f.rule === "status-stale").map((f: any) => `${f.level} ${f.line}`)).toEqual(["WARNING 3", "WARNING 4"]);
   });
 });
 

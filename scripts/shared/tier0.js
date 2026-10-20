@@ -188,7 +188,7 @@ const institutional = (p) => { const m = p.match(/^adr\/ADR-(\d{3,})/i); return 
 // no institutional ADR is touched, and the facts ledger moves in the record's own part only
 function verify(root, payload) {
   root = path.resolve(root);
-  const problems = [], f = payload.request.fields || {}, id = payload.id;
+  const problems = [], notes = [], f = payload.request.fields || {}, id = payload.id;
   const home = payload.kind === 'doc-fix' ? null : KINDS[payload.kind].paths[0];
   const changed = changedPaths(root);
   if (!changed.length) problems.push('nothing was written');
@@ -211,6 +211,11 @@ function verify(root, payload) {
       const want = payload.kind === 'tdr-status' ? f.to : 'Open';
       if (rec.status !== want) problems.push(`${id} is ${rec.status}, the request says ${want}`);
       c.findings.filter((x) => x.level === 'BLOCKING' && (x.file === rec.file || x.file === 'tdr/README.md')).forEach((x) => problems.push(`${x.file}:${x.line} ${x.rule} — ${x.message}`));
+      // a sentence that still states the old status is a line naming the id — the write fixes it (10.10.10); the other
+      // mentions of a closed record are listed on the pull request for a person
+      const m = tdr.mentions(root, c.records);
+      m.stale.filter((x) => x.id === id).forEach((x) => problems.push(`${x.file}:${x.line} states ${id} as \`${x.stated}\`, the record is \`${x.status}\` — ${x.text.slice(0, 120)}`));
+      m.open.filter((x) => x.id === id).forEach((x) => notes.push(`${x.file}:${x.line} cites ${id} (${x.status}) — ${x.text.slice(0, 160)}`));
     }
   }
   if (payload.kind === 'adr-proposed') {
@@ -221,7 +226,7 @@ function verify(root, payload) {
   }
   if (payload.facts && factsHash(root, OWN[payload.kind]) !== payload.facts) problems.push(payload.kind === 'doc-fix' ? 'the fix changed a fact of the architecture — no Tier 0 write; it goes through the architect'
     : `a fact of the architecture outside ${id}'s own record moved — a name, type, technology, integration, flow, figure or another record's status; that goes through the architect`);
-  return { ok: !problems.length, problems, changed };
+  return { ok: !problems.length, problems, changed, notes };
 }
 
 // the TDR vocabulary for readers outside the records category (the bundle, so the MCP server keeps no copy)
@@ -245,7 +250,7 @@ if (require.main === module) {
       }
       if (cmd === 'apply') { const r = apply(root, JSON.parse(read(a[2]))); console.log(`doc-fix applied: ${r.file}:${r.line}`); return; }
       if (cmd === 'verify') { const r = verify(root, JSON.parse(read(a[2])));
-        console.log(r.ok ? `TIER 0 verified: ${r.changed.join(', ')}` : `TIER 0 write refused:\n${r.problems.map((x) => `- ${x}`).join('\n')}`); process.exit(r.ok ? 0 : 1); }
+        console.log(r.ok ? `TIER 0 verified: ${r.changed.join(', ')}${r.notes.length ? `\n${r.notes.map((x) => `- ${x}`).join('\n')}` : ''}` : `TIER 0 write refused:\n${r.problems.map((x) => `- ${x}`).join('\n')}`); process.exit(r.ok ? 0 : 1); }
       console.error('Usage: bun tier0.js render <request.json> | prepare <project> <issue#|url>|--from <issue.json> | apply|verify <project> <payload.json>'); process.exit(2);
     } catch (e) { console.error(`tier0.js: ${e.message}`); process.exit(2); }
   })();

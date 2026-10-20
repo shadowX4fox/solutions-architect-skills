@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.10]
+
+### Fixed
+- **A TDR status move no longer leaves sentences that state the old status.** A move rewrote the record, its index row, the Section 13 row and the component's `**Technical Debt:**` line, and left prose elsewhere such as "… stays in TDR-NNN (In Progress)", so a closed record read as live debt until a person found it. `tdr-check.js` gains `status-stale`: a line of `ARCHITECTURE.md` or `docs/**` that cites a record next to a status (one of the five or its Jira tag, set off by brackets, backticks, bold or a table cell) other than the record's. It is a WARNING in the audit and the release gate. `--mentions [TDR-NNN]` lists those lines and, for a closed record, the other lines that cite it.
+- **A Tier 0 `tdr-status` write edits those lines, or is refused.** `tier0.js verify` refuses a move that leaves a line stating the record's old status. The other lines that cite a record moved to `Resolved` or `Won't Fix` are listed on the pull request under *Mentions to review*: whether a sentence still calls it debt is a person's call. The TDR skill's Update step runs the same check.
+
+### Upgrade
+- Copy `skills/architecture-lifecycle/ci/architecture-tier0.yml` over the architecture repository's `.github/workflows/architecture-tier0.yml` again (the write prompt and the pull request body).
+
 ## [10.10.9]
 
 ### Fixed
