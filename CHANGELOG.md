@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.5]
+
+### Changed
+- **The local server pins Alia 0.3.1** (`SA_INDEX_SERVER_TAG` default in `local/compose.yaml`). Its own `what_changed` compares a part's substance and lists `restamped`, as 10.10.4 does (#10).
+
 ## [10.10.4]
 
 ### Fixed
