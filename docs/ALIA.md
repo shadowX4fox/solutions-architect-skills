@@ -410,7 +410,7 @@ rules, eight and two more on a RUN-team project:
 | 6 | Budgets are requirements — measure the component against its share of each phase |
 | 7 | The stack comes from the team's service template, not from the pack |
 | 8 | Every commit names the architecture version and the `pack_revision` |
-| 9 | *RUN-team project.* What only the architect can answer is escalated (`preview_escalation`), never kept in a local file |
+| 9 | *RUN-team project.* A question that blocks the build is escalated (`preview_escalation`), never kept in a local file |
 | 10 | *RUN-team project.* A Tier 0 write (a workaround TDR, a TDR move, a Proposed ADR, a doc fix) is requested (`preview_tier0`), never made in the service repository |
 
 **Unattended builds.** A build that no person attends, such as a CI job or a platform's agent, declares

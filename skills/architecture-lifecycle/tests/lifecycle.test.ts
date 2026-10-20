@@ -245,6 +245,16 @@ describe("lifecycle — downstream and gates", () => {
     expect(bad.status).toBe(2); expect(bad.stderr).toContain("--undecided takes warn");
   }, 120000);
 
+  test("adr-index: an index synced on an earlier day passes; one that misses a record fails", () => {
+    const idx = require("../../../plugins/sa-records/skills/architecture-definition-record/scripts/adr-index.js");
+    w("adr/ADR-101-order-queue.md", "---\nstatus: Accepted\ndate: 2026-01-01\n---\n\n# ADR-101: Order queue\n\n## Status\n\nAccepted\n");
+    w("adr/README.md", idx.render(ROOT, "2026-01-01"));
+    const gate = () => L.gates(ROOT, require("../../../scripts/shared/arch-facts.js").collect(ROOT), { noRender: true }).find((y: any) => y.id === "adr-index");
+    expect(gate().status).toBe("pass");
+    w("adr/ADR-102-order-cache.md", "---\nstatus: Accepted\ndate: 2026-01-02\n---\n\n# ADR-102: Order cache\n\n## Status\n\nAccepted\n");
+    expect(gate().status).toBe("fail");
+  }, 120000);
+
   test("check --undecided warn hands the flag to the two judged gates", () => {
     w("docs/02-architecture-principles.md", "# Principles\n"); w("docs/04-data-flow-patterns.md", "# Data Flow\n");
     const g = L.gates(ROOT, require("../../../scripts/shared/arch-facts.js").collect(ROOT), { undecided: "warn", noRender: true });

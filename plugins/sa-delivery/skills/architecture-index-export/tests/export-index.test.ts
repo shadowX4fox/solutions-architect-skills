@@ -172,12 +172,12 @@ describe("export-index — build packs", () => {
   test("BUILD.md rule 9: a blocking question goes to the architect — through the team's channel, or as an escalation on a RUN-team project", () => {
     const md = (o: any) => readFileSync(join(exportIndex(P, { kitCheck: clean }).out, "buildpacks/hub-api/BUILD.md"), "utf8");
     const standard = md({});
-    expect(standard).toContain("9. **What only the architect can answer goes to the architect.**");
+    expect(standard).toContain("9. **A question that blocks the build goes to the architect.**");
     expect(standard).not.toContain("preview_escalation");
     expect(standard).toContain("a question that blocks the build follows rule 9");
     w(".sa-skills/project.json", JSON.stringify({ support: "run" }));
     const run = md({});
-    expect(run).toContain("9. **What only the architect can answer is escalated, never kept in a local file.**");
+    expect(run).toContain("9. **A question that blocks the build is escalated, never kept in a local file.**");
     expect(run).toContain('call `preview_escalation(project: "order-desk", …)`');
     expect(run).toContain("`request`, what the developer asked you to build, in their words — the task that led here, never their answer to a question of yours");
     expect(run).toContain("an authentication or authorization gap is `security-iam`; a gap no other trigger names is `low-confidence`");

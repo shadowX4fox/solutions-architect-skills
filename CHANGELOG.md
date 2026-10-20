@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.6]
+
+### Fixed
+- **The `adr-index` release gate no longer fails on the calendar.** It compared `adr/README.md` with a fresh render byte for byte, `**Last Synced**:` date included, so an index synced on an earlier day failed every later run with no ADR changed — and a Tier 0 pull request opened the next day was left unmerged ("a release gate blocks"). The gate now leaves that line out of the comparison.
+- **`BUILD.md` rule 9 is titled for what it covers: a question that blocks the build.** Its title, "What only the architect can answer…, never kept in a local file", read as covering every `TODO(architecture)` rule 3 keeps in the code, and an IDE agent offered to escalate two dozen questions that block nothing.
+
 ## [10.10.5]
 
 ### Changed

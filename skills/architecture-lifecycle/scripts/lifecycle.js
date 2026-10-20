@@ -298,7 +298,9 @@ function gates(root, facts, opts = {}) {
       const r = spawnSync('bun', [adrIndex, root], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
       const disk = exists(path.join(root, 'adr', 'README.md')) ? read(path.join(root, 'adr', 'README.md')) : '';
       if (r.status !== 0) return { status: 'fail', summary: (r.stderr || '').trim().split('\n').pop() };
-      return String(r.stdout).trim() === disk.trim() ? { status: 'pass', summary: 'adr/README.md matches the records' } : { status: 'fail', summary: 'adr/README.md is not the index of the records on disk', fix: 'sync ADR index (architecture-definition-record Workflow 7)' };
+      // the index stamps the day it was written: an index synced on another day is still the index of the records
+      const norm = (t) => String(t).replace(/\r\n?/g, '\n').replace(/^\*\*Last Synced\*\*:.*$/m, '').trim();
+      return norm(r.stdout) === norm(disk) ? { status: 'pass', summary: 'adr/README.md matches the records' } : { status: 'fail', summary: 'adr/README.md is not the index of the records on disk', fix: 'sync ADR index (architecture-definition-record Workflow 7)' };
     } },
   ];
   const waived = Object.fromEntries((opts.waive || []).map((x) => { const i = x.indexOf(':'); return i > 0 ? [x.slice(0, i).trim(), x.slice(i + 1).trim()] : [x.trim(), '']; }));
