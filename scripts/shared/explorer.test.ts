@@ -163,6 +163,12 @@ describe("check — the header contract across files", () => {
     expect(renderCheck(c)).toContain("✗ docs/08-scalability-and-performance.md — unknown-key");
   });
 
+  test("the changelog and the archive a release rotates into need no header", () => {
+    w("docs/CHANGELOG.md", "# Changelog\n\n## [1.0.0]\n");
+    w("docs/CHANGELOG-ARCHIVE.md", "# Changelog — archive\n\n## [0.9.0]\n");
+    expect(checkHeaders(root).findings.some((f) => /CHANGELOG/.test(f.file))).toBe(false);
+  });
+
   test("no adr/ directory: related_adrs are not checked against disk", () => {
     rmSync(join(root, "adr"), { recursive: true, force: true });
     expect(checkHeaders(root).findings.some((f) => f.rule === "unknown-adr")).toBe(false);

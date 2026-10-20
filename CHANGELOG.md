@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.7]
+
+### Fixed
+- **A release that rotates its changelog passes its own gates.** `changelog-rotate.js` moves old entries to `docs/CHANGELOG-ARCHIVE.md`, and the `headers` gate (`explorer-cli.ts check`) exempted `docs/CHANGELOG.md` but not the archive, so the release pull request that first rotated failed with `missing-header`. The archive is exempt there and from the ADR citations the catalog diff collects, as the changelog is.
+
 ## [10.10.6]
 
 ### Fixed

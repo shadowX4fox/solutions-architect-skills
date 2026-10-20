@@ -795,7 +795,7 @@ export function citationChecklist(projectRoot: string, ids: string[]): Citation[
   const res = ids.map((id) => ({ id, re: new RegExp(`\\b${id}(?!\\d)`) }));
   for (const file of files.sort()) {
     const rel = file.slice(projectRoot.length + 1);
-    if (/^docs\/CHANGELOG\.md$/i.test(rel)) continue;
+    if (/^docs\/CHANGELOG(-ARCHIVE)?\.md$/i.test(rel)) continue;
     normalizeText(readFileSync(file, "utf8")).split("\n").forEach((text, i) => {
       for (const { id, re } of res) if (re.test(text)) out.push({ id, file: rel, line: i + 1, text: text.trim().slice(0, 200) });
     });

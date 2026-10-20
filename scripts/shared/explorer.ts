@@ -344,12 +344,13 @@ const slugOf = (file: string) => file.replace(/^.*\//, "").replace(/\.md$/, "").
  * that is not the file's slug, a `components` entry that names no component file, a `related_adrs`
  * id with no file under `adr/`, an `internal_name` that disagrees with the `**Internal Name:**` row,
  * plus `validateHeader`'s own required-field errors and advisory warnings. Section files and
- * component files only — `ARCHITECTURE.md`, every `README.md` and `docs/CHANGELOG.md` are exempt.
+ * component files only — `ARCHITECTURE.md`, every `README.md`, `docs/CHANGELOG.md` and the archive the release rotates its old
+ * entries into (`docs/CHANGELOG-ARCHIVE.md`, changelog-rotate.js) are exempt.
  */
 export function checkHeaders(root: string, opts: { file?: string } = {}): HeaderCheck {
   root = resolve(root);
   const findings: HeaderFinding[] = [];
-  const docs = listDocFiles(root).filter((d) => !/(^|\/)CHANGELOG\.md$/.test(d.path));
+  const docs = listDocFiles(root).filter((d) => !/(^|\/)CHANGELOG(-ARCHIVE)?\.md$/.test(d.path));
   const componentSlugs = new Set(docs.filter((d) => d.path.startsWith("docs/components/")).map((d) => slugOf(d.path)));
   const adrDir = join(root, "adr");
   const adrIds = existsSync(adrDir) ? new Set(readdirSync(adrDir).map((f) => (f.match(/^(ADR-\d{3,})/i) || [])[1]).filter(Boolean).map((s) => s!.toUpperCase())) : null;
