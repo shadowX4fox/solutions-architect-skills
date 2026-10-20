@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.9]
+
+### Fixed
+- **A Tier 0 pull request no longer leaves a failed *Architecture gates* run behind.** GitHub holds the `pull_request` runs of a pull request opened with `GITHUB_TOKEN` for approval, with no job, and ends them as failures once the pull request is merged; every automerged Tier 0 write left one red run (the gates ran inside the Tier 0 job all along). `ci/architecture-tier0.yml` deletes them after the merge (`actions: write`); a pull request left open keeps them for a member of the team to approve.
+- **The record's id appears once in a Tier 0 issue and pull request title.** A request titled "TDR-002: …" became "[TDR-002] TDR-002: …"; the workflow now strips a leading id before adding its own.
+
+### Upgrade
+- Copy `skills/architecture-lifecycle/ci/architecture-tier0.yml` over the architecture repository's `.github/workflows/architecture-tier0.yml` again (it gains `actions: write`).
+
 ## [10.10.8]
 
 ### Changed
