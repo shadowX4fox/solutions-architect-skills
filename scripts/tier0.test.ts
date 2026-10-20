@@ -173,8 +173,10 @@ describe("the workflow's key", () => {
     const dir = join(TMP, `key-${sender}-${type}`);
     mkdirSync(dir, { recursive: true });
     const log = join(dir, "gh.log");
-    writeFileSync(join(dir, "gh"), `#!/bin/bash\necho "$*" >> "${log}"\n[ "$1" = api ] && echo ${role}\nexit 0\n`, { mode: 0o755 });
-    const r = spawnSync("bash", ["-e", "-c", script], { encoding: "utf8",
+    // like gh before the checkout: an issue command without -R finds no repository on disk and fails
+    writeFileSync(join(dir, "gh"), `#!/bin/bash\necho "$*" >> "${log}"\n[ "$1" = api ] && echo ${role}\n` +
+      `if [ "$1" = issue ] && [[ " $* " != *" -R acme/order-desk "* ]]; then echo "not a git repository" >&2; exit 1; fi\nexit 0\n`, { mode: 0o755 });
+    const r = spawnSync("bash", ["-e", "-c", script], { encoding: "utf8", cwd: dir,
       env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, SENDER: sender, SENDER_TYPE: type, AGENTS: agents,
              N: "7", RUNNER_TEMP: dir, GITHUB_REPOSITORY: "acme/order-desk" } });
     const calls = (() => { try { return readFileSync(log, "utf8"); } catch { return ""; } })();
@@ -187,8 +189,8 @@ describe("the workflow's key", () => {
     expect(r.code).toBe(1);
     expect(r.comment).toContain("`build-bot-user` is an automation account");
     expect(r.comment).toContain("the request stands");
-    expect(r.calls).toContain("issue comment 7 --body-file");
-    expect(r.calls).toContain("issue edit 7 --remove-label architecture-tier0");
+    expect(r.calls).toContain("issue comment 7 -R acme/order-desk --body-file");
+    expect(r.calls).toContain("issue edit 7 -R acme/order-desk --remove-label architecture-tier0");
     expect(r.calls).not.toContain("tier0-refused");
   });
 

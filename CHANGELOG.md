@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.11.4]
+
+### Fixed
+- **10.11.3's refused key could not reach the issue.** The key step runs before the checkout, and `gh issue` without `-R` finds the repository from the git checkout on disk: the comment failed (`not a git repository`), the step stopped, and the label stayed on. Both calls now pass `-R "$GITHUB_REPOSITORY"`; the test's fake `gh` fails an issue command without it, as the real one does there.
+
+### Upgrade
+- An architecture repository copies `architecture-tier0.yml` again and moves every workflow's `SA_PLUGIN_REF` to `v10.11.4`.
+
 ## [10.11.3]
 
 ### Fixed
