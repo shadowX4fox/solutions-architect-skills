@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.4]
+
+### Fixed
+- **`what_changed` reports what the developer must act on, not what a release restamped.** Parts were compared by their bytes, so a release that only moved the version stamp, relinked a part inside the pack (10.10.3) or wrote the specification's debt table by code (10.10.2) marked contracts, interfaces and documents as changed, turned the component `action_required` and listed every open question as both new and resolved.
+  - A part is now compared by its substance: link targets and the architecture's own version masked, the specification's technical debt table left out (it is reported as `technical_debt`). A part whose bytes moved and whose substance did not is listed under `restamped`, never an action. Open questions are keyed the same way.
+  - Read from the bundles on disk; a bundle held in memory still compares bytes.
+- **`BUILD.md` rule 10:** a workaround marked in a file that must not change once applied (a database migration) is marked in the code that keeps it instead, when the TDR's id replaces the issue's URL.
+
 ## [10.10.3]
 
 ### Added

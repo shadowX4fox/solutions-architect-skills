@@ -259,7 +259,7 @@ function escalationRule(project, mode) {
 }
 function tier0Rule(project, mode) {
   if (mode !== 'run') return '';
-  return '\n10. **A Tier 0 write is requested, never made here.** Four writes on this architecture need no architect (`get_architecture`\'s `support.tier0_writes`): a workaround recorded as a TDR, a TDR status move, a project ADR in `Proposed`, a doc fix that changes no fact. They belong in the architecture repository, never in this one. When you take a shortcut this pack does not state — a cache, a retry, a stub, a relaxed budget — or your code resolves a TDR, call `preview_tier0(project: "' + project + '", kind, …)`: `request`, the developer\'s task in their words; the components by canonical name; the evidence — this repository, the commit, the file and line; the fields its kind needs (`support.tier0_kinds`; a status move only along `support.tdr_moves`). Show the user the issue it returns; only after a yes follow `file_with.steps`, then `record_tier0`. Unattended, pass `supervision: "unattended"`: the issue carries no `architecture-tier0` label — file it with this build\'s own identity (drop that label from `file_with.steps` if the server still lists it), call `record_tier0`, and list it in your pull request; a person applies the label, and that is the approval. Never apply `architecture-tier0` yourself. Mark the code of a workaround with the issue\'s URL, and replace it with the TDR\'s id when `what_changed` brings it. Whatever crosses a trigger is rule 9, never Tier 0.';
+  return '\n10. **A Tier 0 write is requested, never made here.** Four writes on this architecture need no architect (`get_architecture`\'s `support.tier0_writes`): a workaround recorded as a TDR, a TDR status move, a project ADR in `Proposed`, a doc fix that changes no fact. They belong in the architecture repository, never in this one. When you take a shortcut this pack does not state — a cache, a retry, a stub, a relaxed budget — or your code resolves a TDR, call `preview_tier0(project: "' + project + '", kind, …)`: `request`, the developer\'s task in their words; the components by canonical name; the evidence — this repository, the commit, the file and line; the fields its kind needs (`support.tier0_kinds`; a status move only along `support.tdr_moves`). Show the user the issue it returns; only after a yes follow `file_with.steps`, then `record_tier0`. Unattended, pass `supervision: "unattended"`: the issue carries no `architecture-tier0` label — file it with this build\'s own identity (drop that label from `file_with.steps` if the server still lists it), call `record_tier0`, and list it in your pull request; a person applies the label, and that is the approval. Never apply `architecture-tier0` yourself. Mark the code of a workaround with the issue\'s URL, and replace it with the TDR\'s id when `what_changed` brings it — never in a file that must not change once applied (a database migration): mark the code that keeps the workaround instead. Whatever crosses a trigger is rule 9, never Tier 0.';
 }
 function renderBuild(pack, projectName, server, mode) {
   const c = pack.component; const part = new Map(pack.parts.map((p) => [p.id, p]));
@@ -436,7 +436,8 @@ function loadBundle(dir) {
   const m = JSON.parse(read(path.join(dir, 'manifest.json'))); const ledger = JSON.parse(read(path.join(dir, 'ledger.json')));
   const chunks = read(path.join(dir, 'chunks.jsonl')).split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const packs = Object.fromEntries((m.buildpacks || []).map((b) => [b.component, JSON.parse(read(path.join(dir, b.path)))]));
-  return { m, ledger, chunks, packs };
+  const packDirs = Object.fromEntries((m.buildpacks || []).map((b) => [b.component, path.join(dir, path.dirname(b.path))]));
+  return { m, ledger, chunks, packs, packDirs };
 }
 const revisionOf = (b, slug) => { const f = (b.m.files || []).find((x) => x.path === `buildpacks/${slug}/pack.json`); return f ? f.sha256 : null; };
 const setDiff = (a, b, key, same) => { const A = new Map(a.map((x) => [key(x), x])), B = new Map(b.map((x) => [key(x), x]));
@@ -448,6 +449,14 @@ function flowsOf(ledger, slug) {
   return (ledger.flows || []).filter((f) => (f.phases || []).some((n) => mine.some((p) => p.n === n))).map((f) => ({ code: f.code, name: f.name, use_cases: f.use_cases, latency_target: f.latency_target, governed_by: f.governed_by || [],
     phases: (f.phases || []).map((n) => mine.find((p) => p.n === n)).filter(Boolean).map((p) => ({ n: p.n, name: p.name, hops: p.hops, latency_budget: p.latency_budget })) }));
 }
+// a part's substance: its text with every link target and the architecture's own version masked, and the specification's technical
+// debt table out — a release restamps every part, a pack relinks to where its parts are packed (10.10.3), and the debt table is code's
+// from the descriptor, reported as technical_debt; none is a change the developer acts on. Read from the bundle on disk; a bundle held
+// in memory compares bytes alone
+const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const DEBT_BLOCK = /^#{3,4}\s.*<!--\s*LABEL:\s*Technical Debt\s*-->[\s\S]*?(?=^#{2,4}\s|^-{3,}[ \t]*$|$(?![\s\S]))/m;
+const substance = (t, v) => { t = String(t).replace(/\r\n?/g, '\n').replace(DEBT_BLOCK, '').replace(/\]\([^)\s]*\)/g, '](·)'); return v ? t.replace(new RegExp(`\\bv?${escRe(v)}\\b`, 'g'), '·') : t; };
+const partText = (b, slug, p) => { const d = (b.packDirs || {})[slug]; if (!d || !p.path) return null; const f = path.join(d, p.path); return fs.existsSync(f) ? read(f) : null; };
 const anyDebt = (d) => !!d && (d.added.length + d.removed.length + d.status.length) > 0;
 function componentChanges(o, n, slug) {
   const oc = (o.ledger.components || []).find((c) => c.slug === slug), nc = (n.ledger.components || []).find((c) => c.slug === slug);
@@ -460,14 +469,17 @@ function componentChanges(o, n, slug) {
   r.pack_revised = r.pack === 'present' && r.pack_revision.from !== r.pack_revision.to;
   if (op || np) {
     const parts = (p, kind) => (p ? p.parts.filter((x) => x.kind === kind) : []);
-    const byHash = (a, b) => a.sha256 === b.sha256;
+    const ov = o.m.architecture.version, nv = n.m.architecture.version; r.restamped = [];
+    // bytes moved, substance did not: restamped, listed and never an action
+    const byHash = (a, b) => { if (a.sha256 === b.sha256) return true; const ta = partText(o, slug, a), tb = partText(n, slug, b);
+      const same = ta != null && tb != null && substance(ta, ov) === substance(tb, nv); if (same && !r.restamped.includes(b.title)) r.restamped.push(b.title); return same; };
     r.contracts = setDiff(parts(op, 'asset'), parts(np, 'asset'), (x) => x.title, byHash);
     r.interfaces = setDiff(parts(op, 'interface'), parts(np, 'interface'), (x) => x.id.replace(/^interface:/, ''), byHash);
     r.adrs = setDiff(parts(op, 'adr'), parts(np, 'adr'), (x) => x.id.replace(/^adr:/, ''), byHash);
     for (const [id, label] of [['spec', 'Component Specification'], ['security', 'Security Obligations'], ['cross-cutting-standards', 'Cross-Cutting Standards'], ['runtime-view', 'System Runtime View'], ['instructions', 'Build instructions']]) {
-      const a = op && op.parts.find((x) => x.id === id), b = np && np.parts.find((x) => x.id === id); if (a && b && a.sha256 !== b.sha256) r.documents.push(label); }
-    const q = (p) => (p ? p.open_questions.map((x) => ({ ...x, key: `${x.part}\u0000${x.text}` })) : []);
-    const oq = q(op), nq = q(np); r.open_questions = { new: nq.filter((x) => !oq.some((y) => y.key === x.key)).map(({ key, ...x }) => x), resolved: oq.filter((x) => !nq.some((y) => y.key === x.key)).map(({ key, ...x }) => x) };
+      const a = op && op.parts.find((x) => x.id === id), b = np && np.parts.find((x) => x.id === id); if (a && b && !byHash(a, b)) r.documents.push(label); }
+    const q = (p, v) => (p ? p.open_questions.map((x) => ({ ...x, key: `${x.part}\u0000${substance(x.text, v)}` })) : []);
+    const oq = q(op, ov), nq = q(np, nv); r.open_questions = { new: nq.filter((x) => !oq.some((y) => y.key === x.key)).map(({ key, ...x }) => x), resolved: oq.filter((x) => !nq.some((y) => y.key === x.key)).map(({ key, ...x }) => x) };
   }
   // the flows it takes part in, from each version's ledger — a budget moves with or without a build pack
   const fl = (p) => (p === 'old' ? flowsOf(o.ledger, slug) : flowsOf(n.ledger, slug));
@@ -522,6 +534,7 @@ function renderChanges(d) {
     list('contracts', c.contracts); list('interfaces', c.interfaces); list('ADRs', c.adrs); list('integrations', c.integrations);
     ((c.integrations || {}).fields || []).forEach((f) => L.push(`  - ${f.integration} ${f.field}: ${f.from ?? '—'} → ${f.to ?? '—'}`));
     if (c.documents.length) L.push(`- documents: ${c.documents.join(', ')}`);
+    if (c.restamped && c.restamped.length) L.push(`- restamped — version, links or the debt table only: ${c.restamped.join(', ')}`);
     const td = c.technical_debt; if (anyDebt(td)) L.push(`- technical debt: ${[...td.added.map((t) => `added ${t.id}${t.title ? ` — ${t.title}` : ''}${t.status ? ` (${t.status})` : ''}`), ...td.status.map((t) => `${t.id} ${t.from} → ${t.to}`), ...td.removed.map((t) => `no longer names ${t.id}`)].join(' · ')}`);
     c.flows.forEach((f) => L.push(`- flow ${f.flow}. ${f.name}: ${f.change}${f.fields ? ` — ${f.fields.map((x) => `${x.field} ${x.from ?? '—'} → ${x.to ?? '—'}`).join('; ')}` : ''}`));
     if (c.sections && anyOf(c.sections)) L.push(`- sections naming it: ${c.sections.added.length} added, ${c.sections.changed.length} changed, ${c.sections.removed.length} removed — ${[...c.sections.added, ...c.sections.changed].map((x) => x.title).slice(0, 8).join('; ')}`);

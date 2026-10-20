@@ -265,6 +265,30 @@ describe("export-index — what changed", () => {
     expect(diffBundles(B, C).components.find((c: any) => c.component === "hub-api")).toMatchObject({ pack_revised: true, documents: ["Build instructions"], action_required: false, changed: true });
   });
 
+  test("a part that only moved its version stamp, its link targets or the specification's debt table is restamped, never an action", () => {
+    const A = join(BASE, "stamp-a"), B = join(BASE, "stamp-b");
+    [A, B].forEach((x) => rmSync(x, { recursive: true, force: true }));
+    exportIndex(P, { out: A, kitCheck: clean });
+    cpSync(A, B, { recursive: true });
+    const man = JSON.parse(readFileSync(join(B, "manifest.json"), "utf8")); man.architecture.version = "1.4.0"; writeFileSync(join(B, "manifest.json"), JSON.stringify(man));
+    const dir = join(B, "buildpacks", "hub-api"), pack = JSON.parse(readFileSync(join(dir, "pack.json"), "utf8"));
+    pack.parts.filter((p: any) => /\.md$/.test(p.path)).forEach((p: any) => {
+      let t = readFileSync(join(dir, p.path), "utf8").replace(/\bv?1\.3\.0\b/g, (m) => m.replace("1.3.0", "1.4.0")).replace(/\]\(([^)\s]*)\)/g, "](moved/$1)");
+      if (p.id === "spec") t = t.replace(/(## 7\.[^\n]*\n)/, "$1\n### Technical debt <!-- LABEL: Technical Debt -->\n\n| TDR | Title | Status |\n|---|---|---|\n| [TDR-001](tdrs/x.md) | Batch settlement | Open |\n\n");
+      writeFileSync(join(dir, p.path), t); p.sha256 = "moved-" + p.sha256;
+    });
+    pack.open_questions = pack.open_questions.map((q: any) => ({ ...q, text: q.text.replace(/\]\(([^)\s]*)\)/g, "](moved/$1)") }));
+    writeFileSync(join(dir, "pack.json"), JSON.stringify(pack));
+    const hub = diffBundles(A, B, { component: "hub-api" }).components[0];
+    expect(hub).toMatchObject({ action_required: false, contracts: { changed: [] }, interfaces: { changed: [] }, open_questions: { new: [], resolved: [] } });
+    expect(hub.documents).not.toContain("Component Specification");
+    expect(hub.restamped).toContain("Component Specification");
+    expect(renderChanges(diffBundles(A, B, { component: "hub-api" }))).toContain("- restamped — version, links or the debt table only: ");
+    // a word of the specification that moved is a change again
+    writeFileSync(join(dir, "spec.md"), readFileSync(join(dir, "spec.md"), "utf8") + "\nOne more invariant.\n");
+    expect(diffBundles(A, B, { component: "hub-api" }).components[0]).toMatchObject({ action_required: true });
+  });
+
   test("technical debt: a TDR a container's descriptor starts naming, a status move, one it stops naming — listed, never an action", () => {
     const bundle = (v: string, names: string[], tdrs: any[]) => ({ m: { project: { key: "order-desk" }, architecture: { version: v } }, packs: {}, chunks: [],
       ledger: { components: [{ slug: "hub-api", name: "Hub API", level: "L2", tdrs: names }], tdrs } });
