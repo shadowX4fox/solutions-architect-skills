@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.8]
+
+### Changed
+- **The local server pins Alia 0.3.2** (`SA_INDEX_SERVER_TAG` default in `local/compose.yaml`). `preview_tier0` now previews a TDR status move that is valid from a status reachable since the release, saying what it assumes, instead of refusing it. A second status move on a TDR no longer waits for a release. The architecture repository's CI on main stays the authority (#11).
+
 ## [10.10.7]
 
 ### Fixed
