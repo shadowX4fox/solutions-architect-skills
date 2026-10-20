@@ -154,11 +154,13 @@ sequenceDiagram
   G->>G: written: a doc fix by code, the others by Claude from the payload
   G->>G: tier0.js verify, then the release gates
   G->>G: PR tier0/issue-N with Closes #N, merged when the gates pass
+  G->>A: architecture-index.yml dispatched as a draft: the record is searchable now
 ```
 
 - **Typical uses**: a shortcut the build pack does not state (a cache, a retry, a stub), recorded as a workaround TDR,
-  or a TDR the code has resolved, moved to `Resolved`. The code carries the issue's URL until the TDR's id arrives
-  with the next release (`what_changed`).
+  or a TDR the code has resolved, moved to `Resolved`. The merge dispatches the index as a draft (10.10.11), so the
+  IDE reads the new record — and previews the next move on it — before the next release, which carries it as
+  released (`what_changed`).
 - **The label is the key.** The workflow runs only when someone who can triage or write puts the
   `architecture-tier0` label. On a public repository anyone may open an issue, and its text reaches Claude.
   The key is a person's: a label put by a bot, or by an account listed in `SA_TIER0_AGENTS`, is refused even with

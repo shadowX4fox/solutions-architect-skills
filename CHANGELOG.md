@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.11]
+
+### Fixed
+- **A Tier 0 write reaches the IDE before the next release.** The merge is made with `GITHUB_TOKEN`, which starts no push workflow, and the index workflow publishes only on a release tag or a kit commit, so a new TDR stayed out of the MCP server until a release: the IDE could not read it, nor preview its next status move. `ci/architecture-tier0.yml` now dispatches `architecture-index.yml` with `draft=true` after an automatic merge (a `workflow_dispatch` by `GITHUB_TOKEN` runs; `actions: write` is already granted); a pull request left open says to run it after the merge.
+
+### Upgrade
+- Copy `skills/architecture-lifecycle/ci/architecture-tier0.yml` over the architecture repository's `.github/workflows/architecture-tier0.yml` again, and move every workflow's `SA_PLUGIN_REF` to `v10.10.11`.
+
 ## [10.10.10]
 
 ### Fixed
