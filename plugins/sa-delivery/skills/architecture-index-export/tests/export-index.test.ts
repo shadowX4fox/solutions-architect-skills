@@ -425,7 +425,7 @@ test("the ledger is byte-identical across runs of the same tree — no clock, no
 describe("ci/publish-index.sh", () => {
   // a fake server in this process: the script runs with Bun.spawn (spawnSync would block the server's event loop)
   test("phase 1 at the tag publishes the search part, phase 2 adds the packs to the same version, a draft is not published", async () => {
-    const posts: { path: string; auth: string | null; bytes: number }[] = []; const held = new Set<string>(); let refuse: object | null = null; let reader = false;
+    const posts: { path: string; auth: string | null; bytes: number }[] = []; const held = new Set<string>(); let refuse: object | null = null; let reader = false; let extended = false;
     const server = Bun.serve({ port: 0, async fetch(req) {
       const u = new URL(req.url);
       if (req.method === "GET") return new Response("none", { status: 404 });
@@ -433,7 +433,7 @@ describe("ci/publish-index.sh", () => {
       if (reader) return Response.json({ error: "this instance only reads (archindex.role=reader): publish to the writer" }, { status: 403 });
       if (refuse) return Response.json(refuse, { status: 409 });
       if (!held.has(u.pathname)) { held.add(u.pathname); return new Response("ok", { status: 201 }); }
-      return Response.json({ added: ["hub-api"], replaced: [], unchanged: [] }, { status: 200 });
+      return Response.json({ added: ["hub-api"], replaced: [], unchanged: [], ...(extended ? { outcome: "ledger_extended", ledger: "extended", ledger_added: [".tdrs[0].components"] } : {}) }, { status: 200 });
     } });
     const env = { ...process.env, GIT_CEILING_DIRECTORIES: BASE, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
     const git = (...a: string[]) => spawnSync("git", a, { cwd: P, env, encoding: "utf8" });
@@ -449,18 +449,28 @@ describe("ci/publish-index.sh", () => {
       cpSync(KIT, join(P, "handoffs"), { recursive: true }); git("add", "-A"); git("commit", "-qm", "kit");
       r = await run();
       expect(r.code).toBe(0); expect(r.out).toContain("1.3.0 updated"); expect(r.out).toContain("build packs — added: hub-api · replaced: none · unchanged: none"); expect(r.out).toContain("build packs: 1 — hub-api");
+      expect(r.out).not.toContain("ledger extended");
+      // a newer plugin's derived field extends the ledger held, and the script prints what was added
+      extended = true;
+      r = await run();
+      expect(r.code).toBe(0); expect(r.out).toContain("ledger extended: .tdrs[0].components");
+      extended = false; posts.pop();
       // a publish that leaves out a pack the server holds is refused, and the reason and the packs are printed
       refuse = { reason: "packs_missing", packs: ["web-app"] };
       r = await run();
       expect(r.code).toBe(1); expect(r.out).toContain("1.3.0 refused (packs_missing): it leaves out build packs the server holds for this version — web-app");
       expect(r.out).toContain("regenerate the missing packs or fix the kit (kit-check.js)");
       posts.pop();
-      // a ledger the plugin writes differently since the publish is no kit to fix: it reaches the server with the next release
+      // a changed ledger value is no kit to fix: the architecture moved, or the plugin reads a fact differently
       refuse = { reason: "ledger_differs" };
       r = await run();
       expect(r.code).toBe(1); expect(r.out).toContain("1.3.0 refused (ledger_differs): its ledger differs from the released version held");
-      expect(r.out).toContain("the plugin writes them differently since the version was published (SA_PLUGIN_REF moved): what this plugin adds reaches the server with the next architecture release");
+      expect(r.out).toContain("may add ledger fields, never change one");
       expect(r.out).not.toContain("regenerate the missing packs");
+      posts.pop();
+      refuse = { reason: "chunks_differ" };
+      r = await run();
+      expect(r.code).toBe(1); expect(r.out).toContain("the plugin writes them differently since the version was published (SA_PLUGIN_REF moved): they reach the server with the next architecture release");
       refuse = null; posts.pop();
       // a reader instance of the server never publishes: the script names the setting to fix
       reader = true;

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.11.2]
+
+### Changed
+- **The local server pins Alia 0.4.0** (`SA_INDEX_SERVER_TAG`, #14): a second publish of a released version accepts a ledger that only adds keys to the one held, at any depth, every value unchanged, stored with the publish that carries the build packs. A released version can be republished after the plugin derives a new ledger field — 1.6.0 of the demo project republished its three build packs with 10.10.14's `BUILD.md`, its ledger extended by `tdrs[].components`.
+
+### Fixed
+- **`publish-index.sh` prints a ledger extension and says what `ledger_differs` now means** (#13). On a 200 whose `ledger` is `extended` it prints `ledger extended: <paths>`; the header documents `ledger` / `ledger_added`. `ledger_differs` is a changed value — the architecture differs from its tag, or the plugin reads a fact differently — and only `chunks_differ` waits for the next architecture release.
+
+### Upgrade
+- A server below Alia 0.4.0 still refuses an extended ledger with `ledger_differs`. An architecture repository moves every workflow's `SA_PLUGIN_REF` to `v10.11.2`.
+
 ## [10.11.1]
 
 ### Fixed
