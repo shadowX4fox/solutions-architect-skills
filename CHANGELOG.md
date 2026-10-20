@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.12]
+
+### Changed
+- **The local server pins Alia 0.3.3** (`local/compose.yaml`). A Tier 0 status move on a TDR created since the release, which the draft index carries since 10.10.11, is previewed on the project's draft instead of refused (`no record under tdr/`). The same applies to a project ADR proposed since the release and cited by a workaround (solutions-architect-knowledge-base #26).
+
+### Upgrade
+- A local server: `docker compose … up -d server` again to pull 0.3.3. An architecture repository moves every workflow's `SA_PLUGIN_REF` to `v10.10.12`; nothing else in the workflows changed.
+
 ## [10.10.11]
 
 ### Fixed
