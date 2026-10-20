@@ -497,8 +497,12 @@ function componentChanges(o, n, slug) {
   const oi = new Map(ints(o.ledger).map((i) => [i.id, i])), ni = new Map(ints(n.ledger).map((i) => [i.id, i]));
   r.integrations.fields = r.integrations.changed.flatMap((id) => IF.filter((k) => JSON.stringify(oi.get(id)[k] ?? null) !== JSON.stringify(ni.get(id)[k] ?? null)).map((k) => ({ integration: id, field: k, from: oi.get(id)[k] ?? null, to: ni.get(id)[k] ?? null })));
   // its technical debt (10.9.2): the TDRs its descriptor's **Technical Debt:** line names, with their status — the workaround the code
-  // keeps, or the one it may now drop; a bundle written before 10.8.0 carries no `tdrs` and reads as none
-  const debt = (l, c) => { const st = new Map((l.tdrs || []).map((t) => [t.id, t])); return ((c && c.tdrs) || []).map((id) => ({ id, title: (st.get(id) || {}).title || null, status: (st.get(id) || {}).status || null })); };
+  // keeps, or the one it may now drop; a bundle written before 10.8.0 carries no `tdrs` and reads as none. And the records that name it
+  // in affected-components (10.10.13): a resolved one leaves the line, so a TDR opened and closed between the two releases, or one
+  // resolved since, reads as added or as a status move rather than not at all; a ledger without `components` reads the line alone
+  const debt = (l, c) => { if (!c) return []; const st = new Map((l.tdrs || []).map((t) => [t.id, t]));
+    const ids = [...new Set([...(c.tdrs || []), ...(l.tdrs || []).filter((t) => (t.components || []).some((x) => x === c.name || x === c.slug)).map((t) => t.id)])];
+    return ids.map((id) => ({ id, title: (st.get(id) || {}).title || null, status: (st.get(id) || {}).status || null })); };
   const od = debt(o.ledger, oc), nd = debt(n.ledger, nc);
   r.technical_debt = { added: nd.filter((t) => !od.some((x) => x.id === t.id)), removed: od.filter((t) => !nd.some((x) => x.id === t.id)),
     status: nd.flatMap((t) => { const x = od.find((y) => y.id === t.id); return x && x.status !== t.status ? [{ id: t.id, title: t.title, from: x.status, to: t.status }] : []; }) };

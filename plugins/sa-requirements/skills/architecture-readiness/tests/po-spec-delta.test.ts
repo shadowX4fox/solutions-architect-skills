@@ -47,7 +47,7 @@ describe.skipIf(!ARCH_FACTS)("po-spec-delta", () => {
     expect(d.releases[0].full).toMatch(/A long argument about why/);
     expect(delta(TMP, { full: true }).releases[0].body).toMatch(/A long argument about why/);
     expect(d.adrs.map((a: any) => [a.id, a.title, a.status])).toEqual([["ADR-102", "Hub", "Accepted"], ["ADR-103", "(no file under adr/)", null]]);
-    expect(d.tdrs).toEqual([{ id: "TDR-001", file: "tdr/TDR-001-x.md", title: "Debt", status: "Open", initiative: null, driver: null, capability: null, named_by_changes: true }]);
+    expect(d.tdrs).toEqual([{ id: "TDR-001", file: "tdr/TDR-001-x.md", title: "Debt", status: "Open", initiative: null, driver: null, capability: null, components: [], named_by_changes: true }]);
     expect(d.components.map((c: any) => c.slug)).toEqual(["web-app"]);
     expect(d.useCases).toMatchObject({ in_spec: ["UC-01", "UC-02", "UC-09"], in_architecture: ["UC-01", "UC-03"], architecture_only: ["UC-03"], spec_only: ["UC-02", "UC-09"] });
     expect(d.retired_integrations.map((i: any) => i.id)).toEqual(["I-02"]);

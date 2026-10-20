@@ -30,8 +30,8 @@ beforeAll(() => {
   w("adr/ADR-101-x.md", `# ADR-101: Keep the desk\n\n**Status**: ✅ Accepted\n**Scope**: Project\n`);
   w("adr/ADR-102-y.md", `# ADR-102: Use the hub\n\n**Status**: Proposed\n**Scope**: Project\n`);
   w("tdr/TDR-001-debt.md", `# TDR-001: A debt\n\n## Status\n\nOpen — waiver pending.\n`);
-  w("tdr/TDR-002-planned.md", `---\nstatus: Planned   # one of five\ntarget-date: 2026-12-01\ndriver: Process\n---\n\n# TDR-002: A planned debt\n\n## Status\n\n\`Open\`\n`);
-  w("tdr/TDR-003-wont-fix.md", `---\nstatus: Won't Fix\n---\n\n# TDR-003: A permanent debt\n\n## Status\n\n\`Won't Fix\`\n`);
+  w("tdr/TDR-002-planned.md", `---\nstatus: Planned   # one of five\ntarget-date: 2026-12-01\ndriver: Process\naffected-components: ["Web App", Hub API]\n---\n\n# TDR-002: A planned debt\n\n## Status\n\n\`Open\`\n`);
+  w("tdr/TDR-003-wont-fix.md", `---\nstatus: Won't Fix\naffected-components:\n  - Hub API\n---\n\n# TDR-003: A permanent debt\n\n## Status\n\n\`Won't Fix\`\n`);
 });
 afterAll(() => rmSync(TMP, { recursive: true, force: true }));
 
@@ -53,11 +53,11 @@ describe("arch-facts", () => {
     expect(f.components.find((c: any) => c.slug === "payments-hub").level).toBe("L1");
     expect(f.adrs.map((a: any) => [a.id, a.status, a.scope])).toEqual([["ADR-101", "Accepted", "Project"], ["ADR-102", "Proposed", "Project"]]);
     expect(f.tdrs).toEqual([
-      { id: "TDR-001", file: "tdr/TDR-001-debt.md", title: "A debt", status: "Open — waiver pending.", initiative: null, driver: null, capability: null },
+      { id: "TDR-001", file: "tdr/TDR-001-debt.md", title: "A debt", status: "Open — waiver pending.", initiative: null, driver: null, capability: null, components: [] },
       // the frontmatter key wins over the body, and a trailing YAML comment is not part of the value
-      { id: "TDR-002", file: "tdr/TDR-002-planned.md", title: "A planned debt", status: "Planned", initiative: null, driver: "Process", capability: null },
+      { id: "TDR-002", file: "tdr/TDR-002-planned.md", title: "A planned debt", status: "Planned", initiative: null, driver: "Process", capability: null, components: ["Web App", "Hub API"] },
       // an apostrophe inside the value is not a quote
-      { id: "TDR-003", file: "tdr/TDR-003-wont-fix.md", title: "A permanent debt", status: "Won't Fix", initiative: null, driver: null, capability: null },
+      { id: "TDR-003", file: "tdr/TDR-003-wont-fix.md", title: "A permanent debt", status: "Won't Fix", initiative: null, driver: null, capability: null, components: ["Hub API"] },
     ]);
     expect(f.layers).toEqual([{ n: 1, name: "Channel", containers: ["Web App"], owned: true }, { n: 2, name: "Partners", containers: ["Hub API"], owned: false }]);
     expect(f.integrations).toEqual([

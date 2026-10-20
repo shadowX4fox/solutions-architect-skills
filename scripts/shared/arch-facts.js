@@ -10,7 +10,7 @@
 //   components     component-cli's facts — canonical name, slug, level, system, type, technology, internal
 //                  name, header fields, component version, last updated
 //   adrs           adr/ADR-*.md — id, title, status, scope (the explorer's manifest)
-//   tdrs           tdr/TDR-*.md — id, title (the H1 without its `TDR-NNN:`, as an ADR's), status (frontmatter `status:` first, then `## Status`), the initiative line, the driver (McKinsey cause family), the BIAN capability (frontmatter `bian-capability` or `## Capability`)
+//   tdrs           tdr/TDR-*.md — id, title (the H1 without its `TDR-NNN:`, as an ADR's), status (frontmatter `status:` first, then `## Status`), the initiative line, the driver (McKinsey cause family), the BIAN capability (frontmatter `bian-capability` or `## Capability`), the components it names (`affected-components`)
 //   layers         docs/03 § 4.1 table — number, name, containers, inside the boundary
 //   integrations   docs/05 `I-nn` rows — from, to, protocol, pattern, boundary; a struck-through row is retired
 //   phases         docs/04 Phase Catalog rows, the phase block's Hops and Latency budget lines
@@ -103,7 +103,11 @@ function collect(root) {
     bytes: src ? Buffer.byteLength(src) : 0, file_backed: f.file_backed !== false, warnings: f.warnings || [] }; });
   const systems = components.filter((c) => c.level === 'L1').map((c) => ({ name: c.name, slug: c.slug, file: c.file, type: c.type, owned: /internal/i.test(c.type) || (!/external/i.test(c.type) && components.some((x) => x.level === 'L2' && x.system === c.slug && x.file_backed)), containers: components.filter((x) => x.level === 'L2' && x.system === c.slug).map((x) => x.slug) }));
 
-  // TDRs
+  // TDRs — `components` from the frontmatter's affected-components (10.10.13): the descriptor's Technical Debt line drops a resolved
+  // record, so what_changed reads which components a record names from here, one opened and closed between two releases included
+  const fmList = (src, key) => { const fm = (src.match(/^---\n([\s\S]*?)\n---/) || [])[1] || ''; const m = fm.match(new RegExp('^' + key + ':[ \\t]*(.*)$((?:\\n[ \\t]*-[ \\t].*)*)', 'm')); if (!m) return [];
+    const items = m[1].trim() ? m[1].trim().replace(/^\[|\]$/g, '').split(',') : m[2].split('\n').map((l) => l.replace(/^\s*-\s*/, ''));
+    return items.map((x) => x.trim().replace(/^(["'])(.*)\1$/, '$2').trim()).filter(Boolean); };
   const tdrs = [];
   const tdrDir = path.join(root, 'tdr');
   if (exists(tdrDir)) fs.readdirSync(tdrDir).filter((n) => /^TDR-\d+.*\.md$/i.test(n)).sort().forEach((n) => {
@@ -113,7 +117,7 @@ function collect(root) {
     const capBody = sectionBody(src, /^##\s+(Capability|Capacidad)\b/i); const capFm = (src.match(/^bian-capability:\s*["']?([^"'\n]*)["']?\s*$/m) || [])[1];
     const capRows = capBody ? tables(capBody).flatMap((tb) => tb.rows).filter((r) => r.length >= 3).map((r) => plain(r[1])).filter(Boolean) : [];
     const capability = (capFm && capFm.trim()) || (capRows.length ? capRows.join(' › ') : (capBody ? plain(capBody.split('\n').map((l) => l.trim()).find((l) => l && !/^[#|>*-]/.test(l)) || '') : '')) || null;
-    tdrs.push({ id: (n.match(/^TDR-\d+/i) || [n])[0].toUpperCase(), file: 'tdr/' + n, title: plain((src.match(/^#\s+(.+)$/m) || ['', n])[1]).replace(/^TDR-\d+\s*[:—–-]\s*/i, ''), status: status || null, initiative: field(src, ['Initiative', 'Iniciativa']), driver: ((src.match(/^driver:\s*([A-Za-z]+)/m) || [])[1] || (field(src, ['Driver']) || '').split(/\s+[—–-]\s+/)[0] || null), capability });
+    tdrs.push({ id: (n.match(/^TDR-\d+/i) || [n])[0].toUpperCase(), file: 'tdr/' + n, title: plain((src.match(/^#\s+(.+)$/m) || ['', n])[1]).replace(/^TDR-\d+\s*[:—–-]\s*/i, ''), status: status || null, initiative: field(src, ['Initiative', 'Iniciativa']), driver: ((src.match(/^driver:\s*([A-Za-z]+)/m) || [])[1] || (field(src, ['Driver']) || '').split(/\s+[—–-]\s+/)[0] || null), capability, components: fmList(src, 'affected-components') });
   });
 
   // layers — docs/03 § 4.1

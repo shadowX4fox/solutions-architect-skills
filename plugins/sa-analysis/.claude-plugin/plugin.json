@@ -1,6 +1,6 @@
 {
   "name": "sa-analysis",
-  "version": "10.10.12",
+  "version": "10.10.13",
   "description": "Checks over a written architecture: ten risk and design-characteristics analyses (SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity) plus the consolidated Security Posture, and the PO Spec coverage report (TRACEABILITY_REPORT.md). Reads the architecture through sa-skills, which installs it as a dependency.",
   "author": {
     "name": "shadowX4fox",

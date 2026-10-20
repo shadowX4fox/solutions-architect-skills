@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.10.13]
+
+### Fixed
+- **`what_changed` reports a TDR opened and closed between two releases.** A component's debt was read from its descriptor's `**Technical Debt:**` line, which drops a record once it is `Resolved`. A TDR recorded and resolved between two releases was in neither version's line, and the summary listed only the ADRs that link it. A TDR resolved since the release read as "no longer names" instead of a status move. The facts ledger's `tdrs` now carry `components` (the record's `affected-components`), and the diff counts a record that names the component there as well as on the line: "added TDR-NNN — … (Resolved)", or "TDR-NNN In Progress → Resolved". It is never an action. A ledger written before reads the line alone, as before.
+
+### Upgrade
+- An architecture repository moves every workflow's `SA_PLUGIN_REF` to `v10.10.13`; the next release's `changes.json` carries it.
+
 ## [10.10.12]
 
 ### Changed

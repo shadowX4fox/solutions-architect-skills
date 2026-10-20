@@ -304,6 +304,21 @@ describe("export-index — what changed", () => {
     expect(diffBundles(old, A).components[0].technical_debt.added.map((t: any) => t.id)).toEqual(["TDR-001"]);
   });
 
+  test("technical debt (10.10.13): a record that names the container in affected-components counts after its descriptor line drops it", () => {
+    const bundle = (v: string, names: string[], tdrs: any[]) => ({ m: { project: { key: "order-desk" }, architecture: { version: v } }, packs: {}, chunks: [],
+      ledger: { components: [{ slug: "hub-api", name: "Hub API", level: "L2", tdrs: names }], tdrs } });
+    // opened and resolved between two releases: on no descriptor line in either
+    const A = bundle("1.3.0", [], []);
+    const B = bundle("1.4.0", [], [{ id: "TDR-003", title: "Lost notices", status: "Resolved", components: ["Hub API"] }, { id: "TDR-004", title: "Elsewhere", status: "Open", components: ["Order Desk Web"] }]);
+    expect(diffBundles(A, B).components[0].technical_debt).toEqual({ added: [{ id: "TDR-003", title: "Lost notices", status: "Resolved" }], removed: [], status: [] });
+    expect(renderChanges(diffBundles(A, B))).toContain("- technical debt: added TDR-003 — Lost notices (Resolved)");
+    // resolved since: the line dropped it, the record still names it — a status move, not "no longer names"
+    const C = bundle("1.3.0", ["TDR-001"], [{ id: "TDR-001", title: "Batch settlement", status: "In Progress", components: ["Hub API"] }]);
+    const D = bundle("1.4.0", [], [{ id: "TDR-001", title: "Batch settlement", status: "Resolved", components: ["Hub API"] }]);
+    expect(diffBundles(C, D).components[0].technical_debt).toEqual({ added: [], removed: [], status: [{ id: "TDR-001", title: "Batch settlement", from: "In Progress", to: "Resolved" }] });
+    expect(diffBundles(C, D).components[0].action_required).toBe(false);
+  });
+
   test("per container between two bundles: contracts, interfaces, facts, budgets, sections, open questions; action required where code must move, with or without a pack", () => {
     const A = join(BASE, "bundle-1.3.0"), B = join(BASE, "bundle-1.4.0");
     rmSync(A, { recursive: true, force: true }); rmSync(B, { recursive: true, force: true });
