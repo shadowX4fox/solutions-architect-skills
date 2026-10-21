@@ -315,7 +315,19 @@ environment, so no API key is needed. Running the runner as a dedicated system u
 still the stronger isolation.
 
 `ci-setup.js service <dir> --attended --review --architecture <owner/repo> [--runs-on self-hosted,<label>] --write --settings`
-sets it up: the workflow, `SA_ARCHITECTURE_REPO`, `SA_REVIEW_RUNS_ON`, the runner check, and the required check.
+sets it up: the workflow, `SA_ARCHITECTURE_REPO`, `SA_REVIEW_RUNS_ON`, `SA_DOC_LANGUAGE`, the runner check, and the
+required check.
+
+**CI speaks the architecture's language** (10.17.0). Everything a workflow writes for a person is in the architecture's
+`DOC_LANGUAGE`: pull request titles and bodies, issue and pull request comments, commit statuses, commit messages and
+summary headings. That covers the gates comment, the handoff kit's pull request, every Tier 0 comment and pull request,
+the review's comment and status, and the unattended build's pull request and issues. The architecture repository reads
+the marker from `ARCHITECTURE.md`. A service repository has no `ARCHITECTURE.md` and the build pack does not state its
+language, so it reads the variable `SA_DOC_LANGUAGE`, which `ci-setup.js service … --settings` sets from the
+architecture's marker. The sentences live in `scripts/shared/ci-text.js`; a script's reasons (`tier0.js`,
+`review-check.js`) are `{ en, es }` pairs beside their logic. The tools' own receipts, quoted in a comment under a heading
+in the language, stay as the tools print them, and so do the logs. Identifiers stay as they are: labels, rule codes,
+part ids, record ids and the architecture's names.
 
 ## Setting up the repository
 

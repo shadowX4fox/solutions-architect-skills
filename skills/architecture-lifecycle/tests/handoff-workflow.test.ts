@@ -20,11 +20,12 @@ const endAt = lines.findIndex((l, i) => i >= from && l.trim() !== "" && l.match(
 const script = lines.slice(from, endAt < 0 ? undefined : endAt).map((l) => l.slice(indent)).join("\n");
 
 let k = 0;
-const run = (o: { automerge?: string; drift?: number; changed?: boolean; dispatch?: number }) => {
+const realBun = process.execPath, ciText = join(__dirname, "..", "..", "..", "scripts", "shared", "ci-text.js");
+const run = (o: { automerge?: string; drift?: number; changed?: boolean; dispatch?: number; lang?: string }) => {
   const dir = join(TMP, `r-${++k}`), bin = join(dir, ".bin"), log = join(dir, "calls.log");
   mkdirSync(join(dir, "handoffs"), { recursive: true }); mkdirSync(bin, { recursive: true });
   const git = (...a: string[]) => spawnSync("git", ["-C", dir, ...a], { encoding: "utf8", env: { ...process.env, GIT_CEILING_DIRECTORIES: TMP } });
-  writeFileSync(join(dir, "ARCHITECTURE.md"), "<!-- DOC_LANGUAGE: en -->\n# Order Desk\n");
+  writeFileSync(join(dir, "ARCHITECTURE.md"), `<!-- DOC_LANGUAGE: ${o.lang || "en"} -->\n# Order Desk\n`);
   writeFileSync(join(dir, "handoffs", "README.md"), "kit v1\n");
   git("init", "-q", "-b", "main"); git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base");
   git("add", "-A"); git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "kit");
@@ -34,7 +35,9 @@ const run = (o: { automerge?: string; drift?: number; changed?: boolean; dispatc
 case "$1 $2" in "remote set-url"|"push -u") echo "git $*" >> "${log}"; exit 0;; esac
 exec "${realGit}" "$@"
 `, { mode: 0o755 });
+  // the messages are the real ones (ci-text.js, in the architecture's language); every other script is answered by name
   writeFileSync(join(bin, "bun"), `#!/bin/bash
+[ "$(basename "$1")" = ci-text.js ] && { shift; exec "${realBun}" "${ciText}" "$@"; }
 echo "bun $(basename "$1")" >> "${log}"
 case "$(basename "$1")" in kit-drift.js) exit ${o.drift ?? 0};; snapshot.js) echo "Order Desk v1.1.0"; exit 0;; esac
 exit 0
@@ -86,6 +89,13 @@ describe("architecture-handoff.yml — the kit's pull request and SA_HANDOFF_AUT
     expect(r.code).toBe(0);
     expect(r.calls).toContain("gh pr merge");
     expect(r.out).toContain("::warning::merged, but architecture-index.yml could not be dispatched");
+  });
+
+  test("the pull request, its commits and its comment in the architecture's language (DOC_LANGUAGE, 10.17.0)", () => {
+    const r = run({ automerge: "true", drift: 1, lang: "es" });
+    expect(r.code).toBe(0);
+    expect(r.calls).toContain("gh pr create --base main --head handoff/architecture-v1.1.0 --title Kit de handoff de architecture-v1.1.0 --body Regenerado por el workflow");
+    expect(r.calls).toContain("--body No se fusionó automáticamente: el control de deriva bloquea (kit-drift.js, salida 1)");
   });
 
   test("the kit did not change: no pull request, no merge", () => {

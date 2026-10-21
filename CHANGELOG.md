@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.17.0]
+
+### Added
+- **CI speaks the architecture's language.** Everything the workflows write for a person follows `DOC_LANGUAGE`: PR titles and bodies, issue and PR comments, commit statuses, commit messages and summary headings. That covers the gates comment, the handoff kit's PR, every Tier 0 comment and PR, the review's comment and status, and the unattended build's PR and issues.
+- `scripts/shared/ci-text.js`: the workflows' sentences in `en` and `es`, and the language resolved from `ARCHITECTURE.md`, else `SA_DOC_LANGUAGE`, else English.
+- **`SA_DOC_LANGUAGE`** on a service repository: neither the binding nor the build pack states the language. `ci-setup.js service … --settings` reads it from the architecture's `ARCHITECTURE.md` and sets it.
+- `review-check.js --lang` and `--status-out`: the commit status no longer parses the English summary line.
+
+### Changed
+- `tier0.js` `prepare` and `verify` write their reasons in the architecture's language; `validate` keeps English as its default for `render`.
+- The Tier 0 workflow's `key` job installs Bun and clones the pinned plugin, and reads `ARCHITECTURE.md` through the API.
+- The review and build prompts ask Claude to write its findings, PR and issues in the architecture's language. Identifiers, labels, rule codes and the architecture's names stay as they are.
+- The tools' own receipts, quoted in a comment, and the logs stay as the tools print them.
+
+### Upgrade
+- **Architecture repository:** copy the four `skills/architecture-lifecycle/ci/*.yml` (`ci-setup.js architecture <root> --write --replace …`).
+- **Service repository:** `ci-setup.js service <dir> --architecture <owner/repo> … --write --settings` sets `SA_DOC_LANGUAGE` and replaces the review or build workflow. An attended repository's review upgrade is the file that runs on its own PR, so an admin merges it once, as in 10.16.3.
+
 ## [10.16.3]
 
 ### Fixed

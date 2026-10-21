@@ -4,7 +4,7 @@
  * a written record to the request. Synthetic project (Order Desk / Hub API) in a temporary git repository.
  */
 import { describe, test, expect, beforeEach, afterAll } from "bun:test";
-import { mkdirSync, rmSync, writeFileSync, readFileSync } from "fs";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, symlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { spawnSync } from "child_process";
@@ -82,6 +82,10 @@ describe("tier0.js", () => {
     expect(T.prepare(ROOT, move("Won't Fix")).reasons.join()).toMatch(/is a decision, not a Tier 0 write/);
     expect(T.prepare(ROOT, move("In Progress"))).toMatchObject({ ok: true, id: "TDR-001", from: "Open" });
     expect(T.prepare(ROOT, { ...issue(REQ), labels: [], title: "Hub API caches" }).reasons[0]).toMatch(/not a Tier 0 request/);
+    // in the architecture's language (10.17.0): the reasons are the refusal comment's body
+    const es = T.prepare(ROOT, issue({ ...REQ, components: ["Hub"], evidence: [] }), { lang: "es" }).reasons;
+    expect(es).toContain("tdr-workaround necesita evidencia: dónde se ve en el servicio (repositorio, commit, archivo:línea)");
+    expect(es).toContain('el componente "Hub" no es un nombre canónico de esta arquitectura: un nombre en duda no es una escritura Tier 0');
   });
 
   test("a doc fix is applied by code, verified when no fact moved, refused when one did", () => {
@@ -173,11 +177,15 @@ describe("the workflow's key", () => {
   const script = lines.slice(from, end).map((l) => l.slice(indent)).join("\n");
   let k = 0;
   type Opts = { event?: string; sender?: string; type?: string; author?: string; labels?: string[]; body?: string; state?: string;
-    agents?: string; trusted?: string; role?: string; used?: number; daily?: string; auto?: any };
+    agents?: string; trusted?: string; role?: string; used?: number; daily?: string; auto?: any; lang?: string };
   const run = (o: Opts) => {
     const dir = join(TMP, `key-${++k}`);
     mkdirSync(dir, { recursive: true });
     const log = join(dir, "gh.log");
+    // the step before: the plugin cloned at $RUNNER_TEMP/sa, ARCHITECTURE.md read through the API into $RUNNER_TEMP/arch
+    symlinkSync(join(__dirname, ".."), join(dir, "sa"));
+    mkdirSync(join(dir, "arch"));
+    if (o.lang) writeFileSync(join(dir, "arch", "ARCHITECTURE.md"), `<!-- DOC_LANGUAGE: ${o.lang} -->\n# Order Desk\n`);
     writeFileSync(join(dir, "fixture-issue.json"), JSON.stringify({ state: o.state || "open", user: { login: o.author || o.sender || "build-bot-user" },
       labels: (o.labels || ["tier0:tdr-status"]).map((name) => ({ name })), body: o.body ?? "x\n<!-- sa-tier0 -->\n" }));
     writeFileSync(join(dir, "project.b64"), Buffer.from(JSON.stringify({ support: "run", ...(o.auto ? { tier0: { auto: o.auto } } : {}) })).toString("base64"));
@@ -207,6 +215,15 @@ exit 0
     expect(r.calls).toContain("issue comment 7 -R acme/order-desk --body-file");
     expect(r.calls).toContain("issue edit 7 -R acme/order-desk --remove-label architecture-tier0");
     expect(r.calls).not.toContain("tier0-refused");
+  });
+
+  test("a refusal speaks the architecture's language (DOC_LANGUAGE), its codes and names as they are (10.17.0)", () => {
+    const r = run({ sender: "build-bot-user", agents: "build-bot-user", author: "dev", lang: "es" });
+    expect(r.code).toBe(1);
+    expect(r.comment).toContain("### Tier 0 no iniciado");
+    expect(r.comment).toContain("`build-bot-user` es una cuenta de automatización");
+    expect(r.comment).toContain("la solicitud sigue en pie");
+    expect(r.comment).toContain("`architecture-tier0`");
   });
 
   test("labeled by a bot or a reader without triage: refused; by a person who can write: go, no auto", () => {

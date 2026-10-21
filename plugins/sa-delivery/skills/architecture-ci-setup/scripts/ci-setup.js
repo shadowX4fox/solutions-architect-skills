@@ -41,6 +41,14 @@ function settings(gh, repo) {
   const v = ghJson(gh, ['variable', 'list', '-R', repo, '--json', 'name,value']), s = ghJson(gh, ['secret', 'list', '-R', repo, '--json', 'name']);
   return { error: v.error || s.error, vars: Object.fromEntries((v.value || []).map((x) => [x.name, x.value])), secrets: new Set((s.value || []).map((x) => x.name)) };
 }
+// an architecture repository's DOC_LANGUAGE (en | es), from its ARCHITECTURE.md through the API; null when unread
+function architectureLanguage(gh, repo) {
+  const r = gh(['api', `repos/${repo}/contents/ARCHITECTURE.md`, '--jq', '.content']);
+  if (r.status !== 0) return null;
+  const text = Buffer.from(String(r.stdout || '').replace(/\s/g, ''), 'base64').toString('utf8');
+  const m = text.match(/<!--\s*(?:DOC_LANGUAGE|LANGUAGE):\s*([a-zA-Z]{2})\s*-->/);
+  return m && ['en', 'es'].includes(m[1].toLowerCase()) ? m[1].toLowerCase() : null;
+}
 function githubRepo(dir) {
   const r = spawnSync('git', ['-C', dir, 'remote', 'get-url', 'origin'], { encoding: 'utf8' });
   const m = (r.stdout || '').trim().match(/github\.com[:/]([^/\s]+\/[^/\s]+?)(?:\.git)?$/);
@@ -231,6 +239,14 @@ function service(dir, opts = {}) {
     row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', `secret CLAUDE_CODE_OAUTH_TOKEN — ${opts.attended ? 'the review' : 'the build'}`, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
     if (!opts.attended) row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
     row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
+    // the language the build's pull request and issues, and the review's comment and status, are written in: the
+    // architecture's DOC_LANGUAGE, read from its ARCHITECTURE.md (10.17.0) — the pack does not state it
+    const A = opts.architecture || st.vars.SA_ARCHITECTURE_REPO;
+    if (A) {
+      const lang = architectureLanguage(gh, A), have = st.vars.SA_DOC_LANGUAGE;
+      if (!lang) row(rows, '!', `variable SA_DOC_LANGUAGE${have ? ` = ${have}` : ''} — ${A}'s ARCHITECTURE.md states no DOC_LANGUAGE (or is not readable)`);
+      else varRow(rows, have === lang ? '✓' : '✗', `variable SA_DOC_LANGUAGE${have === lang ? ` = ${have}` : ` — ${have ? `${have}, ` : ''}the architecture is written in ${lang}`}`, repo, 'SA_DOC_LANGUAGE', lang);
+    }
     if (!opts.attended) runnerRows('SA_BUILD_RUNS_ON', 'the build');
     if (opts.review) {
       runnerRows('SA_REVIEW_RUNS_ON', 'the review');

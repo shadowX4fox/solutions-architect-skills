@@ -17,7 +17,7 @@ const git = (root: string, ...a: string[]) => spawnSync("git", ["-C", root, ...a
 const repo = (root: string, slug: string) => { mkdirSync(root, { recursive: true }); git(root, "init", "-q", "-b", "main"); git(root, "remote", "add", "origin", `https://github.com/acme/${slug}.git`); };
 
 // gh as GitHub answers it: per repository its variables, secrets and labels; the workflow permission
-type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[]; protection?: any };
+type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[]; protection?: any; architecture?: string };
 const calls: string[][] = [];
 const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
   calls.push(args);
@@ -28,6 +28,8 @@ const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
   if (args[0] === "api" && args.includes("-X") && args.some((x) => /branches\/main\/protection/.test(x))) return ok(null);
   if (args[0] === "api" && /branches\/main\/protection/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")] || {};
     return x.protection ? ok(x.protection) : { status: 1, stdout: "", stderr: "gh: Branch not protected (HTTP 404)" }; }
+  if (args[0] === "api" && /contents\/ARCHITECTURE\.md$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
+    return x && x.architecture ? { status: 0, stdout: Buffer.from(x.architecture).toString("base64") + "\n", stderr: "" } : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "api" && /actions\/runners$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
     return x && x.runners ? ok({ runners: x.runners.map((n) => ({ ...n, labels: n.labels.map((name) => ({ name })) })) }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "variable") return ok(Object.entries(r.vars || {}).map(([name, value]) => ({ name, value })));
@@ -160,6 +162,22 @@ describe("ci-setup.js service", () => {
     r = C.service(SVC, { gh, ...opts });
     s = states(r);
     for (const k of ["variable SA_BUILD_AGENT = hub-builder", "acme/order-desk SA_SERVICE_REPOS lists acme/hub-api", "acme/order-desk SA_TIER0_TRUSTED_AGENTS trusts hub-builder", "acme/order-desk SA_HANDOFF_AUTOMERGE = true"]) expect(s[k]).toBe("✓");
+  });
+
+  test("the service speaks the architecture's language: SA_DOC_LANGUAGE read from its ARCHITECTURE.md, set by --settings (10.17.0)", () => {
+    const svc: Repo = { secrets: ["CLAUDE_CODE_OAUTH_TOKEN"] };
+    const gh = fakeGh({ "acme/hub-api": svc, "acme/order-desk": { architecture: "<!-- ARCHITECTURE_VERSION: 1.0.0 -->\n<!-- DOC_LANGUAGE: es -->\n# Order Desk\n" } });
+    const opts = { server: "https://idx/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", attended: true, review: true, write: true };
+    let r = C.service(SVC, { gh, ...opts });
+    const row = r.rows.find((x: any) => x.item.startsWith("variable SA_DOC_LANGUAGE"));
+    expect(row.state).toBe("✗");
+    expect(row.item).toContain("the architecture is written in es");
+    r = C.service(SVC, { gh, ...opts, settings: true });
+    expect(svc.vars!.SA_DOC_LANGUAGE).toBe("es");
+    expect(states(C.service(SVC, { gh, ...opts }))["variable SA_DOC_LANGUAGE = es"]).toBe("✓");
+    // the architecture states none, or cannot be read: said, never guessed
+    const quiet = fakeGh({ "acme/hub-api": { secrets: [] }, "acme/order-desk": {} });
+    expect(C.service(SVC, { gh: quiet, ...opts }).rows.find((x: any) => x.item.startsWith("variable SA_DOC_LANGUAGE")).state).toBe("!");
   });
 
   test("attended with --review: the review workflow pinned, its variables, and the required check on the default branch", () => {

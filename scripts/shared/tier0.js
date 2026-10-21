@@ -47,28 +47,29 @@ const filled = (v) => (Array.isArray(v) ? list(v).length > 0 : v != null && Stri
 const cell = (v) => String(v).replace(/\|/g, '\\|').replace(/\n/g, ' ');
 const fenceFor = (t, min = 3) => '`'.repeat(Math.max(min, ...(String(t).match(/`+/g) || []).map((x) => x.length + 1)));
 const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const { languageOf, pick } = require('./ci-text');
 const slugify = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'record';
 
-function validate(req) {
-  const errors = [], k = KINDS[req.kind];
-  if (!k) return [`kind "${req.kind || ''}" is not a Tier 0 write — one of ${Object.keys(KINDS).join(', ')}`];
-  if (!filled(req.title)) errors.push('title is required');
-  if (!filled(req.request)) errors.push('request (what the developer asked for, in their words) is required');
+function validate(req, lang = 'en') {
+  const errors = [], k = KINDS[req.kind], L = (en, es) => pick(lang, { en, es });
+  if (!k) return [L(`kind "${req.kind || ''}" is not a Tier 0 write — one of ${Object.keys(KINDS).join(', ')}`, `el tipo "${req.kind || ''}" no es una escritura Tier 0; uno de ${Object.keys(KINDS).join(', ')}`)];
+  if (!filled(req.title)) errors.push(L('title is required', 'falta title'));
+  if (!filled(req.request)) errors.push(L('request (what the developer asked for, in their words) is required', 'falta request (lo que pidió el desarrollador, con sus palabras)'));
   const f = req.fields || {};
-  k.required.filter((x) => !filled(f[x])).forEach((x) => errors.push(`fields.${x} is required for ${req.kind}`));
-  if (k.evidence && !(req.evidence || []).some((e) => filled(e && e.where))) errors.push(`${req.kind} needs evidence: where it shows in the service (repository, commit, file:line)`);
+  k.required.filter((x) => !filled(f[x])).forEach((x) => errors.push(L(`fields.${x} is required for ${req.kind}`, `falta fields.${x}, que ${req.kind} requiere`)));
+  if (k.evidence && !(req.evidence || []).some((e) => filled(e && e.where))) errors.push(L(`${req.kind} needs evidence: where it shows in the service (repository, commit, file:line)`, `${req.kind} necesita evidencia: dónde se ve en el servicio (repositorio, commit, archivo:línea)`));
   if (req.kind === 'tdr-status') {
-    if (f.tdr && !/^TDR-\d{3,}$/.test(f.tdr)) errors.push(`fields.tdr "${f.tdr}" is not a TDR id`);
-    if (f.to && !tdr.STATUSES.includes(f.to)) errors.push(`fields.to "${f.to}" is not a status — one of ${tdr.STATUSES.join(' · ')}`);
-    if (f.to === 'Planned' && !/^\d{4}-\d{2}-\d{2}$/.test(String(f.target_date || ''))) errors.push('a move to Planned needs fields.target_date (YYYY-MM-DD)');
-    if (f.to === "Won't Fix") errors.push("a move to Won't Fix is a decision, not a Tier 0 write — the architect makes it");
+    if (f.tdr && !/^TDR-\d{3,}$/.test(f.tdr)) errors.push(L(`fields.tdr "${f.tdr}" is not a TDR id`, `fields.tdr "${f.tdr}" no es un id de TDR`));
+    if (f.to && !tdr.STATUSES.includes(f.to)) errors.push(L(`fields.to "${f.to}" is not a status — one of ${tdr.STATUSES.join(' · ')}`, `fields.to "${f.to}" no es un estado; uno de ${tdr.STATUSES.join(' · ')}`));
+    if (f.to === 'Planned' && !/^\d{4}-\d{2}-\d{2}$/.test(String(f.target_date || ''))) errors.push(L('a move to Planned needs fields.target_date (YYYY-MM-DD)', 'un paso a Planned necesita fields.target_date (AAAA-MM-DD)'));
+    if (f.to === "Won't Fix") errors.push(L("a move to Won't Fix is a decision, not a Tier 0 write — the architect makes it", "un paso a Won't Fix es una decisión, no una escritura Tier 0: la toma el arquitecto"));
   }
-  if (req.kind === 'tdr-workaround' && f.driver && !tdr.DRIVERS.includes(f.driver)) errors.push(`fields.driver "${f.driver}" is not one of ${tdr.DRIVERS.join(' · ')}`);
+  if (req.kind === 'tdr-workaround' && f.driver && !tdr.DRIVERS.includes(f.driver)) errors.push(L(`fields.driver "${f.driver}" is not one of ${tdr.DRIVERS.join(' · ')}`, `fields.driver "${f.driver}" no es uno de ${tdr.DRIVERS.join(' · ')}`));
   if (req.kind === 'doc-fix') {
-    if (f.file && (!/^docs\//.test(f.file) || f.file.split('/').includes('..'))) errors.push(`fields.file "${f.file}" is not under docs/`);
-    if (f.line != null && !(Number.isInteger(Number(f.line)) && Number(f.line) >= 1)) errors.push('fields.line is a line number');
-    if (filled(f.before) && f.before === f.after) errors.push('fields.before and fields.after are the same text');
-    if (/\n/.test(String(f.before || '') + String(f.after || ''))) errors.push('a doc-fix replaces text inside one line');
+    if (f.file && (!/^docs\//.test(f.file) || f.file.split('/').includes('..'))) errors.push(L(`fields.file "${f.file}" is not under docs/`, `fields.file "${f.file}" no está bajo docs/`));
+    if (f.line != null && !(Number.isInteger(Number(f.line)) && Number(f.line) >= 1)) errors.push(L('fields.line is a line number', 'fields.line es un número de línea'));
+    if (filled(f.before) && f.before === f.after) errors.push(L('fields.before and fields.after are the same text', 'fields.before y fields.after son el mismo texto'));
+    if (/\n/.test(String(f.before || '') + String(f.after || ''))) errors.push(L('a doc-fix replaces text inside one line', 'un doc-fix reemplaza texto dentro de una sola línea'));
   }
   return errors;
 }
@@ -129,37 +130,40 @@ const nextAdr = (root) => { const d = path.join(root, 'adr'); const n = fs.exist
   return 'ADR-' + String(Math.max(100, ...n) + 1).padStart(3, '0'); };
 function prepare(root, issue, opts = {}) {
   root = path.resolve(root);
-  if (!opts.force && !(issue.labels || []).includes(LABEL) && !/^\[T0-\?\]/.test(String(issue.title))) return { ok: false, reasons: [`not a Tier 0 request: no ${LABEL} label and no [T0-?] title`] };
+  const lang = opts.lang || languageOf(root), L = (en, es) => pick(lang, { en, es });
+  if (!opts.force && !(issue.labels || []).includes(LABEL) && !/^\[T0-\?\]/.test(String(issue.title))) return { ok: false, reasons: [L(`not a Tier 0 request: no ${LABEL} label and no [T0-?] title`, `no es una solicitud Tier 0: sin la etiqueta ${LABEL} ni el título [T0-?]`)] };
   const req = requestOf(issue), reasons = [];
   if (req.fieldsError) reasons.push(req.fieldsError);
-  reasons.push(...validate(req));
+  reasons.push(...validate(req, lang));
   const s = support.supportOf(root);
-  if (!s.tier0) reasons.push(`Tier 0 does not apply here: ${s.reason}`);
+  if (!s.tier0) reasons.push(L(`Tier 0 does not apply here: ${s.reason}`, `Tier 0 no aplica aquí: ${s.reason}`));
   const facts = collect(root), names = new Set((facts.components || []).map((c) => c.name));
-  list(req.components).filter((c) => !names.has(c)).forEach((c) => reasons.push(`component "${c}" is not a canonical name of this architecture — a name in doubt is no Tier 0 write`));
+  list(req.components).filter((c) => !names.has(c)).forEach((c) => reasons.push(L(`component "${c}" is not a canonical name of this architecture — a name in doubt is no Tier 0 write`, `el componente "${c}" no es un nombre canónico de esta arquitectura: un nombre en duda no es una escritura Tier 0`)));
   const f = req.fields || {}, payload = { kind: req.kind, issue: { n: issue.n || null, url: issue.url || null }, today: opts.today || today(), request: req };
   if (!reasons.length && req.kind === 'tdr-workaround') {
     const adrs = new Set((facts.adrs || []).map((a) => a.id));
-    list(f.adrs).filter((a) => !adrs.has(a)).forEach((a) => reasons.push(`fields.adrs: ${a} does not exist`));
+    list(f.adrs).filter((a) => !adrs.has(a)).forEach((a) => reasons.push(L(`fields.adrs: ${a} does not exist`, `fields.adrs: ${a} no existe`)));
     payload.id = tdr.pending(root).next; payload.file = `tdr/${payload.id}-${slugify(req.title)}.md`;
   }
   if (!reasons.length && req.kind === 'tdr-status') {
     const rec = tdr.check(root).records.find((r) => r.id === f.tdr);
-    if (!rec) reasons.push(`${f.tdr} has no record under tdr/`);
-    else { const m = tdr.move(rec.status, f.to); if (!m.ok) reasons.push(`${f.tdr}: ${rec.status} → ${f.to} is refused — ${m.reason}`); else Object.assign(payload, { id: f.tdr, file: rec.file, from: rec.status, arrow: m.arrow }); }
+    if (!rec) reasons.push(L(`${f.tdr} has no record under tdr/`, `${f.tdr} no tiene registro en tdr/`));
+    else { const m = tdr.move(rec.status, f.to); if (!m.ok) reasons.push(L(`${f.tdr}: ${rec.status} → ${f.to} is refused — ${m.reason}`, `${f.tdr}: ${rec.status} → ${f.to} se rechaza — ${m.reason}`)); else Object.assign(payload, { id: f.tdr, file: rec.file, from: rec.status, arrow: m.arrow }); }
   }
   // keyed by a trusted agent, no person read it: the kind is one the architecture lets an agent start, and "the code resolved
   // it" is held to the code that shipped — every commit the evidence names is on its repository's default branch
   if (opts.auto) {
     payload.auto = true;
-    if (!s.auto || !s.auto.includes(req.kind)) reasons.push(`a trusted agent keyed this request, but \`${req.kind}\` is not in this architecture's tier0.auto (.sa-skills/project.json: ${s.auto && s.auto.length ? s.auto.join(', ') : 'none'}) — a person applies ${LABEL}`);
+    if (!s.auto || !s.auto.includes(req.kind)) reasons.push(L(`a trusted agent keyed this request, but \`${req.kind}\` is not in this architecture's tier0.auto (.sa-skills/project.json: ${s.auto && s.auto.length ? s.auto.join(', ') : 'none'}) — a person applies ${LABEL}`,
+      `un agente de confianza habilitó esta solicitud, pero \`${req.kind}\` no está en el tier0.auto de esta arquitectura (.sa-skills/project.json: ${s.auto && s.auto.length ? s.auto.join(', ') : 'ninguno'}); una persona aplica ${LABEL}`));
     else if (!reasons.length && req.kind === 'tdr-status' && f.to === 'Resolved') {
       const refs = refsOf(req.evidence);
-      if (!refs.length) reasons.push(`a move to Resolved keyed for an agent names what resolved it — evidence \`owner/repo#N\` (its pull request) or \`owner/repo@sha\`; none is named`);
+      if (!refs.length) reasons.push(L(`a move to Resolved keyed for an agent names what resolved it — evidence \`owner/repo#N\` (its pull request) or \`owner/repo@sha\`; none is named`,
+        `un paso a Resolved habilitado para un agente nombra lo que lo resolvió — evidencia \`owner/repo#N\` (su pull request) o \`owner/repo@sha\`; no nombra ninguna`));
       const merged = opts.merged || mergedOnDefault, waiting = [];
       refs.forEach((c) => { const r = merged(c), at = c.pr ? `${c.repo}#${c.pr}` : `${c.repo}@${c.sha.slice(0, 12)}`;
         if (r.ok) return;
-        if (r.wait) waiting.push(`${at} is not merged into ${c.repo}'s default branch${r.branch ? ` (${r.branch})` : ''} yet: ${r.reason}`);
+        if (r.wait) waiting.push(L(`${at} is not merged into ${c.repo}'s default branch${r.branch ? ` (${r.branch})` : ''} yet: ${r.reason}`, `${at} aún no está fusionado en la rama por defecto de ${c.repo}${r.branch ? ` (${r.branch})` : ''}: ${r.reason}`));
         else reasons.push(`${at}: ${r.reason}`); });
       if (!reasons.length && waiting.length) return { ok: false, wait: true, kind: req.kind, reasons: waiting };
     }
@@ -167,11 +171,11 @@ function prepare(root, issue, opts = {}) {
   if (!reasons.length && req.kind === 'adr-proposed') { payload.id = nextAdr(root); payload.file = `adr/${payload.id}-${slugify(req.title)}.md`; }
   if (!reasons.length && req.kind === 'doc-fix') {
     const file = path.join(root, f.file);
-    if (!fs.existsSync(file)) reasons.push(`${f.file} does not exist`);
+    if (!fs.existsSync(file)) reasons.push(L(`${f.file} does not exist`, `${f.file} no existe`));
     else {
       const lines = read(file).split('\n'), at = lines[Number(f.line) - 1] || '';
       const where = at.includes(f.before) ? Number(f.line) : (() => { const hits = lines.map((l, i) => (l.includes(f.before) ? i + 1 : 0)).filter(Boolean); return hits.length === 1 ? hits[0] : 0; })();
-      if (!where) reasons.push(`${f.file}:${f.line} does not carry the text to replace, and it is not once elsewhere in the file`);
+      if (!where) reasons.push(L(`${f.file}:${f.line} does not carry the text to replace, and it is not once elsewhere in the file`, `${f.file}:${f.line} no contiene el texto a reemplazar, y no aparece una sola vez en otra parte del archivo`));
       else Object.assign(payload, { file: f.file, line: where, facts: factsHash(root) });
     }
   }
@@ -246,46 +250,47 @@ const institutional = (p) => { const m = p.match(/^adr\/ADR-(\d{3,})/i); return 
 // A record propagates over the documentation surface (the TDR skill links both ways — TDR ↔ affected components, TDR ↔ ADR —
 // and adds its Section 13 row; the ADR skill indexes and links): outside its own folder every hunk names the record's id,
 // no institutional ADR is touched, and the facts ledger moves in the record's own part only
-function verify(root, payload) {
+function verify(root, payload, opts = {}) {
   root = path.resolve(root);
+  const lang = opts.lang || languageOf(root), L = (en, es) => pick(lang, { en, es });
   const problems = [], notes = [], f = payload.request.fields || {}, id = payload.id;
   const home = payload.kind === 'doc-fix' ? null : KINDS[payload.kind].paths[0];
   const changed = changedPaths(root);
-  if (!changed.length) problems.push('nothing was written');
+  if (!changed.length) problems.push(L('nothing was written', 'no se escribió nada'));
   changed.forEach((p) => {
-    if (payload.kind === 'doc-fix') { if (p !== payload.file) problems.push(`${p} changed — a doc-fix writes ${payload.file} only`); return; }
-    if (institutional(p)) { problems.push(`${p} changed — an institutional ADR is never edited by a Tier 0 write`); return; }
+    if (payload.kind === 'doc-fix') { if (p !== payload.file) problems.push(L(`${p} changed — a doc-fix writes ${payload.file} only`, `${p} cambió; un doc-fix solo escribe ${payload.file}`)); return; }
+    if (institutional(p)) { problems.push(L(`${p} changed — an institutional ADR is never edited by a Tier 0 write`, `${p} cambió; una escritura Tier 0 nunca edita un ADR institucional`)); return; }
     if (p.startsWith(home)) return;
-    if (!/^(docs|adr)\//.test(p)) { problems.push(`${p} changed — a ${payload.kind} writes ${home}, and docs/ or a project ADR where it links ${id}`); return; }
-    hunks(root, p).filter((h) => !h.some((l) => l.includes(id))).forEach((h) => problems.push(`${p}: a change that does not name ${id} — ${(h.find((l) => l[0] === '+' && l.slice(1).trim()) || h.find((l) => l.slice(1).trim()) || '').slice(1).trim().slice(0, 120)}`));
+    if (!/^(docs|adr)\//.test(p)) { problems.push(L(`${p} changed — a ${payload.kind} writes ${home}, and docs/ or a project ADR where it links ${id}`, `${p} cambió; un ${payload.kind} escribe ${home}, y docs/ o un ADR del proyecto donde enlaza ${id}`)); return; }
+    hunks(root, p).filter((h) => !h.some((l) => l.includes(id))).forEach((h) => problems.push(L(`${p}: a change that does not name ${id}`, `${p}: un cambio que no nombra ${id}`) + ` — ${(h.find((l) => l[0] === '+' && l.slice(1).trim()) || h.find((l) => l.slice(1).trim()) || '').slice(1).trim().slice(0, 120)}`));
   });
   const debt = payload.kind === 'tdr-workaround' ? debtSection(root) : null;
-  if (debt && !read(path.join(root, debt)).includes(id)) problems.push(`${debt} has no summary row for ${id} — the TDR skill appends one to the Risks and Technical Debt section`);
+  if (debt && !read(path.join(root, debt)).includes(id)) problems.push(L(`${debt} has no summary row for ${id} — the TDR skill appends one to the Risks and Technical Debt section`, `${debt} no tiene fila de resumen para ${id}; el skill de TDR agrega una a la sección de Riesgos y Deuda Técnica`));
   // and the link back: every affected component with a descriptor names it (`**Technical Debt:**`, 10.8.0)
   if (payload.kind === 'tdr-workaround') tdr.descriptors(root).filter((d) => list(payload.request.components).includes(d.name) && !d.ids.includes(id))
-    .forEach((d) => problems.push(`${d.file} does not name ${id} — the affected component's descriptor carries \`**Technical Debt:** [${id}](…)\` after \`**Last Updated:**\``));
+    .forEach((d) => problems.push(L(`${d.file} does not name ${id} — the affected component's descriptor carries \`**Technical Debt:** [${id}](…)\` after \`**Last Updated:**\``, `${d.file} no nombra ${id}; el descriptor del componente afectado lleva \`**Technical Debt:** [${id}](…)\` después de \`**Last Updated:**\``)));
   if (payload.kind === 'tdr-workaround' || payload.kind === 'tdr-status') {
     const c = tdr.check(root), rec = c.records.find((r) => r.id === id);
-    if (!rec) problems.push(`${id} has no record under tdr/`);
+    if (!rec) problems.push(L(`${id} has no record under tdr/`, `${id} no tiene registro en tdr/`));
     else {
       const want = payload.kind === 'tdr-status' ? f.to : 'Open';
-      if (rec.status !== want) problems.push(`${id} is ${rec.status}, the request says ${want}`);
+      if (rec.status !== want) problems.push(L(`${id} is ${rec.status}, the request says ${want}`, `${id} está en ${rec.status}; la solicitud dice ${want}`));
       c.findings.filter((x) => x.level === 'BLOCKING' && (x.file === rec.file || x.file === 'tdr/README.md')).forEach((x) => problems.push(`${x.file}:${x.line} ${x.rule} — ${x.message}`));
       // a sentence that still states the old status is a line naming the id — the write fixes it (10.10.10); the other
       // mentions of a closed record are listed on the pull request for a person
       const m = tdr.mentions(root, c.records);
-      m.stale.filter((x) => x.id === id).forEach((x) => problems.push(`${x.file}:${x.line} states ${id} as \`${x.stated}\`, the record is \`${x.status}\` — ${x.text.slice(0, 120)}`));
-      m.open.filter((x) => x.id === id).forEach((x) => notes.push(`${x.file}:${x.line} cites ${id} (${x.status}) — ${x.text.slice(0, 160)}`));
+      m.stale.filter((x) => x.id === id).forEach((x) => problems.push(L(`${x.file}:${x.line} states ${id} as \`${x.stated}\`, the record is \`${x.status}\``, `${x.file}:${x.line} da ${id} como \`${x.stated}\`; el registro está en \`${x.status}\``) + ` — ${x.text.slice(0, 120)}`));
+      m.open.filter((x) => x.id === id).forEach((x) => notes.push(L(`${x.file}:${x.line} cites ${id} (${x.status})`, `${x.file}:${x.line} cita ${id} (${x.status})`) + ` — ${x.text.slice(0, 160)}`));
     }
   }
   if (payload.kind === 'adr-proposed') {
     const d = path.join(root, 'adr'), hit = fs.existsSync(d) && fs.readdirSync(d).find((n) => n.toUpperCase().startsWith(id + '-'));
-    if (!hit) problems.push(`${id} has no file under adr/`);
-    else { const src = read(path.join(d, hit)); if (!/^(?:status:\s*Proposed|\*\*Status\*\*:?\s*`?Proposed)/im.test(src)) problems.push(`${id} is not Proposed`); }
-    if (!fs.existsSync(path.join(d, 'README.md')) || !read(path.join(d, 'README.md')).includes(id)) problems.push(`adr/README.md does not list ${id}`);
+    if (!hit) problems.push(L(`${id} has no file under adr/`, `${id} no tiene archivo en adr/`));
+    else { const src = read(path.join(d, hit)); if (!/^(?:status:\s*Proposed|\*\*Status\*\*:?\s*`?Proposed)/im.test(src)) problems.push(L(`${id} is not Proposed`, `${id} no está en Proposed`)); }
+    if (!fs.existsSync(path.join(d, 'README.md')) || !read(path.join(d, 'README.md')).includes(id)) problems.push(L(`adr/README.md does not list ${id}`, `adr/README.md no lista ${id}`));
   }
-  if (payload.facts && factsHash(root, OWN[payload.kind]) !== payload.facts) problems.push(payload.kind === 'doc-fix' ? 'the fix changed a fact of the architecture — no Tier 0 write; it goes through the architect'
-    : `a fact of the architecture outside ${id}'s own record moved — a name, type, technology, integration, flow, figure or another record's status; that goes through the architect`);
+  if (payload.facts && factsHash(root, OWN[payload.kind]) !== payload.facts) problems.push(payload.kind === 'doc-fix' ? L('the fix changed a fact of the architecture — no Tier 0 write; it goes through the architect', 'la corrección cambió un hecho de la arquitectura: no es una escritura Tier 0; pasa por el arquitecto')
+    : L(`a fact of the architecture outside ${id}'s own record moved — a name, type, technology, integration, flow, figure or another record's status; that goes through the architect`, `se movió un hecho de la arquitectura fuera del propio registro de ${id} — un nombre, tipo, tecnología, integración, flujo, cifra o el estado de otro registro; eso pasa por el arquitecto`));
   return { ok: !problems.length, problems, changed, notes };
 }
 

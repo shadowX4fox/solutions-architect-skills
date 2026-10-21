@@ -139,6 +139,18 @@ describe("review-check.js — the verdict over the review's findings", () => {
     expect(md.indexOf("⛔ blocking")).toBeLessThan(md.indexOf("⚠ warning"));
     expect(md).toContain("preview_escalation");
   });
+
+  test("the review speaks the architecture's language — SA_DOC_LANGUAGE — and writes the status's one line (10.17.0)", async () => {
+    const r = await run({ findings: { reviewed: true, findings: [{ rule: 5, severity: "warning", finding: "sin contexto de traza" }, f({}).findings[0]] }, lang: "es" });
+    const md = R.render(r);
+    expect(md).toContain("### Revisión de arquitectura — ⛔ FAIL");
+    expect(md).toContain("| | Control | Dónde | Hallazgo |");
+    expect(md).toContain("⛔ bloqueante");
+    expect(md).toContain("regla 5 — sin contexto de traza");
+    expect(md).toContain("`[ESC-…]`");
+    expect(R.statusLine(r)).toBe("1 bloqueante(s) · 1 advertencia(s) · 0 nota(s)");
+    expect(R.statusLine(await run({ findings: OK }))).toBe("0 blocking · 0 warning · 0 note");
+  });
 });
 
 describe("architecture-review.yml — the template", () => {
