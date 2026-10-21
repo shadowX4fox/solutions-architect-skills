@@ -51,6 +51,7 @@ describe("ci-setup.js architecture", () => {
     r = C.architecture(ARCH, { gh, version: "9.9.9", runner: "self-hosted,idx" });
     expect(r.rows.filter((x: any) => x.item.startsWith(".github")).every((x: any) => x.state === "✓")).toBe(true);
     expect(states(r)["variable SA_INDEX_PROJECT_KEY = order-desk"]).toBe("✓");
+    expect(r.rows.find((x: any) => x.item.startsWith("variable SA_HANDOFF_AUTOMERGE"))).toMatchObject({ state: "·", fix: "gh variable set SA_HANDOFF_AUTOMERGE -R acme/order-desk --body true" });
   });
 
   test("a pin of another version moves; a workflow with changes of its own is kept until it is named in --replace", () => {

@@ -57,6 +57,7 @@ For a service repository with `.mcp.json` written, the developer approves the se
 
 | Architecture repository | Service repository |
 |---|---|
+| `architecture-handoff.yml` regenerates the kit after a release and, with `SA_HANDOFF_AUTOMERGE=true`, merges it once its gates pass and dispatches the index | — |
 | `architecture-index.yml` publishes a release's build packs and dispatches `architecture-released` to `SA_SERVICE_REPOS` (`SA_DISPATCH_TOKEN`) | `architecture-build.yml` builds from the pack, unattended, and opens a pull request (`SA_BUILD_TOKEN`) |
 | `architecture-tier0.yml` keys the build's request for a kind in `tier0.auto`, and a move to `Resolved` waits for the pull request it cites | `architecture-build-merge.yml` merges the build's pull request once the tests pass (opt in) |
 

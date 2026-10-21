@@ -224,7 +224,7 @@ The build's pull request lists every `TODO(architecture)` and every issue it fil
 Its reviewer reads them there and applies `architecture-tier0` to the requests that should be written. The agent never
 applies that label: the workflow refuses a bot, and the accounts listed in `SA_TIER0_AGENTS`.
 
-### Fully unattended (10.12.0, 10.13.0)
+### Fully unattended (10.12.0 – 10.14.0)
 
 An architecture can let its build agents start some Tier 0 writes with no person between the request and the merge.
 The agent still never applies `architecture-tier0`: when it opens the issue, the architecture repository keys it.
@@ -262,6 +262,12 @@ service's default branch:
 
 A private service repository needs `SA_TIER0_EVIDENCE_TOKEN`, a secret that reads it.
 
+**The handoff kit merges itself** (10.14.0). After a release, `architecture-handoff.yml` regenerates the kit and opens
+its pull request. With `SA_HANDOFF_AUTOMERGE=true` the workflow merges it when two gates pass:
+`kit-check.js`, and `kit-drift.js`, which blocks on an operation, an `operationId` or a contract version that the docs
+still state but the kit dropped or moved. It then dispatches `architecture-index.yml`, because a merge made with
+`GITHUB_TOKEN` starts no push workflow. If a gate blocks, the pull request stays open with a comment that says why.
+
 **The service side** ships with the plugin under `architecture-index-export/ci/service/`:
 
 - `architecture-index.yml` dispatches `architecture-released` to every repository in `SA_SERVICE_REPOS`, using
@@ -281,7 +287,7 @@ architect's.
 | `"support": "run"` and a first release | `.sa-skills/project.json`, `release my architecture` |
 | The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
-| Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS`, `SA_TIER0_AUTO_DAILY` and `SA_TIER0_WAIT_DAYS` for agents whose requests the repository keys, `SA_SERVICE_REPOS` (with the secret `SA_DISPATCH_TOKEN`) for the service builds (§ Fully unattended) |
+| Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS`, `SA_TIER0_AUTO_DAILY` and `SA_TIER0_WAIT_DAYS` for agents whose requests the repository keys, `SA_HANDOFF_AUTOMERGE=true` to merge the regenerated kit without a reviewer, `SA_SERVICE_REPOS` (with the secret `SA_DISPATCH_TOKEN`) for the service builds (§ Fully unattended) |
 | Labels | `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0-waiting` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all eighteen |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |

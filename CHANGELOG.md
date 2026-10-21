@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.14.0]
+
+### Added
+- **`SA_HANDOFF_AUTOMERGE`: the regenerated kit merges itself.** With the variable `true`, `architecture-handoff.yml` merges the kit's pull request once `kit-check.js` and `kit-drift.js` pass, then dispatches `architecture-index.yml` on the default branch, which publishes the build packs and notifies the service repositories. The workflow dispatches the index itself because a merge made with `GITHUB_TOKEN` starts no push workflow. A blocking drift finding leaves the pull request open with a comment, and without the variable nothing changes. With it, nothing between an attended release and the service's merged build needs a person.
+- **`ci-setup.js architecture`** reports `SA_HANDOFF_AUTOMERGE` as an optional row.
+- **Tests:** `skills/architecture-lifecycle/tests/handoff-workflow.test.ts` runs the step from the template against shims, covering unset, merged and dispatched, drift blocking, dispatch refused, and an unchanged kit.
+
 ## [10.13.2]
 
 ### Changed
