@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.16.3]
+
+### Fixed
+- **The review runs on `pull_request_target`.** In 10.16.2, claude-code-action failed with "Invalid OIDC token": the event refuses the Claude app's token exchange. The action now works with the job's own `GITHUB_TOKEN` (`github_token`), so the job no longer needs `id-token: write`. The review posts its own comment and status with that token, and Claude has no tool that could use it.
+- **The action's own pattern for `pull_request_target`.** The default branch is checked out at the workspace root, which the action expects and runs in. The PR's head goes into `pr-head/`, which Claude reads through `--add-dir`. Claude's working directory, its project configuration and `.sa-review/` are the default branch's, as is the MCP server's URL, which `review-check.js` gets as `--server`. A PR cannot point the review at another server. The PR's binding (version, component) is still the one held to its pack.
+
+### Upgrade
+- **From 10.16.2:** that file is the one that runs on the upgrade PR, and it fails, so an admin merges the upgrade once. From 10.16.0 or 10.16.1, as in 10.16.2.
+
 ## [10.16.2]
 
 ### Fixed

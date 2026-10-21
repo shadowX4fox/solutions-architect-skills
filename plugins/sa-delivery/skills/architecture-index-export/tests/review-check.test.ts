@@ -154,10 +154,17 @@ describe("architecture-review.yml — the template", () => {
   test("the pull request never runs its own review: the default branch's file, its code read as data, the result a status on the head (10.16.2)", () => {
     expect(yml).toMatch(/^on:\n  pull_request_target:/m);
     expect(yml).not.toMatch(/^  pull_request:/m);
-    expect(yml).toContain("persist-credentials: false");
+    // the action's own pattern: the default branch at the root, the pull request as data in pr-head/, read through --add-dir
+    expect(yml).toMatch(/- uses: actions\/checkout@v4 .*\n\s+with:\n\s+persist-credentials: false/);
+    expect(yml).toMatch(/ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}\n\s+path: pr-head\n\s+fetch-depth: 0\n\s+persist-credentials: false/);
+    expect(yml).toContain("--add-dir pr-head");
+    expect(yml).toContain("git -C pr-head diff");
+    // no OIDC exchange (pull_request_target refuses it): the job's own token
+    expect(yml).toContain("github_token: ${{ github.token }}");
+    expect(yml).not.toContain("id-token: write");
     expect(yml).toContain("rm -rf .sa-review && mkdir -p .sa-review");
     // the verdict from the pinned plugin, outside the checkout (Bun reads bunfig.toml from its working directory)
-    expect(yml).toMatch(/\( cd "\$RUNNER_TEMP" && "\$\{\{ steps\.bun\.outputs\.bun-path \}\}" "\$RUNNER_TEMP\/sa\/plugins\/sa-delivery\/skills\/architecture-index-export\/scripts\/review-check\.js" "\$W"/);
+    expect(yml).toMatch(/\( cd "\$RUNNER_TEMP" && "\$\{\{ steps\.bun\.outputs\.bun-path \}\}" "\$RUNNER_TEMP\/sa\/plugins\/sa-delivery\/skills\/architecture-index-export\/scripts\/review-check\.js" "\$W\/pr-head" --base "\$BASE" \\\n\s+--server "\$SA_INDEX_MCP_URL"/);
     // the required check is the commit status on the head commit — pending first, the verdict's state, a failure if it never ran
     expect(yml).toContain("statuses: write");
     for (const s of ["state=pending", 'state="$state"', "the review did not finish"]) expect(yml).toContain(s);
@@ -176,6 +183,6 @@ describe("architecture-review.yml — the template", () => {
     }
     // the review's own Bun: installed in a home of its own, called by its path — the action installs Bun 1.3.14 into $HOME/.bun
     expect(yml).toMatch(/uses: oven-sh\/setup-bun@v2\n\s+id: bun\n\s+env:\n\s+HOME: \$\{\{ runner\.temp \}\}\/bun-home/);
-    expect(yml).toContain('"${{ steps.bun.outputs.bun-path }}" "$RUNNER_TEMP/sa/plugins/sa-delivery/skills/architecture-index-export/scripts/review-check.js" "$W"');
+    expect(yml).toContain('"${{ steps.bun.outputs.bun-path }}" "$RUNNER_TEMP/sa/plugins/sa-delivery/skills/architecture-index-export/scripts/review-check.js" "$W/pr-head"');
   });
 });

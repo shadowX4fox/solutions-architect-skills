@@ -300,8 +300,10 @@ no shell. A pull request from a fork fails the check.
 **A pull request never runs its own review** (10.16.2). The review runs on `pull_request_target`, so the file that runs
 is always the default branch's. A pull request that edits the review (the verdict, the prompt, the tools) is reviewed by
 the review in force. The PR's code is only read: the checkout keeps no credential, Claude has no shell, and
-`review-check.js` comes from the pinned plugin and runs outside the checkout (Bun reads `bunfig.toml` from its working
-directory). `.sa-review/` is made fresh on every run. The result is the commit status "Architecture review" on the
+`review-check.js` comes from the pinned plugin and runs outside the checkouts (Bun reads `bunfig.toml` from its working
+directory). The default branch is checked out at the root, where Claude runs and the MCP server's URL comes from. The
+PR goes into `pr-head/` (10.16.3), which Claude reads through `--add-dir`. The action uses the job's `GITHUB_TOKEN`,
+because `pull_request_target` refuses the Claude app's OIDC exchange. `.sa-review/` is made fresh on every run. The result is the commit status "Architecture review" on the
 PR's head commit, which is the required check. Moving a repository from 10.16.0 or 10.16.1 to it takes one merge by an
 admin: that PR gets no check, because neither version of the file runs on it.
 
