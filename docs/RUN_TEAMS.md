@@ -297,6 +297,14 @@ cites that `[ESC-…]` issue as `owner/repo#N`. The architect answers it, and th
 are never cleared this way: the contract copies belong to the architecture. Claude reads only the checkout and runs
 no shell. A pull request from a fork fails the check.
 
+**A pull request never runs its own review** (10.16.2). The review runs on `pull_request_target`, so the file that runs
+is always the default branch's. A pull request that edits the review (the verdict, the prompt, the tools) is reviewed by
+the review in force. The PR's code is only read: the checkout keeps no credential, Claude has no shell, and
+`review-check.js` comes from the pinned plugin and runs outside the checkout (Bun reads `bunfig.toml` from its working
+directory). `.sa-review/` is made fresh on every run. The result is the commit status "Architecture review" on the
+PR's head commit, which is the required check. Moving a repository from 10.16.0 or 10.16.1 to it takes one merge by an
+admin: that PR gets no check, because neither version of the file runs on it.
+
 **A self-hosted runner is someone's machine** (10.16.1). The runner user's `~/.claude` is a person's configuration: their
 plugins, MCP servers, settings and hooks. claude-code-action also writes its own settings there. So the Claude steps of
 `architecture-review.yml` and `architecture-build.yml` get their own `HOME` and `CLAUDE_CONFIG_DIR` under

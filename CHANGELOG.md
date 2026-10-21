@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.16.2]
+
+### Fixed
+- **A pull request can no longer weaken its own review.** `ci/service/architecture-review.yml` ran on `pull_request`, that is, the workflow file of the PR itself. A PR could edit the verdict to exit 0 and pass the required check. claude-code-action refused to run a workflow that differs from the default branch's, so a PR that changed the review failed closed, and could never be merged. The review now runs on `pull_request_target`, always the default branch's file, so a PR that edits the review is reviewed by the review in force.
+- **The PR's code is read as data, never executed:**
+  - the checkout keeps no credential (`persist-credentials: false`);
+  - Claude has no shell;
+  - `review-check.js` comes from the pinned plugin and runs outside the checkout, because Bun reads `bunfig.toml`, `preload` included, from its working directory;
+  - `.sa-review/` is made fresh, so a PR cannot bring a `findings.json` of its own. This applied to `pull_request` too.
+- **The required check is the commit status "Architecture review" on the PR's head commit:** pending when the review starts, the verdict's state at the end, and a failure when the verdict never ran. A fork's PR gets a failure. The job is named `review`, so its own check run is not the required context.
+
+### Upgrade
+- **A repository on 10.16.0 or 10.16.1** moves with `ci-setup.js service … --attended --review --write --replace architecture-review.yml`. That one PR gets no "Architecture review", because the old file runs on `pull_request` and the new one on `pull_request_target`, neither for it. An admin merges it once: turn the protection's `enforce_admins` off, merge, turn it back on.
+
 ## [10.16.1]
 
 ### Fixed

@@ -144,12 +144,25 @@ describe("review-check.js — the verdict over the review's findings", () => {
 describe("architecture-review.yml — the template", () => {
   const yml = readFileSync(join(__dirname, "..", "ci", "service", "architecture-review.yml"), "utf8");
   test("Claude reads the checkout, writes its findings only, runs no shell; a fork fails; the verdict is code's", () => {
+    expect(yml).toContain("if: github.event.pull_request.head.repo.full_name != github.repository");
     expect(yml).toContain('--allowedTools "Read(./**),Glob,Grep,Edit(./.sa-review/findings.json),mcp__architecture"');
     expect(yml).toContain('--disallowedTools "Bash,WebFetch,WebSearch"');
     expect(yml).toContain("if: github.event.pull_request.head.repo.full_name != github.repository");
-    expect(yml).toContain("name: Architecture review");
-    expect(yml).toMatch(/review-check\.js" \. --base "\$BASE"/);
     expect(yml).toContain("exit $verdict");
+  });
+
+  test("the pull request never runs its own review: the default branch's file, its code read as data, the result a status on the head (10.16.2)", () => {
+    expect(yml).toMatch(/^on:\n  pull_request_target:/m);
+    expect(yml).not.toMatch(/^  pull_request:/m);
+    expect(yml).toContain("persist-credentials: false");
+    expect(yml).toContain("rm -rf .sa-review && mkdir -p .sa-review");
+    // the verdict from the pinned plugin, outside the checkout (Bun reads bunfig.toml from its working directory)
+    expect(yml).toMatch(/\( cd "\$RUNNER_TEMP" && "\$\{\{ steps\.bun\.outputs\.bun-path \}\}" "\$RUNNER_TEMP\/sa\/plugins\/sa-delivery\/skills\/architecture-index-export\/scripts\/review-check\.js" "\$W"/);
+    // the required check is the commit status on the head commit — pending first, the verdict's state, a failure if it never ran
+    expect(yml).toContain("statuses: write");
+    for (const s of ["state=pending", 'state="$state"', "the review did not finish"]) expect(yml).toContain(s);
+    expect((yml.match(/statuses\/\$HEAD" -f state=[^ ]+ -f context="Architecture review"/g) || []).length).toBe(4);
+    expect(yml).toContain("name: review\n");   // the job's own check run is not the required context
   });
 
   test("on a self-hosted runner, Claude never loads the runner user's ~/.claude: its step has a home of its own (10.16.1)", () => {
@@ -163,6 +176,6 @@ describe("architecture-review.yml — the template", () => {
     }
     // the review's own Bun: installed in a home of its own, called by its path — the action installs Bun 1.3.14 into $HOME/.bun
     expect(yml).toMatch(/uses: oven-sh\/setup-bun@v2\n\s+id: bun\n\s+env:\n\s+HOME: \$\{\{ runner\.temp \}\}\/bun-home/);
-    expect(yml).toContain('"${{ steps.bun.outputs.bun-path }}" "$RUNNER_TEMP/sa/plugins/sa-delivery/skills/architecture-index-export/scripts/review-check.js"');
+    expect(yml).toContain('"${{ steps.bun.outputs.bun-path }}" "$RUNNER_TEMP/sa/plugins/sa-delivery/skills/architecture-index-export/scripts/review-check.js" "$W"');
   });
 });
