@@ -17,10 +17,15 @@ const git = (root: string, ...a: string[]) => spawnSync("git", ["-C", root, ...a
 const repo = (root: string, slug: string) => { mkdirSync(root, { recursive: true }); git(root, "init", "-q", "-b", "main"); git(root, "remote", "add", "origin", `https://github.com/acme/${slug}.git`); };
 
 // gh as GitHub answers it: per repository its variables, secrets and labels; the workflow permission
-type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean };
+type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[] };
+const calls: string[][] = [];
 const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
+  calls.push(args);
   const ok = (v: any) => ({ status: 0, stdout: JSON.stringify(v), stderr: "" });
   const r = repos[args[args.indexOf("-R") + 1]] || {};
+  if (args[0] === "variable" && args[1] === "set") { (r.vars ||= {})[args[2]] = args[args.indexOf("--body") + 1]; return ok(null); }
+  if (args[0] === "api" && /actions\/runners$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
+    return x && x.runners ? ok({ runners: x.runners.map((n) => ({ ...n, labels: n.labels.map((name) => ({ name })) })) }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "variable") return ok(Object.entries(r.vars || {}).map(([name, value]) => ({ name, value })));
   if (args[0] === "secret") return ok((r.secrets || []).map((name) => ({ name })));
   if (args[0] === "label") return ok((r.labels || []).map((name) => ({ name })));
@@ -115,10 +120,48 @@ describe("ci-setup.js service", () => {
     expect(existsSync(join(SVC, ".github/workflows/architecture-build.yml"))).toBe(true);
     const s = states(r);
     expect(s["secret SA_BUILD_TOKEN"]).toBe("✗");
-    expect(s["the MCP server is on localhost"]).toBe("!");
+    expect(s["variable SA_BUILD_RUNS_ON"]).toBe("✗");
     expect(s["variable SA_BUILD_AGENT"]).toBe("✗");
     const listed = r.rows.find((x: any) => /SA_SERVICE_REPOS does not list/.test(x.item));
-    expect(listed.fix).toBe('gh variable set SA_SERVICE_REPOS -R acme/order-desk --body "acme/other,acme/hub-api"');
+    expect(listed.fix).toBe("gh variable set SA_SERVICE_REPOS -R acme/order-desk --body acme/other,acme/hub-api");
     expect(r.rows.some((x: any) => /no workflow named/.test(x.item))).toBe(false);
+  });
+
+  test("attaching an unattended build with --merge is full auto: --settings sets every required variable on both sides, never a secret", () => {
+    w(SVC, ".github/workflows/tests.yml", "name: Tests\non: [pull_request]\n");
+    const svc: Repo = { secrets: ["CLAUDE_CODE_OAUTH_TOKEN"], runners: [{ name: "box-1", status: "online", labels: ["self-hosted", "Linux", "idx"] }] };
+    const arch: Repo = { vars: { SA_SERVICE_REPOS: "acme/other", SA_TIER0_TRUSTED_AGENTS: "ci-bot" }, secrets: [] };
+    const gh = fakeGh({ "acme/hub-api": svc, "acme/order-desk": arch });
+    const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", merge: true, tests: "Tests", write: true };
+    // without the values: required, with the command to run — and nothing set
+    let r = C.service(SVC, { gh, ...opts });
+    let s = states(r);
+    expect(s["variable SA_BUILD_RUNS_ON"]).toBe("✗");
+    expect(s["acme/order-desk SA_HANDOFF_AUTOMERGE"]).toBe("✗");
+    expect(s["variable SA_BUILD_AGENT"]).toBe("✗");
+    // the values, then --settings
+    calls.length = 0;
+    r = C.service(SVC, { gh, ...opts, agent: "hub-builder", runsOn: "self-hosted,idx", settings: true });
+    const set = calls.filter((c) => c[0] === "variable" && c[1] === "set").map((c) => `${c[4]} ${c[2]}=${c[6]}`);
+    expect(set).toEqual(expect.arrayContaining([
+      'acme/hub-api SA_BUILD_RUNS_ON=["self-hosted","idx"]', "acme/hub-api SA_BUILD_AGENT=hub-builder",
+      "acme/order-desk SA_SERVICE_REPOS=acme/other,acme/hub-api", "acme/order-desk SA_TIER0_TRUSTED_AGENTS=ci-bot,hub-builder", "acme/order-desk SA_HANDOFF_AUTOMERGE=true"]));
+    expect(calls.some((c) => c[0] === "secret" && c[1] === "set")).toBe(false);
+    s = states(r);
+    expect(s["runner [self-hosted, idx]"]).toBe("✓");
+    expect(r.rows.find((x: any) => x.item.startsWith("variable SA_BUILD_AGENT")).item).toMatch(/— set$/);
+    expect(s["secret SA_BUILD_TOKEN"]).toBe("✗");                        // the user's, in the prompt
+    expect(s["acme/order-desk has no SA_DISPATCH_TOKEN"]).toBe("✗");
+    // run again: what was set reads back as done
+    r = C.service(SVC, { gh, ...opts });
+    s = states(r);
+    for (const k of ["variable SA_BUILD_AGENT = hub-builder", "acme/order-desk SA_SERVICE_REPOS lists acme/hub-api", "acme/order-desk SA_TIER0_TRUSTED_AGENTS trusts hub-builder", "acme/order-desk SA_HANDOFF_AUTOMERGE = true"]) expect(s[k]).toBe("✓");
+  });
+
+  test("a self-hosted runner that is not registered, or offline, is a required row", () => {
+    const gh = (runners: any) => fakeGh({ "acme/hub-api": { vars: { SA_BUILD_RUNS_ON: '["self-hosted","idx"]' }, runners }, "acme/order-desk": {} });
+    const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", write: true };
+    expect(C.service(SVC, { gh: gh([]), ...opts }).rows.find((x: any) => x.item.startsWith("runner")).item).toContain("none registered on this repository");
+    expect(C.service(SVC, { gh: gh([{ name: "box-1", status: "offline", labels: ["self-hosted", "idx"] }]), ...opts }).rows.find((x: any) => x.item.startsWith("runner"))).toMatchObject({ state: "✗", item: expect.stringContaining("box-1 offline") });
   });
 });

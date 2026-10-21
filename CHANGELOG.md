@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.15.0]
+
+### Added
+- **`ci-setup.js --settings`: attaching a service configures both repositories.** After the user's yes, every required variable whose value is known is set with `gh variable set`, on the service and on the architecture repository, and reported as `— set`. A secret is never set; its row stays a command for the user.
+  - **On the service:** `SA_BUILD_AGENT` and `SA_BUILD_RUNS_ON`.
+  - **On the architecture:** `SA_SERVICE_REPOS` extended with the service, `SA_TIER0_TRUSTED_AGENTS` extended with the agent, and `SA_HANDOFF_AUTOMERGE`.
+- **`--agent <login>` and `--runs-on <label,…>`** supply the values that were placeholders.
+- **`--merge` is full auto.** The service report now requires the architecture's `SA_HANDOFF_AUTOMERGE` and the agent in its `SA_TIER0_TRUSTED_AGENTS`. Without them a release, or a Tier 0 request, waits for a person.
+- **The runner is checked.** A self-hosted `SA_BUILD_RUNS_ON` is held to the service repository's runners: none registered, or offline, is a required row with its fix. A server on localhost without `SA_BUILD_RUNS_ON` is now required (`✗`) instead of a warning.
+
+### Changed
+- **The skill's steps:** a service is checked with `--architecture`, the questions name the agent and the runner, the write step runs `--write --settings`, and it explains how a release finds a service (`SA_SERVICE_REPOS`; the handoff names none).
+
 ## [10.14.0]
 
 ### Added

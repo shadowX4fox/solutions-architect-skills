@@ -32,19 +32,24 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 2. **Which side.** A directory with `ARCHITECTURE.md` is the **architecture** repository. One with `.architecture.json`, or a code repository the user names as a service, is a **service** repository. When a request covers both ("connect the service to the architecture"), do the architecture first. If it is unclear, ask.
 3. **Check.** Run it read-only and show its output verbatim:
    - architecture: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js architecture <root> [--runner <labels>]`
-   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"]`
+   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"] [--agent <login>] [--runs-on self-hosted,<label>]`
+
+   A service is always checked with `--architecture`: the pair is configured on both sides in one run.
 
    `✓` is done, `✗` is to do, `!` needs a decision, and `·` is optional.
 4. **Ask what the report cannot know**, with `AskUserQuestion`, only for the rows that need it:
    - **Runner** (architecture): can a GitHub-hosted runner reach the MCP server? If it is on localhost or a private network, the index jobs run on a self-hosted runner: `--runner self-hosted,<label>`.
    - **RUN team** (architecture, only when the user wants Tier 0): `support.js <root> --declare run`. Then ask which kinds the repository may key for a trusted build agent, a multi-select of the four or none: `support.js <root> --declare-auto <kinds>|none`. Both write `.sa-skills/project.json`, which is a reviewed change like any other.
    - **Service binding**: the project key (the architecture's `SA_INDEX_PROJECT_KEY`), the component (its slug: `get_architecture` on the server, or `component-cli.ts list` in the architecture), and the server URL.
-   - **Who builds it**: a person in an IDE (`--attended`), or an unattended build (the default). If unattended, ask whether its pull requests may merge without a person (`--merge`, the service team's policy), and which workflow runs the tests (`--tests`, its `name:`).
-5. **Write.** List the files the run will write, and get the user's yes. Then run the same command with `--write`.
+   - **Who builds it**: a person in an IDE (`--attended`), or an unattended build (the default). If unattended, ask:
+     - whether its pull requests may merge without a person (`--merge`, the service team's policy), and which workflow runs the tests (`--tests`, its `name:`). `--merge` is full auto: the report then requires the architecture's `SA_HANDOFF_AUTOMERGE` and the agent in its `SA_TIER0_TRUSTED_AGENTS`, the architecture team's two settings, so say so in the question;
+     - the build agent's login (`--agent`): the identity of `SA_BUILD_TOKEN`, a machine user or a GitHub App's `name[bot]`;
+     - where the build runs, when the server is on localhost or a private network (`--runs-on self-hosted,<label>`). The report checks that a runner with those labels is registered and online on the service repository.
+5. **Write.** List the files the run will write and the variables it will set on each repository, and get the user's yes. Then run the same command with `--write --settings`. `--settings` sets every required (`✗`) variable whose value is known, on both repositories, and reports each as `— set`; it never sets a secret.
    - A workflow marked `!` differs from its template: it has changes of its own, or it came from an older template. Show `diff <file> <template>`, and replace it (`--replace <file>`) only for the files the user names.
    - The workflows reach the repository through a branch and a pull request, never a push to the default branch. Ask before pushing.
 6. **What only the user sets.** The report prints a command for each row. Give the commands to the user, in order:
-   - **Variables**: run `gh variable set …` after a yes, with the values the user gave.
+   - **Variables**: set by `--settings` (step 5); a row still `✗` lacks its value, so ask for it and run again.
    - **Secrets**: the user sets them in the prompt (`! gh secret set NAME -R <repo>`). Never ask for a secret's value in the chat.
    - **`CLAUDE_CODE_OAUTH_TOKEN`**: from `/install-github-app`, on that repository.
    - **Labels**: `escalate.js labels <root> --create`, after a yes.
@@ -54,6 +59,8 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 For a service repository with `.mcp.json` written, the developer approves the server once in Claude Code (`/mcp`). An unattended build also needs its identity, `SA_BUILD_TOKEN` (a machine user or a GitHub App), listed in the architecture's `SA_TIER0_TRUSTED_AGENTS` for every Tier 0 request it may write without a person.
 
 ## The pair, end to end
+
+How a release finds the service: the handoff names no service. `architecture-index.yml` sends `architecture-released` to every repository listed in the architecture's `SA_SERVICE_REPOS`, and each one builds the component its `.architecture.json` names. A service whose pack did not change opens no pull request. Attaching a service adds it to that list.
 
 | Architecture repository | Service repository |
 |---|---|

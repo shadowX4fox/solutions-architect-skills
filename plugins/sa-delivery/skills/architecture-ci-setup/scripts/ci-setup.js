@@ -10,12 +10,17 @@
 //
 // Every check prints ✓ / ✗ / ! with the fix. --write writes local files only, and never over a workflow that differs from
 // its template beyond the pin — changes of its own, or an older template: the code cannot tell them apart, so the user
-// reads the diff and names the files to replace (--replace); variables, secrets, labels and settings are the user's: the
-// fix is a command to run after a yes.
+// reads the diff and names the files to replace (--replace). A required variable (✗) with a known value is set by
+// --settings, after the user's yes, on either repository of the pair (10.15.0); a secret never is — its fix is a command
+// for the user — and labels and the workflow permission stay a command too.
 //
-//   bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--json]
+//   bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //   bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>]
-//                   [--attended] [--merge --tests "<workflow name>"] [--write] [--json]
+//                   [--attended] [--merge --tests "<workflow name>"] [--agent <login>] [--runs-on <label,…>]
+//                   [--write] [--settings] [--json]
+//
+// --merge is full auto: the build's pull request merges on its tests, so a release reaches it with no person only when the
+// architecture merges its kit (SA_HANDOFF_AUTOMERGE) and trusts the agent's Tier 0 requests (SA_TIER0_TRUSTED_AGENTS).
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -41,7 +46,23 @@ function githubRepo(dir) {
   const m = (r.stdout || '').trim().match(/github\.com[:/]([^/\s]+\/[^/\s]+?)(?:\.git)?$/);
   return m ? m[1] : null;
 }
-const row = (rows, state, item, fix) => rows.push({ state, item, ...(fix ? { fix } : {}) });
+const row = (rows, state, item, fix, apply) => rows.push({ state, item, ...(fix ? { fix } : {}), ...(apply ? { apply } : {}) });
+// a repository variable: the command to print, and — with a value, no placeholder — the gh call --settings makes
+const variable = (repo, k, v) => ({ fix: `gh variable set ${k} -R ${repo} --body ${v == null ? `<${k.toLowerCase()}>` : /^[\w./:@,-]+$/.test(v) ? v : `'${v}'`}`,
+  apply: v == null ? undefined : ['variable', 'set', k, '-R', repo, '--body', v] });
+const varRow = (rows, state, item, repo, k, v) => { const x = variable(repo, k, v); row(rows, state, item, state === '✓' ? null : x.fix, state === '✓' ? undefined : x.apply); };
+const addTo = (list, v) => [...String(list || '').split(/[\s,]+/).filter(Boolean), v].join(',');
+const inList = (list, v) => String(list || '').split(/[\s,]+/).map((x) => x.toLowerCase()).includes(String(v).toLowerCase());
+// --settings: every required row (✗) that carries a gh call is set, and says so; the others are left as they are
+function applySettings(gh, rows) {
+  for (const x of rows) {
+    if (x.state !== '✗' || !x.apply) continue;
+    const r = gh(x.apply);
+    if (r.status === 0) { x.state = '✓'; x.item += ' — set'; delete x.fix; }
+    else { x.state = '!'; x.item += ` — not set (${(r.stderr || '').trim().split('\n')[0] || 'gh failed'})`; }
+    delete x.apply;
+  }
+}
 
 // ---- workflows: the template rendered for this repository, compared to the copy in .github/workflows ----------------
 // a workflow is current, stale (only the pin differs), modified (changes of its own — never overwritten) or missing
@@ -119,6 +140,7 @@ function architecture(root, opts = {}) {
         row(rows, miss.length ? '✗' : '✓', `labels — ${miss.length ? `${miss.length} of ${names.length} missing: ${miss.join(', ')}` : `all ${names.length}`}`, miss.length ? `escalate.js labels ${root} --create` : null); }
     } catch (e) { row(rows, '!', `labels — not checked (${e.message})`); }
   }
+  if (opts.settings) applySettings(gh, rows);
   return { side: 'architecture', root, repo, rows };
 }
 
@@ -157,29 +179,53 @@ function service(dir, opts = {}) {
   if (opts.merge && opts.tests && !(exists(path.join(dir, '.github', 'workflows')) && fs.readdirSync(path.join(dir, '.github', 'workflows')).some((f) => /\.ya?ml$/.test(f) && new RegExp(`^name:\\s*["']?${opts.tests.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']?\\s*$`, 'm').test(read(path.join(dir, '.github', 'workflows', f))))))
     row(rows, '✗', `no workflow named "${opts.tests}" — the merge waits for checks that never run`, 'add the repository\'s test workflow (its `name:` is what --tests names)');
   if (!repo) { row(rows, '✗', 'origin — not a GitHub repository; the workflows are GitHub Actions'); return { side: 'service', root: dir, repo, rows }; }
-  const st = settings(gh, repo), cmd = (k, v) => `gh variable set ${k} -R ${repo} --body ${v}`;
+  const st = settings(gh, repo);
   if (st.error) row(rows, '!', `variables and secrets — not readable (${st.error})`, 'gh auth login with admin on the repository');
-  else {
+  const agent = st.vars.SA_BUILD_AGENT || opts.agent;
+  if (!st.error) {
     row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', 'secret CLAUDE_CODE_OAUTH_TOKEN — the build', st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
     row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
-    row(rows, st.vars.SA_INDEX_MCP_URL || next.server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, st.vars.SA_INDEX_MCP_URL || next.server ? null : cmd('SA_INDEX_MCP_URL', '<mcp_url>'));
-    if (/localhost|127\.0\.0\.1/.test(st.vars.SA_INDEX_MCP_URL || next.server || '') && !st.vars.SA_BUILD_RUNS_ON) row(rows, '!', 'the MCP server is on localhost — a GitHub-hosted runner cannot reach it', cmd('SA_BUILD_RUNS_ON', '\'["self-hosted","<label>"]\''));
-    if (opts.merge) row(rows, st.vars.SA_BUILD_AGENT ? '✓' : '✗', `variable SA_BUILD_AGENT${st.vars.SA_BUILD_AGENT ? ` = ${st.vars.SA_BUILD_AGENT}` : ' — the login whose pull requests merge on their own'}`, st.vars.SA_BUILD_AGENT ? null : cmd('SA_BUILD_AGENT', '<build-agent-login>'));
-  }
-  // the architecture repository's side of the pair: it tells this repository of a release, and trusts its agent
-  if (opts.architecture) {
-    const a = settings(gh, opts.architecture);
-    if (a.error) row(rows, '!', `${opts.architecture} — its variables are not readable (${a.error})`);
-    else {
-      const listed = String(a.vars.SA_SERVICE_REPOS || '').split(/[\s,]+/).map((x) => x.toLowerCase()).includes(repo.toLowerCase());
-      row(rows, listed ? '✓' : '✗', `${opts.architecture} SA_SERVICE_REPOS ${listed ? 'lists' : 'does not list'} ${repo}`, listed ? null : `gh variable set SA_SERVICE_REPOS -R ${opts.architecture} --body "${[a.vars.SA_SERVICE_REPOS, repo].filter(Boolean).join(',')}"`);
-      if (!a.secrets.has('SA_DISPATCH_TOKEN')) row(rows, '✗', `${opts.architecture} has no SA_DISPATCH_TOKEN — it cannot tell this repository of a release`, `gh secret set SA_DISPATCH_TOKEN -R ${opts.architecture}`);
-      if (!st.error && st.vars.SA_BUILD_AGENT && a.vars.SA_TIER0_TRUSTED_AGENTS !== undefined) {
-        const trusted = String(a.vars.SA_TIER0_TRUSTED_AGENTS || '').split(/[\s,]+/).map((x) => x.toLowerCase()).includes(st.vars.SA_BUILD_AGENT.toLowerCase());
-        row(rows, trusted ? '✓' : '·', `${opts.architecture} SA_TIER0_TRUSTED_AGENTS ${trusted ? 'trusts' : 'does not trust'} ${st.vars.SA_BUILD_AGENT}${trusted ? '' : ' — its Tier 0 requests wait for a person'}`);
+    const server = st.vars.SA_INDEX_MCP_URL || next.server;
+    row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
+    // where the build runs: a server only a runner of the team's reaches — localhost, a private network — needs one
+    const runsOn = st.vars.SA_BUILD_RUNS_ON || (opts.runsOn ? JSON.stringify(opts.runsOn.split(',').map((x) => x.trim()).filter(Boolean)) : null);
+    if (st.vars.SA_BUILD_RUNS_ON) row(rows, '✓', `variable SA_BUILD_RUNS_ON = ${st.vars.SA_BUILD_RUNS_ON}`);
+    else if (opts.runsOn) varRow(rows, '✗', 'variable SA_BUILD_RUNS_ON — the runner the build runs on', repo, 'SA_BUILD_RUNS_ON', runsOn);
+    else if (/localhost|127\.0\.0\.1/.test(server || ''))
+      row(rows, '✗', 'variable SA_BUILD_RUNS_ON — the MCP server is on localhost: a GitHub-hosted runner cannot reach it', `gh variable set SA_BUILD_RUNS_ON -R ${repo} --body '["self-hosted","<label>"]'  (or --runs-on self-hosted,<label>)`);
+    let labels = null; try { labels = JSON.parse(runsOn || 'null'); } catch (e) { labels = null; }
+    if (Array.isArray(labels) && labels.includes('self-hosted')) {
+      const rn = ghJson(gh, ['api', `repos/${repo}/actions/runners`]);
+      if (rn.error) row(rows, '!', `runners — not readable (${rn.error})`);
+      else {
+        const fit = ((rn.value && rn.value.runners) || []).filter((r) => labels.every((l) => (r.labels || []).some((x) => String(x.name).toLowerCase() === String(l).toLowerCase())));
+        const up = fit.filter((r) => r.status === 'online');
+        row(rows, up.length ? '✓' : '✗', `runner [${labels.join(', ')}] — ${up.length ? `${up.map((r) => r.name).join(', ')} online` : fit.length ? `${fit.map((r) => r.name).join(', ')} offline: the build queues until it is back` : 'none registered on this repository'}`,
+          up.length ? null : fit.length ? 'start it: ./run.sh in its directory (or its service)' : `register one on ${repo} with the labels ${labels.filter((l) => l !== 'self-hosted').join(', ')}: Settings → Actions → Runners → New self-hosted runner (a personal account's runner serves one repository)`);
       }
     }
+    if (opts.merge) varRow(rows, st.vars.SA_BUILD_AGENT ? '✓' : '✗', `variable SA_BUILD_AGENT${st.vars.SA_BUILD_AGENT ? ` = ${st.vars.SA_BUILD_AGENT}` : ' — the login whose pull requests merge on their own'}`, repo, 'SA_BUILD_AGENT', opts.agent);
   }
+  // the architecture repository's side of the pair: SA_SERVICE_REPOS is how a release reaches this repository — the
+  // handoff names no service, the index dispatches architecture-released to every repository listed there
+  if (opts.architecture) {
+    const A = opts.architecture, a = settings(gh, A);
+    if (a.error) row(rows, '!', `${A} — its variables are not readable (${a.error})`);
+    else {
+      const listed = inList(a.vars.SA_SERVICE_REPOS, repo);
+      varRow(rows, listed ? '✓' : '✗', `${A} SA_SERVICE_REPOS ${listed ? 'lists' : 'does not list'} ${repo}${listed ? '' : ' — a release never reaches this repository'}`, A, 'SA_SERVICE_REPOS', addTo(a.vars.SA_SERVICE_REPOS, repo));
+      if (!a.secrets.has('SA_DISPATCH_TOKEN')) row(rows, '✗', `${A} has no SA_DISPATCH_TOKEN — it cannot tell this repository of a release`, `gh secret set SA_DISPATCH_TOKEN -R ${A}  (a token with write on this repository)`);
+      // full auto (--merge): nothing between the architecture's release and this merge waits for a person
+      const full = opts.merge ? '✗' : '·';
+      if (agent) {
+        const trusted = inList(a.vars.SA_TIER0_TRUSTED_AGENTS, agent);
+        varRow(rows, trusted ? '✓' : full, `${A} SA_TIER0_TRUSTED_AGENTS ${trusted ? 'trusts' : 'does not trust'} ${agent}${trusted ? '' : ' — its Tier 0 requests wait for a person'}`, A, 'SA_TIER0_TRUSTED_AGENTS', addTo(a.vars.SA_TIER0_TRUSTED_AGENTS, agent));
+      }
+      const kit = a.vars.SA_HANDOFF_AUTOMERGE === 'true';
+      varRow(rows, kit ? '✓' : full, `${A} SA_HANDOFF_AUTOMERGE ${kit ? '= true' : '— unset: a release reaches this build once a person merges the kit'}`, A, 'SA_HANDOFF_AUTOMERGE', 'true');
+    }
+  }
+  if (opts.settings) applySettings(gh, rows);
   return { side: 'service', root: dir, repo, rows };
 }
 
@@ -190,8 +236,9 @@ if (require.main === module) {
   const opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
   const o = { write: a.includes('--write'), runner: opt('--runner'), architecture: opt('--architecture'), project: opt('--project'), component: opt('--component'),
     server: opt('--server'), attended: a.includes('--attended'), merge: a.includes('--merge'), tests: opt('--tests'),
+    agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'),
     replace: String(opt('--replace') || '').split(',').map((x) => x.trim()).filter(Boolean) };
-  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"] [--write] [--json]'); process.exit(2); }
+  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"] [--agent <login>] [--runs-on <label,…>] [--write] [--settings] [--json]'); process.exit(2); }
   const r = side === 'architecture' ? architecture(target, o) : service(target, o);
   if (a.includes('--json')) { console.log(JSON.stringify(r, null, 1)); process.exit(r.rows.some((x) => x.state === '✗') ? 1 : 0); }
   console.log(`CI SETUP — ${r.side}: ${r.root}${r.repo ? ` (${r.repo})` : ''}`);
