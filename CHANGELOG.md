@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.16.0]
+
+### Added
+- **The attended service's reviewer, `ci/service/architecture-review.yml`.** Every pull request of a service built in an IDE is held to its build pack, whoever wrote the code. "Architecture review" is a required status check:
+  - **The code checks** (`scripts/review-check.js`, no model): the copies under `architecture/` are the pack's bytes (`asset-modified`, `asset-missing` block); the contracts are committed alone (`assets-mixed` blocks); commits name the version and `pack_revision` (rule 8, warning); the binding is checked against the latest release and the recorded revision (warnings); new `TODO(architecture)` lines are listed.
+  - **Claude's review**, through the MCP server: the diff against BUILD.md's rules, each finding citing the pack part. Claude reads only the checkout, writes only its findings file, and runs no shell and no web tool.
+  - **The verdict, by code:**
+    - a blocking finding that cites no part of the pack is a warning;
+    - a missing review fails closed;
+    - a departure is cleared only by the open `[ESC-…]` issue of the architecture repository that the finding names and the pull request cites, then stays as a warning naming it;
+    - a code finding is never cleared.
+
+    One comment on the pull request, updated on every run. A pull request from a fork fails the check.
+- **`ci-setup.js service --attended --review`:** writes the workflow with the plugin's pin. It sets `SA_ARCHITECTURE_REPO` and `SA_REVIEW_RUNS_ON` with `--settings`, and checks the self-hosted runner. It makes "Architecture review" a required check on the default branch, enforced for admins:
+  - **No protection yet:** with `--settings`, a minimal protection is created.
+  - **Protection with required checks:** "Architecture review" is added to them.
+  - **Any other protection:** the command is printed and nothing is changed.
+
+### Changed
+- **`BUILD.md` rule 9 (RUN teams):** a pull request that departs from the pack while its escalation is open cites the issue as `owner/repo#N`.
+- **`/release`:** also moves the pin of the templates under `ci/service/`.
+
 ## [10.15.0]
 
 ### Added

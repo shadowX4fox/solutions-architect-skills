@@ -16,7 +16,7 @@
 //
 //   bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //   bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>]
-//                   [--attended] [--merge --tests "<workflow name>"] [--agent <login>] [--runs-on <label,…>]
+//                   [--attended [--review]] [--merge --tests "<workflow name>"] [--agent <login>] [--runs-on <label,…>]
 //                   [--write] [--settings] [--json]
 //
 // --merge is full auto: the build's pull request merges on its tests, so a release reaches it with no person only when the
@@ -144,6 +144,28 @@ function architecture(root, opts = {}) {
   return { side: 'architecture', root, repo, rows };
 }
 
+// the review is a required status check of the default branch, or it blocks nothing: added to the checks a protection
+// already requires, or — no protection yet — a protection that requires it of everyone, admins included; any other protection
+// is the team's, and the command is printed, never run
+const REVIEW_CHECK = 'Architecture review';
+function reviewProtection(gh, repo, rows) {
+  const meta = ghJson(gh, ['api', `repos/${repo}`]);
+  if (meta.error) { row(rows, '!', `branch protection — not readable (${meta.error})`); return; }
+  const branch = (meta.value && meta.value.default_branch) || 'main', base = `repos/${repo}/branches/${branch}/protection`;
+  const p = ghJson(gh, ['api', base]);
+  const item = (what) => `branch protection — "${REVIEW_CHECK}" ${what} on ${branch}`;
+  if (p.error && /404|not protected/i.test(p.error)) {
+    row(rows, '✗', item('not required (the branch is not protected): a failing review blocks nothing'), `gh api -X PUT ${base} -F required_status_checks[strict]=false -F 'required_status_checks[contexts][]=${REVIEW_CHECK}' -F enforce_admins=true -F required_pull_request_reviews=null -F restrictions=null`,
+      ['api', '-X', 'PUT', base, '-F', 'required_status_checks[strict]=false', '-F', `required_status_checks[contexts][]=${REVIEW_CHECK}`, '-F', 'enforce_admins=true', '-F', 'required_pull_request_reviews=null', '-F', 'restrictions=null']);
+    return;
+  }
+  if (p.error) { row(rows, '!', `branch protection — not readable (${p.error})`, 'gh auth login with admin on the repository'); return; }
+  const rsc = p.value && p.value.required_status_checks, ctx = rsc ? [...(rsc.contexts || []), ...((rsc.checks || []).map((c) => c.context))] : [];
+  if (ctx.includes(REVIEW_CHECK)) { row(rows, '✓', item('required')); return; }
+  if (rsc) row(rows, '✗', item('not among the required checks'), `gh api -X POST ${base}/required_status_checks/contexts -f 'contexts[]=${REVIEW_CHECK}'`, ['api', '-X', 'POST', `${base}/required_status_checks/contexts`, '-f', `contexts[]=${REVIEW_CHECK}`]);
+  else row(rows, '!', item('not required: the branch is protected without status checks — add it to that protection (Settings → Branches)'));
+}
+
 // ---- a service repository --------------------------------------------------------------------------------------------
 function service(dir, opts = {}) {
   dir = path.resolve(dir);
@@ -168,47 +190,58 @@ function service(dir, opts = {}) {
   if (has) row(rows, '✓', `.mcp.json — "${has[0]}" → ${next.server}`);
   else if (next.server && opts.write) { mcp.mcpServers = { ...servers, architecture: { type: 'http', url: next.server } }; fs.writeFileSync(mf, JSON.stringify(mcp, null, 2) + '\n'); row(rows, '✓', `.mcp.json — "architecture" → ${next.server} added`); }
   else row(rows, '✗', `.mcp.json — no server at ${next.server || '(no server)'}: the IDE cannot reach the architecture`, 'run again with --write');
-  if (opts.attended) return { side: 'service', root: dir, repo, rows };
-  // unattended: the build workflow, and the merge workflow when the team opts in
-  const tpl = path.join(SKILL, 'architecture-index-export', 'ci', 'service'), list = [{ template: path.join(tpl, 'architecture-build.yml'), file: 'architecture-build.yml' }];
-  if (opts.merge) {
-    if (!opts.tests) row(rows, '✗', 'architecture-build-merge.yml — no test workflow named', '--tests "<the name: of this repository\'s test workflow>"');
-    else list.push({ template: path.join(tpl, 'architecture-build-merge.yml'), file: 'architecture-build-merge.yml', edit: (t) => t.replace('workflows: ["Tests"]', `workflows: [${JSON.stringify(opts.tests)}]`) });
+  if (opts.attended && !opts.review) return { side: 'service', root: dir, repo, rows };
+  // unattended: the build workflow, and the merge workflow when the team opts in; --review: the pull requests' reviewer
+  const tpl = path.join(SKILL, 'architecture-index-export', 'ci', 'service'), list = [];
+  if (!opts.attended) {
+    list.push({ template: path.join(tpl, 'architecture-build.yml'), file: 'architecture-build.yml' });
+    if (opts.merge) {
+      if (!opts.tests) row(rows, '✗', 'architecture-build-merge.yml — no test workflow named', '--tests "<the name: of this repository\'s test workflow>"');
+      else list.push({ template: path.join(tpl, 'architecture-build-merge.yml'), file: 'architecture-build-merge.yml', edit: (t) => t.replace('workflows: ["Tests"]', `workflows: [${JSON.stringify(opts.tests)}]`) });
+    }
   }
-  placeWorkflows(dir, list.map((w) => ({ ...w, pin: '', text: (w.edit || ((t) => t))(read(w.template)) })), rows, opts.write, opts.replace);
+  if (opts.review) list.push({ template: path.join(tpl, 'architecture-review.yml'), file: 'architecture-review.yml' });
+  const pin = `SA_PLUGIN_REF: v${opts.version || pluginVersion()}`;
+  placeWorkflows(dir, list.map((w) => ({ ...w, pin, text: (w.edit || ((t) => t))(read(w.template)).replace(PIN, pin) })), rows, opts.write, opts.replace);
   if (opts.merge && opts.tests && !(exists(path.join(dir, '.github', 'workflows')) && fs.readdirSync(path.join(dir, '.github', 'workflows')).some((f) => /\.ya?ml$/.test(f) && new RegExp(`^name:\\s*["']?${opts.tests.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']?\\s*$`, 'm').test(read(path.join(dir, '.github', 'workflows', f))))))
     row(rows, '✗', `no workflow named "${opts.tests}" — the merge waits for checks that never run`, 'add the repository\'s test workflow (its `name:` is what --tests names)');
   if (!repo) { row(rows, '✗', 'origin — not a GitHub repository; the workflows are GitHub Actions'); return { side: 'service', root: dir, repo, rows }; }
   const st = settings(gh, repo);
   if (st.error) row(rows, '!', `variables and secrets — not readable (${st.error})`, 'gh auth login with admin on the repository');
   const agent = st.vars.SA_BUILD_AGENT || opts.agent;
-  if (!st.error) {
-    row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', 'secret CLAUDE_CODE_OAUTH_TOKEN — the build', st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
-    row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
-    const server = st.vars.SA_INDEX_MCP_URL || next.server;
-    row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
-    // where the build runs: a server only a runner of the team's reaches — localhost, a private network — needs one
-    const runsOn = st.vars.SA_BUILD_RUNS_ON || (opts.runsOn ? JSON.stringify(opts.runsOn.split(',').map((x) => x.trim()).filter(Boolean)) : null);
-    if (st.vars.SA_BUILD_RUNS_ON) row(rows, '✓', `variable SA_BUILD_RUNS_ON = ${st.vars.SA_BUILD_RUNS_ON}`);
-    else if (opts.runsOn) varRow(rows, '✗', 'variable SA_BUILD_RUNS_ON — the runner the build runs on', repo, 'SA_BUILD_RUNS_ON', runsOn);
-    else if (/localhost|127\.0\.0\.1/.test(server || ''))
-      row(rows, '✗', 'variable SA_BUILD_RUNS_ON — the MCP server is on localhost: a GitHub-hosted runner cannot reach it', `gh variable set SA_BUILD_RUNS_ON -R ${repo} --body '["self-hosted","<label>"]'  (or --runs-on self-hosted,<label>)`);
+  const server = st.vars.SA_INDEX_MCP_URL || next.server;
+  // where a job runs: a server only a runner of the team's reaches — localhost, a private network — needs one, registered
+  // on this repository and online
+  const runnerRows = (k, what) => {
+    const runsOn = st.vars[k] || (opts.runsOn ? JSON.stringify(opts.runsOn.split(',').map((x) => x.trim()).filter(Boolean)) : null);
+    if (st.vars[k]) row(rows, '✓', `variable ${k} = ${st.vars[k]}`);
+    else if (opts.runsOn) varRow(rows, '✗', `variable ${k} — the runner ${what} runs on`, repo, k, runsOn);
+    else if (/localhost|127\.0\.0\.1/.test(server || '')) row(rows, '✗', `variable ${k} — the MCP server is on localhost: a GitHub-hosted runner cannot reach it`, `gh variable set ${k} -R ${repo} --body '["self-hosted","<label>"]'  (or --runs-on self-hosted,<label>)`);
     let labels = null; try { labels = JSON.parse(runsOn || 'null'); } catch (e) { labels = null; }
-    if (Array.isArray(labels) && labels.includes('self-hosted')) {
-      const rn = ghJson(gh, ['api', `repos/${repo}/actions/runners`]);
-      if (rn.error) row(rows, '!', `runners — not readable (${rn.error})`);
-      else {
-        const fit = ((rn.value && rn.value.runners) || []).filter((r) => labels.every((l) => (r.labels || []).some((x) => String(x.name).toLowerCase() === String(l).toLowerCase())));
-        const up = fit.filter((r) => r.status === 'online');
-        row(rows, up.length ? '✓' : '✗', `runner [${labels.join(', ')}] — ${up.length ? `${up.map((r) => r.name).join(', ')} online` : fit.length ? `${fit.map((r) => r.name).join(', ')} offline: the build queues until it is back` : 'none registered on this repository'}`,
-          up.length ? null : fit.length ? 'start it: ./run.sh in its directory (or its service)' : `register one on ${repo} with the labels ${labels.filter((l) => l !== 'self-hosted').join(', ')}: Settings → Actions → Runners → New self-hosted runner (a personal account's runner serves one repository)`);
-      }
+    if (!Array.isArray(labels) || !labels.includes('self-hosted')) return;
+    const rn = ghJson(gh, ['api', `repos/${repo}/actions/runners`]);
+    if (rn.error) { row(rows, '!', `runners — not readable (${rn.error})`); return; }
+    const fit = ((rn.value && rn.value.runners) || []).filter((r) => labels.every((l) => (r.labels || []).some((x) => String(x.name).toLowerCase() === String(l).toLowerCase())));
+    const up = fit.filter((r) => r.status === 'online');
+    row(rows, up.length ? '✓' : '✗', `runner [${labels.join(', ')}] — ${up.length ? `${up.map((r) => r.name).join(', ')} online` : fit.length ? `${fit.map((r) => r.name).join(', ')} offline: ${what} queues until it is back` : 'none registered on this repository'}`,
+      up.length ? null : fit.length ? 'start it: ./run.sh in its directory (or its service)' : `register one on ${repo} with the labels ${labels.filter((l) => l !== 'self-hosted').join(', ')}: Settings → Actions → Runners → New self-hosted runner (a personal account's runner serves one repository)`);
+  };
+  if (!st.error) {
+    row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', `secret CLAUDE_CODE_OAUTH_TOKEN — ${opts.attended ? 'the review' : 'the build'}`, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
+    if (!opts.attended) row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
+    row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
+    if (!opts.attended) runnerRows('SA_BUILD_RUNS_ON', 'the build');
+    if (opts.review) {
+      runnerRows('SA_REVIEW_RUNS_ON', 'the review');
+      const ar = st.vars.SA_ARCHITECTURE_REPO, want = opts.architecture;
+      varRow(rows, ar && (!want || ar.toLowerCase() === want.toLowerCase()) ? '✓' : '✗', `variable SA_ARCHITECTURE_REPO${ar ? ` = ${ar}` : ' — the architecture repository, where an escalation that clears a review finding lives'}`, repo, 'SA_ARCHITECTURE_REPO', want);
+      reviewProtection(gh, repo, rows);
     }
     if (opts.merge) varRow(rows, st.vars.SA_BUILD_AGENT ? '✓' : '✗', `variable SA_BUILD_AGENT${st.vars.SA_BUILD_AGENT ? ` = ${st.vars.SA_BUILD_AGENT}` : ' — the login whose pull requests merge on their own'}`, repo, 'SA_BUILD_AGENT', opts.agent);
   }
-  // the architecture repository's side of the pair: SA_SERVICE_REPOS is how a release reaches this repository — the
-  // handoff names no service, the index dispatches architecture-released to every repository listed there
-  if (opts.architecture) {
+  // the architecture repository's side of the pair, for an unattended build: SA_SERVICE_REPOS is how a release reaches this
+  // repository — the handoff names no service, the index dispatches architecture-released to every repository listed there
+  if (opts.architecture && !opts.attended) {
     const A = opts.architecture, a = settings(gh, A);
     if (a.error) row(rows, '!', `${A} — its variables are not readable (${a.error})`);
     else {
@@ -236,9 +269,9 @@ if (require.main === module) {
   const opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
   const o = { write: a.includes('--write'), runner: opt('--runner'), architecture: opt('--architecture'), project: opt('--project'), component: opt('--component'),
     server: opt('--server'), attended: a.includes('--attended'), merge: a.includes('--merge'), tests: opt('--tests'),
-    agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'),
+    agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'), review: a.includes('--review'),
     replace: String(opt('--replace') || '').split(',').map((x) => x.trim()).filter(Boolean) };
-  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"] [--agent <login>] [--runs-on <label,…>] [--write] [--settings] [--json]'); process.exit(2); }
+  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--runs-on <label,…>] [--write] [--settings] [--json]'); process.exit(2); }
   const r = side === 'architecture' ? architecture(target, o) : service(target, o);
   if (a.includes('--json')) { console.log(JSON.stringify(r, null, 1)); process.exit(r.rows.some((x) => x.state === '✗') ? 1 : 0); }
   console.log(`CI SETUP — ${r.side}: ${r.root}${r.repo ? ` (${r.repo})` : ''}`);

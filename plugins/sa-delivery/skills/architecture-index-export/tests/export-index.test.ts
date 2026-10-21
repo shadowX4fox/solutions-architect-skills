@@ -190,6 +190,7 @@ describe("export-index — build packs", () => {
     expect(run).toContain('**Nobody attending this build** — a CI job, a platform\'s build agent — is declared in this file: `"supervision": "unattended"`');
     expect(run).toContain("where the service needs a choice they do not make, ask — with no answer, or nobody attending, a `TODO(architecture)` as in rule 3.");
     expect(run).toContain("Unattended, nobody says yes: an escalation writes nothing, so follow `file_with.steps` with this build's own identity");
+    expect(run).toContain("cites the issue in its description as `owner/repo#N` — an architecture review clears that departure only for the escalation the pull request cites");
     expect(run).toContain('Unattended, pass `supervision: "unattended"` and file the issue with this build\'s own identity exactly as `file_with` gives it — its labels included, never one added or dropped');
     expect(run).toContain("it carries no `architecture-tier0`: a person applies the label");
     expect(run).not.toContain("drop that label");

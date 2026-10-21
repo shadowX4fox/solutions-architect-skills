@@ -32,7 +32,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 2. **Which side.** A directory with `ARCHITECTURE.md` is the **architecture** repository. One with `.architecture.json`, or a code repository the user names as a service, is a **service** repository. When a request covers both ("connect the service to the architecture"), do the architecture first. If it is unclear, ask.
 3. **Check.** Run it read-only and show its output verbatim:
    - architecture: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js architecture <root> [--runner <labels>]`
-   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--merge --tests "<name>"] [--agent <login>] [--runs-on self-hosted,<label>]`
+   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--runs-on self-hosted,<label>]`
 
    A service is always checked with `--architecture`: the pair is configured on both sides in one run.
 
@@ -41,7 +41,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
    - **Runner** (architecture): can a GitHub-hosted runner reach the MCP server? If it is on localhost or a private network, the index jobs run on a self-hosted runner: `--runner self-hosted,<label>`.
    - **RUN team** (architecture, only when the user wants Tier 0): `support.js <root> --declare run`. Then ask which kinds the repository may key for a trusted build agent, a multi-select of the four or none: `support.js <root> --declare-auto <kinds>|none`. Both write `.sa-skills/project.json`, which is a reviewed change like any other.
    - **Service binding**: the project key (the architecture's `SA_INDEX_PROJECT_KEY`), the component (its slug: `get_architecture` on the server, or `component-cli.ts list` in the architecture), and the server URL.
-   - **Who builds it**: a person in an IDE (`--attended`), or an unattended build (the default). If unattended, ask:
+   - **Who builds it**: a person in an IDE (`--attended`), or an unattended build (the default). If attended, ask whether a reviewer holds the team's pull requests to the pack (`--review`). That adds `architecture-review.yml`: code checks plus Claude's review against the pack, a required status check on the default branch, enforced for admins too. A departure merges only when the pull request cites an open `[ESC-…]` issue covering it. Ask where it runs (`--runs-on`) when the server is on localhost or a private network. If unattended, ask:
      - whether its pull requests may merge without a person (`--merge`, the service team's policy), and which workflow runs the tests (`--tests`, its `name:`). `--merge` is full auto: the report then requires the architecture's `SA_HANDOFF_AUTOMERGE` and the agent in its `SA_TIER0_TRUSTED_AGENTS`, the architecture team's two settings, so say so in the question;
      - the build agent's login (`--agent`): the identity of `SA_BUILD_TOKEN`, a machine user or a GitHub App's `name[bot]`;
      - where the build runs, when the server is on localhost or a private network (`--runs-on self-hosted,<label>`). The report checks that a runner with those labels is registered and online on the service repository.
@@ -64,6 +64,7 @@ How a release finds the service: the handoff names no service. `architecture-ind
 
 | Architecture repository | Service repository |
 |---|---|
+| — | `architecture-review.yml` (attended, `--review`) holds every pull request to the pack: `review-check.js` checks the contract copies, the commits and the binding, Claude judges the diff against BUILD.md's rules, and code decides; an open `[ESC-…]` issue the pull request cites is the only way past a departure |
 | `architecture-handoff.yml` regenerates the kit after a release and, with `SA_HANDOFF_AUTOMERGE=true`, merges it once its gates pass and dispatches the index | — |
 | `architecture-index.yml` publishes a release's build packs and dispatches `architecture-released` to `SA_SERVICE_REPOS` (`SA_DISPATCH_TOKEN`) | `architecture-build.yml` builds from the pack, unattended, and opens a pull request (`SA_BUILD_TOKEN`) |
 | `architecture-tier0.yml` keys the build's request for a kind in `tier0.auto`, and a move to `Resolved` waits for the pull request it cites | `architecture-build-merge.yml` merges the build's pull request once the tests pass (opt in) |

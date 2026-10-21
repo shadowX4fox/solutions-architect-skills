@@ -17,13 +17,17 @@ const git = (root: string, ...a: string[]) => spawnSync("git", ["-C", root, ...a
 const repo = (root: string, slug: string) => { mkdirSync(root, { recursive: true }); git(root, "init", "-q", "-b", "main"); git(root, "remote", "add", "origin", `https://github.com/acme/${slug}.git`); };
 
 // gh as GitHub answers it: per repository its variables, secrets and labels; the workflow permission
-type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[] };
+type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[]; protection?: any };
 const calls: string[][] = [];
 const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
   calls.push(args);
   const ok = (v: any) => ({ status: 0, stdout: JSON.stringify(v), stderr: "" });
   const r = repos[args[args.indexOf("-R") + 1]] || {};
   if (args[0] === "variable" && args[1] === "set") { (r.vars ||= {})[args[2]] = args[args.indexOf("--body") + 1]; return ok(null); }
+  if (args[0] === "api" && /^repos\/[^/]+\/[^/]+$/.test(args[1])) return ok({ default_branch: "main" });
+  if (args[0] === "api" && /branches\/main\/protection/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")] || {};
+    if (args.includes("-X")) return ok(null);
+    return x.protection ? ok(x.protection) : { status: 1, stdout: "", stderr: "gh: Branch not protected (HTTP 404)" }; }
   if (args[0] === "api" && /actions\/runners$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
     return x && x.runners ? ok({ runners: x.runners.map((n) => ({ ...n, labels: n.labels.map((name) => ({ name })) })) }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "variable") return ok(Object.entries(r.vars || {}).map(([name, value]) => ({ name, value })));
@@ -156,6 +160,36 @@ describe("ci-setup.js service", () => {
     r = C.service(SVC, { gh, ...opts });
     s = states(r);
     for (const k of ["variable SA_BUILD_AGENT = hub-builder", "acme/order-desk SA_SERVICE_REPOS lists acme/hub-api", "acme/order-desk SA_TIER0_TRUSTED_AGENTS trusts hub-builder", "acme/order-desk SA_HANDOFF_AUTOMERGE = true"]) expect(s[k]).toBe("✓");
+  });
+
+  test("attended with --review: the review workflow pinned, its variables, and the required check on the default branch", () => {
+    const svc: Repo = { secrets: ["CLAUDE_CODE_OAUTH_TOKEN"], runners: [{ name: "box-2", status: "online", labels: ["self-hosted", "idx"] }] };
+    const gh = fakeGh({ "acme/hub-api": svc, "acme/order-desk": {} });
+    const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", attended: true, review: true, version: "9.9.9", write: true };
+    let r = C.service(SVC, { gh, ...opts });
+    const yml = readFileSync(join(SVC, ".github/workflows/architecture-review.yml"), "utf8");
+    expect(yml).toContain("SA_PLUGIN_REF: v9.9.9");
+    expect(existsSync(join(SVC, ".github/workflows/architecture-build.yml"))).toBe(false);   // attended: no build
+    expect(JSON.parse(readFileSync(join(SVC, ".architecture.json"), "utf8")).supervision).toBeUndefined();
+    let s = states(r);
+    expect(s["variable SA_REVIEW_RUNS_ON"]).toBe("✗");
+    expect(s["variable SA_ARCHITECTURE_REPO"]).toBe("✗");
+    const prot = (x: any) => r.rows.find((y: any) => y.item.startsWith("branch protection"));
+    expect(prot(r)).toMatchObject({ state: "✗", item: expect.stringContaining("not required (the branch is not protected)") });
+    expect(r.rows.some((x: any) => /SA_SERVICE_REPOS|SA_BUILD_TOKEN|SA_HANDOFF_AUTOMERGE/.test(x.item))).toBe(false);  // the unattended pair's, not this
+    calls.length = 0;
+    r = C.service(SVC, { gh, ...opts, runsOn: "self-hosted,idx", settings: true });
+    expect(calls.some((c) => c.join(" ") === "api -X PUT repos/acme/hub-api/branches/main/protection -F required_status_checks[strict]=false -F required_status_checks[contexts][]=Architecture review -F enforce_admins=true -F required_pull_request_reviews=null -F restrictions=null")).toBe(true);
+    expect(calls.filter((c) => c[0] === "variable" && c[1] === "set").map((c) => `${c[2]}=${c[6]}`)).toEqual(expect.arrayContaining(['SA_REVIEW_RUNS_ON=["self-hosted","idx"]', "SA_ARCHITECTURE_REPO=acme/order-desk"]));
+    s = states(r);
+    expect(s["runner [self-hosted, idx]"]).toBe("✓");
+    // a protection that already requires checks: the review is added to them, nothing else touched
+    svc.protection = { required_status_checks: { contexts: ["Tests"], checks: [{ context: "Tests" }] } };
+    calls.length = 0;
+    C.service(SVC, { gh, ...opts, settings: true });
+    expect(calls.filter((c) => c.includes("-X")).map((c) => c.join(" "))).toEqual(["api -X POST repos/acme/hub-api/branches/main/protection/required_status_checks/contexts -f contexts[]=Architecture review"]);
+    svc.protection = { required_status_checks: { contexts: ["Tests", "Architecture review"] } };
+    expect(C.service(SVC, { gh, ...opts }).rows.find((y: any) => y.item.startsWith("branch protection"))).toMatchObject({ state: "✓", item: 'branch protection — "Architecture review" required on main' });
   });
 
   test("a self-hosted runner that is not registered, or offline, is a required row", () => {

@@ -280,6 +280,26 @@ still state but the kit dropped or moved. It then dispatches `architecture-index
 `sa-delivery:architecture-ci-setup` sets up both sides. Escalations never go this way: a crossed trigger is always an
 architect's.
 
+### The attended service's reviewer (10.16.0)
+
+An attended service is built by people in an IDE. `architecture-review.yml` holds each of their pull requests to the
+pack, whoever wrote the code. "Architecture review" is a required status check of the default branch, enforced for
+admins too. It has three steps:
+
+| Step | Who | What |
+|---|---|---|
+| Code | `review-check.js` | The copies under `architecture/` are the pack's bytes, contracts are committed alone, commits name the version and `pack_revision`, and the binding isn't behind. New `TODO(architecture)` lines are listed |
+| Judgement | Claude, through the MCP server | The diff is checked against BUILD.md's rules (contracts, names, gaps, security, standards and ADRs, budgets). Every finding cites the pack part |
+| Verdict | `review-check.js` | A blocking finding stands unless it cites a pack part that doesn't exist, which makes it a warning. A missing review fails closed |
+
+A departure gets through only one way. The IDE files an escalation (`preview_escalation`), and the pull request
+cites that `[ESC-…]` issue as `owner/repo#N`. The architect answers it, and the next release settles it. Code findings
+are never cleared this way: the contract copies belong to the architecture. Claude reads only the checkout and runs
+no shell. A pull request from a fork fails the check.
+
+`ci-setup.js service <dir> --attended --review --architecture <owner/repo> [--runs-on self-hosted,<label>] --write --settings`
+sets it up: the workflow, `SA_ARCHITECTURE_REPO`, `SA_REVIEW_RUNS_ON`, the runner check, and the required check.
+
 ## Setting up the repository
 
 | What | Where |
