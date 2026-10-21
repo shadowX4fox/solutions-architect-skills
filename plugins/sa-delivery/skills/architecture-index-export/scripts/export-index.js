@@ -263,11 +263,13 @@ function escalationRule(project, mode) {
 }
 // unattended, the key is never the build's: a person applies it — or, for a kind in tier0.auto, the architecture repository
 // itself when this build's identity is one of its trusted agents (10.13.0; 10.12.0 had the build apply it, against the
-// server's own instruction)
+// server's own instruction). The issue is filed as file_with gives it: Alia 0.5.0 files an auto kind with the label, and
+// the architecture repository holds that label to its trusted agents and tier0.auto (10.13.1) — the rule never overrides
+// the server's steps
 function unattendedKey(auto) {
-  const base = 'Unattended, pass `supervision: "unattended"`: the issue carries no `architecture-tier0` label — file it with this build\'s own identity (drop that label from `file_with.steps` if the server still lists it), call `record_tier0`, and list it in your pull request; ';
-  if (!auto.length) return base + 'a person applies the label, and that is the approval. Never apply `architecture-tier0` yourself.';
-  return base + 'never apply `architecture-tier0` yourself. A kind in `support.tier0_auto` — on this architecture ' + auto.map((k) => '`' + k + '`').join(', ') + ' — the architecture repository keys itself when this build\'s identity is one of its trusted agents; any other kind waits for a person. A move to `Resolved` cites, beside the file and line, the pull request that carries the change as `owner/repo#N`: file it with that pull request, and the architecture repository writes it once the pull request is merged.';
+  const base = 'Unattended, pass `supervision: "unattended"` and file the issue with this build\'s own identity exactly as `file_with` gives it — its labels included, never one added or dropped — then call `record_tier0` and list it in your pull request; ';
+  if (!auto.length) return base + 'it carries no `architecture-tier0`: a person applies the label, and that is the approval. Never apply `architecture-tier0` yourself.';
+  return base + 'never apply `architecture-tier0` yourself. A kind in `support.tier0_auto` — on this architecture ' + auto.map((k) => '`' + k + '`').join(', ') + ' — the architecture repository keys itself when this build\'s identity is one of its trusted agents, whether `file_with` carries the label or not; any other kind waits for a person. A move to `Resolved` cites, beside the file and line, the pull request that carries the change as `owner/repo#N`: file it with that pull request, and the architecture repository writes it once the pull request is merged.';
 }
 function tier0Rule(project, mode, auto = []) {
   if (mode !== 'run') return '';

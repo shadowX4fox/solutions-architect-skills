@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.13.1]
+
+### Fixed
+- **A trusted agent's Tier 0 request filed with its label is keyed only for a kind in `tier0.auto`.** Alia 0.5.0's `preview_tier0` files an auto kind with `architecture-tier0`, so `architecture-tier0.yml` keys it on the `labeled` run. That run now holds the kind to `tier0.auto`, as the `opened` run does. A kind not listed is refused on the issue and the label taken off, for a person to key, instead of reaching `prepare --auto` and `tier0-refused`.
+- **`BUILD.md` rule 10 no longer contradicts the server.** Unattended, the build files the issue exactly as `file_with` gives it, labels included. 10.13.0 told it to drop `architecture-tier0` when the server listed it, which is the server's own instruction against the pack, the clash that broke 10.12.0.
+
+### Changed
+- **The local server pins Alia 0.5.0** (`SA_INDEX_SERVER_TAG`, closes #15).
+
 ## [10.13.0]
 
 ### Added

@@ -249,11 +249,21 @@ exit 0
     expect(run({ event: "workflow_dispatch", sender: "maintainer", labels: ["tier0:tdr-status"] }).code).toBe(1);
   });
 
-  test("labeled by a trusted agent on its own request (10.12.0's rule): keyed; on another's: refused", () => {
-    expect(run({ sender: "build-bot-user", trusted: "build-bot-user" }).out).toBe("go=true\nauto=true\nkeyed=build-bot-user\n");
+  test("labeled by a trusted agent on its own request — filed with the label, as Alia 0.5.0 renders an auto kind: keyed; on another's: refused", () => {
+    expect(run({ sender: "build-bot-user", trusted: "build-bot-user", auto: ["tdr-status"] }).out).toBe("go=true\nauto=true\nkeyed=build-bot-user\n");
     const other = run({ sender: "build-bot-user", trusted: "build-bot-user", author: "stranger" });
     expect(other.code).toBe(1);
     expect(other.comment).toContain("keys the requests it filed, and #7 was filed by `stranger`");
+  });
+
+  test("labeled by a trusted agent, its kind not in tier0.auto: refused on the issue, the label off — a person keys it (10.13.1)", () => {
+    for (const auto of [undefined, ["doc-fix"]]) {
+      const r = run({ sender: "build-bot-user", trusted: "build-bot-user", auto });
+      expect(r.code).toBe(1);
+      expect(r.comment).toContain("`tdr-status` is not in this architecture's `tier0.auto`");
+      expect(r.calls).toContain("issue edit 7 -R acme/order-desk --remove-label architecture-tier0");
+      expect(r.calls).not.toContain("tier0-auto");
+    }
   });
 });
 
