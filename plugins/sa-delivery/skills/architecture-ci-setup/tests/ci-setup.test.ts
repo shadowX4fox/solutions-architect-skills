@@ -25,8 +25,8 @@ const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
   const r = repos[args[args.indexOf("-R") + 1]] || {};
   if (args[0] === "variable" && args[1] === "set") { (r.vars ||= {})[args[2]] = args[args.indexOf("--body") + 1]; return ok(null); }
   if (args[0] === "api" && /^repos\/[^/]+\/[^/]+$/.test(args[1])) return ok({ default_branch: "main" });
+  if (args[0] === "api" && args.includes("-X") && args.some((x) => /branches\/main\/protection/.test(x))) return ok(null);
   if (args[0] === "api" && /branches\/main\/protection/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")] || {};
-    if (args.includes("-X")) return ok(null);
     return x.protection ? ok(x.protection) : { status: 1, stdout: "", stderr: "gh: Branch not protected (HTTP 404)" }; }
   if (args[0] === "api" && /actions\/runners$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
     return x && x.runners ? ok({ runners: x.runners.map((n) => ({ ...n, labels: n.labels.map((name) => ({ name })) })) }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
@@ -183,6 +183,7 @@ describe("ci-setup.js service", () => {
     expect(calls.filter((c) => c[0] === "variable" && c[1] === "set").map((c) => `${c[2]}=${c[6]}`)).toEqual(expect.arrayContaining(['SA_REVIEW_RUNS_ON=["self-hosted","idx"]', "SA_ARCHITECTURE_REPO=acme/order-desk"]));
     s = states(r);
     expect(s["runner [self-hosted, idx]"]).toBe("✓");
+    expect(r.rows.find((y: any) => y.item.startsWith("branch protection")).item).toBe('branch protection — "Architecture review" required, enforced for admins on main — set');
     // a protection that already requires checks: the review is added to them, nothing else touched
     svc.protection = { required_status_checks: { contexts: ["Tests"], checks: [{ context: "Tests" }] } };
     calls.length = 0;

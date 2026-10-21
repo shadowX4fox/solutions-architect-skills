@@ -16,7 +16,8 @@
 //   commit-unstamped  WARNING   a commit names neither the version nor the pack_revision       (rule 8)
 //   binding-behind    WARNING   a newer version is released than the one bound
 //   pack-revised      WARNING   the bound version's pack has another revision than the one recorded
-//   todo-added        NOTE      a TODO(architecture) the pull request adds — a question for the architect (rule 3)
+//   todo-added        NOTE      a TODO(architecture) the pull request adds to code or configuration — a question for the
+//                               architect (rule 3); a document that mentions the convention is not one
 // The judgement half — Claude's review (architecture-review.yml) — writes --findings:
 //   { "reviewed": true, "findings": [ { "rule": 1-10, "severity": "blocking"|"warning", "file", "line", "part", "part_line",
 //     "finding", "escalation": "owner/repo#N" | null } ] }
@@ -125,7 +126,8 @@ async function check(dir, opts = {}) {
       let file = '';
       for (const l of diff.split('\n')) {
         if (l.startsWith('+++ b/')) file = l.slice(6);
-        else if (l.startsWith('+') && !l.startsWith('+++') && !file.startsWith('.github/') && /TODO\(architecture\)/.test(l)) add('note', 'todo-added', l.slice(1).trim().slice(0, 160), file);
+        // a marker in code or configuration; a document that mentions the convention (.md) is prose, and CI is not the service
+        else if (l.startsWith('+') && !l.startsWith('+++') && !file.startsWith('.github/') && !/\.(md|mdx|rst|txt)$/i.test(file) && /TODO\(architecture\)/.test(l)) add('note', 'todo-added', l.slice(1).trim().slice(0, 160), file);
       }
     } catch (e) { /* no diff, no notes */ }
   }

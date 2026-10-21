@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.16.1]
+
+### Fixed
+- **A self-hosted runner no longer lends Claude its user's configuration.** On the Portal's runner, the review's Claude session loaded the runner user's `~/.claude`: their plugins (hooks included), MCP servers and settings. claude-code-action also wrote `enableAllProjectMcpServers: true` into that user's own `settings.json`. The Claude steps of `ci/service/architecture-review.yml` and `architecture-build.yml` now run with a `HOME` and `CLAUDE_CONFIG_DIR` of their own under `$RUNNER_TEMP`, cleared with the job. Authentication is unchanged (`CLAUDE_CODE_OAUTH_TOKEN`, from the environment). The same cause replaced the runner user's Bun. claude-code-action installs Bun 1.3.14 with `setup-bun`, which writes to `$HOME/.bun`, and it did so twice over a 1.4.2 install. The action's Bun now goes into its own home. The review's own `setup-bun` gets another home, and the verdict calls that Bun by its path (`steps.bun.outputs.bun-path`).
+- **`review-check.js`:** a `TODO(architecture)` in a document (`.md`, `.mdx`, `.rst`, `.txt`) is prose that mentions the convention, not a question in code. It is no longer listed as `todo-added`.
+- **`ci-setup.js`:** a branch protection applied by `--settings` reads as what it now is ("required, enforced for admins — set"), not as the gap it closed.
+
+### Upgrade
+- **A self-hosted runner that ran an earlier review or build:** check the runner user's `~/.claude/settings.json` for `enableAllProjectMcpServers` the action added, and remove it unless that person set it. Check `bun --version` too, and reinstall the version that person uses if the action's 1.3.14 replaced it.
+- **The service repositories:** move to the new templates with `ci-setup.js service … --write --replace architecture-review.yml` (or `architecture-build.yml`). Each has a step of its own, so it is replaced, not re-pinned.
+
 ## [10.16.0]
 
 ### Added

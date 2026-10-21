@@ -297,6 +297,13 @@ cites that `[ESC-…]` issue as `owner/repo#N`. The architect answers it, and th
 are never cleared this way: the contract copies belong to the architecture. Claude reads only the checkout and runs
 no shell. A pull request from a fork fails the check.
 
+**A self-hosted runner is someone's machine** (10.16.1). The runner user's `~/.claude` is a person's configuration: their
+plugins, MCP servers, settings and hooks. claude-code-action also writes its own settings there. So the Claude steps of
+`architecture-review.yml` and `architecture-build.yml` get their own `HOME` and `CLAUDE_CONFIG_DIR` under
+`$RUNNER_TEMP`, which is cleared with the job. The action still authenticates with `CLAUDE_CODE_OAUTH_TOKEN`, from the
+environment, so no API key is needed. Running the runner as a dedicated system user, `./svc.sh install <user>`, is
+still the stronger isolation.
+
 `ci-setup.js service <dir> --attended --review --architecture <owner/repo> [--runs-on self-hosted,<label>] --write --settings`
 sets it up: the workflow, `SA_ARCHITECTURE_REPO`, `SA_REVIEW_RUNS_ON`, the runner check, and the required check.
 

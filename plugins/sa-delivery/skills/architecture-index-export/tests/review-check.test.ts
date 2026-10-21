@@ -69,7 +69,7 @@ describe("review-check.js — the code checks", () => {
 
   test("rule 8: a code commit with no stamp warns; a CI-only commit needs none and mixes with nothing", async () => {
     w(".github/workflows/ci.yml", "name: CI\n# TODO(architecture): not a code marker\n"); commit("ci: add CI");
-    w("src/app.ts", "// TODO(architecture): retry budget not documented (spec)\nexport {}\n"); commit("feat: retry");
+    w("src/app.ts", "// TODO(architecture): retry budget not documented (spec)\nexport {}\n"); w("README.md", "Each open question stays a `TODO(architecture)`.\n"); commit("feat: retry");
     const r = await run();
     const unstamped = r.findings.filter((f: any) => f.code === "commit-unstamped");
     expect(unstamped.length).toBe(1);
@@ -150,5 +150,19 @@ describe("architecture-review.yml — the template", () => {
     expect(yml).toContain("name: Architecture review");
     expect(yml).toMatch(/review-check\.js" \. --base "\$BASE"/);
     expect(yml).toContain("exit $verdict");
+  });
+
+  test("on a self-hosted runner, Claude never loads the runner user's ~/.claude: its step has a home of its own (10.16.1)", () => {
+    for (const f of ["architecture-review.yml", "architecture-build.yml"]) {
+      const t = readFileSync(join(__dirname, "..", "ci", "service", f), "utf8");
+      const step = t.slice(t.indexOf("uses: anthropics/claude-code-action@v1"), t.indexOf("with:", t.indexOf("uses: anthropics/claude-code-action@v1")));
+      expect(step).toContain("HOME: ${{ runner.temp }}/claude-home");
+      expect(step).toContain("CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home/.claude");
+      expect(t).toContain('mkdir -p');
+      expect(t.indexOf('"$RUNNER_TEMP/claude-home/.claude"')).toBeLessThan(t.indexOf("uses: anthropics/claude-code-action@v1"));
+    }
+    // the review's own Bun: installed in a home of its own, called by its path — the action installs Bun 1.3.14 into $HOME/.bun
+    expect(yml).toMatch(/uses: oven-sh\/setup-bun@v2\n\s+id: bun\n\s+env:\n\s+HOME: \$\{\{ runner\.temp \}\}\/bun-home/);
+    expect(yml).toContain('"${{ steps.bun.outputs.bun-path }}" "$RUNNER_TEMP/sa/plugins/sa-delivery/skills/architecture-index-export/scripts/review-check.js"');
   });
 });

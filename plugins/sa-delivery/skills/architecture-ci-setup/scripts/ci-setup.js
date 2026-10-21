@@ -58,9 +58,9 @@ function applySettings(gh, rows) {
   for (const x of rows) {
     if (x.state !== '✗' || !x.apply) continue;
     const r = gh(x.apply);
-    if (r.status === 0) { x.state = '✓'; x.item += ' — set'; delete x.fix; }
+    if (r.status === 0) { x.state = '✓'; x.item = `${x.done || x.item} — set`; delete x.fix; }
     else { x.state = '!'; x.item += ` — not set (${(r.stderr || '').trim().split('\n')[0] || 'gh failed'})`; }
-    delete x.apply;
+    delete x.apply; delete x.done;
   }
 }
 
@@ -157,12 +157,13 @@ function reviewProtection(gh, repo, rows) {
   if (p.error && /404|not protected/i.test(p.error)) {
     row(rows, '✗', item('not required (the branch is not protected): a failing review blocks nothing'), `gh api -X PUT ${base} -F required_status_checks[strict]=false -F 'required_status_checks[contexts][]=${REVIEW_CHECK}' -F enforce_admins=true -F required_pull_request_reviews=null -F restrictions=null`,
       ['api', '-X', 'PUT', base, '-F', 'required_status_checks[strict]=false', '-F', `required_status_checks[contexts][]=${REVIEW_CHECK}`, '-F', 'enforce_admins=true', '-F', 'required_pull_request_reviews=null', '-F', 'restrictions=null']);
+    rows[rows.length - 1].done = item('required, enforced for admins');
     return;
   }
   if (p.error) { row(rows, '!', `branch protection — not readable (${p.error})`, 'gh auth login with admin on the repository'); return; }
   const rsc = p.value && p.value.required_status_checks, ctx = rsc ? [...(rsc.contexts || []), ...((rsc.checks || []).map((c) => c.context))] : [];
   if (ctx.includes(REVIEW_CHECK)) { row(rows, '✓', item('required')); return; }
-  if (rsc) row(rows, '✗', item('not among the required checks'), `gh api -X POST ${base}/required_status_checks/contexts -f 'contexts[]=${REVIEW_CHECK}'`, ['api', '-X', 'POST', `${base}/required_status_checks/contexts`, '-f', `contexts[]=${REVIEW_CHECK}`]);
+  if (rsc) { row(rows, '✗', item('not among the required checks'), `gh api -X POST ${base}/required_status_checks/contexts -f 'contexts[]=${REVIEW_CHECK}'`, ['api', '-X', 'POST', `${base}/required_status_checks/contexts`, '-f', `contexts[]=${REVIEW_CHECK}`]); rows[rows.length - 1].done = item('required'); }
   else row(rows, '!', item('not required: the branch is protected without status checks — add it to that protection (Settings → Branches)'));
 }
 
