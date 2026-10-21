@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.13.2]
+
+### Changed
+- **The local server pins Alia 0.5.1** (`SA_INDEX_SERVER_TAG`, closes #16). Its `preview_tier0` matches `tier0.js` byte for byte (checked on a live preview):
+  - An unattended request carries `tier0:<kind>` only, even for a kind in `tier0.auto`, so the architecture repository keys it on `opened`.
+  - A `Resolved` move may cite its pull request (`owner/repo#N`) or a commit, and the agent is told to file it now.
+  - The footer is 10.13's.
+
+  The `labeled` run 10.13.1 added for a request filed with its label stays, for a 0.5.0 server.
+
 ## [10.13.1]
 
 ### Fixed

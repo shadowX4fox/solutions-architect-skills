@@ -22,7 +22,7 @@ name: sa-architecture-index
 
 services:
   server:
-    image: ghcr.io/shadowx4fox/alia-mcp-server:${SA_INDEX_SERVER_TAG:-0.5.0}
+    image: ghcr.io/shadowx4fox/alia-mcp-server:${SA_INDEX_SERVER_TAG:-0.5.1}
     ports:
       - "${SA_INDEX_PORT:-8080}:8080"
     environment:
