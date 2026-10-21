@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.17.1]
+
+### Changed
+- **The local server pins Alia 0.5.2** (`SA_INDEX_SERVER_TAG`, closes #17). Step 4 of `file_with.steps` now names the arguments of `record_escalation` and `record_tier0`: `project`, `preview_id` and `url`. Before, an agent following it passed `file_with`'s `issue_url` and was refused (server #34).
+
 ## [10.17.0]
 
 ### Added
