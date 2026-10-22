@@ -155,6 +155,7 @@ async function check(dir, opts = {}) {
   const parts = new Set(((pack && pack.parts) || []).map((p) => p.id));
   const J = opts.findings === undefined ? null : opts.findings;
   let escalations = new Set();
+  const rejected = new Set();   // escalations the architect refused that a still-blocking finding cites (10.19.2)
   if (!J || J.reviewed !== true || !Array.isArray(J.findings)) add('blocking', 'review-missing', L('the architecture review (Claude, against the pack) wrote no findings — the check fails closed; re-run it', 'la revisión de arquitectura (Claude, contra el pack) no escribió hallazgos: el control falla cerrado; vuelva a ejecutarla'));
   else {
     const cache = new Map(), esc = (ref) => { if (!cache.has(ref)) cache.set(ref, escalationOf(gh, ref, lang)); return cache.get(ref); };
@@ -170,14 +171,15 @@ async function check(dir, opts = {}) {
       const cover = own.find((e) => e.ok);
       if (cover) escalations.add(cover.ref);
       if (cover) add('warning', 'review-escalated', `${text} — ${L(`covered by ${cover.ref} (${cover.title}): the architect answers it`, `cubierto por ${cover.ref} (${cover.title}): lo responde el arquitecto`)}`, where);
-      else add('blocking', 'review', `${text}${own.length ? ` — ${own.map((e) => `${e.ref} ${e.why}`).join('; ')}` : ''}`, where);
+      else own.filter((e) => e.rejected).forEach((e) => rejected.add(e.ref));
+      if (!cover) add('blocking', 'review', `${text}${own.length ? ` — ${own.map((e) => `${e.ref} ${e.why}`).join('; ')}` : ''}`, where);
     }
   }
   const blocking = findings.filter((f) => f.severity === 'blocking').length, order = { blocking: 0, warning: 1, note: 2 };
   findings.sort((x, y) => order[x.severity] - order[y.severity]);
   let head = opts.head || null;
   if (!head) try { head = git(dir, 'rev-parse', 'HEAD').trim(); } catch (e) { head = null; }
-  return { status: blocking ? 'FAIL' : escalations.size ? 'HELD' : 'PASS', lang, head, run: opts.runUrl || process.env.RUN_URL || null, escalations: [...escalations], binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
+  return { status: blocking ? 'FAIL' : escalations.size ? 'HELD' : 'PASS', lang, head, run: opts.runUrl || process.env.RUN_URL || null, escalations: [...escalations], rejected: [...rejected], binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
 }
 
 function counts(r) {
@@ -200,7 +202,9 @@ function render(r) {
     r.status === 'HELD' ? L(`Nothing blocks, but the departures above stand on ${r.escalations.map((x) => `\`${x}\``).join(', ')}: the pull request waits for the architect's answer, and the status stays pending until then. When the escalation closes, the review fails; rebuild on the release that answered it, or fix the code.`,
       `Nada bloquea, pero las desviaciones de arriba se apoyan en ${r.escalations.map((x) => `\`${x}\``).join(', ')}: el pull request espera la respuesta del arquitecto y el estado queda pendiente hasta entonces. Cuando la escalación se cierre, la revisión falla; reconstruya sobre la release que la respondió o corrija el código.`) : '',
     r.status === 'HELD' ? `${ESCALATIONS}${JSON.stringify({ head: r.head, refs: r.escalations, run: r.run })} -->` : '',
-    r.status !== 'FAIL' ? '' : L('A blocking finding is cleared by fixing the code, or — a real departure from the architecture — by an open `[ESC-…]` issue in the architecture repository, filed from the IDE with `preview_escalation` and cited in this pull request. A contract copy under `architecture/` is never edited here.',
+    // the architect refused a departure: the way out is the code, never the same question asked again
+    r.status !== 'FAIL' ? '' : r.rejected && r.rejected.length ? L(`The architect rejected ${r.rejected.map((x) => `\`${x}\``).join(', ')}: the departure is not accepted. The findings that cite it are cleared only by code that keeps the architecture — not by a new escalation of the same question. A contract copy under \`architecture/\` is never edited here.`,
+      `El arquitecto rechazó ${r.rejected.map((x) => `\`${x}\``).join(', ')}: la desviación no se acepta. Los hallazgos que la citan solo se resuelven con código que respete la arquitectura, no con una nueva escalación de la misma pregunta. Una copia de contrato bajo \`architecture/\` nunca se edita aquí.`) : L('A blocking finding is cleared by fixing the code, or — a real departure from the architecture — by an open `[ESC-…]` issue in the architecture repository, filed from the IDE with `preview_escalation` and cited in this pull request. A contract copy under `architecture/` is never edited here.',
       'Un hallazgo bloqueante se resuelve corrigiendo el código o —si es una desviación real de la arquitectura— con un issue `[ESC-…]` abierto en el repositorio de la arquitectura, presentado desde el IDE con `preview_escalation` y citado en este pull request. Una copia de contrato bajo `architecture/` nunca se edita aquí.')].join('\n');
 }
 

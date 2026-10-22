@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.2]
+
+### Fixed
+- **A rejected escalation no longer invites another one.** A FAIL comment's footer always said a departure could be cleared by citing an open `[ESC-…]` issue. When a blocking finding cites an escalation the architect rejected (closed as not planned), the footer now says the departure is not accepted. Those findings are cleared only by code that keeps the architecture, not by a new escalation of the same question. A FAIL with no rejection keeps the usual footer. The review result carries the rejected escalations as `rejected`.
+
 ## [10.19.1]
 
 ### Fixed

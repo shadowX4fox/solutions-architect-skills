@@ -214,6 +214,18 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     delete issues["acme/order-desk#11"];
   });
 
+  test("a finding that cites a rejected escalation: the footer says fix the code, never escalate again (10.19.2)", async () => {
+    issues["acme/order-desk#13"] = { title: "[ESC-007] refused", state: "closed", state_reason: "not_planned" };
+    const r = await run({ findings: { ...f, findings: [{ ...f.findings[0], escalation: "acme/order-desk#13" }] }, body: "acme/order-desk#13", lang: "es" });
+    expect(r).toMatchObject({ status: "FAIL", rejected: ["acme/order-desk#13"] });
+    const md = R.render(r);
+    expect(md).toContain("El arquitecto rechazó `acme/order-desk#13`: la desviación no se acepta.");
+    expect(md).not.toContain("preview_escalation");
+    // a FAIL with no rejection keeps the way through an escalation
+    expect(R.render(await run({ findings: f, body: "nothing" }))).toContain("preview_escalation");
+    delete issues["acme/order-desk#13"];
+  });
+
   test("closed as not planned is a rejection: the code is the way out, said once, no colon chain (10.19.1)", async () => {
     issues["acme/order-desk#12"] = { title: "[ESC-006] refused", state: "closed", state_reason: "not_planned" };
     const at = R.render({ status: "HELD", lang: "es", head: "h1", run: null, escalations: ["acme/order-desk#12"], binding: {}, findings: [] });
