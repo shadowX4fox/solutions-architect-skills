@@ -53,7 +53,8 @@ describe('the record', () => {
     const c = E.close(p, 'ESC-001', { by: 'ADR-131', today: '2026-10-20' });
     expect(c.meta).toMatchObject({ status: 'Resolved', resolution: 'ADR-131', closed: '2026-10-20' });
     expect(readFileSync(join(p, c.file), 'utf8')).toContain('## Resolution\n\n- Resolved 2026-10-20 by ADR-131.\n');
-    E.close(p, 'ESC-002', { rejected: 'not an architecture change', today: '2026-10-21' });
+    const rj = E.close(p, 'ESC-002', { rejected: 'not an architecture change. ', today: '2026-10-21' });
+    expect(readFileSync(join(p, rj.file), 'utf8')).toContain('- Rejected 2026-10-21: not an architecture change.\n');   // one period
     expect(E.open(p)).toHaveLength(0);
     expect(E.closedSince(p, '2026-10-20').map((r: any) => r.meta.id)).toEqual(['ESC-002']);
     expect(E.closedSince(p, null)).toHaveLength(2);

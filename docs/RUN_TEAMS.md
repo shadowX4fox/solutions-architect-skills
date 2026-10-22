@@ -309,7 +309,9 @@ every repository in `SA_SERVICE_REPOS` (with `SA_DISPATCH_TOKEN`). The `recheck`
 answers it, and also runs every hour as a fallback. It runs no model and checks out nothing. The review comment of a
 held pull request records the escalations it waits on and the head commit it reviewed. For each open pull
 request still at that head, `review-check.js --recheck` asks GitHub for those escalations' state. If one no longer
-covers the departure, the status "Architecture review" fails and the comment says why. A push, an edit of the body or
+covers the departure, the status "Architecture review" fails and the comment says why. An escalation closed as not
+planned is read as the architect's rejection (10.19.1): the status says to fix the code, since no release will answer it.
+`escalate.js close … --rejected` says to close the issue that way. A push, an edit of the body or
 a re-run of the review then decides again.
 
 **A pull request never runs its own review** (10.16.2). The review runs on `pull_request_target`, so the file that runs

@@ -164,7 +164,7 @@ function close(root, id, opts = {}) {
   const by = String(opts.by || '').trim();
   if (opts.rejected == null && !/^(ADR-\d{3}|TDR-\d{3}|architecture-v\d+\.\d+\.\d+)$/.test(by)) throw new Error('--by must name what resolved it: ADR-NNN, TDR-NNN or architecture-vX.Y.Z');
   const date = opts.today || today();
-  if (opts.rejected != null) return update(root, id, { status: 'Rejected', resolution: by, closed: date }, `Rejected ${date}${by ? ` (${by})` : ''}: ${opts.rejected || 'no reason given'}.`);
+  if (opts.rejected != null) return update(root, id, { status: 'Rejected', resolution: by, closed: date }, `Rejected ${date}${by ? ` (${by})` : ''}: ${String(opts.rejected || 'no reason given').trim().replace(/[.\s]+$/, '')}.`);   // one period, whatever the reason ends with
   return update(root, id, { status: 'Resolved', resolution: by, closed: date }, `Resolved ${date} by ${by}.`);
 }
 const open = (root) => records(root).filter((r) => r.meta.status === 'Open' || r.meta.status === 'In Review');
@@ -434,7 +434,7 @@ if (require.main === module) {
         if (r.created.length) console.log(`${r.created.length} created`);
         if (r.missing.length) { console.log(`${r.missing.length} missing — escalation issues are opened without them, and without architecture-tier0 nobody can apply a Tier 0 request. Create them: escalate.js labels ${root} --create`); process.exit(1); }
       } else if (cmd === 'status') { const r = setStatus(root, pos[0], pos[1]); console.log(`${r.meta.id}: ${r.meta.status}`); }
-      else if (cmd === 'close') { const r = close(root, pos[0], { by: opt('--by'), rejected: a.includes('--rejected') ? (opt('--rejected') || '') : undefined }); console.log(`${r.meta.id}: ${r.meta.status}${r.meta.resolution ? ` by ${r.meta.resolution}` : ''}${r.meta.issue ? ` — close the issue too: ${r.meta.issue}` : ''}`); }
+      else if (cmd === 'close') { const r = close(root, pos[0], { by: opt('--by'), rejected: a.includes('--rejected') ? (opt('--rejected') || '') : undefined }); console.log(`${r.meta.id}: ${r.meta.status}${r.meta.resolution ? ` by ${r.meta.resolution}` : ''}${r.meta.issue ? ` — close the issue too: ${r.meta.issue}${r.meta.status === 'Rejected' ? ' as not planned (gh issue close --reason "not planned"): the review reads that reason as the rejection' : ''}` : ''}`); }
       else if (cmd === 'list') {
         const rs = a.includes('--all') ? records(root) : open(root);
         if (a.includes('--json')) { console.log(JSON.stringify(rs.map((r) => Object.assign({ title: r.title, file: r.file }, r.meta)), null, 2)); return; }

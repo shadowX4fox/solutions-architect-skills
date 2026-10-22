@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.1]
+
+### Fixed
+- **A rejected escalation reads as a rejection.** When an `[ESC-…]` issue was closed, the recheck's status and comment said "cerrada: la release que la respondió es la que se construye" ("build the release that answered it"), even when the architect had refused the departure. An issue closed as not planned now reads "rechazada — la desviación no se acepta; corrija el código" ("rejected — fix the code"), and the comment says the architect rejected the departure. An issue closed as completed still points to the release that answered it.
+- **The recheck's commit status is one sentence.** It no longer chains two colon-joined clauses ("…: …: vuelva a ejecutar la revisión").
+- **The recheck clears the HELD paragraph.** After a recheck, the comment no longer keeps "Nada bloquea, pero…" under the `⛔ FAIL` heading.
+- **`escalate.js close --rejected` writes one period.** A reason that already ended in a period came out with two.
+- `escalate.js close --rejected` says to close the issue as not planned, the reason the review reads as the rejection.
+
 ## [10.19.0]
 
 ### Changed

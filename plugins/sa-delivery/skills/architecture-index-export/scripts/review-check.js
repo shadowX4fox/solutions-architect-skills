@@ -92,7 +92,9 @@ function escalationOf(gh, ref, lang = 'en') {
   const at = String(i.repository_url || '').split('/repos/')[1];
   if (at && at.toLowerCase() !== repo.toLowerCase()) return { ref, ok: false, why: L(`transferred to ${at}`, `transferida a ${at}`) };
   if (!/^\[ESC-/.test(i.title || '')) return { ref, ok: false, why: L('not an escalation ([ESC-…] title)', 'no es una escalación (título [ESC-…])') };
-  if (i.state !== 'open') return { ref, ok: false, why: L('closed — the release that answered it is the one to build', 'cerrada: la release que la respondió es la que se construye') };
+  // closed as not planned is the architect's no: the departure is refused, and the code is what changes (10.19.1)
+  if (i.state !== 'open' && i.state_reason === 'not_planned') return { ref, ok: false, rejected: true, why: L('rejected — the departure is not accepted; fix the code', 'rechazada — la desviación no se acepta; corrija el código') };
+  if (i.state !== 'open') return { ref, ok: false, why: L('closed — the release that answered it is the one to build', 'cerrada — la release que la respondió es la que se construye') };
   return { ref, ok: true, title: i.title, url: i.html_url };
 }
 
@@ -227,13 +229,17 @@ async function recheck(repo, opts = {}) {
     const gone = rec.refs.map(esc).filter((e) => !e.ok);
     if (!gone.length) { out.push({ pr: pr.number, state: 'covered', refs: rec.refs }); continue; }
     const what = gone.map((e) => `${e.ref} ${e.why}`).join('; ');
-    const desc = L(`${what} — re-run the review`, `${what}: vuelva a ejecutar la revisión`).slice(0, 140);
+    const desc = what.slice(0, 140);
     if (!opts.dryRun) {
       gh(['api', `repos/${repo}/statuses/${pr.head}`, '-f', 'state=failure', '-f', 'context=Architecture review', '-f', `description=${desc}`, ...(rec.run || opts.runUrl ? ['-f', `target_url=${rec.run || opts.runUrl}`] : [])]);
-      const line = `> ⛔ ${L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
-        `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
+      // a rejection leaves one way out — the code; any other loss may also be met by another open escalation or a rebuild
+      const line = `> ⛔ ${gone.every((e) => e.rejected)
+        ? L(`**The architect rejected the departure this review stood on** — ${what}. The findings it cleared block again until the code keeps the architecture.`,
+          `**El arquitecto rechazó la desviación en la que se apoyaba esta revisión** — ${what}. Los hallazgos que resolvía vuelven a bloquear hasta que el código respete la arquitectura.`)
+        : L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
+          `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
       // the record goes with it: the next sweep has nothing to re-check until a review writes one again
-      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(MARKER, `${MARKER}\n${line}\n`);
+      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(/^(?:Nothing blocks, but|Nada bloquea, pero) .*\n?/m, '').replace(MARKER, `${MARKER}\n${line}\n`);
       gh(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
     }
     out.push({ pr: pr.number, state: 'failed', refs: rec.refs, why: what });

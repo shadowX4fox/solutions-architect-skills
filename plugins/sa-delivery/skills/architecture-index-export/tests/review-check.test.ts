@@ -25,7 +25,7 @@ const packOf = (o: { version?: string; latest?: string; revision?: string; asset
     ...Object.entries(o.assets || { "openapi.yaml": OPENAPI }).map(([t, body]) => ({ id: `asset:${t}`, kind: "asset", title: t, sha256: sha(body) }))],
 });
 // gh, as GitHub answers an issue of the architecture repository
-const issues: Record<string, { title: string; state: string; repository_url?: string }> = {
+const issues: Record<string, { title: string; state: string; state_reason?: string; repository_url?: string }> = {
   "acme/order-desk#7": { title: "[ESC-003] Hub API: retry budget not documented", state: "open" },
   "acme/order-desk#8": { title: "[ESC-002] closed one", state: "closed" },
   "acme/order-desk#9": { title: "[T0-?] not an escalation", state: "open" },
@@ -202,15 +202,29 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     expect(res.map((x: any) => `${x.pr}:${x.state}`)).toEqual(["1:covered", "2:failed", "3:skipped"]);
     const status = calls.find((c) => c.includes("repos/acme/hub-api/statuses/h1"))!;
     expect(status).toEqual(expect.arrayContaining(["state=failure", "context=Architecture review", "target_url=https://ci/run/1"]));
-    expect(status.find((x) => x.startsWith("description="))).toContain("acme/order-desk#11 closed");
+    expect(status.find((x) => x.startsWith("description="))).toBe("description=acme/order-desk#11 closed — the release that answered it is the one to build");
     const patch = calls.find((c) => c.includes("repos/acme/hub-api/issues/comments/502"))!, body = patch.find((x) => x.startsWith("body="))!.slice(5);
     expect(body.startsWith(`${R.MARKER}\n> ⛔ **The escalation this review stood on no longer covers it**`)).toBe(true);
     expect(body).not.toContain(R.ESCALATIONS);
     expect(body).toContain("### Architecture review — ⛔ FAIL");
     expect(body).not.toContain("⏸");
+    expect(body).not.toContain("Nothing blocks");   // the HELD paragraph goes with the heading (10.19.1)
     expect(calls.filter((c) => c.some((x) => x.includes("/statuses/"))).length).toBe(1);   // pull request 2's only
     expect(calls.filter((c) => c.some((x) => /comments\/50[134]$/.test(x)))).toEqual([]);
     delete issues["acme/order-desk#11"];
+  });
+
+  test("closed as not planned is a rejection: the code is the way out, said once, no colon chain (10.19.1)", async () => {
+    issues["acme/order-desk#12"] = { title: "[ESC-006] refused", state: "closed", state_reason: "not_planned" };
+    const at = R.render({ status: "HELD", lang: "es", head: "h1", run: null, escalations: ["acme/order-desk#12"], binding: {}, findings: [] });
+    const calls: string[][] = [];
+    await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", comment: at }], calls), lang: "es" });
+    const desc = calls.find((c) => c.some((x) => x.includes("/statuses/")))!.find((x) => x.startsWith("description="))!;
+    expect(desc).toBe("description=acme/order-desk#12 rechazada — la desviación no se acepta; corrija el código");
+    const body = calls.find((c) => c.includes("-X"))!.find((x) => x.startsWith("body="))!;
+    expect(body).toContain("**El arquitecto rechazó la desviación en la que se apoyaba esta revisión**");
+    expect(body).not.toContain("release que la respondió");
+    delete issues["acme/order-desk#12"];
   });
 
   test("transferred, deleted or retitled away from [ESC-…]: each no longer covers; --dry-run writes nothing", async () => {
