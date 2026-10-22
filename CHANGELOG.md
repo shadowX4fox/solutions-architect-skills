@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.4]
+
+### Fixed
+
+- **Command center — a plan page larger than the stage can be moved**: in the Plan view (`4`) any drag, or ← / →, slides the page under the pointer, held to its floor, and the wheel (or + / −) zooms about the point under the cursor; a drag used to leave the plan, so the part of a wide floor outside the frame could not be reached. ↑ / ↓, PgUp / PgDn still turn the pages, and the page bar's hint names the new keys.
+
+### Upgrade
+
+- Re-render a project's command center (`render.js`, or the skill) to get the new viewer.
+
 ## [10.19.3]
 
 ### Fixed

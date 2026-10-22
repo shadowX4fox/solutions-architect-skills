@@ -513,6 +513,9 @@ Ten cues the user chose from the game's stage HUD, all in the viewer's own chrom
       floor to jump to it, and the key hint.
     - PgUp / PgDn and ↑ / ↓ turn a page, and Home / End go to the first or last floor. The layer
       buttons do the same.
+    - A page larger than the stage moves without leaving the plan: any drag (or ← / →) slides it under the
+      pointer, held to its floor, and the wheel (or + / −) zooms it about the point under the cursor.
+      Turning the page frames the next floor again.
     - Labels give the bar its room, and leaving the plan, or entering photo mode, hides it.
     - **Ports**: a path to another floor leaves the page, so a tag hangs under each block that has
       one — compact, the floors it reaches (`▲L3 ▼L6×2`); hovered or selected, whole: ▲ for a floor
