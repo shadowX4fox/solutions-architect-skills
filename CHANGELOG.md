@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.0]
+
+### Changed
+- **A cited escalation holds a pull request instead of passing it.** Until now, an open `[ESC-…]` issue that covered every blocking finding made the review a PASS. The status was `success`, so GitHub offered the merge while the architect had not answered yet. The verdict is now **HELD**: `review-check.js` exits 3, and `architecture-review.yml` posts "Architecture review" as `pending`, described as "waiting for `owner/repo#N`". Branch protection doesn't accept `pending`, so the pull request can't merge until the escalation is answered.
+- The comment's heading reads `⏸ HELD` (`⏸ EN ESPERA`) and says what the pull request waits for. A pass that rests on no escalation is `success`, as before.
+- When the escalation closes, the 10.18.0 recheck fails the status and turns the heading into `⛔ FAIL`.
+
+### Upgrade
+- **Attended service repository:** `ci-setup.js service <dir> --attended --review --write --replace architecture-review.yml`. A pull request that passed under an open escalation stays green until its review runs again; to re-run it, close and reopen the pull request, because a re-run of the old run uses the old workflow.
+
 ## [10.18.0]
 
 ### Fixed

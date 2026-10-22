@@ -26,12 +26,14 @@
 // and code decides what stands: a blocking finding must cite a part the pack carries (else it is a warning — a block the pack
 // cannot back is not a block); it is cleared only by the escalation the review ties to it, when the pull request body cites
 // that issue (owner/repo#N or its URL) and it is an open [ESC-…] issue of the architecture repository (verified with gh) —
-// then it stays as a warning naming it. No findings file, or one that is
+// then it stays as a warning naming it, and the verdict is HELD (10.19.0): nothing blocks, but the pull request waits for the
+// architect — the commit status is pending, so a required check keeps the merge closed until the escalation is answered.
+// No findings file, or one that is
 // not { reviewed: true }, is a blocking review-missing: the required check fails closed. A code finding is never cleared by
 // an escalation — the contract copies are the architecture's, whatever is being asked about them.
 // The review speaks the architecture's language (10.17.0): --lang, else SA_DOC_LANGUAGE (the service repository's variable,
 // set by ci-setup.js --settings), else English; --status-out writes the commit status's one-line description.
-// Exit 1 on a blocking finding, 0 otherwise.
+// Exit 1 on a blocking finding (FAIL), 3 when only open escalations clear the blocking findings (HELD), 0 otherwise (PASS).
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -173,7 +175,7 @@ async function check(dir, opts = {}) {
   findings.sort((x, y) => order[x.severity] - order[y.severity]);
   let head = opts.head || null;
   if (!head) try { head = git(dir, 'rev-parse', 'HEAD').trim(); } catch (e) { head = null; }
-  return { status: blocking ? 'FAIL' : 'PASS', lang, head, run: opts.runUrl || process.env.RUN_URL || null, escalations: [...escalations], binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
+  return { status: blocking ? 'FAIL' : escalations.size ? 'HELD' : 'PASS', lang, head, run: opts.runUrl || process.env.RUN_URL || null, escalations: [...escalations], binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
 }
 
 function counts(r) {
@@ -181,22 +183,27 @@ function counts(r) {
   return `${n('blocking')} ${L('blocking', 'bloqueante(s)')} · ${n('warning')} ${L('warning', 'advertencia(s)')} · ${n('note')} ${L('note', 'nota(s)')}`;
 }
 // the commit status's description — GitHub keeps 140 characters
-const statusLine = (r) => counts(r).slice(0, 140);
+const statusLine = (r) => (r.status === 'HELD'
+  ? `${say(r.lang, `waiting for ${r.escalations.join(', ')}`, `en espera de ${r.escalations.join(', ')}`)} · ${counts(r)}` : counts(r)).slice(0, 140);
+const VERDICT = { PASS: () => '✅ PASS', FAIL: () => '⛔ FAIL', HELD: (L) => L('⏸ HELD', '⏸ EN ESPERA') };
 
 function render(r) {
   const L = (en, es) => say(r.lang, en, es);
   const sev = { blocking: L('⛔ blocking', '⛔ bloqueante'), warning: L('⚠ warning', '⚠ advertencia'), note: L('ℹ note', 'ℹ nota') };
   const rows = r.findings.map((f) => `| ${sev[f.severity]} | \`${f.code}\` | ${f.where ? `\`${f.where}\`` : '—'} | ${String(f.text).replace(/\|/g, '\\|')} |`);
-  return [MARKER, `### ${L('Architecture review', 'Revisión de arquitectura')} — ${r.status === 'PASS' ? '✅ PASS' : '⛔ FAIL'}`, '',
+  return [MARKER, `### ${L('Architecture review', 'Revisión de arquitectura')} — ${VERDICT[r.status](L)}`, '',
     `${L('Held to', 'Contrastado con')} **${r.binding.component || '?'}** ${L('at architecture', 'en la arquitectura')} **${r.binding.version || '?'}** (pack_revision \`${String(r.binding.pack_revision || '?').slice(0, 12)}\`): ${counts(r)}.`, '',
     ...(rows.length ? [L('| | Check | Where | Finding |', '| | Control | Dónde | Hallazgo |'), '|---|---|---|---|', ...rows] : [L('Nothing to report: the pull request keeps the pack.', 'Nada que reportar: el pull request respeta el pack.')]), '',
     // what this PASS stands on: the escalations that cleared a finding — --recheck reads it when one of them closes (10.18.0)
-    r.status === 'PASS' && r.escalations && r.escalations.length ? `${ESCALATIONS}${JSON.stringify({ head: r.head, refs: r.escalations, run: r.run })} -->` : '',
-    r.status === 'PASS' ? '' : L('A blocking finding is cleared by fixing the code, or — a real departure from the architecture — by an open `[ESC-…]` issue in the architecture repository, filed from the IDE with `preview_escalation` and cited in this pull request. A contract copy under `architecture/` is never edited here.',
+    r.status === 'HELD' ? L(`Nothing blocks, but the departures above stand on ${r.escalations.map((x) => `\`${x}\``).join(', ')}: the pull request waits for the architect's answer, and the status stays pending until then. When the escalation closes, the review fails; rebuild on the release that answered it, or fix the code.`,
+      `Nada bloquea, pero las desviaciones de arriba se apoyan en ${r.escalations.map((x) => `\`${x}\``).join(', ')}: el pull request espera la respuesta del arquitecto y el estado queda pendiente hasta entonces. Cuando la escalación se cierre, la revisión falla; reconstruya sobre la release que la respondió o corrija el código.`) : '',
+    r.status === 'HELD' ? `${ESCALATIONS}${JSON.stringify({ head: r.head, refs: r.escalations, run: r.run })} -->` : '',
+    r.status !== 'FAIL' ? '' : L('A blocking finding is cleared by fixing the code, or — a real departure from the architecture — by an open `[ESC-…]` issue in the architecture repository, filed from the IDE with `preview_escalation` and cited in this pull request. A contract copy under `architecture/` is never edited here.',
       'Un hallazgo bloqueante se resuelve corrigiendo el código o —si es una desviación real de la arquitectura— con un issue `[ESC-…]` abierto en el repositorio de la arquitectura, presentado desde el IDE con `preview_escalation` y citado en este pull request. Una copia de contrato bajo `architecture/` nunca se edita aquí.')].join('\n');
 }
 
 // ---- the re-check: a PASS an escalation cleared, held to that escalation again when its state changes (10.18.0) ----------
+// A HELD review (10.19.0) is pending while its escalations are open; this is what turns it into a failure when one closes.
 // The review reads an escalation's state only when it runs, and it runs on the pull request's own events. When an [ESC-…]
 // issue closes (or is transferred, deleted or retitled) the architecture repository dispatches architecture-escalation-closed
 // and a schedule sweeps as a fallback: every open pull request whose review comment records the escalations its PASS stood
@@ -226,7 +233,7 @@ async function recheck(repo, opts = {}) {
       const line = `> ⛔ ${L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
         `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
       // the record goes with it: the next sweep has nothing to re-check until a review writes one again
-      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(MARKER, `${MARKER}\n${line}\n`);
+      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(MARKER, `${MARKER}\n${line}\n`);
       gh(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
     }
     out.push({ pr: pr.number, state: 'failed', refs: rec.refs, why: what });
@@ -253,6 +260,6 @@ if (require.main === module) {
     if (opt('--out')) fs.writeFileSync(opt('--out'), md + '\n');
     if (opt('--status-out')) fs.writeFileSync(opt('--status-out'), statusLine(r) + '\n');
     console.log(a.includes('--json') ? JSON.stringify(r, null, 1) : md);
-    process.exit(r.status === 'FAIL' ? 1 : 0);
+    process.exit(r.status === 'FAIL' ? 1 : r.status === 'HELD' ? 3 : 0);
   })().catch((e) => { console.error(`review-check: ${e.message}`); process.exit(2); });
 }

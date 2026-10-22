@@ -294,16 +294,20 @@ admins too. It has three steps:
 
 A departure gets through only one way. The IDE files an escalation (`preview_escalation`), and the pull request
 cites that `[ESC-…]` issue as `owner/repo#N`. The architect answers it, and the next release settles it. Code findings
-are never cleared this way: the contract copies belong to the architecture. Claude reads only the checkout and runs
+are never cleared this way: the contract copies belong to the architecture.
+
+**A cited escalation holds the pull request; it doesn't pass it** (10.19.0). When open escalations clear every blocking
+finding, the verdict is HELD (`review-check.js` exits 3): nothing blocks, but the status "Architecture review" stays
+`pending`, described as "waiting for `owner/repo#N`". Branch protection doesn't accept `pending`, so the pull request
+can't merge before the architect answers. A pass that rests on no escalation is `success`, as before. Claude reads only the checkout and runs
 no shell. A pull request from a fork fails the check.
 
-**A pass that an escalation allowed is checked again when the escalation closes** (10.18.0). The review reads the
-escalation's state only when it runs, so a pull request that passed under an open escalation would stay green after
-the architect closes it. When an `[ESC-…]` issue is closed, transferred, deleted, or retitled so it no longer starts
+**A held pull request fails when its escalation closes** (10.18.0). The review reads the escalation's state only when
+it runs, so nothing would change the status once the architect closes the escalation. When an `[ESC-…]` issue is closed, transferred, deleted, or retitled so it no longer starts
 with `[ESC-…]`, the architecture repository's `architecture-escalations.yml` sends `architecture-escalation-closed` to
 every repository in `SA_SERVICE_REPOS` (with `SA_DISPATCH_TOKEN`). The `recheck` job of `architecture-review.yml`
 answers it, and also runs every hour as a fallback. It runs no model and checks out nothing. The review comment of a
-passing pull request records the escalations that pass depended on and the head commit it reviewed. For each open pull
+held pull request records the escalations it waits on and the head commit it reviewed. For each open pull
 request still at that head, `review-check.js --recheck` asks GitHub for those escalations' state. If one no longer
 covers the departure, the status "Architecture review" fails and the comment says why. A push, an edit of the body or
 a re-run of the review then decides again.

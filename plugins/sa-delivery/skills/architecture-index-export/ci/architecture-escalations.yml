@@ -1,6 +1,6 @@
 # Architecture escalations — GitHub Actions. Copy to .github/workflows/architecture-escalations.yml in the architecture's
 # repository (ci-setup.js architecture writes it, 10.18.0).
-# A service pull request whose architecture review passed because an open [ESC-…] issue here covered a departure stands on
+# A service pull request whose architecture review is held because an open [ESC-…] issue here covers a departure waits on
 # that issue. When it stops being an open escalation — closed (answered or refused), transferred, deleted, or retitled away
 # from [ESC-…] — every service repository in SA_SERVICE_REPOS is sent `architecture-escalation-closed`, which its
 # ci/service/architecture-review.yml answers by checking those pull requests again (review-check.js --recheck).

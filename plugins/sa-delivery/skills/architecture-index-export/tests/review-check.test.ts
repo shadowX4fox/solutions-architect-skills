@@ -112,7 +112,7 @@ describe("review-check.js — the verdict over the review's findings", () => {
   test("cleared only by the open [ESC-…] the finding names and the pull request cites", async () => {
     // named and cited, open: a warning that names it
     let r = await run({ findings: f({ escalation: "acme/order-desk#7" }), body: "Departs from security — see https://github.com/acme/order-desk/issues/7" });
-    expect(r.status).toBe("PASS");
+    expect(r.status).toBe("HELD");
     expect(r.findings[0]).toMatchObject({ code: "review-escalated" });
     // named, not cited in the pull request
     r = await run({ findings: f({ escalation: "acme/order-desk#7" }), body: "no reference" });
@@ -167,9 +167,25 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     return gh(args);
   };
 
-  test("the PASS records the escalations it stands on and the head; a FAIL, or a PASS without one, records none", async () => {
+  test("an open escalation holds the pull request: HELD, pending, and the comment says it waits for the architect (10.19.0)", async () => {
+    const r = await run({ findings: f, body: "acme/order-desk#7" });
+    expect(r.status).toBe("HELD");
+    expect(R.statusLine(r)).toBe("waiting for acme/order-desk#7 · 0 blocking · 1 warning · 0 note");
+    const md = R.render(r);
+    expect(md).toContain("### Architecture review — ⏸ HELD");
+    expect(md).toContain("the status stays pending until then");
+    expect(md).not.toContain("A blocking finding is cleared");
+    const es = await run({ findings: f, body: "acme/order-desk#7", lang: "es" });
+    expect(R.render(es)).toContain("### Revisión de arquitectura — ⏸ EN ESPERA");
+    expect(R.statusLine(es)).toBe("en espera de acme/order-desk#7 · 0 bloqueante(s) · 1 advertencia(s) · 0 nota(s)");
+    // a blocking finding the escalation does not cover still fails, whatever else it covers
+    const both = { reviewed: true, findings: [f.findings[0], { ...f.findings[0], line: 9, escalation: null }] };
+    expect((await run({ findings: both, body: "acme/order-desk#7" })).status).toBe("FAIL");
+  });
+
+  test("the HELD verdict records the escalations it stands on and the head; a FAIL, or a PASS without one, records none", async () => {
     const r = await run({ findings: f, body: "acme/order-desk#7", runUrl: "https://ci/run/1" });
-    expect(r).toMatchObject({ status: "PASS", escalations: ["acme/order-desk#7"], head: git("rev-parse", "HEAD") });
+    expect(r).toMatchObject({ status: "HELD", escalations: ["acme/order-desk#7"], head: git("rev-parse", "HEAD") });
     expect(R.render(r)).toContain(`${R.ESCALATIONS}{"head":"${r.head}","refs":["acme/order-desk#7"],"run":"https://ci/run/1"} -->`);
     expect(R.render(await run({ findings: OK }))).not.toContain(R.ESCALATIONS);
     expect(R.render(await run({ findings: f, body: "nothing" }))).not.toContain(R.ESCALATIONS);
@@ -190,13 +206,15 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     const patch = calls.find((c) => c.includes("repos/acme/hub-api/issues/comments/502"))!, body = patch.find((x) => x.startsWith("body="))!.slice(5);
     expect(body.startsWith(`${R.MARKER}\n> ⛔ **The escalation this review stood on no longer covers it**`)).toBe(true);
     expect(body).not.toContain(R.ESCALATIONS);
+    expect(body).toContain("### Architecture review — ⛔ FAIL");
+    expect(body).not.toContain("⏸");
     expect(calls.filter((c) => c.some((x) => x.includes("/statuses/"))).length).toBe(1);   // pull request 2's only
     expect(calls.filter((c) => c.some((x) => /comments\/50[134]$/.test(x)))).toEqual([]);
     delete issues["acme/order-desk#11"];
   });
 
   test("transferred, deleted or retitled away from [ESC-…]: each no longer covers; --dry-run writes nothing", async () => {
-    const at = (ref: string) => R.render({ status: "PASS", lang: "es", head: "h1", run: null, escalations: [ref], binding: {}, findings: [] });
+    const at = (ref: string) => R.render({ status: "HELD", lang: "es", head: "h1", run: null, escalations: [ref], binding: {}, findings: [] });
     for (const [n, why] of [["10", "transferida a acme/elsewhere"], ["99", "no existe"], ["9", "no es una escalación"]]) {
       const calls: string[][] = [];
       const res = await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", comment: at(`acme/order-desk#${n}`) }], calls), lang: "es", dryRun: true });
@@ -247,6 +265,9 @@ describe("architecture-review.yml — the template", () => {
     expect((yml.match(/statuses\/\$HEAD" -f state=[^ ]+ -f context="Architecture review"/g) || []).length).toBe(4);
     expect(yml).toContain("name: review\n");   // the job's own check run is not the required context
     expect(yml).toContain("if: github.event_name == 'pull_request_target'");
+    // HELD (exit 3) is a pending status and a finished step; FAIL stays a failure (10.19.0)
+    expect(yml).toContain('state=$(case "$verdict" in 0) echo success ;; 3) echo pending ;; *) echo failure ;; esac)');
+    expect(yml).toContain('[ "$verdict" -eq 3 ] && exit 0\n          exit $verdict');
   });
 
   test("the re-check: a closed escalation's dispatch and the hourly sweep run review-check.js --recheck, no model, no checkout (10.18.0)", () => {
