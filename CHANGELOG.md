@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.18.0]
+
+### Fixed
+- **A pass an escalation allowed no longer outlives the escalation** (closes #18). The review read an `[ESC-…]` issue's state only when it ran, and it ran only on the pull request's own events. A pull request that passed while its escalation was open stayed green after the architect closed the escalation. With the review as the only required check, the departure could still be merged.
+- `review-check.js` refuses an escalation that was transferred to another repository. GitHub answers a transferred issue from its new repository, and the check had accepted it.
+
+### Added
+- **`ci/architecture-escalations.yml`** in the architecture repository, written by `ci-setup.js architecture`. When an `[ESC-…]` issue is closed, transferred, deleted, or retitled so it no longer starts with `[ESC-…]`, it sends `architecture-escalation-closed` to `SA_SERVICE_REPOS` with `SA_DISPATCH_TOKEN`.
+- **The `recheck` job of `ci/service/architecture-review.yml`**: it runs on that dispatch, every hour as a fallback, and on demand. It runs no model and checks out nothing.
+- **`review-check.js --recheck <owner/repo>`**: a passing review's comment now records the escalations the pass depended on and the head commit it reviewed. For each open pull request still at that head, the recheck asks GitHub for those escalations' state. If one no longer covers the departure, the status "Architecture review" fails and the comment says why. A push, an edit of the body or a re-run of the review then decides again.
+- `ci-setup.js service … --attended --review` checks that the architecture's `SA_SERVICE_REPOS` lists the service and that the architecture has `SA_DISPATCH_TOKEN`.
+
+### Upgrade
+- **Architecture repository:** `ci-setup.js architecture <root> --write` writes `architecture-escalations.yml` and moves the pins.
+- **Attended service repository:** `ci-setup.js service <dir> --attended --review --write --replace architecture-review.yml --settings` writes the new review workflow and adds the service to the architecture's `SA_SERVICE_REPOS`. Without that listing, the hourly sweep still catches a closed escalation.
+- A pull request that passed before 10.18.0 has no record of its escalations, so nothing re-checks it until its review runs again.
+
 ## [10.17.1]
 
 ### Changed

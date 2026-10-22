@@ -5,7 +5,8 @@
 //
 //   bun review-check.js <service_dir> --base <git-ref> [--findings <claude.json>] [--body-file <pr-body.md>]
 //                       [--architecture <owner/repo>] [--server <mcp_url>] [--out <review.md>] [--status-out <status.txt>]
-//                       [--lang en|es] [--json]
+//                       [--lang en|es] [--run-url <url>] [--json]
+//   bun review-check.js --recheck <owner/repo> [--lang en|es] [--run-url <url>] [--dry-run] [--json]
 //
 // By code (no model), each against the pack the server serves for .architecture.json's version:
 //   binding-missing   BLOCKING  .architecture.json lacks server, project, component, architecture_version or pack_revision
@@ -38,6 +39,7 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
 const MARKER = '<!-- sa-architecture-review -->';
+const ESCALATIONS = '<!-- sa-review-escalations: ';
 const read = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n?/g, '\n');
 const readJson = (f) => { try { return JSON.parse(read(f)); } catch (e) { return null; } };
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
@@ -84,6 +86,9 @@ function escalationOf(gh, ref, lang = 'en') {
   const r = gh(['api', `repos/${repo}/issues/${n}`]);
   if (r.status !== 0) return { ref, ok: false, why: L('not found', 'no existe') };
   let i; try { i = JSON.parse(r.stdout); } catch (e) { return { ref, ok: false, why: L('unreadable', 'ilegible') }; }
+  // a transferred issue answers from its new repository: it is no longer the architecture's escalation
+  const at = String(i.repository_url || '').split('/repos/')[1];
+  if (at && at.toLowerCase() !== repo.toLowerCase()) return { ref, ok: false, why: L(`transferred to ${at}`, `transferida a ${at}`) };
   if (!/^\[ESC-/.test(i.title || '')) return { ref, ok: false, why: L('not an escalation ([ESC-…] title)', 'no es una escalación (título [ESC-…])') };
   if (i.state !== 'open') return { ref, ok: false, why: L('closed — the release that answered it is the one to build', 'cerrada: la release que la respondió es la que se construye') };
   return { ref, ok: true, title: i.title, url: i.html_url };
@@ -145,10 +150,12 @@ async function check(dir, opts = {}) {
   const gh = opts.gh || ghDefault, body = opts.body || '';
   const parts = new Set(((pack && pack.parts) || []).map((p) => p.id));
   const J = opts.findings === undefined ? null : opts.findings;
+  let escalations = new Set();
   if (!J || J.reviewed !== true || !Array.isArray(J.findings)) add('blocking', 'review-missing', L('the architecture review (Claude, against the pack) wrote no findings — the check fails closed; re-run it', 'la revisión de arquitectura (Claude, contra el pack) no escribió hallazgos: el control falla cerrado; vuelva a ejecutarla'));
   else {
     const cache = new Map(), esc = (ref) => { if (!cache.has(ref)) cache.set(ref, escalationOf(gh, ref, lang)); return cache.get(ref); };
     const declared = new Set(refsIn(body, arch).map((x) => x.toLowerCase()));
+    escalations = new Set();
     for (const f of J.findings) {
       const where = f.file ? `${f.file}${f.line ? `:${f.line}` : ''}` : undefined, cite = f.part ? `${f.part}${f.part_line ? `:${f.part_line}` : ''}` : null;
       const text = `${L('rule', 'regla')} ${f.rule || '?'} — ${String(f.finding || '').trim()}${cite ? ` (pack: ${cite})` : ''}`;
@@ -157,13 +164,16 @@ async function check(dir, opts = {}) {
       // cleared only by the escalation the review ties to this finding, which the pull request itself cites
       const own = refsIn(f.escalation || '', arch).map((ref) => (declared.has(ref.toLowerCase()) ? esc(ref) : { ref, ok: false, why: L('not cited in the pull request', 'no se cita en el pull request') }));
       const cover = own.find((e) => e.ok);
+      if (cover) escalations.add(cover.ref);
       if (cover) add('warning', 'review-escalated', `${text} — ${L(`covered by ${cover.ref} (${cover.title}): the architect answers it`, `cubierto por ${cover.ref} (${cover.title}): lo responde el arquitecto`)}`, where);
       else add('blocking', 'review', `${text}${own.length ? ` — ${own.map((e) => `${e.ref} ${e.why}`).join('; ')}` : ''}`, where);
     }
   }
   const blocking = findings.filter((f) => f.severity === 'blocking').length, order = { blocking: 0, warning: 1, note: 2 };
   findings.sort((x, y) => order[x.severity] - order[y.severity]);
-  return { status: blocking ? 'FAIL' : 'PASS', lang, binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
+  let head = opts.head || null;
+  if (!head) try { head = git(dir, 'rev-parse', 'HEAD').trim(); } catch (e) { head = null; }
+  return { status: blocking ? 'FAIL' : 'PASS', lang, head, run: opts.runUrl || process.env.RUN_URL || null, escalations: [...escalations], binding: { project: b.project, component: b.component, version: b.architecture_version, pack_revision: b.pack_revision }, findings };
 }
 
 function counts(r) {
@@ -180,19 +190,65 @@ function render(r) {
   return [MARKER, `### ${L('Architecture review', 'Revisión de arquitectura')} — ${r.status === 'PASS' ? '✅ PASS' : '⛔ FAIL'}`, '',
     `${L('Held to', 'Contrastado con')} **${r.binding.component || '?'}** ${L('at architecture', 'en la arquitectura')} **${r.binding.version || '?'}** (pack_revision \`${String(r.binding.pack_revision || '?').slice(0, 12)}\`): ${counts(r)}.`, '',
     ...(rows.length ? [L('| | Check | Where | Finding |', '| | Control | Dónde | Hallazgo |'), '|---|---|---|---|', ...rows] : [L('Nothing to report: the pull request keeps the pack.', 'Nada que reportar: el pull request respeta el pack.')]), '',
+    // what this PASS stands on: the escalations that cleared a finding — --recheck reads it when one of them closes (10.18.0)
+    r.status === 'PASS' && r.escalations && r.escalations.length ? `${ESCALATIONS}${JSON.stringify({ head: r.head, refs: r.escalations, run: r.run })} -->` : '',
     r.status === 'PASS' ? '' : L('A blocking finding is cleared by fixing the code, or — a real departure from the architecture — by an open `[ESC-…]` issue in the architecture repository, filed from the IDE with `preview_escalation` and cited in this pull request. A contract copy under `architecture/` is never edited here.',
       'Un hallazgo bloqueante se resuelve corrigiendo el código o —si es una desviación real de la arquitectura— con un issue `[ESC-…]` abierto en el repositorio de la arquitectura, presentado desde el IDE con `preview_escalation` y citado en este pull request. Una copia de contrato bajo `architecture/` nunca se edita aquí.')].join('\n');
 }
 
-module.exports = { check, render, statusLine, refsIn, MARKER };
+// ---- the re-check: a PASS an escalation cleared, held to that escalation again when its state changes (10.18.0) ----------
+// The review reads an escalation's state only when it runs, and it runs on the pull request's own events. When an [ESC-…]
+// issue closes (or is transferred, deleted or retitled) the architecture repository dispatches architecture-escalation-closed
+// and a schedule sweeps as a fallback: every open pull request whose review comment records the escalations its PASS stood
+// on, for the head it still has, is checked again — by code, no model. One that no longer covers gets the commit status
+// "Architecture review" failed and a line in the comment; re-running the review, a push or an edit of the body decides anew.
+async function recheck(repo, opts = {}) {
+  const lang = langOf(opts.lang || process.env.SA_DOC_LANGUAGE), L = (en, es) => say(lang, en, es);
+  const gh = opts.gh || ghDefault, out = [];
+  const lines = (r) => String(r.stdout || '').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  const prs = gh(['api', '--paginate', `repos/${repo}/pulls?state=open&per_page=100`, '--jq', '.[] | {number, head: .head.sha}']);
+  if (prs.status !== 0) throw new Error(`the open pull requests of ${repo}: ${(prs.stderr || '').trim()}`);
+  const cache = new Map(), esc = (ref) => { if (!cache.has(ref)) cache.set(ref, escalationOf(gh, ref, lang)); return cache.get(ref); };
+  for (const pr of lines(prs)) {
+    const cs = gh(['api', '--paginate', `repos/${repo}/issues/${pr.number}/comments?per_page=100`, '--jq', `.[] | select(.body | startswith("${MARKER}")) | {id, body}`]);
+    const c = cs.status === 0 ? lines(cs)[0] : null;
+    const at = c ? c.body.indexOf(ESCALATIONS) : -1;
+    if (at < 0) continue;
+    let rec; try { rec = JSON.parse(c.body.slice(at + ESCALATIONS.length, c.body.indexOf(' -->', at))); } catch (e) { continue; }
+    // a newer head is reviewed by its own run
+    if (!rec || rec.head !== pr.head || !Array.isArray(rec.refs)) { out.push({ pr: pr.number, state: 'skipped', why: 'another head' }); continue; }
+    const gone = rec.refs.map(esc).filter((e) => !e.ok);
+    if (!gone.length) { out.push({ pr: pr.number, state: 'covered', refs: rec.refs }); continue; }
+    const what = gone.map((e) => `${e.ref} ${e.why}`).join('; ');
+    const desc = L(`${what} — re-run the review`, `${what}: vuelva a ejecutar la revisión`).slice(0, 140);
+    if (!opts.dryRun) {
+      gh(['api', `repos/${repo}/statuses/${pr.head}`, '-f', 'state=failure', '-f', 'context=Architecture review', '-f', `description=${desc}`, ...(rec.run || opts.runUrl ? ['-f', `target_url=${rec.run || opts.runUrl}`] : [])]);
+      const line = `> ⛔ ${L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
+        `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
+      // the record goes with it: the next sweep has nothing to re-check until a review writes one again
+      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(MARKER, `${MARKER}\n${line}\n`);
+      gh(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
+    }
+    out.push({ pr: pr.number, state: 'failed', refs: rec.refs, why: what });
+  }
+  return out;
+}
+
+module.exports = { check, render, statusLine, refsIn, recheck, escalationOf, MARKER, ESCALATIONS };
 
 if (require.main === module) {
   (async () => {
     const a = process.argv.slice(2), opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
+    if (opt('--recheck')) {
+      const res = await recheck(opt('--recheck'), { lang: opt('--lang'), runUrl: opt('--run-url'), dryRun: a.includes('--dry-run') });
+      if (a.includes('--json')) console.log(JSON.stringify(res, null, 1));
+      else { for (const x of res) console.log(`#${x.pr} ${x.state}${x.why ? ` — ${x.why}` : x.refs ? ` — ${x.refs.join(', ')}` : ''}`); if (!res.length) console.log('no open pull request stands on an escalation'); }
+      process.exit(0);
+    }
     const dir = a[0] && !a[0].startsWith('--') ? a[0] : '.';
     const fj = opt('--findings');
     const r = await check(dir, { base: opt('--base'), architecture: opt('--architecture'), server: opt('--server'), lang: opt('--lang'),
-      findings: fj ? (readJson(fj) || { reviewed: false }) : undefined, body: opt('--body-file') ? read(opt('--body-file')) : '' });
+      runUrl: opt('--run-url'), findings: fj ? (readJson(fj) || { reviewed: false }) : undefined, body: opt('--body-file') ? read(opt('--body-file')) : '' });
     const md = render(r);
     if (opt('--out')) fs.writeFileSync(opt('--out'), md + '\n');
     if (opt('--status-out')) fs.writeFileSync(opt('--status-out'), statusLine(r) + '\n');

@@ -25,10 +25,11 @@ const packOf = (o: { version?: string; latest?: string; revision?: string; asset
     ...Object.entries(o.assets || { "openapi.yaml": OPENAPI }).map(([t, body]) => ({ id: `asset:${t}`, kind: "asset", title: t, sha256: sha(body) }))],
 });
 // gh, as GitHub answers an issue of the architecture repository
-const issues: Record<string, { title: string; state: string }> = {
+const issues: Record<string, { title: string; state: string; repository_url?: string }> = {
   "acme/order-desk#7": { title: "[ESC-003] Hub API: retry budget not documented", state: "open" },
   "acme/order-desk#8": { title: "[ESC-002] closed one", state: "closed" },
   "acme/order-desk#9": { title: "[T0-?] not an escalation", state: "open" },
+  "acme/order-desk#10": { title: "[ESC-004] moved away", state: "open", repository_url: "https://api.github.com/repos/acme/elsewhere" },
 };
 const gh = (args: string[]) => {
   const m = args[1].match(/^repos\/(.+)\/issues\/(\d+)$/), i = m && issues[`${m[1]}#${m[2]}`];
@@ -118,7 +119,7 @@ describe("review-check.js — the verdict over the review's findings", () => {
     expect(r.status).toBe("FAIL");
     expect(r.findings[0].text).toContain("not cited in the pull request");
     // cited, but closed — or not an escalation
-    for (const n of [8, 9]) expect((await run({ findings: f({ escalation: `acme/order-desk#${n}` }), body: `acme/order-desk#${n}` })).status).toBe("FAIL");
+    for (const n of [8, 9, 10]) expect((await run({ findings: f({ escalation: `acme/order-desk#${n}` }), body: `acme/order-desk#${n}` })).status).toBe("FAIL");
     // cited by the pull request, not tied to the finding: a body citation alone clears nothing; a bare #7 is this repository's
     expect((await run({ findings: f({}), body: "acme/order-desk#7 and #7" })).status).toBe("FAIL");
     // another repository's issue never counts
@@ -153,6 +154,69 @@ describe("review-check.js — the verdict over the review's findings", () => {
   });
 });
 
+describe("review-check.js --recheck — a PASS an escalation cleared, held to it again (10.18.0)", () => {
+  const f = { reviewed: true, findings: [{ rule: 4, severity: "blocking", file: "src/app.ts", line: 3, part: "security", finding: "lets a caller in", escalation: "acme/order-desk#7" }] };
+  // GitHub for the service repository: its open pull requests and their review comments; the architecture's issues as above
+  const service = (prs: { number: number; head: string; comment?: string }[], calls: string[][]) => (args: string[]) => {
+    calls.push(args);
+    const path = args.find((x) => x.startsWith("repos/")) || "";
+    if (/^repos\/acme\/hub-api\/pulls\?/.test(path)) return { status: 0, stdout: prs.map((p) => JSON.stringify({ number: p.number, head: p.head })).join("\n"), stderr: "" };
+    const c = path.match(/^repos\/acme\/hub-api\/issues\/(\d+)\/comments/);
+    if (c) { const p = prs.find((x) => x.number === Number(c[1])); return { status: 0, stdout: p && p.comment ? JSON.stringify({ id: 500 + p.number, body: p.comment }) : "", stderr: "" }; }
+    if (/statuses|comments\/\d+$/.test(path)) return { status: 0, stdout: "{}", stderr: "" };
+    return gh(args);
+  };
+
+  test("the PASS records the escalations it stands on and the head; a FAIL, or a PASS without one, records none", async () => {
+    const r = await run({ findings: f, body: "acme/order-desk#7", runUrl: "https://ci/run/1" });
+    expect(r).toMatchObject({ status: "PASS", escalations: ["acme/order-desk#7"], head: git("rev-parse", "HEAD") });
+    expect(R.render(r)).toContain(`${R.ESCALATIONS}{"head":"${r.head}","refs":["acme/order-desk#7"],"run":"https://ci/run/1"} -->`);
+    expect(R.render(await run({ findings: OK }))).not.toContain(R.ESCALATIONS);
+    expect(R.render(await run({ findings: f, body: "nothing" }))).not.toContain(R.ESCALATIONS);
+  });
+
+  test("an escalation closed: the status fails on the head, the comment says why and drops the record; open, or another head: untouched", async () => {
+    const pass = async (ref: string) => R.render(await run({ findings: { ...f, findings: [{ ...f.findings[0], escalation: ref }] }, body: ref, head: "h1", runUrl: "https://ci/run/1" }));
+    const open = await pass("acme/order-desk#7");
+    issues["acme/order-desk#11"] = { title: "[ESC-005] answered", state: "open" };
+    const closed = await pass("acme/order-desk#11");
+    issues["acme/order-desk#11"].state = "closed";
+    const calls: string[][] = [];
+    const res = await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", comment: open }, { number: 2, head: "h1", comment: closed }, { number: 3, head: "h2", comment: closed }, { number: 4, head: "h1" }], calls), runUrl: "https://ci/recheck" });
+    expect(res.map((x: any) => `${x.pr}:${x.state}`)).toEqual(["1:covered", "2:failed", "3:skipped"]);
+    const status = calls.find((c) => c.includes("repos/acme/hub-api/statuses/h1"))!;
+    expect(status).toEqual(expect.arrayContaining(["state=failure", "context=Architecture review", "target_url=https://ci/run/1"]));
+    expect(status.find((x) => x.startsWith("description="))).toContain("acme/order-desk#11 closed");
+    const patch = calls.find((c) => c.includes("repos/acme/hub-api/issues/comments/502"))!, body = patch.find((x) => x.startsWith("body="))!.slice(5);
+    expect(body.startsWith(`${R.MARKER}\n> ⛔ **The escalation this review stood on no longer covers it**`)).toBe(true);
+    expect(body).not.toContain(R.ESCALATIONS);
+    expect(calls.filter((c) => c.some((x) => x.includes("/statuses/"))).length).toBe(1);   // pull request 2's only
+    expect(calls.filter((c) => c.some((x) => /comments\/50[134]$/.test(x)))).toEqual([]);
+    delete issues["acme/order-desk#11"];
+  });
+
+  test("transferred, deleted or retitled away from [ESC-…]: each no longer covers; --dry-run writes nothing", async () => {
+    const at = (ref: string) => R.render({ status: "PASS", lang: "es", head: "h1", run: null, escalations: [ref], binding: {}, findings: [] });
+    for (const [n, why] of [["10", "transferida a acme/elsewhere"], ["99", "no existe"], ["9", "no es una escalación"]]) {
+      const calls: string[][] = [];
+      const res = await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", comment: at(`acme/order-desk#${n}`) }], calls), lang: "es", dryRun: true });
+      expect(res[0]).toMatchObject({ state: "failed", why: expect.stringContaining(why) });
+      expect(calls.filter((c) => c.includes("-X") || c.some((x) => x.includes("statuses")))).toEqual([]);
+    }
+  });
+});
+
+describe("architecture-escalations.yml — the architecture repository's side", () => {
+  const yml = readFileSync(join(__dirname, "..", "ci", "architecture-escalations.yml"), "utf8");
+  test("an [ESC-…] issue closed, transferred, deleted or retitled away dispatches architecture-escalation-closed to SA_SERVICE_REPOS", () => {
+    expect(yml).toContain("types: [closed, edited, transferred, deleted]");
+    expect(yml).toContain("startsWith(github.event.changes.title.from, '[ESC-') && !startsWith(github.event.issue.title, '[ESC-')");
+    expect(yml).toContain("GH_TOKEN: ${{ secrets.SA_DISPATCH_TOKEN }}");
+    expect(yml).toContain("event_type=architecture-escalation-closed");
+    expect(yml).toContain("permissions: {}");
+  });
+});
+
 describe("architecture-review.yml — the template", () => {
   const yml = readFileSync(join(__dirname, "..", "ci", "service", "architecture-review.yml"), "utf8");
   test("Claude reads the checkout, writes its findings only, runs no shell; a fork fails; the verdict is code's", () => {
@@ -182,6 +246,18 @@ describe("architecture-review.yml — the template", () => {
     for (const s of ["state=pending", 'state="$state"', "the review did not finish"]) expect(yml).toContain(s);
     expect((yml.match(/statuses\/\$HEAD" -f state=[^ ]+ -f context="Architecture review"/g) || []).length).toBe(4);
     expect(yml).toContain("name: review\n");   // the job's own check run is not the required context
+    expect(yml).toContain("if: github.event_name == 'pull_request_target'");
+  });
+
+  test("the re-check: a closed escalation's dispatch and the hourly sweep run review-check.js --recheck, no model, no checkout (10.18.0)", () => {
+    expect(yml).toMatch(/  repository_dispatch:\n    types: \[architecture-escalation-closed\]/);
+    expect(yml).toMatch(/  schedule:\n    - cron: '23 \* \* \* \*'/);
+    const job = yml.slice(yml.indexOf("  recheck:"), yml.indexOf("  review:\n"));
+    expect(job).toContain("if: github.event_name != 'pull_request_target'");
+    expect(job).toContain('--recheck "$GITHUB_REPOSITORY"');
+    expect(job).not.toContain("claude-code-action");
+    expect(job).not.toContain("actions/checkout");
+    expect(yml).toContain("group: architecture-review-${{ github.event.pull_request.number || 'recheck' }}");
   });
 
   test("on a self-hosted runner, Claude never loads the runner user's ~/.claude: its step has a home of its own (10.16.1)", () => {

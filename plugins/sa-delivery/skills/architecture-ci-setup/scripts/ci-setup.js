@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 // CI/CD for an architecture and the service repositories built from it, by code (10.13.0). Two sides:
 //
-//   architecture  the architecture repository — the five workflows (gates, release, handoff, index, Tier 0 on a RUN team)
+//   architecture  the architecture repository — the six workflows (gates, release, handoff, index, escalations, Tier 0 on a
+//                 RUN team)
 //                 copied from the plugin's templates with the plugin's pin, the RUN-team policy, the labels, and the
 //                 repository's variables, secrets and settings read with gh
 //   service       a service (dev) repository — the binding (.architecture.json), the architecture MCP server for the IDE
@@ -107,6 +108,8 @@ function architectureWorkflows(root, opts = {}) {
       t = t.replace(/^    tags: \['architecture-v\*'\].*\n/m, '');
       return runner ? t.replace(/^(  index:\n    runs-on: )ubuntu-latest$/m, `$1${runner}`) : t;
     }),
+    // an escalation that closes re-checks the service pull requests it cleared (10.18.0)
+    render(path.join(idx, 'architecture-escalations.yml'), 'architecture-escalations.yml'),
   ];
   if (support.support === 'run') list.push(render(path.join(life, 'architecture-tier0.yml'), 'architecture-tier0.yml'));
   return { list, support };
@@ -136,7 +139,7 @@ function architecture(root, opts = {}) {
     }
     const repos = st.vars.SA_SERVICE_REPOS;
     row(rows, repos ? '✓' : '·', `variable SA_SERVICE_REPOS${repos ? ` = ${repos}` : ' — no service repository is told of a release'}`, repos ? null : cmd('SA_SERVICE_REPOS', '<owner/service,…>'));
-    if (repos) row(rows, st.secrets.has('SA_DISPATCH_TOKEN') ? '✓' : '✗', 'secret SA_DISPATCH_TOKEN — dispatches architecture-released to SA_SERVICE_REPOS', st.secrets.has('SA_DISPATCH_TOKEN') ? null : `${sec('SA_DISPATCH_TOKEN')}  (a token with write on each service repository)`);
+    if (repos) row(rows, st.secrets.has('SA_DISPATCH_TOKEN') ? '✓' : '✗', 'secret SA_DISPATCH_TOKEN — dispatches architecture-released and architecture-escalation-closed to SA_SERVICE_REPOS', st.secrets.has('SA_DISPATCH_TOKEN') ? null : `${sec('SA_DISPATCH_TOKEN')}  (a token with write on each service repository)`);
   }
   const pr = ghJson(gh, ['api', `repos/${repo}/actions/permissions/workflow`]);
   if (!pr.error) row(rows, pr.value && pr.value.can_approve_pull_request_reviews ? '✓' : '✗', 'setting — Actions may create pull requests (the handoff kit, Tier 0)', pr.value && pr.value.can_approve_pull_request_reviews ? null : `gh api -X PUT repos/${repo}/actions/permissions/workflow -F can_approve_pull_request_reviews=true`);
@@ -256,15 +259,22 @@ function service(dir, opts = {}) {
     }
     if (opts.merge) varRow(rows, st.vars.SA_BUILD_AGENT ? '✓' : '✗', `variable SA_BUILD_AGENT${st.vars.SA_BUILD_AGENT ? ` = ${st.vars.SA_BUILD_AGENT}` : ' — the login whose pull requests merge on their own'}`, repo, 'SA_BUILD_AGENT', opts.agent);
   }
-  // the architecture repository's side of the pair, for an unattended build: SA_SERVICE_REPOS is how a release reaches this
-  // repository — the handoff names no service, the index dispatches architecture-released to every repository listed there
-  if (opts.architecture && !opts.attended) {
-    const A = opts.architecture, a = settings(gh, A);
+  // the architecture repository's side of the pair: SA_SERVICE_REPOS is how a release reaches an unattended build — the
+  // handoff names no service, the index dispatches architecture-released to every repository listed there — and how a
+  // closed escalation reaches the review's re-check (10.18.0; without it, the hourly sweep)
+  const AR = opts.architecture || (opts.review && !st.error ? st.vars.SA_ARCHITECTURE_REPO : null);
+  if (AR && (!opts.attended || opts.review)) {
+    const A = AR, a = settings(gh, A), what = opts.attended ? 'a closed escalation re-checks its pull requests only on the hourly sweep' : 'a release never reaches this repository';
     if (a.error) row(rows, '!', `${A} — its variables are not readable (${a.error})`);
     else {
       const listed = inList(a.vars.SA_SERVICE_REPOS, repo);
-      varRow(rows, listed ? '✓' : '✗', `${A} SA_SERVICE_REPOS ${listed ? 'lists' : 'does not list'} ${repo}${listed ? '' : ' — a release never reaches this repository'}`, A, 'SA_SERVICE_REPOS', addTo(a.vars.SA_SERVICE_REPOS, repo));
-      if (!a.secrets.has('SA_DISPATCH_TOKEN')) row(rows, '✗', `${A} has no SA_DISPATCH_TOKEN — it cannot tell this repository of a release`, `gh secret set SA_DISPATCH_TOKEN -R ${A}  (a token with write on this repository)`);
+      varRow(rows, listed ? '✓' : '✗', `${A} SA_SERVICE_REPOS ${listed ? 'lists' : 'does not list'} ${repo}${listed ? '' : ` — ${what}`}`, A, 'SA_SERVICE_REPOS', addTo(a.vars.SA_SERVICE_REPOS, repo));
+      if (!a.secrets.has('SA_DISPATCH_TOKEN')) row(rows, '✗', `${A} has no SA_DISPATCH_TOKEN — it cannot tell this repository of a ${opts.attended ? 'closed escalation' : 'release'}`, `gh secret set SA_DISPATCH_TOKEN -R ${A}  (a token with write on this repository)`);
+    }
+  }
+  if (opts.architecture && !opts.attended) {
+    const A = opts.architecture, a = settings(gh, A);
+    if (!a.error) {
       // full auto (--merge): nothing between the architecture's release and this merge waits for a person
       const full = opts.merge ? '✗' : '·';
       if (agent) {

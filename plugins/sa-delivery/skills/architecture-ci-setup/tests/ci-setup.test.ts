@@ -55,6 +55,7 @@ describe("ci-setup.js architecture", () => {
     r = C.architecture(ARCH, { gh, version: "9.9.9", write: true, runner: "self-hosted,idx" });
     for (const f of ["gates", "release", "handoff", "index"]) expect(readFileSync(join(ARCH, `.github/workflows/architecture-${f}.yml`), "utf8")).toContain("SA_PLUGIN_REF: v9.9.9");
     expect(existsSync(join(ARCH, ".github/workflows/architecture-tier0.yml"))).toBe(false);   // not a RUN team
+    expect(readFileSync(join(ARCH, ".github/workflows/architecture-escalations.yml"), "utf8")).toContain("event_type=architecture-escalation-closed");   // every team (10.18.0)
     const idx = readFileSync(join(ARCH, ".github/workflows/architecture-index.yml"), "utf8");
     expect(idx).not.toMatch(/^\s+tags: \['architecture-v\*'\]/m);
     expect(idx).toContain("  index:\n    runs-on: [self-hosted, idx]");
@@ -194,7 +195,10 @@ describe("ci-setup.js service", () => {
     expect(s["variable SA_ARCHITECTURE_REPO"]).toBe("✗");
     const prot = (x: any) => r.rows.find((y: any) => y.item.startsWith("branch protection"));
     expect(prot(r)).toMatchObject({ state: "✗", item: expect.stringContaining("not required (the branch is not protected)") });
-    expect(r.rows.some((x: any) => /SA_SERVICE_REPOS|SA_BUILD_TOKEN|SA_HANDOFF_AUTOMERGE/.test(x.item))).toBe(false);  // the unattended pair's, not this
+    expect(r.rows.some((x: any) => /SA_BUILD_TOKEN|SA_HANDOFF_AUTOMERGE|SA_TIER0_TRUSTED_AGENTS/.test(x.item))).toBe(false);  // the unattended pair's, not this
+    // a closed escalation reaches the review's re-check through the architecture's SA_SERVICE_REPOS (10.18.0)
+    expect(r.rows.find((x: any) => String(x.item).startsWith("acme/order-desk SA_SERVICE_REPOS"))).toMatchObject({ state: "✗", item: expect.stringContaining("only on the hourly sweep"), fix: "gh variable set SA_SERVICE_REPOS -R acme/order-desk --body acme/hub-api" });
+    expect(r.rows.find((x: any) => String(x.item).includes("has no SA_DISPATCH_TOKEN")).item).toContain("closed escalation");
     calls.length = 0;
     r = C.service(SVC, { gh, ...opts, runsOn: "self-hosted,idx", settings: true });
     expect(calls.some((c) => c.join(" ") === "api -X PUT repos/acme/hub-api/branches/main/protection -F required_status_checks[strict]=false -F required_status_checks[contexts][]=Architecture review -F enforce_admins=true -F required_pull_request_reviews=null -F restrictions=null")).toBe(true);

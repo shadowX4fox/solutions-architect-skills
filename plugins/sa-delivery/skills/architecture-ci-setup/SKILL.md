@@ -2,8 +2,8 @@
 name: architecture-ci-setup
 description: >
   Set up CI/CD for an architecture and connect the service (dev) repositories built from it: in
-  the architecture repository the five GitHub Actions workflows (gates, release, handoff, index,
-  Tier 0) from the plugin's templates with the plugin's pin, the RUN-team policy, the labels and the
+  the architecture repository the six GitHub Actions workflows (gates, release, handoff, index,
+  escalations, Tier 0) from the plugin's templates with the plugin's pin, the RUN-team policy, the labels and the
   repository's variables, secrets and settings; in a service repository the binding
   (.architecture.json), the architecture MCP server for the IDE (.mcp.json) and, for an unattended
   build, the build and merge workflows. Checks first, writes after the user's yes, never sets a
@@ -65,6 +65,7 @@ How a release finds the service: the handoff names no service. `architecture-ind
 | Architecture repository | Service repository |
 |---|---|
 | — | `architecture-review.yml` (attended, `--review`) holds every pull request to the pack: `review-check.js` checks the contract copies, the commits and the binding, Claude judges the diff against BUILD.md's rules, and code decides; an open `[ESC-…]` issue the pull request cites is the only way past a departure |
+| `architecture-escalations.yml` dispatches `architecture-escalation-closed` to `SA_SERVICE_REPOS` when an `[ESC-…]` issue closes, is transferred or deleted, or is retitled away from `[ESC-…]` | `architecture-review.yml`'s `recheck` job fails the status of an open pull request whose pass depended on that escalation (also hourly, as a fallback). An attended service with `--review` is listed in `SA_SERVICE_REPOS` for this |
 | `architecture-handoff.yml` regenerates the kit after a release and, with `SA_HANDOFF_AUTOMERGE=true`, merges it once its gates pass and dispatches the index | — |
 | `architecture-index.yml` publishes a release's build packs and dispatches `architecture-released` to `SA_SERVICE_REPOS` (`SA_DISPATCH_TOKEN`) | `architecture-build.yml` builds from the pack, unattended, and opens a pull request (`SA_BUILD_TOKEN`) |
 | `architecture-tier0.yml` keys the build's request for a kind in `tier0.auto`, and a move to `Resolved` waits for the pull request it cites | `architecture-build-merge.yml` merges the build's pull request once the tests pass (opt in) |
