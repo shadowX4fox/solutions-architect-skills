@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.3]
+
+### Fixed
+- **The review comment is read only from the review's own identity** (#19). The verdict step and `review-check.js --recheck` found the comment by its marker alone, so anyone could post a comment starting with `<!-- sa-architecture-review -->` ahead of the bot's. The review would then patch that comment, and the recheck would read a planted escalations record. Both now take only a comment by `github-actions[bot]`. `--recheck --author <login>` names another identity.
+- **A schedule GitHub disabled is no longer silent** (#20). GitHub turns off a public repository's scheduled workflows after 60 days without activity. `ci-setup.js` now reads the state of `architecture-review.yml` (`service … --review`) and of `architecture-tier0.yml` (`architecture`, RUN team). It reports `disabled_inactivity` as a required row, and `--settings` runs `gh workflow enable`. A workflow someone disabled by hand is reported, never re-enabled. The template explains the rule beside its `schedule:`.
+- **A failed escalation dispatch fails the run.** `architecture-escalations.yml` used to log a failed `architecture-escalation-closed` dispatch only as a warning. It is now an error, and the run fails after every repository was tried, because the hourly sweep is then the only re-check.
+
+### Upgrade
+- Projects: `ci-setup.js architecture|service … --write` moves the pins. A service with `--review` takes the new `architecture-review.yml` with `--replace architecture-review.yml`, and the architecture repository takes the new `architecture-escalations.yml` with `--replace architecture-escalations.yml`.
+
 ## [10.19.2]
 
 ### Fixed

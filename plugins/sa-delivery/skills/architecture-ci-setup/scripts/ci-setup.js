@@ -150,9 +150,21 @@ function architecture(root, opts = {}) {
       if (!have.error) { const set = new Set((have.value || []).map((l) => l.name)), miss = names.filter((n) => !set.has(n));
         row(rows, miss.length ? '✗' : '✓', `labels — ${miss.length ? `${miss.length} of ${names.length} missing: ${miss.join(', ')}` : `all ${names.length}`}`, miss.length ? `escalate.js labels ${root} --create` : null); }
     } catch (e) { row(rows, '!', `labels — not checked (${e.message})`); }
+    scheduleRow(gh, repo, 'architecture-tier0.yml', rows, 'a request waiting for its service pull request is never re-checked');
   }
   if (opts.settings) applySettings(gh, rows);
   return { side: 'architecture', root, repo, rows };
+}
+
+// a workflow whose schedule matters: GitHub disables a public repository's scheduled workflows after 60 days without activity
+// and tells no one (state disabled_inactivity) — the schedule is a fallback, so its loss is silent until it is needed
+function scheduleRow(gh, repo, file, rows, loss) {
+  const w = ghJson(gh, ['api', `repos/${repo}/actions/workflows/${file}`]);
+  if (w.error) { row(rows, '·', `workflow ${file} — not on the default branch yet: its schedule starts once it is`); return; }
+  const state = w.value && w.value.state, enable = ['workflow', 'enable', file, '-R', repo];
+  if (state === 'active') row(rows, '✓', `workflow ${file} — active`);
+  else if (state === 'disabled_inactivity') { row(rows, '✗', `workflow ${file} — disabled by GitHub after 60 days without activity: ${loss}`, `gh ${enable.join(' ')}`, enable); rows[rows.length - 1].done = `workflow ${file} — enabled`; }
+  else row(rows, '!', `workflow ${file} — ${state || 'state unknown'}: ${loss}`, `gh ${enable.join(' ')}  (someone disabled it — enable it only if that was not on purpose)`);
 }
 
 // the review is a required status check of the default branch, or it blocks nothing: added to the checks a protection
@@ -256,6 +268,7 @@ function service(dir, opts = {}) {
       const ar = st.vars.SA_ARCHITECTURE_REPO, want = opts.architecture;
       varRow(rows, ar && (!want || ar.toLowerCase() === want.toLowerCase()) ? '✓' : '✗', `variable SA_ARCHITECTURE_REPO${ar ? ` = ${ar}` : ' — the architecture repository, where an escalation that clears a review finding lives'}`, repo, 'SA_ARCHITECTURE_REPO', want);
       reviewProtection(gh, repo, rows);
+      scheduleRow(gh, repo, 'architecture-review.yml', rows, 'a pull request held on an escalation whose dispatch never came stays pending');
     }
     if (opts.merge) varRow(rows, st.vars.SA_BUILD_AGENT ? '✓' : '✗', `variable SA_BUILD_AGENT${st.vars.SA_BUILD_AGENT ? ` = ${st.vars.SA_BUILD_AGENT}` : ' — the login whose pull requests merge on their own'}`, repo, 'SA_BUILD_AGENT', opts.agent);
   }

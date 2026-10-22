@@ -157,12 +157,14 @@ describe("review-check.js — the verdict over the review's findings", () => {
 describe("review-check.js --recheck — a PASS an escalation cleared, held to it again (10.18.0)", () => {
   const f = { reviewed: true, findings: [{ rule: 4, severity: "blocking", file: "src/app.ts", line: 3, part: "security", finding: "lets a caller in", escalation: "acme/order-desk#7" }] };
   // GitHub for the service repository: its open pull requests and their review comments; the architecture's issues as above
-  const service = (prs: { number: number; head: string; comment?: string }[], calls: string[][]) => (args: string[]) => {
+  const service = (prs: { number: number; head: string; comment?: string; planted?: { id: number; author: string; body: string } }[], calls: string[][]) => (args: string[]) => {
     calls.push(args);
     const path = args.find((x) => x.startsWith("repos/")) || "";
     if (/^repos\/acme\/hub-api\/pulls\?/.test(path)) return { status: 0, stdout: prs.map((p) => JSON.stringify({ number: p.number, head: p.head })).join("\n"), stderr: "" };
     const c = path.match(/^repos\/acme\/hub-api\/issues\/(\d+)\/comments/);
-    if (c) { const p = prs.find((x) => x.number === Number(c[1])); return { status: 0, stdout: p && p.comment ? JSON.stringify({ id: 500 + p.number, body: p.comment }) : "", stderr: "" }; }
+    if (c) { const p = prs.find((x) => x.number === Number(c[1]));
+      const cs = p ? [...(p.planted ? [p.planted] : []), ...(p.comment ? [{ id: 500 + p.number, body: p.comment, author: R.REVIEW_BOT }] : [])] : [];
+      return { status: 0, stdout: cs.map((x) => JSON.stringify(x)).join("\n"), stderr: "" }; }
     if (/statuses|comments\/\d+$/.test(path)) return { status: 0, stdout: "{}", stderr: "" };
     return gh(args);
   };
@@ -214,6 +216,24 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     delete issues["acme/order-desk#11"];
   });
 
+  test("only the review's own comment is read: a marker comment from another author, placed first, is neither read nor patched (#19)", async () => {
+    const pass = async (ref: string) => R.render(await run({ findings: { ...f, findings: [{ ...f.findings[0], escalation: ref }] }, body: ref, head: "h1" }));
+    const real = await pass("acme/order-desk#7");                   // open: the real review is covered
+    issues["acme/order-desk#11"] = { title: "[ESC-005] answered", state: "closed" };
+    const planted = { id: 999, author: "mallory", body: R.render({ status: "HELD", lang: "en", head: "h1", run: null, escalations: ["acme/order-desk#11"], binding: {}, findings: [] }) };   // a record of a closed escalation
+    const calls: string[][] = [];
+    const res = await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", comment: real, planted }], calls) });
+    expect(res.map((x: any) => `${x.pr}:${x.state}`)).toEqual(["1:covered"]);
+    expect(calls.filter((c) => c.some((x) => /statuses|comments\/999$/.test(x)))).toEqual([]);
+    // the planted comment alone: nothing to re-check, nothing written
+    calls.length = 0;
+    expect(await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", planted }], calls) })).toEqual([]);
+    expect(calls.filter((c) => c.includes("-X") || c.some((x) => x.includes("/statuses/")))).toEqual([]);
+    // another identity writes the comment: --author names it
+    expect((await R.recheck("acme/hub-api", { gh: service([{ number: 1, head: "h1", planted }], calls), author: "mallory", dryRun: true })).map((x: any) => x.state)).toEqual(["failed"]);
+    delete issues["acme/order-desk#11"];
+  });
+
   test("a finding that cites a rejected escalation: the footer says fix the code, never escalate again (10.19.2)", async () => {
     issues["acme/order-desk#13"] = { title: "[ESC-007] refused", state: "closed", state_reason: "not_planned" };
     const r = await run({ findings: { ...f, findings: [{ ...f.findings[0], escalation: "acme/order-desk#13" }] }, body: "acme/order-desk#13", lang: "es" });
@@ -252,6 +272,11 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
 
 describe("architecture-escalations.yml — the architecture repository's side", () => {
   const yml = readFileSync(join(__dirname, "..", "ci", "architecture-escalations.yml"), "utf8");
+  test("a failed dispatch is an error and fails the run, after every repository was tried (#20)", () => {
+    expect(yml).toContain('::error::$r: the dispatch failed');
+    expect(yml).toContain("failed=1; fi\n          done\n          exit $failed");
+  });
+
   test("an [ESC-…] issue closed, transferred, deleted or retitled away dispatches architecture-escalation-closed to SA_SERVICE_REPOS", () => {
     expect(yml).toContain("types: [closed, edited, transferred, deleted]");
     expect(yml).toContain("startsWith(github.event.changes.title.from, '[ESC-') && !startsWith(github.event.issue.title, '[ESC-')");
@@ -299,6 +324,8 @@ describe("architecture-review.yml — the template", () => {
   test("the re-check: a closed escalation's dispatch and the hourly sweep run review-check.js --recheck, no model, no checkout (10.18.0)", () => {
     expect(yml).toMatch(/  repository_dispatch:\n    types: \[architecture-escalation-closed\]/);
     expect(yml).toMatch(/  schedule:\n    - cron: '23 \* \* \* \*'/);
+    expect(yml).toContain("GitHub disables a public repository's schedule after 60 days without");   // #20
+    expect(yml).toContain(`select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- sa-architecture-review -->")))`);   // #19
     const job = yml.slice(yml.indexOf("  recheck:"), yml.indexOf("  review:\n"));
     expect(job).toContain("if: github.event_name != 'pull_request_target'");
     expect(job).toContain('--recheck "$GITHUB_REPOSITORY"');

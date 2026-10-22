@@ -314,6 +314,16 @@ planned is read as the architect's rejection (10.19.1): the status says to fix t
 `escalate.js close … --rejected` says to close the issue that way. A push, an edit of the body or
 a re-run of the review then decides again.
 
+**A schedule can stop without a word** (10.19.3). GitHub turns off the scheduled workflows of a public repository after
+60 days without activity: the workflow's state becomes `disabled_inactivity` and nobody is notified. Two schedules here
+are fallbacks: the review's hourly sweep, for a dispatch that never came, and the Tier 0 workflow's 30-minute re-check of a
+waiting request. `ci-setup.js` reports either one disabled as a required row (`service … --review`, and `architecture`
+on a RUN team); `--settings` runs `gh workflow enable <file> -R <repo>`. A workflow someone disabled by hand is reported,
+never re-enabled. A failed `architecture-escalation-closed` dispatch fails `architecture-escalations.yml`'s run, since
+the sweep is then the only re-check. The review comment is read only from `github-actions[bot]`, the identity the
+review writes as: a comment anyone else starts with the review's marker is neither read nor patched (`--author` names
+another identity to `review-check.js --recheck`).
+
 **A pull request never runs its own review** (10.16.2). The review runs on `pull_request_target`, so the file that runs
 is always the default branch's. A pull request that edits the review (the verdict, the prompt, the tools) is reviewed by
 the review in force. The PR's code is only read: the checkout keeps no credential, Claude has no shell, and

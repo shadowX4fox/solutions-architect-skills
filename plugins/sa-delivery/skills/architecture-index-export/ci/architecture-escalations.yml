@@ -31,7 +31,10 @@ jobs:
           ACTION: ${{ github.event.action }}
         run: |
           [ -n "$GH_TOKEN" ] || { echo "::warning::SA_DISPATCH_TOKEN is not set: the service repositories re-check on their hourly sweep only"; exit 0; }
+          # a failed dispatch fails the run: the service's hourly sweep is then the only re-check, and GitHub may have disabled it
+          failed=0
           for r in $(printf '%s' "$REPOS" | tr ',' ' '); do
             if gh api "repos/$r/dispatches" -f event_type=architecture-escalation-closed -f "client_payload[ref]=$REF" -f "client_payload[action]=$ACTION" >/dev/null
-            then echo "architecture-escalation-closed $REF ($ACTION) → $r"; else echo "::warning::$r: the dispatch failed — the token cannot write there, or the repository does not exist"; fi
+            then echo "architecture-escalation-closed $REF ($ACTION) → $r"; else echo "::error::$r: the dispatch failed — the token cannot write there, or the repository does not exist; its pull requests re-check on the hourly sweep only"; failed=1; fi
           done
+          exit $failed

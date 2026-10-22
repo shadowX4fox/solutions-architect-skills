@@ -6,7 +6,7 @@
 //   bun review-check.js <service_dir> --base <git-ref> [--findings <claude.json>] [--body-file <pr-body.md>]
 //                       [--architecture <owner/repo>] [--server <mcp_url>] [--out <review.md>] [--status-out <status.txt>]
 //                       [--lang en|es] [--run-url <url>] [--json]
-//   bun review-check.js --recheck <owner/repo> [--lang en|es] [--run-url <url>] [--dry-run] [--json]
+//   bun review-check.js --recheck <owner/repo> [--lang en|es] [--run-url <url>] [--author <login>] [--dry-run] [--json]
 //
 // By code (no model), each against the pack the server serves for .architecture.json's version:
 //   binding-missing   BLOCKING  .architecture.json lacks server, project, component, architecture_version or pack_revision
@@ -41,6 +41,8 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
 const MARKER = '<!-- sa-architecture-review -->';
+// who writes the review comment: architecture-review.yml posts it with the job's GITHUB_TOKEN (--author for another identity)
+const REVIEW_BOT = 'github-actions[bot]';
 const ESCALATIONS = '<!-- sa-review-escalations: ';
 const read = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n?/g, '\n');
 const readJson = (f) => { try { return JSON.parse(read(f)); } catch (e) { return null; } };
@@ -218,13 +220,16 @@ function render(r) {
 async function recheck(repo, opts = {}) {
   const lang = langOf(opts.lang || process.env.SA_DOC_LANGUAGE), L = (en, es) => say(lang, en, es);
   const gh = opts.gh || ghDefault, out = [];
+  const author = opts.author || REVIEW_BOT;
   const lines = (r) => String(r.stdout || '').split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const prs = gh(['api', '--paginate', `repos/${repo}/pulls?state=open&per_page=100`, '--jq', '.[] | {number, head: .head.sha}']);
   if (prs.status !== 0) throw new Error(`the open pull requests of ${repo}: ${(prs.stderr || '').trim()}`);
   const cache = new Map(), esc = (ref) => { if (!cache.has(ref)) cache.set(ref, escalationOf(gh, ref, lang)); return cache.get(ref); };
   for (const pr of lines(prs)) {
-    const cs = gh(['api', '--paginate', `repos/${repo}/issues/${pr.number}/comments?per_page=100`, '--jq', `.[] | select(.body | startswith("${MARKER}")) | {id, body}`]);
-    const c = cs.status === 0 ? lines(cs)[0] : null;
+    // the review's own comment: the marker and this workflow's identity — a comment anyone else starts with the marker is
+    // neither read nor patched (#19)
+    const cs = gh(['api', '--paginate', `repos/${repo}/issues/${pr.number}/comments?per_page=100`, '--jq', '.[] | {id, body, author: .user.login}']);
+    const c = cs.status === 0 ? lines(cs).find((x) => x.author === author && String(x.body || '').startsWith(MARKER)) : null;
     const at = c ? c.body.indexOf(ESCALATIONS) : -1;
     if (at < 0) continue;
     let rec; try { rec = JSON.parse(c.body.slice(at + ESCALATIONS.length, c.body.indexOf(' -->', at))); } catch (e) { continue; }
@@ -251,13 +256,13 @@ async function recheck(repo, opts = {}) {
   return out;
 }
 
-module.exports = { check, render, statusLine, refsIn, recheck, escalationOf, MARKER, ESCALATIONS };
+module.exports = { check, render, statusLine, refsIn, recheck, escalationOf, MARKER, ESCALATIONS, REVIEW_BOT };
 
 if (require.main === module) {
   (async () => {
     const a = process.argv.slice(2), opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
     if (opt('--recheck')) {
-      const res = await recheck(opt('--recheck'), { lang: opt('--lang'), runUrl: opt('--run-url'), dryRun: a.includes('--dry-run') });
+      const res = await recheck(opt('--recheck'), { lang: opt('--lang'), runUrl: opt('--run-url'), author: opt('--author'), dryRun: a.includes('--dry-run') });
       if (a.includes('--json')) console.log(JSON.stringify(res, null, 1));
       else { for (const x of res) console.log(`#${x.pr} ${x.state}${x.why ? ` — ${x.why}` : x.refs ? ` — ${x.refs.join(', ')}` : ''}`); if (!res.length) console.log('no open pull request stands on an escalation'); }
       process.exit(0);

@@ -17,7 +17,7 @@ const git = (root: string, ...a: string[]) => spawnSync("git", ["-C", root, ...a
 const repo = (root: string, slug: string) => { mkdirSync(root, { recursive: true }); git(root, "init", "-q", "-b", "main"); git(root, "remote", "add", "origin", `https://github.com/acme/${slug}.git`); };
 
 // gh as GitHub answers it: per repository its variables, secrets and labels; the workflow permission
-type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[]; protection?: any; architecture?: string };
+type Repo = { vars?: Record<string, string>; secrets?: string[]; labels?: string[]; canPr?: boolean; runners?: { name: string; status: string; labels: string[] }[]; protection?: any; architecture?: string; workflows?: Record<string, string> };
 const calls: string[][] = [];
 const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
   calls.push(args);
@@ -32,6 +32,9 @@ const fakeGh = (repos: Record<string, Repo>) => (args: string[]) => {
     return x && x.architecture ? { status: 0, stdout: Buffer.from(x.architecture).toString("base64") + "\n", stderr: "" } : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "api" && /actions\/runners$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")];
     return x && x.runners ? ok({ runners: x.runners.map((n) => ({ ...n, labels: n.labels.map((name) => ({ name })) })) }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
+  if (args[0] === "workflow" && args[1] === "enable") { (r.workflows ||= {})[args[2]] = "active"; return ok(null); }
+  if (args[0] === "api" && /actions\/workflows\/[^/]+$/.test(args[1])) { const x = repos[args[1].split("/").slice(1, 3).join("/")] || {}, f = args[1].split("/").pop()!;
+    return x.workflows && x.workflows[f] ? ok({ state: x.workflows[f] }) : { status: 1, stdout: "", stderr: "HTTP 404" }; }
   if (args[0] === "variable") return ok(Object.entries(r.vars || {}).map(([name, value]) => ({ name, value })));
   if (args[0] === "secret") return ok((r.secrets || []).map((name) => ({ name })));
   if (args[0] === "label") return ok((r.labels || []).map((name) => ({ name })));
@@ -213,6 +216,22 @@ describe("ci-setup.js service", () => {
     expect(calls.filter((c) => c.includes("-X")).map((c) => c.join(" "))).toEqual(["api -X POST repos/acme/hub-api/branches/main/protection/required_status_checks/contexts -f contexts[]=Architecture review"]);
     svc.protection = { required_status_checks: { contexts: ["Tests", "Architecture review"] } };
     expect(C.service(SVC, { gh, ...opts }).rows.find((y: any) => y.item.startsWith("branch protection"))).toMatchObject({ state: "✓", item: 'branch protection — "Architecture review" required on main' });
+  });
+
+  test("a schedule GitHub disabled after 60 days without activity is a required row, enabled by --settings (#20)", () => {
+    const svc: Repo = { secrets: ["CLAUDE_CODE_OAUTH_TOKEN"], vars: { SA_ARCHITECTURE_REPO: "acme/order-desk" } };
+    const gh = fakeGh({ "acme/hub-api": svc, "acme/order-desk": {} });
+    const opts = { server: "https://idx/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", attended: true, review: true, write: true };
+    const wf = (r: any) => r.rows.find((x: any) => x.item.startsWith("workflow architecture-review.yml"));
+    expect(wf(C.service(SVC, { gh, ...opts })).state).toBe("·");   // not pushed yet
+    svc.workflows = { "architecture-review.yml": "disabled_inactivity" };
+    expect(wf(C.service(SVC, { gh, ...opts }))).toMatchObject({ state: "✗", item: expect.stringContaining("60 days"), fix: "gh workflow enable architecture-review.yml -R acme/hub-api" });
+    expect(wf(C.service(SVC, { gh, ...opts, settings: true }))).toMatchObject({ state: "✓", item: "workflow architecture-review.yml — enabled — set" });
+    expect(wf(C.service(SVC, { gh, ...opts }))).toMatchObject({ state: "✓", item: "workflow architecture-review.yml — active" });
+    svc.workflows = { "architecture-review.yml": "disabled_manually" };
+    calls.length = 0;
+    expect(wf(C.service(SVC, { gh, ...opts, settings: true })).state).toBe("!");   // someone's choice: reported, never undone
+    expect(calls.some((c) => c[0] === "workflow")).toBe(false);
   });
 
   test("a self-hosted runner that is not registered, or offline, is a required row", () => {
