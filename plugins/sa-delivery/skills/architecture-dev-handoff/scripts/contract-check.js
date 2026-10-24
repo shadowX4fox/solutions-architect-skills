@@ -187,7 +187,9 @@ function structure(doc) {
 }
 
 // ---- fidelity
-function fidelity(doc, st, src) {
+// `declaredSrc` is where the operations the component declares are read (the operation-missing warnings): the source
+// itself when it is the component's payload, its descriptor when the source is the whole architecture
+function fidelity(doc, st, src, declaredSrc = src) {
   const f = [], w = [];
   if (st.kind === 'asyncapi') {
     const text = src.replace(/\r\n?/g, '\n');
@@ -200,7 +202,7 @@ function fidelity(doc, st, src) {
     });
     return { f, w, summary: `${checked} channel address(es) checked`, missing: [] };
   }
-  const s = sourceOps(src);
+  const s = sourceOps(src); if (declaredSrc !== src) s.declared = declaredSrc ? sourceOps(declaredSrc).declared : new Map();
   const bases = (Array.isArray(doc.servers) ? doc.servers : []).map((x) => { try { return new URL(x.url, 'http://h').pathname.replace(/\/+$/, ''); } catch { return ''; } }).filter(Boolean);
   const keysOf = (o) => [opKey(o.method, o.path), ...bases.map((b) => opKey(o.method, b + o.path))];
   const inFile = new Set(st.ops.flatMap(keysOf));
@@ -535,6 +537,12 @@ function findPayload(file) {
   for (let i = 0; i < 8; i++) { const p = path.join(d, '.cache', 'sa-skills', 'handoff-payloads', `${slug}.md`); if (fs.existsSync(p)) return stalePayload(p, d) ? null : p; const up = path.dirname(d); if (up === d) break; d = up; }
   return null;
 }
+// the component's descriptor: the file under docs/components whose EXPLORER_HEADER names the slug as component_self
+function descriptorOf(root, slug) {
+  if (!slug) return null; const out = [];
+  const walk = (d) => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (/\.md$/i.test(e.name) && new RegExp(`^component_self:\\s*${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm').test(fs.readFileSync(p, 'utf8'))) out.push(p); } };
+  walk(path.join(root, 'docs', 'components')); return out.length === 1 ? out[0] : null;
+}
 // a payload cut for another architecture version is not the asset's source: a kit regenerated elsewhere (CI) leaves the
 // local cut behind, and its operations are the old version's
 function stalePayload(p, root) {
@@ -555,11 +563,18 @@ function checkFile(file, opts = {}) {
   let doc; try { doc = Bun.YAML.parse(raw); } catch (e) { res.findings.push({ rule: 'yaml-parse', text: String(e.message || e).split('\n')[0] }); return res; }
   if (Array.isArray(doc)) doc = doc[0];
   const st = structure(doc); res.kind = st.kind; res.findings.push(...st.f); res.warnings.push(...st.w);
-  const source = opts.source || findPayload(file);
+  const source = opts.source || findPayload(file), root = source ? null : projectRoot(file);
   if (source && fs.existsSync(source) && isMap(doc)) {
     const fi = fidelity(doc, st, fs.readFileSync(source, 'utf8'));
     res.findings.push(...fi.f); res.warnings.push(...fi.w);
     res.fidelity = { source, summary: fi.summary, missing: fi.missing };
+  } else if (root && isMap(doc)) {
+    // no current payload (a fresh checkout, CI): the architecture docs are the source, as for every other asset kind —
+    // an operation or a channel they never state blocks; the declared ones are the component descriptor's
+    const texts = corpus(root), desc = descriptorOf(root, slugOf(file));
+    const fi = fidelity(doc, st, texts.join('\n'), desc ? fs.readFileSync(desc, 'utf8') : null);
+    res.findings.push(...fi.f); res.warnings.push(...fi.w);
+    res.fidelity = { source: root, summary: `${fi.summary} — against the architecture docs (${texts.length} file(s))${desc ? '' : ', no descriptor found for the declared operations'}`, missing: fi.missing };
   } else res.fidelity = { source: null, skipped: 'no source — pass --source <component.md>, or run over a kit whose cut-sheet payloads are in .cache/sa-skills/handoff-payloads/' };
   const rd = opts.redoclyLint ? opts.redoclyLint(file) : redocly(file);
   if (rd.absent) { res.redocly = 'NOT INSTALLED'; res.findings.push({ rule: 'redocly', text: `@redocly/openapi-core is not installed — the contract cannot be validated: ${INSTALL}` }); }

@@ -164,11 +164,33 @@ describe("fidelity", () => {
     expect(r.fidelity.source).toMatch(/handoff-payloads\/hub-api\.md$/);
     expect(checkFile(w("nosrc/x/openapi.yaml", GOOD), off).fidelity.skipped).toMatch(/no source/);
   });
+  test("no payload: the architecture docs are the source, and the declared operations the descriptor's (#21)", () => {
+    const hdr = "<!-- EXPLORER_HEADER\ncomponent_self: hub-api\n-->";
+    w("docs-src/ARCHITECTURE.md", "<!-- ARCHITECTURE_VERSION: 1.0.0 -->\n# P\n");
+    w("docs-src/docs/components/desk/02-hub-api.md", SOURCE.replace("# Hub API\n", `# Hub API\n\n${hdr}\n`));
+    w("docs-src/docs/05-integration-points.md", "# Integrations\n\n- `GET /api/v1/items/{itemId}` — the web app reads one item\n");
+    const r = checkFile(w("docs-src/handoffs/assets/02-hub-api/openapi.yaml", GOOD), off);
+    expect(r.fidelity.source).toBe(join(TMP, "docs-src"));
+    expect(r.fidelity.summary).toMatch(/against the architecture docs \(3 file\(s\)\)$/);
+    expect(r.findings).toEqual([]);
+    expect(r.warnings.filter((x: any) => x.rule === "operation-missing").map((x: any) => x.key)).toEqual(expect.arrayContaining([expect.stringMatching(/^POST /)]));
+    const extra = GOOD.replace("components:", `  /graphql:\n    post:\n      operationId: gql\n      responses:\n        '200': { description: ok }\ncomponents:`);
+    const r2 = checkFile(w("docs-src/handoffs/assets/02-hub-api/openapi.yaml", extra), off);
+    expect(r2.findings.map((x: any) => x.rule)).toEqual(["operation-undocumented"]);
+  });
+  test("no payload, no descriptor: undocumented operations still block, nothing is declared", () => {
+    w("nodesc/ARCHITECTURE.md", "# P\n");
+    w("nodesc/docs/05-integration-points.md", SOURCE);
+    const r = checkFile(w("nodesc/handoffs/assets/02-hub-api/openapi.yaml", GOOD), off);
+    expect(r.findings).toEqual([]);
+    expect(r.fidelity.summary).toMatch(/no descriptor found for the declared operations$/);
+    expect(r.warnings.filter((x: any) => x.rule === "operation-missing")).toEqual([]);
+  });
   test("a payload cut for another architecture version is not the asset's source", () => {
     w("stale/ARCHITECTURE.md", "<!-- ARCHITECTURE_VERSION: 1.4.0 -->\n# P\n");
     w("stale/.cache/sa-skills/handoff-payloads/hub-api.md", `---\narchitecture_version: 1.0.0\n---\n${SOURCE}`);
     const f = w("stale/handoffs/assets/02-hub-api/openapi.yaml", GOOD);
-    expect(checkFile(f, off).fidelity.source).toBeNull();
+    expect(checkFile(f, off).fidelity.source).toBe(join(TMP, "stale"));   // the architecture docs instead (#21)
     w("stale/.cache/sa-skills/handoff-payloads/hub-api.md", `---\narchitecture_version: 1.4.0\n---\n${SOURCE}`);
     expect(checkFile(f, off).fidelity.source).toMatch(/handoff-payloads\/hub-api\.md$/);
   });
@@ -212,6 +234,12 @@ describe("asyncapi", () => {
   test("a channel the source never names is channel-undocumented", () => {
     const r = checkFile(w("async2/asyncapi.yaml", ASYNC.replace("ledger.entries.posted", "ledger.audit")), { source: w("async2/src.md", ASYNC_SRC) });
     expect(rules(r)).toContain("channel-undocumented");
+  });
+  test("no payload: a channel is held to the architecture docs (#21)", () => {
+    w("async-docs/ARCHITECTURE.md", "# P\n");
+    w("async-docs/docs/05-integration-points.md", ASYNC_SRC);
+    expect(checkFile(w("async-docs/handoffs/assets/02-hub-api/asyncapi.yaml", ASYNC), off).findings).toEqual([]);
+    expect(rules(checkFile(w("async-docs/handoffs/assets/02-hub-api/asyncapi.yaml", ASYNC.replace("ledger.entries.posted", "ledger.audit")), off))).toContain("channel-undocumented");
   });
   test("action must be send / receive; channel a $ref; channels: with only comments is null", () => {
     expect(rules(checkFile(w("async3/asyncapi.yaml", ASYNC.replace("action: send", "action: publish")), off))).toContain("operation");

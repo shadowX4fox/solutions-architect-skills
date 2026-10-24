@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.22.0]
+
+### Changed
+
+- **OpenAPI and AsyncAPI contracts are held to the architecture docs when no cut-sheet payload exists** (#21). `contract-check.js` skipped their fidelity without a payload of the architecture's version, so a kit checked on a fresh checkout, in CI above all, never ran `operation-undocumented` or `channel-undocumented`. Without one, the source is now `ARCHITECTURE.md` and `docs/`, as it already was for DDL, Avro, Protobuf and the Redis key schema: an operation or channel they never state blocks. The `operation-missing` warnings read the component's descriptor (`component_self` in its `EXPLORER_HEADER`), never the whole corpus.
+
+### Upgrade
+
+- A contract that passed in CI because nothing checked it may now fail with `operation-undocumented` or `channel-undocumented`: state the operation in the component's descriptor, or drop it from the contract.
+
 ## [10.21.2]
 
 ### Fixed
