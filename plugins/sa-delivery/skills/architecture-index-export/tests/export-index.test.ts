@@ -119,6 +119,24 @@ describe("export-index — chunks", () => {
 });
 
 describe("export-index — build packs", () => {
+  test("each ADR part says why it is there: own (descriptor, security) or context (only an interface or a flow brings it)", () => {
+    w("adr/ADR-103-ledger-retention.md", `# ADR-103: Ledger retention\n\n**Status**: Accepted\n**Scope**: Project\n\n## Decision\n\nKeep entries 24 months.\n`);
+    const mf = JSON.parse(readFileSync(join(P, "handoffs/.manifest.json"), "utf8"));
+    mf.seams["hub-api→ledger-store"].related_adrs = ["ADR-103"];
+    w("handoffs/.manifest.json", JSON.stringify(mf));
+    const { out } = exportIndex(P, { kitCheck: clean });
+    const pack = JSON.parse(readFileSync(join(out, "buildpacks/hub-api/pack.json"), "utf8"));
+    const adr = (id: string) => pack.parts.find((p: any) => p.id === `adr:${id}`);
+    expect(pack.adrs).toEqual(["ADR-012", "ADR-101", "ADR-103"]);
+    expect(adr("ADR-101")).toMatchObject({ scope: "own", via: ["component", "interface:web-app→hub-api", "flow:1"] });
+    expect(adr("ADR-012")).toMatchObject({ scope: "context", via: ["security"] });   // the security section's decision, not the descriptor's
+    expect(adr("ADR-103")).toMatchObject({ scope: "context", via: ["interface:hub-api→ledger-store"] });
+    const md = readFileSync(join(out, "buildpacks/hub-api/BUILD.md"), "utf8");
+    expect(md).toContain("`adr:ADR-101` — ADR-101: Idempotency keys on every write (`adrs/ADR-101-idempotency-keys.md`) — **own**: this code carries it out");
+    expect(md).toContain("— **context**, through the interface Hub API → Ledger Store: not an obligation of this code; read it for what the other side does");
+    expect(md).toContain("`adr:ADR-012` — ADR-012: Service mesh (`adrs/ADR-012-service-mesh.md`) — **context**, through the security obligations");
+    expect(md).toContain("an `adr:` part marked **context** reaches this pack through an interface, a flow or the security section");
+  });
   test("a superseded ADR the component still cites is left out of its pack, with a warning naming it", () => {
     w("adr/ADR-102-polling-cache.md", `# ADR-102: Polling cache\n\n**Status**: Superseded by [ADR-101]\n**Scope**: Project\n\n## Decision\n\nPoll every minute.\n`);
     w("docs/components/desk/02-hub-api.md", readFileSync(join(P, "docs/components/desk/02-hub-api.md"), "utf8").replace("related_adrs: ADR-101", "related_adrs: ADR-101, ADR-102"));

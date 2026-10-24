@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.23.0]
+
+### Added
+
+- **Each ADR of a build pack says why it is there.** The ADR parts of `pack.json` carry `scope` and `via`. `own` means the component's descriptor names the ADR and this code carries it out. `context` means the ADR reaches the pack only through an interface contract, a flow or the security section: it describes what the other side does. `via` lists every origin (`component`, `security`, `interface:<key>`, `flow:<code>`). The plan in `BUILD.md` marks each ADR, and rule 5 holds the code to the `own` ones only: a `context` ADR is never reported missing from the code. An IDE agent that compared every ADR of the pack with its code kept reporting the other side's decisions as gaps for the architect. `pack.adrs` keeps its shape.
+
 ## [10.22.0]
 
 ### Changed

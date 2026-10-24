@@ -273,7 +273,7 @@ passes `kit-check.js`. A developer never builds from an outdated or failing kit.
 | `spec.md` | the Component Specification: responsibility, contracts, invariants, budgets, acceptance |
 | `security.md` | the **security obligations**, second in the plan: every caller and each interface's authentication, the Security by Design principle, the institutional ADRs, the STRIDE findings and mitigations, data sensitivity flows, security tests |
 | `assets/` | the contracts byte for byte: `openapi.yaml`, `asyncapi.yaml`, `schema.graphql`, `*.avsc`, `ddl.sql`, `schema.proto`, `redis-key-schema.md` |
-| `interfaces/` · `adrs/` · `cross-cutting-standards.md` · `runtime-view.md` | the Interface Contracts both ways, the governing ADRs, the shared kit documents |
+| `interfaces/` · `adrs/` · `cross-cutting-standards.md` · `runtime-view.md` | the Interface Contracts both ways, the governing ADRs — each `own` (its descriptor names it: this code carries it out) or `context` (only an interface, a flow or the security section brings it: what the other side does) —, the shared kit documents |
 | `tdrs/` | the technical debt records the component's descriptor names, read with the specification. Links between parts point inside the pack |
 | `pack.json` | the index: parts, ordered plan, flows, interfaces, ADRs, open questions |
 

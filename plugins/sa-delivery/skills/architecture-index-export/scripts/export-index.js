@@ -280,7 +280,10 @@ function renderBuild(pack, projectName, server, mode, auto = []) {
   const c = pack.component; const part = new Map(pack.parts.map((p) => [p.id, p]));
   // the pack's revision is the sha256 of the pack.json listing this very file, so the export cannot write it: the agent records it from get_build_pack
   const binding = JSON.stringify({ ...(server ? { server } : {}), project: pack.project, component: c.slug, architecture_version: pack.architecture_version, pack_revision: '<pack_revision from get_build_pack>' }, null, 2);
-  const plan = pack.plan.map((s) => `### ${s.step}. ${s.title}\n\n${s.id === 'acceptance' ? '- `spec` — § Acceptance of the Component Specification: each criterion becomes an automated test' : s.parts.map((id) => `- \`${id}\` — ${part.get(id).title} (\`${part.get(id).path}\`)`).join('\n')}${s.id === 'flows' && pack.flows.length ? '\n- the flows and budgets below' : ''}`).join('\n\n');
+  // an ADR the component's descriptor names is carried out here; one only an interface, a flow or the security section brings is context
+  const viaName = (x) => { const i = pack.interfaces.find((y) => `interface:${y.key}` === x); if (i) return `the interface ${i.upstream_name} → ${i.downstream_name}`; const f = pack.flows.find((y) => `flow:${y.code}` === x); if (f) return `flow ${f.code}. ${f.name}`; return x === 'security' ? 'the security obligations' : x; };
+  const adrNote = (p) => (p.kind !== 'adr' || !p.scope ? '' : p.scope === 'own' ? ' — **own**: this code carries it out' : ` — **context**, through ${p.via.map(viaName).join(', ')}: not an obligation of this code; read it for what the other side does`);
+  const plan = pack.plan.map((s) => `### ${s.step}. ${s.title}\n\n${s.id === 'acceptance' ? '- `spec` — § Acceptance of the Component Specification: each criterion becomes an automated test' : s.parts.map((id) => `- \`${id}\` — ${part.get(id).title} (\`${part.get(id).path}\`)${adrNote(part.get(id))}`).join('\n')}${s.id === 'flows' && pack.flows.length ? '\n- the flows and budgets below' : ''}`).join('\n\n');
   const interfaces = pack.interfaces.length ? mdTable(['Direction', 'Interface', 'Part'], pack.interfaces.map((i) => [i.direction, `${i.upstream_name} → ${i.downstream_name}`, `\`${i.part}\``])) : 'None stated for this component.';
   const flows = pack.flows.length ? mdTable(['Flow', 'Use cases', 'Flow target', 'Phase', 'Hops', 'Phase budget'], pack.flows.flatMap((f) => f.phases.map((p) => [`${f.code}. ${f.name}`, f.use_cases.join(', '), f.latency_target, `${p.n}. ${p.name}`, p.hops, p.latency_budget]))) : 'None stated for this component.';
   // the Inbound section of the security part, verbatim: who may call and how, before anything is built
@@ -332,6 +335,12 @@ function buildPacks(root, facts, outDir, opts = {}) {
     const retired = cited.filter((id) => RETIRED_ADR.test(adrStatus.get(id) || ''));
     if (retired.length) res.warnings.push(`${slug}: ${retired.map((id) => `${id} (${adrStatus.get(id)})`).join(', ')} cited but not in force — left out of the build pack; drop the citation`);
     const adrs = cited.filter((id) => !retired.includes(id));
+    // why each one is here (10.23.0): the component's descriptor names the decisions this code carries out (`own`); one only
+    // an interface contract, a flow or the security section brings is `context` — read for what the other side does, not an
+    // obligation of this code nor missing from it (the security obligations themselves bind through the `security` part)
+    const via = (id) => [...((c.related_adrs || []).includes(id) ? ['component'] : []), ...(secAdrs.includes(id) ? ['security'] : []),
+      ...seams.filter((s) => s.related_adrs.includes(id)).map((s) => `interface:${s.key}`), ...flows.filter((f) => (f.governed_by || []).includes(id)).map((f) => `flow:${f.code}`)];
+    const adrScope = (v) => (v.includes('component') ? 'own' : 'context');
 
     const dir = path.join(outDir, 'buildpacks', slug); const partsOut = [];
     const add = (id, kind, title, src, rel, step) => { const dst = path.join(dir, rel); fs.mkdirSync(path.dirname(dst), { recursive: true }); fs.copyFileSync(src, dst); const b = fs.readFileSync(dst);
@@ -342,7 +351,7 @@ function buildPacks(root, facts, outDir, opts = {}) {
     seams.sort((a, b) => (a.upstream === slug ? 0 : 1) - (b.upstream === slug ? 0 : 1) || a.key.localeCompare(b.key))
       .forEach((s) => add(`interface:${s.key}`, 'interface', `Interface Contract: ${nameOf(s.upstream)} → ${nameOf(s.downstream)}`, s.file, path.join('interfaces', path.basename(s.file)), 'interfaces'));
     add('cross-cutting-standards', 'standards', 'Cross-Cutting Standards', shared['cross-cutting-standards'], 'cross-cutting-standards.md', 'standards');
-    adrs.forEach((id) => add(`adr:${id}`, 'adr', adrTitle.get(id), path.join(root, adrFile.get(id)), path.join('adrs', path.basename(adrFile.get(id))), 'standards'));
+    adrs.forEach((id) => { add(`adr:${id}`, 'adr', adrTitle.get(id), path.join(root, adrFile.get(id)), path.join('adrs', path.basename(adrFile.get(id))), 'standards'); const v = via(id); Object.assign(partsOut[partsOut.length - 1], { scope: adrScope(v), via: v }); });
     // its technical debt (10.10.3): the TDRs its descriptor's **Technical Debt:** line names, read with the specification whose § 7 lists them
     const tdrs = (c.tdrs || []).filter((id) => tdrById.has(id) && tdrById.get(id).file && fs.existsSync(path.join(root, tdrById.get(id).file)));
     tdrs.forEach((id) => { const t = tdrById.get(id); add(`tdr:${id}`, 'tdr', t.title ? `${id}: ${t.title}` : id, path.join(root, t.file), path.join('tdrs', path.basename(t.file)), 'spec'); });
