@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.23.1]
+
+### Changed
+
+- **The local server runs Alia 0.6.0** (`local/compose.yaml`, `SA_INDEX_SERVER_TAG`), closing #22. `get_build_pack` now passes each ADR part's `scope` and `via`, the fields added in 10.23.0, and its tool description explains them. A client that reads only the index no longer treats the other side's decisions as gaps.
+
+### Upgrade
+
+- A running local server keeps its image: `docker compose … pull` and `up -d` with the same files and variables it was started with (`compose.escalation.yaml` included). Its bundles stay in their volume.
+
 ## [10.23.0]
 
 ### Added
