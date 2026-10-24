@@ -221,6 +221,7 @@ function chunksOf(root, facts, key) {
 
 // ---- build packs, from the handoff kit only when it holds
 const ASSET_STEP = (f) => /^(openapi\.ya?ml|asyncapi\.ya?ml|schema\.graphql|schema\.proto|.*\.avsc)$/i.test(f) ? 'contracts' : /^(ddl\.sql|redis-key-schema\.md)$/i.test(f) ? 'data' : /^c4-descriptor\.md$/i.test(f) ? 'spec' : 'contracts';
+const RETIRED_ADR = /^(superseded|deprecated|rejected)\b/i;   // ADR status values no longer in force (the ADR skill writes them in English)
 const PLAN = [
   ['spec', 'Read the Component Specification: responsibility, invariants, budgets, data ownership'],
   ['security', 'Enforce the security obligations first: who may call, how each interface authenticates, the threats to mitigate'],
@@ -306,6 +307,7 @@ function buildPacks(root, facts, outDir, opts = {}) {
   if (sharedFail.length) { res.warnings.push(`kit-check: ${sharedFail.map((f) => posix(path.relative(root, f))).join(', ')} missing or failing — no build packs`); comps.forEach((c) => res.skipped.push({ component: c.slug, reason: 'kit-check shared' })); return res; }
   const slugOf = resolver(facts); const phaseComps = new Map((facts.phases || []).map((p) => [p.n, uniq(hopNames(p.hops).map(slugOf))]));
   const adrFile = new Map((facts.adrs || []).map((a) => [a.id, a.file]));
+  const adrStatus = new Map((facts.adrs || []).map((a) => [a.id, a.status || '']));
   const adrTitle = new Map((facts.adrs || []).map((a) => [a.id, !a.title ? a.id : a.title.startsWith(a.id) ? a.title : `${a.id}: ${a.title}`]));
   const tdrById = new Map((facts.tdrs || []).map((t) => [t.id, t]));
   const nameOf = (sl) => ((facts.components || []).find((x) => x.slug === sl) || {}).name || sl;   // canonical names in every title a builder reads
@@ -325,7 +327,11 @@ function buildPacks(root, facts, outDir, opts = {}) {
     const flows = flowsOf(facts, slug);
     // the governing ADRs, and the institutional ones its security obligations name (the security section's decisions in force)
     const secAdrs = adrIds(read(security)).filter((id) => parseInt(id.slice(4), 10) <= 100);
-    const adrs = uniq([...(c.related_adrs || []), ...seams.flatMap((s) => s.related_adrs), ...flows.flatMap((f) => f.governed_by), ...secAdrs]).filter((id) => adrFile.has(id)).sort();
+    const cited = uniq([...(c.related_adrs || []), ...seams.flatMap((s) => s.related_adrs), ...flows.flatMap((f) => f.governed_by), ...secAdrs]).filter((id) => adrFile.has(id)).sort();
+    // decisions in force only: a superseded, deprecated or rejected ADR is named, never packed — the builder would follow both
+    const retired = cited.filter((id) => RETIRED_ADR.test(adrStatus.get(id) || ''));
+    if (retired.length) res.warnings.push(`${slug}: ${retired.map((id) => `${id} (${adrStatus.get(id)})`).join(', ')} cited but not in force — left out of the build pack; drop the citation`);
+    const adrs = cited.filter((id) => !retired.includes(id));
 
     const dir = path.join(outDir, 'buildpacks', slug); const partsOut = [];
     const add = (id, kind, title, src, rel, step) => { const dst = path.join(dir, rel); fs.mkdirSync(path.dirname(dst), { recursive: true }); fs.copyFileSync(src, dst); const b = fs.readFileSync(dst);

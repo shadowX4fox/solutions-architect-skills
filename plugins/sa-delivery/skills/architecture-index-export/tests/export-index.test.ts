@@ -119,6 +119,14 @@ describe("export-index — chunks", () => {
 });
 
 describe("export-index — build packs", () => {
+  test("a superseded ADR the component still cites is left out of its pack, with a warning naming it", () => {
+    w("adr/ADR-102-polling-cache.md", `# ADR-102: Polling cache\n\n**Status**: Superseded by [ADR-101]\n**Scope**: Project\n\n## Decision\n\nPoll every minute.\n`);
+    w("docs/components/desk/02-hub-api.md", readFileSync(join(P, "docs/components/desk/02-hub-api.md"), "utf8").replace("related_adrs: ADR-101", "related_adrs: ADR-101, ADR-102"));
+    const { out, manifest } = exportIndex(P, { kitCheck: clean });
+    const pack = JSON.parse(readFileSync(join(out, "buildpacks/hub-api/pack.json"), "utf8"));
+    expect(pack.adrs).toEqual(["ADR-012", "ADR-101"]);
+    expect(manifest.warnings.join("\n")).toMatch(/hub-api: ADR-102 \(Superseded by \[ADR-101\]\) cited but not in force/);
+  });
   test("a kit that holds packs the component: parts byte for byte, the plan in order, interfaces both ways, ADRs, open questions", () => {
     const { out, manifest } = exportIndex(P, { kitCheck: clean });
     expect(manifest.buildpacks).toEqual([{ component: "hub-api", path: "buildpacks/hub-api/pack.json", parts: 12, open_questions: 1 }]);

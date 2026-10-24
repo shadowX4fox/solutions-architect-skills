@@ -4,7 +4,7 @@ description: >
   Export an architecture as an index bundle (sa-index/1) for an architecture MCP server — the
   chunks a server embeds for search, the facts ledger its exact tools answer from, and one build
   pack per container the handoff kit covers (spec, interface contracts, assets byte for byte,
-  flows and budgets, governing ADRs, open questions, an ordered build plan), so a developer's IDE
+  flows and budgets, governing ADRs in force, open questions, an ordered build plan), so a developer's IDE
   can ask the architecture and build one component from its spec. By code; calls no model and no
   vector store; reads nothing compliance writes.
 triggers:

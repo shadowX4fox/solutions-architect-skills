@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.21.1]
+
+### Fixed
+
+- **A build pack carries only decisions in force.** `export-index.js` packed every ADR a component, its interfaces, its flows or its security obligations cited, whatever its status, so a descriptor still naming a superseded ADR handed the builder both the decision and its replacement. A cited ADR whose status is `Superseded`, `Deprecated` or `Rejected` is now left out of the pack and named in the export's warnings, with the citation to drop.
+
 ## [10.21.0]
 
 ### Added
