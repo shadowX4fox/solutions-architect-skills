@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.19.5]
+
+### Security
+
+- **Bun 1.4.4 in every CI template and in the plugin's own CI**: the `bun-version` pins (`architecture-gates`, `-release`, `-handoff`, `-tier0`, the service's `architecture-review.yml`, the GitHub and Gitea index examples) and the Azure Pipelines install move from 1.4.2 to 1.4.4, which fixes CVE-2026-111497 (out-of-bounds write in the bundled brotli decoder, GHSA-663w-cv8g-jj2p), the HTTP/3 QPACK memory exhaustion (GHSA-cf8x-9m69-3gg3) and the bundled root certificates trusting compromised eMudhra intermediates (GHSA-26q8-h657-pf84).
+
+### Upgrade
+
+- Local: `bun upgrade` (1.4.4 or later).
+- Projects: `ci-setup.js architecture|service … --write` moves the plugin pin; a workflow copied from the earlier template shows as `!` — take the new one with `--replace <file>` for each.
+
 ## [10.19.4]
 
 ### Fixed

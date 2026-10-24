@@ -32,7 +32,7 @@ steps:
     fetchDepth: 0                    # the release tag and its tree
     fetchTags: true
   - bash: |
-      curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
+      curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.4"
       echo "##vso[task.prependpath]$HOME/.bun/bin"
     displayName: Install Bun
   - bash: |
