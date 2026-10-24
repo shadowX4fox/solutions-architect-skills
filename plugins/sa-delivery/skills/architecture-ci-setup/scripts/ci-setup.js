@@ -7,7 +7,8 @@
 //                 repository's variables, secrets and settings read with gh
 //   service       a service (dev) repository — the binding (.architecture.json), the architecture MCP server for the IDE
 //                 (.mcp.json), and for an unattended build its two workflows (architecture-build.yml and, opt in,
-//                 architecture-build-merge.yml) with their secrets and variables
+//                 architecture-build-merge.yml) with their secrets and variables; --mention, on either kind, the workflow
+//                 that answers @claude with the architecture (architecture-mention.yml, 10.20.0)
 //
 // Every check prints ✓ / ✗ / ! with the fix. --write writes local files only, and never over a workflow that differs from
 // its template beyond the pin — changes of its own, or an older template: the code cannot tell them apart, so the user
@@ -17,8 +18,8 @@
 //
 //   bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //   bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>]
-//                   [--attended [--review]] [--merge --tests "<workflow name>"] [--agent <login>] [--runs-on <label,…>]
-//                   [--write] [--settings] [--json]
+//                   [--attended [--review]] [--merge --tests "<workflow name>"] [--agent <login>] [--mention]
+//                   [--runs-on <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //
 // --merge is full auto: the build's pull request merges on its tests, so a release reaches it with no person only when the
 // architecture merges its kit (SA_HANDOFF_AUTOMERGE) and trusts the agent's Tier 0 requests (SA_TIER0_TRUSTED_AGENTS).
@@ -214,8 +215,9 @@ function service(dir, opts = {}) {
   if (has) row(rows, '✓', `.mcp.json — "${has[0]}" → ${next.server}`);
   else if (next.server && opts.write) { mcp.mcpServers = { ...servers, architecture: { type: 'http', url: next.server } }; fs.writeFileSync(mf, JSON.stringify(mcp, null, 2) + '\n'); row(rows, '✓', `.mcp.json — "architecture" → ${next.server} added`); }
   else row(rows, '✗', `.mcp.json — no server at ${next.server || '(no server)'}: the IDE cannot reach the architecture`, 'run again with --write');
-  if (opts.attended && !opts.review) return { side: 'service', root: dir, repo, rows };
-  // unattended: the build workflow, and the merge workflow when the team opts in; --review: the pull requests' reviewer
+  if (opts.attended && !opts.review && !opts.mention) return { side: 'service', root: dir, repo, rows };
+  // unattended: the build workflow, and the merge workflow when the team opts in; --review: the pull requests' reviewer;
+  // --mention: @claude with the architecture's MCP server and BUILD.md as standing rules
   const tpl = path.join(SKILL, 'architecture-index-export', 'ci', 'service'), list = [];
   if (!opts.attended) {
     list.push({ template: path.join(tpl, 'architecture-build.yml'), file: 'architecture-build.yml' });
@@ -225,8 +227,17 @@ function service(dir, opts = {}) {
     }
   }
   if (opts.review) list.push({ template: path.join(tpl, 'architecture-review.yml'), file: 'architecture-review.yml' });
+  if (opts.mention) list.push({ template: path.join(tpl, 'architecture-mention.yml'), file: 'architecture-mention.yml' });
   const pin = `SA_PLUGIN_REF: v${opts.version || pluginVersion()}`;
   placeWorkflows(dir, list.map((w) => ({ ...w, pin, text: (w.edit || ((t) => t))(read(w.template)).replace(PIN, pin) })), rows, opts.write, opts.replace);
+  // another workflow that answers @claude (the stock claude.yml /install-github-app writes) runs beside it: every mention
+  // twice, the second without the architecture. Reported, never deleted — it is the team's file
+  if (opts.mention) {
+    const wf = path.join(dir, '.github', 'workflows');
+    const others = exists(wf) ? fs.readdirSync(wf).filter((f) => /\.ya?ml$/.test(f) && f !== 'architecture-mention.yml' && f !== 'architecture-build.yml' && f !== 'architecture-review.yml')
+      .filter((f) => { const t = read(path.join(wf, f)); return /anthropics\/claude-code-action@/.test(t) && /^\s*issue_comment:/m.test(t) && !/^\s*prompt:/m.test(t); }) : [];
+    for (const f of others) row(rows, '!', `.github/workflows/${f} — also answers @claude, without the architecture: every mention runs twice`, `git rm .github/workflows/${f} (architecture-mention.yml replaces it)`);
+  }
   if (opts.merge && opts.tests && !(exists(path.join(dir, '.github', 'workflows')) && fs.readdirSync(path.join(dir, '.github', 'workflows')).some((f) => /\.ya?ml$/.test(f) && new RegExp(`^name:\\s*["']?${opts.tests.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']?\\s*$`, 'm').test(read(path.join(dir, '.github', 'workflows', f))))))
     row(rows, '✗', `no workflow named "${opts.tests}" — the merge waits for checks that never run`, 'add the repository\'s test workflow (its `name:` is what --tests names)');
   if (!repo) { row(rows, '✗', 'origin — not a GitHub repository; the workflows are GitHub Actions'); return { side: 'service', root: dir, repo, rows }; }
@@ -251,7 +262,8 @@ function service(dir, opts = {}) {
       up.length ? null : fit.length ? 'start it: ./run.sh in its directory (or its service)' : `register one on ${repo} with the labels ${labels.filter((l) => l !== 'self-hosted').join(', ')}: Settings → Actions → Runners → New self-hosted runner (a personal account's runner serves one repository)`);
   };
   if (!st.error) {
-    row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', `secret CLAUDE_CODE_OAUTH_TOKEN — ${opts.attended ? 'the review' : 'the build'}`, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
+    const uses = [!opts.attended && 'the build', opts.review && 'the review', opts.mention && '@claude'].filter(Boolean).join(', ');
+    row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', `secret CLAUDE_CODE_OAUTH_TOKEN — ${uses}`, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
     if (!opts.attended) row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
     row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
     // the language the build's pull request and issues, and the review's comment and status, are written in: the
@@ -263,6 +275,12 @@ function service(dir, opts = {}) {
       else varRow(rows, have === lang ? '✓' : '✗', `variable SA_DOC_LANGUAGE${have === lang ? ` = ${have}` : ` — ${have ? `${have}, ` : ''}the architecture is written in ${lang}`}`, repo, 'SA_DOC_LANGUAGE', lang);
     }
     if (!opts.attended) runnerRows('SA_BUILD_RUNS_ON', 'the build');
+    if (opts.mention) {
+      runnerRows('SA_MENTION_RUNS_ON', '@claude');
+      // a person merges what @claude writes: on an attended service the review holds it to the pack; an unattended one has
+      // no review, and its merge workflow merges only the build agent's pull requests
+      if (!opts.review) row(rows, '·', `@claude's pull requests — a person merges them, and no review holds them to the pack${opts.attended ? ' (--review adds it)' : ' (the review is an attended service\'s)'}`);
+    }
     if (opts.review) {
       runnerRows('SA_REVIEW_RUNS_ON', 'the review');
       const ar = st.vars.SA_ARCHITECTURE_REPO, want = opts.architecture;
@@ -309,9 +327,9 @@ if (require.main === module) {
   const opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
   const o = { write: a.includes('--write'), runner: opt('--runner'), architecture: opt('--architecture'), project: opt('--project'), component: opt('--component'),
     server: opt('--server'), attended: a.includes('--attended'), merge: a.includes('--merge'), tests: opt('--tests'),
-    agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'), review: a.includes('--review'),
+    agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'), review: a.includes('--review'), mention: a.includes('--mention'),
     replace: String(opt('--replace') || '').split(',').map((x) => x.trim()).filter(Boolean) };
-  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--runs-on <label,…>] [--write] [--settings] [--json]'); process.exit(2); }
+  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on <label,…>] [--write] [--replace <file,…>] [--settings] [--json]'); process.exit(2); }
   const r = side === 'architecture' ? architecture(target, o) : service(target, o);
   if (a.includes('--json')) { console.log(JSON.stringify(r, null, 1)); process.exit(r.rows.some((x) => x.state === '✗') ? 1 : 0); }
   console.log(`CI SETUP — ${r.side}: ${r.root}${r.repo ? ` (${r.repo})` : ''}`);

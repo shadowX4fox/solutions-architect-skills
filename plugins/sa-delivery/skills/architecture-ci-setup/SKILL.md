@@ -6,7 +6,7 @@ description: >
   escalations, Tier 0) from the plugin's templates with the plugin's pin, the RUN-team policy, the labels and the
   repository's variables, secrets and settings; in a service repository the binding
   (.architecture.json), the architecture MCP server for the IDE (.mcp.json) and, for an unattended
-  build, the build and merge workflows. Checks first, writes after the user's yes, never sets a
+  build, the build and merge workflows, and on either kind the workflow that answers @claude with the architecture. Checks first, writes after the user's yes, never sets a
   secret itself. Use for "set up architecture CI", "connect a service repo to the architecture",
   "configure the architecture MCP in this repo", "set up the unattended build".
 triggers:
@@ -20,6 +20,7 @@ triggers:
   - configure the architecture mcp
   - set up alia in this repo
   - set up the unattended build
+  - set up @claude with the architecture
 ---
 
 # Architecture CI Setup
@@ -32,7 +33,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 2. **Which side.** A directory with `ARCHITECTURE.md` is the **architecture** repository. One with `.architecture.json`, or a code repository the user names as a service, is a **service** repository. When a request covers both ("connect the service to the architecture"), do the architecture first. If it is unclear, ask.
 3. **Check.** Run it read-only and show its output verbatim:
    - architecture: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js architecture <root> [--runner <labels>]`
-   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--runs-on self-hosted,<label>]`
+   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on self-hosted,<label>]`
 
    A service is always checked with `--architecture`: the pair is configured on both sides in one run.
 
@@ -45,6 +46,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
      - whether its pull requests may merge without a person (`--merge`, the service team's policy), and which workflow runs the tests (`--tests`, its `name:`). `--merge` is full auto: the report then requires the architecture's `SA_HANDOFF_AUTOMERGE` and the agent in its `SA_TIER0_TRUSTED_AGENTS`, the architecture team's two settings, so say so in the question;
      - the build agent's login (`--agent`): the identity of `SA_BUILD_TOKEN`, a machine user or a GitHub App's `name[bot]`;
      - where the build runs, when the server is on localhost or a private network (`--runs-on self-hosted,<label>`). The report checks that a runner with those labels is registered and online on the service repository.
+   - **@claude** (either kind): should a mention in an issue or pull request ask Claude for a change with the architecture (`--mention`)? That adds `architecture-mention.yml`: the action's mention mode, with the MCP server and the component's BUILD.md as standing rules. Claude keeps the contracts and puts an escalation `preview_escalation` renders in its reply instead of departing. Only the owner, members and collaborators start it. A person merges its branch; on an attended service, `--review` holds it to the pack. When the repository has the stock `claude.yml`, the report marks it `!`: two workflows would answer every mention. It is removed only on the user's yes (`git rm`), in the same pull request.
 5. **Write.** List the files the run will write and the variables it will set on each repository, and get the user's yes. Then run the same command with `--write --settings`. `--settings` sets every required (`✗`) variable whose value is known, on both repositories, and reports each as `— set`; it never sets a secret.
    - A workflow marked `!` differs from its template: it has changes of its own, or it came from an older template. Show `diff <file> <template>`, and replace it (`--replace <file>`) only for the files the user names.
    - The workflows reach the repository through a branch and a pull request, never a push to the default branch. Ask before pushing.
@@ -69,6 +71,7 @@ How a release finds the service: the handoff names no service. `architecture-ind
 | `architecture-handoff.yml` regenerates the kit after a release and, with `SA_HANDOFF_AUTOMERGE=true`, merges it once its gates pass and dispatches the index | — |
 | `architecture-index.yml` publishes a release's build packs and dispatches `architecture-released` to `SA_SERVICE_REPOS` (`SA_DISPATCH_TOKEN`) | `architecture-build.yml` builds from the pack, unattended, and opens a pull request (`SA_BUILD_TOKEN`) |
 | `architecture-tier0.yml` keys the build's request for a kind in `tier0.auto`, and a move to `Resolved` waits for the pull request it cites | `architecture-build-merge.yml` merges the build's pull request once the tests pass (opt in) |
+| — | `architecture-mention.yml` (`--mention`, either kind) answers `@claude` with the MCP server and BUILD.md; a person merges its work (`SA_MENTION_RUNS_ON`) |
 
 Escalations stay with the architect: nothing in this pair answers one. Reference: `docs/RUN_TEAMS.md`.
 

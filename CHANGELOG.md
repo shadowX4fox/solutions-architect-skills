@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.20.0]
+
+### Added
+
+- **@claude with the architecture** (`ci/service/architecture-mention.yml`, `ci-setup.js service … --mention`, on an attended or an unattended service): a mention in an issue, a comment or a review is answered with the architecture MCP server, from `SA_MENTION_RUNS_ON`, with Claude's own `HOME`. The action's mention mode keeps the comment as the instruction, and `--append-system-prompt` adds BUILD.md as standing rules: read the build pack first, ask in the reply, keep the contracts byte for byte, and put the escalation `preview_escalation` renders in the reply for a person to file instead of a departure. Only the owner, members and collaborators start it, tested before a runner is chosen. The work ends on a `claude/` branch that a person merges. `ci-setup` reports the stock `claude.yml` as `!`, because every mention would run twice and the second without the architecture, and never deletes it. On an unattended service nothing reviews that work against the pack; a `·` row says so.
+
+### Fixed
+
+- **`architecture-build-merge.yml` never merges a `claude/` branch.** It checked only who opened the pull request, so a pull request opened from @claude's branch by the `SA_BUILD_AGENT` account merged once its tests passed.
+
+### Upgrade
+
+- A service that wants @claude: `ci-setup.js service … --mention [--runs-on self-hosted,<label>] --write --settings`, then remove the stock `claude.yml` (`git rm`). An unattended service with `--merge` takes the new `architecture-build-merge.yml` with `--replace architecture-build-merge.yml`; the other workflows move their pin with `--write`.
+
 ## [10.19.5]
 
 ### Security

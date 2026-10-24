@@ -356,6 +356,23 @@ architecture's marker. The sentences live in `scripts/shared/ci-text.js`; a scri
 in the language, stay as the tools print them, and so do the logs. Identifiers stay as they are: labels, rule codes,
 part ids, record ids and the architecture's names.
 
+### @claude with the architecture (10.20.0)
+
+The stock `claude.yml` that `/install-github-app` writes answers `@claude` on a GitHub-hosted runner, with no
+architecture: it can't reach a server on a private network, and nothing tells it the contracts under `architecture/`
+are the architecture's. `architecture-mention.yml` replaces it, on an attended or an unattended service:
+
+| | What |
+|---|---|
+| Trigger | `@claude` in an issue, a comment, a pull request review or a review comment, by the owner, a member or a collaborator. The `author_association` test runs before a runner is chosen, so nobody else's comment queues a job on a machine of yours. The action also requires write access |
+| Context | The MCP server from `SA_INDEX_MCP_URL` or the binding. Claude runs on `SA_MENTION_RUNS_ON`, with its own `HOME` and `CLAUDE_CONFIG_DIR` |
+| Rules | The action's mention mode keeps the comment as the instruction. `--append-system-prompt` adds the standing rules: read the build pack and its BUILD.md before changing code, ask in the reply, keep the contracts byte for byte, and when the request needs a departure, put the escalation `preview_escalation` renders in the reply for a person to file. The job's token reaches only this repository |
+| Result | A branch and a link to open the pull request, the action's default. A person merges it: `architecture-build-merge.yml` never merges a `claude/` branch, whoever opens its pull request, and on an attended service `architecture-review.yml` holds it to the pack like any other |
+
+`ci-setup.js service <dir> … --mention [--runs-on self-hosted,<label>] --write --settings` writes it. It reports the
+stock `claude.yml` as `!`, since every mention would otherwise run twice and the second run would have no architecture,
+and it never deletes the file.
+
 ## Setting up the repository
 
 | What | Where |
