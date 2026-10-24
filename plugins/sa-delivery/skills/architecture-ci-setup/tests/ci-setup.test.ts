@@ -243,7 +243,10 @@ describe("ci-setup.js service", () => {
     const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", attended: true, mention: true, runsOn: "self-hosted,idx", write: true };
     const r = C.service(SVC, { gh: svcGh(svc), ...opts });
     const yml = readFileSync(join(SVC, ".github/workflows/architecture-mention.yml"), "utf8");
-    expect(yml).toContain("--mcp-config ${{ runner.temp }}/mcp.json");
+    // inline JSON: the action merges its own inline config with another and drops a file path beside it (10.20.2)
+    expect(yml).toContain("--mcp-config '${{ steps.mcp.outputs.config }}'");
+    expect(yml).not.toMatch(/--mcp-config [^'\n]*mcp\.json/);
+    expect(yml).toContain("never state that you read the build pack unless get_build_pack answered");
     expect(yml).toContain("get_build_pack");
     expect(yml).toContain("preview_escalation");
     expect(yml).toMatch(/^\s*trigger_phrase: '@alia'/m);

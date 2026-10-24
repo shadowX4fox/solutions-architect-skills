@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.20.2]
+
+### Fixed
+
+- **`@alia` reaches the architecture MCP server.** In mention mode claude-code-action puts its own server (`github_comment`) first as inline JSON, and its merge of several `--mcp-config` values drops one given as a file path. So `architecture-mention.yml` ran with no architecture tools. The server step now writes the config as a step output, and `--mcp-config` passes it inline, which the action merges. The build workflow is unaffected: in its mode the action adds no server of its own.
+- **No claim of a pack it did not read.** The standing rules now say: without the architecture server's tools, say so and change nothing, and never state the build pack was read unless `get_build_pack` answered. A run without the server had cited the version and `pack_revision` from `.architecture.json` as if it had read the pack.
+
+### Upgrade
+
+- A service with `--mention`: `ci-setup.js service … --mention --write --replace architecture-mention.yml`.
+
 ## [10.20.1]
 
 ### Changed
