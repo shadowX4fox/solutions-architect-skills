@@ -21,15 +21,18 @@ const script = lines.slice(from, endAt < 0 ? undefined : endAt).map((l) => l.sli
 
 let k = 0;
 const realBun = process.execPath, ciText = join(__dirname, "..", "..", "..", "scripts", "shared", "ci-text.js");
-const run = (o: { automerge?: string; drift?: number; changed?: boolean; dispatch?: number; lang?: string }) => {
+const run = (o: { automerge?: string; drift?: number; changed?: boolean; dispatch?: number; lang?: string; manifest?: [Record<string, string>, Record<string, string>] }) => {
   const dir = join(TMP, `r-${++k}`), bin = join(dir, ".bin"), log = join(dir, "calls.log");
   mkdirSync(join(dir, "handoffs"), { recursive: true }); mkdirSync(bin, { recursive: true });
   const git = (...a: string[]) => spawnSync("git", ["-C", dir, ...a], { encoding: "utf8", env: { ...process.env, GIT_CEILING_DIRECTORIES: TMP } });
   writeFileSync(join(dir, "ARCHITECTURE.md"), `<!-- DOC_LANGUAGE: ${o.lang || "en"} -->\n# Order Desk\n`);
   writeFileSync(join(dir, "handoffs", "README.md"), "kit v1\n");
+  const mf = (h: Record<string, string>) => JSON.stringify({ cut_sheets: Object.fromEntries(Object.entries(h).map(([k, v]) => [k, { payload_hash: v }])) });
+  if (o.manifest) writeFileSync(join(dir, "handoffs", ".manifest.json"), mf(o.manifest[0]));
   git("init", "-q", "-b", "main"); git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base");
   git("add", "-A"); git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "kit");
   if (o.changed !== false) writeFileSync(join(dir, "handoffs", "README.md"), "kit v2\n");
+  if (o.manifest) writeFileSync(join(dir, "handoffs", ".manifest.json"), mf(o.manifest[1]));
   const realGit = spawnSync("bash", ["-c", "command -v git"], { encoding: "utf8" }).stdout.trim();
   writeFileSync(join(bin, "git"), `#!/bin/bash
 case "$1 $2" in "remote set-url"|"push -u") echo "git $*" >> "${log}"; exit 0;; esac
@@ -38,8 +41,8 @@ exec "${realGit}" "$@"
   // the messages are the real ones (ci-text.js, in the architecture's language); every other script is answered by name
   writeFileSync(join(bin, "bun"), `#!/bin/bash
 [ "$(basename "$1")" = ci-text.js ] && { shift; exec "${realBun}" "${ciText}" "$@"; }
-echo "bun $(basename "$1")" >> "${log}"
-case "$(basename "$1")" in kit-drift.js) exit ${o.drift ?? 0};; snapshot.js) echo "Order Desk v1.1.0"; exit 0;; esac
+echo "bun $(basename "$1") \${*:2}" >> "${log}"
+case "$(basename "$1")" in kit-drift.js) exit ${o.drift ?? 0};; snapshot.js) [ "$4" = --plan ] && echo "Order Desk v1.1.0 · L2 Domain · $5" || echo "Order Desk v1.1.0"; exit 0;; esac
 exit 0
 `, { mode: 0o755 });
   writeFileSync(join(bin, "gh"), `#!/bin/bash
@@ -65,6 +68,21 @@ describe("architecture-handoff.yml — the kit's pull request and SA_HANDOFF_AUT
     expect(r.calls).not.toContain("gh pr merge");
     expect(r.calls).not.toContain("gh workflow run");
     expect(r.out).toContain("left open for a reviewer: SA_HANDOFF_AUTOMERGE is not true");
+  });
+
+  test("the evidence is framed on what the release changed: a plan page per component whose payload_hash moved (10.21.0)", () => {
+    const r = run({ manifest: [{ "hub-api": "h1", "order-desk-web": "w1", "ledger-db": "d1" }, { "hub-api": "h2", "order-desk-web": "w1", "ledger-db": "d2" }] });
+    expect(r.code).toBe(0);
+    expect(r.calls).toContain("bun snapshot.js visualizations/architecture-command-center.html visualizations/evidence/architecture-v1.1.0-hub-api.png --plan hub-api");
+    expect(r.calls).toContain("--plan ledger-db");
+    expect(r.calls).not.toContain("--plan order-desk-web");   // only its version row moved
+    const body = r.calls.slice(r.calls.indexOf("gh pr create"));
+    expect(body).toContain("architecture-v1.1.0-hub-api.png?raw=true");
+    expect(body).toContain("*Order Desk v1.1.0 · L2 Domain · ledger-db*");
+    // no component changed: the whole model, one picture, as before
+    const w = run({ manifest: [{ "hub-api": "h1" }, { "hub-api": "h1" }] });
+    expect(w.calls).toContain("visualizations/evidence/architecture-v1.1.0.png");
+    expect(w.calls).not.toContain("--plan");
   });
 
   test("true and both gates pass: merged, then architecture-index.yml dispatched on main as released", () => {

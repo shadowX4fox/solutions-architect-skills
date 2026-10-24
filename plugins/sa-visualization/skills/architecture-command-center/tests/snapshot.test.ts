@@ -27,4 +27,20 @@ describe('snapshot.js', () => {
     expect(readFileSync(join(out, 'p.png')).subarray(1, 4).toString()).toBe('PNG');
     [out, cfg].forEach((d) => rmSync(d, { recursive: true }));
   }, 60000);
+  test.skipIf(!chrome)('--plan: the plan page of the component\'s floor, the caption naming the floor and the component (10.21.0)', () => {
+    const out = mkdtempSync(join(tmpdir(), 'sa-snap-')), cfg = mkdtempSync(join(tmpdir(), 'sa-cfg-'));
+    const env = Object.assign({}, process.env, { CLAUDE_CONFIG_DIR: cfg, SA_PACKS: '' });
+    expect(Bun.spawnSync(['bun', RENDER, SCENE, join(out, 'v.html'), '--lang', 'en'], { env, stdout: 'pipe', stderr: 'pipe' }).exitCode).toBe(0);
+    const shot = (plan: string) => Bun.spawnSync(['bun', SNAP, join(out, 'v.html'), join(out, plan + '.png'), '--plan', plan, '--width', '1200', '--height', '800', '--wait', '3000'], { env, stdout: 'pipe', stderr: 'pipe' });
+    const r = shot('order-service'), scene = JSON.parse(readFileSync(SCENE, 'utf8'));
+    const node = scene.nodes.find((n: any) => n.id === 'order-service'), floor = scene.layers.find((l: any) => l.n === node.layer);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout.toString()).toContain(floor.name);
+    expect(r.stdout.toString()).toContain(node.name);
+    // an id the scene lacks: the default view, no floor in the caption
+    const x = shot('no-such-component');
+    expect(x.exitCode).toBe(0);
+    expect(x.stdout.toString()).not.toContain(floor.name);
+    [out, cfg].forEach((d) => rmSync(d, { recursive: true }));
+  }, 90000);
 });

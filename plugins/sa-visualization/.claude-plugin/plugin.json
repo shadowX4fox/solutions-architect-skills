@@ -1,6 +1,6 @@
 {
   "name": "sa-visualization",
-  "version": "10.20.2",
+  "version": "10.21.0",
   "description": "Interactive views of the architecture: the Architecture Command Center — a navigable 3D model of the documented architecture (a floor per layer, every C4 L2 container a block, use-case walkthroughs, the physical deployment view), Alia the navigator with her dossier, findings on the stage, the load simulation and photo mode, as one self-contained HTML file. Reads the architecture through sa-skills, which installs it as a dependency.",
   "author": {
     "name": "shadowX4fox",

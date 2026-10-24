@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.21.0]
+
+### Added
+
+- **The release evidence is framed on what the release changed.** `ci/architecture-handoff.yml` takes one photo-mode picture per component whose `payload_hash` moved in the kit's manifest (the hash leaves out the version stamps), at most three: the plan page of that component's floor, it selected, named `evidence/<tag>-<component>.png`, all embedded in the kit's pull request. A release that changed no component keeps the whole-model picture.
+- **`snapshot.js --plan <component id>`** and the viewer's **`#plan=<id>`** link: the plan page of that component's floor, the component selected without the inspector. An id the scene lacks opens the default view.
+
+### Changed
+
+- **Photo mode on a plan page**: the caption adds the floor and the selected component, the page keeps its ports and routes, the page bar leaves the picture, and entering or leaving photo mode re-frames the page to the new stage.
+
+### Upgrade
+
+- Architecture repositories: `ci-setup.js architecture … --write --replace architecture-handoff.yml` (the other workflows move their pin).
+
 ## [10.20.2]
 
 ### Fixed

@@ -3,7 +3,10 @@
 // leaves, the caption names the project, the version, the view and the date) and writes the window as a PNG — the picture a
 // release PR or a review carries as evidence of the version it shows. No dependency: Chrome over the DevTools protocol, from Bun.
 //
-//   bun snapshot.js <viewer.html> <out.png> [--width 1600] [--height 1000] [--scale 1|2|3] [--wait <ms>] [--chrome <path>]
+//   bun snapshot.js <viewer.html> <out.png> [--plan <component id>] [--width 1600] [--height 1000] [--scale 1|2|3] [--wait <ms>] [--chrome <path>]
+//
+// --plan: the plan page of that component's floor, the component selected (the viewer's #plan=<id>) — a release's evidence framed
+// on what it changed (10.21.0); the caption then names the floor and the component. An id the scene lacks: the default view.
 //
 // The browser: --chrome, else SA_CHROME / PUPPETEER_EXECUTABLE_PATH / CHROME_PATH, else Puppeteer's newest download under
 // ~/.cache/puppeteer, else google-chrome, chromium or chrome on PATH. The page is a local file the plugin rendered, so it runs with
@@ -15,8 +18,8 @@ const path = require('path');
 
 const a = process.argv.slice(2), opt = (f, d) => { const i = a.indexOf(f); return i >= 0 ? a[i + 1] : d; };
 const [html, out] = a.filter((x, i) => !x.startsWith('--') && !(i > 0 && a[i - 1].startsWith('--')));
-if (!html || !out) { console.error('Usage: bun snapshot.js <viewer.html> <out.png> [--width 1600] [--height 1000] [--scale 1|2|3] [--wait <ms>] [--chrome <path>]'); process.exit(2); }
-const W = +opt('--width', 1600), H = +opt('--height', 1000), SCALE = +opt('--scale', 1), WAIT = +opt('--wait', 6000);
+if (!html || !out) { console.error('Usage: bun snapshot.js <viewer.html> <out.png> [--plan <component id>] [--width 1600] [--height 1000] [--scale 1|2|3] [--wait <ms>] [--chrome <path>]'); process.exit(2); }
+const PLAN = opt('--plan'), W = +opt('--width', 1600), H = +opt('--height', 1000), SCALE = +opt('--scale', 1), WAIT = +opt('--wait', 6000);
 
 function findChrome() {
   const named = [opt('--chrome'), process.env.SA_CHROME, process.env.PUPPETEER_EXECUTABLE_PATH, process.env.CHROME_PATH].filter(Boolean);
@@ -50,7 +53,7 @@ async function main() {
   const { result: { sessionId: s } } = await send('Target.attachToTarget', { targetId, flatten: true });
   await send('Page.enable', {}, s); await send('Runtime.enable', {}, s);
   await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: SCALE, mobile: false }, s);
-  await send('Page.navigate', { url: 'file://' + path.resolve(html) }, s);
+  await send('Page.navigate', { url: 'file://' + path.resolve(html) + (PLAN ? '#plan=' + encodeURIComponent(PLAN) : '') }, s);
   await Bun.sleep(WAIT);   // the scene builds and the camera settles
   const on = await evaluate(s, "(() => { const b = document.getElementById('b-photo'); if (!b) return false; b.click(); return true; })()");
   if (!on) { console.error('The viewer did not start: no photo button in ' + html); done(1); }

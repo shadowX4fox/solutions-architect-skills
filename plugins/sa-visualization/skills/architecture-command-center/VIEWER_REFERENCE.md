@@ -517,6 +517,9 @@ Ten cues the user chose from the game's stage HUD, all in the viewer's own chrom
       pointer, held to its floor, and the wheel (or + / −) zooms it about the point under the cursor.
       Turning the page frames the next floor again.
     - Labels give the bar its room, and leaving the plan, or entering photo mode, hides it.
+    - A link opens a page (10.21.0): `#plan=<component id>` in the URL opens the plan on that component's
+      floor with the component selected, without the inspector. `snapshot.js --plan` uses it, and an id the
+      scene lacks opens the viewer as usual.
     - **Ports**: a path to another floor leaves the page, so a tag hangs under each block that has
       one — compact, the floors it reaches (`▲L3 ▼L6×2`); hovered or selected, whole: ▲ for a floor
       above, ▼ for one below, "from" or "to" by the path's direction (↔ for a two-way path), the floor
@@ -663,7 +666,9 @@ Ten cues the user chose from the game's stage HUD, all in the viewer's own chrom
   click outside closes.
 - **Photo mode** (8.126.0): `p`, the header's **Photo** button or the wheel. The chrome leaves, the camera frames
   into the whole window or a 16:9 / 4:3 / 1:1 frame (the frame is the stage rectangle while the mode is on), with
-  an optional rule-of-thirds grid and a caption (project · version · view · date). **Save PNG** / **Copy** render
+  an optional rule-of-thirds grid and a caption (project · version · view · date; on a plan page also the floor and
+the selected component, 10.21.0). A plan page keeps its ports and routes in the picture, and entering or leaving
+photo mode re-frames it to the new stage. **Save PNG** / **Copy** render
   at 1×, 2× or 3× the screen's pixels (capped at 8192 px a side), cropped to the frame, the HTML labels drawn into
   the picture run by run with each skin's case and spacing; the grid is a guide and never exported. The bar fades
   after 2.6 s without a pointer move; `l` labels, `g` grid, `p` or Esc leaves. Clipboard copy depends on the

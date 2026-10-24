@@ -5592,7 +5592,8 @@
   }
   const photoFx = document.createElement('div'); photoFx.id = 'photofx'; photoFx.hidden = true; document.body.appendChild(photoFx);
   const photoBar = document.createElement('div'); photoBar.id = 'photobar'; photoBar.className = 'card bar'; photoBar.hidden = true; photoBar.setAttribute('role', 'toolbar'); document.body.appendChild(photoBar);
-  const captionText = () => [SCENE.project, SCENE.version ? 'v' + SCENE.version : null, W.id === 'physical' ? UX.photo.physical : UX.photo.logical, new Date().toISOString().slice(0, 10)].filter(Boolean).join('  ·  ');
+  const captionText = () => { const F = activePreset === 'top' && W.focus != null ? W.floors.find(x => x.n === W.focus) : null, b = F && selected && selected.block;   // a plan page names its floor, and the block it shows
+    return [SCENE.project, SCENE.version ? 'v' + SCENE.version : null, W.id === 'physical' ? UX.photo.physical : UX.photo.logical, F ? W.prefix + F.n + ' ' + F.name : null, b && b.floor === F.n ? b.name : null, new Date().toISOString().slice(0, 10)].filter(Boolean).join('  ·  '); };
   function renderPhotoBar() {
     const P = UX.photo, tg = (k, on, l) => '<button type="button" data-ph="' + k + '" aria-pressed="' + on + '">' + esc(l) + '</button>';
     photoBar.innerHTML = '<span class="cap">' + esc(P.title) + '</span>' +
@@ -5622,7 +5623,10 @@
     document.documentElement.classList.toggle('photo', on); document.documentElement.classList.toggle('photo-nolabels', on && !PHOTO.labels);
     photoBar.hidden = photoFx.hidden = !on;
     if (on) { stopRotate(); renderPhotoBar(); renderPhotoFx(); photoWake(); } else { document.documentElement.classList.remove('photo-idle'); clearTimeout(photoIdle); }
-    requestAnimationFrame(() => { fitStageView(); kick(); });   // the camera stays where the viewer left it: the picture is framed by hand
+    syncPlanBar();   // the plan's page bar is chrome: out of the picture, back after it
+    // the camera stays where the viewer left it: the picture is framed by hand — except a plan page, whose frame is its fit, refitted to the
+    // picture's stage (and back), or the page lands off-centre by the chrome it no longer has
+    requestAnimationFrame(() => { fitStageView(); if (inPlan()) planOn(W.focus); kick(); });
   }
   photoBar.addEventListener('click', ev => {
     const b = ev.target.closest('button'); if (!b) return;
@@ -6268,7 +6272,7 @@
     const w = innerWidth, h = innerHeight;
     const sel = selected && selected.block;
     // the plan reads one floor: the names of the floors faded under it would print over its page, and its ports show
-    const planF = activePreset === 'top' && W.focus != null && !(typeof PHOTO !== 'undefined' && PHOTO.on) ? W.focus : null;
+    const planF = activePreset === 'top' && W.focus != null ? W.focus : null;   // a photo of a plan page keeps its ports and routes
     W.labels.forEach(li => {
       if (li.viaOf) {
         const off = planF !== li.floor || routeStyle !== 'circuit' || !li.viaOf.circ; if (li.hide !== off) { li.hide = off; if (!off) remeasure(li); }
@@ -6377,5 +6381,9 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   new MutationObserver(() => { applyTheme(); rewordRanks(); syncWarning(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] });
   fitDock(); fitStageView(); setFloors('glass'); applyTheme(); setView(WORLDS[OPEN_VIEW] ? OPEN_VIEW : 'logical'); Object.assign(orbit, isoAngles()); orbit.radius = W.R0; goal = null; updateCamera(); kick();
+  // #plan=<id>: the plan page of that block's floor, the block selected — how snapshot.js --plan frames a release's evidence on
+  // the component it changed (10.21.0); an id the scene does not have opens the viewer as it always does
+  { const m = /(?:^|[#&])plan=([^&]+)/.exec(location.hash), b = m && W.blockById[decodeURIComponent(m[1])];
+    if (b) { stopRotate(); activePreset = 'top'; syncPill(); selected = { block: b }; buildSelFx(b); planOn(b.floor); } }   // selected without the inspector: the page is framed on the whole stage, as the photo is
 })();
 </script>
