@@ -234,7 +234,7 @@ describe("ci-setup.js service", () => {
     expect(calls.some((c) => c[0] === "workflow")).toBe(false);
   });
 
-  test("--mention: @claude with the architecture on either kind of service; the stock claude.yml reported, never deleted (10.20.0)", () => {
+  test("--mention: @alia with the architecture on either kind of service; the stock claude.yml kept beside it (10.20.0, 10.20.1)", () => {
     const stock = "name: Claude Code\non:\n  issue_comment:\n    types: [created]\njobs:\n  claude:\n    steps:\n      - uses: anthropics/claude-code-action@v1\n";
     const review = "name: Claude Code Review\non:\n  pull_request:\njobs:\n  r:\n    steps:\n      - uses: anthropics/claude-code-action@v1\n        with:\n          prompt: review\n";
     w(SVC, ".github/workflows/claude.yml", stock);
@@ -246,25 +246,27 @@ describe("ci-setup.js service", () => {
     expect(yml).toContain("--mcp-config ${{ runner.temp }}/mcp.json");
     expect(yml).toContain("get_build_pack");
     expect(yml).toContain("preview_escalation");
-    expect(yml).toMatch(/^\s*branch_prefix: claude\//m);
-    expect(readFileSync(join(import.meta.dir, "../../architecture-index-export/ci/service/architecture-build-merge.yml"), "utf8")).toContain('case "$BRANCH" in claude/*)');   // never merged on its own, whoever opens it
+    expect(yml).toMatch(/^\s*trigger_phrase: '@alia'/m);
+    expect(yml).toMatch(/^\s*branch_prefix: alia\//m);
+    expect(yml).not.toContain("'@claude'");
+    expect(readFileSync(join(import.meta.dir, "../../architecture-index-export/ci/service/architecture-build-merge.yml"), "utf8")).toContain('case "$BRANCH" in alia/*|claude/*)');   // never merged on its own, whoever opens it
     expect(yml).not.toMatch(/^\s*prompt:/m);   // tag mode: the mention is the instruction, BUILD.md the standing rules
     expect(yml.match(/author_association\)/g)!.length).toBe(4);   // nobody else's comment queues a job on a runner of yours
     expect(existsSync(join(SVC, ".github/workflows/architecture-review.yml"))).toBe(false);   // attended without --review
     expect(existsSync(join(SVC, ".github/workflows/claude.yml"))).toBe(true);
     const dup = r.rows.find((x: any) => x.item.includes("claude.yml"));
-    expect(dup.state).toBe("!"); expect(dup.fix).toContain("git rm .github/workflows/claude.yml");
+    expect(dup.state).toBe("·"); expect(dup.fix).toBeUndefined();   // its own phrase: nothing runs twice
     expect(r.rows.some((x: any) => x.item.includes("claude-code-review.yml"))).toBe(false);   // a review with its own prompt answers no mention
     const runsOn = r.rows.find((x: any) => x.item.startsWith("variable SA_MENTION_RUNS_ON")), runner = r.rows.find((x: any) => x.item.startsWith("runner"));
     expect(runsOn.state).toBe("✗"); expect(runsOn.fix).toContain('["self-hosted","idx"]');
     expect(runner.state).toBe("✓"); expect(runner.item).toContain("box-1 online");
-    expect(r.rows.find((x: any) => x.item.startsWith("secret CLAUDE_CODE_OAUTH_TOKEN")).item).toBe("secret CLAUDE_CODE_OAUTH_TOKEN — @claude");
-    const merged = r.rows.find((x: any) => x.item.startsWith("@claude's pull requests"));
+    expect(r.rows.find((x: any) => x.item.startsWith("secret CLAUDE_CODE_OAUTH_TOKEN")).item).toBe("secret CLAUDE_CODE_OAUTH_TOKEN — @alia");
+    const merged = r.rows.find((x: any) => x.item.startsWith("@alia's pull requests"));
     expect(merged.state).toBe("·"); expect(merged.item).toContain("--review adds it");
     // unattended: beside the build, its token row names both
     const u = C.service(SVC, { gh: svcGh(svc), server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", mention: true, write: true });
     expect(existsSync(join(SVC, ".github/workflows/architecture-build.yml"))).toBe(true);
-    expect(u.rows.find((x: any) => x.item.startsWith("secret CLAUDE_CODE_OAUTH_TOKEN")).item).toBe("secret CLAUDE_CODE_OAUTH_TOKEN — the build, @claude");
+    expect(u.rows.find((x: any) => x.item.startsWith("secret CLAUDE_CODE_OAUTH_TOKEN")).item).toBe("secret CLAUDE_CODE_OAUTH_TOKEN — the build, @alia");
     expect(u.rows.find((x: any) => x.item.startsWith("variable SA_MENTION_RUNS_ON")).item).toContain("localhost");
   });
 

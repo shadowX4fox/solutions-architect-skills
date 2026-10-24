@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.20.1]
+
+### Changed
+
+- **The mention workflow answers `@alia`, not `@claude`** (`architecture-mention.yml`, `trigger_phrase`). With its own phrase the stock `claude.yml` can stay beside it, so nothing runs twice; `ci-setup.js … --mention` now notes that workflow (`·`: `@claude` there answers without the architecture) instead of asking to remove it. Its branches are `alia/…`. Claude still does the work and replies as the Claude GitHub App.
+- **`architecture-build-merge.yml` never merges an `alia/` or a `claude/` branch**: both come from a person's request.
+
+### Upgrade
+
+- A service set up with 10.20.0's `--mention`: `ci-setup.js service … --mention --write --replace architecture-mention.yml,architecture-build-merge.yml` (the latter with `--merge`), then mention `@alia`.
+
 ## [10.20.0]
 
 ### Added
