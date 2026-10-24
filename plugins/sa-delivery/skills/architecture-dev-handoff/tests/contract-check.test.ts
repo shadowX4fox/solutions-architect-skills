@@ -164,6 +164,14 @@ describe("fidelity", () => {
     expect(r.fidelity.source).toMatch(/handoff-payloads\/hub-api\.md$/);
     expect(checkFile(w("nosrc/x/openapi.yaml", GOOD), off).fidelity.skipped).toMatch(/no source/);
   });
+  test("a payload cut for another architecture version is not the asset's source", () => {
+    w("stale/ARCHITECTURE.md", "<!-- ARCHITECTURE_VERSION: 1.4.0 -->\n# P\n");
+    w("stale/.cache/sa-skills/handoff-payloads/hub-api.md", `---\narchitecture_version: 1.0.0\n---\n${SOURCE}`);
+    const f = w("stale/handoffs/assets/02-hub-api/openapi.yaml", GOOD);
+    expect(checkFile(f, off).fidelity.source).toBeNull();
+    w("stale/.cache/sa-skills/handoff-payloads/hub-api.md", `---\narchitecture_version: 1.4.0\n---\n${SOURCE}`);
+    expect(checkFile(f, off).fidelity.source).toMatch(/handoff-payloads\/hub-api\.md$/);
+  });
 });
 
 const ASYNC = `asyncapi: "3.0.0"

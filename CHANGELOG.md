@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.21.2]
+
+### Fixed
+
+- **A stale cut-sheet payload is no longer a contract's source.** `contract-check.js` held every asset to the payload it found under `.cache/sa-skills/handoff-payloads/`, whatever architecture version it was cut for. A kit regenerated elsewhere (CI) left the local payload behind, so a working copy reported a documented operation added since as `operation-undocumented` and `export-index.js` dropped that component's build pack. A payload whose `architecture_version` is not the architecture's is now ignored, as if absent.
+
 ## [10.21.1]
 
 ### Fixed

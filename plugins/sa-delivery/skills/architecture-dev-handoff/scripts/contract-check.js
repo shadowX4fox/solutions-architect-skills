@@ -532,8 +532,16 @@ function checkRedis(file, raw, res, opts) {
 function slugOf(file) { const m = path.basename(path.dirname(path.resolve(file))).match(/^\d+-(.+)$/); return m ? m[1] : null; }
 function findPayload(file) {
   const slug = slugOf(file); if (!slug) return null; let d = path.dirname(path.resolve(file));
-  for (let i = 0; i < 8; i++) { const p = path.join(d, '.cache', 'sa-skills', 'handoff-payloads', `${slug}.md`); if (fs.existsSync(p)) return p; const up = path.dirname(d); if (up === d) break; d = up; }
+  for (let i = 0; i < 8; i++) { const p = path.join(d, '.cache', 'sa-skills', 'handoff-payloads', `${slug}.md`); if (fs.existsSync(p)) return stalePayload(p, d) ? null : p; const up = path.dirname(d); if (up === d) break; d = up; }
   return null;
+}
+// a payload cut for another architecture version is not the asset's source: a kit regenerated elsewhere (CI) leaves the
+// local cut behind, and its operations are the old version's
+function stalePayload(p, root) {
+  const pv = (fs.readFileSync(p, 'utf8').match(/^architecture_version:\s*"?([\w.-]+)"?\s*$/m) || [])[1];
+  const a = path.join(root, 'ARCHITECTURE.md');
+  const av = fs.existsSync(a) ? (fs.readFileSync(a, 'utf8').match(/<!--\s*ARCHITECTURE_VERSION:\s*([\w.-]+)\s*-->/) || [])[1] : null;
+  return !!(pv && av && pv !== av);
 }
 
 function checkFile(file, opts = {}) {
