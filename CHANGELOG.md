@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.25.1]
+
+### Fixed
+
+- **Chat mode is detected by the skill's folder, not by Bun.** A Claude chat's sandbox has Bun and Node, so `bun --version` answered there and the skill ran the Claude Code workflows against scripts the chat package does not carry; the chat then wrote checks of its own. The package has no `scripts/`, and that now decides: `SKILL.md` § Execution mode, `CHAT_MODE.md`.
+
+### Added
+
+- **The chat's pre-check starts from the evaluation's code.** `scripts/po-spec-precheck.js` prints the use-case parts missing, the statements whose words suggest a failing test and the ones naming a technology, with the tests' criteria — checkability's first stage, no judge, no score, no stamp. `build-chat-skill.ts` bundles it into the package as `precheck/po-spec-precheck.cjs` (Node or Bun); the chat reads each candidate against the criteria and writes no checking code of its own.
+
 ## [10.25.0]
 
 ### Added

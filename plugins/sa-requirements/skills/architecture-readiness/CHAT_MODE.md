@@ -1,7 +1,7 @@
 # Chat Mode — helping the Product Owner write the spec
 
-Read this file instead of `SKILL.md`'s workflows when the skill runs where it cannot run a shell command or
-`bun --version` fails — a Claude chat (claude.ai), the desktop or mobile app. Chat mode **supports the Product Owner in
+Read this file instead of `SKILL.md`'s workflows when the skill's folder has no `scripts/` — the chat package
+(`scripts/build-chat-skill.ts`) uploaded to a Claude chat (claude.ai), the desktop or mobile app. Chat mode **supports the Product Owner in
 writing the PO Spec**; evaluating it, scoring it and releasing it to the architecture team happen in Claude Code, where
 the rest of the delivery runs.
 
@@ -35,9 +35,15 @@ never `… - Product Owner Specification`, so no gate mistakes it for the spec.
 
 ## Pre-check — before the Product Owner sends the spec
 
-Read the spec once and report **findings, never a number**: no section score, no total, no multiplier, no Ready cap,
-no "ready" or "not ready". The official result is the scripts' (`PO_SPEC_SCORING_GUIDE.md` § The checkability rule,
-§ The coherence gate), which find more than a reading does.
+Report **findings, never a number**: no section score, no total, no multiplier, no Ready cap, no "ready" or "not
+ready". The official result is the evaluation's (`PO_SPEC_SCORING_GUIDE.md` § The checkability rule, § The coherence
+gate), which finds more than a reading does.
+
+Start from the evaluation's own code: `node precheck/po-spec-precheck.cjs <spec>` (or `bun`; the folder of this skill).
+It prints the use-case parts missing (each one a finding), the statements whose words suggest a failing test and the
+ones naming a technology, with the tests' criteria. Read each candidate against those criteria — it is a finding only
+when the statement really fails — then read the rest of the spec for what words cannot flag. No sandbox to run it →
+read the spec against the same tests. Never write code of your own to score or check the spec.
 
 1. **Checkability** — every statement in Business Objectives, Use Cases (part by part: description, actor, trigger,
    steps, alternative flows, outcome, acceptance criteria), User Stories, UX Requirements, Business Constraints and

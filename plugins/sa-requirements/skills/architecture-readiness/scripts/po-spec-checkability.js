@@ -34,7 +34,7 @@
 // Exit: 0 PASS · 1 FAIL · 10 PENDING (a worksheet waits for the worksheet-judge subagent; nothing failed by code).
 'use strict';
 const fs = require('fs'), path = require('path');
-const { parseSpec, plain } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'po-spec.js'));
+const { parseSpec, plain } = require('../../../scripts/shared/po-spec.js');
 
 // ---- the judge (sa-skills'), found as capability-prepare.js finds it -------------------------------------------------------
 const MARKETPLACE = 'shadowx4fox-solution-architect-marketplace';

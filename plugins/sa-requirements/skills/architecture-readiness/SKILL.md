@@ -39,9 +39,10 @@ The skill includes four primary functions:
 
 ## Execution mode
 
-Run `bun --version` first. It answers → **Claude Code**: every workflow below, as written. No shell, or Bun absent (a
-Claude chat, the desktop or mobile app) → **chat mode**: read `CHAT_MODE.md` and follow it instead — elicitation and
-drafting only, a pre-check that reports findings and never a score, the spec delivered with `<!-- READINESS_CHECK: draft -->`.
+The skill's own folder decides — never whether Bun answers (a Claude chat's sandbox has Bun and Node). `scripts/`
+beside this file → **Claude Code**: every workflow below, as written. No `scripts/` (the chat package,
+`precheck/` in its place) → **chat mode**: read `CHAT_MODE.md` and follow it instead — elicitation and drafting only, a
+pre-check that reports findings and never a score, the spec delivered with `<!-- READINESS_CHECK: draft -->`.
 Evaluation, the stamp, the PDF and the sync stay in Claude Code.
 
 ## Plugin directories
@@ -99,12 +100,13 @@ Invoke this skill when:
 - **templates/PO_SPEC_TEMPLATE.md**: Quick-start template for creating a new PO Specification
 - **PO_SPEC_SCORING_GUIDE.md**: Weighted scoring methodology to evaluate PO Spec readiness (0-10 scale)
 - **ASYNC_INTAKE_GUIDE.md**: File-based async intake methodology — extraction rules, keyword indicators, gap report template, and follow-up question generation
-- **CHAT_MODE.md**: what runs without a shell — elicitation, drafting, the Discovery Summary as a file, the pre-check; load only in chat mode
+- **CHAT_MODE.md**: what runs in a Claude chat (the package without `scripts/`) — elicitation, drafting, the Discovery Summary as a file, the pre-check; load only in chat mode
 - **PO_SPEC_SYNC_WORKFLOW.md**: Workflow 6 — PO Spec Sync (architecture → PO Spec): the delta by code, the section mapping, proposals the Product Owner approves, the sync marker, the sync log. Load only for a sync
 - **scripts/po-spec-checkability.js**: `bun scripts/po-spec-checkability.js <PRODUCT_OWNER_SPEC.md> [--judge …] [--answers] [--json] | --verify <fixtures.json>` — the checkability rule over every requirement (workflow 4, step 3): statements and use-case parts by code, one judge question per candidate, per-section multipliers and the 7.4 Ready cap by code; exit 0 PASS · 1 FAIL · 10 a worksheet waits
 - **scripts/po-spec-coherence.js**: `bun scripts/po-spec-coherence.js <PRODUCT_OWNER_SPEC.md> [--judge …] [--answers] [--json]` — the coherence gate (workflow 4, step 3b): label vs substance (`references/solution-labels.json`), the objectives ↔ use cases ↔ metrics triangle, closure (every state a use case names has a setter, every trigger a producer), contradictions (use case × use case, × constraint, × out-of-scope item), sizing (an objective's figures against its KPI and against the acceptance limits of the use cases that serve it — warnings only), and one acceptance test per use case (`sa-requirements:generators:acceptance-test-writer`; a missing fact blocks once the judge confirms no use case gives it and that it is a business fact, not a detail a test takes as given, a clause the use case does not state warns); exit 0 PASS · 1 FAIL · 10 waiting
 - **scripts/coherence-eval.js**: `bun scripts/coherence-eval.js <out_dir> [--judge …]` — the gate measured on seeded defects (`tests/fixtures/coherence/`): detection and false alarms
 - **scripts/readiness-stamp.js**: `bun scripts/readiness-stamp.js <PRODUCT_OWNER_SPEC.md> [--check] [--json]` — the evaluation's stamp (workflow 4, step 7): both checks re-run on the answers already given, `<!-- READINESS_CHECK: verified <date> sha256:… -->` written when they pass; any later edit voids it, and architecture-docs' PO Spec gate blocks a `draft` or stale stamp; exit 0 · 1 · 10
+- **scripts/po-spec-precheck.js**: chat mode's pre-check (`CHAT_MODE.md`), shipped in the chat package bundled as `precheck/po-spec-precheck.cjs` — the missing use-case parts and the candidates `po-spec-checkability.js` would ask the judge, with the tests' criteria, for the chat to read; no judge, no score, no stamp
 - **scripts/po-spec-delta.js**: `bun scripts/po-spec-delta.js <project> [--po-spec <file>] [--out] [--json] | --stamp` — the delta (`.cache/sa-skills/po-spec-delta.md`) and the stamp (marker, Version, Date)
 
 ## How to Use This Skill
