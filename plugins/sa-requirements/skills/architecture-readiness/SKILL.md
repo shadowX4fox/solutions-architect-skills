@@ -37,6 +37,13 @@ The skill includes four primary functions:
 3. **PO Spec Evaluation**: Scoring methodology to assess if a PO Spec is ready for architecture team handoff
 4. **Async Intake**: File-based requirements extraction from tickets, emails, or documents — produces a gap report for async follow-up
 
+## Execution mode
+
+Run `bun --version` first. It answers → **Claude Code**: every workflow below, as written. No shell, or Bun absent (a
+Claude chat, the desktop or mobile app) → **chat mode**: read `CHAT_MODE.md` and follow it instead — elicitation and
+drafting only, a pre-check that reports findings and never a score, the spec delivered with `<!-- READINESS_CHECK: draft -->`.
+Evaluation, the stamp, the PDF and the sync stay in Claude Code.
+
 ## Plugin directories
 
 This skill ships in the **sa-requirements** plugin (`sa-skills` depends on it and installs it). `[plugin_dir]` is its
@@ -92,10 +99,12 @@ Invoke this skill when:
 - **templates/PO_SPEC_TEMPLATE.md**: Quick-start template for creating a new PO Specification
 - **PO_SPEC_SCORING_GUIDE.md**: Weighted scoring methodology to evaluate PO Spec readiness (0-10 scale)
 - **ASYNC_INTAKE_GUIDE.md**: File-based async intake methodology — extraction rules, keyword indicators, gap report template, and follow-up question generation
+- **CHAT_MODE.md**: what runs without a shell — elicitation, drafting, the Discovery Summary as a file, the pre-check; load only in chat mode
 - **PO_SPEC_SYNC_WORKFLOW.md**: Workflow 6 — PO Spec Sync (architecture → PO Spec): the delta by code, the section mapping, proposals the Product Owner approves, the sync marker, the sync log. Load only for a sync
 - **scripts/po-spec-checkability.js**: `bun scripts/po-spec-checkability.js <PRODUCT_OWNER_SPEC.md> [--judge …] [--answers] [--json] | --verify <fixtures.json>` — the checkability rule over every requirement (workflow 4, step 3): statements and use-case parts by code, one judge question per candidate, per-section multipliers and the 7.4 Ready cap by code; exit 0 PASS · 1 FAIL · 10 a worksheet waits
 - **scripts/po-spec-coherence.js**: `bun scripts/po-spec-coherence.js <PRODUCT_OWNER_SPEC.md> [--judge …] [--answers] [--json]` — the coherence gate (workflow 4, step 3b): label vs substance (`references/solution-labels.json`), the objectives ↔ use cases ↔ metrics triangle, closure (every state a use case names has a setter, every trigger a producer), contradictions (use case × use case, × constraint, × out-of-scope item), sizing (an objective's figures against its KPI and against the acceptance limits of the use cases that serve it — warnings only), and one acceptance test per use case (`sa-requirements:generators:acceptance-test-writer`; a missing fact blocks once the judge confirms no use case gives it and that it is a business fact, not a detail a test takes as given, a clause the use case does not state warns); exit 0 PASS · 1 FAIL · 10 waiting
 - **scripts/coherence-eval.js**: `bun scripts/coherence-eval.js <out_dir> [--judge …]` — the gate measured on seeded defects (`tests/fixtures/coherence/`): detection and false alarms
+- **scripts/readiness-stamp.js**: `bun scripts/readiness-stamp.js <PRODUCT_OWNER_SPEC.md> [--check] [--json]` — the evaluation's stamp (workflow 4, step 7): both checks re-run on the answers already given, `<!-- READINESS_CHECK: verified <date> sha256:… -->` written when they pass; any later edit voids it, and architecture-docs' PO Spec gate blocks a `draft` or stale stamp; exit 0 · 1 · 10
 - **scripts/po-spec-delta.js**: `bun scripts/po-spec-delta.js <project> [--po-spec <file>] [--out] [--json] | --stamp` — the delta (`.cache/sa-skills/po-spec-delta.md`) and the stamp (marker, Version, Date)
 
 ## How to Use This Skill
@@ -132,8 +141,8 @@ When business context arrives via ticket, email, or document (not a live convers
 When this skill is activated and no existing PO Spec is found (or the user requests discovery/elicitation):
 
 1. **Detect existing PO Spec**: Search for `PRODUCT_OWNER_SPEC.md`, `PO_SPEC.md`, `**/po-spec*`, `**/product-owner*`
-   - If found: offer Evaluation or Creation workflows instead
-   - If not found: proceed with elicitation
+   - If found: offer Evaluation or Creation workflows instead (a spec carrying `READINESS_CHECK: draft` came from chat mode: offer Evaluation)
+   - If not found: proceed with elicitation — from `DISCOVERY_SUMMARY.md` when a chat-mode interview left one: confirm it with the PO and continue at its open and low-confidence sections
 2. **Load the guide**: Read `REQUIREMENTS_ELICITATION_GUIDE.md` fully before starting
 3. **Detect language**: Infer from user's first message; ask if ambiguous
 4. **Conduct the 4-phase interview**:
@@ -182,6 +191,15 @@ When this skill is activated to evaluate a PO Spec:
    - List every requirement that fails the checkability rule with its ladder question, and offer to move the ones the PO cannot make concrete to Appendix → Aspirations
    - Provide actionable recommendations for improvement
 6. **Determine readiness**: Score ≥7.5/10, no checkability cap and no blocking coherence finding indicates ready for architecture team handoff
+7. **Stamp it**: on every evaluation, whatever the score —
+   ```bash
+   bun [plugin_dir]/skills/architecture-readiness/scripts/readiness-stamp.js <PRODUCT_OWNER_SPEC.md>
+   ```
+   It re-runs both checks on the answers steps 3 and 3b already gave (exit 10: one waits — go back to that step) and, when
+   no Ready cap and no blocking coherence finding stands, writes `<!-- READINESS_CHECK: verified <date> sha256:… -->` as the
+   spec's last line, replacing a `draft`. Exit 1: the stamp stays as it was, and the reasons it prints go to the PO with the
+   feedback of step 5. The score is not stamped; the architecture's PO Spec gate (`gates-check.js` 0.2) blocks a `draft`
+   or stale stamp and warns on none
 
 ### 5. Distribution PDF (automatic post-write)
 

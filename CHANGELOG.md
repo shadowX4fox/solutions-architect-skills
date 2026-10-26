@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.24.0]
+
+### Added
+
+- **Chat mode for architecture-readiness** (`CHAT_MODE.md`). Where the skill finds no shell or no Bun (a Claude chat, the desktop or mobile app), it helps the Product Owner write the spec: the elicitation interview, drafting from the template, and a pre-check before sending. The pre-check covers the five checkability tests and the coherence that reading shows: a label no use case exercises, an objective no use case delivers or no metric measures. It reports findings, never a score. The Discovery Summary is saved as `DISCOVERY_SUMMARY.md`, so an interview can span several chats, and Claude Code's elicitation resumes from it. Evaluation, async intake, the PDF and the sync stay in Claude Code. A chat writes the spec with `<!-- READINESS_CHECK: draft -->` as its last line.
+- **The evaluation stamps the spec** (`scripts/readiness-stamp.js`, workflow 4 step 7). The script re-runs the checkability rule and the coherence gate on the answers already given. When no Ready cap and no blocking coherence finding stands, it writes `<!-- READINESS_CHECK: verified <date> sha256:… -->`. The hash covers the spec without the stamp, so any edit voids it. The score is not stamped.
+- **`scripts/build-chat-skill.ts`** writes the zip to upload to a Claude chat: the skill without `scripts/` and `tests/`, its frontmatter reduced to `name` and `description`.
+
+### Changed
+
+- **The PO Spec gate reads the stamp** (`gates-check.js` 0.2). A `draft` spec, or one edited after its evaluation, is BLOCK until `evaluate PO spec` runs in Claude Code. A spec with no stamp is WARN (`not evaluated`), and the architect is asked whether to evaluate it first. Before this, the gate checked only that the spec existed, so a spec scored by a reading passed unchecked.
+
+### Upgrade
+
+- A spec written before 10.24.0 has no stamp, and Workflow 1 now warns on it. Run `evaluate PO spec` once to stamp it.
+
 ## [10.23.1]
 
 ### Changed

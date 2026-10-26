@@ -3,6 +3,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 const { check, stepRanges } = require("../scripts/gates-check.js");
+const RS = require("../../../plugins/sa-requirements/skills/architecture-readiness/scripts/readiness-stamp.js");
+const verified = (body: string) => RS.stamped(body, "2026-10-25");
 
 let root = "";
 const put = (rel: string, body = "x\n") => { mkdirSync(join(root, rel, ".."), { recursive: true }); writeFileSync(join(root, rel), body); };
@@ -32,12 +34,32 @@ describe("gates-check", () => {
     expect(w.value).toBe("PRODUCT_OWNER_SPEC.md");
     expect(w.note).toMatch(/2 architecture reference\(s\) in the spec \(ADR-117, TDR-002\)/);
     expect(w.read).toBeUndefined();
-    put("PRODUCT_OWNER_SPEC.md", "# X - Product Owner Specification\n\nEl cliente consulta sin conexión.\n");
-    expect(gate(check(root), "po_spec").status).toBe("PASS");
+    put("PRODUCT_OWNER_SPEC.md", verified("# X - Product Owner Specification\n\nEl cliente consulta sin conexión.\n"));
+    expect(gate(check(root), "po_spec")).toMatchObject({ status: "PASS", readiness: "verified" });
+  });
+
+  test("the evaluation's stamp (10.24.0): a chat draft and a stale stamp block with their note, none warns, verified passes", () => {
+    const spec = "# X - Product Owner Specification\n\nEl cliente consulta sin conexión.\n";
+    put("PRODUCT_OWNER_SPEC.md", spec + "\n<!-- READINESS_CHECK: draft -->\n");
+    let r = check(root), g = gate(r, "po_spec");
+    expect(g).toMatchObject({ status: "BLOCK", readiness: "draft" });
+    expect(g.note).toMatch(/chat mode.*evaluate PO spec/);
+    expect(g.read).toBeUndefined();
+    expect(r.blocked).toBe(true);
+    put("PRODUCT_OWNER_SPEC.md", verified(spec).replace("sin conexión", "con conexión"));
+    g = gate(check(root), "po_spec");
+    expect(g).toMatchObject({ status: "BLOCK", readiness: "stale" });
+    expect(g.note).toMatch(/edited after its evaluation \(2026-10-25\)/);
+    put("PRODUCT_OWNER_SPEC.md", spec);
+    g = gate(check(root), "po_spec");
+    expect(g).toMatchObject({ status: "WARN", readiness: "none" });
+    expect(g.note).toMatch(/not evaluated/);
+    put("PRODUCT_OWNER_SPEC.md", verified(spec).replace(/\n/g, "\r\n"));
+    expect(gate(check(root), "po_spec")).toMatchObject({ status: "PASS", readiness: "verified" });
   });
 
   test("common path: spec, BIAN v3.0, a Mermaid HLD — every gate passes and nothing is to read", () => {
-    put("PRODUCT_OWNER_SPEC.md", "<!-- DOC_LANGUAGE: es -->\n# X - Product Owner Specification\n");
+    put("PRODUCT_OWNER_SPEC.md", verified("<!-- DOC_LANGUAGE: es -->\n# X - Product Owner Specification\n"));
     put("BIAN_ALIGNMENT.md", "<!-- BIAN_ALIGNMENT_VERSION: 3.0 -->\n<!-- PO_SPEC_SOURCE: PRODUCT_OWNER_SPEC.md -->\n");
     put("design/hld.mmd", "flowchart TB\n  a-->b\n");
     put("adr/ADR-001-x.md");

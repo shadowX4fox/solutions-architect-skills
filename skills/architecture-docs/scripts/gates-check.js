@@ -68,11 +68,30 @@ function archRefs(root, f) {
   try { poSpecDelta = require(path.join(__dirname, '..', '..', '..', 'plugins', 'sa-requirements', 'skills', 'architecture-readiness', 'scripts', 'po-spec-delta.js')); } catch { return null; } // optional:
   try { return poSpecDelta.check(root, { poSpec: path.join(root, f) }).findings; } catch { return null; }
 }
+// The evaluation's stamp (sa-requirements' readiness-stamp.js, 10.24.0): a spec drafted in chat mode carries `draft` and
+// a spec edited after its evaluation a stale hash — both BLOCK until workflow 4 runs in Claude Code; a spec with no stamp
+// (written before 10.24.0, or never evaluated) is a WARN.
+function readiness(root, f) {
+  let rs = null;
+  try { rs = require(path.join(__dirname, '..', '..', '..', 'plugins', 'sa-requirements', 'skills', 'architecture-readiness', 'scripts', 'readiness-stamp.js')); } catch { return null; } // optional:
+  return rs.stampOf(read(path.join(root, f)));
+}
+const EVALUATE = 'run `evaluate PO spec` in Claude Code (sa-requirements:architecture-readiness workflow 4), which stamps it';
 function poSpecPass(root, f) {
+  const st = readiness(root, f);
+  if (st && st.state === 'draft') return { gate: '0.2', name: 'po_spec', status: 'BLOCK', value: f, readiness: 'draft', note: `drafted in chat mode, never evaluated — ${EVALUATE}` };
+  if (st && st.state === 'stale') return { gate: '0.2', name: 'po_spec', status: 'BLOCK', value: f, readiness: 'stale', note: `edited after its evaluation (${st.date}) — ${EVALUATE}` };
+  const notes = [];
+  if (st && st.state === 'none') notes.push(`not evaluated — no READINESS_CHECK stamp; ${EVALUATE}`);
   const refs = archRefs(root, f);
-  if (!refs || !refs.length) return { gate: '0.2', name: 'po_spec', status: 'PASS', value: f };
-  const ids = [...new Set(refs.map(r => r.ref.replace(/^.*\//, '').replace(/^((?:ADR|TDR)-\d{3}).*$/, '$1')))];
-  return { gate: '0.2', name: 'po_spec', status: 'WARN', value: f, note: `${refs.length} architecture reference(s) in the spec (${ids.slice(0, 6).join(', ')}${ids.length > 6 ? ', …' : ''}) — the PO Spec is business only; none is a decision of this architecture` };
+  if (refs && refs.length) {
+    const ids = [...new Set(refs.map(r => r.ref.replace(/^.*\//, '').replace(/^((?:ADR|TDR)-\d{3}).*$/, '$1')))];
+    notes.push(`${refs.length} architecture reference(s) in the spec (${ids.slice(0, 6).join(', ')}${ids.length > 6 ? ', …' : ''}) — the PO Spec is business only; none is a decision of this architecture`);
+  }
+  const r = { gate: '0.2', name: 'po_spec', status: notes.length ? 'WARN' : 'PASS', value: f };
+  if (st) r.readiness = st.state === 'current' ? 'verified' : st.state;
+  if (notes.length) r.note = notes.join(' · ');
+  return r;
 }
 
 function checkPoSpec(root, files) {
@@ -174,9 +193,10 @@ function check(root, opts = {}) {
   const hld = checkHld(root, files, opts, po, align);
   const catalog = checkCatalog(root, po);
   const ranges = stepRanges();
-  // a range is read only when the receipt cannot carry the handling: the PO Spec menu, a blocking message, the
+  // a range is read only when the receipt cannot carry the handling: the PO Spec menu, a blocking message (the PO Spec's
+  // carries its own: evaluate it), the
   // transcription rules of an HLD that is not Mermaid. An ASK or a WARN is resolved from its note.
-  const needsRange = (g) => g.status === 'MISSING' || g.status === 'BLOCK' || (g.name === 'hld' && g.status === 'TRANSCRIBE');
+  const needsRange = (g) => g.status === 'MISSING' || (g.status === 'BLOCK' && g.name !== 'po_spec') || (g.name === 'hld' && g.status === 'TRANSCRIBE');
   const gates = [lang, po, align, hld, catalog].map(g => (needsRange(g) && ranges[g.gate] ? Object.assign(g, { read: `workflow1/00-gates.md:${ranges[g.gate].from}-${ranges[g.gate].to}` }) : g));
   return { project_root: root, gates, blocked: gates.some(g => g.status === 'BLOCK') };
 }

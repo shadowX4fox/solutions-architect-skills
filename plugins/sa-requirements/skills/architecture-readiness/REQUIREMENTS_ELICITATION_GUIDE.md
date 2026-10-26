@@ -274,7 +274,7 @@ It is normal for POs to not have all answers ready. Handle gaps gracefully:
 
 ## 9. Discovery Summary (Checkpoint)
 
-After completing all 4 phases, produce a structured Discovery Summary **in the conversation** (do not save as a file). This is a checkpoint — the PO must confirm before drafting.
+After completing all 4 phases, produce a structured Discovery Summary **in the conversation** (do not save as a file — except in chat mode, `CHAT_MODE.md`, where it is `DISCOVERY_SUMMARY.md` so an interview can span chats). This is a checkpoint — the PO must confirm before drafting.
 
 **Format:**
 
