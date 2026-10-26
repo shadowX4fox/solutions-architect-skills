@@ -60,6 +60,16 @@ describe("lifecycle — git, direct", () => {
     expect(L.status(ROOT).state).toBe("released");
   });
 
+  test("the PO's open implementation suggestions are listed, never a gate (10.25.0)", () => {
+    w("PRODUCT_OWNER_SPEC.md", "# Order Desk - Product Owner Specification\n\n## Appendix\n\n### Implementation Suggestions <!-- SECTION: Implementation Suggestions -->\n\n| # | Suggestion | Need | Proposed by | Status | Answer |\n|---|---|---|---|---|---|\n| IS-01 | Use a queue for orders | No order is lost | Sales | Open | |\n| IS-02 | Mobile first | UC-01 | Sales | Adopted | The phone app ships first |\n");
+    repo(); release({ direct: true });
+    const s = L.status(ROOT);
+    expect(s.state).toBe("released");
+    expect(s.suggestions).toEqual([{ id: "IS-01", suggestion: "Use a queue for orders", need: "No order is lost" }]);
+    const out = spawnSync("bun", [SCRIPT, "status", ROOT], { encoding: "utf8" }).stdout;
+    expect(out).toMatch(/PO implementation suggestions open \(1\)[\s\S]*IS-01 Use a queue for orders — need: No order is lost/);
+  });
+
   test("a change since the tag is listed with its bump; an added container is MINOR, a retired integration MAJOR", () => {
     repo(); release({ direct: true });
     w("docs/components/order-desk/02-order-api.md", container("Order API", "order-api", "Java"));

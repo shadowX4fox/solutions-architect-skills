@@ -94,6 +94,8 @@ const findSection = (src, re) => block(src, re, /^#{1,2}\s/);
 // Ten of the twelve PO Specs on this machine were written from a template that carried no anchors (fixed in 8.31.0),
 // so a spec without them is cut by the heading's visible text — the English or Spanish name the registry
 // `scripts/shared/po-spec-anchors.json` gives the anchor — and the cut says so (`fallback: text`).
+// what a writer does with a PO Spec block that is not a requirement
+const PO_NOTES = { 'Implementation Suggestions': ' — not requirements: how someone proposed to build it. Weigh each against the need it names; this section may adopt it or not, and a choice with weight is an ADR candidate. Never cite a suggestion as a requirement; the PO Spec sync writes the answer back' };
 const PO_ANCHORS = (() => { try { return JSON.parse(read(path.join(SKILL, '..', '..', 'scripts', 'shared', 'po-spec-anchors.json'))).anchors; } catch { return {}; } })();
 const headingText = (l) => l.replace(/^#+\s+/, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\d+(\.\d+)*\.?\s+/, '').replace(/\s+/g, ' ').trim().toLowerCase();
 // an outline of a block: its heading, then every subheading with the first paragraph under it — what an overview needs
@@ -161,7 +163,7 @@ function prepare(root, n, opts = {}) {
   // the editor's route: the PO Spec cut by anchor replaces every po-spec-* kind
   if (Array.isArray(opts.poSpecAnchors)) {
     if (!poSrc) miss('PO Spec', `${path.relative(root, poSpec)} not found`);
-    else { let byText = 0; opts.poSpecAnchors.forEach((entry) => { const a = typeof entry === 'string' ? entry : entry.anchor, mode = typeof entry === 'string' ? 'whole' : (entry.mode || 'whole'); const b = anchorBlock(poSrc, a); if (b) { if (b.fallback) byText++; const text = mode === 'outline' ? outlineOf(b.text) : b.text; add(`PO Spec § ${a}${mode === 'outline' ? ' (outline — headings and their first paragraph; the whole section feeds another document)' : ''}`, text, `${path.relative(root, poSpec)} lines ${b.from}–${b.to}${b.fallback ? ' — matched by heading text, no anchor' : ''}`); } else miss(`PO Spec § ${a}`, 'no heading carries that SECTION anchor, and none matches its registered name'); });
+    else { let byText = 0; opts.poSpecAnchors.forEach((entry) => { const a = typeof entry === 'string' ? entry : entry.anchor, mode = typeof entry === 'string' ? 'whole' : (entry.mode || 'whole'); const b = anchorBlock(poSrc, a); if (b) { if (b.fallback) byText++; const text = mode === 'outline' ? outlineOf(b.text) : b.text; add(`PO Spec § ${a}${mode === 'outline' ? ' (outline — headings and their first paragraph; the whole section feeds another document)' : ''}${PO_NOTES[a] || ''}`, text, `${path.relative(root, poSpec)} lines ${b.from}–${b.to}${b.fallback ? ' — matched by heading text, no anchor' : ''}`); } else miss(`PO Spec § ${a}`, 'no heading carries that SECTION anchor, and none matches its registered name'); });
       if (byText) miss('PO Spec anchors', `${byText} section(s) matched by heading text — this spec predates the anchored template; run \`sync PO spec\` (architecture-readiness Workflow 6) to anchor it`); }
   }
   spec.inputs.filter((k) => !(Array.isArray(opts.poSpecAnchors) && k.startsWith('po-spec'))).forEach((k) => {

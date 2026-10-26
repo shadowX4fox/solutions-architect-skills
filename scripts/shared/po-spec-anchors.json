@@ -44,6 +44,7 @@
     "Risks":                                  { "level": 3, "en": "Risks",                                  "es": "Riesgos" },
     "Open Questions":                         { "level": 3, "en": "Open Questions",                         "es": "Preguntas Abiertas" },
     "Aspirations":                            { "level": 3, "en": "Aspirations",                            "es": "Aspiraciones" },
+    "Implementation Suggestions":             { "level": 3, "en": "Implementation Suggestions",             "es": "Sugerencias de Implementación" },
     "Sync Log":                               { "level": 3, "en": "Sync Log",                               "es": "Registro de sincronización" },
     "References":                             { "level": 3, "en": "References",                             "es": "Referencias" }
   }

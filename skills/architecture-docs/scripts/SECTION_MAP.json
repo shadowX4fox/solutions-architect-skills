@@ -44,6 +44,7 @@
     "Risks",
     "Open Questions",
     "Aspirations",
+    "Implementation Suggestions",
     "Sync Log",
     "References"
   ],
@@ -74,7 +75,8 @@
         "Integration Constraints",
         "Technology Constraints",
         "Operational Constraints",
-        "Out of Scope"
+        "Out of Scope",
+        "Implementation Suggestions"
       ]
     },
     "5": {
@@ -85,7 +87,8 @@
         {
           "anchor": "Use Cases",
           "mode": "outline"
-        }
+        },
+        "Implementation Suggestions"
       ]
     },
     "6": {
@@ -107,7 +110,8 @@
         "Technology Constraints",
         "Budget Constraints",
         "Timeline Constraints",
-        "Resource Constraints"
+        "Resource Constraints",
+        "Implementation Suggestions"
       ]
     },
     "9": {

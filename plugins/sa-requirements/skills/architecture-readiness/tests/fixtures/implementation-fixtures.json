@@ -1,0 +1,22 @@
+[
+ {"id":"f01","where":"Business Constraints","text":"Orders must be published to Kafka so no order is lost.","label":true},
+ {"id":"f02","where":"Business Objectives","text":"Build the platform as microservices to scale each module independently.","label":true},
+ {"id":"f03","where":"UC-02 Book a table › step 3","text":"The React app shows the available time slots.","label":true},
+ {"id":"f04","where":"Business Constraints","text":"Store every reservation in PostgreSQL.","label":true},
+ {"id":"f05","where":"User Experience Requirements","text":"Expose a REST API for partners to query availability.","label":true},
+ {"id":"f06","where":"Restricciones de Negocio","text":"Usar una base de datos NoSQL para el historial de clientes.","label":true},
+ {"id":"f07","where":"Objetivos de Negocio","text":"Implementar un chatbot con GPT para atender reclamos.","label":true},
+ {"id":"f08","where":"Casos de Uso › UC-04 paso 2","text":"El sistema guarda la sesión en Redis por 15 minutos.","label":true},
+ {"id":"f09","where":"Restricciones de Negocio","text":"Desplegar la solución en contenedores sobre Kubernetes.","label":true},
+ {"id":"f10","where":"Business Constraints","text":"Cache the menu in the browser to load faster.","label":true},
+ {"id":"f11","where":"Business Constraints","text":"Balances are read from the bank's SAP ledger, which stays the system of record.","label":false},
+ {"id":"f12","where":"Business Constraints","text":"The solution must run on Azure: the company has a signed enterprise agreement and no other cloud is approved.","label":false},
+ {"id":"f13","where":"UC-01 Check status › step 1","text":"The customer opens the mobile app and selects an order.","label":false},
+ {"id":"f14","where":"Success Metrics","text":"Order capture time falls from 12 to 4 minutes by Q2 2027.","label":false},
+ {"id":"f15","where":"Business Constraints","text":"Card data must never be stored, as PCI DSS requires.","label":false},
+ {"id":"f16","where":"Restricciones de Negocio","text":"Los pagos se confirman con la pasarela de PayLink que ya contrató la empresa.","label":false},
+ {"id":"f17","where":"Casos de Uso › UC-03 resultado","text":"El cliente recibe un correo con el código de la reserva.","label":false},
+ {"id":"f18","where":"Restricciones de Negocio","text":"Los reportes se publican en Power BI, la herramienta corporativa obligatoria.","label":false},
+ {"id":"f19","where":"Business Objectives","text":"Partners can check availability without calling the front desk.","label":false},
+ {"id":"f20","where":"User Experience Requirements","text":"The menu loads in under 2 seconds on a 4G connection.","label":false}
+]

@@ -66,6 +66,8 @@ A use case is checked part by part — description, actor, trigger (or precondit
 | Any failure in Use Cases, Business Objectives, Business Constraints or Success Metrics | the total is capped at **7.4** — below Ready — until it is fixed or moved |
 | A statement moved to **Aspirations** (Appendix) | nothing: an aspiration is not a requirement, and the architecture designs nothing for it |
 
+**Implementation suggestions are not scored.** The same script asks, of every requirement naming a technology or a product, whether it prescribes how the system is built (`po-spec-implementation`; the Haiku worksheet judge put 20 of 20 labelled statements on the right side, the four hard negatives included — an imposed platform, an existing system to work with). A yes is reported, never penalized: the statement moves to Appendix → Implementation Suggestions and the need behind it stays as the requirement.
+
 Score each section as below, multiply it by its multiplier, sum, then apply the cap. Measured on 40 labelled requirements (English and Spanish): the Haiku worksheet judge, Jev and Clef each put every statement on the right side of the rule. A judged answer under 0.6 is reported and never applied; an unanswered candidate leaves the score provisional.
 
 ### The coherence gate — can it be built as it stands?

@@ -2,7 +2,7 @@
 // po-spec.js — the Product Owner Specification's Use Cases, parsed once: every UC heading (`### UC-01: …`, `### Use Case 1`,
 // `### Caso de Uso 1`) with its labelled fields (Description, Actors, Preconditions, Postconditions, Primary Flow,
 // Alternative Flows, Edge Cases, Success Metrics, and since 8.134.0 Trigger and Acceptance Criteria — English or
-// Spanish), and the spec's version.
+// Spanish), and the spec's version; since 10.25.0 the Appendix's Implementation Suggestions table (`suggestionsOf`).
 //
 // Shared across skills: architecture-traceability measures the architecture against it, architecture-capability-alignment
 // maps it onto BIAN. Ships in sa-requirements with BIAN alignment; sa-skills re-exports it at scripts/shared/po-spec.js,
@@ -43,4 +43,30 @@ function parseSpec(text) {
   return { useCases: ucs, version, warnings };
 }
 
-module.exports = { parseSpec, plain, FIELDS };
+// The Appendix's Implementation Suggestions (10.25.0): how someone proposed to build the system — not a requirement, the
+// architecture's to answer. The table `# | Suggestion | Need | Proposed by | Status | Answer` (column headers English in
+// every language, Status `Open` · `Adopted` · `Not adopted`), under the `SECTION: Implementation Suggestions` anchor or its
+// heading. A row with an empty or unknown Status is Open; a placeholder row ([…]) is no suggestion.
+const SUGGESTION_STATUS = ['Open', 'Adopted', 'Not adopted'];
+function suggestionsOf(text) {
+  const lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+  let start = lines.findIndex((l) => /<!--\s*SECTION:\s*Implementation Suggestions\s*-->/.test(l));
+  if (start < 0) start = lines.findIndex((l) => /^#{2,4}\s+(?:Implementation Suggestions|Sugerencias de Implementaci[óo]n)\b/i.test(l));
+  if (start < 0) return [];
+  const level = (lines[start].match(/^#+/) || ['###'])[0].length, out = [];
+  let cols = null;
+  for (let i = start + 1; i < lines.length; i++) {
+    const h = lines[i].match(/^(#{1,6})\s/); if (h && h[1].length <= level) break;
+    const l = lines[i].trim(); if (!l.startsWith('|')) continue;
+    const cells = l.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => plain(c));
+    if (cells.every((c) => /^:?-{3,}:?$/.test(c))) continue;
+    if (!cols) { cols = cells.map((c) => c.toLowerCase()); continue; }
+    const at = (name) => { const k = cols.indexOf(name); return k >= 0 ? cells[k] || '' : ''; };
+    const suggestion = at('suggestion'); if (!suggestion || /^\[.*\]$/.test(suggestion)) continue;
+    const st = SUGGESTION_STATUS.find((x) => x.toLowerCase() === at('status').toLowerCase()) || 'Open';
+    out.push({ id: at('#') || `IS-${String(out.length + 1).padStart(2, '0')}`, suggestion, need: at('need'), by: at('proposed by'), status: st, answer: at('answer'), line: i + 1 });
+  }
+  return out;
+}
+
+module.exports = { parseSpec, plain, FIELDS, suggestionsOf, SUGGESTION_STATUS };

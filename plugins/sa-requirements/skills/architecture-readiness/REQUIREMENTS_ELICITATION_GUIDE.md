@@ -217,6 +217,7 @@ Apply these techniques throughout the interview to increase answer depth:
 | **Stakeholder Perspective** | Missing viewpoints | "How would the [ops team / compliance team / end users] experience this?" |
 | **Analogies** | Abstract requirements | "Is there an existing product that does something similar? What would you borrow from it?" |
 | **Checkability ladder** | A requirement no one could check — "extensible to other systems", "fast", "etc." | The four questions below, in order |
+| **Need behind the means** | The PO names how to build it — a product, technology, vendor or design ("use Kafka", "in React", "microservices") | "What does that give you?" — then the ladder on the answer. The need goes into its section as a requirement; the proposal is kept verbatim under **Appendix → Implementation Suggestions** (Status `Open`): the architecture team decides it. A technology the organization imposes (an existing contract, a mandated platform) is a Business Constraint instead |
 
 ### The checkability ladder
 

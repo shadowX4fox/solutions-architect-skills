@@ -26,6 +26,11 @@
 //      Ready cap: any failing statement in Business Objectives, Use Cases, Business Constraints or Success Metrics
 //      caps the total at 7.4 until it is fixed or moved.
 //
+// Beside the rule (10.25.0), one more question that never scores: does a requirement prescribe how the system is built — a
+// product, a technology, a design? A candidate (a technology word or a product-shaped name) goes to the judge; a confident
+// yes is reported as an implementation suggestion — the statement moves to Appendix › Implementation Suggestions, the need
+// behind it stays in its section. Unanswered, it keeps the result PENDING like any other candidate.
+//
 // Exit: 0 PASS · 1 FAIL · 10 PENDING (a worksheet waits for the worksheet-judge subagent; nothing failed by code).
 'use strict';
 const fs = require('fs'), path = require('path');
@@ -74,6 +79,19 @@ const CUE = {
   dated: /\b(?:in the future|future(?:-proof)?|eventually|later(?: on)?|at some point|down the road|someday|should allow (?:extending|adding)|could be extended|a futuro|en el futuro|más adelante|posteriormente|eventualmente|en algún momento|en una (?:fase|etapa) posterior|podría extenderse|que se pueda extender)\b/i,
   observable: /\b(?:appropriately|properly|as needed|as required|correctly|seamlessly|handles? (?:all )?(?:the )?errors?|process(?:es)? the request|integrates? (?:well|properly)|adecuadamente|correctamente|según corresponda|de forma adecuada|maneja(?:r)? (?:los )?errores|procesa(?:r)? la solicitud|se integra(?:rá)? bien|sin problemas)\b/i,
   measurable: /\b(?:scalab\w*|extensib\w*|extendable|flexib\w*|robust\w*|fast|quick\w*|rapid\w*|performant|efficient\w*|secure\w*|reliab\w*|user[- ]friendly|intuitive|easy|simple|modern|high(?:ly)? availab\w*|escalab\w*|extensib\w*|flexib\w*|robust\w*|rápid\w*|ágil|eficien\w*|segur[oa]s?|confiab\w*|amigable|intuitiv\w*|fácil(?:es)?|sencill\w*|modern\w*|alta disponibilidad|buen(?:as)? prácticas)\b/i,
+};
+// implementation candidates: a technology word, bilingual, or a product name — an inner capital (PostgreSQL, DynamoDB) or a
+// product that is also a plain word, matched by its case (React, REST)
+const IMPL_WORD = /\b(?:micro-?servic\w*|microservicios?|monolit\w*|monolith\w*|serverless|kubernetes|docker|containeri[sz]ed|contenedores|cloud-native|nube|databases?|bases? de datos|message (?:queue|broker|bus)|event bus|bus de eventos|colas? de mensajes|kafka|rabbitmq|frameworks?|librer[íi]as?|blockchain|cach[eé]|redis|data lake|mainframe|webhooks?|graphql|grpc|postgres\w*|mysql|mongo\w*|low-?code|no-?code|chatbot)\b/i;
+const IMPL_NAME = /\b(?:React|Vue|Angular|Java|Python|REST|SOAP|SAP|AWS|GCP|Azure|Lambda|Oracle|Node\.js|\.NET|Salesforce|Tableau|Power ?BI|LLM|GPT|SQL|NoSQL|JSON|XML|ETL|SDK|APIs?|K8s)\b|\b[A-Z][a-z]+[A-Z][A-Za-z]*\b/;
+const implCue = (t) => IMPL_WORD.test(t) || IMPL_NAME.test(t);
+const IMPL = {
+  id: 'po-spec-implementation', type: 'noul', hi: 0.6,
+  question: 'Does the requirement `item.statement` (from `item.where`) prescribe how the system is to be built — a product, technology, vendor, framework, data store, protocol, architecture style or internal component of the system — rather than what it must do?',
+  criteria: {
+    true: 'It chooses the means: "use Kafka for orders", "built as microservices", "the app in React", "store it in PostgreSQL", "expose a REST API", "usar una base de datos NoSQL".',
+    false: 'It states a need, an existing system the initiative must work with ("read balances from the bank\'s SAP ledger"), a channel users reach it through, or a technology the organization imposes as a constraint (an existing contract, a mandated platform, a regulation).',
+  },
 };
 const HAS_NUMBER = /\d/;
 const HAS_DATE = /\b(?:20\d\d|Q[1-4]|H[12]|release\s*\d|r\d|fase\s*\d|phase\s*\d|v\d|sprint\s*\d|(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|january|february|march|april|may|june|july|august|september|october|november|december))\b/i;
@@ -166,13 +184,19 @@ function extract(text) {
     }
     statementsOf(body, r.start + 1).forEach((s) => statements.push({ section: sec.anchor, part: null, where: sec.anchor, ...s }));
   }
-  statements.forEach((s, i) => { s.id = `s${i + 1}`; s.cues = cues(s.text); });
+  statements.forEach((s, i) => { s.id = `s${i + 1}`; s.cues = cues(s.text); s.impl = implCue(s.text); });
   return { statements, structural, sections };
 }
 
 // ---- stage 3: score ---------------------------------------------------------------------------------------------------
-function score(ex, answers) {
-  const findings = [...ex.structural], unsure = [], undecided = [];
+function score(ex, answers, implAnswers = {}) {
+  const findings = [...ex.structural], unsure = [], undecided = [], suggestions = [];
+  for (const s of ex.statements.filter((x) => x.impl)) {
+    const a = implAnswers[s.id];
+    if (!a) { undecided.push({ ...s, question: 'implementation' }); continue; }
+    if ((a.p ?? a.confidence ?? 0) >= IMPL.hi) suggestions.push({ section: s.section, use_case: s.use_case, where: s.where, text: s.text, line: s.line, by: a.by, confidence: a.p ?? a.confidence,
+      ask: 'This chooses how to build it — the architecture team\'s call. What does it give you? Write that need here as a requirement and move the statement to Appendix › Implementation Suggestions.' });
+  }
   for (const s of ex.statements.filter((x) => x.cues.length)) {
     const a = answers[s.id];
     if (!a) { undecided.push(s); continue; }
@@ -192,7 +216,7 @@ function score(ex, answers) {
   });
   const capped = sections.filter((s) => s.critical && s.failing).map((s) => s.section);
   const status = findings.length ? 'FAIL' : undecided.length || unsure.length ? 'PENDING' : 'PASS';
-  return { status, findings: findings.map((f) => ({ ...f, ask: LADDER[f.test] })), unsure, undecided, sections, ready_cap: capped.length ? READY_CAP : null, capped_by: capped };
+  return { status, findings: findings.map((f) => ({ ...f, ask: LADDER[f.test] })), unsure, undecided, suggestions, sections, ready_cap: capped.length ? READY_CAP : null, capped_by: capped };
 }
 
 // ---- run --------------------------------------------------------------------------------------------------------------
@@ -202,25 +226,29 @@ async function check(specPath, opts = {}) {
   const candidates = ex.statements.filter((s) => s.cues.length);
   const SA = opts.saSkills !== undefined ? opts.saSkills : saSkillsDir();
   const J = opts.judge || (SA ? require(path.join(SA, 'scripts', 'judge.js')) : null);
-  let answers = {}, judgeInfo = { engine: J ? opts.engine || J.engineInForce() : 'none', pending: null, note: J ? null : 'no judge — the judge ships in sa-skills (scripts/judge.js), which was not found; every candidate is undecided — pass --sa-skills <dir> or set SA_SKILLS_DIR' };
-  if (candidates.length && J) {
-    const items = candidates.map((s) => ({ id: s.id, state: { text: s.text, where: s.where } }));
+  const judgeInfo = { engine: J ? opts.engine || J.engineInForce() : 'none', pending: null, note: J ? null : 'no judge — the judge ships in sa-skills (scripts/judge.js), which was not found; every candidate is undecided — pass --sa-skills <dir> or set SA_SKILLS_DIR' };
+  const ask = async (spec, items) => {
+    if (!items.length || !J) return {};
     try {
-      const res = await J.judge(SPEC, items, { engine: judgeInfo.engine, root: opts.root || path.dirname(path.resolve(specPath)), answers: opts.answers, cache: opts.cache, fetch: opts.fetch, apiKey: opts.apiKey });
-      if (res.pending) { judgeInfo.pending = res.pending; judgeInfo.dispatch = res.dispatch || J.WORKSHEET_JUDGE || null; }
-      answers = res.answers || {}; judgeInfo.engine = res.engine || judgeInfo.engine;
-    } catch (e) { if (e.name !== 'JudgeError') throw e; judgeInfo.note = e.message; }
-  }
-  return { spec: specPath, statements: ex.statements.length, candidates: candidates.length, judge: judgeInfo, ...score(ex, answers) };
+      const res = await J.judge(spec, items, { engine: judgeInfo.engine, root: opts.root || path.dirname(path.resolve(specPath)), answers: opts.answers, cache: opts.cache, fetch: opts.fetch, apiKey: opts.apiKey });
+      if (res.pending) { judgeInfo.pending = judgeInfo.pending ? `${judgeInfo.pending} and ${res.pending}` : res.pending; judgeInfo.dispatch = res.dispatch || J.WORKSHEET_JUDGE || null; }
+      judgeInfo.engine = res.engine || judgeInfo.engine; return res.answers || {};
+    } catch (e) { if (e.name !== 'JudgeError') throw e; judgeInfo.note = e.message; return {}; }
+  };
+  const answers = await ask(SPEC, candidates.map((s) => ({ id: s.id, state: { text: s.text, where: s.where } })));
+  const implItems = ex.statements.filter((s) => s.impl);
+  const implAnswers = await ask(IMPL, implItems.map((s) => ({ id: s.id, state: { statement: s.text, where: s.where } })));
+  return { spec: specPath, statements: ex.statements.length, candidates: candidates.length + implItems.length, judge: judgeInfo, ...score(ex, answers, implAnswers) };
 }
 
 function render(r) {
-  const out = [`CHECKABILITY: ${r.status} · ${r.statements} statement(s) · ${r.candidates} asked · ${r.findings.length} failing · ${r.unsure.length} unsure · ${r.undecided.length} undecided · judge ${r.judge.engine}`];
+  const out = [`CHECKABILITY: ${r.status} · ${r.statements} statement(s) · ${r.candidates} asked · ${r.findings.length} failing · ${(r.suggestions || []).length} implementation suggestion(s), not scored · ${r.unsure.length} unsure · ${r.undecided.length} undecided · judge ${r.judge.engine}`];
   for (const s of r.sections) out.push(s.section === 'Use Cases'
     ? `  ${s.section}: ${s.complete} of ${s.use_cases} use case(s) complete → ×${s.multiplier} (at most ${s.max_points} of ${s.points})${s.failing_use_cases.length ? ` · failing: ${s.failing_use_cases.join(', ')}` : ''}`
     : `  ${s.section}: ${s.failing} failing → ×${s.multiplier} (at most ${s.max_points} of ${s.points})`);
   out.push(r.ready_cap ? `  Ready cap: total at most ${r.ready_cap} — failing statements in ${r.capped_by.join(', ')}` : '  Ready cap: none');
   for (const f of r.findings) out.push(`  ✗ ${f.where} · ${f.test}${f.by !== 'code' ? ` (${f.by}${f.confidence != null ? ` ${(+f.confidence).toFixed(2)}` : ''})` : ''} — "${f.text.slice(0, 140)}" → ${f.ask}`);
+  for (const g of r.suggestions || []) out.push(`  → ${g.where} · implementation suggestion${g.by ? ` (${g.by}${g.confidence != null ? ` ${(+g.confidence).toFixed(2)}` : ''})` : ''} — "${g.text.slice(0, 140)}" → ${g.ask}`);
   for (const u of r.unsure) out.push(`  ? ${u.where} · judged ${u.judged} at ${(+u.confidence).toFixed(2)}, under 0.6 — not applied: "${u.text.slice(0, 140)}"`);
   if (r.undecided.length) out.push(`  undecided: ${r.undecided.length} candidate(s) no judge has answered${r.judge.pending ? ` — dispatch ${r.judge.dispatch || 'the worksheet-judge subagent'} on ${r.judge.pending}, then run again` : r.judge.note ? ` — ${r.judge.note}` : ''}`);
   return out.join('\n');
@@ -239,7 +267,7 @@ async function verify(fixturesPath, opts = {}) {
   return { engine: res.engine, total: rows.length, verdict_correct: rows.filter((r) => r.verdict_ok).length, test_exact: rows.filter((r) => r.exact).length, applied_wrong: rows.filter((r) => r.applied_wrong).length, rows };
 }
 
-module.exports = { check, verify, extract, score, cues, render, sectionLines, statementsOf, saSkillsDir, SPEC, TESTS, LADDER, SECTIONS, READY_CAP };
+module.exports = { check, verify, extract, score, cues, implCue, render, sectionLines, statementsOf, saSkillsDir, SPEC, IMPL, TESTS, LADDER, SECTIONS, READY_CAP };
 
 if (require.main === module) {
   const args = process.argv.slice(2), opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : undefined; };

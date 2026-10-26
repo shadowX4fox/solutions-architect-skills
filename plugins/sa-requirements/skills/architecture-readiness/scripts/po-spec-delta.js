@@ -53,6 +53,7 @@ const exists = (p) => fs.existsSync(p);
 const read = (p) => fs.readFileSync(p, "utf8").replace(/\r\n?/g, "\n");
 const semver = (v) => String(v || '0').replace(/^v/, '').split('.').map((x) => parseInt(x, 10) || 0);
 const cmp = (a, b) => { const x = semver(a), y = semver(b); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); } return 0; };
+const { suggestionsOf } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'po-spec.js'));
 const field = (src, labels) => { for (const l of labels) { const m = src.match(new RegExp('^\\*\\*' + l + '\\*\\*\\s*:?\\s*(.+)$', 'mi')); if (m) return m[1].replace(/\*/g, '').trim(); } return null; };
 
 // the changelog: every `## [version] - date` entry with its body, in file order
@@ -104,7 +105,8 @@ function delta(root, opts = {}) {
     flows: facts.flows.map((f) => ({ code: f.code, name: f.name, use_cases: f.use_cases, latency_target: f.latency_target })) };
   const retired = facts.integrations.filter((i) => i.retired);
   const releases = releasesSince.map((e) => ({ ...e, full: e.body, body: opts.full ? e.body : headlines(e.body) }));
-  return { state, full: !!opts.full, releases, adrs, tdrs, components, useCases, retired_integrations: retired, layers: facts.layers.length, systems: facts.systems.map((s) => ({ name: s.name, owned: s.owned })) };
+  const suggestions = suggestionsOf(spec);
+  return { state, full: !!opts.full, releases, adrs, tdrs, components, useCases, retired_integrations: retired, suggestions, layers: facts.layers.length, systems: facts.systems.map((s) => ({ name: s.name, owned: s.owned })) };
 }
 
 const MAPPING = `| What changed in the architecture | Where it lands in the PO Spec | Written as |
@@ -115,6 +117,7 @@ const MAPPING = `| What changed in the architecture | Where it lands in the PO S
 | Scope moved: containers or phases added or removed, a deferred capability (docs/03, a CHANGELOG Removed / Deprecated) | § 1 Business Context (Desired Future State) · § 3 Business Objectives | what the customer gets or no longer gets, and when |
 | A new owner, operator or approver (component owners, integration owners, a TDR's approver) | § 2 Stakeholders & Users | the role, its responsibility in this initiative |
 | Technical debt accepted with a business effect (a TDR the changes name, a Deprecated entry) | § 7 Business Constraints · Appendix (Risks) | the risk in business terms and its owner |
+| An implementation suggestion the architecture answered (an ADR, the technology stack, a container's technology) | Appendix › Implementation Suggestions — its Status and Answer | \`Adopted\` or \`Not adopted\`, with what the business gets instead and the architecture version — never the ADR id |
 
 The PO Spec is business only: an ADR, TDR or integration id (\`ADR-nnn\`, \`TDR-nnn\`, \`I-nn\`) or a link into \`adr/\`, \`tdr/\` or \`docs/\` never enters its text — the Source column carries the id for the Product Owner's review, and \`--check\` refuses a spec that carries one.`;
 
@@ -134,6 +137,8 @@ function render(d) {
   out.push('## Use cases — the spec vs the architecture', '', `- In the spec: ${u.in_spec.join(', ') || 'none found (headings `### UC-nn:` expected in § 4)'}`, `- Served by the architecture's flows: ${u.in_architecture.join(', ') || 'none'}`,
     `- **In the architecture only** (a flow serves a use case the spec does not define): ${u.architecture_only.join(', ') || 'none'}`, `- **In the spec only** (no flow serves it): ${u.spec_only.join(', ') || 'none'}`, '',
     u.flows.length ? '| Flow | Use cases | Latency target |\n|---|---|---|\n' + u.flows.map((f) => `| ${f.code}. ${f.name} | ${f.use_cases.join(', ')} | ${f.latency_target || ''} |`).join('\n') : '', '');
+  const open = (d.suggestions || []).filter((x) => x.status === 'Open');
+  out.push(`## Implementation suggestions (${(d.suggestions || []).length}, ${open.length} open — answer each from the architecture: does it adopt it, and if not, how is the need met?)`, '', (d.suggestions || []).length ? '| # | Suggestion | Need | Status | Answer |\n|---|---|---|---|---|\n' + d.suggestions.map((x) => `| ${x.id} | ${x.suggestion} | ${x.need} | ${x.status} | ${x.answer} |`).join('\n') : '(none)', '');
   out.push(`## Retired integrations (${d.retired_integrations.length})`, '', d.retired_integrations.length ? d.retired_integrations.map((i) => `- ${i.id}: ${i.from} → ${i.to} — ${i.boundary || ''}`).join('\n') : '(none)', '');
   return out.join('\n');
 }

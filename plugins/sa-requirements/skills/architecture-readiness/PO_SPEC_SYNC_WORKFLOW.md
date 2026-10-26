@@ -76,6 +76,11 @@ Rules for the proposed text:
   flow's trigger and latency target, never from the containers.
 - Every row cites its source in the Source column: the changelog entry, the ADR or TDR id, the delta section.
 - Quote the current text verbatim (open the spec by heading range for it — never paraphrase).
+- **Every open implementation suggestion** the delta lists (Appendix › Implementation Suggestions) gets a row when the
+  architecture answers it — the technology stack, a container's technology or an ADR decides the means it proposed:
+  Status `Adopted` or `Not adopted`, and an Answer in business words — what the business gets, how the need is met,
+  the architecture version (*"Not adopted (architecture v1.3.0): a managed queue keeps every order through an outage"*).
+  The ADR id goes in the Source column, never in the Answer. A suggestion the architecture has not reached stays `Open`.
 
 ## Step 3 — Present, and let the Product Owner decide
 
@@ -114,7 +119,7 @@ bun [plugin_dir]/skills/architecture-readiness/scripts/po-spec-delta.js <project
 1. In the spec's Appendix, add or extend a **Sync log** table — one row per sync:
    `| Date | Spec version | Architecture version | Applied | Declined |` with the proposal
    numbers, so the next sync and the next traceability report know what the business chose.
-2. Re-score the spec (Workflow 4, `PO_SPEC_SCORING_GUIDE.md`) and report the score next to the
+2. Re-score the spec (Workflow 4, `PO_SPEC_SCORING_GUIDE.md` — its step 7 restamps it: the sync's edits voided the `READINESS_CHECK` stamp) and report the score next to the
    previous one — a sync must not lower it.
 3. Render the distribution PDF (Workflow 5) — every write of the spec renders it.
 4. Report:

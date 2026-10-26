@@ -58,6 +58,8 @@ describe.skipIf(!ARCH_FACTS)("po-spec-delta", () => {
     expect(md).toMatch(/\| ★ TDR-001 \|/);
     expect(md).toMatch(/\*\*In the spec only\*\*[^\n]*: UC-02, UC-09/);
     expect(md).toMatch(/headlines — each bullet/);
+    expect(md).toMatch(/## Implementation suggestions \(0, 0 open/);
+    expect(md).toMatch(/An implementation suggestion the architecture answered/);
   });
 
   test("entries rotated to the archive are part of the delta when the sync predates the main file", () => {

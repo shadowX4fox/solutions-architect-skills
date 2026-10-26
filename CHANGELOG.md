@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.25.0]
+
+### Added
+
+- **Implementation suggestions in the PO Spec**: a new Appendix table, `Implementation Suggestions`, for a product, technology or design someone proposes. Its columns are `# | Suggestion | Need | Proposed by | Status | Answer`, and Status is `Open`, `Adopted` or `Not adopted`. A suggestion is not a requirement and is not scored. The interview asks what the suggestion gives the business, writes that need as the requirement, and keeps the suggestion verbatim (*Need behind the means*, in the elicitation guide and in chat mode). A technology the organization imposes stays a Business Constraint.
+- **`po-spec-checkability.js` reports a requirement that prescribes the means.** A requirement that names a technology word or a product gets one judge question: does it say how the system is built rather than what it must do? A yes is reported with its fix: move the statement and keep the need. It never moves a multiplier or the Ready cap. Measured on 20 labelled statements, the Haiku worksheet judge placed all 20 correctly, the imposed platforms and existing systems included (`docs/DESIGN_NOTES.md` § Requirements).
+- **The architecture sees them and answers them.** The Section 4, 5 and 8 payloads carry the table, marked as input the architecture decides. `lifecycle.js status` lists the open suggestions and never gates on them. The PO Spec sync lists every suggestion in its delta and writes each answer in business words, with the architecture version and no ADR id.
+
 ## [10.24.0]
 
 ### Added

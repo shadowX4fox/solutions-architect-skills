@@ -60,6 +60,7 @@ const increments = require(P('scripts', 'shared', 'increments.js'));
 const { readReview } = require(P('skills', 'architecture-docs', 'scripts', 'principle-check.js'));
 const { rotate } = require(P('skills', 'architecture-docs', 'scripts', 'changelog-rotate.js'));
 const escalate = require(P('scripts', 'shared', 'escalate.js'));
+const { suggestionsOf } = require(P('scripts', 'shared', 'po-spec.js'));
 
 const ARCH_PATHS = ['ARCHITECTURE.md', 'docs', 'adr', 'tdr'];
 const TAG = (v) => `architecture-v${v}`;
@@ -383,6 +384,9 @@ function status(root, opts = {}) {
   else if (base.kind === 'none') r.state = 'draft';
   else r.state = r.changes.length || r.unreleased.length ? 'changed' : 'released';
   r.downstream = r.state === 'draft' ? [] : downstream(root, version, released);
+  // the PO's implementation suggestions the architecture has not answered (10.25.0) — reported, never a gate
+  const spec = path.join(root, 'PRODUCT_OWNER_SPEC.md');
+  if (exists(spec)) { const open = suggestionsOf(read(spec)).filter((x) => x.status === 'Open'); if (open.length) r.suggestions = open.map((x) => ({ id: x.id, suggestion: x.suggestion, need: x.need })); }
   const sl = increments.slices(cur);
   if (sl.increments.length) r.increments = { file: sl.file, list: sl.increments.map((x) => ({ id: x.id, target: x.target, use_cases: x.use_cases, flows: x.flows, containers: x.containers.length, new_containers: x.new.containers, integrations: x.integrations.length, new_integrations: x.new.integrations.length, gaps: x.gaps, released_in: deliveredIn(cl, x.id) })), unassigned: sl.unassigned, duplicates: sl.duplicates, temporary: sl.temporary, temporary_gaps: sl.temporary_gaps };
   r.next = { draft: `release my architecture — first release, v${version}`, changed: `release my architecture — ${r.changes.length} change(s) since v${version}, recommended ${r.recommended || 'patch'}`,
@@ -611,6 +615,7 @@ function renderStatus(r) {
   if (r.note) o.push(`note: ${r.note}`);
   if (r.increments) { o.push(`delivery increments (${r.increments.file}):`); r.increments.list.forEach((x) => o.push(`  ${x.released_in ? `✓ v${x.released_in}` : '·      '} ${x.id}${x.target ? ` · ${x.target}` : ''} — ${x.use_cases.join(', ')} · ${x.containers} containers (${x.new_containers.length} new) · ${x.integrations} integrations (${x.new_integrations} new)${x.gaps.length ? ` · ${x.gaps.length} gap(s): ${x.gaps.map((g) => g.rule).join(', ')}` : ''}`)); if (r.increments.unassigned.use_cases.length) o.push(`  unassigned use cases: ${r.increments.unassigned.use_cases.join(', ')}`); if (r.increments.unassigned.containers.length) o.push(`  containers no increment needs: ${r.increments.unassigned.containers.join(', ')}`); r.increments.temporary.forEach((t) => o.push(`  temporary ${t.kind} ${t.name}: increments ${t.from || '?'}–${t.until || '?'}${t.tdr ? ` · ${t.tdr}` : ''} · ${t.live ? 'live' : 'retired'}`)); r.increments.temporary_gaps.forEach((g) => o.push(`  ✗ ${g.rule}: ${g.text}`)); }
   if (r.downstream && r.downstream.length) { o.push('downstream:'); r.downstream.forEach((d) => o.push(`  ${d.stale ? '⚠ stale' : '✓      '} ${d.artifact} — ${d.file} ${d.version ? `v${d.version}` : d.built ? `built ${d.built}` : 'no version'}${d.stale ? ` → "${d.command}"` : ''}`)); o.push('  · compliance contracts are not read — re-run "generate compliance contracts" after a release'); }
+  if (r.suggestions) { o.push(`PO implementation suggestions open (${r.suggestions.length}) — the architecture answers them; "update the PO spec" writes each answer:`); r.suggestions.forEach((x) => o.push(`  · ${x.id} ${x.suggestion.slice(0, 90)}${x.need ? ` — need: ${x.need.slice(0, 60)}` : ''}`)); }
   o.push(`next: ${r.next}`);
   return o.join('\n');
 }

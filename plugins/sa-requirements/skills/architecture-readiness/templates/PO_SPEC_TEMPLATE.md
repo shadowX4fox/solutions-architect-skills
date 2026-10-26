@@ -513,6 +513,14 @@ So that [benefit/value].
 ### Aspirations <!-- SECTION: Aspirations -->
 - [A wish that is not yet a requirement — no system named, no date or no number yet. It costs the score nothing and the architecture designs nothing for it. When it gets its names, date and number, it moves into the section it belongs to.]
 
+### Implementation Suggestions <!-- SECTION: Implementation Suggestions -->
+
+[How the system could be built, as someone proposed it — a product, technology, vendor or design. Not a requirement and not scored: the architecture team decides. Keep it verbatim; the need behind it goes into its section as a checkable requirement and is named in Need. A technology the organization imposes (an existing contract, a mandated platform) is a Business Constraint, not a suggestion. Status is `Open`, `Adopted` or `Not adopted`; Answer is the architecture's, in business words, written by the PO Spec sync.]
+
+| # | Suggestion | Need | Proposed by | Status | Answer |
+|---|---|---|---|---|---|
+| IS-01 | [as stated, verbatim] | [the requirement it serves — UC-nn, objective, constraint] | [role or area] | Open | |
+
 ---
 
 **Document Status**: Draft | In Review | Approved

@@ -49,6 +49,10 @@ no "ready" or "not ready". The official result is the scripts' (`PO_SPEC_SCORING
    - a use case that serves no objective, a metric that measures none (warnings).
    The rest of the coherence gate — acceptance tests, closure of states and triggers, contradictions, sizing — needs
    the judge and the test writer: it is not attempted here.
+3. **Implementation suggestions** — a requirement that chooses how to build the system (a product, technology, vendor,
+   framework, data store or design) rather than what it must do: ask what it gives the business, write that need as the
+   requirement, and move the statement verbatim to Appendix › Implementation Suggestions with Status `Open`
+   (`REQUIREMENTS_ELICITATION_GUIDE.md` § 6, *Need behind the means*). Never answer a suggestion: the architecture does.
 
 Report each finding as one line — where (section, `UC-nn`, objective number), the test it fails, the statement quoted,
 the ladder question that fixes it — then work through them with the Product Owner: each answer rewritten in place, a

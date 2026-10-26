@@ -301,6 +301,7 @@ before the stamp.
 - **Business-focused**: No technical details or architecture decisions in PO Spec
 - **User-centric**: Emphasize user needs, personas, and pain points
 - **Measurable**: All goals and success criteria must be quantifiable
+- **Means are the architecture's**: a product, technology or design the PO proposes is kept verbatim under Appendix → Implementation Suggestions — not a requirement, not scored; the need behind it is the requirement. `po-spec-checkability.js` reports a requirement that prescribes one; `lifecycle.js status` lists the open ones; the PO Spec sync (workflow 6) writes the architecture's answer
 - **Checkable**: every requirement — use cases above all — must be checkable by someone who was not in the room: named, closed, dated, observable, measured. A wish that is not yet checkable goes to Appendix → Aspirations; `scripts/po-spec-checkability.js` holds the rule and the penalty
 - **Constraint-aware**: Document all business constraints (budget, timeline, compliance)
 
