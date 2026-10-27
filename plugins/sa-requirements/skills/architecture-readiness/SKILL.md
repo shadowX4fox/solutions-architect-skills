@@ -98,6 +98,7 @@ Invoke this skill when:
 - **REQUIREMENTS_ELICITATION_GUIDE.md**: Structured discovery interview methodology — 4 phases, probing techniques, Discovery Summary, and transition to PO Spec drafting
 - **PRODUCT_OWNER_SPEC_GUIDE.md**: Comprehensive guide with 8-section template, examples, and best practices
 - **templates/PO_SPEC_TEMPLATE.md**: Quick-start template for creating a new PO Specification
+- **templates/PROJECT_INSTRUCTIONS_TEMPLATE.md**: the instructions of a Claude Project that runs chat mode — placeholders, where the files live, start and end of every chat (`CHAT_MODE.md` § A Claude Project)
 - **PO_SPEC_SCORING_GUIDE.md**: Weighted scoring methodology to evaluate PO Spec readiness (0-10 scale)
 - **ASYNC_INTAKE_GUIDE.md**: File-based async intake methodology — extraction rules, keyword indicators, gap report template, and follow-up question generation
 - **CHAT_MODE.md**: what runs in a Claude chat (the package without `scripts/`) — elicitation, drafting, the Discovery Summary as a file, the pre-check; load only in chat mode

@@ -16,6 +16,14 @@ the rest of the delivery runs.
 | 5 Distribution PDF | No — it needs Bun. Say so once, when the spec is delivered |
 | 6 PO Spec Sync | No — it reads the architecture repository |
 
+## A Claude Project
+
+A team that runs the interview in a Claude Project gives it the skill and project instructions: copy
+`templates/PROJECT_INSTRUCTIONS_TEMPLATE.md` into the Project's instructions, replace every `{{…}}`, choose where the
+files live (a folder shared with Claude Code, or files the Product Owner downloads and commits), and delete the optional
+sections it does not need. The template adds product context and boundaries only; where it and this file differ, this
+file wins.
+
 ## The Discovery Summary is a file
 
 A discovery interview often spans several chats. After the four phases, write the Discovery Summary

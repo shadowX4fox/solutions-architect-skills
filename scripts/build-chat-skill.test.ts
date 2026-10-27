@@ -18,6 +18,15 @@ describe("build-chat-skill", () => {
     expect(out.slice(out.indexOf("\n---\n") + 5)).toBe(src.slice(src.indexOf("\n---\n") + 5));
   });
 
+  test("the Project instructions template ships with the package and names what the package carries", () => {
+    const skill = join(import.meta.dir, "..", "plugins", "sa-requirements", "skills", "architecture-readiness");
+    const t = readFileSync(join(skill, "templates", "PROJECT_INSTRUCTIONS_TEMPLATE.md"), "utf8");
+    expect(t).toContain("{{PRODUCT}}");
+    expect(t).toContain("precheck/po-spec-precheck.cjs");
+    expect(t).toContain("READINESS_CHECK: draft");
+    expect(readFileSync(join(skill, "CHAT_MODE.md"), "utf8")).toContain("templates/PROJECT_INSTRUCTIONS_TEMPLATE.md");
+  });
+
   test("the pre-check bundles into one file that runs under Node with nothing beside it", async () => {
     const dir = mkdtempSync(join(tmpdir(), "precheck-"));
     try {

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.25.2]
+
+### Added
+
+- **A Claude Project's instructions ship with the chat package.** `templates/PROJECT_INSTRUCTIONS_TEMPLATE.md` — the split of work between chat and Claude Code, no score and never `verified` in chat, technology ideas to Implementation Suggestions, what to do at the start of a chat by the files it finds, language, the end-of-session handoff block — with `{{PRODUCT}}`, `{{PO_NAME}}`, `{{REPO_FOLDER}}` and an optional `{{LEGACY_FOLDER}}`, two optional sections (product context as hypotheses, domain defaults) and two ways to keep the files: a folder shared with Claude Code, or files the Product Owner downloads and commits. `CHAT_MODE.md` § A Claude Project points to it.
+
 ## [10.25.1]
 
 ### Fixed
