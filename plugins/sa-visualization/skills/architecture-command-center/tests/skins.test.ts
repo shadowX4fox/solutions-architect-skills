@@ -38,12 +38,21 @@ describe('plugin skins', () => {
   });
   test('alia shows Alia in person: each face embedded once, picked by the page\'s mood and by the codec\'s own', () => {
     const css = SK.loadSkins(null).skins.find((s: any) => s.id === 'alia').css;
-    expect((css.match(/data:image\/webp;base64,/g) || []).length).toBe(4);
+    expect((css.match(/data:image\/webp;base64,/g) || []).length).toBe(7);   // calm, thinking, pleased, warn, stern + the two talking frames
     ['thinking', 'pleased', 'worried', 'stern'].forEach((m) => {
       expect(css).toContain('[data-alia-mood="' + m + '"]');
       expect(css).toContain('[data-mood="' + m + '"]');
     });
     expect(css).toContain('.codec .cface svg { display: none; }');
+  });
+  test('alia: stern has her own face, and she talks with her mouth only where the frames fit the mood', () => {
+    const css = SK.loadSkins(null).skins.find((s: any) => s.id === 'alia').css;
+    expect(css).toContain('.codec[data-mood="stern"] { --alia-face: var(--alia-face-stern); }');
+    expect(css).toContain('[data-alia-mood="stern"] { --alia-face: var(--alia-face-stern); }');
+    expect(css).toMatch(/@keyframes aliamouth \{ 0% \{ background-image: var\(--alia-face-talk-closed\); \} 50% \{ background-image: var\(--alia-face-talk-open\); \} \}/);
+    const talk = css.split('\n').find((l: string) => l.includes('aliamouth .3s')) || '';
+    expect(talk).toContain('[data-mood="calm"], [data-mood="thinking"], [data-mood="pleased"]');
+    expect(talk).not.toContain('stern'); expect(talk).not.toContain('worried');
   });
   test('the palette CSS: a block per skin, the dark mode under the OS preference and the explicit choice, a default bare :root', () => {
     const { skins } = SK.loadSkins(null), css = SK.tokensCss(skins, 'holo');

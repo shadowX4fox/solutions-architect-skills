@@ -18,6 +18,19 @@ BLOB = {
     "face-thinking.webp": ("2dc85977bee7cd7d93621a4ad6feb30c", 12142, "image/webp"),
     "face-pleased.webp": ("88355b339bfbb20887ec7e75bf49c660", 14292, "image/webp"),
     "face-warn.webp": ("b91e973839cc9037fc4f1803b42e5e13", 13828, "image/webp"),
+    "alia-blazon.png": ("c06ceb1df51a0fc23cca3dfa2b2353b3", 26694, "image/png"),
+    "alia-blazon.svg": ("fa167016ff52a93b43a4eb247d5e05fe", 2776, "image/svg+xml"),
+    "alia-point-left.webp": ("934f2a8f4a6d7930bb1234d3587c282a", 46592, "image/webp"),
+    "alia-point-up.webp": ("6a108dc9a5ae9813379225b85768c522", 47990, "image/webp"),
+    "alia-perched.webp": ("78fd1f68291f2bb6d433cbc625ee4ca2", 39168, "image/webp"),
+    "alia-stern.webp": ("bc0f9fb5c628b9c0d5914e307aa53bd5", 44092, "image/webp"),
+    "alia-talk-closed.webp": ("e587215ade0467194271a6bcf7d06b5d", 44082, "image/webp"),
+    "alia-talk-open.webp": ("07baecc424f351029c9d700b82efe1f1", 43526, "image/webp"),
+    "face-stern.webp": ("39ebf78c7f41d021fb820c52a9cc054c", 13520, "image/webp"),
+    "face-talk-closed.webp": ("f6a0aa87977e434c90a631ff3ccbc48d", 13494, "image/webp"),
+    "face-talk-open.webp": ("b0fc8c7b825da7d9d4ab27d60af104ad", 13584, "image/webp"),
+    "alia-blazon-mono.png": ("43464a3b1f0d8c9b4d79a6956e9b195d", 18309, "image/png"),
+    "alia-blazon-mono-reverse.png": ("26c7ecda8dcfe557ba899c3967e08560", 16613, "image/png"),
 }
 def b(name): return "/_blob/" + BLOB[name][0]
 def w(path, text):
@@ -230,6 +243,9 @@ w("components/bundle.css", """@import url("https://fonts.googleapis.com/css2?fam
 }
 @keyframes ag-codec-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
 @keyframes ag-codec-rise { from { opacity: 0; transform: translateY(18px) scale(.8); } }
+/* AliaBlazon: her escudo — the mark of a document in her theme, as drawn, at one of two sizes */
+.ag-blazon { display: block; flex: none; aspect-ratio: 1; object-fit: contain; }
+.ag-blazon--cover { width: 64px; } .ag-blazon--head { width: 14px; display: inline-block; vertical-align: -2px; }
 @keyframes ag-codec-talk { from { transform: translateY(0); } to { transform: translateY(-2px) scale(1.04); filter: brightness(1.12); } }
 """)
 
@@ -395,7 +411,7 @@ def tip(pose, text, light=False):
 preview("AliaTip", "Alia", 330, '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
         '<div style="position:relative;height:290px;border-radius:var(--radius-card);overflow:hidden;background:#0b1013;border:1px solid var(--night-line)">'
         '<div style="position:absolute;inset:16px;font:400 11px/1.6 var(--font-mono);color:#5d7380">$ git push origin feat/arquitectura-1.10.1<br>Architecture review · running…<br>■ contracts 1.10.1 · pack_revision e566ddf</div>'
-        '<div style="position:absolute;right:12px;bottom:6px">' + tip("warning", "Los contratos se comitean solos, para que su diff se lea sin ruido.") + '</div></div>'
+        '<div style="position:absolute;right:12px;bottom:6px">' + tip("point-left", "Los contratos se comitean solos, para que su diff se lea sin ruido.") + '</div></div>'
         '<div style="position:relative;height:290px;border-radius:var(--radius-card);background:var(--surface-page);border:1px solid var(--border)">'
         '<div style="position:absolute;right:12px;bottom:6px">' + tip("happy", "Pregúntame qué cambió con <span class=\'ag-code\'>what_changed</span> antes de tocar código.", light=True) + '</div></div>'
         '</div>')
@@ -406,6 +422,7 @@ Chibi Alia pops in at a corner on her glowing ring and gives one short tip in a 
 - **When**: at an important moment of what is on screen — an approval, a rule that blocks, a command worth remembering. A tip names the *why* or the *next move* in one or two sentences (~20 words), never repeats the caption.
 - **Where**: bottom-right corner, bubble to her left; on footage above the caption band. Never over a face, a table being read or the content the moment is about.
 - **Pose = tone**: `explaining` a rule, `thinking` a step to weigh, `happy` a good move, `warning` a trap. Never `cover` (that pose belongs to covers).
+- **Pose = where the tip points**: `point-left` when the bubble sits to her left and names what is beside it (the default corner); `point-up` when the tip sits under the thing it is about (a table, a chart); `perched` when there is no free corner — she sits on the top edge of a card, legs over the edge, and the bubble stays outside the card. A pointing pose replaces the tone pose; the bubble's words carry the tone.
 - **Timing (video, slides with motion)**: she rises from below on her ring (0.6 s, a small overshoot), the bubble slides in 0.3 s later; the tip stays only while it is read — `1.5 s + words ÷ 2.2` plus 1.5 s — then both fade, so the content is clear again. The footage under a tip is slowed (down to ×0.4) until every caption and the tip have their reading time.
 - **Frequency**: one tip at a time, at most one per segment or slide; about one a minute of video.
 - **Static (print, a page)**: the same block in a page corner, `.ag-tip--light` on light grounds; at most one per page, and never on a page that already has an `AliaNote`.
@@ -413,7 +430,7 @@ Chibi Alia pops in at a corner on her glowing ring and gives one short tip in a 
 - Classes: `.ag-tip`, `.ag-tip-alia`, `.ag-tip-ring`, `.ag-tip-bubble`, `.ag-tip--light`. Sizes scale with the surface: at 1920 × 1080 Alia is 300 × 330 px and the bubble text 31 px.
 """)
 
-FACE = {"calm": "face-calm", "thinking": "face-thinking", "pleased": "face-pleased", "worried": "face-warn", "stern": "face-warn"}
+FACE = {"calm": "face-calm", "thinking": "face-thinking", "pleased": "face-pleased", "worried": "face-warn", "stern": "face-stern"}
 def codec(mood, kind, text, acts):
     return (f'<div class="ag-codec" data-mood="{mood}"><span class="ag-codec-face"><img src="{b(FACE[mood] + ".webp")}" alt="Alia"></span>'
             f'<div class="ag-codec-body"><div class="ag-codec-head"><b>Alia</b><span class="ch">NAV-LINK</span><span class="ck">{kind}</span><span class="x">×</span></div>'
@@ -429,15 +446,60 @@ w("components/AliaCodec/README.md", """# AliaCodec
 
 Alia's call on a live surface — the command center's codec, as the `alia` skin draws it: her face on a ring in her mood's colour, the channel line («ALIA · NAV-LINK · <kind>»), one line she types, and the ways in as pills. It is how she interrupts a running view without a dialog: a finding worth seeing, a simulation that saturates, a walkthrough that breaks, a tip.
 
-- **Mood = face + colour**: `calm` (`face-calm`, `alia-aqua`) a tip or a pointer; `thinking` (`face-thinking`, `alia-aqua`) a step to weigh; `pleased` (`face-pleased`, `mood-pleased`) all clear; `worried` (`face-warn`, `mood-worried`) something saturates or drifts; `stern` (`face-warn`, `mood-stern`) something is down or blocks. The mood belongs to the call, not to the page: a warning call on a calm page shows her warning face.
+- **Mood = face + colour**: `calm` (`face-calm`, `alia-aqua`) a tip or a pointer; `thinking` (`face-thinking`, `alia-aqua`) a step to weigh; `pleased` (`face-pleased`, `mood-pleased`) all clear; `worried` (`face-warn`, `mood-worried`) something saturates or drifts; `stern` (`face-stern`, `mood-stern`) something is down or blocks — her own frowning face, arms crossed, never the worried one. The mood belongs to the call, not to the page: a warning call on a calm page shows her warning face.
 - **Head**: «ALIA» in the mood colour with its glow, «NAV-LINK» faint, the kind in `night-muted` (Consejo · Peor hallazgo · Simulación · Alerta · Todo en orden · Recorrido), × to dismiss at the right.
 - **Line**: one sentence, ~20 words, white Nunito 700; it names the component by its full name and the figure that matters. Typed two characters every 18 ms on screen; whole in print.
 - **Actions**: one to three pills; the last is the primary (`.pri`, outlined in the mood colour) — usually «Leer», the page that says it. «Muéstramelo» flies to the block.
 - **Where**: at the foot of the stage, left-aligned with it, above any transport bar; 300–460 px wide. One call at a time; a new one replaces it.
-- **Motion**: `.is-open` — the frame rises 0.5 s with a small overshoot, her face 0.6 s; `.is-talking` while the line types. Nothing moves under `prefers-reduced-motion`.
+- **Motion**: `.is-open` — the frame rises 0.5 s with a small overshoot, her face 0.6 s; `.is-talking` while the line types — where frames can change (video, the viewer), she talks by alternating `face-talk-closed` and `face-talk-open` every 0.15 s, then rests on her mood's face — on a `calm`, `thinking` or `pleased` call only: the talking frames smile, so a `worried` or `stern` call keeps its own face and only bobs. Nothing moves under `prefers-reduced-motion`.
+- **One face size per piece**: across a deck, a page set or a video every image of her face — the codec's and the `AliaNote` avatar — is the same size (64 px at 1920 × 1080). When a bar is tight, cut its padding; never shrink her on one slide.
 - **Night only**: the codec lives on `night` grounds (the command center, footage). On a light page use `AliaNote` or `AliaTip`.
 - **vs AliaTip**: the tip is chibi Alia with a bubble over content that plays by itself (video, slides); the codec is her face in a frame over a surface the reader drives, with actions.
 - Classes: `.ag-codec` (`data-mood`), `.ag-codec-face`, `.ag-codec-body`, `.ag-codec-head` (`b`, `.ch`, `.ck`, `.x`), `.ag-codec-line`, `.ag-codec-act` (`.pri`), `.is-open`, `.is-talking`. Faces: the `Faces` asset group.
+""")
+
+BZ = b("alia-blazon.png")
+def mini(ground, kicker_c, title_c, tag):
+    return (f'<div style="flex:1;display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:var(--radius-card);background:{ground};border:1px solid var(--border)">'
+            f'<img class="ag-blazon ag-blazon--cover" src="{BZ}" alt="Escudo de Alia">'
+            f'<span style="font:600 8.5px var(--font-mono);letter-spacing:.18em;color:{kicker_c}">SA · ARQUITECTURA DE SOLUCIÓN</span>'
+            f'<b style="font:900 17px/1.15 var(--font-rounded);color:{title_c}">Order Desk — Solution Architecture</b>'
+            f'<span style="margin-top:auto;font:600 9px var(--font-mono);color:var(--ink-3)">{tag}</span></div>')
+def dont(style, label):
+    return (f'<div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:92px">'
+            f'<div style="height:44px;display:flex;align-items:center"><img src="{BZ}" alt="" style="width:40px;height:40px;object-fit:contain;{style}"></div>'
+            f'<span style="font:600 9px var(--font-mono);color:var(--coral-ink);text-align:center">✗ {label}</span></div>')
+preview("AliaBlazon", "Alia", 390, '<div style="display:flex;flex-direction:column;gap:14px">'
+        '<div style="display:flex;gap:14px;height:196px">'
+        + mini("var(--night)", "var(--alia-aqua)", "var(--alia-white)", "PDF · portada night · 64 px")
+        + mini("var(--alia-white)", "var(--aqua-ink)", "var(--ink)", "Word · portada blanca · 64 px")
+        + '<div style="flex:1.3;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:var(--radius-card);background:var(--alia-white);border:1px solid var(--border)">'
+        f'<div style="display:flex;align-items:center;gap:6px;padding-bottom:5px;border-bottom:1px solid var(--border);font:400 9.5px var(--font-rounded);color:var(--ink-2)"><img class="ag-blazon ag-blazon--head" src="{BZ}" alt="Escudo de Alia"><b style="color:var(--aqua-ink)">SA</b> Order Desk — Solution Architecture</div>'
+        '<span style="font:400 10px/1.5 var(--font-rounded);color:var(--ink-3)">Cada página después de la portada abre con el escudo a 14 px, antes del tipo de documento.</span>'
+        '<span style="margin-top:auto;font:600 9px var(--font-mono);color:var(--ink-3)">Encabezado · 14 px · desde la página 2</span></div></div>'
+        '<div style="display:flex;gap:6px;align-items:flex-start;justify-content:space-between;padding:12px 16px;border-radius:var(--radius-card);background:var(--alia-white);border:1px solid var(--border)">'
+        + dont("filter:hue-rotate(150deg)", "recolorear") + dont("transform:rotate(-14deg)", "girar")
+        + dont("filter:drop-shadow(0 0 8px #2ee6e6)", "brillo o sombra") + dont("width:58px;height:34px;object-fit:fill", "estirar")
+        + dont("clip-path:inset(0 0 40% 0)", "recortar") + dont("opacity:.4", "atenuar")
+        + '</div></div>')
+w("components/AliaBlazon/README.md", """# AliaBlazon
+
+Alia's escudo: the mark of a document written in her theme. A heraldic shield — `night` field, `alia-silver` bordure with an `alia-aqua` inner line, her hair clip as an aqua chevron (`alia-aqua` over `aqua-mark`), her sparkle in chief with a small silver one beside it, a faint hologram grid in base. Source: `brand/alia/blazon/escudo.svg`; the documents carry the 512 px PNG rendered from it (`tools/docgen/themes/alia/blazon.png`). Assets: the `Blazon` group.
+
+- **What it marks**: a document in the Alia theme — the Word and PDF exports, a printed guide. It says *this document is Alia's look*; it is not a logo for a product, a team or a system, and it never stands for an organization.
+- **Where, and only there**:
+  - **The cover**: above the document-type label, left-aligned with the title, at **64 px** on screen (48 pt in PDF, 64 px in Word) — on the night cover (PDF) and on the white cover (Word) alike, as drawn.
+  - **The running header**: at the start of every page after the cover, before the document type, at **14 px** (11 pt in PDF).
+  - **A deck or a guide's cover** may carry it once, at the cover size. Never on inner slides, in the body of a page, beside a table or in the command center.
+- **Two sizes only**: 64 px and 14 px (scale them together for another canvas: at 1920 × 1080 the cover size is 128 px). Below 14 px the chevron closes up — never smaller.
+- **Clear space**: a quarter of its width on every side; nothing — text, a rule, her figure — inside it.
+- **One per page**: never repeated as a pattern, a watermark or a bullet.
+- **As drawn, on any ground**: it carries its own night field and silver bordure, so it reads on white, on `surface-page` and on `night` without a plate behind it. Never recolour, rotate, stretch, crop, fade, outline, or add a glow or a shadow; never put her face or another sparkle inside it; never rebuild it from parts.
+- **With her figure**: the cover may show both — the escudo on the left above the title, Alia on the right. The escudo never sits on her stage or in a note, a tip or a codec.
+- **Another organization's theme**: an institution pack's document theme uses its own blazon or none; Alia's escudo never marks an organization-branded document.
+- **One colour**: where colour cannot print — grayscale, a stamp, a fax, an engraving — use `alia-blazon-mono.png` (ink shield, the bordure line, chevrons and sparkles knocked out to the paper) on light grounds and `alia-blazon-mono-reverse.png` on dark ones. Never convert the colour escudo to gray: its silver bordure and grid wash out. Same sizes, same rules.
+- **Changing it**: edit the SVG, re-render the PNG (512 px, transparent), then upload it here. A new design is approved first, like a new pose.
+- Classes: `.ag-blazon` with `.ag-blazon--cover` (64 px) or `.ag-blazon--head` (14 px, inline).
 """)
 
 w("components/Cover/preview.html", '''<!-- @dsCard height=320 -->
@@ -468,9 +530,11 @@ w("components/Cover/preview.html", '''<!-- @dsCard height=320 -->
 </div></div>
 ''')
 
-w("assets/Alia/README.md", """Alia's five approved poses and her avatar, cut out on transparency (WebP with alpha; poses 640 px, avatar 320 px). Generated locally with Animagine XL 4.0 Opt (CreativeML Open RAIL++-M, commercial use allowed) through IP-Adapter from two anchor images; sources and workflows live in the plugin repository under `brand/alia/`. Use the poses only through `AliaStage` and the avatar only through `AliaNote`: never crop again, mirror, recolour or redraw.
+w("assets/Alia/README.md", """Alia's approved poses and her avatar — the five tone poses (`cover`, `explaining`, `thinking`, `happy`, `warning`), the three placing poses for tips (`point-left`, `point-up`, `perched`), `stern`, and the talking pair (`talk-closed`, `talk-open`, the source of her talking frames) — cut out on transparency (WebP with alpha; poses 640 px, avatar 320 px). Generated locally with Animagine XL 4.0 Opt (CreativeML Open RAIL++-M, commercial use allowed) through IP-Adapter from two anchor images; sources and workflows live in the plugin repository under `brand/alia/`. Use the poses only through `AliaStage` and the avatar only through `AliaNote`: never crop again, mirror, recolour or redraw.
 """)
-w("assets/Faces/README.md", """Her face cut from each approved pose, 192 px WebP, for `AliaCodec` only: `face-calm` (cover pose), `face-thinking`, `face-pleased` (happy pose), `face-warn` (warning pose — worried and stern). Shown round, on a ring in the mood colour; never crop again, mirror or recolour. Sources in the plugin repository under `brand/alia/design-system/assets/faces/`.
+w("assets/Faces/README.md", """Her face cut from each approved pose, 192 px WebP, for `AliaCodec` only: `face-calm` (cover pose), `face-thinking`, `face-pleased` (happy pose), `face-warn` (warning pose — worried), `face-stern` (stern pose — stern), and the talking pair `face-talk-closed` / `face-talk-open` (alternated while she talks). One size per piece. Shown round, on a ring in the mood colour; never crop again, mirror or recolour. Sources in the plugin repository under `brand/alia/design-system/assets/faces/`.
+""")
+w("assets/Blazon/README.md", """Alia's escudo, the mark of a document in her theme: `alia-blazon.png` (512 px, transparent — what documents embed) and `alia-blazon.svg` (the source, from `brand/alia/blazon/escudo.svg`); `alia-blazon-mono.png` and `alia-blazon-mono-reverse.png`, the one-colour escudo for grayscale print, stamps and fax (sources `escudo-mono.svg`, `escudo-mono-reverse.svg`). Use it only as `AliaBlazon` says: the cover at 64 px, the running header at 14 px, as drawn — never recoloured, rotated, cropped or glowing.
 """)
 w("assets/Motifs/README.md", """Her sparkle, a four-point star in one ink. `alia-sparkle-aqua.svg` (`alia-aqua`) is the one in use. The yellow and navy sparkles are from v1 and are kept only for history: do not use them.
 """)
@@ -500,6 +564,7 @@ w("README.md", """Alia Guide is the look of the guides where Alia, the architect
 - **Inner pages** (`GuidePage`): the content on the left, her **stage** on the right — a third of the page (`stage-col`), a soft `aqua-soft` halo, an `aqua-mark` ring under her feet, a tag with her verb («Alia · pensando»).
 - **The cover** (`CoverPage`): `night` with a faint 32px hologram grid (`holo-grid`), her name in aqua, three fact tiles, her palette, and Alia on a glowing ring among hologram panels.
 - **Her voice** (`AliaNote`): a `night` card with her avatar in a glowing aqua ring.
+- **Her escudo** (`AliaBlazon`): the mark of a document in her theme — on the cover above the document type at 64 px and at the start of every running header at 14 px, as drawn, one per page. It marks the look, never an organization: a pack's theme carries its own blazon or none.
 - **Her call** (`AliaCodec`): on a live surface she interrupts in a frame at the foot of the stage — her face by mood on a ring in the mood colour (`mood-pleased`, `mood-worried`, `mood-stern`; calm in aqua), one typed line, the ways in. The command center's `alia` skin draws it.
 
 **Depth.** Only Alia has light: her shadow on light pages, her glow on night. Cards are flat.
@@ -515,7 +580,7 @@ w("README.md", """Alia Guide is the look of the guides where Alia, the architect
 | Prop | Aqua holograms: the architecture she navigates |
 | Style | Chibi, clean line art |
 
-**Poses**: `cover` on the cover only; `explaining` for an introduction; `thinking` for how something works; `happy` for what she delivers; `warning` for limits. **Avatar**: in her note only.
+**Poses**: `cover` on the cover only; `explaining` for an introduction; `thinking` for how something works; `happy` for what she delivers; `warning` for limits; `stern` for what blocks. For tips: `point-left`, `point-up` and `perched` (sitting on a card's top edge where there is no free corner). The talking pair (`talk-closed`, `talk-open`) feeds her talking frames only. **Avatar**: in her note only.
 
 **Her tips** (`AliaTip`): on footage, slides and pages, a small chibi Alia pops in at a corner on her ring with a one-line «TIP DE ALIA» at an important moment — the pose matches the tone, the tip stays only while it is read, then the content is clear again. It is how she teaches without taking the screen.
 
@@ -535,8 +600,10 @@ Author each page as a `page-width` × `page-height` section with `break-after: p
 """)
 
 groups = {
-    "Alia": ["alia-cover.webp", "alia-explaining.webp", "alia-thinking.webp", "alia-happy.webp", "alia-warning.webp", "alia-avatar.webp"],
-    "Faces": ["face-calm.webp", "face-thinking.webp", "face-pleased.webp", "face-warn.webp"],
+    "Alia": ["alia-cover.webp", "alia-explaining.webp", "alia-thinking.webp", "alia-happy.webp", "alia-warning.webp", "alia-stern.webp",
+             "alia-point-left.webp", "alia-point-up.webp", "alia-perched.webp", "alia-talk-closed.webp", "alia-talk-open.webp", "alia-avatar.webp"],
+    "Blazon": ["alia-blazon.png", "alia-blazon.svg", "alia-blazon-mono.png", "alia-blazon-mono-reverse.png"],
+    "Faces": ["face-calm.webp", "face-thinking.webp", "face-pleased.webp", "face-warn.webp", "face-stern.webp", "face-talk-closed.webp", "face-talk-open.webp"],
     "Motifs": ["alia-sparkle-aqua.svg", "alia-sparkle-yellow.svg", "alia-sparkle-navy.svg"],
 }
 def index(created_at):
@@ -547,7 +614,7 @@ def index(created_at):
                             "files": {f: {"name": f, "blob": BLOB[f][0], "size": BLOB[f][1], "type": BLOB[f][2]} for f in fs}}
                         for g, fs in groups.items()},
         "blobs": {}, "docs": {"readme": "project/README.md", "sections": []},
-        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaCodec: her call from the command center's alia skin — face by mood, mood colours, the Faces assets"},
+        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaCodec: talking frames only on calm, thinking and pleased calls (the frames smile); worried and stern keep their own face"},
     }
 import sys
 w("design-system.json", json.dumps(index(sys.argv[1] if len(sys.argv) > 1 else NOW), ensure_ascii=False))

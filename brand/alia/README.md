@@ -37,14 +37,19 @@ Approved (2026-10-30):
 | Warning | `poses/warning.png` | `alia-pose-warning-b1` (v1; v2 drafts kept) |
 | Happy | `poses/happy.png` | `alia-pose-happy-b1` |
 | Thinking | `poses/thinking.png` | `alia-pose-thinking-b2` |
+| Stern — arms crossed, frowning | `poses/stern.png` | `alia-pose-stern-b1` (the codec's `stern` face) |
+| Pointing left | `poses/point-left.png` | `alia-pose-point-left-b1` (tips, bubble to her left) |
+| Pointing up | `poses/point-up.png` | `alia-pose-point-up-b2` (tips under a table or chart) |
+| Perched — sitting on an edge | `poses/perched.png` | `alia-pose-perched` seed 1030450, c2 (tips on a card's top edge) |
+| Talking pair — mouth closed / open | `poses/talk-closed.png`, `poses/talk-open.png` | `alia-pose-talk-*-b1`, same seed (talking frames) |
 
 The two anchors are the IP-Adapter references for every further pose.
 
 Poses: `workflows/alia-pose-<pose>.json` — both anchors through IP-Adapter Plus SDXL (`PLUS` preset, weight 0.7, `average`, end 0.85), the pose in the prompt, 2 images per run (seed 1030200 + index). Anchors are copied to `~/ai/ComfyUI/input/alia/`. Models: `clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` and `ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors` (h94/IP-Adapter, Apache-2.0); node pack `comfyui_ipadapter_plus` 2.0.0. A new pose is a copy of one file with another pose prompt.
 
-Blazon (`blazon/escudo.svg`, approved 2026-10-30): a heraldic shield — night field, silver bordure with an aqua inner line, her hair clip as an aqua chevron, her sparkle in chief, a hologram grid in base. The Word and PDF exports carry it as `tools/docgen/themes/alia/blazon.png` (512 px, rendered from the SVG): on the cover above the document type, and at 14 px at the start of every page header. Re-render the PNG after any change to the SVG.
+Blazon (`blazon/escudo.svg`, approved 2026-10-30; one-colour `escudo-mono.svg` and `escudo-mono-reverse.svg` for grayscale print, stamps and fax, with their 512 px PNGs): a heraldic shield — night field, silver bordure with an aqua inner line, her hair clip as an aqua chevron, her sparkle in chief, a hologram grid in base. The Word and PDF exports carry it as `tools/docgen/themes/alia/blazon.png` (512 px, rendered from the SVG): on the cover above the document type, and at 14 px at the start of every page header. Re-render the PNG after any change to the SVG.
 
-Faces (`design-system/assets/faces/face-<pose>.webp`, 192 px): her head cut from each approved pose — the command center's `alia` skin embeds them and shows the one her mood calls for (calm `cover`, `thinking`, pleased `happy`, worried and stern `warning`).
+Faces (`design-system/assets/faces/face-<pose>.webp`, 192 px): her head cut from each approved pose — the command center's `alia` skin embeds them and shows the one her mood calls for (calm `cover`, `thinking`, pleased `happy`, worried `warning`, `stern`); `face-talk-closed` / `face-talk-open` are her talking frames. Faces are cropped from the cutout so the head fills the frame like the first four.
 
 Rule: the references give the style and palette; Alia's design is original and never a copy of the referenced character.
 

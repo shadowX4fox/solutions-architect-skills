@@ -1,6 +1,6 @@
 {
   "name": "sa-skills",
-  "version": "10.28.0",
+  "version": "10.29.0",
   "dependencies": [
     "sa-records",
     "sa-requirements",

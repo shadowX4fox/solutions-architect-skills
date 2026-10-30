@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.29.0]
+
+### Added
+
+- **Alia's stern face in the command center.** In the `alia` skin a stern call (something down or blocking) shows her own frowning face, arms crossed — no longer the worried one it shared; the Alia dialog's eyebrow follows when the page's mood is stern.
+- **Alia talks.** While a calm, thinking or pleased line types in the codec she alternates two real frames, mouth closed and open (0.3 s), then rests on her mood's face; a worried or stern call keeps its own face and bobs, because the talking frames smile. The three new faces are embedded once, at 128 px.
+- **New approved assets in `brand/alia/`**: poses `point-left`, `point-up`, `perched` (for her tips), `stern`, and the talking pair; their faces (`face-stern`, `face-talk-closed`, `face-talk-open`); the one-colour escudo (`blazon/escudo-mono.svg`, `escudo-mono-reverse.svg`, with 512 px PNGs) for grayscale print, stamps and fax; the six ComfyUI workflows.
+- **The Alia Guide design system** (`brand/alia/design-system/gen2.py`): `AliaBlazon` — the escudo's rules (cover 64 px, header 14 px, as drawn, one per page, never for an organization, the one-colour version for grayscale); `AliaTip` chooses its pose by where the tip points; `AliaCodec` maps stern to its own face, talks with the two frames on calm, thinking and pleased calls only, and keeps one face size per piece.
+
 ## [10.28.0]
 
 ### Added
