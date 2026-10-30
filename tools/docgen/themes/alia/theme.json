@@ -1,0 +1,44 @@
+{
+  "id": "alia",
+  "name": "Alia Guide",
+  "summary": "The base's document theme: Alia's palette (night, silver, aqua, white), her figure on the cover (night in PDF, on white in Word), Nunito headings in the PDF.",
+  "colors": {
+    "primary":   "1B1F24",
+    "secondary": "0A7177",
+    "accent":    "0C9DA3",
+    "headerBg":  "DCFAFA",
+    "altRow":    "F3F7F9",
+    "text":      "1B1F24",
+    "subtext":   "44515C",
+    "white":     "FFFFFF",
+    "border":    "D5E0E5",
+    "codeBg":    "F3F7F9",
+    "codeText":  "0A7177",
+    "codeFill":  "E8F0F3"
+  },
+  "docTypes": {
+    "solution-architecture": "0A7177",
+    "adr":                   "7A5600",
+    "handoff":               "5443B0",
+    "po-spec":               "1B7148"
+  },
+  "cover": {
+    "style": "night",
+    "image": "cover.png",
+    "night":      "0D1418",
+    "nightPanel": "15222A",
+    "nightLine":  "2B4A55",
+    "nightText":  "C9D1D9",
+    "nightMuted": "8EA3AD",
+    "signature":  "2EE6E6"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Nunito",
+      "normal": "fonts/Nunito-Regular.ttf",
+      "bold": "fonts/Nunito-ExtraBold.ttf",
+      "italics": "fonts/Nunito-Italic.ttf",
+      "bolditalics": "fonts/Nunito-ExtraBoldItalic.ttf"
+    }
+  }
+}

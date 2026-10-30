@@ -1,0 +1,148 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "animagine-xl-4.0-opt.safetensors"
+    }
+  },
+  "10": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "alia/anchor-b3.png"
+    }
+  },
+  "11": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "alia/anchor-b4.png"
+    }
+  },
+  "12": {
+    "class_type": "ImageBatch",
+    "inputs": {
+      "image1": [
+        "10",
+        0
+      ],
+      "image2": [
+        "11",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "IPAdapterUnifiedLoader",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "preset": "PLUS (high strength)"
+    }
+  },
+  "14": {
+    "class_type": "IPAdapterAdvanced",
+    "inputs": {
+      "model": [
+        "13",
+        0
+      ],
+      "ipadapter": [
+        "13",
+        1
+      ],
+      "image": [
+        "12",
+        0
+      ],
+      "weight": 0.6,
+      "weight_type": "linear",
+      "combine_embeds": "average",
+      "start_at": 0.0,
+      "end_at": 0.85,
+      "embeds_scaling": "V only"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "safe, 1girl, solo, chibi, big head, small body, short silver hair, bob cut, hair over one eye, aqua hair tips, gradient hair, aqua eyes, aqua hair clip, small earring, oversized white ribbed sweater, zipped up, high collar, sleeves past wrists, black shorts, black pantyhose, black lace-up boots, platform boots, aqua hologram, full body, simple background, white background, masterpiece, high score, great score, absurdres, one hand raised, palm out, stop gesture, other hand on hip, serious, frown, v-shaped eyebrows, sweatdrop, amber warning triangle hologram, exclamation mark, alert, looking at viewer"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, fewer digits, cropped, worst quality, low quality, low score, bad score, average score, signature, watermark, username, blurry, nsfw, cleavage, bare shoulders, off shoulder, midriff, navel, bare legs, torn clothes, animal ears, tail, realistic, multiple girls, smile, closed eyes"
+    }
+  },
+  "4": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 4
+    }
+  },
+  "5": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "14",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "4",
+        0
+      ],
+      "seed": 1030301,
+      "steps": 28,
+      "cfg": 5.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1.0
+    }
+  },
+  "6": {
+    "class_type": "VAEDecodeTiled",
+    "inputs": {
+      "samples": [
+        "5",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "tile_size": 512,
+      "overlap": 64,
+      "temporal_size": 64,
+      "temporal_overlap": 8
+    }
+  },
+  "7": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ],
+      "filename_prefix": "mascot/alia-pose-warning-v2"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "classic",
+  "name": "Classic",
+  "summary": "The corporate-blue look of the exports before 10.26.0, kept for `--theme classic`.",
+  "colors": {
+    "primary":   "1F4E79",
+    "secondary": "2E75B6",
+    "accent":    "4472C4",
+    "headerBg":  "D6E4F0",
+    "altRow":    "EBF3FA",
+    "text":      "1A1A1A",
+    "subtext":   "595959",
+    "white":     "FFFFFF",
+    "border":    "BDD7EE",
+    "codeBg":    "F4F6FB",
+    "codeText":  "2E75B6",
+    "codeFill":  "F0F4FA"
+  },
+  "docTypes": {
+    "solution-architecture": "1F4E79",
+    "adr":                   "8B6914",
+    "handoff":               "0D7377",
+    "po-spec":               "2E6B3A"
+  },
+  "cover": { "style": "light" }
+}

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.26.0]
+
+### Added
+
+- **Alia is the default look of the Word and PDF exports.** `tools/docgen/theme.js` resolves the document theme — `--theme <id|folder>`, else an institution pack's `provides.docTheme` (`packs.js --path doc-theme`), else the base's `themes/alia`: Alia's palette, her figure on the cover (the whole PDF cover night, the Word cover on white), Nunito headings in PDF (embedded, OFL; body text stays Roboto, which the glyph sanitizer is verified against), one colour per document type from her palette (architecture `#0A7177`, ADR `#7A5600`, handoff `#5443B0`, PO Spec `#1B7148`). Status and priority fills are unchanged. The PO Spec distribution PDF takes it too.
+- **`--theme classic`** keeps the corporate blue of the exports before this release.
+- **Institution packs get a document theme slot**: `provides.docTheme`, a folder with `theme.json` (`colors`, `docTypes`, `cover`, `fonts.heading`). A key it leaves out comes from `alia`; a theme that states no cover or font gets a light cover and the body font — an organization's brand never borrows Alia (`docs/INSTITUTION_PACKS.md`).
+- **`brand/alia/`**: Alia's character — the identity sheet, the approved poses (anchors, cover, explaining, thinking, happy, warning), the ComfyUI workflows that made them (Animagine XL 4.0 Opt through IP-Adapter, local) and the generator of the Alia Guide design system (`design-system/`). Drafts and third-party style references stay local (`.gitignore`).
+
+### Changed
+
+- The Word renderer's code colours (inline code, code blocks) come from the palette instead of fixed values.
+
 ## [10.25.2]
 
 ### Added

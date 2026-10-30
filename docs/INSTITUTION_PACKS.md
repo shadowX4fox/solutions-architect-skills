@@ -36,7 +36,8 @@ A plugin whose root carries `sa-pack.json`:
     "designLanguage": "design-language",
     "skins": "skins",
     "architectureTypes": "architecture-types",
-    "frameworks": "frameworks"
+    "frameworks": "frameworks",
+    "docTheme": "doc-theme"
   },
   "defaults": {
     "docLanguage": "es",
@@ -63,6 +64,7 @@ A plugin whose root carries `sa-pack.json`:
 | `architectureTypes` | Architecture types, one folder each: `type.json` (`id`, `name`, `summary`, `files` — `section4`, `section5` (or null), `reference`, `c4` — and `matrix`, the principle gate's rows: principle number → phrases one of which its Implementation or Trade-offs must name) and the four Markdown files it names. A type with a built-in's id replaces it. `bun <sa_skills_dir>/scripts/shared/arch-types.js` lists what is in force | each `type.json` and its files |
 | `frameworks` | Capability frameworks, one folder each: `framework.json` (`id`, `name`, `industry`, `index`, `files` — the area files' pattern —, `levels` / `headings` — the names of its three levels —, `id_label`, `noun`, `report`, `license`, `attribution`) and the corpus it describes, in the shape of the base's `references/bian-v14/`. A framework with a built-in's id replaces it: an organization's licensed BIAN Service Landscape is a `BIAN` folder here, its `framework.json` the base's with the pack's `license`. `bun <sa_skills_dir>/scripts/shared/frameworks.js` lists what is in force | each `framework.json` and its index file |
 | `skins` | Command center skins, one folder each (`skin.json`, `skin.css`) — see `plugins/sa-visualization/skills/architecture-command-center/skins/README.md` | each `skin.json` |
+| `docTheme` | The Word and PDF exports' look: `theme.json` — `colors`, `docTypes`, `cover` (`style` `night` or `light`, `image`, the night colours), `fonts.heading` (TTF files for PDF headings) — beside the files it names. It replaces the base's `alia` theme; a key it leaves out comes from `alia`, but no cover image or font is borrowed. `bun <sa_skills_dir>/tools/docgen/theme.js` names the theme in force; `tools/docgen/themes/alia/theme.json` is the reference | `theme.json` |
 
 ## How the base finds packs
 

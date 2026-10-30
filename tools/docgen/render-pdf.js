@@ -21,14 +21,14 @@ const { fitDimensions } = require('./render-mermaid.js');
 // accepts a Buffer, so they are embedded directly — no vendored .ttf files and no
 // dependency on a system font. The export shape moved between pdfmake 0.1 and 0.2,
 // hence the three-way unwrap.
-function loadFonts() {
+function loadFonts(theme) {
   const mod = pinnedRequire(__dirname, 'pdfmake/build/vfs_fonts.js', INSTALL_IN);
   const vfs = mod.pdfMake ? mod.pdfMake.vfs : (mod.vfs || mod);
   const buf = (name) => {
     if (!vfs[name]) throw new Error(`pdfmake vfs is missing ${name}`);
     return Buffer.from(vfs[name], 'base64');
   };
-  return {
+  const fonts = {
     Roboto: {
       normal:      buf('Roboto-Regular.ttf'),
       bold:        buf('Roboto-Medium.ttf'),
@@ -36,7 +36,13 @@ function loadFonts() {
       bolditalics: buf('Roboto-MediumItalic.ttf'),
     },
   };
+  // The theme's heading face sets titles and headings only; body text stays Roboto, whose coverage the sanitizer
+  // below was verified against.
+  const h = theme && theme.fonts && theme.fonts.heading;
+  if (h) fonts[HEADING] = { normal: fs.readFileSync(h.normal), bold: fs.readFileSync(h.bold), italics: fs.readFileSync(h.italics), bolditalics: fs.readFileSync(h.bolditalics) };
+  return fonts;
 }
+const HEADING = 'Heading';
 
 // ─── Glyph sanitizer ──────────────────────────────────────────────────────────
 // Roboto covers Latin-1 and General Punctuation in full — every Spanish accent,
@@ -117,7 +123,8 @@ function sanitize(text) {
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 // Mirrors the docx COLORS map. pdfmake wants CSS hex, the docx model wants bare hex,
-// so these carry the leading '#'.
+// so these carry the leading '#'. These are the `classic` values; buildDocDefinition resets them and lays the
+// document theme over them on every build (opts.theme, from ./theme.js).
 const C = {
   primary:   '#1F4E79',
   secondary: '#2E75B6',
@@ -133,6 +140,12 @@ const C = {
 };
 
 const hex = (c) => (c && c.startsWith('#') ? c : `#${c}`);
+const C_CLASSIC = Object.assign({}, C);
+function applyColours(theme) {
+  Object.assign(C, C_CLASSIC);
+  if (theme && theme.colors) for (const [k, v] of Object.entries(theme.colors)) C[k] = hex(v);
+}
+const headingFont = (theme) => (theme && theme.fonts && theme.fonts.heading ? HEADING : 'Roboto');
 
 // ─── Conditional table fills ──────────────────────────────────────────────────
 // Ported verbatim from the docx renderers so a table means the same thing in both
@@ -430,6 +443,39 @@ function blocksToPdf(blocks, labels) {
 }
 
 // ─── Cover page ───────────────────────────────────────────────────────────────
+// A night cover (a theme whose cover.style is "night"): page 1 is painted by `nightBackground`; this lays the badge,
+// the title and the tagline over it, the theme's figure on the right, the metadata under them.
+function nightCover(typeMeta, title, meta, theme) {
+  const v = theme.cover, font = headingFont(theme);
+  const text = [
+    { text: sanitize(`${typeMeta.code} · ${typeMeta.label}`).toUpperCase(), fontSize: 9, bold: true, color: hex(v.signature), characterSpacing: 1.5, margin: [0, 0, 0, 16] },
+    { columns: [
+      { width: 5, canvas: [{ type: 'rect', x: 0, y: 2, w: 5, h: 64, r: 2, color: hex(v.signature) }] },
+      { width: '*', text: sanitize(title), font, fontSize: 28, bold: true, color: '#FFFFFF', margin: [12, 0, 0, 0] },
+    ], margin: [0, 0, 0, 14] },
+    { text: sanitize(typeMeta.tagline), fontSize: 11, color: hex(v.nightText), margin: [0, 0, 0, 36] },
+    { table: { widths: [100, '*'], body: Object.entries(meta).map(([k, val]) => ([
+        { text: sanitize(k), bold: true, fontSize: 9, color: hex(v.nightMuted), margin: [0, 3, 6, 3] },
+        { text: sanitize(String(val)), fontSize: 9, color: '#FFFFFF', margin: [0, 3, 0, 3] },
+      ])) }, layout: 'noBorders' },
+  ];
+  const cols = [{ width: '*', stack: text }];
+  if (v.image) cols.push({ width: 170, image: 'data:image/png;base64,' + fs.readFileSync(v.image).toString('base64'), fit: [170, 230], margin: [12, 40, 0, 0] });
+  return [
+    { columns: cols, columnGap: 10, margin: [0, 120, 0, 0] },
+    { text: '', pageBreak: 'after' },
+  ];
+}
+function nightBackground(theme) {
+  const v = theme.cover;
+  return (currentPage, pageSize) => (currentPage !== 1 ? null : {
+    canvas: [
+      { type: 'rect', x: 0, y: 0, w: pageSize.width, h: pageSize.height, color: hex(v.night) },
+      { type: 'rect', x: 0, y: pageSize.height - 6, w: pageSize.width, h: 6, color: hex(v.signature) },
+    ],
+  });
+}
+
 function coverPage(typeMeta, title, meta) {
   const color = hex(typeMeta.color);
   return [
@@ -460,8 +506,11 @@ function coverPage(typeMeta, title, meta) {
 // Split from the writer so the whole block→document mapping is assertable without
 // producing a PDF. See render-pdf.test.js.
 function buildDocDefinition(opts) {
-  const { title, blocks, meta, labels, typeMeta, changelog } = opts;
+  const { title, blocks, meta, labels, typeMeta, changelog, theme } = opts;
+  applyColours(theme);
   const color = hex(typeMeta.color);
+  const night = Boolean(theme && theme.cover && theme.cover.style === 'night');
+  const hFont = headingFont(theme);
 
   const body = [];
   if (changelog) {
@@ -488,12 +537,13 @@ function buildDocDefinition(opts) {
       subject: sanitize(typeMeta.label),
     },
     content: [
-      ...coverPage(typeMeta, title, meta),
+      ...(night ? nightCover(typeMeta, title, meta, theme) : coverPage(typeMeta, title, meta)),
       { text: sanitize(labels.tocTitle), style: 'h1' },
       { toc: { id: 'mainToc' } },
       { text: '', pageBreak: 'after' },
       ...body,
     ],
+    background: night ? nightBackground(theme) : undefined,
     // The cover page is page 1 and carries no chrome, matching the .docx two-section layout.
     header: (currentPage) => (currentPage === 1 ? null : {
       margin: [58, 24, 58, 0],
@@ -511,10 +561,10 @@ function buildDocDefinition(opts) {
       alignment: 'center', fontSize: 8, color: C.subtext,
     }),
     styles: {
-      h1: { fontSize: 17, bold: true, color: C.primary,   margin: [0, 16, 0, 6] },
-      h2: { fontSize: 13, bold: true, color,              margin: [0, 12, 0, 5] },
-      h3: { fontSize: 11, bold: true, color: C.secondary, margin: [0, 9, 0, 4] },
-      h4: { fontSize: 10, bold: true, italics: true, color: C.subtext, margin: [0, 7, 0, 3] },
+      h1: { font: hFont, fontSize: 17, bold: true, color: C.primary,   margin: [0, 16, 0, 6] },
+      h2: { font: hFont, fontSize: 13, bold: true, color,              margin: [0, 12, 0, 5] },
+      h3: { font: hFont, fontSize: 11, bold: true, color: C.secondary, margin: [0, 9, 0, 4] },
+      h4: { font: hFont, fontSize: 10, bold: true, italics: true, color: C.subtext, margin: [0, 7, 0, 3] },
     },
     defaultStyle: { font: 'Roboto', fontSize: 10, color: C.text, lineHeight: 1.15 },
   };
@@ -527,7 +577,7 @@ function buildDocDefinition(opts) {
 // existing when the promise settles.
 function renderPdf(opts) {
   const docDefinition = buildDocDefinition(opts);
-  const printer = new PdfPrinter(loadFonts());
+  const printer = new PdfPrinter(loadFonts(opts.theme));
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
 
   return new Promise((resolve, reject) => {

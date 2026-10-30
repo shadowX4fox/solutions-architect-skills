@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
-// Institution packs: what an organization adds to the base plugin without forking it — its design language standard, its brand skins, its
+// Institution packs: what an organization adds to the base plugin without forking it — its design language standard, its brand skins, its document theme, its
 // architecture types, its capability frameworks (a licensed BIAN landscape among them), its defaults. A pack is any installed Claude Code plugin (any marketplace, usually a private
 // one) whose root carries `sa-pack.json`:
 //
 //   { "name": "sa-pack-acme", "version": "1.0.0", "base": ">=9.1.0 <10.0.0",
-//     "provides": { "designLanguage": "design-language", "skins": "skins", "architectureTypes": "architecture-types", "frameworks": "frameworks" },
+//     "provides": { "designLanguage": "design-language", "skins": "skins", "architectureTypes": "architecture-types", "frameworks": "frameworks", "docTheme": "doc-theme" },
 //     "defaults": { "docLanguage": "es", "theme": "acme", "architectureType": "ACME", "framework": "BIAN", "adrCatalog": { "url": "https://…/adr-catalog.git", "ref": "main" } } }
 //
 // `provides` paths are relative to the pack. The base never names a pack: it finds them here, from Claude Code's install registry
@@ -18,7 +18,7 @@
 //
 //   bun packs.js [--project <dir>] [--json]               the packs found and what each provides
 //   bun packs.js --declare none|all|<name,…> [--project <dir>]   record the project's packs in .sa-skills/project.json
-//   bun packs.js --path <design-language|skins|architecture-types|frameworks> [--project <dir>]   the folder in force, or nothing (exit 1)
+//   bun packs.js --path <design-language|skins|architecture-types|frameworks|doc-theme> [--project <dir>]   the folder in force, or nothing (exit 1)
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -26,10 +26,11 @@ const os = require('os');
 const BASE = path.join(__dirname, '..', '..');                     // sa-skills' root
 const BUNDLED = {                                                 // the base's own copies, used when no pack provides one
   'design-language': path.join(BASE, 'skills', 'architecture-docs', 'references', 'design-language'),
+  'doc-theme': path.join(BASE, 'tools', 'docgen', 'themes', 'alia'),
 };
-const KEY = { 'design-language': 'designLanguage', skins: 'skins', 'architecture-types': 'architectureTypes', frameworks: 'frameworks' };
+const KEY = { 'design-language': 'designLanguage', skins: 'skins', 'architecture-types': 'architectureTypes', frameworks: 'frameworks', 'doc-theme': 'docTheme' };
 // what proves a folder is the thing it claims to be
-const PROBE = { 'design-language': 'llms-rules.txt', skins: null, 'architecture-types': null, frameworks: null };
+const PROBE = { 'design-language': 'llms-rules.txt', skins: null, 'architecture-types': null, frameworks: null, 'doc-theme': 'theme.json' };
 
 const read = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return null; } };
 const baseVersion = () => (read(path.join(BASE, '.claude-plugin', 'plugin.json')) || {}).version || '0.0.0';
@@ -137,7 +138,7 @@ if (require.main === module) {
   if (a.includes('--path')) {
     const kind = opt('--path');
     if (kind === 'skins' || kind === 'architecture-types' || kind === 'frameworks') { const s = ({ skins: skinDirs, 'architecture-types': typeDirs, frameworks: frameworkDirs })[kind](opts); s.forEach((x) => console.log(x.dir)); process.exit(s.length ? 0 : 1); }
-    if (!KEY[kind]) { console.error('--path takes design-language, skins, architecture-types or frameworks'); process.exit(2); }
+    if (!KEY[kind]) { console.error('--path takes design-language, skins, architecture-types, frameworks or doc-theme'); process.exit(2); }
     const r = assetPath(kind, opts); r.warnings.forEach((w) => console.error('⚠ ' + w));
     if (r.path) { console.log(r.path); process.exit(0); } process.exit(1);
   }

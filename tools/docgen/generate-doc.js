@@ -21,25 +21,39 @@ const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   Header, Footer, AlignmentType, HeadingLevel, LevelFormat, BorderStyle,
   WidthType, ShadingType, VerticalAlign, PageNumber, PageBreak,
-  ExternalHyperlink, ImageRun
+  ExternalHyperlink, ImageRun, HeightRule
 } = (() => {
   // at tools/docgen's pin, never Bun's auto-install (scripts/shared/pinned.js); `bun install` runs at sa-skills' root, the workspace
   try { return require('../../scripts/shared/pinned.js').pinnedRequire(__dirname, 'docx', { installIn: path.join(__dirname, '..', '..') }); }
   catch (e) { if (!e.pin) throw e; console.error(`generate-doc: ${e.message}`); process.exit(1); }
 })();
 
-// ─── Corporate Blue Palette (reserved for Solution Architecture docs) ─────────
+// ─── Palette ──────────────────────────────────────────────────────────────────
+// The document theme fills it (./theme.js: --theme → an institution pack's docTheme → the base's `alia`); the values
+// here are `classic`, what a caller that never applies a theme (a test, a fallback) renders with.
 const COLORS = {
-  primary:    '1F4E79',  // Deep corporate blue
-  secondary:  '2E75B6',  // Medium blue
-  accent:     '4472C4',  // Light blue
-  headerBg:   'D6E4F0',  // Very light blue (table headers)
-  altRow:     'EBF3FA',  // Alt table row
-  text:       '1A1A1A',  // Near black
-  subtext:    '595959',  // Dark gray
+  primary:    '1F4E79',  // titles, H1
+  secondary:  '2E75B6',  // H3, links, code-block caption
+  accent:     '4472C4',  // blockquote bar
+  headerBg:   'D6E4F0',  // table headers
+  altRow:     'EBF3FA',  // alt table row
+  text:       '1A1A1A',
+  subtext:    '595959',
   white:      'FFFFFF',
-  border:     'BDD7EE',  // Blue-tinted border
+  border:     'BDD7EE',
+  codeBg:     'F4F6FB',  // code-block fill
+  codeText:   '2E75B6',  // inline code
+  codeFill:   'F0F4FA',  // inline code fill
 };
+let THEME = null;      // the resolved document theme, once main() applies one
+
+// Fill COLORS and the document-type colours from a theme (./theme.js loadTheme). Statuses and priorities keep their
+// own fills: they mean the same in every theme.
+function applyTheme(theme) {
+  THEME = theme;
+  Object.assign(COLORS, theme.colors);
+  for (const [t, c] of Object.entries(theme.docTypes || {})) if (DOC_TYPES[t]) DOC_TYPES[t].color = c;
+}
 
 // ─── Document type metadata ───────────────────────────────────────────────────
 // Corporate blue is reserved for SA docs. ADR uses amber/gold. Handoff uses teal.
@@ -380,7 +394,7 @@ function inlineRuns(text, baseSize, baseColor) {
       case 'italic':
         return new TextRun({ text: t.text, italics: true, size: baseSize, color: baseColor, font: 'Arial' });
       case 'code':
-        return new TextRun({ text: t.text, font: 'Courier New', size: baseSize - 2, color: '2E75B6', shading: { fill: 'F0F4FA', type: ShadingType.CLEAR } });
+        return new TextRun({ text: t.text, font: 'Courier New', size: baseSize - 2, color: COLORS.codeText, shading: { fill: COLORS.codeFill, type: ShadingType.CLEAR } });
       case 'link':
         return new TextRun({ text: t.text, size: baseSize, color: COLORS.secondary, underline: {}, font: 'Arial' });
       default:
@@ -473,9 +487,9 @@ function codeElements(block) {
   }));
   for (const cl of codeLines) {
     elements.push(new Paragraph({
-      children: [new TextRun({ text: cl || ' ', font: 'Courier New', size: 18, color: '1A1A1A' })],
+      children: [new TextRun({ text: cl || ' ', font: 'Courier New', size: 18, color: COLORS.text })],
       spacing: { before: 0, after: 0 },
-      shading: { fill: 'F4F6FB', type: ShadingType.CLEAR },
+      shading: { fill: COLORS.codeBg, type: ShadingType.CLEAR },
       indent: { left: 360 },
       border: {
         left: { style: BorderStyle.SINGLE, size: 12, color: COLORS.secondary },
@@ -828,9 +842,69 @@ function parseComplianceSummaryTableDoc(lines) {
 }
 
 // ─── Cover page ───────────────────────────────────────────────────────────────
+// The figure cover of a theme with a night cover: on Word it stays on white (a dark panel prints heavy and fights the
+// page) — the badge, the title after the theme's accent bar and the tagline, the theme's figure on the right, the
+// metadata under them. The PDF paints its cover night (render-pdf.js nightCover).
+function makeFigureCover(dt, title, meta, cover) {
+  const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+  const noBorders = { top: none, bottom: none, left: none, right: none };
+  const textW = cover.image ? 6120 : PAGE.content, imgW = PAGE.content - textW;
+  const cells = [new TableCell({
+    borders: noBorders, width: { size: textW, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER,
+    margins: { top: 240, bottom: 240, left: 0, right: 240 },
+    children: [
+      new Paragraph({ children: [new TextRun({ text: `${dt.code} · ${dt.label}`.toUpperCase(), font: 'Arial', size: 17, bold: true, color: dt.color, characterSpacing: 40 })], spacing: { after: 280 } }),
+      new Paragraph({
+        children: [new TextRun({ text: title, font: 'Arial', size: 52, bold: true, color: COLORS.primary })],
+        border: { left: { style: BorderStyle.SINGLE, size: 36, color: COLORS.accent, space: 12 } }, spacing: { after: 240 },
+      }),
+      new Paragraph({ children: [new TextRun({ text: dt.tagline, font: 'Arial', size: 22, color: COLORS.subtext })] }),
+    ],
+  })];
+  if (cover.image) {
+    cells.push(new TableCell({
+      borders: noBorders, width: { size: imgW, type: WidthType.DXA }, verticalAlign: VerticalAlign.BOTTOM,
+      margins: { top: 240, bottom: 240, left: 120, right: 0 },
+      children: [new Paragraph({ alignment: AlignmentType.CENTER,
+        children: [new ImageRun({ data: fs.readFileSync(cover.image), type: 'png', transformation: { width: 210, height: 210 } })] })],
+    }));
+  }
+  return [
+    new Paragraph({ text: '', spacing: { before: 0, after: 0 }, border: { top: { style: BorderStyle.SINGLE, size: 24, color: COLORS.accent, space: 1 } } }),
+    new Paragraph({ text: '', spacing: { before: 960, after: 0 } }),
+    new Table({
+      width: { size: PAGE.content, type: WidthType.DXA }, columnWidths: cover.image ? [textW, imgW] : [PAGE.content],
+      rows: [new TableRow({ height: { value: 5400, rule: HeightRule.ATLEAST }, children: cells })],
+    }),
+    new Paragraph({ text: '', spacing: { before: 480, after: 0 }, border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: dt.color, space: 1 } } }),
+    new Paragraph({ text: '', spacing: { after: 160 } }),
+    metaTable(meta),
+    new Paragraph({ children: [new PageBreak()] }),
+  ];
+}
+
+// Label → value rows, borderless, under the cover's title.
+function metaTable(meta) {
+  const none = { style: BorderStyle.NONE };
+  return new Table({
+    width: { size: 6000, type: WidthType.DXA },
+    columnWidths: [2000, 4000],
+    rows: Object.entries(meta).map(([k, v]) => new TableRow({
+      children: [
+        new TableCell({ borders: { top: none, bottom: none, left: none, right: none }, width: { size: 2000, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 0, right: 120 },
+          children: [new Paragraph({ children: [new TextRun({ text: k, font: 'Arial', size: 18, bold: true, color: COLORS.subtext })] })] }),
+        new TableCell({ borders: { top: none, bottom: none, left: none, right: none }, width: { size: 4000, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 0, right: 0 },
+          children: [new Paragraph({ children: [new TextRun({ text: v, font: 'Arial', size: 18, color: COLORS.text })] })] }),
+      ],
+    })),
+  });
+}
+
 function makeCoverPage(docType, title, meta) {
   const dt = docTypeFor(docType);
-  const today = localizedToday();
+  if (THEME && THEME.cover && THEME.cover.style === 'night') return makeFigureCover(dt, title, meta, THEME.cover);
 
   return [
     // Top color bar
@@ -880,28 +954,7 @@ function makeCoverPage(docType, title, meta) {
     }),
 
     // Metadata table
-    new Table({
-      width: { size: 6000, type: WidthType.DXA },
-      columnWidths: [2000, 4000],
-      rows: Object.entries(meta).map(([k, v]) => new TableRow({
-        children: [
-          new TableCell({
-            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
-                       left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-            width: { size: 2000, type: WidthType.DXA },
-            margins: { top: 60, bottom: 60, left: 0, right: 120 },
-            children: [new Paragraph({ children: [new TextRun({ text: k, font: 'Arial', size: 18, bold: true, color: COLORS.subtext })] })],
-          }),
-          new TableCell({
-            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
-                       left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-            width: { size: 4000, type: WidthType.DXA },
-            margins: { top: 60, bottom: 60, left: 0, right: 0 },
-            children: [new Paragraph({ children: [new TextRun({ text: v, font: 'Arial', size: 18, color: COLORS.text })] })],
-          }),
-        ],
-      })),
-    }),
+    metaTable(meta),
 
     new Paragraph({ children: [new PageBreak()] }),
   ];
@@ -1144,6 +1197,12 @@ async function main() {
   // machine and falls back to source when it is not; `on` makes a missing
   // mermaid-cli an error, for a pipeline whose deliverable must carry the drawings;
   // `off` keeps the pre-v6.2.0 behaviour unconditionally.
+  // The document theme: --theme <id|folder>, else an institution pack's docTheme, else the base's `alia` (./theme.js)
+  try {
+    const theme = require('./theme.js').loadTheme({ theme: get('--theme'), project: process.cwd() });
+    theme.warnings.forEach((w) => console.warn(`theme: ${w}`));
+    applyTheme(theme);
+  } catch (e) { console.error(e.message); process.exit(1); }
   const mermaidMode = (get('--mermaid') || 'auto').toLowerCase();
   const mermaidOpts = {
     mode:            mermaidMode,
@@ -1158,7 +1217,7 @@ async function main() {
 
   if (!input) {
     console.error(`Usage: bun run generate-doc.js --type <${Object.keys(DOC_TYPES).join('|')}> --input <file.md> --output <file.docx|file.pdf> [--format <docx|pdf>] [--lang <en|es>] [--translated-from <en|es>]
-       [--mermaid <auto|on|off>] [--mermaid-theme <name>] [--mermaid-scale <n>] [--mermaid-background <color>] [--mermaid-puppeteer-config <file.json>]`);
+       [--theme <alia|classic|folder>] [--mermaid <auto|on|off>] [--mermaid-theme <name>] [--mermaid-scale <n>] [--mermaid-background <color>] [--mermaid-puppeteer-config <file.json>]`);
     process.exit(1);
   }
 
@@ -1251,6 +1310,7 @@ async function main() {
         labels:    L(),
         typeMeta:  docTypeFor(docType),
         changelog: directives.changelog || null,
+        theme:     THEME,
       });
     } catch (e) {
       console.error(`Cannot write output file: ${output}\n${e.message}`);
@@ -1280,7 +1340,7 @@ async function main() {
 // requires render-pdf.js — moving it inside a function reintroduces the cycle for real.
 module.exports = {
   parseMarkdown, extractDirectives, extractTitle, tokenizeInline,
-  DOC_TYPES, LABELS, COLORS, PAGE,
+  DOC_TYPES, LABELS, COLORS, PAGE, applyTheme,
 };
 
 // Only run the CLI when invoked directly, so the exports above can be required

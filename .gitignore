@@ -65,3 +65,7 @@ plugins/sa-ux/.claude-plugin/types/
 
 # check-generic.ts: the maintainer's reference projects, one path per line — never committed
 .sa-reference-projects
+
+# Alia identity work: drafts and third-party style references stay local
+brand/alia/drafts/
+brand/alia/reference/

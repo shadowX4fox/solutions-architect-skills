@@ -539,11 +539,13 @@ report says so, and they are delivered together.
 
 ## Document Styling
 
-| Document | Type Code | Color | Purpose |
-|----------|-----------|-------|---------|
-| Stakeholder Briefing | `SA` | Corporate blue `#1F4E79` | Role-routed architecture deliverable |
-| ADR-*.md | `ADR` | Amber/Gold `#8B6914` | Architecture decisions |
-| handoff kit — all four parts | `HANDOFF` | Teal `#0D7377` | Dev team deliverables |
+The look comes from the **document theme** (`tools/docgen/theme.js`): an institution pack's `docTheme` when one is in force, else the base's `alia` — Alia's palette, her figure on the cover (night in PDF, on white in Word), Nunito headings in PDF. `--theme classic` restores the corporate blue; `bun <sa_skills_dir>/tools/docgen/theme.js` names the theme in force. Each type keeps its own colour:
+
+| Document | Type Code | `alia` colour | Purpose |
+|----------|-----------|---------------|---------|
+| Stakeholder Briefing | `SA` | Aqua ink `#0A7177` | Role-routed architecture deliverable |
+| ADR-*.md | `ADR` | Amber ink `#7A5600` | Architecture decisions |
+| handoff kit — all four parts | `HANDOFF` | Violet ink `#5443B0` | Dev team deliverables |
 
 ---
 
