@@ -13,7 +13,8 @@ const DEFAULT_ID = 'alia';
 const HEX = /^[0-9A-Fa-f]{6}$/;
 
 const read = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
-const bundled = () => fs.readdirSync(THEMES).filter((d) => fs.existsSync(path.join(THEMES, d, 'theme.json')));
+// sorted: readdir's order is the file system's (ext4 on CI lists them otherwise), and the refusal names them
+const bundled = () => fs.readdirSync(THEMES).filter((d) => fs.existsSync(path.join(THEMES, d, 'theme.json'))).sort();
 
 function packTheme(project, packOpts) {
   try {

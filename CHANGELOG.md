@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.29.1]
+
+### Fixed
+
+- **CI red since 10.26.0.** `tools/docgen/theme.js` listed the bundled themes in `readdir` order, which is the file system's — the CI runner lists `classic, alia` where a laptop lists `alia, classic` — so the refusal of an unknown `--theme` named them differently and `theme.test.js` failed on every push. The list is sorted.
+
 ## [10.29.0]
 
 ### Added
