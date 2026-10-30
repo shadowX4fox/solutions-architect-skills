@@ -3,7 +3,7 @@
 **Architecture documentation that stays true to itself — written with Claude Code, checked by code, delivered to the people who build it.**
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-10.26.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-10.27.0-blue.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-purple.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -165,7 +165,7 @@ floor per layer, every C4 container a block, every integration a route. Alia wal
 - **Load simulation** — documented capacity against documented demand; find the first thing that breaks, save scenarios,
   export them to `.xlsx`.
 - **Ask Alia** — she answers from a dossier of the architecture baked into the page: sections, ADRs, TDRs, findings.
-- **Skins** — `holo`, `atlas`, a neutral `corporate`, or your organization's own.
+- **Skins** — `alia` (the default, with Alia in person), `holo`, `atlas`, a neutral `corporate`, or your organization's own.
 
 Read-only by design: it never edits a document; it hands the architect Markdown to paste.
 

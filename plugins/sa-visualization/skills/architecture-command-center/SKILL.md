@@ -313,7 +313,7 @@ bun <skill_dir>/scripts/render.js visualizations/architecture-command-center.sce
     visualizations/architecture-command-center.html --lang <doc_language> [--theme <skin id>] [--skins <dir>] [--view logical|physical]
 ```
 
-`--theme` picks the look the file opens with — `holo`, `atlas`, `corporate` or a project skin from `visualizations/skins/` beside the scene (see `skins/README.md`); omit it for `holo`, or set
+`--theme` picks the look the file opens with — `alia`, `holo`, `atlas`, `corporate` or a project skin from `visualizations/skins/` beside the scene (see `skins/README.md`); omit it for `alia`, or set
 `"theme"` in the scene JSON. `--view physical` opens on the physical view (needs `deployment`);
 omit it for `logical`, or set `"view"` in the scene. The viewer keeps runtime switches for both.
 
@@ -442,7 +442,7 @@ and never writes to them.
 - [ ] Every edge traceable to a `docs/05` row or a Communication table (synthesized hops reported as findings); layer-skipping edges marked `jump`; the thesis and every hand decision in the overrides file, not in the JSON
 - [ ] Phases and use cases match Section 6 verbatim in order and budgets
 - [ ] `render.js` ran clean (no dangling references) and the HTML opened locally
-- [ ] Theme matches what the user asked for (`holo` unless they asked for the neutral `atlas` look, the `corporate` business look, or the project's own skin)
+- [ ] Theme matches what the user asked for (`alia` unless they asked for the retro `holo` hologram, the neutral `atlas` look, the `corporate` business look, or the project's own skin)
 - [ ] `deployment` authored when Section 11 documents where the system runs: tiers by trust zone (or Section 11's own grouping), nodes named as the docs name them, one instance per internal container, paths undirected in transport form with a Path Class
 - [ ] `render.js` warnings read; unplaced containers and *No declared path* links reported as findings, not patched with guesses
 - [ ] `dossier.js --write` run from the project root after the scene; cited ADRs without a file, descriptors whose H1 does not match, missing contracts and unresolved findings reported, never hand-written into the dossier

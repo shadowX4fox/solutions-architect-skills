@@ -6,8 +6,8 @@
     "es": "Holo"
   },
   "hint": {
-    "en": "Hologram on navy — the default look",
-    "es": "Holograma sobre azul marino — la vista por defecto"
+    "en": "Retro hologram on navy, CRT scanlines",
+    "es": "Holograma retro sobre azul marino, con líneas CRT"
   },
   "look": "neon",
   "fonts": [

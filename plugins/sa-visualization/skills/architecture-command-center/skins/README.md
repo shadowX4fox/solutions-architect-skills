@@ -7,7 +7,8 @@ never geometry, layout or what a colour means.
 
 | Skin | Look | Modes |
 |------|------|-------|
-| `holo` (default) | Retro sci-fi hologram: self-lit cyan blocks over an indigo grid, game ranks (`LV S · A …`) | dark |
+| `alia` (default) | Alia's hologram on night: aqua for what the organization owns, silver for what it consumes, Nunito, round frosted panels, her face in the codec by mood, game ranks (`LV S · A …`) | dark |
+| `holo` | Retro sci-fi hologram: self-lit cyan blocks over an indigo grid, CRT scanlines, game ranks | dark |
 | `atlas` | Neutral and formal, IBM Plex, priorities (`P1 … P5`) | light, dark |
 | `corporate` | Neutral business palette, slate and teal, rounded cards | light |
 

@@ -42,6 +42,8 @@ The two anchors are the IP-Adapter references for every further pose.
 
 Poses: `workflows/alia-pose-<pose>.json` — both anchors through IP-Adapter Plus SDXL (`PLUS` preset, weight 0.7, `average`, end 0.85), the pose in the prompt, 2 images per run (seed 1030200 + index). Anchors are copied to `~/ai/ComfyUI/input/alia/`. Models: `clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` and `ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors` (h94/IP-Adapter, Apache-2.0); node pack `comfyui_ipadapter_plus` 2.0.0. A new pose is a copy of one file with another pose prompt.
 
+Faces (`design-system/assets/faces/face-<pose>.webp`, 192 px): her head cut from each approved pose — the command center's `alia` skin embeds them and shows the one her mood calls for (calm `cover`, `thinking`, pleased `happy`, worried and stern `warning`).
+
 Rule: the references give the style and palette; Alia's design is original and never a copy of the referenced character.
 
 ## Environment

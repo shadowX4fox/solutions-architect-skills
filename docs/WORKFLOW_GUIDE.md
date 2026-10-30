@@ -421,7 +421,7 @@ The server side is Alia — see [ALIA.md](ALIA.md).
 It writes `visualizations/architecture-command-center.scene.json` and `.html` — one self-contained page, regenerated
 in place. A floor per layer, a block per container, routes per integration; Logical and Physical views; use-case
 walkthroughs phase by phase; analysis findings on the stage; a load simulation from the documented capacity and demand;
-an increment filter when increments are declared; skins `holo`, `atlas`, `corporate` or your own. **Alia**, the
+an increment filter when increments are declared; skins `alia` (default), `holo`, `atlas`, `corporate` or your own. **Alia**, the
 navigator, answers from a dossier of the architecture baked into the page. It never edits a document. See
 [ALIA.md](ALIA.md).
 

@@ -13,7 +13,7 @@ marketplace. Install the base, then the pack; the base finds the pack, never the
   257 of them; the Service Landscape's role definitions and examples of use are © BIAN and are not bundled. A pack
   whose `frameworks` folder carries a `BIAN` framework — the organization's licensed landscape — replaces it, and BIAN
   alignment then judges every Service Domain.
-- **Three skins** (`holo`, `atlas`, a neutral `corporate`).
+- **Four skins** (`alia`, the default, `holo`, `atlas`, a neutral `corporate`).
 - **Two capability frameworks** for the alignment gate — `BIAN` (banking) and `CROSS-INDUSTRY` (the Turbo EA cross-industry
   map, CC BY 4.0). The gate is mandatory only once a framework is declared (`.sa-skills/project.json`, or a pack's
   `defaults.framework`); a project may declare `none`.

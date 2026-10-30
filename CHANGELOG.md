@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.27.0]
+
+### Added
+
+- **The command center's `alia` skin, now the default.** Alia's hologram on night (`#0d1418`): aqua blocks for what the organization owns, silver for what it consumes, pink for an actor, warm colours left to severity; Nunito, round frosted panels, pill controls, an aqua and silver stripe; no scanlines or flicker. Holo's lessons are kept: frosted panels, labels legible by a tight dark halo on thin plates, no glyph shadow on a badge, the game voice (ranks, banners, the typed codec).
+- **Alia in person in the viewer.** In `alia` the codec is her tip — her face on an aqua ring beside a round bubble, rising in and bobbing while she talks — and her face opens the Alia dialog. The face follows her mood (calm, thinking, pleased, worried, stern), the codec's own mood first, so a warning shows her worried face. Five faces cut from her approved poses, each embedded once (`brand/alia/design-system/assets/faces/`).
+
+### Changed
+
+- **`holo` is no longer the default**; it stays as `--theme holo` (or `"theme": "holo"` in a scene). A scene or an institution pack that names `holo` keeps opening in it.
+
 ## [10.26.0]
 
 ### Added

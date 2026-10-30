@@ -16,7 +16,7 @@ synthetic order-taking system with a container named **Hub API**.
 
 ![The Logical view: a floor per layer, a block per container, the "Place an order" use case lit phase by phase](images/command-center/logical.webp)
 
-*The synthetic Order Desk example in the default `holo` skin — the Logical view, walking the "Place an order" use case.*
+*The synthetic Order Desk example in the `holo` skin — the Logical view, walking the "Place an order" use case.*
 
 ## What it renders
 
@@ -189,7 +189,8 @@ on the stage. Her voice (browser speech synthesis) is off until switched on in S
 
 | Skin | Look |
 |---|---|
-| `holo` (default) | Retro sci-fi hologram: self-lit cyan blocks over an indigo grid, game ranks. Dark only |
+| `alia` (default) | Alia's hologram on night: aqua and silver blocks, round frosted panels, her face in the codec and the Alia dialog, changing with her mood. Dark only |
+| `holo` | Retro sci-fi hologram: self-lit cyan blocks over an indigo grid, game ranks. Dark only |
 | `atlas` | Neutral and formal, IBM Plex, priorities. Light and dark |
 | `corporate` | Neutral business palette, slate and teal, rounded cards. Light only; the base to copy for a brand |
 

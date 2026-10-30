@@ -687,7 +687,8 @@ The full guide: `skins/README.md`.
 
 | Theme | Look | When |
 |-------|------|------|
-| `holo` (**default**) | **Retro sci-fi hologram** — the *Mega Man X* capsule hologram over a holodeck grid, in the *Mega Man DO* palette (cyan fading to indigo on deep navy): self-lit translucent cyan blocks with glowing outlines, game ranks. Dark only | Demos, walkthroughs, anything shown on a screen |
+| `alia` (**default**, 10.27.0) | **Alia's hologram** — the night she glows against, aqua blocks for what the organization owns and silver for what it consumes, an actor in pink; Nunito, round frosted panels, pill controls, an aqua and silver stripe; no scanlines or flicker. **Alia appears in person**: the codec is her tip — her face on an aqua ring, chosen by the codec's own mood (calm, thinking, pleased, worried and stern) — and her face opens the Alia dialog. Holo's lessons kept: frosted panels, labels legible by a tight dark halo on thin plates, warm colours reserved for severity, no glyph shadow on a badge. Game ranks. Dark only | Everything — demos, walkthroughs, reviews |
+| `holo` | **Retro sci-fi hologram** — the *Mega Man X* capsule hologram over a holodeck grid, in the *Mega Man DO* palette (cyan fading to indigo on deep navy): self-lit translucent cyan blocks with glowing outlines, game ranks. Dark only | Demos, walkthroughs, anything shown on a screen |
 | `atlas` | Neutral and formal: opaque lit blocks, translucent floors, IBM Plex type, priorities. Follows the viewer's light / dark preference | Committees, formal reviews, anything printed or projected in a bright room, or when the user asks for a "corporate", "neutral" or "formal" look |
 | `corporate` | A neutral business palette — slate and teal, white rounded cards, Nunito Sans. Light only | Business audiences; the base to copy for an organization's brand |
 | *a project skin* | An organization's own look (its brand), from `visualizations/skins/<id>/` beside the scene | When the project carries one |
@@ -695,7 +696,7 @@ The full guide: `skins/README.md`.
 **Selecting**: `--theme <id>` on `render.js`, or `"theme"` in the scene JSON (the flag wins); otherwise the
 skin with the lowest `order`. The **Theme** menu lists every skin the page carries (the plugin's and the
 project's) and switches at runtime without a re-render. Ask for the theme only when the user's phrasing hints
-at one; otherwise render `holo` and mention the switch in the report.
+at one; otherwise render `alia` and mention the switch in the report.
 
 **Adding a theme**: a folder under `skins/` (the plugin's) or under the project's `visualizations/skins/`,
 checked with `bun scripts/skins.js --check [<dir>]` — no template edit. A project skin with a plugin id

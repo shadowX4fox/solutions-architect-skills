@@ -28,8 +28,22 @@ describe('plugin skins', () => {
     const { skins, errors, from } = SK.loadSkins(null);
     expect(errors).toEqual([]);
     // the plugin's own — an installed institution pack may add more (its skins load between the plugin's and the project's)
-    expect(skins.filter((s: any) => from[s.id] === 'plugin').map((s: any) => s.id)).toEqual(['holo', 'atlas', 'corporate']);
+    expect(skins.filter((s: any) => from[s.id] === 'plugin').map((s: any) => s.id)).toEqual(['alia', 'holo', 'atlas', 'corporate']);
     skins.forEach((s: any) => Object.values(s.json.modes).forEach((t: any) => SK.REQUIRED.forEach((k: string) => expect(t[k]).toBeTruthy())));
+  });
+  test('alia is the default: the first by order, so render.js opens a file in it when no --theme, scene or pack names one; holo stays available', () => {
+    const { skins } = SK.loadSkins(null);
+    expect(skins[0].id).toBe('alia');
+    expect(skins.map((s: any) => s.id)).toContain('holo');
+  });
+  test('alia shows Alia in person: each face embedded once, picked by the page\'s mood and by the codec\'s own', () => {
+    const css = SK.loadSkins(null).skins.find((s: any) => s.id === 'alia').css;
+    expect((css.match(/data:image\/webp;base64,/g) || []).length).toBe(4);
+    ['thinking', 'pleased', 'worried', 'stern'].forEach((m) => {
+      expect(css).toContain('[data-alia-mood="' + m + '"]');
+      expect(css).toContain('[data-mood="' + m + '"]');
+    });
+    expect(css).toContain('.codec .cface svg { display: none; }');
   });
   test('the palette CSS: a block per skin, the dark mode under the OS preference and the explicit choice, a default bare :root', () => {
     const { skins } = SK.loadSkins(null), css = SK.tokensCss(skins, 'holo');

@@ -12,7 +12,7 @@ and substitutes the object into `VIEWER_TEMPLATE.html`. See
 | `version`, `status` | string | no | From the `ARCHITECTURE_VERSION` / `ARCHITECTURE_STATUS` markers |
 | `architectureType` | string | no | `ENTERPRISE`, `3-Tier`, `Microservices`, … shown in the meta line |
 | `language` | `"en"` \| `"es"` | no | Default for the viewer chrome; `--lang` overrides |
-| `theme` | `"holo"` \| `"atlas"` | no | Theme the rendered file opens with (default `holo`, the retro sci-fi hologram; `atlas` is the neutral corporate look); `--theme` overrides. The viewer can switch at runtime either way |
+| `theme` | a skin id (`"alia"`, `"holo"`, `"atlas"`, `"corporate"` or a project skin) | no | Theme the rendered file opens with (default `alia`, Alia's hologram; `holo` the retro sci-fi one; `atlas` the neutral corporate look); `--theme` overrides. The viewer can switch at runtime either way |
 | `view` | `"logical"` \| `"physical"` | no | View the rendered file opens with (default `logical`); `--view` overrides. `physical` needs `deployment`. The viewer switches at runtime either way |
 | `sources` | string | no | Info dialog: the files the scene was built from |
 | `thesis` | string | no | Info dialog, first row: the one sentence the model is built to show (usually the layering exception) |
