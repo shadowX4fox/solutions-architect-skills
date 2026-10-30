@@ -363,9 +363,11 @@ Alia on her stage: an approved pose standing on an aqua ring, inside a soft aqua
 | Thinking | `alia-thinking.webp` | pensando | How something works, an analysis |
 | Happy | `alia-happy.webp` | contenta | What she delivers, results |
 | Warning | `alia-warning.webp` | advirtiendo | Limits, risks |
+| Stern | `alia-stern.webp` | firme | What blocks, a rule that is not negotiable |
 
 - **Light grounds** `.ag-stage`: `aqua-soft` halo, `aqua-mark` ring, `figure-shade` shadow. **Night** `.ag-stage--night`: a fainter halo, an `alia-aqua` ring that glows, the `alia-glow` around her.
 - She fills her stage's height and stands on the ring (`object-position: bottom`); never cropped, mirrored, recoloured or redrawn. One stage per page.
+- Not stage poses: `point-left`, `point-up` and `perched` belong to `AliaTip`, and the talking pair to her talking frames (`AliaCodec`).
 - A new pose comes from her anchors (`brand/alia/` in the plugin repository), is approved, then uploaded here.
 """)
 
@@ -614,7 +616,7 @@ def index(created_at):
                             "files": {f: {"name": f, "blob": BLOB[f][0], "size": BLOB[f][1], "type": BLOB[f][2]} for f in fs}}
                         for g, fs in groups.items()},
         "blobs": {}, "docs": {"readme": "project/README.md", "sections": []},
-        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaCodec: talking frames only on calm, thinking and pleased calls (the frames smile); worried and stern keep their own face"},
+        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaStage: stern joins the stage poses; the tip poses and the talking pair are not stage poses"},
     }
 import sys
 w("design-system.json", json.dumps(index(sys.argv[1] if len(sys.argv) > 1 else NOW), ensure_ascii=False))
