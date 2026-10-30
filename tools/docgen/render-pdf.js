@@ -443,11 +443,15 @@ function blocksToPdf(blocks, labels) {
 }
 
 // ─── Cover page ───────────────────────────────────────────────────────────────
+// The theme's blazon (theme.json `blazon`): on the cover above the type label, and at the start of every page header.
+const blazonImage = (theme) => (theme && theme.blazon ? 'data:image/png;base64,' + fs.readFileSync(theme.blazon).toString('base64') : null);
+
 // A night cover (a theme whose cover.style is "night"): page 1 is painted by `nightBackground`; this lays the badge,
 // the title and the tagline over it, the theme's figure on the right, the metadata under them.
 function nightCover(typeMeta, title, meta, theme) {
   const v = theme.cover, font = headingFont(theme);
   const text = [
+    ...(blazonImage(theme) ? [{ image: blazonImage(theme), width: 48, margin: [0, 0, 0, 18] }] : []),
     { text: sanitize(`${typeMeta.code} · ${typeMeta.label}`).toUpperCase(), fontSize: 9, bold: true, color: hex(v.signature), characterSpacing: 1.5, margin: [0, 0, 0, 16] },
     { columns: [
       { width: 5, canvas: [{ type: 'rect', x: 0, y: 2, w: 5, h: 64, r: 2, color: hex(v.signature) }] },
@@ -476,10 +480,11 @@ function nightBackground(theme) {
   });
 }
 
-function coverPage(typeMeta, title, meta) {
+function coverPage(typeMeta, title, meta, theme) {
   const color = hex(typeMeta.color);
   return [
     { canvas: [{ type: 'rect', x: 0, y: 0, w: 495, h: 6, color }], margin: [0, 0, 0, 60] },
+    ...(blazonImage(theme) ? [{ image: blazonImage(theme), width: 48, margin: [0, 0, 0, 16] }] : []),
     {
       text: `  ${typeMeta.code} · ${sanitize(typeMeta.label)}  `,
       fontSize: 10, bold: true, color: C.white, background: color,
@@ -511,6 +516,7 @@ function buildDocDefinition(opts) {
   const color = hex(typeMeta.color);
   const night = Boolean(theme && theme.cover && theme.cover.style === 'night');
   const hFont = headingFont(theme);
+  const blazon = blazonImage(theme);   // read once: the header runs on every page
 
   const body = [];
   if (changelog) {
@@ -537,7 +543,7 @@ function buildDocDefinition(opts) {
       subject: sanitize(typeMeta.label),
     },
     content: [
-      ...(night ? nightCover(typeMeta, title, meta, theme) : coverPage(typeMeta, title, meta)),
+      ...(night ? nightCover(typeMeta, title, meta, theme) : coverPage(typeMeta, title, meta, theme)),
       { text: sanitize(labels.tocTitle), style: 'h1' },
       { toc: { id: 'mainToc' } },
       { text: '', pageBreak: 'after' },
@@ -548,6 +554,7 @@ function buildDocDefinition(opts) {
     header: (currentPage) => (currentPage === 1 ? null : {
       margin: [58, 24, 58, 0],
       columns: [
+        ...(blazon ? [{ width: 15, image: blazon, fit: [11, 11] }] : []),
         { text: [
           { text: `${typeMeta.code}  `, bold: true, color },
           { text: sanitize(title), color: C.subtext },

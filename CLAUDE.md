@@ -141,8 +141,9 @@ bun run tools/docgen/generate-doc.js --type <type> --input <file.md> --output <f
 `provides.docTheme` (`packs.js --path doc-theme`) → the base's `themes/alia` (Alia Guide: her palette, her figure on the cover —
 night in PDF, on white in Word —, Nunito headings in PDF — body text stays Roboto, which the glyph sanitizer is verified against; Word stays Arial, docx 8
 embeds no fonts). `themes/classic` is the corporate blue before it. A `theme.json` states `colors`, `docTypes`, `cover`
-(`style` `night` | `light`, `image`, the night colours) and `fonts.heading`; a missing key comes from `alia`, but a theme that
-states no cover or font gets a light cover and the body font — an organization's brand never borrows Alia. Status and priority
+(`style` `night` | `light`, `image`, the night colours), `blazon` (a square PNG on the cover and at the start of every page
+header — Alia's is her escudo, `brand/alia/blazon/escudo.svg`) and `fonts.heading`; a missing key comes from `alia`, but a theme that
+states no cover, blazon or font gets a light cover, no blazon and the body font — an organization's brand never borrows Alia. Status and priority
 fills are not theme colours. Tests: `tools/docgen/theme.test.js`.
 
 Both formats share the Markdown parse layer (`extractDirectives` → `parseMarkdown` → blocks); only

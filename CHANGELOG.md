@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.28.0]
+
+### Added
+
+- **A blazon in the Word and PDF exports.** The Alia document theme carries her escudo — a heraldic shield, night field, silver bordure, her hair clip as an aqua chevron, her sparkle in chief, a hologram grid in base (`brand/alia/blazon/escudo.svg`, rendered to `tools/docgen/themes/alia/blazon.png`): on the cover above the document type (Word on white, PDF on night) and at 14 px at the start of every page header.
+- **`blazon` in a `theme.json`.** A square PNG beside the theme, resolved by `theme.js` like the cover image; an institution pack's docTheme shows its own blazon or none — never Alia's — and `--theme classic` has none. A blazon that is named but missing is a warning.
+- **`AliaCodec` in the Alia Guide design system** — her call from the command center's `alia` skin, face by mood, three mood colours (`mood-pleased`, `mood-worried`, `mood-stern`) and the `Faces` assets (`brand/alia/design-system/gen2.py`).
+
+### Changed
+
+- `scripts/build-release.sh` requires `tools/docgen/themes/alia/blazon.png`.
+
 ## [10.27.0]
 
 ### Added

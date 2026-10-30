@@ -845,6 +845,12 @@ function parseComplianceSummaryTableDoc(lines) {
 // The figure cover of a theme with a night cover: on Word it stays on white (a dark panel prints heavy and fights the
 // page) — the badge, the title after the theme's accent bar and the tagline, the theme's figure on the right, the
 // metadata under them. The PDF paints its cover night (render-pdf.js nightCover).
+// The theme's blazon (theme.json `blazon`): on the cover above the type label, and at the start of every page header.
+function blazonRun(px) {
+  return THEME && THEME.blazon ? new ImageRun({ data: fs.readFileSync(THEME.blazon), type: 'png', transformation: { width: px, height: px } }) : null;
+}
+const blazonPara = (px, after) => (blazonRun(px) ? [new Paragraph({ children: [blazonRun(px)], spacing: { after } })] : []);
+
 function makeFigureCover(dt, title, meta, cover) {
   const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
   const noBorders = { top: none, bottom: none, left: none, right: none };
@@ -853,6 +859,7 @@ function makeFigureCover(dt, title, meta, cover) {
     borders: noBorders, width: { size: textW, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER,
     margins: { top: 240, bottom: 240, left: 0, right: 240 },
     children: [
+      ...blazonPara(64, 200),
       new Paragraph({ children: [new TextRun({ text: `${dt.code} · ${dt.label}`.toUpperCase(), font: 'Arial', size: 17, bold: true, color: dt.color, characterSpacing: 40 })], spacing: { after: 280 } }),
       new Paragraph({
         children: [new TextRun({ text: title, font: 'Arial', size: 52, bold: true, color: COLORS.primary })],
@@ -916,6 +923,7 @@ function makeCoverPage(docType, title, meta) {
     }),
 
     new Paragraph({ text: '', spacing: { before: 720, after: 0 } }),
+    ...blazonPara(64, 200),
 
     // Document type badge
     new Paragraph({
@@ -967,6 +975,7 @@ function makeHeader(docType, title) {
     children: [
       new Paragraph({
         children: [
+          ...(blazonRun(14) ? [blazonRun(14), new TextRun({ text: '  ', font: 'Arial', size: 16 })] : []),
           new TextRun({ text: `${dt.code}  `, font: 'Arial', size: 16, bold: true, color: dt.color }),
           new TextRun({ text: title, font: 'Arial', size: 16, color: COLORS.subtext }),
         ],

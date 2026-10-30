@@ -1,4 +1,4 @@
-// The document theme every export renders with: colours, the document-type colours, the cover, the PDF heading font.
+// The document theme every export renders with: colours, the document-type colours, the cover, the blazon, the PDF heading font.
 // One resolver, in this order: the --theme argument (a bundled id or a folder holding theme.json) → an institution
 // pack's `provides.docTheme` (scripts/shared/packs.js) → the base's own `alia`. A theme states only what it changes:
 // every missing key falls back to `alia`, so a pack can recolour without redrawing the cover.
@@ -55,6 +55,10 @@ function loadTheme(opts = {}) {
   cover.image = coverOwn.image && fs.existsSync(path.join(dir, coverOwn.image)) ? path.join(dir, coverOwn.image) : null;
   if (coverOwn.image && !cover.image) warnings.push(`cover.image: ${coverOwn.image} not found in ${dir} — the cover has no image`);
 
+  // the blazon is the theme's own mark (cover + every page header): a theme that names none has none, never Alia's escudo
+  const blazon = own.blazon && fs.existsSync(path.join(dir, own.blazon)) ? path.join(dir, own.blazon) : null;
+  if (own.blazon && !blazon) warnings.push(`blazon: ${own.blazon} not found in ${dir} — the documents carry no blazon`);
+
   let fonts = null;
   const f = own.fonts && own.fonts.heading, fDir = dir;
   if (f && f.family) {
@@ -71,7 +75,7 @@ function loadTheme(opts = {}) {
     id: own.id || path.basename(dir), name: own.name || own.id || path.basename(dir), dir, from,
     colors: colours('colors', base.colors, own.colors),
     docTypes: colours('docTypes', base.docTypes, own.docTypes),
-    cover, fonts, warnings,
+    cover, blazon, fonts, warnings,
   };
 }
 
@@ -85,6 +89,7 @@ if (require.main === module) {
     console.log(`document theme: ${t.name} (${t.id}) — from ${t.from}`);
     console.log(`  folder: ${t.dir}`);
     console.log(`  cover:  ${t.cover.style}${t.cover.image ? ' · ' + path.basename(t.cover.image) : ''}`);
+    console.log(`  blazon: ${t.blazon ? path.basename(t.blazon) + ' (cover and page headers)' : 'none'}`);
     console.log(`  fonts:  ${t.fonts ? t.fonts.heading.family + ' (PDF headings)' : 'the body font'}`);
     t.warnings.forEach((w) => console.log(`  ! ${w}`));
   } catch (e) { console.error(e.message); process.exit(2); }

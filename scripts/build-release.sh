@@ -233,6 +233,7 @@ required_in_zip=(
     "tools/docgen/theme.js"
     "tools/docgen/themes/alia/theme.json"
     "tools/docgen/themes/alia/cover.png"
+    "tools/docgen/themes/alia/blazon.png"
     "tools/docgen/package.json"
     "scripts/setup-docgen.ts"
     "skills/architecture-docs/SKILL.md"

@@ -1,7 +1,7 @@
 {
   "id": "alia",
   "name": "Alia Guide",
-  "summary": "The base's document theme: Alia's palette (night, silver, aqua, white), her figure on the cover (night in PDF, on white in Word), Nunito headings in the PDF.",
+  "summary": "The base's document theme: Alia's palette (night, silver, aqua, white), her figure on the cover (night in PDF, on white in Word), her escudo on the cover and in every page header, Nunito headings in the PDF.",
   "colors": {
     "primary":   "1B1F24",
     "secondary": "0A7177",
@@ -22,6 +22,7 @@
     "handoff":               "5443B0",
     "po-spec":               "1B7148"
   },
+  "blazon": "blazon.png",
   "cover": {
     "style": "night",
     "image": "cover.png",
