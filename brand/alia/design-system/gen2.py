@@ -14,6 +14,10 @@ BLOB = {
     "alia-sparkle-aqua.svg": ("ef4c42a6f7a47647a4731b3cbb74b173", 166, "image/svg+xml"),
     "alia-sparkle-yellow.svg": ("baaa52ad2f81851417ccc605fad59f4a", 166, "image/svg+xml"),
     "alia-sparkle-navy.svg": ("9773eaf5a67a77b19effb0ea790d6d7a", 166, "image/svg+xml"),
+    "face-calm.webp": ("77c60efcf240e5e21bcfb47d53ec9dbc", 12378, "image/webp"),
+    "face-thinking.webp": ("2dc85977bee7cd7d93621a4ad6feb30c", 12142, "image/webp"),
+    "face-pleased.webp": ("88355b339bfbb20887ec7e75bf49c660", 14292, "image/webp"),
+    "face-warn.webp": ("b91e973839cc9037fc4f1803b42e5e13", 13828, "image/webp"),
 }
 def b(name): return "/_blob/" + BLOB[name][0]
 def w(path, text):
@@ -56,6 +60,10 @@ colors = [
     c("mint-ink", "#1b7148", "Kicker text of a `mint` card (6.0:1 on white)."),
     c("amber", "#e0a100", "Card role: what changed, what to escalate."),
     c("amber-ink", "#7a5600", "Kicker text of an `amber` card (6.7:1 on white)."),
+    # her moods, on night only (the codec's ring, outline, glow and name); calm and thinking are `alia-aqua`
+    c("mood-pleased", "#4dffa0", "AliaCodec, mood `pleased`: all clear, a good move (12.9:1 on `night-2`)."),
+    c("mood-worried", "#ffd23f", "AliaCodec, mood `worried`: something saturates or drifts (12.0:1 on `night-2`)."),
+    c("mood-stern", "#ff3b4e", "AliaCodec, mood `stern`: something is down or blocks (5.0:1 on `night-2`)."),
     # light and shadow on her
     c("alia-glow", "rgba(46,230,230,0.38)", "The 30px drop-shadow glow around her on `night`."),
     c("figure-shade", "rgba(13,20,24,0.16)", "The drop shadow under her on light grounds."),
@@ -200,6 +208,29 @@ w("components/bundle.css", """@import url("https://fonts.googleapis.com/css2?fam
 .ag-tip-bubble::after { content: ""; position: absolute; right: -19px; bottom: 22px; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 18px solid var(--alia-aqua); }
 .ag-tip--light .ag-tip-ring { border-color: var(--aqua-mark); box-shadow: none; }
 .ag-tip--light .ag-tip-alia img { filter: drop-shadow(0 6px 10px var(--figure-shade)); }
+/* AliaCodec: her call on a live surface — her face by mood on a ring, the channel, one typed line and the ways in */
+.ag-codec { --m: var(--alia-aqua); display: flex; gap: 14px; align-items: flex-start; box-sizing: border-box; min-width: 300px; max-width: 460px; padding: 12px 14px 12px 12px; background: var(--night-2); border: 1.5px solid color-mix(in srgb, var(--m) 75%, transparent); border-radius: 20px; box-shadow: 0 0 22px color-mix(in srgb, var(--m) 28%, transparent), 0 10px 26px rgba(0,0,0,.4); font-family: var(--font-rounded); }
+.ag-codec[data-mood="pleased"] { --m: var(--mood-pleased); } .ag-codec[data-mood="worried"] { --m: var(--mood-worried); } .ag-codec[data-mood="stern"] { --m: var(--mood-stern); }
+.ag-codec-face { flex: none; width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--m); box-shadow: 0 0 14px color-mix(in srgb, var(--m) 55%, transparent); background: var(--night-2); overflow: hidden; }
+.ag-codec-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ag-codec-body { flex: 1; min-width: 0; }
+.ag-codec-head { display: flex; align-items: baseline; gap: 8px; font: 600 10.5px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--alia-silver); }
+.ag-codec-head b { color: var(--m); text-shadow: 0 0 8px var(--m); }
+.ag-codec-head .ch { font-size: 10px; font-weight: 500; color: var(--m); opacity: .8; }
+.ag-codec-head .ck { color: var(--night-muted); font-weight: 500; }
+.ag-codec-head .x { margin-left: auto; font: 400 16px/1 var(--font-rounded); letter-spacing: 0; color: var(--night-muted); }
+.ag-codec-line { margin: 4px 0 8px; font: 700 14px/1.4 var(--font-rounded); color: var(--alia-white); }
+.ag-codec-act { display: flex; flex-wrap: wrap; gap: 6px; }
+.ag-codec-act span { font: 700 11.5px var(--font-rounded); color: var(--alia-white); background: rgba(46,230,230,.10); border: 1px solid rgba(143,230,230,.24); border-radius: 999px; padding: 3px 11px; }
+.ag-codec-act .pri { border-color: var(--m); background: color-mix(in srgb, var(--m) 18%, transparent); }
+@media (prefers-reduced-motion: no-preference) {
+  .ag-codec.is-open { animation: ag-codec-in .5s cubic-bezier(.2,.9,.3,1.25) both; }
+  .ag-codec.is-open .ag-codec-face { animation: ag-codec-rise .6s cubic-bezier(.2,.9,.3,1.35) both; }
+  .ag-codec.is-talking .ag-codec-face { animation: ag-codec-talk .5s ease-in-out infinite alternate; }
+}
+@keyframes ag-codec-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@keyframes ag-codec-rise { from { opacity: 0; transform: translateY(18px) scale(.8); } }
+@keyframes ag-codec-talk { from { transform: translateY(0); } to { transform: translateY(-2px) scale(1.04); filter: brightness(1.12); } }
 """)
 
 # ------------------------------------------------------------------ snippets
@@ -382,6 +413,33 @@ Chibi Alia pops in at a corner on her glowing ring and gives one short tip in a 
 - Classes: `.ag-tip`, `.ag-tip-alia`, `.ag-tip-ring`, `.ag-tip-bubble`, `.ag-tip--light`. Sizes scale with the surface: at 1920 × 1080 Alia is 300 × 330 px and the bubble text 31 px.
 """)
 
+FACE = {"calm": "face-calm", "thinking": "face-thinking", "pleased": "face-pleased", "worried": "face-warn", "stern": "face-warn"}
+def codec(mood, kind, text, acts):
+    return (f'<div class="ag-codec" data-mood="{mood}"><span class="ag-codec-face"><img src="{b(FACE[mood] + ".webp")}" alt="Alia"></span>'
+            f'<div class="ag-codec-body"><div class="ag-codec-head"><b>Alia</b><span class="ch">NAV-LINK</span><span class="ck">{kind}</span><span class="x">×</span></div>'
+            f'<p class="ag-codec-line">{text}</p><div class="ag-codec-act">'
+            + "".join(f'<span{" class=\"pri\"" if i == len(acts) - 1 else ""}>{a}</span>' for i, a in enumerate(acts)) + '</div></div></div>')
+preview("AliaCodec", "Alia", 330, '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 16px;padding:8px">'
+        + codec("calm", "Consejo", "Pulsa <b>a</b> y pregúntame por cualquier bloque: respondo con la página que lo dice.", ["Sin más consejos", "Leer"])
+        + codec("worried", "Simulación", "Order Desk se satura — ρ 1.12 a ×1.5. 2 más sobre el límite.", ["Muéstramelo", "Leer"])
+        + codec("stern", "Alerta", "Reservar está interrumpido: Hub API está caído en todas sus instancias.", ["Muéstramelo", "Leer"])
+        + codec("pleased", "Todo en orden", "Nada se satura a ×1.5.", ["Leer"])
+        + '</div>', bg="var(--night)")
+w("components/AliaCodec/README.md", """# AliaCodec
+
+Alia's call on a live surface — the command center's codec, as the `alia` skin draws it: her face on a ring in her mood's colour, the channel line («ALIA · NAV-LINK · <kind>»), one line she types, and the ways in as pills. It is how she interrupts a running view without a dialog: a finding worth seeing, a simulation that saturates, a walkthrough that breaks, a tip.
+
+- **Mood = face + colour**: `calm` (`face-calm`, `alia-aqua`) a tip or a pointer; `thinking` (`face-thinking`, `alia-aqua`) a step to weigh; `pleased` (`face-pleased`, `mood-pleased`) all clear; `worried` (`face-warn`, `mood-worried`) something saturates or drifts; `stern` (`face-warn`, `mood-stern`) something is down or blocks. The mood belongs to the call, not to the page: a warning call on a calm page shows her warning face.
+- **Head**: «ALIA» in the mood colour with its glow, «NAV-LINK» faint, the kind in `night-muted` (Consejo · Peor hallazgo · Simulación · Alerta · Todo en orden · Recorrido), × to dismiss at the right.
+- **Line**: one sentence, ~20 words, white Nunito 700; it names the component by its full name and the figure that matters. Typed two characters every 18 ms on screen; whole in print.
+- **Actions**: one to three pills; the last is the primary (`.pri`, outlined in the mood colour) — usually «Leer», the page that says it. «Muéstramelo» flies to the block.
+- **Where**: at the foot of the stage, left-aligned with it, above any transport bar; 300–460 px wide. One call at a time; a new one replaces it.
+- **Motion**: `.is-open` — the frame rises 0.5 s with a small overshoot, her face 0.6 s; `.is-talking` while the line types. Nothing moves under `prefers-reduced-motion`.
+- **Night only**: the codec lives on `night` grounds (the command center, footage). On a light page use `AliaNote` or `AliaTip`.
+- **vs AliaTip**: the tip is chibi Alia with a bubble over content that plays by itself (video, slides); the codec is her face in a frame over a surface the reader drives, with actions.
+- Classes: `.ag-codec` (`data-mood`), `.ag-codec-face`, `.ag-codec-body`, `.ag-codec-head` (`b`, `.ch`, `.ck`, `.x`), `.ag-codec-line`, `.ag-codec-act` (`.pri`), `.is-open`, `.is-talking`. Faces: the `Faces` asset group.
+""")
+
 w("components/Cover/preview.html", '''<!-- @dsCard height=320 -->
 <div style="position:relative;width:960px;height:320px;background:var(--surface-page);overflow:hidden;font-family:var(--font-rounded)">
 <svg width="960" height="320" viewBox="0 0 960 320" style="position:absolute;inset:0">
@@ -412,6 +470,8 @@ w("components/Cover/preview.html", '''<!-- @dsCard height=320 -->
 
 w("assets/Alia/README.md", """Alia's five approved poses and her avatar, cut out on transparency (WebP with alpha; poses 640 px, avatar 320 px). Generated locally with Animagine XL 4.0 Opt (CreativeML Open RAIL++-M, commercial use allowed) through IP-Adapter from two anchor images; sources and workflows live in the plugin repository under `brand/alia/`. Use the poses only through `AliaStage` and the avatar only through `AliaNote`: never crop again, mirror, recolour or redraw.
 """)
+w("assets/Faces/README.md", """Her face cut from each approved pose, 192 px WebP, for `AliaCodec` only: `face-calm` (cover pose), `face-thinking`, `face-pleased` (happy pose), `face-warn` (warning pose — worried and stern). Shown round, on a ring in the mood colour; never crop again, mirror or recolour. Sources in the plugin repository under `brand/alia/design-system/assets/faces/`.
+""")
 w("assets/Motifs/README.md", """Her sparkle, a four-point star in one ink. `alia-sparkle-aqua.svg` (`alia-aqua`) is the one in use. The yellow and navy sparkles are from v1 and are kept only for history: do not use them.
 """)
 
@@ -440,6 +500,7 @@ w("README.md", """Alia Guide is the look of the guides where Alia, the architect
 - **Inner pages** (`GuidePage`): the content on the left, her **stage** on the right — a third of the page (`stage-col`), a soft `aqua-soft` halo, an `aqua-mark` ring under her feet, a tag with her verb («Alia · pensando»).
 - **The cover** (`CoverPage`): `night` with a faint 32px hologram grid (`holo-grid`), her name in aqua, three fact tiles, her palette, and Alia on a glowing ring among hologram panels.
 - **Her voice** (`AliaNote`): a `night` card with her avatar in a glowing aqua ring.
+- **Her call** (`AliaCodec`): on a live surface she interrupts in a frame at the foot of the stage — her face by mood on a ring in the mood colour (`mood-pleased`, `mood-worried`, `mood-stern`; calm in aqua), one typed line, the ways in. The command center's `alia` skin draws it.
 
 **Depth.** Only Alia has light: her shadow on light pages, her glow on night. Cards are flat.
 
@@ -475,6 +536,7 @@ Author each page as a `page-width` × `page-height` section with `break-after: p
 
 groups = {
     "Alia": ["alia-cover.webp", "alia-explaining.webp", "alia-thinking.webp", "alia-happy.webp", "alia-warning.webp", "alia-avatar.webp"],
+    "Faces": ["face-calm.webp", "face-thinking.webp", "face-pleased.webp", "face-warn.webp"],
     "Motifs": ["alia-sparkle-aqua.svg", "alia-sparkle-yellow.svg", "alia-sparkle-navy.svg"],
 }
 def index(created_at):
@@ -485,7 +547,7 @@ def index(created_at):
                             "files": {f: {"name": f, "blob": BLOB[f][0], "size": BLOB[f][1], "type": BLOB[f][2]} for f in fs}}
                         for g, fs in groups.items()},
         "blobs": {}, "docs": {"readme": "project/README.md", "sections": []},
-        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaTip: the chibi tip pattern from the case-7 video — pose by tone, read-time timing, never over the content"},
+        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaCodec: her call from the command center's alia skin — face by mood, mood colours, the Faces assets"},
     }
 import sys
 w("design-system.json", json.dumps(index(sys.argv[1] if len(sys.argv) > 1 else NOW), ensure_ascii=False))
