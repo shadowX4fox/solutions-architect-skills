@@ -17,7 +17,7 @@ If no argument is provided, default to `patch`.
    - `major`: 2.2.1 → 3.0.0
    - Or accept an explicit version string like `2.5.0`
 3. **Update README.md** (do this before touching any other file):
-   - Version badge: `version-OLD_VERSION-blue` → `version-NEW_VERSION-blue`
+   - Version badge: `version-OLD_VERSION-0C9DA3` → `version-NEW_VERSION-0C9DA3` (the badge is in Alia's `aqua-mark`)
    - Installation verification line: `v OLD_VERSION` → `v NEW_VERSION`
    - § Releases holds **one** entry: replace it with `### vNEW_VERSION (Current Release) ✅` and a short summary of this release (infer from git log / staged changes). The README never accumulates releases
    - Add `## [NEW_VERSION]` at the top of `CHANGELOG.md` (Keep a Changelog: `### Added` / `### Changed` / `### Fixed`, one line per change, plus upgrade steps when a plugin or dependency is added)

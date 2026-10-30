@@ -1,12 +1,14 @@
-# Solutions Architect Skills
+<h1 align="center"><img src="docs/images/brand/hero.webp" alt="Solutions Architect Skills — architecture documentation that stays true to itself: written with Claude Code, checked by code, delivered to the people who build it. With Alia, the architecture's navigator." width="100%"></h1>
 
-**Architecture documentation that stays true to itself — written with Claude Code, checked by code, delivered to the people who build it.**
+<div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-10.29.1-blue.svg)](CHANGELOG.md)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-purple.svg)](https://claude.com/claude-code)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Version](https://img.shields.io/badge/version-10.29.1-0C9DA3.svg)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
+[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
+
+</div>
 
 A suite of [Claude Code](https://claude.com/claude-code) plugins for solutions architects. It takes an initiative from a
 Product Owner's requirements to a versioned `ARCHITECTURE.md`, decision records, risk analyses, a development handoff kit,
@@ -151,6 +153,8 @@ prompts, an architecture radar) — `claude plugin install sa-ux@shadowx4fox-sol
 
 ## Meet Alia
 
+<img src="docs/images/brand/alia-explaining.webp" alt="Alia, the architecture's navigator, explaining beside a hologram panel" width="220" align="right">
+
 **Alia** is the architecture's navigator. She lives in two places.
 
 ### In the command center — a 3D model of your architecture
@@ -193,6 +197,14 @@ CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and
 `architecture-lifecycle`'s `ci/` adds the rest of the pipeline: release gates on every pull request, and on the merge of a
 release PR the tag, the index and the handoff kit edited by Claude into a pull request; on a RUN-team project, a Tier 0
 workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN_TEAMS.md)). While you write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
+
+### Her look
+
+Alia has an identity of her own: the night she glows against, her silver hair, her aqua eyes and holograms. It is the
+default look of what the plugin delivers — the command center's `alia` skin, and the Word and PDF exports, with her figure
+on the cover and her escudo on the cover and every page header. An organization's institution pack replaces it with its
+own (`docTheme`, a project skin) and never borrows hers. Her poses, faces, escudo and the workflows that drew them live in
+[`brand/alia/`](brand/alia/README.md).
 
 ## Any industry, any organization
 
@@ -281,3 +293,5 @@ Third-party notices: [NOTICE](NOTICE).
 ## License
 
 [MIT](LICENSE) © 2025-2026 shadowx4fox
+
+<p align="center"><img src="docs/images/brand/escudo.png" alt="Alia's escudo" width="40"></p>
