@@ -27,6 +27,7 @@
   "permissions": {
     "allow": [
       "Bash(bun *)",
+      "Bash(bunx hyperframes*)",
       "Bash(rg *)",
       "Bash(git clone *)",
       "Bash(git -C .cache/sa-skills/adr-catalog *)",
@@ -53,6 +54,8 @@
       "Read(analysis/*)",
       "Edit(visualizations/*)",
       "Read(visualizations/*)",
+      "Edit(visualizations/architecture-video/**)",
+      "Read(visualizations/architecture-video/**)",
       "Edit(handoffs/**)",
       "Read(handoffs/**)",
       "Edit(handoffs/.manifest.json)",

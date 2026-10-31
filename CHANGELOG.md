@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [10.30.0]
+
+### Added
+
+- **`sa-visualization:architecture-video` — an explainer video of the architecture, narrated by Alia.** `video-prepare.js` cuts the storyboard from the facts ledger by code: title, what it is (docs/01 Problem Statement and Solution), who it talks to (the systems and the docs/05 pairs that cross a boundary), the layers (docs/03 § 4.1), each use case whose phases resolve (up to five: phases in order, owner chains, budgets, target, governing ADRs), the ADRs in force, the open TDRs, the closing; a scene with no material is left out and named. The session writes only Alia's lines (`lines.json`, each slot with its limit and sources); `video-build.js` refuses a line that breaks a rule and writes the HyperFrames project under `visualizations/architecture-video/` in the Alia Guide look — her poses on the stage, a talking codec at the video size (160 px) on each chapter card, a pointing tip per use case, the escudo once —, checked, snapshotted and rendered with `bunx hyperframes@0.8.223`. Motion graphics only: no 3D, no voice.
+- **AliaCodec's video size** in the Alia Guide design system: 160 px with a 4 px ring at 1920 × 1080, so her talking mouth reads; the codec replaces her stage figure on that card (`.ag-codec--video`).
+
+### Changed
+
+- **The local architecture index server runs Alia 0.7.0** (`SA_INDEX_SERVER_TAG` default in `architecture-index-export/local/compose.yaml`): her escudo in `serverInfo`, `ARCHINDEX_ICON` to replace it, `initialize` declaring only `tools` (#24).
+- **The docs' showcase shots** are retaken in the `alia` skin, `holo` joins the skins gallery, and the capture recipe declares no pack.
+
+### Upgrade
+
+- Rendering needs HyperFrames: `bunx hyperframes@0.8.223 --version` once (it fetches the CLI and its browser), and the network at render time. Add `Bash(bunx hyperframes*)` to the project's permissions (`/sa-skills:setup` merges it).
+
 ## [10.29.1]
 
 ### Fixed

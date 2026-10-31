@@ -72,6 +72,7 @@ required_dirs=(
     "plugins/sa-delivery/skills/architecture-icepanel-sync"
     "plugins/sa-delivery/agents"
     "plugins/sa-visualization/skills/architecture-command-center"
+    "plugins/sa-visualization/skills/architecture-video"
     "agents"
     "commands"
     "hooks"
