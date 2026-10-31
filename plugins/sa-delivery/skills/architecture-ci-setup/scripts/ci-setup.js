@@ -60,6 +60,16 @@ const row = (rows, state, item, fix, apply) => rows.push({ state, item, ...(fix 
 // a repository variable: the command to print, and — with a value, no placeholder — the gh call --settings makes
 const variable = (repo, k, v) => ({ fix: `gh variable set ${k} -R ${repo} --body ${v == null ? `<${k.toLowerCase()}>` : /^[\w./:@,-]+$/.test(v) ? v : `'${v}'`}`,
   apply: v == null ? undefined : ['variable', 'set', k, '-R', repo, '--body', v] });
+// Alia's face on GitHub (11.3.0): her own GitHub App posts the workflows' comments as <slug>[bot] — optional; without it they
+// are github-actions[bot]'s, her codec heading them either way. A person creates the App once and installs it on each
+// repository (docs/RUN_TEAMS.md § Alia on GitHub): no script can upload its avatar
+function aliaRows(rows, st, repo) {
+  const id = st.vars.SA_ALIA_CLIENT_ID, key = st.secrets.has('SA_ALIA_APP_KEY');
+  if (id && key) row(rows, '✓', `Alia's GitHub App — variable SA_ALIA_CLIENT_ID = ${id}, secret SA_ALIA_APP_KEY: her comments post as her App, installed on ${repo}`);
+  else if (id || key) row(rows, '✗', `Alia's GitHub App — ${id ? 'secret SA_ALIA_APP_KEY' : 'variable SA_ALIA_CLIENT_ID'} missing: the comments stay github-actions[bot]'s`,
+    id ? `gh secret set SA_ALIA_APP_KEY -R ${repo} < <app>.private-key.pem` : `gh variable set SA_ALIA_CLIENT_ID -R ${repo} --body <client-id>`);
+  else row(rows, '·', 'Alia\'s GitHub App — none: her codec heads the comments, posted as github-actions[bot]', 'optional — docs/RUN_TEAMS.md § Alia on GitHub: create the App once, install it here, set SA_ALIA_CLIENT_ID and SA_ALIA_APP_KEY');
+}
 const varRow = (rows, state, item, repo, k, v) => { const x = variable(repo, k, v); row(rows, state, item, state === '✓' ? null : x.fix, state === '✓' ? undefined : x.apply); };
 const addTo = (list, v) => [...String(list || '').split(/[\s,]+/).filter(Boolean), v].join(',');
 const inList = (list, v) => String(list || '').split(/[\s,]+/).map((x) => x.toLowerCase()).includes(String(v).toLowerCase());
@@ -141,6 +151,7 @@ function architecture(root, opts = {}) {
     const repos = st.vars.SA_SERVICE_REPOS;
     row(rows, repos ? '✓' : '·', `variable SA_SERVICE_REPOS${repos ? ` = ${repos}` : ' — no service repository is told of a release'}`, repos ? null : cmd('SA_SERVICE_REPOS', '<owner/service,…>'));
     if (repos) row(rows, st.secrets.has('SA_DISPATCH_TOKEN') ? '✓' : '✗', 'secret SA_DISPATCH_TOKEN — dispatches architecture-released and architecture-escalation-closed to SA_SERVICE_REPOS', st.secrets.has('SA_DISPATCH_TOKEN') ? null : `${sec('SA_DISPATCH_TOKEN')}  (a token with write on each service repository)`);
+    aliaRows(rows, st, repo);
   }
   const pr = ghJson(gh, ['api', `repos/${repo}/actions/permissions/workflow`]);
   if (!pr.error) row(rows, pr.value && pr.value.can_approve_pull_request_reviews ? '✓' : '✗', 'setting — Actions may create pull requests (the handoff kit, Tier 0)', pr.value && pr.value.can_approve_pull_request_reviews ? null : `gh api -X PUT repos/${repo}/actions/permissions/workflow -F can_approve_pull_request_reviews=true`);
@@ -264,6 +275,7 @@ function service(dir, opts = {}) {
   if (!st.error) {
     const uses = [!opts.attended && 'the build', opts.review && 'the review', opts.mention && '@alia'].filter(Boolean).join(', ');
     row(rows, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? '✓' : '✗', `secret CLAUDE_CODE_OAUTH_TOKEN — ${uses}`, st.secrets.has('CLAUDE_CODE_OAUTH_TOKEN') ? null : '/install-github-app in Claude Code, on this repository');
+    if (opts.review || opts.mention) aliaRows(rows, st, repo);
     if (!opts.attended) row(rows, st.secrets.has('SA_BUILD_TOKEN') ? '✓' : '✗', 'secret SA_BUILD_TOKEN — the build agent\'s identity: its pull request here, its issues in the architecture repository', st.secrets.has('SA_BUILD_TOKEN') ? null : `gh secret set SA_BUILD_TOKEN -R ${repo}  (a machine user's or a GitHub App's token)`);
     row(rows, server ? '✓' : '✗', `the MCP server — ${st.vars.SA_INDEX_MCP_URL ? `variable SA_INDEX_MCP_URL = ${st.vars.SA_INDEX_MCP_URL}` : next.server ? `.architecture.json server = ${next.server}` : 'none'}`, server ? null : variable(repo, 'SA_INDEX_MCP_URL').fix);
     // the language the build's pull request and issues, and the review's comment and status, are written in: the

@@ -341,25 +341,27 @@ async function createIssue(root, id, opts = {}) {
 // ---- labels: what a RUN-team repository needs before its first issue — the escalation labels and the Tier 0 key -----
 // `gh issue create --label` refuses an issue whose label the repository lacks; the plugin refiles without it, so a missing
 // label never shows until a triager filters by it. Azure DevOps tags are created by their first use: nothing to set up.
-// GitHub caps a label's description at 100 characters.
+// GitHub caps a label's description at 100 characters. The colours are the Alia Guide's (11.3.0): her stern red for an
+// escalation, amber for its triggers and a refusal, aqua for the Tier 0 key and its kinds — the meaning each colour had.
+const LABEL_COLOR = { escalation: 'FF3B4E', route: '2B4A55', trigger: 'FFD23F', key: '2EE6E6', refused: 'FFD23F', auto: '0C9DA3', waiting: '8EA3AD', kind: '4DFFA0' };
 function labelSet() {
   const { TIER0 } = require('./support.js');   // required here: support.js requires this file
   const TIER0_WHAT = { 'tdr-workaround': 'Tier 0 request: a workaround recorded as a new TDR', 'tdr-status': 'Tier 0 request: a TDR status move',
     'adr-proposed': 'Tier 0 request: a project ADR (101+) in Proposed', 'doc-fix': 'Tier 0 request: a doc fix that changes no fact' };
   return [
-    { name: 'architecture-escalation', color: 'B60205', description: 'A RUN-team request that crossed an escalation trigger — for an architect' },
-    ...Object.entries(ROUTES).map(([name, d]) => ({ name, color: 'D93F0B', description: `Escalation route: ${d}` })),
-    ...Object.entries(TRIGGERS).map(([id, d]) => ({ name: `trigger:${id}`, color: 'FBCA04', description: `Escalation trigger: ${d}` })),
-    { name: 'architecture-tier0', color: '0E8A16', description: 'The key: write this Tier 0 request — a person, or this repository for a trusted agent (tier0.auto)' },
-    { name: 'tier0-refused', color: 'E4E669', description: 'The Tier 0 workflow refused this request — the comment says why' },
-    { name: 'tier0-auto', color: 'BFD4F2', description: 'Keyed for a trusted agent (SA_TIER0_TRUSTED_AGENTS): no person read it before the write' },
-    { name: 'tier0-waiting', color: 'D4C5F9', description: 'Tier 0 request waiting for its service pull request to merge — re-checked every 30 minutes' },
-    ...TIER0.map((k) => ({ name: `tier0:${k}`, color: 'C2E0C6', description: TIER0_WHAT[k] || `Tier 0 request: ${k}` })),
+    { name: 'architecture-escalation', color: LABEL_COLOR.escalation, description: 'A RUN-team request that crossed an escalation trigger — for an architect' },
+    ...Object.entries(ROUTES).map(([name, d]) => ({ name, color: LABEL_COLOR.route, description: `Escalation route: ${d}` })),
+    ...Object.entries(TRIGGERS).map(([id, d]) => ({ name: `trigger:${id}`, color: LABEL_COLOR.trigger, description: `Escalation trigger: ${d}` })),
+    { name: 'architecture-tier0', color: LABEL_COLOR.key, description: 'The key: write this Tier 0 request — a person, or this repository for a trusted agent (tier0.auto)' },
+    { name: 'tier0-refused', color: LABEL_COLOR.refused, description: 'The Tier 0 workflow refused this request — the comment says why' },
+    { name: 'tier0-auto', color: LABEL_COLOR.auto, description: 'Keyed for a trusted agent (SA_TIER0_TRUSTED_AGENTS): no person read it before the write' },
+    { name: 'tier0-waiting', color: LABEL_COLOR.waiting, description: 'Tier 0 request waiting for its service pull request to merge — re-checked every 30 minutes' },
+    ...TIER0.map((k) => ({ name: `tier0:${k}`, color: LABEL_COLOR.kind, description: TIER0_WHAT[k] || `Tier 0 request: ${k}` })),
   ];
 }
 async function hostLabels(r) {
   const json = (argv) => { const x = run(argv); if (x.status !== 0) throw new Error(`${argv[0]}: ${(x.stderr || '').trim() || (x.error && x.error.code === 'ENOENT' ? `${argv[0]} is not installed` : 'failed')}`); return JSON.parse(x.stdout || '[]'); };
-  if (r.host === 'github') return json(['gh', 'label', 'list', '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--limit', '500', '--json', 'name']).map((l) => l.name);
+  if (r.host === 'github') return json(['gh', 'label', 'list', '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--limit', '500', '--json', 'name,color']);
   if (r.host === 'gitlab') return json(['glab', 'label', 'list', '-R', r.web, '-F', 'json', '-P', '100']).map((l) => l.name);
   const token = process.env.GITEA_TOKEN;
   if (!token) throw new Error('GITEA_TOKEN is not set');
@@ -367,14 +369,17 @@ async function hostLabels(r) {
   if (!res.ok) throw new Error(`gitea: HTTP ${res.status}`);
   return (await res.json()).map((l) => l.name);
 }
-// { host, remote, labels: [{ name, color, description, present }], missing: [name], created: [name] }
+// { host, remote, labels: [{ name, color, description, present }], missing: [name], created: [name], recolor: [name], recolored: [name] }
+// A host list may answer names, or { name, color }: a present label in another colour is reported, and GitHub's is repainted on --create.
 async function labels(root, opts = {}) {
   const r = opts.remote || remoteOf(root, opts.host), want = labelSet();
-  const out = { host: r.host, remote: r.url, labels: want, missing: [], created: [] };
+  const out = { host: r.host, remote: r.url, labels: want, missing: [], created: [], recolor: [], recolored: [] };
   if (r.host === 'azure') { want.forEach((l) => { l.present = true; }); out.note = 'Azure DevOps creates a tag on its first use — nothing to set up'; return out; }
-  const have = new Set(await (opts.list || hostLabels)(r));
+  const listed = (await (opts.list || hostLabels)(r)).map((x) => (typeof x === 'string' ? { name: x } : x));
+  const have = new Map(listed.map((x) => [x.name, x.color ? String(x.color).replace(/^#/, '').toUpperCase() : null]));
   want.forEach((l) => { l.present = have.has(l.name); });
   out.missing = want.filter((l) => !l.present).map((l) => l.name);
+  out.recolor = want.filter((l) => l.present && have.get(l.name) && have.get(l.name) !== l.color).map((l) => l.name);
   if (!opts.create) return out;
   const make = opts.make || (async (l) => {
     if (r.host === 'gitea') {
@@ -389,6 +394,11 @@ async function labels(root, opts = {}) {
   });
   for (const l of want.filter((x) => !x.present)) { await make(l); l.present = true; out.created.push(l.name); }
   out.missing = [];
+  const paint = opts.paint || (r.host !== 'github' ? null : async (l) => {
+    const x = run(['gh', 'label', 'edit', l.name, '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--color', l.color]);
+    if (x.status !== 0) throw new Error(`gh: ${(x.stderr || '').trim() || 'failed'} (recolouring ${l.name})`);
+  });
+  if (paint) { for (const l of want.filter((x) => out.recolor.includes(x.name))) { await paint(l); out.recolored.push(l.name); } }
   return out;
 }
 
@@ -430,8 +440,10 @@ if (require.main === module) {
         const r = await labels(root, { host: opt('--host'), create: a.includes('--create') });
         if (a.includes('--json')) { console.log(JSON.stringify(r, null, 2)); return; }
         console.log(`LABELS — ${r.host} (${r.remote})${r.note ? `\n${r.note}` : ''}`);
-        r.labels.forEach((l) => console.log(`${r.created.includes(l.name) ? '+' : l.present ? '✓' : '✗'} ${l.name.padEnd(30)} ${l.description}`));
+        r.labels.forEach((l) => console.log(`${r.created.includes(l.name) ? '+' : r.recolored.includes(l.name) ? '~' : !l.present ? '✗' : r.recolor.includes(l.name) ? '·' : '✓'} ${l.name.padEnd(30)} ${l.description}`));
         if (r.created.length) console.log(`${r.created.length} created`);
+        if (r.recolored.length) console.log(`${r.recolored.length} recoloured to the Alia Guide's palette`);
+        else if (r.recolor.length) console.log(`${r.recolor.length} in another colour (·) — ${r.host === 'github' ? `escalate.js labels ${root} --create repaints them in the Alia Guide's palette` : 'repaint them by hand if you want the Alia Guide\'s palette'}`);
         if (r.missing.length) { console.log(`${r.missing.length} missing — escalation issues are opened without them, and without architecture-tier0 nobody can apply a Tier 0 request. Create them: escalate.js labels ${root} --create`); process.exit(1); }
       } else if (cmd === 'status') { const r = setStatus(root, pos[0], pos[1]); console.log(`${r.meta.id}: ${r.meta.status}`); }
       else if (cmd === 'close') { const r = close(root, pos[0], { by: opt('--by'), rejected: a.includes('--rejected') ? (opt('--rejected') || '') : undefined }); console.log(`${r.meta.id}: ${r.meta.status}${r.meta.resolution ? ` by ${r.meta.resolution}` : ''}${r.meta.issue ? ` — close the issue too: ${r.meta.issue}${r.meta.status === 'Rejected' ? ' as not planned (gh issue close --reason "not planned"): the review reads that reason as the rejection' : ''}` : ''}`); }

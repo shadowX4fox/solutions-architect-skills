@@ -53,3 +53,32 @@ describe("the catalog", () => {
     for (const k of used) expect(X.T[k], `${k} is called and not in the catalog`).toBeDefined();
   });
 });
+
+describe("Alia's codec on what the CI says (11.3.0)", () => {
+  const run = (args: string[], env: Record<string, string> = {}) => spawnSync("bun", [join(ROOT, "scripts/shared/ci-text.js"), ...args], { encoding: "utf8", env: { ...process.env, SA_PLUGIN_REF: "", SA_ALIA_IMAGES: "", ...env } });
+  test("her face in the mood's ring, 64 px, from the public repository at the pinned release; the key's message beside her name", () => {
+    const es = arch("codec-es", "<!-- DOC_LANGUAGE: es -->");
+    const r = run(["--codec", "worried", "t0_refused", "--project", es], { SA_PLUGIN_REF: "v11.3.0" });
+    expect(r.status).toBe(0);
+    expect(r.stdout).toBe('### <img src="https://raw.githubusercontent.com/shadowx4fox/solutions-architect-skills/v11.3.0/brand/alia/github/codec-worried.png" width="64" height="64" align="middle" alt="Alia"> Alia · Tier 0 rechazado\n');
+  });
+  test("a branch pin falls back to this plugin's version; SA_ALIA_IMAGES moves the pictures or, none, writes her sparkle", () => {
+    const v = JSON.parse(readFileSync(join(ROOT, ".claude-plugin/plugin.json"), "utf8")).version;
+    expect(X.codec("calm", "", { SA_PLUGIN_REF: "main" })).toContain(`/v${v}/brand/alia/github/codec-calm.png`);
+    expect(X.codec("calm", "x", { SA_ALIA_IMAGES: "https://ghe.acme.test/alia/" })).toContain('src="https://ghe.acme.test/alia/codec-calm.png"');
+    expect(X.codec("stern", "Gates", { SA_ALIA_IMAGES: "none" })).toBe("### ✦ Alia · Gates");
+    expect(() => X.codec("angry", "")).toThrow(/no mood/);
+    expect(run(["--codec", "angry"]).status).toBe(2);
+  });
+  test("every mood has its picture, and every key a workflow puts beside her is in the catalog", () => {
+    for (const m of X.MOODS) expect(readFileSync(join(ROOT, `brand/alia/github/codec-${m}.png`)).subarray(1, 4).toString()).toBe("PNG");
+    const files = ["skills/architecture-lifecycle/ci/architecture-gates.yml", "skills/architecture-lifecycle/ci/architecture-tier0.yml", "skills/architecture-lifecycle/ci/architecture-handoff.yml"].map((f) => join(ROOT, f));
+    const used = new Set<string>(), moods = new Set<string>();
+    for (const f of files) for (const m of readFileSync(f, "utf8").matchAll(/--codec "?(?:\$\(.*?echo (\w+) \|\| echo (\w+)\)"?|(\w+))(?: ([a-z][a-z0-9_]+))?/g)) {
+      [m[1], m[2], m[3]].filter(Boolean).forEach((x) => moods.add(x)); if (m[4]) used.add(m[4]);
+    }
+    expect(used.size).toBeGreaterThanOrEqual(5);
+    for (const k of used) expect(X.T[k], `${k} is beside her and not in the catalog`).toBeDefined();
+    for (const m of moods) expect(X.MOODS).toContain(m);
+  });
+});

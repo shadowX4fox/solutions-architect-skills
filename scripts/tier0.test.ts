@@ -220,7 +220,7 @@ exit 0
   test("a refusal speaks the architecture's language (DOC_LANGUAGE), its codes and names as they are (10.17.0)", () => {
     const r = run({ sender: "build-bot-user", agents: "build-bot-user", author: "dev", lang: "es" });
     expect(r.code).toBe(1);
-    expect(r.comment).toContain("### Tier 0 no iniciado");
+    expect(r.comment).toContain("Alia · Tier 0 no iniciado");   // her codec heads it (11.3.0)
     expect(r.comment).toContain("`build-bot-user` es una cuenta de automatización");
     expect(r.comment).toContain("la solicitud sigue en pie");
     expect(r.comment).toContain("`architecture-tier0`");
@@ -251,7 +251,8 @@ exit 0
     expect(run({ event: "opened", trusted: "build-bot-user", auto: "all", body: "write this" }).out).toBe("go=false\n");
     const notAuto = run({ event: "opened", trusted: "build-bot-user", auto: ["doc-fix"] });
     expect(notAuto).toMatchObject({ code: 0, out: "go=false\n" });
-    expect(notAuto.calls).toContain("issue comment 7 -R acme/order-desk --body Tier 0: `tdr-status` is not in this architecture's `tier0.auto`");
+    expect(notAuto.calls).toContain("issue comment 7 -R acme/order-desk --body ### ");
+    expect(notAuto.calls).toContain("Alia\n\nTier 0: `tdr-status` is not in this architecture's `tier0.auto`");
     expect(notAuto.calls).not.toContain("--add-label");
     expect(run({ event: "opened", trusted: "build-bot-user", auto: "all", state: "closed" }).out).toBe("go=false\n");
   });

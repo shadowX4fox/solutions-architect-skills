@@ -233,6 +233,16 @@ describe('labels: what the repository needs before its first issue', () => {
     expect(r.created.sort()).toEqual(made);
     expect(r.missing).toEqual([]);
   });
+  test('a present label in another colour is reported, and repainted in the Alia Guide\'s palette on --create (11.3.0)', async () => {
+    const want = E.labelSet(), painted: string[] = [];
+    const listed = want.map((l: any) => ({ name: l.name, color: l.name === 'architecture-escalation' ? 'B60205' : l.color.toLowerCase() }));
+    const dry = await E.labels('.', { remote: GH, list: async () => listed });
+    expect(dry.recolor).toEqual(['architecture-escalation']);
+    expect(dry.missing).toEqual([]);
+    const r = await E.labels('.', { remote: GH, create: true, list: async () => listed, make: async () => { throw new Error('nothing is missing'); }, paint: async (l: any) => { painted.push(`${l.name}:${l.color}`); } });
+    expect(painted).toEqual(['architecture-escalation:FF3B4E']);
+    expect(r.recolored).toEqual(['architecture-escalation']);
+  });
   test('Azure DevOps needs nothing: a tag is created by its first use', async () => {
     const r = await E.labels('.', { remote: { host: 'azure', url: 'https://dev.azure.com/acme/Desk/_git/desk' }, create: true, list: async () => { throw new Error('not called'); } });
     expect(r.missing).toEqual([]);

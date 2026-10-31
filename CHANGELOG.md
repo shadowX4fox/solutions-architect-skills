@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.3.0]
+
+### Added
+- **The CI speaks as Alia**: every comment and pull request body the architecture workflows write opens with her codec — her face in the outcome's ring (pleased, stern, worried, thinking, calm), 64 px — beside her name and the message's heading: the gates, the Tier 0 key and write, the handoff pull request, the review (`ci-text.js --codec <mood> [<key>]`, `review-check.js`).
+- `brand/alia/github/` — the five codec pictures, served from this public repository at the pinned release so a private repository shows them (GitHub's image proxy reaches public URLs only); `SA_ALIA_IMAGES` names another copy, `none` writes her sparkle; `app-avatar.png`, the 512 px logo of her GitHub App.
+- **Her optional GitHub App**: with `SA_ALIA_CLIENT_ID` and the secret `SA_ALIA_APP_KEY` (`actions/create-github-app-token@v3`), the comments come from her account and `@alia` answers and commits as her; without them, `github-actions[bot]` as before. Only comments change identity: labels, pushes, merges and commit statuses stay `GITHUB_TOKEN`'s. `ci-setup.js` reports the App on both sides; `docs/RUN_TEAMS.md` § Alia on GitHub sets it up.
+
+### Changed
+- The escalation and Tier 0 labels use the Alia Guide's palette; `escalate.js labels <project>` reports a label in another colour and `--create` repaints it on GitHub.
+- A review held on an escalation that closes turns its codec ring from amber to red with the verdict (`review-check.js --recheck`, which edits the comment as her App when there is one).
+
+### Upgrade
+- Copy the workflow templates again (`ci-setup.js architecture|service … --replace <changed> --write`): the pins move to `v11.3.0`. For her face, create the App once (`docs/RUN_TEAMS.md` § Alia on GitHub), install it, set the variable and secret, then `escalate.js labels <project> --create` for the palette.
+
 ## [11.2.0]
 
 ### Changed

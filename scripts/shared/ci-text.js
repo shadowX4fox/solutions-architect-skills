@@ -6,6 +6,7 @@
 //
 //   bun ci-text.js <key> [--project <dir>] [--lang <xx>] [name=value …]     prints the message, {name} filled
 //   bun ci-text.js --lang-of <dir>                                           prints the language: en | es
+//   bun ci-text.js --codec <mood> [<key>] [--project <dir>] [name=value …]   prints Alia's codec heading, the key's message beside it
 //
 // The language: --lang → DOC_LANGUAGE in <dir>/ARCHITECTURE.md (the legacy LANGUAGE marker read too) → SA_DOC_LANGUAGE
 // (a service repository's variable, set by ci-setup.js --settings) → en. Anything but en / es is en.
@@ -94,6 +95,28 @@ const T = {
 
 };
 
+// Alia's codec on what the CI says (11.3.0): her face in the mood's ring heading a comment, one size everywhere (64 px). The
+// pictures are this plugin's, read from its public repository at the pinned release, so a private repository shows them too:
+// GitHub serves a comment's pictures through its image proxy, which reaches public URLs only. SA_ALIA_IMAGES points at
+// another copy (a GitHub Enterprise Server that cannot reach github.com); `none` writes her sparkle instead.
+const MOODS = ['calm', 'pleased', 'thinking', 'worried', 'stern'];
+const IMAGES_REPO = 'https://raw.githubusercontent.com/shadowx4fox/solutions-architect-skills';
+function imagesBase(env = process.env) {
+  const v = String(env.SA_ALIA_IMAGES || '').trim();
+  if (v) return v === 'none' ? null : v.replace(/\/+$/, '');
+  let ref = String(env.SA_PLUGIN_REF || '').trim();
+  if (!/^v\d+\.\d+\.\d+$/.test(ref)) {
+    try { ref = `v${JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '.claude-plugin', 'plugin.json'), 'utf8')).version}`; } catch (e) { ref = 'main'; }
+  }
+  return `${IMAGES_REPO}/${ref}/brand/alia/github`;
+}
+function codec(mood, kicker, env = process.env) {
+  if (!MOODS.includes(mood)) throw new Error(`ci-text: no mood "${mood}" (${MOODS.join(', ')})`);
+  const base = imagesBase(env);
+  const mark = base ? `<img src="${base}/codec-${mood}.png" width="64" height="64" align="middle" alt="Alia">` : '✦';
+  return `### ${mark} Alia${kicker ? ` · ${kicker}` : ''}`;
+}
+
 // the language's name, for a prompt that asks a model to write in it
 const NAMES = { en: 'English', es: 'Spanish (Latin America)' };
 
@@ -102,14 +125,20 @@ function text(key, lang, vars) {
   return pick(lang, T[key], vars);
 }
 
-module.exports = { languageOf, pick, text, fill, T, NAMES, LANGS };
+module.exports = { languageOf, pick, text, fill, T, NAMES, LANGS, MOODS, codec, imagesBase };
 
 if (require.main === module) {
   const a = process.argv.slice(2), opt = (k) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : undefined; };
   if (a.includes('--lang-of')) { console.log(languageOf(opt('--lang-of'))); process.exit(0); }
   if (a.includes('--name-of')) { console.log(NAMES[languageOf(opt('--name-of'))]); process.exit(0); }
-  const key = a.find((x) => !x.startsWith('--') && !x.includes('=') && a[a.indexOf(x) - 1] !== '--project' && a[a.indexOf(x) - 1] !== '--lang');
-  if (!key) { console.error('Usage: bun ci-text.js <key> [--project <dir>] [--lang <xx>] [name=value …] | --lang-of <dir> | --name-of <dir>'); process.exit(2); }
+  const key = a.find((x) => !x.startsWith('--') && !x.includes('=') && !['--project', '--lang', '--codec'].includes(a[a.indexOf(x) - 1]));
+  if (a.includes('--codec')) {
+    const lang = norm(opt('--lang')) || languageOf(opt('--project') || '.');
+    const vars = Object.fromEntries(a.filter((x) => /^\w+=/.test(x)).map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
+    try { process.stdout.write(`${codec(opt('--codec'), key ? text(key, lang, vars) : '')}\n`); } catch (e) { console.error(e.message); process.exit(2); }
+    process.exit(0);
+  }
+  if (!key) { console.error('Usage: bun ci-text.js <key> [--project <dir>] [--lang <xx>] [name=value …] | --codec <mood> [<key>] | --lang-of <dir> | --name-of <dir>'); process.exit(2); }
   const lang = norm(opt('--lang')) || languageOf(opt('--project') || '.');
   const vars = Object.fromEntries(a.filter((x) => /^\w+=/.test(x)).map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
   try { process.stdout.write(text(key, lang, vars)); } catch (e) { console.error(e.message); process.exit(2); }

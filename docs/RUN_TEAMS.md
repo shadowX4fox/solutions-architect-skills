@@ -373,6 +373,42 @@ service. Claude does the work and replies as the Claude GitHub App:
 `claude.yml` can stay: the phrases differ, so nothing runs twice. The report notes (`·`) that `@claude` there answers
 without the architecture.
 
+## Alia on GitHub
+
+What the workflows say on GitHub is Alia's (11.3.0). Every comment and pull request body they write opens with her codec:
+her face in a mood ring, 64 px, beside her name and the message's heading. The mood follows the outcome:
+
+| Mood | Where |
+|---|---|
+| pleased | the gates pass, a review passes, a Tier 0 write closes its request |
+| stern | a gate blocks, a review fails, a Tier 0 write is refused at verify |
+| worried | a Tier 0 request refused or not started, a review held on an escalation, a pull request left for a reviewer |
+| thinking | a Tier 0 request waiting for its service pull request |
+| calm | the handoff and Tier 0 pull requests, a kind left to a person |
+
+The pictures come from this plugin's public repository at the pinned release (`brand/alia/github/`), because GitHub
+shows a comment's images through a proxy that only reaches public URLs. A private repository shows them too. A GitHub
+Enterprise Server that cannot reach github.com sets `SA_ALIA_IMAGES` to its own copy; `SA_ALIA_IMAGES=none` writes her
+sparkle (✦) instead. The escalation and Tier 0 labels use her palette, and `escalate.js labels <project> --create`
+repaints the labels a repository already has.
+
+**Her face on the comments (optional).** Without more, the comments are posted by `github-actions[bot]`. A GitHub App
+posts them as Alia:
+
+1. Create the App: *Settings → Developer settings → GitHub Apps → New GitHub App* (an organization's settings for its
+   repositories). Name it, for example `alia-architect` (App names are unique on GitHub). Untick *Webhook*. Repository
+   permissions: *Issues* and *Pull requests* read and write; *Contents* read and write only for `@alia`, which commits.
+2. Upload `brand/alia/github/app-avatar.png` as its logo, and generate a private key.
+3. Install it on the architecture repository and on each service repository.
+4. On each repository: `gh variable set SA_ALIA_CLIENT_ID --body <client id>` and
+   `gh secret set SA_ALIA_APP_KEY < <app>.private-key.pem`. `ci-setup.js` reports both.
+
+The App posts comments, edits the review comment and answers `@alia`, and nothing else. Labels, pushes, merges and commit
+statuses stay `GITHUB_TOKEN`'s: an App's label or merge would start workflows a `GITHUB_TOKEN` event never starts (a
+label by a bot is refused as a Tier 0 key), and a status from another source would not satisfy a required check
+pinned to GitHub Actions. If the App's token cannot be made (no App, not installed, a wrong key), the job goes on as
+`github-actions[bot]`. Switching identity leaves the old review comment in place: the next review writes a new one.
+
 ## Setting up the repository
 
 | What | Where |
@@ -383,6 +419,7 @@ without the architecture.
 | Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS`, `SA_TIER0_AUTO_DAILY` and `SA_TIER0_WAIT_DAYS` for agents whose requests the repository keys, `SA_HANDOFF_AUTOMERGE=true` to merge the regenerated kit without a reviewer, `SA_SERVICE_REPOS` (with the secret `SA_DISPATCH_TOKEN`) for the service builds (§ Fully unattended) |
 | Labels | `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0-waiting` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all eighteen |
 | Settings | Actions may create pull requests; the default branch accepts a merge by `GITHUB_TOKEN` |
+| Alia's identity (optional) | Variable `SA_ALIA_CLIENT_ID` and secret `SA_ALIA_APP_KEY`, her GitHub App's (§ Alia on GitHub) |
 | MCP server | The escalation host configured for the project (`archindex.escalation.projects`) |
 
 ## Command reference

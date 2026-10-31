@@ -48,6 +48,12 @@ const MARKER = '<!-- sa-architecture-review -->';
 // who writes the review comment: architecture-review.yml posts it with the job's GITHUB_TOKEN (--author for another identity)
 const REVIEW_BOT = 'github-actions[bot]';
 const ESCALATIONS = '<!-- sa-review-escalations: ';
+// Alia's codec heads the review (11.3.0): ci-text.js's, from the sa-skills checkout the workflow clones — her face in the
+// verdict's ring; without that file, the plain heading
+let codec = null;
+try { ({ codec } = require(path.join(__dirname, '..', '..', '..', '..', '..', 'scripts', 'shared', 'ci-text.js'))); } catch (e) { /* sa-delivery alone */ }
+const MOOD = { PASS: 'pleased', FAIL: 'stern', HELD: 'worried' };
+const heading = (status, title) => (codec ? codec(MOOD[status], title) : `### ${title}`);
 const read = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n?/g, '\n');
 const readJson = (f) => { try { return JSON.parse(read(f)); } catch (e) { return null; } };
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
@@ -234,7 +240,7 @@ function render(r) {
   const L = (en, es) => say(r.lang, en, es);
   const sev = { blocking: L('⛔ blocking', '⛔ bloqueante'), warning: L('⚠ warning', '⚠ advertencia'), note: L('ℹ note', 'ℹ nota') };
   const rows = r.findings.map((f) => `| ${sev[f.severity]} | \`${f.code}\` | ${f.where ? `\`${f.where}\`` : '—'} | ${String(f.text).replace(/\|/g, '\\|')} |`);
-  return [MARKER, `### ${L('Architecture review', 'Revisión de arquitectura')} — ${VERDICT[r.status](L)}`, '',
+  return [MARKER, heading(r.status, `${L('Architecture review', 'Revisión de arquitectura')} — ${VERDICT[r.status](L)}`), '',
     `${L('Held to', 'Contrastado con')} **${r.binding.component || '?'}** ${L('at architecture', 'en la arquitectura')} **${r.binding.version || '?'}** (pack_revision \`${String(r.binding.pack_revision || '?').slice(0, 12)}\`): ${counts(r)}.`, '',
     ...(rows.length ? [L('| | Check | Where | Finding |', '| | Control | Dónde | Hallazgo |'), '|---|---|---|---|', ...rows] : [L('Nothing to report: the pull request keeps the pack.', 'Nada que reportar: el pull request respeta el pack.')]), '',
     // what this PASS stands on: the escalations that cleared a finding — --recheck reads it when one of them closes (10.18.0)
@@ -257,6 +263,9 @@ function render(r) {
 async function recheck(repo, opts = {}) {
   const lang = langOf(opts.lang || process.env.SA_DOC_LANGUAGE), L = (en, es) => say(lang, en, es);
   const gh = opts.gh || ghDefault, out = [];
+  // the comment is Alia's when her App's token is there (ALIA_TOKEN); the status stays the job's, the source the required check names
+  const ghSay = opts.ghSay || (opts.gh || !process.env.ALIA_TOKEN ? gh
+    : (args) => spawnSync('gh', args, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: process.env.ALIA_TOKEN } }));
   const author = opts.author || REVIEW_BOT;
   const lines = (r) => String(r.stdout || '').split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const prs = gh(['api', '--paginate', `repos/${repo}/pulls?state=open&per_page=100`, '--jq', '.[] | {number, head: .head.sha}']);
@@ -285,8 +294,8 @@ async function recheck(repo, opts = {}) {
         : L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
           `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
       // the record goes with it: the next sweep has nothing to re-check until a review writes one again
-      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(/^(?:Nothing blocks, but|Nada bloquea, pero) .*\n?/m, '').replace(MARKER, `${MARKER}\n${line}\n`);
-      gh(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
+      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(/codec-worried\.png/, 'codec-stern.png').replace(/^(?:Nothing blocks, but|Nada bloquea, pero) .*\n?/m, '').replace(MARKER, `${MARKER}\n${line}\n`);
+      ghSay(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
     }
     out.push({ pr: pr.number, state: 'failed', refs: rec.refs, why: what });
   }

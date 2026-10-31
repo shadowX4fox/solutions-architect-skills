@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.2.0-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.3.0-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
@@ -156,7 +156,7 @@ and above the prompt box, next-step prompts, an architecture radar, `/alia`) —
 
 <img src="docs/images/brand/alia-explaining.webp" alt="Alia, the architecture's navigator, explaining beside a hologram panel" width="220" align="right">
 
-**Alia** is the architecture's navigator. She lives in three places.
+**Alia** is the architecture's navigator. She lives in four places.
 
 ### In the command center — a 3D model of your architecture
 
@@ -214,6 +214,13 @@ The optional `sa-alia` plugin brings her into the session that works on the arch
 - **The confirmations in her look** — a write to the architecture Claude Code would ask about, shown with its change.
 
 It draws what the skills leave on disk and edits nothing. [docs/ALIA.md § In Claude Code](docs/ALIA.md#part-3--in-claude-code).
+
+### On GitHub — the CI speaks as her
+
+The architecture's workflows open every comment and pull request body with her codec, its ring in the outcome's mood:
+pleased when the gates pass, stern when one blocks, worried when a review is held on an escalation. The escalation and
+Tier 0 labels use her palette. With her optional GitHub App, the comments and the `@alia` answers are posted by her
+own account. [docs/RUN_TEAMS.md § Alia on GitHub](docs/RUN_TEAMS.md#alia-on-github).
 
 <br clear="right">
 

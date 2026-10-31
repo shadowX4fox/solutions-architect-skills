@@ -178,7 +178,7 @@ describe("review-check.js — the verdict over the review's findings", () => {
   test("the review speaks the architecture's language — SA_DOC_LANGUAGE — and writes the status's one line (10.17.0)", async () => {
     const r = await run({ findings: { reviewed: true, findings: [{ rule: 5, severity: "warning", finding: "sin contexto de traza" }, f({}).findings[0]] }, lang: "es" });
     const md = R.render(r);
-    expect(md).toContain("### Revisión de arquitectura — ⛔ FAIL");
+    expect(md).toContain("Alia · Revisión de arquitectura — ⛔ FAIL");
     expect(md).toContain("| | Control | Dónde | Hallazgo |");
     expect(md).toContain("⛔ bloqueante");
     expect(md).toContain("regla 5 — sin contexto de traza");
@@ -208,11 +208,12 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     expect(r.status).toBe("HELD");
     expect(R.statusLine(r)).toBe("waiting for acme/order-desk#7 · 0 blocking · 1 warning · 0 note");
     const md = R.render(r);
-    expect(md).toContain("### Architecture review — ⏸ HELD");
+    expect(md).toContain("Alia · Architecture review — ⏸ HELD");
+    expect(md).toContain("codec-worried.png");
     expect(md).toContain("the status stays pending until then");
     expect(md).not.toContain("A blocking finding is cleared");
     const es = await run({ findings: f, body: "acme/order-desk#7", lang: "es" });
-    expect(R.render(es)).toContain("### Revisión de arquitectura — ⏸ EN ESPERA");
+    expect(R.render(es)).toContain("Alia · Revisión de arquitectura — ⏸ EN ESPERA");
     expect(R.statusLine(es)).toBe("en espera de acme/order-desk#7 · 0 bloqueante(s) · 1 advertencia(s) · 0 nota(s)");
     // a blocking finding the escalation does not cover still fails, whatever else it covers
     const both = { reviewed: true, findings: [f.findings[0], { ...f.findings[0], line: 9, escalation: null }] };
@@ -242,7 +243,8 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     const patch = calls.find((c) => c.includes("repos/acme/hub-api/issues/comments/502"))!, body = patch.find((x) => x.startsWith("body="))!.slice(5);
     expect(body.startsWith(`${R.MARKER}\n> ⛔ **The escalation this review stood on no longer covers it**`)).toBe(true);
     expect(body).not.toContain(R.ESCALATIONS);
-    expect(body).toContain("### Architecture review — ⛔ FAIL");
+    expect(body).toContain("Alia · Architecture review — ⛔ FAIL");
+    expect(body).toContain("codec-stern.png");   // her ring turns red with the verdict
     expect(body).not.toContain("⏸");
     expect(body).not.toContain("Nothing blocks");   // the HELD paragraph goes with the heading (10.19.1)
     expect(calls.filter((c) => c.some((x) => x.includes("/statuses/"))).length).toBe(1);   // pull request 2's only
@@ -359,7 +361,8 @@ describe("architecture-review.yml — the template", () => {
     expect(yml).toMatch(/  repository_dispatch:\n    types: \[architecture-escalation-closed\]/);
     expect(yml).toMatch(/  schedule:\n    - cron: '23 \* \* \* \*'/);
     expect(yml).toContain("GitHub disables a public repository's schedule after 60 days without");   // #20
-    expect(yml).toContain(`select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- sa-architecture-review -->")))`);   // #19
+    expect(yml).toContain(`select(.user.login == \\"$me\\" and (.body | startswith(\\"<!-- sa-architecture-review -->\\")))`);
+    expect(yml).toContain('me="${me:-github-actions[bot]}"');   // Alia's App when there is one (11.3.0), else GITHUB_TOKEN's   // #19
     const job = yml.slice(yml.indexOf("  recheck:"), yml.indexOf("  review:\n"));
     expect(job).toContain("if: github.event_name != 'pull_request_target'");
     expect(job).toContain('--recheck "$GITHUB_REPOSITORY"');

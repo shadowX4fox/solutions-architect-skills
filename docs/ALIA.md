@@ -1,14 +1,15 @@
 # Alia — the architecture's navigator
 
-**Alia** is the guide to a documented architecture. She lives in three places:
+**Alia** is the guide to a documented architecture. She lives in four places:
 
 | Where | What it is | Produced by | For |
 |---|---|---|---|
 | **The command center** | An interactive 3D model of the architecture, one self-contained HTML file | `sa-visualization:architecture-command-center` | Architects, product owners, reviewers, new team members |
 | **The MCP server** | The architecture served to IDEs and build agents: search, exact facts, build packs | `sa-delivery:architecture-index-export` + the [Alia server](https://github.com/shadowX4fox/solutions-architect-knowledge-base) | Developers, their coding agents, and unattended build agents |
 | **Claude Code** | Her presence in the session: her codec over every reply, the next steps, the risk radar, the explorer, readable script rows, milestone cards, the write confirmations | the optional `sa-alia` plugin (named `sa-ux` before 1.0.0) | The architect working in the architecture repository |
+| **GitHub** | Her codec on what the architecture's CI says — gates, reviews, Tier 0, handoff pull requests — and, with her optional GitHub App, her own account | the workflow templates (`ci-setup.js`) | Architects and developers reading pull requests and issues |
 
-All three read only what the architecture documents state and write to none of them. Examples use **Order Desk**, a
+All four read only what the architecture documents state and write to none of them. Examples use **Order Desk**, a
 synthetic order-taking system with a container named **Hub API**.
 
 ---
@@ -509,6 +510,13 @@ Set them with `/plugin configure sa-alia@shadowx4fox-solution-architect-marketpl
 | Panes, rows, cards, confirmations | ✓ | ✓ |
 | Neighbourhood diagram, findings trend | ✓ | Lists and meters instead |
 | Footer label `✦ v1.10.2 Released` | Not drawn: the app's footer is its own | ✓ |
+
+# Part 4 — On GitHub
+
+The workflows `ci-setup.js` installs speak as Alia: her codec heads each comment and pull request body (64 px, the ring
+in the outcome's mood), the labels use her palette, and with her GitHub App the comments come from her account rather
+than `github-actions[bot]`. Setting it up, the moods and what stays `GITHUB_TOKEN`'s:
+[RUN_TEAMS.md § Alia on GitHub](RUN_TEAMS.md#alia-on-github).
 
 ---
 

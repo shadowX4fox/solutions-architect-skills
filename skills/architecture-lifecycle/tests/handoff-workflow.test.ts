@@ -99,7 +99,8 @@ describe("architecture-handoff.yml — the kit's pull request and SA_HANDOFF_AUT
     expect(r.code).toBe(0);
     expect(r.calls).toContain("gh pr create");
     expect(r.calls).not.toContain("gh pr merge");
-    expect(r.calls).toContain("gh pr comment https://github.com/acme/order-desk/pull/9 --body Not merged automatically: the drift gate blocks (kit-drift.js, exit 1)");
+    expect(r.calls).toContain("gh pr comment https://github.com/acme/order-desk/pull/9 --body ### ");
+    expect(r.calls).toContain("Alia\n\nNot merged automatically: the drift gate blocks (kit-drift.js, exit 1)");
   });
 
   test("merged, the dispatch refused: a warning to run the index by hand, the step still green", () => {
@@ -112,8 +113,9 @@ describe("architecture-handoff.yml — the kit's pull request and SA_HANDOFF_AUT
   test("the pull request, its commits and its comment in the architecture's language (DOC_LANGUAGE, 10.17.0)", () => {
     const r = run({ automerge: "true", drift: 1, lang: "es" });
     expect(r.code).toBe(0);
-    expect(r.calls).toContain("gh pr create --base main --head handoff/architecture-v1.1.0 --title Kit de handoff de architecture-v1.1.0 --body Regenerado por el workflow");
-    expect(r.calls).toContain("--body No se fusionó automáticamente: el control de deriva bloquea (kit-drift.js, salida 1)");
+    expect(r.calls).toContain("gh pr create --base main --head handoff/architecture-v1.1.0 --title Kit de handoff de architecture-v1.1.0 --body ### ");
+    expect(r.calls).toContain("Alia\n\nRegenerado por el workflow");
+    expect(r.calls).toContain("Alia\n\nNo se fusionó automáticamente: el control de deriva bloquea (kit-drift.js, salida 1)");
   });
 
   test("the kit did not change: no pull request, no merge", () => {
