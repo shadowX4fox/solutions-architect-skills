@@ -394,7 +394,7 @@ Type the file path to continue. There is no skip option.
    Dispatch on the first statement of each block.
 
    **`C4Context` / `C4Container`** — apply the element-by-element extraction already specified in
-   `plugins/sa-delivery/skills/architecture-icepanel-sync/SKILL.md` Step 1.1. Do not restate those rules here; that file
+   `skills/architecture-docs/references/C4-ELEMENT-GRAMMAR.md`. Do not restate those rules here; that file
    is the single source of truth for `Person()`, `Person_Ext()`, `System()`, `System_Ext()`,
    `Container()`, `ContainerDb()`, `ContainerQueue()`, `Container_Boundary()` and `Rel()`.
 

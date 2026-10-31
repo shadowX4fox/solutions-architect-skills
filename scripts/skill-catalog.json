@@ -5,7 +5,7 @@
     "records": "Decision and debt records — ADRs and TDRs, kept in adr/ and tdr/.",
     "authoring": "Writing and maintaining ARCHITECTURE.md and docs/ — the core the other categories read.",
     "governance": "Checks over a written architecture — compliance contracts, risk analyses, requirement coverage.",
-    "delivery": "Artifacts handed to other teams and tools — handoff kit, Word export, blueprints, IcePanel.",
+    "delivery": "Artifacts handed to other teams and tools — handoff kit, Word export, blueprints.",
     "visualization": "Interactive views of the architecture."
   },
   "skills": {
@@ -161,15 +161,6 @@
       ]
     },
     "architecture-docs-export": {
-      "category": "delivery",
-      "plugin": "sa-delivery",
-      "standalone": false,
-      "needs": [
-        "ARCHITECTURE.md"
-      ],
-      "depends_on": []
-    },
-    "architecture-icepanel-sync": {
       "category": "delivery",
       "plugin": "sa-delivery",
       "standalone": false,

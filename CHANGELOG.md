@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.0.0]
+
+### Removed
+
+- **`sa-delivery:architecture-icepanel-sync`.** The IcePanel C4 import and drift report is withdrawn while integrations with other tools are rethought; "sync to IcePanel" no longer routes to a skill. The C4 modelling convention it shared with the docs stays (`references/ICEPANEL-C4-MODEL.md`, the bracketed technology form).
+
+### Changed
+
+- **The C4 element grammar has its own reference**, `skills/architecture-docs/references/C4-ELEMENT-GRAMMAR.md` — how a `C4Context` / `C4Container` block (or the governed `flowchart TB` notation) is read; the HLD Intake Gate cites it, where it cited the IcePanel skill's Step 1.1.
+
+### Added
+
+- **`asset-outside` in the architecture review** (`review-check.js`, BLOCKING): a contract copy outside `architecture/` — a tracked file whose bytes equal a pack asset, or a file the pull request changes that was a byte copy of a contract at the base. BUILD.md rule 1: `architecture/` is the only place a copy lives, and code is generated from it (#23).
+
+### Upgrade
+
+- A project that used the IcePanel skill keeps its `icepanel-sync/` output; nothing reads it now. Copy the regenerated `BUILD.md` into a bound service with the next handoff kit: its rule 1 names `asset-outside`, and a service that keeps a second contract copy (`contracts/…`) generates from `architecture/` instead.
+
 ## [10.30.0]
 
 ### Added

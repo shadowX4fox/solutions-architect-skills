@@ -69,7 +69,6 @@ required_dirs=(
     "plugins/sa-delivery/skills/architecture-dev-handoff"
     "plugins/sa-delivery/skills/architecture-docs-export"
     "plugins/sa-delivery/skills/architecture-blueprint"
-    "plugins/sa-delivery/skills/architecture-icepanel-sync"
     "plugins/sa-delivery/agents"
     "plugins/sa-visualization/skills/architecture-command-center"
     "plugins/sa-visualization/skills/architecture-video"

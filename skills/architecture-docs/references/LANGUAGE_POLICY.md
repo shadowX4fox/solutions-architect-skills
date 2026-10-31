@@ -455,6 +455,5 @@ Nothing in §4 changes — a new language adds visible text only.
 | `architecture-command-center` | Viewer chrome via `UI_STRINGS` (`en` / `es`, selected by `--lang`); scene notes, phase and use-case text authored in `doc_language`; node ids, component names, ADR and `UC-nn` ids stay as the docs write them |
 | an institution pack's template skills | Use §3 instead of their own detection; select `*_EN` / `*_ES` templates |
 | `architecture-docs-export` | Passes `--lang` to docgen |
-| `architecture-icepanel-sync` | **No localization** — YAML is machine-facing and the Design Language Standard mandates English values |
 | `architecture-explorer-headers` | No change — field keys English, values localize |
 | Every agent under `agents/**` | Carry the `## Documentation Language` block and honour the `doc_language` input; `coverage-renderer` writes the target edition's language and quotes only that edition's ADR |

@@ -393,12 +393,6 @@ cites, and `exports/ADR-NNN-<title>.docx` per ADR.
 `export handoff to Word` exports the kit. Mermaid diagrams render as pictures when mermaid-cli is installed (`/sa-skills:setup`
 checks it), otherwise as source.
 
-### IcePanel — `architecture-icepanel-sync`
-
-`sync to IcePanel` writes `icepanel-sync/c4-model.yaml` (a C4 import) and `icepanel-sync/sync-report.md`. With
-`ICEPANEL_API_KEY` and `ICEPANEL_LANDSCAPE_ID` set it also compares against the landscape and reports drift
-(`IcePanel drift check`).
-
 ### Architecture index — `architecture-index-export`
 
 `export architecture index` turns the architecture into an `sa-index/1` bundle for an architecture MCP server: every
@@ -467,7 +461,6 @@ Typing one of these starts the matching skill directly. Slash names work too (`/
 | `check requirements coverage` · `traceability report` · `PO spec coverage` | `architecture-traceability` | `TRACEABILITY_REPORT.md` |
 | `generate dev handoff` · `component handoff for <X>` · `interface contracts` | `architecture-dev-handoff` | The handoff kit |
 | `export architecture to Word` · `export handoff to Word` · `stakeholder briefing` | `architecture-docs-export` | `.docx` files |
-| `sync to IcePanel` · `IcePanel drift check` · `C4 model sync` | `architecture-icepanel-sync` | C4 import and drift |
 | `export architecture index` · `export build packs` · `test the architecture index` | `architecture-index-export` | The MCP bundle |
 | `command center` · `3D view` · `physical view` · `onboard to architecture` | `architecture-command-center` | The 3D model |
 

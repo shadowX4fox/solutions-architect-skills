@@ -284,7 +284,7 @@ the author.
 | **A — gate-enforced** | `ARCHITECTURE.md`, `docs/**` | Full contract. `PROSE_VALIDATION.md` runs at Step 5.7, on edit, and at release |
 | **B — contract, no gate** | `adr/`, `tdr/`, `handoffs/**`, `analysis/**`, `BIAN_ALIGNMENT.md`, `TRACEABILITY_REPORT.md` | Full contract, applied at authoring time by the generating agent. No blocking gate — each of these has its own generator and round budget. No post-hoc scoring since the `PROSE` peer-review category was retired — authoring-time application is the only enforcement |
 | **C — lexical rules only** | `compliance-docs/**`, template-driven outputs of an institution pack's skills | §4 banned constructions only. §2 form and §3 length do **not** apply: contract structure is written by code (`contract.ts` in sa-compliance — the requirement rows, verdicts and score table), never by a model. The banned-construction rules only remove words *inside cells* — they never move structure, rename a header, or touch an enum |
-| **Exempt** | `COMPLIANCE_MANIFEST.md`, `icepanel-sync/*.yaml`, `examples/ARCHITECTURE_example_3tier.md` | Nothing applies. The first two are machine artifacts (`LANGUAGE_POLICY.md` §4 precedent); the third is a deliberate historical reference |
+| **Exempt** | `COMPLIANCE_MANIFEST.md`, `examples/ARCHITECTURE_example_3tier.md` | Nothing applies. The first is a machine artifact (`LANGUAGE_POLICY.md` §4 precedent); the second is a deliberate historical reference |
 
 ### Consumers
 
@@ -298,7 +298,6 @@ the author.
 | `architecture-dev-handoff` | B | All four handoff-kit documents |
 | `architecture-compliance` | C | Narrative fields inside contract cells |
 | an institution pack's template skills | C | Template-driven; lexical rules only |
-| `architecture-icepanel-sync` | Exempt | Machine-facing YAML |
 | Every agent under `agents/**` | — | Carry the `## Prose Style` block |
 
 ---

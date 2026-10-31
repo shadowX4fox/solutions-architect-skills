@@ -14,6 +14,9 @@
 //   asset-missing     BLOCKING  an asset of the pack is not at architecture/<file>          (rule 1)
 //   asset-modified    BLOCKING  architecture/<file> differs from the pack's bytes (sha256)    (rule 1)
 //   assets-mixed      BLOCKING  a commit changes architecture/ and other files together       (the update is committed alone)
+//   asset-outside     BLOCKING  a contract copy outside architecture/ — a tracked file whose bytes equal a pack asset, or a
+//                               file the pull request changes that was a byte copy of a contract at the base (rule 1: the
+//                               copies live in architecture/ only, and code is generated from there) (11.0.0)
 //   asset-unknown     WARNING   a file under architecture/ that the pack does not carry
 //   commit-unstamped  WARNING   a commit names neither the version nor the pack_revision       (rule 8)
 //   binding-behind    WARNING   a newer version is released than the one bound
@@ -124,6 +127,31 @@ async function check(dir, opts = {}) {
       const f = path.join(dir, 'architecture', p.title);
       if (!fs.existsSync(f)) { add('blocking', 'asset-missing', L(`the pack's ${p.title} is not at architecture/${p.title} (rule 1: kept byte for byte)`, `el ${p.title} del pack no está en architecture/${p.title} (regla 1: se conserva byte a byte)`), `architecture/${p.title}`); continue; }
       if (sha256(fs.readFileSync(f)) !== p.sha256) add('blocking', 'asset-modified', L(`architecture/${p.title} differs from the pack's bytes (rule 1: a contract change is the architecture's — escalate it, never edit the copy)`, `architecture/${p.title} difiere de los bytes del pack (regla 1: un cambio de contrato es de la arquitectura; se escala, nunca se edita la copia)`), `architecture/${p.title}`);
+    }
+    // a copy kept anywhere else escapes both checks above, so it is not allowed at all: rule 1 keeps the copies in architecture/
+    const bySha = new Map(assets.map((p) => [p.sha256, p.title]));
+    const outside = (f) => !f.startsWith('architecture/') && f !== '.architecture.json';
+    let tracked = [];
+    try { tracked = git(dir, 'ls-files', '-z').split('\0').filter(Boolean).filter(outside); } catch (e) { /* not a repository: nothing tracked to compare */ }
+    const flagged = new Set();
+    for (const f of tracked) {
+      const fp = path.join(dir, f);
+      let st; try { st = fs.statSync(fp); } catch (e) { continue; }
+      if (!st.isFile() || st.size > 16 * 1024 * 1024) continue;
+      const t = bySha.get(sha256(fs.readFileSync(fp)));
+      if (t) { flagged.add(f); add('blocking', 'asset-outside', L(`${f} is a copy of the pack's ${t} outside architecture/ — keep the one copy at architecture/${t} and generate from it (rule 1)`, `${f} es una copia del ${t} del pack fuera de architecture/: se conserva una sola copia en architecture/${t} y se genera desde ella (regla 1)`), f); }
+    }
+    // a file that was a byte copy of a contract at the base and that the pull request changes — a copy drifting away
+    if (opts.base) {
+      let changed = [];
+      try { changed = git(dir, 'diff', '--name-only', `${opts.base}...HEAD`).split('\n').filter(Boolean).filter(outside); } catch (e) { /* no diff */ }
+      const atBase = (f) => { const r = spawnSync('git', ['-C', dir, 'show', `${opts.base}:${f}`], { maxBuffer: 64 * 1024 * 1024 }); return r.status === 0 ? sha256(r.stdout) : null; };
+      const baseCopies = new Map(assets.map((p) => [atBase(`architecture/${p.title}`), p.title]).filter(([h]) => h));
+      for (const f of changed) {
+        if (flagged.has(f)) continue;
+        const h = atBase(f), t = h && (baseCopies.get(h) || bySha.get(h));
+        if (t) add('blocking', 'asset-outside', L(`${f} was a copy of ${t} and this pull request changes it outside architecture/ — the copies live in architecture/ only, read-only (rule 1)`, `${f} era una copia de ${t} y este pull request la cambia fuera de architecture/: las copias viven solo en architecture/, de solo lectura (regla 1)`), f);
+      }
     }
     const adir = path.join(dir, 'architecture');
     if (fs.existsSync(adir)) for (const f of fs.readdirSync(adir)) if (!names.has(f)) add('warning', 'asset-unknown', L(`architecture/${f} is not an asset of the ${b.architecture_version} pack`, `architecture/${f} no es un asset del pack de ${b.architecture_version}`), `architecture/${f}`);

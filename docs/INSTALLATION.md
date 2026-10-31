@@ -62,7 +62,7 @@ Installing `sa-skills` installs the five plugins it depends on. The suite is six
 | `sa-records` | Architecture Decision Records (ADRs) and Technical Debt Records (TDRs) |
 | `sa-requirements` | The Product Owner Specification (PO Spec) and its capability alignment (BIAN, cross-industry or your own) |
 | `sa-analysis` | Ten risk and design analyses (SPOF, STRIDE, latency …) and PO Spec coverage |
-| `sa-delivery` | The developer handoff kit, Word exports, the IcePanel sync and the MCP index |
+| `sa-delivery` | The developer handoff kit, Word exports and the MCP index |
 | `sa-visualization` | The 3D Architecture Command Center |
 
 You can install part of the suite on its own: `sa-records` for a repository that maintains an institutional ADR

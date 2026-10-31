@@ -65,7 +65,7 @@ In governed mode the SA Design Language Standard's Mermaid syntax contract (`llm
 
 **What governed mode does NOT change**: the four `#### Diagram:` headings (do-not-localize registry values, and the Step 7.3 gate keys on them), the 1→2→3→4 ordering, canonical file locations, the component-facts sourcing rule, Diagram 1's band-to-band edge form, the Diagram 4 subgraph-ID-arrow prohibition, and the "diagrams for undocumented flows are discarded" rule.
 
-**Regeneration**: a governed run **replaces** a fallback-mode `C4Context` / `C4Container` / `graph TB` block under the same heading — never supplements it — the same replace-don't-supplement rule the v4.3.0 Logical View migration set. `architecture-icepanel-sync` Step 1.1 carries a governed-notation branch, so the sync does not depend on the C4 fences surviving.
+**Regeneration**: a governed run **replaces** a fallback-mode `C4Context` / `C4Container` / `graph TB` block under the same heading — never supplements it — the same replace-don't-supplement rule the v4.3.0 Logical View migration set. `C4-ELEMENT-GRAMMAR.md` reads the governed notation too, so no reader depends on the C4 fences surviving.
 
 ---
 

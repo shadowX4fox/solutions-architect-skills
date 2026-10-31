@@ -88,7 +88,7 @@ bun "$plugin_dir/scripts/setup-gitignore.ts" "$project_cwd"
 The helper ensures `$project_cwd/.gitignore` contains the sa-skills baseline entries:
 
 - `exports/` — generated Word `.docx` deliverables (`architecture-docs-export` output)
-- `.cache/sa-skills/` — project-local scratch dir for generated payloads, the facts ledger, judge worksheets and IcePanel JSON snapshots (inside the project, so it works the same on every OS)
+- `.cache/sa-skills/` — project-local scratch dir for generated payloads, the facts ledger, and judge worksheets (inside the project, so it works the same on every OS)
 - `CLAUDE.md` — the per-project Claude Code instructions file (managed by Step 5)
 - `.claude/settings.json` — the per-project Claude Code settings file (managed by Step 3). Gitignored because it carries each developer's own settings (permissions, the judge engine, local paths). Each developer runs `/setup` locally.
 

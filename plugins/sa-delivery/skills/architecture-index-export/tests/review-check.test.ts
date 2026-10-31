@@ -68,6 +68,21 @@ describe("review-check.js — the code checks", () => {
     expect(r.findings.find((f: any) => f.code === "asset-missing").where).toBe("architecture/ddl.sql");
   });
 
+  test("a contract copy outside architecture/ is blocked — kept as a byte copy, or a former copy changed with code (#23)", async () => {
+    w("contracts/hub/openapi.yaml", OPENAPI); commit(`chore: client copy — architecture 1.1.0 ${REV.slice(0, 8)}`);
+    let r = await run();
+    expect(r.status).toBe("FAIL");
+    expect(r.findings.filter((f: any) => f.code === "asset-outside").map((f: any) => f.where)).toEqual(["contracts/hub/openapi.yaml"]);
+    base = git("rev-parse", "HEAD");
+    w("contracts/hub/openapi.yaml", OPENAPI + "  x-client: regenerated\n"); w("src/app.ts", "export const z = 3\n");
+    commit(`feat: z — architecture 1.1.0 ${REV.slice(0, 8)}`);
+    r = await run();
+    const out = r.findings.filter((f: any) => f.code === "asset-outside");
+    expect(out.length).toBe(1);
+    expect(out[0].text).toContain("was a copy of openapi.yaml");
+    expect(codes(r, "blocking")).not.toContain("assets-mixed");
+  });
+
   test("rule 8: a code commit with no stamp warns; a CI-only commit needs none and mixes with nothing", async () => {
     w(".github/workflows/ci.yml", "name: CI\n# TODO(architecture): not a code marker\n"); commit("ci: add CI");
     w("src/app.ts", "// TODO(architecture): retry budget not documented (spec)\nexport {}\n"); w("README.md", "Each open question stays a `TODO(architecture)`.\n"); commit("feat: retry");

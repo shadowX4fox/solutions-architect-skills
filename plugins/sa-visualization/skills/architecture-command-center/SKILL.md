@@ -8,7 +8,7 @@ description: >
   Use for "command center", "centro de mando", "3D view", "vista 3D", "maqueta 3D", "modelo 3D",
   "physical view", "vista física", "deployment view", walking through use cases visually, or any
   spatial, navigable or animated view of the architecture — even without the word "3D". Requires
-  ARCHITECTURE.md. Not for Mermaid / C4 diagrams in docs (architecture-docs Workflow 8) or IcePanel sync.
+  ARCHITECTURE.md. Not for Mermaid / C4 diagrams in docs (architecture-docs Workflow 8).
 triggers:
   - command center
   - centro de mando
@@ -101,7 +101,6 @@ exactly as the docs write them (`LANGUAGE_POLICY.md` §4).
 
 **Do NOT invoke for:**
 - Mermaid / C4 diagrams inside `docs/` → `architecture-docs` Workflow 8
-- IcePanel model sync → `architecture-icepanel-sync`
 - Editing any architecture content → `architecture-docs`
 
 ---
@@ -402,7 +401,6 @@ user asks how the viewer behaves or when the viewer itself is being changed.
 | `architecture-docs` | Source of every fact in the scene; Workflow 8 owns the Mermaid diagrams the 3D view complements |
 | `architecture-component-guardian` | Owns `docs/components/README.md`; canonical names come from the container files it writes |
 | `explorer-cli.ts manifest` (code) | Corpus overview in Step 1 for corpus overview |
-| `architecture-icepanel-sync` | The maintained C4 model with drift detection; recommend it when the user wants a living model rather than a presentation artifact |
 
 ---
 

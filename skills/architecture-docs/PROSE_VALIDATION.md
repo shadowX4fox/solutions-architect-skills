@@ -570,4 +570,4 @@ that owns the decision). Enforcing once `PROSE_STYLE: v1` is stamped. Size budge
 | B | project `adr/` (101+) and `tdr/` | Groups 1, 2, 3, 6, 8 under `--scope records`, logs skipped; Group 9 (`S-STRUCT-01`) on ADRs, `tdr-check.js` on TDRs |
 | B | `handoffs/**`, `analysis/**`, `BIAN_ALIGNMENT.md`, `TRACEABILITY_REPORT.md` | None — contract applies at authoring time only; the `PROSE` peer-review category that used to surface residue post-hoc has been retired |
 | C | `compliance-docs/**`, template-driven outputs of an institution pack's skills | Groups 1 and 2 only. Form, length and density would fight a structure code writes |
-| Exempt | `COMPLIANCE_MANIFEST.md`, `icepanel-sync/*.yaml`, `examples/ARCHITECTURE_example_3tier.md` | None |
+| Exempt | `COMPLIANCE_MANIFEST.md`, `examples/ARCHITECTURE_example_3tier.md` | None |
