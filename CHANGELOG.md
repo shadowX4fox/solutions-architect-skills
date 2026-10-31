@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.1.1]
+
+### Changed
+
+- **The local architecture index server runs Alia 0.8.0** (`SA_INDEX_SERVER_TAG` default in `architecture-index-export/local/compose.yaml`): its `what_changed` lists `dependencies` — a provider's contract added, removed or changed — and marks the consumer action required, field for field with the plugin's `changes.json` (#25).
+
 ## [11.1.0]
 
 ### Added

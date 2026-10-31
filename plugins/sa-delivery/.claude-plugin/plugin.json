@@ -1,6 +1,6 @@
 {
   "name": "sa-delivery",
-  "version": "11.1.0",
+  "version": "11.1.1",
   "description": "Artifacts handed to other teams and tools: the four-part development handoff kit (System Runtime View, Cross-Cutting Standards, Interface Contracts, Component Specifications with validated OpenAPI / AsyncAPI / GraphQL / Avro / DDL / Protobuf / Redis assets), Word exports (stakeholder briefing and reference, handoff kit), organizational blueprints and the IcePanel C4 sync. Reads the architecture through sa-skills, which installs it as a dependency.",
   "author": {
     "name": "shadowX4fox",
