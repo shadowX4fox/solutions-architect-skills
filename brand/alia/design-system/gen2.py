@@ -245,6 +245,8 @@ w("components/bundle.css", """@import url("https://fonts.googleapis.com/css2?fam
 @keyframes ag-codec-rise { from { opacity: 0; transform: translateY(18px) scale(.8); } }
 /* AliaBlazon: her escudo — the mark of a document in her theme, as drawn, at one of two sizes */
 .ag-blazon { display: block; flex: none; aspect-ratio: 1; object-fit: contain; }
+.ag-codec--video .ag-codec-face { width: 160px; height: 160px; border-width: 4px; }
+.ag-codec--video .ag-codec-line { font-size: 36px; line-height: 1.4; }
 .ag-blazon--cover { width: 64px; } .ag-blazon--head { width: 14px; display: inline-block; vertical-align: -2px; }
 @keyframes ag-codec-talk { from { transform: translateY(0); } to { transform: translateY(-2px) scale(1.04); filter: brightness(1.12); } }
 """)
@@ -454,10 +456,11 @@ Alia's call on a live surface — the command center's codec, as the `alia` skin
 - **Actions**: one to three pills; the last is the primary (`.pri`, outlined in the mood colour) — usually «Leer», the page that says it. «Muéstramelo» flies to the block.
 - **Where**: at the foot of the stage, left-aligned with it, above any transport bar; 300–460 px wide. One call at a time; a new one replaces it.
 - **Motion**: `.is-open` — the frame rises 0.5 s with a small overshoot, her face 0.6 s; `.is-talking` while the line types — where frames can change (video, the viewer), she talks by alternating `face-talk-closed` and `face-talk-open` every 0.15 s, then rests on her mood's face — on a `calm`, `thinking` or `pleased` call only: the talking frames smile, so a `worried` or `stern` call keeps its own face and only bobs. Nothing moves under `prefers-reduced-motion`.
-- **One face size per piece**: across a deck, a page set or a video every image of her face — the codec's and the `AliaNote` avatar — is the same size (64 px at 1920 × 1080). When a bar is tight, cut its padding; never shrink her on one slide.
+- **One face size per piece**: across a deck, a page set or a video every image of her face — the codec's and the `AliaNote` avatar — is the same size: **64 px** at 1920 × 1080 on slides and pages. When a bar is tight, cut its padding; never shrink her on one slide.
+- **In video, 160 px**: a talking codec in a video (`.ag-codec--video`) shows her face at **160 px with a 4 px ring** at 1920 × 1080 — at 64 px her mouth cannot be seen moving. The line sits beside the face, centred on it, at 36 px; the codec spans the content column (e.g. a chapter card, 1600 px). When the codec is her voice on a card, it replaces her stage figure there: one Alia per card. Still one size within the video; a `stern` call bobs 8 px instead of talking.
 - **Night only**: the codec lives on `night` grounds (the command center, footage). On a light page use `AliaNote` or `AliaTip`.
 - **vs AliaTip**: the tip is chibi Alia with a bubble over content that plays by itself (video, slides); the codec is her face in a frame over a surface the reader drives, with actions.
-- Classes: `.ag-codec` (`data-mood`), `.ag-codec-face`, `.ag-codec-body`, `.ag-codec-head` (`b`, `.ch`, `.ck`, `.x`), `.ag-codec-line`, `.ag-codec-act` (`.pri`), `.is-open`, `.is-talking`. Faces: the `Faces` asset group.
+- Classes: `.ag-codec` (`data-mood`), `.ag-codec-face`, `.ag-codec-body`, `.ag-codec-head` (`b`, `.ch`, `.ck`, `.x`), `.ag-codec-line`, `.ag-codec-act` (`.pri`), `.is-open`, `.is-talking`, `.ag-codec--video` (160 px face, for video). Faces: the `Faces` asset group.
 """)
 
 BZ = b("alia-blazon.png")
@@ -534,7 +537,7 @@ w("components/Cover/preview.html", '''<!-- @dsCard height=320 -->
 
 w("assets/Alia/README.md", """Alia's approved poses and her avatar — the five tone poses (`cover`, `explaining`, `thinking`, `happy`, `warning`), the three placing poses for tips (`point-left`, `point-up`, `perched`), `stern`, and the talking pair (`talk-closed`, `talk-open`, the source of her talking frames) — cut out on transparency (WebP with alpha; poses 640 px, avatar 320 px). Generated locally with Animagine XL 4.0 Opt (CreativeML Open RAIL++-M, commercial use allowed) through IP-Adapter from two anchor images; sources and workflows live in the plugin repository under `brand/alia/`. Use the poses only through `AliaStage` and the avatar only through `AliaNote`: never crop again, mirror, recolour or redraw.
 """)
-w("assets/Faces/README.md", """Her face cut from each approved pose, 192 px WebP, for `AliaCodec` only: `face-calm` (cover pose), `face-thinking`, `face-pleased` (happy pose), `face-warn` (warning pose — worried), `face-stern` (stern pose — stern), and the talking pair `face-talk-closed` / `face-talk-open` (alternated while she talks). One size per piece. Shown round, on a ring in the mood colour; never crop again, mirror or recolour. Sources in the plugin repository under `brand/alia/design-system/assets/faces/`.
+w("assets/Faces/README.md", """Her face cut from each approved pose, 192 px WebP, for `AliaCodec` only: `face-calm` (cover pose), `face-thinking`, `face-pleased` (happy pose), `face-warn` (warning pose — worried), `face-stern` (stern pose — stern), and the talking pair `face-talk-closed` / `face-talk-open` (alternated while she talks). One size per piece (64 px on slides, 160 px in a video codec). Shown round, on a ring in the mood colour; never crop again, mirror or recolour. Sources in the plugin repository under `brand/alia/design-system/assets/faces/`.
 """)
 w("assets/Blazon/README.md", """Alia's escudo, the mark of a document in her theme: `alia-blazon.png` (512 px, transparent — what documents embed) and `alia-blazon.svg` (the source, from `brand/alia/blazon/escudo.svg`); `alia-blazon-mono.png` and `alia-blazon-mono-reverse.png`, the one-colour escudo for grayscale print, stamps and fax (sources `escudo-mono.svg`, `escudo-mono-reverse.svg`). Use it only as `AliaBlazon` says: the cover at 64 px, the running header at 14 px, as drawn — never recoloured, rotated, cropped or glowing.
 """)
@@ -616,7 +619,7 @@ def index(created_at):
                             "files": {f: {"name": f, "blob": BLOB[f][0], "size": BLOB[f][1], "type": BLOB[f][2]} for f in fs}}
                         for g, fs in groups.items()},
         "blobs": {}, "docs": {"readme": "project/README.md", "sections": []},
-        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaStage: stern joins the stage poses; the tip poses and the talking pair are not stage poses"},
+        "lastChange": {"by": "Claude", "at": NOW, "via": "Claude Code", "note": "AliaCodec: the video size — a talking codec in video shows her face at 160 px so her mouth reads; it replaces her stage figure on that card"},
     }
 import sys
 w("design-system.json", json.dumps(index(sys.argv[1] if len(sys.argv) > 1 else NOW), ensure_ascii=False))
