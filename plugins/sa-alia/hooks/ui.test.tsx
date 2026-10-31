@@ -280,6 +280,7 @@ describe('sa-alia, end to end on every surface', () => {
       const first = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Ya revisé las ramas.', isFirstOfReply: true } })
       expect(await first.find({ type: 'Text', text: 'Alia' })).toBeDefined()
       expect(await first.find({ type: surface === 'terminal' ? 'Text' : 'Svg', ...(surface === 'terminal' ? { text: '✦' } : {}) })).toBeDefined()
+      expect(JSON.stringify(await first.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","gap":1,"alignItems":"flex-start"/)   // her face at the reply's start, never centred
       await first.unmount()
       const later = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Y algo más.', isFirstOfReply: false } })
       expect(await later.find({ type: 'Text', text: 'Alia' })).toBeUndefined()

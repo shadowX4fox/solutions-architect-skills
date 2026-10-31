@@ -2,7 +2,13 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.0.0]
+## [1.0.1]
+
+### Fixed
+
+- **Her face sits at the start of a reply**, beside her name: the desktop app centred it on the reply's height, so on a long reply it floated down the middle (seen live, 2026-10-31). Every codec — a reply, `/alia`, the radar, the explorer, a card, a confirmation — aligns its mark to the top.
+
+
 
 ### Changed
 

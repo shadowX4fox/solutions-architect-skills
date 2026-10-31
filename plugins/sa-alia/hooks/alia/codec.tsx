@@ -64,8 +64,9 @@ export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: b
 export function Codec(props: { els: Els; say: Pick<AliaLine, 'mood' | 'line'> | null; kicker: string; svg: string | null; showMark?: boolean; blazon?: boolean; children?: unknown }) {
   const { Box, Text } = props.els
   const mood: Mood = props.say ? props.say.mood : 'calm'
+  // the mark sits at the top, beside her name, however long what follows is: a surface centres a row's children otherwise
   return (
-    <Box flexDirection="row" gap={1}>
+    <Box flexDirection="row" gap={1} alignItems="flex-start">
       <Mark els={props.els} mood={mood} svg={props.svg} show={props.showMark} blazon={props.blazon} />
       <Box flexDirection="column" flexGrow={1}>
         <Box flexDirection="row" gap={1}>

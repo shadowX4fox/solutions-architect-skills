@@ -1,6 +1,6 @@
 {
   "name": "sa-alia",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Alia in Claude Code, for sa-skills (formerly sa-ux): her codec over every reply and above the prompt box (where the architecture stands, next steps computed from the project's files), /alia, /radar and /arch, the suite's script rows read as their verdict, milestone cards, notifications after long turns, today's write confirmations in her look, her words on the spinner. Her face where the surface draws pictures, her sparkle in the terminal. Optional; reads what the skills write and never edits an architecture document.",
   "author": {
     "name": "shadowX4fox",

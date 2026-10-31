@@ -63,7 +63,7 @@
       "name": "sa-alia",
       "source": "./plugins/sa-alia",
       "description": "Alia in Claude Code, for a solution architect working with sa-skills (formerly sa-ux): her codec over every reply and above the prompt box with one line on where the architecture stands and the next steps computed from the project's files, /alia, /radar and /arch, the suite's script rows read as their verdict, milestone cards in the transcript, notifications after long turns, today's write confirmations in her look, her words on the spinner. Her face where the surface draws pictures (the desktop app), her sparkle in the terminal. Reads what the skills write; never edits an architecture document. Needs a Claude Code build with function-hook mods.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "shadowX4fox"
       }
