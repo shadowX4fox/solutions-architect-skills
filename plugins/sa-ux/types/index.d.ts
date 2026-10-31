@@ -45,6 +45,9 @@ export type ProjectSnapshot = {
 /** milestones: one card Alia places in the transcript. */
 export type Milestone = { id: string; kind: 'release' | 'analysis' | 'kit'; mood: 'calm' | 'pleased' | 'worried' | 'stern'; title: string; lines: string[] }
 
+/** confirm: a write to the architecture waiting for the person's yes — the file, a preview of what it changes, the question. */
+export type ChangePreview = { file: string; summary: string; lines: { sign: '+' | '-'; text: string }[]; question: string }
+
 declare module 'claude-code' {
   interface PluginState {
     'sa-ux': {
@@ -71,6 +74,10 @@ declare module 'claude-code' {
       snapshot: ProjectSnapshot | null
       /** milestones: the cards placed this session, by id — what each Placed row draws. */
       milestones: Milestone[]
+      /** confirm: the session's permission mode as its last prompt reported it, null before one — unknown, Alia never asks. */
+      permissionMode: string | null
+      /** confirm: the write Alia is asking about now, null when none. */
+      pendingChange: ChangePreview | null
     }
   }
 }

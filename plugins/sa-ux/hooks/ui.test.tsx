@@ -61,7 +61,8 @@ function engine(on: On) {
   on('ui.status', () => ({ value: undefined }))
   on('ui.open', (_$, e) => { box.opened.push(e.id); return { value: { isPlaced: true } } })
   on('ui.place', (_$, e) => { box.placed.push(e.id); return { value: { isPlaced: true, requestId: e.id } } })
-  on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return { type: 'Text', props: {}, children: [''] } as never })   // the engine's own drawing: nothing
+  on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return (e.component === 'AskUserQuestion' ? { type: 'engine', ref: 0 } : { type: 'Text', props: {}, children: [''] }) as never })
+  on('classic.UserPromptSubmit', () => ({}) as never)   // the engine's own drawing: nothing
   return box
 }
 
@@ -197,6 +198,79 @@ describe('sa-ux, end to end on every surface', () => {
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
       await $.turn.complete({ answer: '', durationMs: 60 * 60000, isAborted: false, turnId: 't0', reason: 'answer' } as never)
       expect(box.notified).toEqual([])
+    })
+
+    test(`${surface}: a write to the architecture that would ask the person asks in Alia's dialog; the answer is the verdict`, async ($, on) => {
+      const box = engine(on)
+      let verdict: 'ask' | 'allow' = 'ask', answer = 'Aplicar', asked: unknown[] = []
+      on('tool.check', (_$, e) => ({ decision: e.tool === 'AskUserQuestion' ? 'allow' : verdict }))   // the engine's own verdict for the mode and rules; her question itself is allowed, as in a session
+      const drawn: unknown[] = []
+      on('tool.call', { tool: 'AskUserQuestion' }, async (_$, e) => {
+        asked.push(e)
+        const qs = (e as unknown as { questions: { question: string }[] }).questions
+        // her dialog, drawn while the question is open: it must fit the surface's rows, or the engine drops it
+        const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AskUserQuestion', props: { tool: 'AskUserQuestion', questions: qs } as never })
+        drawn.push(await ui.find({ type: 'Text', text: /docs\/05-integration-points\.md/ })); await ui.unmount()
+        return { result: { questions: [], answers: { [qs[0]!.question]: answer } } } as never
+      })
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      await $.classic.UserPromptSubmit({ prompt: 'x', permission_mode: 'default' } as never)
+      const edit = { tool: 'Edit', tool_use_id: 'u1', approver: 'person', input: { file_path: '/p/docs/05-integration-points.md',
+        old_string: '| I-07 | Servicio de Alta | Servicio de Correo | SMTP | Asíncrono |\n| I-08 | Servicio de Alta | Auditoría | Kafka | Evento |',
+        new_string: '| I-07 | Servicio de Alta | Servicio de Correo | HTTPS/REST | Petición-respuesta |\n| I-08 | Servicio de Alta | Auditoría | Kafka | Evento |\n| I-09 | Servicio de Alta | Notificaciones | HTTPS/REST | Petición-respuesta |\n| I-10 | A | B | C | D |\n| I-11 | A | B | C | D |' } } as const
+      expect((await $.tool.check(edit as never)).decision).toBe('allow')
+      expect(JSON.stringify(asked[0])).toContain('¿Aplicar este cambio a docs/05-integration-points.md?')
+      expect(drawn[0]).toBeDefined()   // her codec drew around the dialog, within the rows
+      answer = 'No aplicar'
+      const no = await $.tool.check({ ...edit, tool_use_id: 'u2' } as never)
+      expect(no.decision).toBe('deny')
+      expect(no.reason).toContain('eligió no aplicar este cambio a docs/05-integration-points.md')
+      // where the engine would not ask the person, she never asks
+      const n = asked.length
+      verdict = 'allow'; expect((await $.tool.check({ ...edit, tool_use_id: 'u3' } as never)).decision).toBe('allow')
+      verdict = 'ask'
+      expect((await $.tool.check({ ...edit, tool_use_id: 'u4', input: { ...edit.input, file_path: '/p/src/app.ts' } } as never)).decision).toBe('ask')   // not the architecture
+      expect((await $.tool.check({ ...edit, tool_use_id: 'u5', agentId: 'a1' } as never)).decision).toBe('ask')   // a subagent's loop
+      expect((await $.tool.check({ ...edit, tool_use_id: 'u6', approver: 'host' } as never)).decision).toBe('ask')   // a host answers
+      await $.classic.UserPromptSubmit({ prompt: 'x', permission_mode: 'auto' } as never)
+      expect((await $.tool.check({ ...edit, tool_use_id: 'u7' } as never)).decision).toBe('ask')   // auto mode: the classifier's
+      expect(asked.length).toBe(n)
+      void box
+    })
+
+    test(`${surface}: a large write still fits her dialog in the surface's rows`, async ($, on) => {
+      engine(on)
+      let fits: unknown
+      on('tool.check', (_$, e) => ({ decision: e.tool === 'AskUserQuestion' ? 'allow' : 'ask' }))
+      on('tool.call', { tool: 'AskUserQuestion' }, async (_$, e) => {
+        const qs = (e as unknown as { questions: { question: string }[] }).questions
+        const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AskUserQuestion', props: { tool: 'AskUserQuestion', questions: qs } as never })
+        fits = await ui.find({ type: 'Text', text: /ARCHITECTURE\.md/ }); await ui.unmount()
+        return { result: { questions: [], answers: { [qs[0]!.question]: 'Aplicar' } } } as never
+      })
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      await $.classic.UserPromptSubmit({ prompt: 'x', permission_mode: 'default' } as never)
+      const content = Array.from({ length: 40 }, (_, i) => `| una fila nueva bastante larga de la tabla número ${i} con más texto | x |`).join('\n')
+      expect((await $.tool.check({ tool: 'Write', tool_use_id: 'w1', approver: 'person', input: { file_path: '/p/ARCHITECTURE.md', content } } as never)).decision).toBe('allow')
+      expect(fits).toBeDefined()   // drawn: within the 12 rows on the terminal, the 48 elsewhere
+    })
+
+    test(`${surface}: before the mode is known she never asks`, async ($, on) => {
+      engine(on)
+      let asked = 0
+      on('tool.check', (_$, e) => ({ decision: e.tool === 'AskUserQuestion' ? 'allow' : 'ask' }))
+      on('tool.call', { tool: 'AskUserQuestion' }, () => { asked++; return { result: { questions: [], answers: {} } } as never })
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      expect((await $.tool.check({ tool: 'Write', input: { file_path: '/p/ARCHITECTURE.md', content: '#' }, tool_use_id: 'u1', approver: 'person' } as never)).decision).toBe('ask')
+      expect(asked).toBe(0)
+    })
+
+    test(`${surface}: the skills' questions get her codec on top of the engine's dialog`, async ($, on) => {
+      engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AskUserQuestion', props: { tool: 'AskUserQuestion', questions: [{ question: '¿Aplico los 3 cambios?', header: 'Cambios', options: [], multiSelect: false }] } })
+      expect(await ui.find({ type: 'Text', text: /Nada cambia sin tu sí/ })).toBeDefined()
+      await ui.unmount()
     })
 
     test(`${surface}: the footer carries the architecture's version and status`, async ($, on) => {

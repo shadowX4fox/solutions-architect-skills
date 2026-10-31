@@ -2,7 +2,16 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.8.0]
+## [0.9.0]
+
+### Added
+
+- **Today's confirmations, in Alia's look** (`hooks/confirm/`) — asked exactly when they are asked today, deciding exactly what they decide:
+  - **A write to the architecture that Claude Code would put to the person** (`Write`, `Edit` or `MultiEdit` on `ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`) is asked in her dialog: the file, a preview of the lines the write removes and adds (`+2 −1 líneas`, then the lines), `Apply` / `Don't apply`. `Apply` runs it; `Don't apply`, or dismissing it, refuses it with a reason the model reads — as the engine's dialog would. She asks only where the engine would ask the person: its verdict `ask`, a person to answer (`approver`), the main loop, the session in `default` mode — in `auto` an ask is the classifier's, and an unknown mode leaves the engine's dialog standing. The mode is read from the session's own hook events (`classic.SessionStart`, `classic.UserPromptSubmit`). Her dialog has no "don't ask again".
+  - **The questions the skills already ask** (the change set before → after, approved before any write) get her codec on top of the engine's own dialog — its options and its answer untouched — inside an architecture.
+  - On the terminal the dialog's surroundings are held to its 12 rows (counted at 40 columns): one header row `✦ Alia · confirmar · <file>`, the summary and six lines; on the desktop app her codec with her face and up to twelve lines. A test holds the worst case, so the dialog is never dropped for overflow.
+
+
 
 ### Added
 
