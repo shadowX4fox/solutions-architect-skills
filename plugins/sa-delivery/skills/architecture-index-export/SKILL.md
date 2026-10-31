@@ -80,6 +80,7 @@ The server contract the script calls: `GET {server}/bundles/{key}/before/{versio
 | **Metadata** components and ADRs from the ledger and the headers — a classified block names its own; exact names only | filters a server can trust |
 | **Build pack** only from `handoffs/.manifest.json` of this architecture version, the component's own entry of this version, and `kit-check.js` clean on the shared documents and on every file of the pack | a developer never builds from an outdated or failing kit |
 | **Security** the kit's `assets/NN-<slug>/security.md` (`security-obligations.js`) as its own part `security`, second in the plan: who may call, each interface's authentication, the Security by Design principle, the institutional ADRs the security section cites, the STRIDE findings, the Data Sensitivity flows, the security tests; `BUILD.md` carries its Inbound table | a contract with no security scheme is never read as a public operation; an interface without documented authentication fails closed |
+| **Dependencies** (11.1.0) the contracts of the components at the other end of its interfaces, whole and byte for byte, from the same kit at the same version, each a `dependency:<provider>/<file>` part under `deps/<provider>/`: the API of a component it calls (it is the interface's upstream — `openapi.yaml`, `schema.graphql`, `schema.proto`), the events of one it reads (it is downstream — `asyncapi.yaml`, `*.avsc`); never their storage (DDL, Redis keys); a provider whose part of the kit is another version contributes nothing, with a warning | the client is generated from the provider's own contract, kept at `architecture/deps/<provider>/<file>` and held by the review like the service's own |
 | **Technical debt** (10.10.3) the TDRs the container's descriptor names on its `**Technical Debt:**` line, each a `tdr:TDR-NNN` part under `tdrs/`, read with the specification whose § 7 lists them; `pack.json` `tdrs` | the builder reads the workaround in force, not only its id |
 | **Links** in a Markdown part, rewritten to the part's path in the pack when their target travels in it (an ADR, a TDR, an interface, a shared document), `#anchor` kept, `sha256` taken after; any other link as written | a link the builder follows resolves inside the pack |
 | **Open questions** every `[NOT DOCUMENTED` line of the component's spec, security obligations, interfaces and assets | the builder asks; it never fills a gap |
@@ -95,10 +96,10 @@ manifest.json        schema sa-index/1, project, architecture, channel, git, cou
 chunks.jsonl         { id, content_hash, text, meta: { project, architecture_version, channel, doc_language, kind, file, lines,
                        title, anchor, components, adrs, … } }   kind: overview section principle flow phase integration component adr tdr
 ledger.json          the facts ledger (arch-facts.js), without the absolute project path
-changes.json         with --previous: { from, to, same_version, components: [{ component, action_required, facts, contracts, interfaces, adrs,
+changes.json         with --previous: { from, to, same_version, components: [{ component, action_required, facts, contracts, dependencies, interfaces, adrs,
                      documents, flows, integrations, sections, open_questions, pack, pack_revised, pack_revision: { from, to } }] }
 buildpacks/<slug>/   pack.json { component, parts, plan, flows, interfaces, adrs, open_questions, instructions } + BUILD.md, spec.md,
-                     security.md, interfaces/, assets/, adrs/, cross-cutting-standards.md, runtime-view.md
+                     security.md, interfaces/, assets/, deps/<provider>/, adrs/, cross-cutting-standards.md, runtime-view.md
 ```
 
 ## Permissions

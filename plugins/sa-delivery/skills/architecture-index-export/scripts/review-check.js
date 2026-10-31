@@ -11,8 +11,9 @@
 // By code (no model), each against the pack the server serves for .architecture.json's version:
 //   binding-missing   BLOCKING  .architecture.json lacks server, project, component, architecture_version or pack_revision
 //   pack-unreadable   BLOCKING  the server does not answer get_build_pack — the check fails closed
-//   asset-missing     BLOCKING  an asset of the pack is not at architecture/<file>          (rule 1)
-//   asset-modified    BLOCKING  architecture/<file> differs from the pack's bytes (sha256)    (rule 1)
+//   asset-missing     BLOCKING  an asset of the pack is not at architecture/<file>, or a dependency contract is not at
+//                               architecture/deps/<provider>/<file> (rule 1; dependencies 11.1.0)
+//   asset-modified    BLOCKING  that copy differs from the pack's bytes (sha256)              (rule 1)
 //   assets-mixed      BLOCKING  a commit changes architecture/ and other files together       (the update is committed alone)
 //   asset-outside     BLOCKING  a contract copy outside architecture/ — a tracked file whose bytes equal a pack asset, or a
 //                               file the pull request changes that was a byte copy of a contract at the base (rule 1: the
@@ -121,15 +122,17 @@ async function check(dir, opts = {}) {
   if (pack) {
     if (pack.pack_revision && pack.pack_revision !== b.pack_revision) add('warning', 'pack-revised', L(`the ${b.architecture_version} pack is at revision ${pack.pack_revision.slice(0, 12)}, the binding records ${String(b.pack_revision).slice(0, 12)} — what_changed with from_revision`, `el pack de ${b.architecture_version} está en la revisión ${pack.pack_revision.slice(0, 12)}, el binding registra ${String(b.pack_revision).slice(0, 12)}: what_changed con from_revision`), '.architecture.json');
     if (latest && latest.architecture_version && latest.architecture_version !== b.architecture_version) add('warning', 'binding-behind', L(`architecture ${latest.architecture_version} is released; this repository is bound to ${b.architecture_version} — what_changed, then rebind`, `la arquitectura ${latest.architecture_version} está publicada; este repositorio está atado a ${b.architecture_version}: what_changed y luego rebind`), '.architecture.json');
-    const assets = (pack.parts || []).filter((p) => p.kind === 'asset');
-    const names = new Set(assets.map((p) => p.title));
+    // its own contracts at architecture/<file>; the contracts of the components it depends on at architecture/deps/<provider>/<file>
+    const assets = (pack.parts || []).filter((p) => p.kind === 'asset' || p.kind === 'dependency')
+      .map((p) => ({ ...p, rel: p.kind === 'dependency' ? `deps/${p.id.replace(/^dependency:/, '')}` : p.title }));
+    const names = new Set(assets.filter((p) => p.kind === 'asset').map((p) => p.title));
     for (const p of assets) {
-      const f = path.join(dir, 'architecture', p.title);
-      if (!fs.existsSync(f)) { add('blocking', 'asset-missing', L(`the pack's ${p.title} is not at architecture/${p.title} (rule 1: kept byte for byte)`, `el ${p.title} del pack no está en architecture/${p.title} (regla 1: se conserva byte a byte)`), `architecture/${p.title}`); continue; }
-      if (sha256(fs.readFileSync(f)) !== p.sha256) add('blocking', 'asset-modified', L(`architecture/${p.title} differs from the pack's bytes (rule 1: a contract change is the architecture's — escalate it, never edit the copy)`, `architecture/${p.title} difiere de los bytes del pack (regla 1: un cambio de contrato es de la arquitectura; se escala, nunca se edita la copia)`), `architecture/${p.title}`);
+      const f = path.join(dir, 'architecture', p.rel);
+      if (!fs.existsSync(f)) { add('blocking', 'asset-missing', L(`the pack's ${p.title} is not at architecture/${p.rel} (rule 1: kept byte for byte)`, `el ${p.title} del pack no está en architecture/${p.rel} (regla 1: se conserva byte a byte)`), `architecture/${p.rel}`); continue; }
+      if (sha256(fs.readFileSync(f)) !== p.sha256) add('blocking', 'asset-modified', L(`architecture/${p.rel} differs from the pack's bytes (rule 1: a contract change is the architecture's — escalate it, never edit the copy)`, `architecture/${p.rel} difiere de los bytes del pack (regla 1: un cambio de contrato es de la arquitectura; se escala, nunca se edita la copia)`), `architecture/${p.rel}`);
     }
     // a copy kept anywhere else escapes both checks above, so it is not allowed at all: rule 1 keeps the copies in architecture/
-    const bySha = new Map(assets.map((p) => [p.sha256, p.title]));
+    const bySha = new Map(assets.map((p) => [p.sha256, p.rel]));
     const outside = (f) => !f.startsWith('architecture/') && f !== '.architecture.json';
     let tracked = [];
     try { tracked = git(dir, 'ls-files', '-z').split('\0').filter(Boolean).filter(outside); } catch (e) { /* not a repository: nothing tracked to compare */ }
@@ -146,7 +149,7 @@ async function check(dir, opts = {}) {
       let changed = [];
       try { changed = git(dir, 'diff', '--name-only', `${opts.base}...HEAD`).split('\n').filter(Boolean).filter(outside); } catch (e) { /* no diff */ }
       const atBase = (f) => { const r = spawnSync('git', ['-C', dir, 'show', `${opts.base}:${f}`], { maxBuffer: 64 * 1024 * 1024 }); return r.status === 0 ? sha256(r.stdout) : null; };
-      const baseCopies = new Map(assets.map((p) => [atBase(`architecture/${p.title}`), p.title]).filter(([h]) => h));
+      const baseCopies = new Map(assets.map((p) => [atBase(`architecture/${p.rel}`), p.rel]).filter(([h]) => h));
       for (const f of changed) {
         if (flagged.has(f)) continue;
         const h = atBase(f), t = h && (baseCopies.get(h) || bySha.get(h));
@@ -154,7 +157,13 @@ async function check(dir, opts = {}) {
       }
     }
     const adir = path.join(dir, 'architecture');
-    if (fs.existsSync(adir)) for (const f of fs.readdirSync(adir)) if (!names.has(f)) add('warning', 'asset-unknown', L(`architecture/${f} is not an asset of the ${b.architecture_version} pack`, `architecture/${f} no es un asset del pack de ${b.architecture_version}`), `architecture/${f}`);
+    const depPaths = new Set(assets.filter((p) => p.kind === 'dependency').map((p) => p.rel));
+    const ddir = path.join(adir, 'deps');
+    if (fs.existsSync(ddir)) for (const pv of fs.readdirSync(ddir)) for (const f of (fs.statSync(path.join(ddir, pv)).isDirectory() ? fs.readdirSync(path.join(ddir, pv)) : [''])) {
+      const rel = f ? `deps/${pv}/${f}` : `deps/${pv}`;
+      if (!depPaths.has(rel)) add('warning', 'asset-unknown', L(`architecture/${rel} is not a dependency contract of the ${b.architecture_version} pack`, `architecture/${rel} no es un contrato de dependencia del pack de ${b.architecture_version}`), `architecture/${rel}`);
+    }
+    if (fs.existsSync(adir)) for (const f of fs.readdirSync(adir)) if (!names.has(f) && f !== 'deps') add('warning', 'asset-unknown', L(`architecture/${f} is not an asset of the ${b.architecture_version} pack`, `architecture/${f} no es un asset del pack de ${b.architecture_version}`), `architecture/${f}`);
   }
   // the commits the pull request adds
   if (opts.base) {

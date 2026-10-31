@@ -220,6 +220,9 @@ function chunksOf(root, facts, key) {
 }
 
 // ---- build packs, from the handoff kit only when it holds
+// a dependency's contract (11.1.0): the other end's interface, whole and byte for byte — the API a caller calls (this
+// component upstream), the events a consumer reads (this component downstream); its storage (DDL, Redis keys) is its own
+const DEP_API = /^(openapi\.ya?ml|schema\.graphql|schema\.proto)$/i, DEP_EVENTS = /^(asyncapi\.ya?ml|.*\.avsc)$/i;
 const ASSET_STEP = (f) => /^(openapi\.ya?ml|asyncapi\.ya?ml|schema\.graphql|schema\.proto|.*\.avsc)$/i.test(f) ? 'contracts' : /^(ddl\.sql|redis-key-schema\.md)$/i.test(f) ? 'data' : /^c4-descriptor\.md$/i.test(f) ? 'spec' : 'contracts';
 const RETIRED_ADR = /^(superseded|deprecated|rejected)\b/i;   // ADR status values no longer in force (the ADR skill writes them in English)
 const PLAN = [
@@ -243,7 +246,7 @@ function kitCheckDefault(hd) {
 function relinkParts(dir, parts) {
   const bySource = new Map(parts.filter((p) => p.source).map((p) => [p.source, p]));
   for (const p of parts) {
-    if (!/\.md$/i.test(p.path) || !p.source || p.kind === 'asset') continue;
+    if (!/\.md$/i.test(p.path) || !p.source || p.kind === 'asset' || p.kind === 'dependency') continue;
     const dst = path.join(dir, p.path), src = read(dst);
     const out = src.replace(/\]\(([^)\s#]+\.md)(#[^)\s]*)?\)/g, (m, target, anchor) => {
       if (/^[a-z][a-z0-9+.-]*:/i.test(target)) return m;
@@ -322,6 +325,20 @@ function buildPacks(root, facts, outDir, opts = {}) {
     const spec = path.join(hd, e.cut_sheet_file); const nn = path.basename(e.cut_sheet_file, '.md'); const assetsDir = path.join(hd, 'assets', nn);
     const seams = Object.entries(m.seams || {}).map(([k, s]) => { const [u, d] = k.split('→'); return { key: k, upstream: u, downstream: d, file: path.join(hd, s.seam_file), related_adrs: s.related_adrs || [] }; }).filter((s) => s.upstream === slug || s.downstream === slug);
     const assets = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir, { withFileTypes: true }).filter((d) => d.isFile() && d.name !== 'security.md').map((d) => d.name).sort() : [];
+    // the contracts of the components at the other end of its interfaces, from the same kit and the same architecture version
+    const deps = [];
+    for (const sm of seams) {
+      const other = sm.upstream === slug ? sm.downstream : sm.upstream, want = sm.upstream === slug ? DEP_API : DEP_EVENTS, oe = (m.cut_sheets || {})[other];
+      if (!oe || other === slug) continue;   // an external system's container carries no contract of the kit
+      if (oe.architecture_version !== version) { res.warnings.push(`${slug}: ${other}'s contracts are from architecture ${oe.architecture_version || 'unknown'} — no dependency part from it until its part of the kit is regenerated`); continue; }
+      const od = path.join(hd, 'assets', path.basename(oe.cut_sheet_file, '.md'));
+      if (!fs.existsSync(od)) continue;
+      for (const f of fs.readdirSync(od, { withFileTypes: true }).filter((d) => d.isFile() && want.test(d.name)).map((d) => d.name).sort()) {
+        const src = path.join(od, f);
+        if (failBy.has(path.resolve(src))) { res.warnings.push(`${slug}: ${other}'s ${f} fails kit-check — left out of its build pack`); continue; }
+        if (!deps.some((d) => d.provider === other && d.file === f)) deps.push({ provider: other, file: f, src });
+      }
+    }
     const security = path.join(assetsDir, 'security.md');   // security-obligations.js, its own part — kit-check holds every component to it
     const files = [spec, security, ...seams.map((s) => s.file), ...assets.map((a) => path.join(assetsDir, a))];
     const missing = files.filter((f) => !fs.existsSync(f)); const bad = files.filter((f) => failBy.has(f));
@@ -348,6 +365,8 @@ function buildPacks(root, facts, outDir, opts = {}) {
     add('spec', 'specification', 'Component Specification', spec, 'spec.md', 'spec');
     add('security', 'security', 'Security Obligations', security, 'security.md', 'security');
     assets.forEach((a) => add(`asset:${a}`, 'asset', a, path.join(assetsDir, a), path.join('assets', a), ASSET_STEP(a)));
+    deps.sort((x, y) => x.provider.localeCompare(y.provider) || x.file.localeCompare(y.file));
+    deps.forEach((d) => { add(`dependency:${d.provider}/${d.file}`, 'dependency', `${nameOf(d.provider)} — ${d.file}`, d.src, path.join('deps', d.provider, d.file), 'contracts'); partsOut[partsOut.length - 1].provider = d.provider; });
     seams.sort((a, b) => (a.upstream === slug ? 0 : 1) - (b.upstream === slug ? 0 : 1) || a.key.localeCompare(b.key))
       .forEach((s) => add(`interface:${s.key}`, 'interface', `Interface Contract: ${nameOf(s.upstream)} → ${nameOf(s.downstream)}`, s.file, path.join('interfaces', path.basename(s.file)), 'interfaces'));
     add('cross-cutting-standards', 'standards', 'Cross-Cutting Standards', shared['cross-cutting-standards'], 'cross-cutting-standards.md', 'standards');
@@ -489,7 +508,7 @@ const partText = (b, slug, p) => { const d = (b.packDirs || {})[slug]; if (!d ||
 const anyDebt = (d) => !!d && (d.added.length + d.removed.length + d.status.length) > 0;
 function componentChanges(o, n, slug) {
   const oc = (o.ledger.components || []).find((c) => c.slug === slug), nc = (n.ledger.components || []).find((c) => c.slug === slug);
-  const r = { component: slug, name: (nc || oc).name, status: !oc ? 'added' : !nc ? 'removed' : 'present', facts: [], contracts: null, interfaces: null, adrs: null, documents: [], flows: [], integrations: null, sections: null, open_questions: null, technical_debt: null };
+  const r = { component: slug, name: (nc || oc).name, status: !oc ? 'added' : !nc ? 'removed' : 'present', facts: [], contracts: null, dependencies: null, interfaces: null, adrs: null, documents: [], flows: [], integrations: null, sections: null, open_questions: null, technical_debt: null };
   if (oc && nc) for (const k of ['name', 'type', 'technology', 'internal_name', 'component_version', 'system']) if (JSON.stringify(oc[k] ?? null) !== JSON.stringify(nc[k] ?? null)) r.facts.push({ field: k, from: oc[k] ?? null, to: nc[k] ?? null });
   const op = o.packs[slug], np = n.packs[slug];
   // a pack's revision is the sha256 of its pack.json in the manifest — pack.json lists every part's hash, so any part moving moves it
@@ -503,6 +522,7 @@ function componentChanges(o, n, slug) {
     const byHash = (a, b) => { if (a.sha256 === b.sha256) return true; const ta = partText(o, slug, a), tb = partText(n, slug, b);
       const same = ta != null && tb != null && substance(ta, ov) === substance(tb, nv); if (same && !r.restamped.includes(b.title)) r.restamped.push(b.title); return same; };
     r.contracts = setDiff(parts(op, 'asset'), parts(np, 'asset'), (x) => x.title, byHash);
+    r.dependencies = setDiff(parts(op, 'dependency'), parts(np, 'dependency'), (x) => x.id.replace(/^dependency:/, ''), byHash);
     r.interfaces = setDiff(parts(op, 'interface'), parts(np, 'interface'), (x) => x.id.replace(/^interface:/, ''), byHash);
     r.adrs = setDiff(parts(op, 'adr'), parts(np, 'adr'), (x) => x.id.replace(/^adr:/, ''), byHash);
     for (const [id, label] of [['spec', 'Component Specification'], ['security', 'Security Obligations'], ['cross-cutting-standards', 'Cross-Cutting Standards'], ['runtime-view', 'System Runtime View'], ['instructions', 'Build instructions']]) {
@@ -539,10 +559,10 @@ function componentChanges(o, n, slug) {
   const sd = setDiff(ch(o), ch(n), (c) => c.id, (a, b) => a.content_hash === b.content_hash);
   const where = (b, id) => { const c = b.chunks.find((x) => x.id === id); return { file: c.meta.file, title: c.meta.title, kind: c.meta.kind }; };
   r.sections = { added: sd.added.map((id) => where(n, id)), removed: sd.removed.map((id) => where(o, id)), changed: sd.changed.map((id) => where(n, id)) };
-  r.changed = r.status !== 'present' || r.facts.length > 0 || [r.contracts, r.interfaces, r.adrs, r.integrations, r.sections].some((d) => d && anyOf(d)) || r.documents.length > 0 || r.flows.length > 0 || anyDebt(r.technical_debt) || ['added', 'removed'].includes(r.pack) || r.pack_revised || !!(r.open_questions && (r.open_questions.new.length || r.open_questions.resolved.length));
+  r.changed = r.status !== 'present' || r.facts.length > 0 || [r.contracts, r.dependencies, r.interfaces, r.adrs, r.integrations, r.sections].some((d) => d && anyOf(d)) || r.documents.length > 0 || r.flows.length > 0 || anyDebt(r.technical_debt) || ['added', 'removed'].includes(r.pack) || r.pack_revised || !!(r.open_questions && (r.open_questions.new.length || r.open_questions.resolved.length));
   // what the developer must act on: the code-facing parts moved — the contracts, an interface or an integration row naming it, its name / type / technology /
   // internal name, a budget, its spec. A component version alone is listed, not an action: it moves with any edit of the descriptor
-  r.action_required = r.status === 'removed' || r.facts.some((f) => ['name', 'type', 'technology', 'internal_name'].includes(f.field)) || !!(r.contracts && anyOf(r.contracts)) || !!(r.interfaces && anyOf(r.interfaces)) || anyOf(r.integrations) || r.flows.length > 0 || r.documents.includes('Component Specification') || r.documents.includes('Security Obligations');
+  r.action_required = r.status === 'removed' || r.facts.some((f) => ['name', 'type', 'technology', 'internal_name'].includes(f.field)) || !!(r.contracts && anyOf(r.contracts)) || !!(r.dependencies && anyOf(r.dependencies)) || !!(r.interfaces && anyOf(r.interfaces)) || anyOf(r.integrations) || r.flows.length > 0 || r.documents.includes('Component Specification') || r.documents.includes('Security Obligations');
   return r;
 }
 function diffBundles(oldDir, newDir, opts = {}) {
@@ -564,7 +584,7 @@ function renderChanges(d) {
     c.facts.forEach((f) => L.push(`- ${f.field}: ${JSON.stringify(f.from)} → ${JSON.stringify(f.to)}`));
     if (c.pack === 'added' || c.pack === 'removed') L.push(`- build pack ${c.pack}`);
     if (c.pack_revised && d.same_version) L.push(`- build pack replaced: revision ${c.pack_revision.from.slice(0, 12)} → ${c.pack_revision.to.slice(0, 12)}`);
-    list('contracts', c.contracts); list('interfaces', c.interfaces); list('ADRs', c.adrs); list('integrations', c.integrations);
+    list('contracts', c.contracts); list('dependency contracts', c.dependencies); list('interfaces', c.interfaces); list('ADRs', c.adrs); list('integrations', c.integrations);
     ((c.integrations || {}).fields || []).forEach((f) => L.push(`  - ${f.integration} ${f.field}: ${f.from ?? '—'} → ${f.to ?? '—'}`));
     if (c.documents.length) L.push(`- documents: ${c.documents.join(', ')}`);
     if (c.restamped && c.restamped.length) L.push(`- restamped — version, links or the debt table only: ${c.restamped.join(', ')}`);

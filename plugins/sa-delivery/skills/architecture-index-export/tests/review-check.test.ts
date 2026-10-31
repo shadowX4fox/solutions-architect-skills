@@ -19,10 +19,11 @@ const w = (rel: string, body: string) => { mkdirSync(join(SVC, rel, ".."), { rec
 const git = (...a: string[]) => spawnSync("git", ["-C", SVC, ...a], { encoding: "utf8", env: { ...process.env, GIT_CEILING_DIRECTORIES: TMP } }).stdout.trim();
 const commit = (m: string) => { git("add", "-A"); git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", m); };
 
-const packOf = (o: { version?: string; latest?: string; revision?: string; assets?: Record<string, string> } = {}) => async (a: any) => ({
+const packOf = (o: { version?: string; latest?: string; revision?: string; assets?: Record<string, string>; deps?: Record<string, string> } = {}) => async (a: any) => ({
   architecture_version: a.version || o.latest || "1.1.0", pack_revision: o.revision || REV,
   parts: [{ id: "spec", kind: "specification" }, { id: "security", kind: "security" }, { id: "interface:hub-api→stock-ledger", kind: "interface" },
-    ...Object.entries(o.assets || { "openapi.yaml": OPENAPI }).map(([t, body]) => ({ id: `asset:${t}`, kind: "asset", title: t, sha256: sha(body) }))],
+    ...Object.entries(o.assets || { "openapi.yaml": OPENAPI }).map(([t, body]) => ({ id: `asset:${t}`, kind: "asset", title: t, sha256: sha(body) })),
+    ...Object.entries(o.deps || {}).map(([k, body]) => ({ id: `dependency:${k}`, kind: "dependency", title: k, provider: k.split("/")[0], sha256: sha(body) }))],
 });
 // gh, as GitHub answers an issue of the architecture repository
 const issues: Record<string, { title: string; state: string; state_reason?: string; repository_url?: string }> = {
@@ -81,6 +82,24 @@ describe("review-check.js — the code checks", () => {
     expect(out.length).toBe(1);
     expect(out[0].text).toContain("was a copy of openapi.yaml");
     expect(codes(r, "blocking")).not.toContain("assets-mixed");
+  });
+
+  test("a dependency contract is held like its own: at architecture/deps/<provider>/, byte for byte, committed alone, never copied elsewhere", async () => {
+    const LEDGER = "openapi: 3.1.0\ninfo:\n  title: Stock Ledger\n  version: 2.0.0\n";
+    const pack = { deps: { "stock-ledger/openapi.yaml": LEDGER } };
+    let r = await run({ pack });
+    expect(r.findings.find((f: any) => f.code === "asset-missing").where).toBe("architecture/deps/stock-ledger/openapi.yaml");
+    w("architecture/deps/stock-ledger/openapi.yaml", LEDGER); commit(`architecture: contracts 1.1.0 (pack_revision ${REV.slice(0, 12)})`);
+    base = git("rev-parse", "HEAD");
+    r = await run({ pack });
+    expect(r.status).toBe("PASS");
+    w("architecture/deps/stock-ledger/openapi.yaml", LEDGER + "  x-mine: 1\n"); w("architecture/deps/old-svc/openapi.yaml", "x\n");
+    w("src/client/ledger.yaml", LEDGER); w("src/app.ts", "export const w = 4\n");
+    commit(`feat: w — architecture 1.1.0 ${REV.slice(0, 8)}`);
+    r = await run({ pack });
+    expect(codes(r, "blocking")).toEqual(expect.arrayContaining(["asset-modified", "assets-mixed", "asset-outside"]));
+    expect(r.findings.find((f: any) => f.code === "asset-outside").where).toBe("src/client/ledger.yaml");
+    expect(r.findings.filter((f: any) => f.code === "asset-unknown").map((f: any) => f.where)).toEqual(["architecture/deps/old-svc/openapi.yaml"]);
   });
 
   test("rule 8: a code commit with no stamp warns; a CI-only commit needs none and mixes with nothing", async () => {

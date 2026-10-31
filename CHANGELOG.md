@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.1.0]
+
+### Added
+
+- **A service's dependency contracts travel in its build pack.** Each pack carries, whole and byte for byte, the contracts of the components at the other end of its interfaces — the API of each one it calls (`openapi.yaml`, `schema.graphql`, `schema.proto`), the events of each one it reads (`asyncapi.yaml`, `*.avsc`), never their storage — as `dependency:<provider>/<file>` parts under `deps/<provider>/`, from the same kit at the same architecture version (a stale provider contributes nothing, with a warning). `--diff` reports them (`dependencies`), and a provider's contract change marks the consumer action required.
+- **BUILD.md rule 1**: a dependency contract is kept at `architecture/deps/<provider>/<file>`, the client generated from it, never edited.
+- **The architecture review holds dependency copies like the service's own**: `asset-missing` / `asset-modified` at `architecture/deps/…`, `assets-mixed` when committed with code, `asset-outside` for a copy kept anywhere else, `asset-unknown` for a file under `deps/` the pack does not carry.
+
+### Upgrade
+
+- Regenerate the index after the next handoff kit: a service whose new pack carries dependency contracts copies them to `architecture/deps/<provider>/` (committed alone) before its next pull request, or the review reports `asset-missing`. The architecture MCP server's own `what_changed` reports dependency changes once it supports the part kind (filed on its repository).
+
 ## [11.0.0]
 
 ### Removed

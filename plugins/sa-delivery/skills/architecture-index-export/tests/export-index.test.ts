@@ -137,6 +137,32 @@ describe("export-index — build packs", () => {
     expect(md).toContain("`adr:ADR-012` — ADR-012: Service mesh (`adrs/ADR-012-service-mesh.md`) — **context**, through the security obligations");
     expect(md).toContain("an `adr:` part marked **context** reaches this pack through an interface, a flow or the security section");
   });
+  test("a dependency's contract comes whole: the API of the component it calls, the events of the one upstream — never their storage, never a stale version", () => {
+    // Ledger Store (called by Hub API) exposes an API and a table; Web App (upstream of Hub API) publishes events
+    w("handoffs/assets/03-ledger-store/openapi.yaml", "openapi: 3.1.0\ninfo:\n  title: Ledger Store\n  version: 1.0.0\npaths: {}\n");
+    w("handoffs/assets/03-ledger-store/ddl.sql", "CREATE TABLE entries (id uuid);\n");
+    w("handoffs/assets/01-web-app/asyncapi.yaml", "asyncapi: 3.0.0\ninfo:\n  title: Web App\n  version: 1.0.0\n");
+    w("handoffs/assets/01-web-app/openapi.yaml", "openapi: 3.1.0\ninfo:\n  title: Web App\n  version: 1.0.0\npaths: {}\n");
+    const mf = JSON.parse(readFileSync(join(P, "handoffs/.manifest.json"), "utf8"));
+    mf.cut_sheets["ledger-store"] = { ...mf.cut_sheets["hub-api"], cut_sheet_file: "components/03-ledger-store.md" };
+    mf.cut_sheets["web-app"].architecture_version = "1.3.0";
+    w("handoffs/.manifest.json", JSON.stringify(mf));
+    const { out } = exportIndex(P, { kitCheck: clean });
+    const pack = JSON.parse(readFileSync(join(out, "buildpacks/hub-api/pack.json"), "utf8"));
+    const deps = pack.parts.filter((p: any) => p.kind === "dependency");
+    expect(deps.map((p: any) => [p.id, p.title, p.path, p.provider])).toEqual([
+      ["dependency:ledger-store/openapi.yaml", "Ledger Store — openapi.yaml", "deps/ledger-store/openapi.yaml", "ledger-store"],
+      ["dependency:web-app/asyncapi.yaml", "Web App — asyncapi.yaml", "deps/web-app/asyncapi.yaml", "web-app"]]);
+    expect(readFileSync(join(out, "buildpacks/hub-api/deps/ledger-store/openapi.yaml"))).toEqual(readFileSync(join(P, "handoffs/assets/03-ledger-store/openapi.yaml")));
+    expect(pack.plan.find((s: any) => s.id === "contracts").parts).toEqual(["asset:openapi.yaml", "dependency:ledger-store/openapi.yaml", "dependency:web-app/asyncapi.yaml"]);
+    expect(readFileSync(join(out, "buildpacks/hub-api/BUILD.md"), "utf8")).toContain("`architecture/deps/<provider>/<file>`");
+    // a provider whose part of the kit is another version contributes nothing, and says so
+    mf.cut_sheets["web-app"].architecture_version = "1.2.0"; w("handoffs/.manifest.json", JSON.stringify(mf));
+    const r2 = exportIndex(P, { kitCheck: clean });
+    const p2 = JSON.parse(readFileSync(join(r2.out, "buildpacks/hub-api/pack.json"), "utf8"));
+    expect(p2.parts.filter((p: any) => p.kind === "dependency").map((p: any) => p.id)).toEqual(["dependency:ledger-store/openapi.yaml"]);
+    expect(r2.manifest.warnings.join("\n")).toMatch(/hub-api: web-app's contracts are from architecture 1\.2\.0/);
+  });
   test("a superseded ADR the component still cites is left out of its pack, with a warning naming it", () => {
     w("adr/ADR-102-polling-cache.md", `# ADR-102: Polling cache\n\n**Status**: Superseded by [ADR-101]\n**Scope**: Project\n\n## Decision\n\nPoll every minute.\n`);
     w("docs/components/desk/02-hub-api.md", readFileSync(join(P, "docs/components/desk/02-hub-api.md"), "utf8").replace("related_adrs: ADR-101", "related_adrs: ADR-101, ADR-102"));
@@ -181,8 +207,8 @@ describe("export-index — build packs", () => {
     expect(md).toContain("Keep each one, byte for byte, at `architecture/<file>` in the repository");
     expect(md).toContain("its `sha256` must equal the part's");
     expect(md).toContain("`download_url`"); expect(md).toContain('"<download_url>?pack_revision=<pack_revision>"'); expect(md).toContain("a 409 means the pack was revised since"); expect(md).toContain("a 404 just after a release means the server instance that answered has not loaded it yet"); expect(md).toContain("for up to a minute — a 404 that stays is a missing part: report it");
-    expect(md).toContain("Overwrite the copies under `architecture/` with the new assets first (delete the ones it removes) and commit them alone — `architecture: contracts <new version> (pack_revision <new revision>)`");
-    expect(md).toContain("- [ ] every asset is committed under `architecture/`, its `sha256` equal to the part's");
+    expect(md).toContain("Overwrite the copies under `architecture/` with the new assets and dependency contracts first (delete the ones it removes) and commit them alone — `architecture: contracts <new version> (pack_revision <new revision>)`");
+    expect(md).toContain("- [ ] every asset is committed under `architecture/`, and every dependency contract under `architecture/deps/<provider>/`, its `sha256` equal to the part's");
     expect(md).toContain("### 3. Implement the API and message contracts exactly as written\n\n- `asset:openapi.yaml` — openapi.yaml (`assets/openapi.yaml`)");
     expect(md).toContain("| outbound | Hub API → Ledger Store | `interface:hub-api→ledger-store` |");
     expect(md).toContain("- `interface:hub-api→ledger-store` — Interface Contract: Hub API → Ledger Store (");

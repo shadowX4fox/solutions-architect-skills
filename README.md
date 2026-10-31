@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.0.0-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.1.0-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
