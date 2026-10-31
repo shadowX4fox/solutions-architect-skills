@@ -1,13 +1,14 @@
 # Alia — the architecture's navigator
 
-**Alia** is the guide to a documented architecture. She lives in two places:
+**Alia** is the guide to a documented architecture. She lives in three places:
 
 | Where | What it is | Produced by | For |
 |---|---|---|---|
 | **The command center** | An interactive 3D model of the architecture, one self-contained HTML file | `sa-visualization:architecture-command-center` | Architects, product owners, reviewers, new team members |
 | **The MCP server** | The architecture served to IDEs and build agents: search, exact facts, build packs | `sa-delivery:architecture-index-export` + the [Alia server](https://github.com/shadowX4fox/solutions-architect-knowledge-base) | Developers, their coding agents, and unattended build agents |
+| **Claude Code** | Her presence in the session: her codec over every reply, the next steps, the risk radar, the explorer, readable script rows, milestone cards, the write confirmations | the optional `sa-alia` plugin (named `sa-ux` before 1.0.0) | The architect working in the architecture repository |
 
-Both read only what the architecture documents state and write to none of them. Examples use **Order Desk**, a
+All three read only what the architecture documents state and write to none of them. Examples use **Order Desk**, a
 synthetic order-taking system with a container named **Hub API**.
 
 ---
@@ -427,8 +428,93 @@ On an update, the agent overwrites the copies under `architecture/` first and co
 (`architecture: contracts <version> (pack_revision <revision>)`), so the IDE and the pull request show the contract diff
 before any code moves.
 
+# Part 3 — In Claude Code
+
+`sa-alia` brings her into the Claude Code session that works on the architecture. It is optional and separate from the
+skills: it draws what they leave on disk and edits nothing. Install it once, at user scope:
+
+```bash
+claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user
+```
+
+She appears only in a project with an `ARCHITECTURE.md`; anywhere else the session is untouched. The screenshots come
+from the desktop app on the Northwind Reservas demo; the terminal image is drawn from the plugin's own output.
+
+## Her codec over every reply
+
+![A reply in her codec under a diagram, and the next-steps band under her escudo — desktop app](images/claude-code/reply-codec.webp)
+
+Every reply opens beside her mark and her name: her face on the desktop app, a ringed `✦` in the terminal. The face
+sits at the top of the reply, however long; the text is Claude Code's own and the stored message is unchanged
+(ctrl+o shows it as it was). The ring takes her mood only where she judges: calm on a reply, red for critical findings,
+amber for drift, green when all is clear. Option `replyCodec` turns it off.
+
+## Above the prompt: the next steps
+
+The band above the prompt box is marked by her **escudo**, not her face: the face in a ring is her voice, the band is
+what she offers. It carries one line on where the architecture stands — computed by code from the radar and the
+release state, never by a model — and up to three next steps (release, regenerate the handoff, rerun a stale analysis,
+recover a tag…). A click fills the prompt and never sends it.
+
+## `/alia`, `/radar`, `/arch`
+
+![The /alia pane: the architecture, its version and status, her line, the way to every view](images/claude-code/alia-pane.webp)
+
+`/alia` opens her pane: the architecture's name, version and status, her line, and the way to every view (release
+status, the radar, the explorer, the command center, the explainer video). `/radar` shows the findings of each
+analysis lens, the open debt and the stale reports; on the desktop, a trend per lens. `/arch` browses containers,
+integrations, ADRs and TDRs; a container's card draws its neighbourhood on the desktop app.
+
+![/arch on the desktop app: a container's card with its neighbourhood](images/claude-code/arch-card.webp)
+
+## In the transcript
+
+![The terminal: a reply in her codec, script rows read as their verdict, a milestone card, a write confirmation and the band](images/claude-code/cli.webp)
+
+- **Script rows read as their verdict.** A row that runs one of the suite's scripts shows what it is and what it said
+  (`✦ Gate de principios ✓ LAYER1: PASS — 0 blocking finding(s)`), the warnings counted, a failure's first findings in
+  view; ctrl+o shows the raw row.
+- **Milestone cards.** When a turn releases the architecture, re-runs an analysis or regenerates the handoff kit, she
+  places a card at that point: the version and its changelog entry, each lens's delta, the components whose
+  specification moved.
+- **Notifications.** A turn that ran 3 minutes or more ends with a notification of what it moved (`notifyAfterMinutes`,
+  0 turns it off).
+- **The spinner** says what an architect does (`Trazando costuras`, `Weighing trade-offs`); option `voice`.
+
+## The confirmations, in her look
+
+![Her codec over a question the session asks — desktop app](images/claude-code/question-codec.webp)
+
+They ask exactly when they ask today and decide exactly what they decide:
+
+- **A skill's own question** (a change set to approve, a choice) gets her codec on top; the dialog, its options and
+  the answer are Claude Code's.
+- **A write to the architecture that Claude Code would put to you** (`ARCHITECTURE.md`, `docs/`, `adr/`, `tdr/`) is
+  asked in her dialog, with the change previewed: the file, `+2 −1 líneas`, the lines. *Aplicar* runs it; *No aplicar*
+  or Esc refuses it. In auto mode, in a subagent, or where a write is already allowed, Claude Code's own path stands.
+
+## Options and surfaces
+
+| Option | Default | What it does |
+|---|---|---|
+| `replyCodec` | on | Every reply beside her mark |
+| `voice` | on | Her words on the spinner and the turn's closing line |
+| `notifyAfterMinutes` | 3 | A notification after a turn this long; 0 turns it off |
+
+Set them with `/plugin configure sa-alia@shadowx4fox-solution-architect-marketplace`.
+
+| | Desktop app | Terminal (CLI) |
+|---|---|---|
+| Her mark | Her face in the mood's ring; the escudo on the band | A ringed `✦`; a bare `✦` on the band |
+| Panes, rows, cards, confirmations | ✓ | ✓ |
+| Neighbourhood diagram, findings trend | ✓ | Lists and meters instead |
+| Footer label `✦ v1.10.2 Released` | Not drawn: the app's footer is its own | ✓ |
+
+---
+
 **See also**: every viewer behaviour in
 [VIEWER_REFERENCE.md](../plugins/sa-visualization/skills/architecture-command-center/VIEWER_REFERENCE.md), the scene
 contract in [SCENE_SCHEMA.md](../plugins/sa-visualization/skills/architecture-command-center/references/SCENE_SCHEMA.md),
-the export's rules in [its SKILL.md](../plugins/sa-delivery/skills/architecture-index-export/SKILL.md), and deployment
+the export's rules in [its SKILL.md](../plugins/sa-delivery/skills/architecture-index-export/SKILL.md), the plugin's history in
+[sa-alia's CHANGELOG](../plugins/sa-alia/CHANGELOG.md), and deployment
 and settings in [the Alia server's README](https://github.com/shadowX4fox/solutions-architect-knowledge-base).

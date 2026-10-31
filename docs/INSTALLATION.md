@@ -93,7 +93,7 @@ function-hook mods.
 claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user
 ```
 
-Coming from `sa-ux`: install `sa-alia` as above, then `claude plugin uninstall sa-ux --scope user` and `/reload-plugins` — an update does not carry a renamed plugin over.
+What she shows, with screenshots: [ALIA.md § In Claude Code](ALIA.md#part-3--in-claude-code). Coming from `sa-ux`: install `sa-alia` as above, then `claude plugin uninstall sa-ux --scope user` and `/reload-plugins` — an update does not carry a renamed plugin over.
 
 ### Install the npm packages
 

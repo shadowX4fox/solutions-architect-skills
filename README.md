@@ -156,7 +156,7 @@ and above the prompt box, next-step prompts, an architecture radar, `/alia`) —
 
 <img src="docs/images/brand/alia-explaining.webp" alt="Alia, the architecture's navigator, explaining beside a hologram panel" width="220" align="right">
 
-**Alia** is the architecture's navigator. She lives in two places.
+**Alia** is the architecture's navigator. She lives in three places.
 
 ### In the command center — a 3D model of your architecture
 
@@ -198,6 +198,24 @@ CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and
 `architecture-lifecycle`'s `ci/` adds the rest of the pipeline: release gates on every pull request, and on the merge of a
 release PR the tag, the index and the handoff kit edited by Claude into a pull request; on a RUN-team project, a Tier 0
 workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN_TEAMS.md)). While you write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
+
+### In Claude Code — her presence in the session
+
+<img src="docs/images/claude-code/reply-codec.webp" alt="Claude Code's desktop app: a reply in Alia's codec under a diagram, and the next-steps band under her escudo" width="420" align="right">
+
+The optional `sa-alia` plugin brings her into the session that works on the architecture, in any project with an
+`ARCHITECTURE.md`:
+
+- **Her codec over every reply** — her face on the desktop app, a ringed `✦` in the terminal; the text is Claude Code's own.
+- **The next steps** above the prompt, under her escudo — one line on where the architecture stands, a click fills the prompt.
+- **`/alia`, `/radar`, `/arch`** — the architecture's state, the findings by lens, the containers and their neighbourhood.
+- **Readable script rows** — `✦ Gate de principios ✓ LAYER1: PASS` instead of a raw command.
+- **Milestone cards** — a release, an analysis run, a regenerated handoff kit, placed where the turn made them.
+- **The confirmations in her look** — a write to the architecture Claude Code would ask about, shown with its change.
+
+It draws what the skills leave on disk and edits nothing. [docs/ALIA.md § In Claude Code](docs/ALIA.md#part-3--in-claude-code).
+
+<br clear="right">
 
 ### Her look
 
