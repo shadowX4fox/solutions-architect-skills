@@ -391,7 +391,7 @@ function status(root, opts = {}) {
   if (sl.increments.length) r.increments = { file: sl.file, list: sl.increments.map((x) => ({ id: x.id, target: x.target, use_cases: x.use_cases, flows: x.flows, containers: x.containers.length, new_containers: x.new.containers, integrations: x.integrations.length, new_integrations: x.new.integrations.length, gaps: x.gaps, released_in: deliveredIn(cl, x.id) })), unassigned: sl.unassigned, duplicates: sl.duplicates, temporary: sl.temporary, temporary_gaps: sl.temporary_gaps };
   r.next = { draft: `release my architecture — first release, v${version}`, changed: `release my architecture — ${r.changes.length} change(s) since v${version}, recommended ${r.recommended || 'patch'}`,
     untagged: `tag ${TAG(version)} on the commit that released it (lifecycle.js tag) — a release merged through its pull request is tagged after the merge`, released: r.downstream.some((d) => d.stale) ? 'refresh the stale downstream artifacts listed' : 'nothing due', deprecated: 'nothing — the architecture is deprecated' }[r.state];
-  // the last status on disk, for readers that cannot run git (sa-ux's next steps)
+  // the last status on disk, for readers that cannot run git (sa-alia's next steps)
   try { const d = path.join(root, '.cache', 'sa-skills', 'lifecycle'); fs.mkdirSync(d, { recursive: true }); fs.writeFileSync(path.join(d, 'status.json'), JSON.stringify({ state: r.state, version, changes: r.changes.length, recommended: r.recommended, at: new Date().toISOString() }) + '\n'); } catch { /* read-only project */ }
   return r;
 }

@@ -20,7 +20,7 @@
  *  7. Every plugins/<name>/ is a plugin of the marketplace: its own .claude-plugin/plugin.json named <name>,
  *     a marketplace entry with source ./plugins/<name> at the same version, and a place in sa-skills'
  *     `dependencies`. Its version is sa-skills' unless the catalog's `plugins.<name>.cadence` is
- *     `independent` (sa-ux: released on its own cadence) — a release that bumps one
+ *     `independent` (sa-alia: released on its own cadence) — a release that bumps one
  *     and not the other fails here.
  *
  * Usage: bun scripts/check-skill-catalog.ts            # exits 1 on any error
@@ -208,7 +208,7 @@ export function check(root: string): { errors: string[]; catalog: Catalog; edges
         const want = independent ? m.version : main.version;
         if (entry.version !== want) errors.push(`plugins/${name}: marketplace version ${entry.version}, ${independent ? "its plugin.json" : "sa-skills"} is ${want}`);
       }
-      // an optional plugin (the catalog's `plugins.<name>.optional: true` — sa-ux, a UX layer) is installed on its own and
+      // an optional plugin (the catalog's `plugins.<name>.optional: true` — sa-alia, a UX layer) is installed on its own and
       // must not be forced on every sa-skills user; every other one is a dependency of sa-skills
       const isDep = (main.dependencies ?? []).some((d: any) => (typeof d === "string" ? d.split("@")[0] : d?.name) === name);
       if (catalog.plugins?.[name]?.optional) { if (isDep) errors.push(`plugins/${name}: optional, yet in sa-skills' dependencies — remove it there, or drop \`optional\``); }

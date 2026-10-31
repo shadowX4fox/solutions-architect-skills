@@ -15,5 +15,5 @@
     "rootDir": "./"
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "plugins/sa-ux"]
+  "exclude": ["node_modules", "dist", "plugins/sa-alia"]
 }

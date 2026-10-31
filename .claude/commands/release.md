@@ -21,7 +21,7 @@ If no argument is provided, default to `patch`.
    - Installation verification line: `v OLD_VERSION` → `v NEW_VERSION`
    - § Releases holds **one** entry: replace it with `### vNEW_VERSION (Current Release) ✅` and a short summary of this release (infer from git log / staged changes). The README never accumulates releases
    - Add `## [NEW_VERSION]` at the top of `CHANGELOG.md` (Keep a Changelog: `### Added` / `### Changed` / `### Fixed`, one line per change, plus upgrade steps when a plugin or dependency is added)
-4. **Update version** in the version files (sa-skills and the plugins under `plugins/` move together, except sa-ux, which versions itself — `check:catalog` fails on drift):
+4. **Update version** in the version files (sa-skills and the plugins under `plugins/` move together, except sa-alia, which versions itself — `check:catalog` fails on drift):
    - `.claude-plugin/plugin.json`, `package.json` → `"version": "NEW_VERSION"`
    - `.claude-plugin/marketplace.json` → the `sa-skills`, `sa-records` and `sa-requirements` entries
    - `plugins/sa-records/.claude-plugin/plugin.json`, `plugins/sa-requirements/.claude-plugin/plugin.json`

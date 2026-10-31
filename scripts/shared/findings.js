@@ -300,7 +300,7 @@ function archiveOlder(file) {
 module.exports = { archiveOlder, MITIGATION_COL, WHAT_COL, NONE_CELL, MITIGATION_PRESENT, mitigationOf, residualSeverity, whatOf, enrich, judgeMitigations, plain, norm, cells, FINDING_ID, INVENTORY_ROW, ID_HEADER, NAME_COL, TIER_COL, SEVERITY_COL, TIER_HEADER, LOCALIZED_HEADER, PREFIX_SEVERITY, TIER_SEVERITY, LENS_ID, LENSES, SEV, idPrefix, prefixSeverity, columnSeverity, tierSeverity, labelOf, lensOf, dateOf, collect, extractMarkdown, extractHtml, checkReport };
 
 // CLI (8.116.0): the findings of the newest report of each lens, counted by severity and by residual severity — what a
-// dashboard (sa-ux's risk radar) reads instead of parsing reports itself, so the contract stays this file's alone.
+// dashboard (sa-alia's risk radar) reads instead of parsing reports itself, so the contract stays this file's alone.
 //   bun scripts/shared/findings.js <analysis-dir> [--json]
 //   bun scripts/shared/findings.js <analysis-dir> --archive   — every earlier report of each lens to archive/ (8.117.0)
 // One row per lens: { lens, date, file, total, severity: { critical, high, medium, low }, residual: { … } }; a report

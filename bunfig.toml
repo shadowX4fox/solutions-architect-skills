@@ -1,3 +1,3 @@
 [test]
-# plugins/sa-ux holds Claude Code mods: their tests import `claude-code/testing` and run under `claude plugin test plugins/sa-ux`
-pathIgnorePatterns = ["plugins/sa-ux/**"]
+# plugins/sa-alia holds Claude Code mods: their tests import `claude-code/testing` and run under `claude plugin test plugins/sa-alia`
+pathIgnorePatterns = ["plugins/sa-alia/**"]

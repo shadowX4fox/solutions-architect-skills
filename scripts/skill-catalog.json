@@ -204,7 +204,7 @@
     "plugins/sa-delivery/agents/generators/docs-export-generator.md": "architecture-docs-export"
   },
   "plugins": {
-    "sa-ux": {
+    "sa-alia": {
       "cadence": "independent",
       "optional": true,
       "why": "a UX layer of Claude Code mods: installed by whoever wants it, never as a dependency, and released on the mods' own cadence"

@@ -1,0 +1,41 @@
+{
+  "name": "sa-alia",
+  "version": "1.0.0",
+  "description": "Alia in Claude Code, for sa-skills (formerly sa-ux): her codec over every reply and above the prompt box (where the architecture stands, next steps computed from the project's files), /alia, /radar and /arch, the suite's script rows read as their verdict, milestone cards, notifications after long turns, today's write confirmations in her look, her words on the spinner. Her face where the surface draws pictures, her sparkle in the terminal. Optional; reads what the skills write and never edits an architecture document.",
+  "author": {
+    "name": "shadowX4fox",
+    "url": "https://github.com/shadowX4fox"
+  },
+  "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "alia",
+    "mods",
+    "next-steps",
+    "navigator"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "voice": {
+      "type": "boolean",
+      "title": "Alia's words on the spinner",
+      "description": "Inside an architecture, the spinner and the turn's closing line say what an architect does (Tracing seams, Weighing trade-offs) instead of the engine's words.",
+      "default": true
+    },
+    "notifyAfterMinutes": {
+      "type": "number",
+      "title": "Notify after a long turn (minutes)",
+      "description": "When a turn in an architecture runs at least this many minutes, Alia sends a notification with what it moved (a release, analyses, the handoff kit) or her line. 0 turns it off.",
+      "default": 3
+    },
+    "replyCodec": {
+      "type": "boolean",
+      "title": "Replies in Alia's codec",
+      "description": "Inside an architecture, every reply is drawn beside Alia's mark (her face on the desktop app, her ringed sparkle in the terminal). The stored message is unchanged.",
+      "default": true
+    }
+  },
+  "icon": "./.claude-plugin/icon.png"
+}

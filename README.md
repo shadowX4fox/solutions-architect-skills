@@ -149,8 +149,8 @@ Make a video of the architecture                        → architecture-video
 ```
 
 Full guide: [docs/INSTALLATION.md](docs/INSTALLATION.md) · a first architecture, step by step:
-[docs/QUICK_START.md](docs/QUICK_START.md). Optional: `sa-ux`, a small UX layer drawn inside Claude Code in Alia's voice (her codec
-above the prompt box, next-step prompts, an architecture radar, `/alia`) — `claude plugin install sa-ux@shadowx4fox-solution-architect-marketplace --scope user`.
+[docs/QUICK_START.md](docs/QUICK_START.md). Optional: `sa-alia`, Alia in Claude Code (her codec over every reply
+and above the prompt box, next-step prompts, an architecture radar, `/alia`) — `claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user`.
 
 ## Meet Alia
 

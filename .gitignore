@@ -60,8 +60,8 @@ yarn-error.log*
 tools/claim-sweep/claims/*.claim.json
 !tools/claim-sweep/claims/example-*.claim.json
 
-# written by Claude Code when it loads the sa-ux mods (editor types), never committed
-plugins/sa-ux/.claude-plugin/types/
+# written by Claude Code when it loads the sa-alia mods (editor types), never committed
+plugins/sa-alia/.claude-plugin/types/
 
 # check-generic.ts: the maintainer's reference projects, one path per line — never committed
 .sa-reference-projects
