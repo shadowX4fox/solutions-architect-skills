@@ -7,16 +7,18 @@ Capacity tables, a demand row and three small analysis reports so that Analysis 
 SKILL=plugins/sa-visualization/skills/architecture-command-center
 OUT=$(mktemp -d)
 bun scripts/docs-screenshots/build-showcase.ts $PWD/$SKILL $OUT/proj
+bun scripts/shared/packs.js --declare none --project $OUT/proj   # the plugin's own skins, whatever packs this machine has
 SCENE=$OUT/proj/visualizations/architecture-command-center.scene.json
 bun $SKILL/scripts/scene-from-docs.js $OUT/proj --base $SCENE --out $SCENE
 bun $SKILL/scripts/dossier.js $OUT/proj $SCENE --write
 bun $SKILL/scripts/render.js $SCENE $OUT/showcase.html
+bun $SKILL/scripts/render.js $SCENE $OUT/showcase-holo.html --theme holo
 bun $SKILL/scripts/render.js $SCENE $OUT/showcase-atlas.html --theme atlas
 bun $SKILL/scripts/render.js $SCENE $OUT/showcase-corporate.html --theme corporate
 # a Chrome binary, e.g. Puppeteer's: bunx puppeteer browsers install chrome
 bun scripts/docs-screenshots/capture.ts <chrome> docs/images/command-center \
   "$OUT/showcase.html::logical=;physical=v;analysis=v;simulation=v" "$OUT/showcase.html::alia=a" \
-  "$OUT/showcase-atlas.html::atlas=" "$OUT/showcase-corporate.html::corporate="
+  "$OUT/showcase-holo.html::holo=" "$OUT/showcase-atlas.html::atlas=" "$OUT/showcase-corporate.html::corporate="
 ```
 
 `capture.ts` drives headless Chrome over the DevTools protocol with real key presses (`v` cycles the views, `a` opens

@@ -16,7 +16,7 @@ synthetic order-taking system with a container named **Hub API**.
 
 ![The Logical view: a floor per layer, a block per container, the "Place an order" use case lit phase by phase](images/command-center/logical.webp)
 
-*The synthetic Order Desk example in the `holo` skin — the Logical view, walking the "Place an order" use case.*
+*The synthetic Order Desk example in the `alia` skin, the default — the Logical view, walking the "Place an order" use case, Alia's tip in the codec.*
 
 ## What it renders
 
@@ -96,7 +96,7 @@ view ring gains **Analysis**, with one entry per report.
   drawn hollow. The rail filters by severity and by *Open · Mitigated*.
 - Selecting a block stacks its findings as flags over it (up to eight, then `+N`); each opens the finding in Alia.
 - Findings that name no container (a process, a missing control) stay in the list, marked with a dash.
-- `holo` ranks findings `LV S · A · B · C · D`; `atlas` and `corporate` state priorities `P1 … P5`.
+- `alia` and `holo` rank findings `LV S · A · B · C · D`; `atlas` and `corporate` state priorities `P1 … P5`.
 
 ## Simulation mode — load against capacity
 
@@ -183,13 +183,15 @@ on the stage. Her voice (browser speech synthesis) is off until switched on in S
 
 ## Skins
 
-| `atlas` | `corporate` |
-|---|---|
-| ![The atlas skin](images/command-center/atlas.webp) | ![The corporate skin](images/command-center/corporate.webp) |
+| `holo` | `atlas` | `corporate` |
+|---|---|---|
+| ![The holo skin](images/command-center/holo.webp) | ![The atlas skin](images/command-center/atlas.webp) | ![The corporate skin](images/command-center/corporate.webp) |
+
+Every other shot on this page is the default, `alia`.
 
 | Skin | Look |
 |---|---|
-| `alia` (default) | Alia's hologram on night: aqua and silver blocks, round frosted panels, her face in the codec and the Alia dialog, changing with her mood. Dark only |
+| `alia` (default) | Alia's hologram on night: aqua and silver blocks, round frosted panels, her face in the codec and the Alia dialog — one face per mood (calm, thinking, pleased, worried, stern), talking while a calm, thinking or pleased line types. Game ranks. Dark only |
 | `holo` | Retro sci-fi hologram: self-lit cyan blocks over an indigo grid, game ranks. Dark only |
 | `atlas` | Neutral and formal, IBM Plex, priorities. Light and dark |
 | `corporate` | Neutral business palette, slate and teal, rounded cards. Light only; the base to copy for a brand |
