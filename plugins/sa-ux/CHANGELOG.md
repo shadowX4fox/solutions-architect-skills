@@ -2,7 +2,13 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.10.0]
+## [0.11.0]
+
+### Added
+
+- **Every reply in her codec**, inside an architecture: her mark (her calm face on the desktop app, the ringed sparkle in the terminal) and «Alia» beside a reply's first block, the blocks after it aligned under it, so a reply reads as one codec. The text is the engine's own drawing and the stored message is untouched (ctrl+o shows it as it was); summaries between tool calls stay plain. Her face is the calm one: a reply is her voice, the mood ring stays for her judgements. Option `replyCodec` (default on) turns it off.
+
+
 
 ### Changed
 

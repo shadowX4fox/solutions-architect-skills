@@ -61,7 +61,7 @@ function engine(on: On) {
   on('ui.status', () => ({ value: undefined }))
   on('ui.open', (_$, e) => { box.opened.push(e.id); return { value: { isPlaced: true } } })
   on('ui.place', (_$, e) => { box.placed.push(e.id); return { value: { isPlaced: true, requestId: e.id } } })
-  on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return (e.component === 'AskUserQuestion' ? { type: 'engine', ref: 0 } : { type: 'Text', props: {}, children: [''] }) as never })
+  on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return (e.component === 'AskUserQuestion' || e.component === 'AssistantMessage' ? { type: 'engine', ref: 0 } : { type: 'Text', props: {}, children: [''] }) as never })
   on('classic.UserPromptSubmit', () => ({}) as never)   // the engine's own drawing: nothing
   return box
 }
@@ -271,6 +271,31 @@ describe('sa-ux, end to end on every surface', () => {
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
       const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AskUserQuestion', props: { tool: 'AskUserQuestion', questions: [{ question: '¿Aplico los 3 cambios?', header: 'Cambios', options: [], multiSelect: false }] } })
       expect(await ui.find({ type: 'Text', text: /Nada cambia sin tu sí/ })).toBeDefined()
+      await ui.unmount()
+    })
+
+    test(`${surface}: every reply in her codec — the mark and name on its first block, the rest aligned, summaries plain`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const first = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AssistantMessage', props: { text: 'Ya revisé las ramas.', isFirstOfReply: true } })
+      expect(await first.find({ type: 'Text', text: 'Alia' })).toBeDefined()
+      expect(await first.find({ type: surface === 'terminal' ? 'Text' : 'Svg', ...(surface === 'terminal' ? { text: '✦' } : {}) })).toBeDefined()
+      await first.unmount()
+      const later = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AssistantMessage', props: { text: 'Y algo más.', isFirstOfReply: false } })
+      expect(await later.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
+      await later.unmount()
+      const n = box.drawn.filter((d) => d.component === 'AssistantMessage').length
+      const summary = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AssistantMessage', props: { text: 'resumen', isFirstOfReply: true, isSummary: true } })
+      expect(await summary.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
+      await summary.unmount()
+      expect(box.drawn.filter((d) => d.component === 'AssistantMessage').length).toBe(n + 1)   // passed to the engine
+    })
+
+    test(`${surface}: replyCodec off leaves replies as they are`, { options: { replyCodec: false } }, async ($, on) => {
+      engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AssistantMessage', props: { text: 'hola', isFirstOfReply: true } })
+      expect(await ui.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
       await ui.unmount()
     })
 
