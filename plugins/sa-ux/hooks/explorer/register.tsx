@@ -97,7 +97,7 @@ export function registerExplorer(on: On) {
                   <Box flexDirection="column" flexShrink={1}>{c.lines.map(([k, v]) => <Text key={`v-${k}`} wrap="truncate-end">{v}</Text>)}</Box>
                 </Box>
               )}
-              {map && Svg ? <Box marginTop={1}><Svg source={map} alt={es ? `Vecindario de ${c.title}` : `${c.title}'s neighbourhood`} isInteractive /></Box> : null}
+              {map && Svg ? <Box marginTop={1}><Svg source={map} alt={es ? `Vecindario de ${c.title}` : `${c.title}'s neighbourhood`} /></Box> : null}
               {c.lists.map((l) => (
                 <Box key={`list-${l.label}`} flexDirection="column" marginTop={1}>
                   <Text dimColor>{`${l.label} ${GLYPH.dot} ${l.items.length}`}</Text>

@@ -2,7 +2,14 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.9.0]
+## [0.9.1]
+
+### Fixed
+
+- **Her face in the `/alia` pane on the desktop app**: the pane drew nothing where her face goes — it was the one picture asked for as interactive (for a talking moment), and the desktop app draws an interactive picture as nothing inside a pane (seen live, 2026-10-31). Her face is a still picture everywhere now, as in the transcript and the band, which drew it; the talking moment is gone.
+- **The neighbourhood diagram (`/arch`) and the findings trend (`/radar`) on the desktop app** are still pictures for the same reason — both sit inside a pane. Their hover tooltips go with it; the `I-nn` and protocol stay drawn on each link, and the dates and counts stay in the radar's columns.
+
+
 
 ### Added
 

@@ -1,6 +1,5 @@
 // sa-ux · Alia — the suite's navigator, present in Claude Code: `/alia` opens her codec over the architecture (where it
-// stands, her line, the way to every view, each a draft in the prompt) — on the desktop her face speaks for a moment
-// when it opens —, and while
+// stands, her line, the way to every view, each a draft in the prompt), and while
 // a turn runs in an architecture the spinner says what an architect does. Her line is composed by code (voice.ts); she
 // never sends a prompt and never edits a document.
 import { atom, read } from 'claude-code'
@@ -48,7 +47,7 @@ export function registerAlia(on: On, options: PluginOptions) {
     const status = say.status === 'Released' ? TONE.ok : say.status === 'Deprecated' ? TONE.critical : TONE.high
     return (
       <Box flexDirection="column" gap={1}>
-        <Codec els={els} say={say} svg={await portrait($, e.surface, say.mood, true)} interactive
+        <Codec els={els} say={say} svg={await portrait($, e.surface, say.mood)}
           kicker={say.name || (es ? 'arquitectura' : 'architecture')}>
           <Box flexDirection="row" gap={1}>
             {say.version ? <Text bold>{`v${say.version}`}</Text> : null}

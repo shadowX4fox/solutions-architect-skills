@@ -63,7 +63,7 @@
       "name": "sa-ux",
       "source": "./plugins/sa-ux",
       "description": "Optional UX layer for a solution architect working with sa-skills, in Alia's voice: Claude Code mods that draw the architecture's state — Alia's codec above the prompt box with one line on where the architecture stands and the next steps computed from the project's files, /alia, /radar and /arch panes, her words on the spinner. Her face where the surface draws pictures (the desktop app), her ringed sparkle in the terminal. Reads what the skills write; never edits an architecture document. Needs a Claude Code build with function-hook mods.",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "author": {
         "name": "shadowX4fox"
       }

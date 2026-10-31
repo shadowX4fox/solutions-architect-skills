@@ -28,20 +28,20 @@ async function face($: EngineInterface, file: string): Promise<string | null> {
  * Her codec picture for a surface that draws `Svg`, null in the terminal (whose element table still answers `Svg`, with an
  * empty box) or where the face cannot be read.
  */
-export async function portrait($: EngineInterface, surface: string, mood: Mood, talk = false): Promise<string | null> {
+export async function portrait($: EngineInterface, surface: string, mood: Mood): Promise<string | null> {
   if (surface === 'terminal') return null
   const f = await face($, FACE[mood])
   if (!f) return null
-  return codecSvg(f, RING[mood], talk ? (await face($, FACE['talk'])) ?? undefined : undefined)
+  return codecSvg(f, RING[mood])
 }
 
 type Els = { Box: any; Text: any; Svg?: any }
 
 /** The mark: her face where a picture can be drawn, else the sparkle in the mood's ring. */
-export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: boolean; interactive?: boolean }) {
+export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: boolean }) {
   const { Box, Svg, Text } = props.els
   if (props.show === false) return null
-  if (props.svg && Svg) return <Svg source={props.svg} alt={`Alia, ${props.mood}`} width={FACE_PX + 8} height={FACE_PX + 8} isInteractive={props.interactive} />
+  if (props.svg && Svg) return <Svg source={props.svg} alt={`Alia, ${props.mood}`} width={FACE_PX + 8} height={FACE_PX + 8} />
   return (
     <Box borderStyle="round" borderColor={RING_TONE[props.mood]} paddingX={1}>
       <Text color={ALIA.aquaMark} bold>{GLYPH.brand}</Text>
@@ -50,12 +50,12 @@ export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: b
 }
 
 /** The codec: her mark, then «Alia · <kicker>» and her line, then whatever the caller puts beneath. */
-export function Codec(props: { els: Els; say: Pick<AliaLine, 'mood' | 'line'> | null; kicker: string; svg: string | null; showMark?: boolean; interactive?: boolean; children?: unknown }) {
+export function Codec(props: { els: Els; say: Pick<AliaLine, 'mood' | 'line'> | null; kicker: string; svg: string | null; showMark?: boolean; children?: unknown }) {
   const { Box, Text } = props.els
   const mood: Mood = props.say ? props.say.mood : 'calm'
   return (
     <Box flexDirection="row" gap={1}>
-      <Mark els={props.els} mood={mood} svg={props.svg} show={props.showMark} interactive={props.interactive} />
+      <Mark els={props.els} mood={mood} svg={props.svg} show={props.showMark} />
       <Box flexDirection="column" flexGrow={1}>
         <Box flexDirection="row" gap={1}>
           <Text color={ALIA.aquaMark} bold>{props.showMark === false ? `${GLYPH.brand} Alia` : 'Alia'}</Text>

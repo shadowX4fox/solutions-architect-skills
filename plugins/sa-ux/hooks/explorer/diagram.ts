@@ -1,6 +1,6 @@
 // sa-ux · explorer — a container's neighbourhood as SVG, for the card on surfaces that draw pictures: the container in the
-// middle, what calls it on the left, what it calls on the right, each link its `I-nn` and protocol, a tooltip on every
-// element. Drawn on Alia's night ground (her palette), so it reads the same on a light or a dark app. Live integrations
+// middle, what calls it on the left, what it calls on the right, each link its `I-nn` and protocol drawn on it (a still
+// picture: the desktop draws an interactive one as nothing inside a pane, so the `<title>`s are for a screen reader). Drawn on Alia's night ground (her palette), so it reads the same on a light or a dark app. Live integrations
 // only; a node outside the architecture is silver, inside it aqua. Pure: the card draws what this returns.
 import type { ExplorerFacts } from '../../types'
 import { ALIA } from '../alia/palette'

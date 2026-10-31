@@ -108,7 +108,7 @@ describe('sa-ux, end to end on every surface', () => {
       expect(await card.find({ type: 'Text', text: /● en alcance/ })).toBeDefined()
       expect(await card.find({ type: 'Text', text: /I-05/ })).toBeDefined()
       expect(await card.find({ type: 'Text', text: /1 entrante, 0 salientes — gobernado por ADR-120/ })).toBeDefined()
-      if (surface === 'desktop') expect(await card.find({ type: 'Svg', props: { isInteractive: true } } as never)).toBeDefined()   // her map of its neighbourhood
+      if (surface === 'desktop') expect(await card.find({ type: 'Svg' })).toBeDefined()   // her map of its neighbourhood
       await card.press({ key: 'act-1' })
       expect(box.text).toBe('genera el handoff del Servicio de Alta')
       await card.unmount()

@@ -1,6 +1,6 @@
 {
   "name": "sa-ux",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A solution architect's UX layer for sa-skills, in Alia's voice: mods that draw the architecture's state inside Claude Code — Alia's codec above the prompt box (her line on where the architecture stands, next steps computed from the project's files, a click filling the prompt), /alia, /radar and /arch, her words on the spinner. Optional; reads what the skills write and never edits an architecture document.",
   "author": {
     "name": "shadowX4fox",

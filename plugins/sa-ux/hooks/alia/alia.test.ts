@@ -14,15 +14,12 @@ const radar = (lenses: { lens: string; critical: number; high: number; stale?: b
 })
 
 describe('Alia codec picture', () => {
-  test('her face in a disc, the mood ring around it; talking adds the open mouth for a moment, then her mood holds', () => {
+  test('her face in a disc, the mood ring around it, a still picture', () => {
     const svg = codecSvg('QUJD', RING.stern)
     expect(svg).toContain('href="data:image/webp;base64,QUJD"')
     expect(svg).toContain(`stroke="${RING.stern}"`)
     expect(svg).not.toContain('<animate')
-    const talk = codecSvg('QUJD', RING.calm, 'WFla')
-    expect(talk).toContain('base64,WFla')
-    expect(talk).toMatch(/repeatCount="5" fill="freeze"/)
-    expect(talk.length).toBeLessThan(131072)
+    expect(svg.length).toBeLessThan(131072)
   })
   test('every mood has a face and a ring', () => {
     for (const m of MOODS) { expect(FACE[m]).toMatch(/^face-.+\.webp$/); expect(RING[m]).toMatch(/^#[0-9a-f]{6}$/) }

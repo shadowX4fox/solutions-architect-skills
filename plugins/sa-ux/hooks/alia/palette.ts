@@ -24,15 +24,14 @@ export const FACE: Record<Mood, string> = {
 export const FACE_PX = 64
 
 /**
- * The codec as SVG: her face clipped to a disc on `night-2`, the mood's ring around it. With `talk`, the open-mouth face
- * blinks over the mood's for a moment (SMIL, drawn only where the surface runs it), then her mood holds.
+ * The codec as SVG: her face clipped to a disc on `night-2`, the mood's ring around it. A still picture: the desktop app
+ * draws it as an image in the transcript, the band and a pane alike (an interactive one draws nothing in a pane).
  */
-export function codecSvg(face: string, ring: string, talk?: string): string {
+export function codecSvg(face: string, ring: string): string {
   const S = FACE_PX + 8, c = S / 2, r = FACE_PX / 2
   const img = (b64: string, extra = '') => `<image href="data:image/webp;base64,${b64}" x="4" y="4" width="${FACE_PX}" height="${FACE_PX}" clip-path="url(#d)"${extra}/>`
-  const talking = talk ? img(talk, ' opacity="0"') .replace('/>', `><animate attributeName="opacity" values="1;0" dur="0.28s" repeatCount="5" fill="freeze" calcMode="discrete"/></image>`) : ''
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">`
     + `<defs><clipPath id="d"><circle cx="${c}" cy="${c}" r="${r}"/></clipPath></defs>`
-    + `<circle cx="${c}" cy="${c}" r="${r}" fill="${ALIA.night2}"/>${img(face)}${talking}`
+    + `<circle cx="${c}" cy="${c}" r="${r}" fill="${ALIA.night2}"/>${img(face)}`
     + `<circle cx="${c}" cy="${c}" r="${r + 2}" fill="none" stroke="${ring}" stroke-width="3"/></svg>`
 }

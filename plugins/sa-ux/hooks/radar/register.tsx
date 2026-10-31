@@ -95,7 +95,7 @@ export function registerRadar(on: On) {
                 {r.trend && lenses.some((l) => (r.trend![l.lens] || []).length > 1) && (els as { Svg?: unknown }).Svg ? col('c-trend', es ? 'tendencia' : 'trend', lenses.map((l) => {
                   const svg = sparkline(r.trend![l.lens] || [], r.lang)
                   const Svg = (els as { Svg?: any }).Svg
-                  return svg ? <Svg key={`s-${l.lens}`} source={svg} alt={es ? `tendencia de ${l.lens}` : `${l.lens} trend`} width={SPARK_W} height={SPARK_H} isInteractive /> : <Text key={`s-${l.lens}`} dimColor>—</Text>
+                  return svg ? <Svg key={`s-${l.lens}`} source={svg} alt={es ? `tendencia de ${l.lens}` : `${l.lens} trend`} width={SPARK_W} height={SPARK_H} /> : <Text key={`s-${l.lens}`} dimColor>—</Text>
                 })) : null}
                 {col('c-age', es ? 'edad' : 'age', lenses.map((l) => l.stale
                   ? <Text key={`a-${l.lens}`} color={TONE.high}>{`${GLYPH.stale} ${l.ageDays} d`}</Text>

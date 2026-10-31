@@ -1,5 +1,5 @@
 // sa-ux · radar — a lens's findings over time as a sparkline, for the desktop radar: critical in red, high in amber, a dot
-// and a tooltip per report. Fewer than two readings draw nothing (one point is not a trend). Pure: the pane draws it.
+// per report (a still picture inside the radar's pane; the `<title>`s are for a screen reader). Fewer than two readings draw nothing (one point is not a trend). Pure: the pane draws it.
 import type { TrendPoint } from './model'
 
 export const SPARK_W = 96, SPARK_H = 20
