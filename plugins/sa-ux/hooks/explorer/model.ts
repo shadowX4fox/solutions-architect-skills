@@ -102,3 +102,62 @@ export function card(f: ExplorerFacts, tab: ExplorerTab, id: string): Card | nul
     lines: ([['Driver', d.driver], [t(L, 'File', 'Archivo'), d.file]] as [string, string][]).filter(([, v]) => v), lists: [],
     actions: [{ label: t(L, 'Summarize', 'Resumir'), prompt: t(L, `summarize ${d.id}: the compromise, its impact and the plan to pay it`, `resume el ${d.id}: el compromiso, su impacto y el plan para pagarlo`) }] }
 }
+
+/** Alia's line over the explorer: what the open tab or card comes to, by count or by state, with her mood. */
+export function aliaOnExplorer(f: ExplorerFacts, tab: ExplorerTab, selected: string | null): { mood: 'calm' | 'pleased' | 'thinking' | 'worried' | 'stern'; line: string } {
+  const L = f.lang
+  const plural = (n: number, en: string, es: string) => (n === 1 ? t(L, en, es) : t(L, `${en}s`, `${es}s`))
+  if (selected && tab === 'components') {
+    const c = f.components.find((x) => x.slug === selected)
+    if (c) {
+      const live = f.integrations.filter((i) => !i.retired)
+      const ins = live.filter((i) => i.to === c.name).length, outs = live.filter((i) => i.from === c.name).length
+      const adrs = c.adrs.length ? t(L, `governed by ${c.adrs.join(', ')}`, `gobernado por ${c.adrs.join(', ')}`) : t(L, 'no ADR names it', 'ningún ADR lo nombra')
+      return { mood: c.adrs.length || !c.inScope ? 'calm' : 'thinking', line: t(L,
+        `${ins} in, ${outs} out — ${adrs}${c.inScope ? '' : '; outside the architecture, documented as its context'}.`,
+        `${ins} entrante${ins === 1 ? '' : 's'}, ${outs} saliente${outs === 1 ? '' : 's'} — ${adrs}${c.inScope ? '' : '; fuera de la arquitectura, documentado como contexto'}.`) }
+    }
+  }
+  if (selected && tab === 'integrations') {
+    const i = f.integrations.find((x) => x.id === selected)
+    if (i) return i.retired
+      ? { mood: 'calm', line: t(L, `${i.id} is retired — kept for the record.`, `${i.id} está retirada — se conserva como registro.`) }
+      : { mood: 'calm', line: t(L, `${i.id} carries ${i.protocol || 'an undocumented protocol'} from ${i.from} to ${i.to}.`, `${i.id} lleva ${i.protocol || 'un protocolo no documentado'} de ${i.from} a ${i.to}.`) }
+  }
+  if (selected && tab === 'adrs') {
+    const a = f.adrs.find((x) => x.id === selected)
+    if (a) return /^Proposed/i.test(a.status)
+      ? { mood: 'thinking', line: t(L, `${a.id} is still Proposed — a decision waiting for its yes.`, `${a.id} sigue Proposed — una decisión esperando su sí.`) }
+      : /^Accepted/i.test(a.status) ? { mood: 'pleased', line: t(L, `${a.id} is in force.`, `${a.id} está vigente.`) }
+      : { mood: 'calm', line: t(L, `${a.id} is no longer in force (${a.status}).`, `${a.id} ya no está vigente (${a.status}).`) }
+  }
+  if (selected && tab === 'tdrs') {
+    const d = f.tdrs.find((x) => x.id === selected)
+    if (d) return d.status === 'Open'
+      ? { mood: 'worried', line: t(L, `${d.id} is open — accepted debt, not yet planned.`, `${d.id} está abierta — deuda aceptada, sin plan todavía.`) }
+      : /^(Resolved|Won't Fix)$/.test(d.status) ? { mood: 'pleased', line: t(L, `${d.id} is closed (${d.status}).`, `${d.id} está cerrada (${d.status}).`) }
+      : { mood: 'thinking', line: t(L, `${d.id} is ${d.status} — on its way to being paid.`, `${d.id} está ${d.status} — en camino a pagarse.`) }
+  }
+  if (tab === 'components') {
+    const out = f.components.filter((c) => !c.inScope).length, n = f.components.length
+    return { mood: 'calm', line: t(L,
+      `${n} ${plural(n, 'container', 'contenedor')}${out ? ` — ${out} outside the architecture, as its context` : ', all inside the architecture'}.`,
+      `${n} ${n === 1 ? 'contenedor' : 'contenedores'}${out ? ` — ${out} fuera de la arquitectura, como contexto` : ', todos dentro de la arquitectura'}.`) }
+  }
+  if (tab === 'integrations') {
+    const live = f.integrations.filter((i) => !i.retired), cross = live.filter((i) => i.scope === 'boundary').length, retired = f.integrations.length - live.length
+    return { mood: 'calm', line: t(L,
+      `${live.length} live ${plural(live.length, 'integration', 'integración')} — ${cross} ${cross === 1 ? 'crosses' : 'cross'} the boundary${retired ? `, ${retired} retired` : ''}.`,
+      `${live.length} ${live.length === 1 ? 'integración viva' : 'integraciones vivas'} — ${cross} ${cross === 1 ? 'cruza' : 'cruzan'} la frontera${retired ? `, ${retired} ${retired === 1 ? 'retirada' : 'retiradas'}` : ''}.`) }
+  }
+  if (tab === 'adrs') {
+    const proposed = f.adrs.filter((a) => /^Proposed/i.test(a.status)).length, inForce = f.adrs.filter((a) => /^Accepted/i.test(a.status)).length
+    return { mood: proposed ? 'thinking' : 'pleased', line: t(L,
+      `${inForce} in force${proposed ? `, ${proposed} still Proposed` : ''}.`,
+      `${inForce} vigente${inForce === 1 ? '' : 's'}${proposed ? `, ${proposed} todavía Proposed` : ''}.`) }
+  }
+  const open = f.tdrs.filter((d) => !/^(Resolved|Won't Fix)$/.test(d.status)).length
+  return { mood: open ? 'worried' : 'pleased', line: t(L,
+    open ? `${open} of ${f.tdrs.length} debt ${f.tdrs.length === 1 ? 'record' : 'records'} still open.` : 'No debt left open.',
+    open ? `${open} de ${f.tdrs.length} ${f.tdrs.length === 1 ? 'deuda todavía abierta' : 'deudas todavía abiertas'}.` : 'Ninguna deuda abierta.') }
+}

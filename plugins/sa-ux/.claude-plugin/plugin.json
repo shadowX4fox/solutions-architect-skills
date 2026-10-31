@@ -1,11 +1,29 @@
 {
   "name": "sa-ux",
-  "version": "0.5.0",
-  "description": "A solution architect's UX layer for sa-skills: mods that draw the architecture's state inside Claude Code — next steps computed from the project's files, offered above the prompt box, a click filling the prompt. Optional; reads what the skills write and never edits an architecture document.",
-  "author": { "name": "shadowX4fox", "url": "https://github.com/shadowX4fox" },
+  "version": "0.6.0",
+  "description": "A solution architect's UX layer for sa-skills, in Alia's voice: mods that draw the architecture's state inside Claude Code — Alia's codec above the prompt box (her line on where the architecture stands, next steps computed from the project's files, a click filling the prompt), /alia, /radar and /arch, her words on the spinner. Optional; reads what the skills write and never edits an architecture document.",
+  "author": {
+    "name": "shadowX4fox",
+    "url": "https://github.com/shadowX4fox"
+  },
   "homepage": "https://github.com/shadowX4fox/solutions-architect-skills",
   "repository": "https://github.com/shadowX4fox/solutions-architect-skills",
   "license": "MIT",
-  "keywords": ["architecture", "ux", "mods", "next-steps"],
-  "types": "./types/index.d.ts"
+  "keywords": [
+    "architecture",
+    "ux",
+    "mods",
+    "next-steps",
+    "alia"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "voice": {
+      "type": "boolean",
+      "title": "Alia's words on the spinner",
+      "description": "Inside an architecture, the spinner and the turn's closing line say what an architect does (Tracing seams, Weighing trade-offs) instead of the engine's words.",
+      "default": true
+    }
+  },
+  "icon": "./.claude-plugin/icon.png"
 }

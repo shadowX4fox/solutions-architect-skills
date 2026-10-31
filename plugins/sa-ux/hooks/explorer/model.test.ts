@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 
 import type { ExplorerFacts } from '../../types'
-import { card, inFilter, loadFacts, rows } from './model'
+import { aliaOnExplorer, card, inFilter, loadFacts, rows } from './model'
 
 const LEDGER = {
   generated_at: '2026-10-01T18:00:00Z', architecture: { language: 'es' },
@@ -61,5 +61,18 @@ describe('sa-ux explorer model', () => {
     expect(card(f, 'components', 'core')).toMatchObject({ badge: { glyph: '○', text: 'fuera de alcance' }, lines: [['Sistema', 'Externo'], ['Tipo', 'Database']] })
     expect(rows(f, 'integrations').map((r) => r.glyph)).toEqual(['⇄', '✕', '⇥', '⋯'])   // internal, retired, boundary, external
     expect(rows(f, 'adrs').map((r) => [r.glyph, r.tone])).toEqual([['◌', 'warning'], ['✕', undefined]])   // proposed, superseded
+  })
+
+  test("Alia's line: what the tab comes to, then the open card's state, with her mood", async () => {
+    const f = (await loadFacts(io(JSON.stringify(LEDGER)), '/p')) as ExplorerFacts
+    expect(aliaOnExplorer(f, 'components', null)).toEqual({ mood: 'calm', line: '3 contenedores — 1 fuera de la arquitectura, como contexto.' })
+    expect(aliaOnExplorer(f, 'integrations', null).line).toBe('3 integraciones vivas — 1 cruza la frontera, 1 retirada.')
+    expect(aliaOnExplorer(f, 'adrs', null)).toEqual({ mood: 'thinking', line: '0 vigentes, 1 todavía Proposed.' })
+    expect(aliaOnExplorer(f, 'tdrs', null)).toEqual({ mood: 'worried', line: '1 de 1 deuda todavía abierta.' })
+    expect(aliaOnExplorer(f, 'components', 'alta').line).toBe('2 entrantes, 0 salientes — gobernado por ADR-120.')
+    expect(aliaOnExplorer(f, 'components', 'gw')).toMatchObject({ mood: 'thinking', line: '0 entrantes, 1 saliente — ningún ADR lo nombra.' })
+    expect(aliaOnExplorer(f, 'adrs', 'ADR-120').mood).toBe('thinking')
+    expect(aliaOnExplorer(f, 'tdrs', 'TDR-001').line).toBe('TDR-001 está abierta — deuda aceptada, sin plan todavía.')
+    expect(aliaOnExplorer(f, 'integrations', 'I-11').line).toContain('retirada')
   })
 })

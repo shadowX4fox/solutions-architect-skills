@@ -4,13 +4,15 @@
 // the values they keep.
 import type { Register } from 'claude-code'
 
+import { registerAlia } from './alia/register'
 import { registerExplorer } from './explorer/register'
 import { registerLifecycle } from './lifecycle'
 import { registerNextSteps } from './next-steps/register'
 import { registerRadar } from './radar/register'
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
   registerLifecycle(on)
+  registerAlia(on, options)
   registerNextSteps(on)
   registerExplorer(on)
   registerRadar(on)

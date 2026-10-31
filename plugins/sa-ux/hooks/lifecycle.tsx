@@ -4,11 +4,15 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On } from 'claude-code'
 
-import type { Radar, Step } from '../types'
+import type { AliaLine, Radar, Step } from '../types'
+
+import { aliaSays, archHeader } from './alia/voice'
+import { GLYPH } from './ui'
 
 import { fingerprint, newestMd, nextSteps, type Io } from './next-steps/rules'
 import { buildRadar, type FindingsRow } from './radar/model'
 
+const aliaAtom = atom({ plugin: 'sa-ux', key: 'alia' } as const, null as AliaLine | null)
 const dismissedAtom = atom({ plugin: 'sa-ux', key: 'nextStepsDismissed' } as const, '')
 const langAtom = atom({ plugin: 'sa-ux', key: 'lang' } as const, 'en' as 'en' | 'es')
 const radarAtom = atom({ plugin: 'sa-ux', key: 'radar' } as const, null as Radar | null)
@@ -60,7 +64,7 @@ async function refreshRadar($: EngineInterface) {
   const io: Io = { exists: (p) => $.fs.exists(p), read: (p) => $.fs.read(p), list: (p) => $.fs.list(p), stat: (p) => $.fs.stat(p) }
   const docs = await newestMd(io, `${root}/docs`)
   const key = [reports.length, Math.max(0, ...reports.map((x) => x.mtimeMs)), await mtime(facts), docs].join(':')
-  if (key === (await read($, radarKeyAtom)) && (await read($, radarAtom))) { const r = await read($, radarAtom); if (r) $.ui.status(r.line); return }
+  if (key === (await read($, radarKeyAtom)) && (await read($, radarAtom))) { const r = await read($, radarAtom); if (r) $.ui.status(`${GLYPH.brand} ${r.line}`); return }
 
   const lang: 'en' | 'es' = /<!--\s*(?:DOC_)?LANGUAGE:\s*es\b/i.test(arch) ? 'es' : 'en'
   let findings: FindingsRow[] | null = null, findingsNote: string | null = null
@@ -80,7 +84,17 @@ async function refreshRadar($: EngineInterface) {
   const radar = buildRadar({ lang, findings, findingsNote, tdrs, docsNewest: docs, now: await $.clock.now() })
   await update($, radarAtom, () => radar)
   await update($, radarKeyAtom, () => key)
-  $.ui.status(radar.line)
+  $.ui.status(`${GLYPH.brand} ${radar.line}`)
+}
+
+/** alia: her line from what the other mods just read — after them, so it speaks of the same state. */
+async function refreshAlia($: EngineInterface) {
+  const root = await $.session.root()
+  let text = ''
+  try { text = await $.fs.read(`${root}/ARCHITECTURE.md`) } catch { text = '' }
+  const say = aliaSays({ lang: await read($, langAtom), arch: text ? archHeader(text) : null, radar: await read($, radarAtom), steps: await read($, stepsAtom) })
+  const was = await read($, aliaAtom)
+  if (JSON.stringify(was) !== JSON.stringify(say)) await update($, aliaAtom, () => say)
 }
 
 /** The lifecycle hooks of every mod: commands at session start, refreshes at session start and after each turn. */
@@ -89,8 +103,10 @@ export function registerLifecycle(on: On) {
     const r = await next(e)
     await $.command.register({ name: 'arch', description: 'Browse the architecture: containers, integrations, ADRs and TDRs (sa-ux)' })
     await $.command.register({ name: 'radar', description: "The architecture's risk: findings by lens and open debt (sa-ux)" })
+    await $.command.register({ name: 'alia', description: 'Alia: where the architecture stands, in one line, and the way to every view (sa-ux)' })
     await refreshNextSteps($)
     await refreshRadar($)
+    await refreshAlia($)
     return r
   })
 
@@ -98,6 +114,7 @@ export function registerLifecycle(on: On) {
     const r = await next(e)
     await refreshNextSteps($)
     await refreshRadar($)
+    await refreshAlia($)
     return r
   })
 }

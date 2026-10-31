@@ -7,7 +7,8 @@ import type { ExplorerFacts, ExplorerScope, ExplorerTab } from '../../types'
 import { ARCH_PANE } from '../state'
 import type { Io } from '../next-steps/rules'
 import { GLYPH, TONE, cut, pad, rule } from '../ui'
-import { card, inFilter, loadFacts, rows } from './model'
+import { Codec, portrait } from '../alia/codec'
+import { aliaOnExplorer, card, inFilter, loadFacts, rows } from './model'
 
 const factsAtom = atom({ plugin: 'sa-ux', key: 'explorerFacts' } as const, null as ExplorerFacts | null)
 const pageAtom = atom({ plugin: 'sa-ux', key: 'explorerPage' } as const, 0)
@@ -40,8 +41,10 @@ export function registerExplorer(on: On) {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Button, Text } = $.ui.resolve(e)
+    const els = $.ui.resolve(e)
+    const { Box, Button, Text } = els
     const f = await read($, factsAtom)
+    const mono = e.surface === 'terminal'   // fields line up by padding in a monospaced cell grid; elsewhere, by columns
     if (!f) return (
       <Box flexDirection="column">
         <Text color={TONE.info} bold>{`${GLYPH.brand} Architecture`}</Text>
@@ -53,9 +56,13 @@ export function registerExplorer(on: On) {
     const width = Math.max(30, e.props.bodyColumns - 2)
     const total: Record<ExplorerTab, number> = { components: f.components.length, integrations: f.integrations.length, adrs: f.adrs.length, tdrs: f.tdrs.length }
     const go = (x: ExplorerTab) => async () => { await update($, tabAtom, () => x); await update($, pageAtom, () => 0); await update($, selectedAtom, () => null) }
+    // her codec heads the pane: what the open tab or card comes to
+    const say = aliaOnExplorer(f, tab, selected)
+    const header = <Codec els={els} say={say} svg={await portrait($, e.surface, say.mood)} kicker={es ? 'explorador' : 'explorer'} />
     // the tab bar: the open tab is a solid chip, the others are keys
     const tabs = (
       <Box flexDirection="column">
+        {header}
         <Box flexDirection="row" gap={2}>
           {TABS.map((x) => (x.tab === tab
             ? <Text key={`on-${x.tab}`} inverse bold>{` ${es ? x.es : x.en} ${total[x.tab]} `}</Text>
@@ -75,12 +82,17 @@ export function registerExplorer(on: On) {
             <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
               <Text bold wrap="truncate-end">{c.title}</Text>
               <Text color={c.badge.tone} dimColor={!c.badge.tone}>{`${c.badge.glyph} ${c.badge.text}`}</Text>
-              {c.lines.map(([k, v]) => (
+              {mono ? c.lines.map(([k, v]) => (
                 <Box key={`l-${k}`} flexDirection="row" gap={1}>
                   <Text dimColor>{pad(k, labelWidth)}</Text>
                   <Box flexShrink={1}><Text wrap="wrap">{v}</Text></Box>
                 </Box>
-              ))}
+              )) : (
+                <Box flexDirection="row" gap={2}>
+                  <Box flexDirection="column">{c.lines.map(([k]) => <Text key={`k-${k}`} dimColor>{k}</Text>)}</Box>
+                  <Box flexDirection="column" flexShrink={1}>{c.lines.map(([k, v]) => <Text key={`v-${k}`} wrap="truncate-end">{v}</Text>)}</Box>
+                </Box>
+              )}
               {c.lists.map((l) => (
                 <Box key={`list-${l.label}`} flexDirection="column" marginTop={1}>
                   <Text dimColor>{`${l.label} ${GLYPH.dot} ${l.items.length}`}</Text>

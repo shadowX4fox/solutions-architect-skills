@@ -2,6 +2,27 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.6.0]
+
+### Added
+
+- **Alia speaks in Claude Code**: one line on where the architecture stands, composed by code from what the mods already read (`hooks/alia/voice.ts`) — never by a model — with AliaCodec's mood: stern for critical findings (naming the lens with the most), worried for stale analyses or high findings, thinking when a next step waits, calm with open debt, pleased when all is clear. Recomputed after each turn (`alia` in the state contract).
+- **AliaCodec** (`hooks/alia/codec.tsx`): her mark, «Alia» in `aqua-mark`, her line in the mood's theme tone. Where the surface draws pictures (`Svg`: the desktop app, the editor, mobile) the mark is her face — the video's set, at the Alia Guide's 64 px — clipped to a disc inside the mood's ring (`hooks/alia/palette.ts`, `assets/alia/`). In the terminal a face at cell resolution is a blur, so the mark is the codec's sign instead: her sparkle `✦` in a ring that takes the mood's colour.
+- **`/alia`**: a pane with her codec over the architecture — its H1, version and status — and the way to every view (release status, the radar, the explorer, the command center, the explainer video), each a draft in the prompt or a pane of this plugin. On the desktop her face talks for a moment when it opens (SMIL in the codec SVG), then holds her mood.
+- **Her words on the spinner** inside an architecture: `Tracing seams`, `Weighing trade-offs`, `Reading the ledger` (`Trazando costuras`, `Sopesando trade-offs` … in a Spanish one), a stable pick per engine word; English turns close with her past tense (`Traced for 3s`). Option `voice` (default on) turns them off.
+- The escudo as the plugin's icon.
+
+### Changed
+
+- **The next-steps band is her codec**: her mark and line head it, each step opens with `▸`; the mark is left out under 60 columns.
+- **The radar pane opens with her codec**; the status line opens with her sparkle (`✦ risk: …`), the brand glyph of every mod (was `◆`).
+- **The explorer (`/arch`) opens with her codec**, her line by code (`aliaOnExplorer`): what the open tab comes to (containers outside the architecture, integrations crossing the boundary, ADRs still Proposed, debt still open) or the open card's state (a container's links and the ADRs that govern it, an ADR waiting for its yes, a TDR not yet planned), with her mood.
+- **On the desktop app the tables are columns**: the radar's lens table and a card's fields line up as columns, each as wide as its widest cell — padding with spaces aligns only in the terminal's monospaced grid. The terminal keeps its padded rows.
+
+### Fixed
+
+- The picture is chosen by surface, not by the element table: the terminal's table also answers `Svg` (an empty box), so her ringed sparkle came out as nothing there. The tests now hold the terminal to the sparkle and no picture.
+
 ## [0.5.0]
 
 ### Changed

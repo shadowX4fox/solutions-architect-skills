@@ -29,6 +29,9 @@ export type Radar = {
   line: string
 }
 
+/** alia: what she says for the project as it stands — the mood her face takes and one line, with the architecture's markers. */
+export type AliaLine = { mood: 'calm' | 'pleased' | 'thinking' | 'worried' | 'stern' | 'talk'; line: string; name: string; version: string; status: string }
+
 declare module 'claude-code' {
   interface PluginState {
     'sa-ux': {
@@ -49,6 +52,8 @@ declare module 'claude-code' {
       radar: Radar | null
       /** radar: what the last reading was computed from — re-read only when it changes. */
       radarKey: string
+      /** alia: her line for the project, null outside an architecture. */
+      alia: AliaLine | null
     }
   }
 }

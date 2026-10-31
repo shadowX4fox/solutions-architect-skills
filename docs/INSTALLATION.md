@@ -80,8 +80,10 @@ plugin of the suite, and pass the same flag when you update or uninstall.
 
 ### Optional: sa-ux
 
-`sa-ux` is a small UX layer drawn inside Claude Code: next-step prompts computed from the project's files, shown above
-the prompt box. It reads what the skills write and never edits a document. It needs a Claude Code build with
+`sa-ux` is a small UX layer drawn inside Claude Code, in Alia's voice: her codec above the prompt box — one line on where
+the architecture stands and next-step prompts computed from the project's files —, `/alia`, `/radar` and `/arch` panes, and
+her words on the spinner. Her face shows where the surface draws pictures (the desktop app); in the terminal her mark is
+her sparkle in a ring coloured by her mood. It reads what the skills write and never edits a document. It needs a Claude Code build with
 function-hook mods.
 
 ```bash

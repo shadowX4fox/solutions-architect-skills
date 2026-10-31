@@ -33,14 +33,15 @@ const FILES: Record<string, { text: string; mtimeMs: number }> = {
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
 function engine(on: On) {
-  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '' }
+  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[] }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('session.root', () => ({ value: '/p' }))
   on('clock.now', () => ({ value: NOW }))
   on('env.get', (_$, e) => ({ value: e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
   on('fs.exists', (_$, e) => ({ value: !!FILES[e.path] || dir(e.path) }))
-  on('fs.read', (_$, e) => { const f = FILES[e.path]; if (!f) throw new Error(`ENOENT ${e.path}`); return { value: f.text } })
+  on('fs.read', (_$, e) => { if (/\/assets\/alia\/face-[a-z-]+\.webp$/.test(e.path)) return { value: { base64: 'UklGRg==' } } as never
+    const f = FILES[e.path]; if (!f) throw new Error(`ENOENT ${e.path}`); return { value: f.text } })
   on('fs.stat', (_$, e) => { const f = FILES[e.path]; if (!f && !dir(e.path)) throw new Error(`ENOENT ${e.path}`); return { value: { kind: f ? 'file' : 'dir', size: f ? f.text.length : 0, mtimeMs: f ? f.mtimeMs : 0, isLink: false } } })
   on('fs.list', (_$, e) => { if (!dir(e.path)) throw new Error(`ENOENT ${e.path}`); const kids = new Map<string, { name: string; kind: 'file' | 'dir'; size: number; mtimeMs: number; isLink: boolean }>()
     for (const [k, f] of Object.entries(FILES)) { if (!k.startsWith(e.path + '/')) continue; const rest = k.slice(e.path.length + 1); const name = rest.split('/')[0] ?? rest
@@ -53,8 +54,8 @@ function engine(on: On) {
   on('prompt.suggest', () => ({ isShown: true }))
   on('prompt.fill', (_$, e) => { box.text = e.text; return { isFilled: true, text: e.text, cursor: e.text.length } })
   on('ui.status', () => ({ value: undefined }))
-  on('ui.open', () => ({ value: { isPlaced: true } }))
-  on('ui.render', () => ({ type: 'Text', props: {}, children: [''] }) as never)   // the engine's own drawing: nothing
+  on('ui.open', (_$, e) => { box.opened.push(e.id); return { value: { isPlaced: true } } })
+  on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return { type: 'Text', props: {}, children: [''] } as never })   // the engine's own drawing: nothing
   return box
 }
 
@@ -75,6 +76,10 @@ describe('sa-ux, end to end on every surface', () => {
       const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'AbovePrompt', props: BAND })
       expect((await ui.find({ key: 'step-release' }))?.text).toContain('Liberar la arquitectura')
       expect(await ui.find({ type: 'Text', text: /2 cambio\(s\) en \[Unreleased\] desde v7\.1\.0/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /^Alia$|✦ Alia/ })).toBeDefined()
+      if (surface === 'terminal') { expect(await ui.find({ type: 'Text', text: '✦' })).toBeDefined(); expect(await ui.find({ type: 'Svg' })).toBeUndefined() }
+      else expect(await ui.find({ type: 'Svg' })).toBeDefined()   // her face on the desktop; her ringed sparkle in the terminal
+      expect(await ui.find({ type: 'Text', text: /Hay 7 hallazgos críticos — SPOF pesa más/ })).toBeDefined()   // stern: SPOF holds 7 critical
       await ui.press({ key: 'step-release' })
       expect(box.text).toBe('release my architecture')
       await ui.unmount()
@@ -87,6 +92,7 @@ describe('sa-ux, end to end on every surface', () => {
       const arch = { plugin: 'sa-ux', surface, component: 'Pane', requestId: 'sa-ux-arch', props: PANE } as const
       const list = await $.ui.mount(arch)
       expect(await list.find({ key: 'scope' })).toBeDefined()
+      expect(await list.find({ type: 'Text', text: /2 contenedores — 1 fuera de la arquitectura/ })).toBeDefined()   // her line heads the pane
       expect(await list.find({ type: 'Text', text: /en alcance 1/ })).toBeDefined()
       await list.press({ key: 'pick-alta' })
       await list.unmount()
@@ -94,6 +100,7 @@ describe('sa-ux, end to end on every surface', () => {
       const card = await $.ui.mount(arch)
       expect(await card.find({ type: 'Text', text: /● en alcance/ })).toBeDefined()
       expect(await card.find({ type: 'Text', text: /I-05/ })).toBeDefined()
+      expect(await card.find({ type: 'Text', text: /1 entrante, 0 salientes — gobernado por ADR-120/ })).toBeDefined()
       await card.press({ key: 'act-1' })
       expect(box.text).toBe('genera el handoff del Servicio de Alta')
       await card.unmount()
@@ -105,9 +112,38 @@ describe('sa-ux, end to end on every surface', () => {
       const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'Pane', requestId: 'sa-ux-radar', props: PANE })
       expect(await ui.find({ type: 'Text', text: /críticos/ })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: /6\.6\/10/ })).toBeUndefined()   // compliance is isolated: the manifest is on disk and never read (0.4.0)
+      expect(await ui.find({ type: 'Text', text: /radar de riesgo/ })).toBeDefined()   // her codec heads the pane
+      expect(await ui.find({ type: surface === 'terminal' ? 'Text' : 'Svg', ...(surface === 'terminal' ? { text: '✦' } : {}) })).toBeDefined()
       await ui.press({ key: 'rerun-SPOF' })
       expect(box.text).toBe('run spof analysis')
       expect(await ui.find({ key: 'rerun-STRIDE' })).toBeUndefined()   // four days old: not stale
+      await ui.unmount()
+    })
+
+    test(`${surface}: /alia → her codec over the architecture, every view a draft or a pane`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const r = await $.command.run({ command: 'alia', args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } })
+      expect(JSON.stringify(r)).toContain('Alia: Hay 7 hallazgos')
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'Pane', requestId: 'sa-ux-alia', props: PANE })
+      expect(await ui.find({ type: 'Text', text: /^Mesa$|Mesa/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /v7\.1\.0/ })).toBeDefined()
+      if (surface === 'desktop') expect(await ui.find({ type: 'Svg' })).toBeDefined()   // her face, talking, on the desktop
+      else { expect(await ui.find({ type: 'Svg' })).toBeUndefined(); expect(await ui.find({ type: 'Text', text: '✦' })).toBeDefined() }   // the terminal: her ringed sparkle, no picture
+      await ui.press({ key: 'v-video' })
+      expect(box.text).toBe('architecture video')
+      await ui.press({ key: 'v-radar' })
+      expect(box.opened).toContain('sa-ux-radar')
+      await ui.unmount()
+    })
+
+    test(`${surface}: inside an architecture the spinner speaks hers`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'Spinner', props: { word: 'Sauteing', message: null, suffix: '…', mode: 'thinking' } })
+      const drawn = box.drawn.filter((d) => d.component === 'Spinner').pop()
+      expect(drawn?.props.word).not.toBe('Sauteing')
+      expect(String(drawn?.props.word)).toMatch(/^[A-Z][a-zé]+ /)
       await ui.unmount()
     })
   }

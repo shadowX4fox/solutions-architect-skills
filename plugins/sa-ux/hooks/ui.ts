@@ -5,7 +5,7 @@ export const TONE = { critical: 'error', high: 'warning', ok: 'success', info: '
 export type Tone = (typeof TONE)[keyof typeof TONE] | undefined
 
 export const GLYPH = {
-  brand: '◆', step: '▸', inScope: '●', outScope: '○', internal: '⇄', boundary: '⇥', external: '⋯', retired: '✕',
+  brand: '✦', step: '▸', inScope: '●', outScope: '○', internal: '⇄', boundary: '⇥', external: '⋯', retired: '✕',
   accepted: '✓', proposed: '◌', superseded: '✕', debtOpen: '▲', debtDone: '✓', inbound: '←', outbound: '→', stale: '⚠', dot: '·',
 } as const
 
