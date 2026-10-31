@@ -5,6 +5,8 @@
 import type { Register } from 'claude-code'
 
 import { registerAlia } from './alia/register'
+import { registerMilestones } from './milestones/register'
+import { registerRows } from './rows/register'
 import { registerExplorer } from './explorer/register'
 import { registerLifecycle } from './lifecycle'
 import { registerNextSteps } from './next-steps/register'
@@ -16,4 +18,6 @@ export const register: Register = (on, options) => {
   registerNextSteps(on)
   registerExplorer(on)
   registerRadar(on)
+  registerRows(on)
+  registerMilestones(on)
 }

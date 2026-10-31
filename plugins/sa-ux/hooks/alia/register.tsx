@@ -71,6 +71,13 @@ export function registerAlia(on: On, options: PluginOptions) {
     )
   })
 
+  // the architecture in the prompt footer, beside the engine's modes: `✦ v1.10.2 Released` — what every turn works on
+  on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
+    const say = await read($, aliaAtom)
+    if (!say || !say.version) return next(e)
+    return next({ ...e, props: { ...e.props, modes: [...e.props.modes, `${GLYPH.brand} v${say.version} ${say.status}`] } })
+  })
+
   // her words on the spinner and the turn's closing line — only inside an architecture, and only with `voice` on
   on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
     if (!voice || !(await read($, aliaAtom))) return next(e)

@@ -4,7 +4,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On } from 'claude-code'
 
-import type { AliaLine, Radar, Step } from '../types'
+import type { AliaLine, Milestone, ProjectSnapshot, Radar, Step } from '../types'
+
+import { kitOf, milestones } from './milestones/model'
 
 import { aliaSays, archHeader } from './alia/voice'
 import { GLYPH } from './ui'
@@ -13,6 +15,8 @@ import { fingerprint, newestMd, nextSteps, type Io } from './next-steps/rules'
 import { buildRadar, type FindingsRow } from './radar/model'
 
 const aliaAtom = atom({ plugin: 'sa-ux', key: 'alia' } as const, null as AliaLine | null)
+const snapshotAtom = atom({ plugin: 'sa-ux', key: 'snapshot' } as const, null as ProjectSnapshot | null)
+const milestonesAtom = atom({ plugin: 'sa-ux', key: 'milestones' } as const, [] as Milestone[])
 const dismissedAtom = atom({ plugin: 'sa-ux', key: 'nextStepsDismissed' } as const, '')
 const langAtom = atom({ plugin: 'sa-ux', key: 'lang' } as const, 'en' as 'en' | 'es')
 const radarAtom = atom({ plugin: 'sa-ux', key: 'radar' } as const, null as Radar | null)
@@ -97,6 +101,38 @@ async function refreshAlia($: EngineInterface) {
   if (JSON.stringify(was) !== JSON.stringify(say)) await update($, aliaAtom, () => say)
 }
 
+/** milestones: read the project as the skills left it, compare with the last reading, place a card for each move. */
+async function refreshMilestones($: EngineInterface) {
+  const root = await $.session.root()
+  let text = ''
+  try { text = await $.fs.read(`${root}/ARCHITECTURE.md`) } catch { text = '' }
+  if (!text) return
+  const { version, status } = archHeader(text)
+  let tagged = false
+  if (version) try {
+    const r = await $.process.run(['git', '-C', root, 'tag', '-l', `architecture-v${version}`], { timeoutMs: 5000 })
+    tagged = r.exitCode === 0 && r.stdout.trim() !== ''
+  } catch { tagged = false }
+  const radar = await read($, radarAtom)
+  const lenses: ProjectSnapshot['lenses'] = {}
+  for (const l of radar ? radar.lenses : []) lenses[l.lens] = { date: l.date, critical: l.critical, high: l.high }
+  let kit: ProjectSnapshot['kit'] = null
+  try { kit = kitOf(JSON.parse(await $.fs.read(`${root}/handoffs/.manifest.json`))) } catch { kit = null }
+  const next: ProjectSnapshot = { version, status, tagged, lenses, kit }
+  const prev = await read($, snapshotAtom)
+  if (JSON.stringify(prev) === JSON.stringify(next)) return
+  let changelog = ''
+  try { changelog = await $.fs.read(`${root}/docs/CHANGELOG.md`) } catch { changelog = '' }
+  const cards = milestones(prev, next, await read($, langAtom), changelog)
+  await update($, snapshotAtom, () => next)
+  if (!cards.length) return
+  const placed = await read($, milestonesAtom)
+  const fresh = cards.filter((c) => !placed.some((p) => p.id === c.id))
+  if (!fresh.length) return
+  await update($, milestonesAtom, (xs) => [...xs, ...fresh].slice(-40))
+  for (const c of fresh) try { await $.ui.place({ id: c.id }) } catch { /* a build without placed rows: the cards stay unshown */ }
+}
+
 /** The lifecycle hooks of every mod: commands at session start, refreshes at session start and after each turn. */
 export function registerLifecycle(on: On) {
   on('session.start', async ($, e, next) => {
@@ -107,6 +143,7 @@ export function registerLifecycle(on: On) {
     await refreshNextSteps($)
     await refreshRadar($)
     await refreshAlia($)
+    await refreshMilestones($)
     return r
   })
 
@@ -115,6 +152,7 @@ export function registerLifecycle(on: On) {
     await refreshNextSteps($)
     await refreshRadar($)
     await refreshAlia($)
+    await refreshMilestones($)
     return r
   })
 }

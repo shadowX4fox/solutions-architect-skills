@@ -5,7 +5,7 @@ export type Mood = 'calm' | 'pleased' | 'thinking' | 'worried' | 'stern' | 'talk
 
 /** The Alia Guide's colours. */
 export const ALIA = {
-  aqua: '#2ee6e6', aquaMark: '#0c9da3', silver: '#c9d1d9', night: '#0d1418', night2: '#15222a', nightLine: '#2b4a55',
+  aqua: '#2ee6e6', aquaMark: '#0c9da3', silver: '#c9d1d9', night: '#0d1418', night2: '#15222a', nightLine: '#2b4a55', nightMuted: '#8ea3ad',
   pleased: '#4dffa0', worried: '#ffd23f', stern: '#ff3b4e',
 } as const
 

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 
 import type { ExplorerFacts } from '../../types'
+import { neighbourhoodSvg } from './diagram'
 import { aliaOnExplorer, card, inFilter, loadFacts, rows } from './model'
 
 const LEDGER = {
@@ -74,5 +75,16 @@ describe('sa-ux explorer model', () => {
     expect(aliaOnExplorer(f, 'adrs', 'ADR-120').mood).toBe('thinking')
     expect(aliaOnExplorer(f, 'tdrs', 'TDR-001').line).toBe('TDR-001 está abierta — deuda aceptada, sin plan todavía.')
     expect(aliaOnExplorer(f, 'integrations', 'I-11').line).toContain('retirada')
+  })
+
+  test('a container\'s neighbourhood: the container in the middle, its live links both ways, a tooltip on each', async () => {
+    const f = (await loadFacts(io(JSON.stringify(LEDGER)), '/p')) as ExplorerFacts
+    const svg = neighbourhoodSvg(f, 'alta')!
+    expect(svg).toContain('>Servicio de Alta</text>')
+    expect(svg).toContain('<title>I-27 · Gateway de Control → Servicio de Alta · REST/HTTPS · Petición-respuesta</title>')
+    expect(svg).toContain('I-05 CDC')
+    expect(svg).not.toContain('I-11')            // retired
+    expect(neighbourhoodSvg(f, 'nope')).toBeNull()
+    expect(svg.length).toBeLessThan(131072)
   })
 })

@@ -8,6 +8,7 @@ import { ARCH_PANE } from '../state'
 import type { Io } from '../next-steps/rules'
 import { GLYPH, TONE, cut, pad, rule } from '../ui'
 import { Codec, portrait } from '../alia/codec'
+import { neighbourhoodSvg } from './diagram'
 import { aliaOnExplorer, card, inFilter, loadFacts, rows } from './model'
 
 const factsAtom = atom({ plugin: 'sa-ux', key: 'explorerFacts' } as const, null as ExplorerFacts | null)
@@ -76,6 +77,9 @@ export function registerExplorer(on: On) {
       const c = card(f, tab, selected)
       if (c) {
         const labelWidth = Math.max(...c.lines.map(([k]) => k.length), 0)
+        // on a surface that draws pictures, a container's card shows its neighbourhood; the terminal keeps the lists
+        const map = !mono && tab === 'components' ? neighbourhoodSvg(f, selected) : null
+        const Svg = (els as { Svg?: any }).Svg
         return (
           <Box flexDirection="column">
             {tabs}
@@ -93,6 +97,7 @@ export function registerExplorer(on: On) {
                   <Box flexDirection="column" flexShrink={1}>{c.lines.map(([k, v]) => <Text key={`v-${k}`} wrap="truncate-end">{v}</Text>)}</Box>
                 </Box>
               )}
+              {map && Svg ? <Box marginTop={1}><Svg source={map} alt={es ? `Vecindario de ${c.title}` : `${c.title}'s neighbourhood`} isInteractive /></Box> : null}
               {c.lists.map((l) => (
                 <Box key={`list-${l.label}`} flexDirection="column" marginTop={1}>
                   <Text dimColor>{`${l.label} ${GLYPH.dot} ${l.items.length}`}</Text>

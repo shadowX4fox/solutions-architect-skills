@@ -32,6 +32,17 @@ export type Radar = {
 /** alia: what she says for the project as it stands — the mood her face takes and one line, with the architecture's markers. */
 export type AliaLine = { mood: 'calm' | 'pleased' | 'thinking' | 'worried' | 'stern' | 'talk'; line: string; name: string; version: string; status: string }
 
+/** milestones: what the skills left on disk, at the end of a turn — compared with the last reading to find what moved. */
+export type ProjectSnapshot = {
+  version: string
+  status: string
+  tagged: boolean
+  lenses: Record<string, { date: string; critical: number; high: number }>
+  kit: { version: string; hashes: Record<string, string>; interfaces: number } | null
+}
+/** milestones: one card Alia places in the transcript. */
+export type Milestone = { id: string; kind: 'release' | 'analysis' | 'kit'; mood: 'calm' | 'pleased' | 'worried' | 'stern'; title: string; lines: string[] }
+
 declare module 'claude-code' {
   interface PluginState {
     'sa-ux': {
@@ -54,6 +65,10 @@ declare module 'claude-code' {
       radarKey: string
       /** alia: her line for the project, null outside an architecture. */
       alia: AliaLine | null
+      /** milestones: the last reading of the project, null before the session's first. */
+      snapshot: ProjectSnapshot | null
+      /** milestones: the cards placed this session, by id — what each Placed row draws. */
+      milestones: Milestone[]
     }
   }
 }

@@ -2,7 +2,16 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.6.0]
+## [0.7.0]
+
+### Added
+
+- **Readable rows for the suite's scripts** (`hooks/rows/`): a Bash row that runs one of the suite's scripts — recognized by its file name under a sa-* plugin, the checkout or the marketplace's cache, about seventy of them, a `lifecycle.js` subcommand and a `*-prepare.js` payload cutter by their own names — is drawn as `✦ <what it is> <verdict> <the script's own summary line>` (`✦ Gate de principios ✓ LAYER1: PASS — 0 blocking finding(s)`), the warnings it printed counted, the first three findings of a failure kept in view, the raw result folded under it. The verdict is the exit status and the script's own line, picked by code, never reworded. ctrl+o (or `--verbose`) shows the engine's row and result untouched; any other command is the engine's.
+- **Milestone cards in the transcript** (`hooks/milestones/`): at the end of each turn the project is read as the skills left it — the version and status, the release tag, each lens's newest report and its critical and high findings, the handoff kit's manifest — and compared with the last reading; each move becomes Alia's card at that point in the conversation: a release (the version, its tag or that it comes after the merge, the changelog entry), the analyses re-run (each lens's deltas; stern when critical findings grew, pleased when every lens improved), the handoff kit regenerated (the components whose payload moved; worried when it was cut at another version). The session's first reading is the baseline. Display only: the model and the transcript file never read them.
+- **A container's neighbourhood on the desktop app**: its card in `/arch` draws the container between what calls it and what it calls, each link its `I-nn` and protocol, a tooltip on every element, on Alia's night ground (`hooks/explorer/diagram.ts`). The terminal keeps its lists.
+- **The architecture in the prompt footer**: `✦ v1.10.2 Released` beside the engine's mode labels, on the terminal and the desktop app.
+
+
 
 ### Added
 

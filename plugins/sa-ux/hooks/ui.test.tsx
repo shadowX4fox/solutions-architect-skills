@@ -33,9 +33,10 @@ const FILES: Record<string, { text: string; mtimeMs: number }> = {
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
 function engine(on: On) {
-  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[] }
+  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[] }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('turn.complete', () => ({ text: '' }) as never)
   on('session.root', () => ({ value: '/p' }))
   on('clock.now', () => ({ value: NOW }))
   on('env.get', (_$, e) => ({ value: e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
@@ -47,7 +48,7 @@ function engine(on: On) {
     for (const [k, f] of Object.entries(FILES)) { if (!k.startsWith(e.path + '/')) continue; const rest = k.slice(e.path.length + 1); const name = rest.split('/')[0] ?? rest
       kids.set(name, rest.includes('/') ? { name, kind: 'dir', size: 0, mtimeMs: 0, isLink: false } : { name, kind: 'file', size: f.text.length, mtimeMs: f.mtimeMs, isLink: false }) }
     return { value: [...kids.values()] } })
-  on('process.run', () => ({ value: { exitCode: 0, stdout: JSON.stringify(FINDINGS), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('process.run', (_$, e) => ({ value: { exitCode: 0, stdout: e.argv[0] === 'git' ? '' : JSON.stringify(FINDINGS), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
   on('command.register', (_$, e) => ({ value: { command: e.name } }))
   on('state.get', (_$, e) => { const s = state.get(`${e.plugin}/${e.key}`); return { value: (s ? { isSet: true, value: s.value, version: s.version } : { isSet: false, version: 0 }) as never } })   // the store is untyped here: one Map for every key
   on('state.set', (_$, e) => { const k = `${e.plugin}/${e.key}`; const version = (state.get(k)?.version ?? 0) + 1; state.set(k, { value: e.value, version }); return { value: { isSet: true, version } } })
@@ -55,6 +56,7 @@ function engine(on: On) {
   on('prompt.fill', (_$, e) => { box.text = e.text; return { isFilled: true, text: e.text, cursor: e.text.length } })
   on('ui.status', () => ({ value: undefined }))
   on('ui.open', (_$, e) => { box.opened.push(e.id); return { value: { isPlaced: true } } })
+  on('ui.place', (_$, e) => { box.placed.push(e.id); return { value: { isPlaced: true, requestId: e.id } } })
   on('ui.render', (_$, e) => { box.drawn.push({ component: e.component, props: e.props as never }); return { type: 'Text', props: {}, children: [''] } as never })   // the engine's own drawing: nothing
   return box
 }
@@ -101,6 +103,7 @@ describe('sa-ux, end to end on every surface', () => {
       expect(await card.find({ type: 'Text', text: /● en alcance/ })).toBeDefined()
       expect(await card.find({ type: 'Text', text: /I-05/ })).toBeDefined()
       expect(await card.find({ type: 'Text', text: /1 entrante, 0 salientes — gobernado por ADR-120/ })).toBeDefined()
+      if (surface === 'desktop') expect(await card.find({ type: 'Svg', props: { isInteractive: true } } as never)).toBeDefined()   // her map of its neighbourhood
       await card.press({ key: 'act-1' })
       expect(box.text).toBe('genera el handoff del Servicio de Alta')
       await card.unmount()
@@ -135,6 +138,50 @@ describe('sa-ux, end to end on every surface', () => {
       await ui.press({ key: 'v-radar' })
       expect(box.opened).toContain('sa-ux-radar')
       await ui.unmount()
+    })
+
+    test(`${surface}: a suite script's row reads as what it said; its raw result folds; any other command is the engine's`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const row = { tool_use_id: 't1', tool: 'Bash', input: { command: 'bun /x/solutions-architect-skills/skills/architecture-docs/scripts/flow-check.js /p' },
+        isRunning: false, isErrored: false, isInterrupted: false, output: { stdout: 'F-01 ✓\n  ⚠ alias\nPASS\n', stderr: '' } }
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'ToolUse', props: row })
+      expect(await ui.find({ type: 'Text', text: 'Revisión de flujos' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: 'PASS' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /1 aviso/ })).toBeDefined()
+      await ui.unmount()
+      const result = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'ToolResult', props: { tool_use_id: 't1', tool: 'Bash', output: row.output, isErrored: false } })
+      expect(await result.find({ type: 'Text' })).toBeUndefined()   // folded under the readable row
+      await result.unmount()
+      const before = box.drawn.length
+      const other = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'ToolUse', props: { ...row, tool_use_id: 't2', input: { command: 'git status' } } })
+      expect(box.drawn.slice(before).some((d) => d.component === 'ToolUse')).toBe(true)   // passed to the engine
+      await other.unmount()
+    })
+
+    test(`${surface}: the footer carries the architecture's version and status`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'SessionMode', props: { modes: ['focus'] } })
+      expect(box.drawn.filter((d) => d.component === 'SessionMode').pop()?.props.modes).toEqual(['focus', '✦ v7.1.0 Draft'])
+      await ui.unmount()
+    })
+
+    test(`${surface}: a turn that releases the architecture places her card in the transcript`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      expect(box.placed).toEqual([])   // the session's first reading is the baseline
+      const was = { ...FILES['/p/ARCHITECTURE.md']! }, log = { ...FILES['/p/docs/CHANGELOG.md']! }
+      FILES['/p/ARCHITECTURE.md'] = { ...was, text: was.text.replace('7.1.0', '7.2.0').replace('-->', '-->\n<!-- ARCHITECTURE_STATUS: Released -->') }
+      FILES['/p/docs/CHANGELOG.md'] = { ...log, text: log.text + '\n## [7.2.0] - 2026-10-01\n\n### Added\n- tres\n' }
+      try {
+        await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId: 't1', reason: 'answer' } as never)
+        expect(box.placed).toEqual(['release-7_2_0-doc'])
+        const card = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'Placed', props: { id: 'release-7_2_0-doc', plugin: 'sa-ux' } })
+        expect(await card.find({ type: 'Text', text: 'Liberada v7.2.0 · el tag llega tras el merge' })).toBeDefined()
+        expect(await card.find({ type: 'Text', text: /tres/ })).toBeDefined()
+        await card.unmount()
+      } finally { FILES['/p/ARCHITECTURE.md'] = was; FILES['/p/docs/CHANGELOG.md'] = log }
     })
 
     test(`${surface}: inside an architecture the spinner speaks hers`, async ($, on) => {
