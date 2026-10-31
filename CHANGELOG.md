@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.2.0]
+
+### Changed
+
+- **The RUN-team policy is for the components, never for the architecture repository**: `"support": "run"` declares that the components built from the architecture are maintained by RUN teams — their build packs' `BUILD.md` (rules 9 and 10) escalate through `preview_escalation` and request Tier 0 writes through `preview_tier0`, `architecture-tier0.yml` applies them, the review holds a service pull request on an open escalation; all unchanged. A session in the architecture repository is the architect's: every write is confirmed first (before → after) and no request becomes an escalation on its own — the Tier 0 exception and the automatic escalation are gone from the CLAUDE.md block `/setup` writes (§ RUN teams), `EDIT_WORKFLOW.md` step 3.5 and the ADR and TDR skills. An escalation is opened there only when the user asks; importing, listing and closing the ones the components file, and `lifecycle.js plan --resolves`, are unchanged. `support.js` says who the policy is for; `docs/RUN_TEAMS.md` describes the model.
+
+### Upgrade
+
+- In a RUN-team architecture repository, run `/setup` again: it rewrites the project CLAUDE.md's § RUN teams, which a session reads. An escalation a session opened by itself before this release can be closed with `escalate.js close <project> ESC-NNN --rejected "<reason>"`.
+
 ## [11.1.1]
 
 ### Changed

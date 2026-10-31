@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.1.1-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.2.0-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
@@ -253,7 +253,7 @@ Fifteen skills in six categories. **Standalone** means the skill starts without 
 | [Quick start](docs/QUICK_START.md) | A first architecture, end to end |
 | [Workflow guide](docs/WORKFLOW_GUIDE.md) | Every phase and what it produces |
 | [Alia](docs/ALIA.md) | The 3D command center and the architecture MCP server |
-| [RUN teams](docs/RUN_TEAMS.md) | Operating a released architecture: Tier 0 writes, escalations, unattended build agents |
+| [RUN teams](docs/RUN_TEAMS.md) | Components maintained by RUN teams: Tier 0 requests, escalations from the IDE, unattended build agents |
 | [Institution packs](docs/INSTITUTION_PACKS.md) | Adding an organization's standards, frameworks, types and skins |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common problems and fixes |
 | [Design notes](docs/DESIGN_NOTES.md) | Why the rules are what they are — with the measurements |

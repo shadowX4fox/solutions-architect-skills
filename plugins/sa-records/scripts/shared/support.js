@@ -1,10 +1,12 @@
 #!/usr/bin/env bun
-// RUN-team support (Tier 0, the AI architect): a project maintained by a team with no architect budget declares
-// `"support": "run"` in `.sa-skills/project.json`. Once its architecture has a release (an `architecture-v*` tag), four
-// writes go ahead without the change-set approval when nothing is in doubt and no escalation trigger is crossed —
-// a workaround recorded as a TDR, a TDR status move, a project ADR (101+) in Proposed, a doc fix that changes no fact.
-// Every other write, and every write before the first release, is confirmed first. A crossed trigger writes nothing to
-// the architecture: it becomes an escalation for a human architect (escalate.js).
+// RUN-team support (Tier 0, the AI architect for the components): an architecture whose components are maintained by
+// teams with no architect budget declares `"support": "run"` in `.sa-skills/project.json`. It is a policy for the
+// components' repositories, never for the architecture repository, which is the architect's (11.2.0): once the
+// architecture has a release (an `architecture-v*` tag), a component's build pack tells its IDE agent to request four
+// writes the architecture repository applies without an architect when nothing is in doubt — a workaround recorded as
+// a TDR, a TDR status move, a project ADR (101+) in Proposed, a doc fix that changes no fact (`preview_tier0`,
+// architecture-tier0.yml) — and to escalate whatever crosses a trigger (`preview_escalation`, escalate.js import).
+// A session in the architecture repository confirms every write and escalates only when asked.
 //
 //   bun support.js <project> [--json]          the project's support mode, whether Tier 0 applies, the triggers
 //   bun support.js <project> --declare run|none
@@ -46,7 +48,7 @@ function supportOf(root) {
   if (!support) return { support: null, released: null, tier0: false, reason: 'not a RUN-team project — every write is confirmed first' };
   const released = releaseTag(root);
   if (!released) return { support, released: null, tier0: false, auto: autoOf(p), reason: 'RUN team, but no architecture release yet (no architecture-v* tag) — every write is confirmed first, changes go to Tier 1' };
-  return { support, released, tier0: true, auto: autoOf(p), reason: `RUN team, released ${released} — Tier 0 writes go ahead when nothing is in doubt and no trigger is crossed` };
+  return { support, released, tier0: true, auto: autoOf(p), reason: `RUN team, released ${released} — the components' IDE agents request Tier 0 writes and escalate crossed triggers; an edit in this repository is confirmed first` };
 }
 
 function declareSupport(root, value) {
@@ -84,9 +86,10 @@ if (require.main === module) {
   if (a.includes('--json')) { console.log(JSON.stringify(Object.assign({}, s, { tier0_writes: s.tier0 ? TIER0 : [], triggers: TRIGGERS }), null, 2)); process.exit(0); }
   console.log(`support: ${s.support || 'standard'} · ${s.reason}`);
   if (s.tier0) {
-    console.log('Tier 0 writes (no change-set approval when nothing is in doubt):');
+    console.log('Tier 0 writes a component\'s IDE agent may request (preview_tier0 → architecture-tier0.yml applies them here):');
     TIER0.forEach((k) => console.log(`  - ${TIER0_LABEL[k]}${s.auto.includes(k) ? ' — a trusted agent keys it itself' : ''}`));
-    console.log('Escalation triggers (a crossed trigger writes nothing to the architecture — it becomes an escalation: escalate.js new):');
+    console.log('Escalation triggers (a component\'s request that crosses one becomes an escalation: preview_escalation → escalate.js import):');
     TRIGGERS.forEach((t) => console.log(`  - ${t}`));
+    console.log('This repository is the architect\'s: an edit here is confirmed first and never escalates on its own.');
   }
 }

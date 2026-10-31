@@ -1,13 +1,19 @@
 # RUN teams: Tier 0 and escalations
 
-A RUN team maintains a released architecture without an architect at hand. The plugin lets the AI act as the
-architect for small, safe changes (**Tier 0**). It turns everything else into an **escalation**, a structured
-request a human architect answers. The architecture is never changed behind the architect's back. A request either
-fits Tier 0 and is written, or it crosses a trigger and becomes an escalation that writes nothing.
+A RUN team maintains a component built from a released architecture, without an architect at hand. The policy is
+the architecture's, and it applies to the components' repositories: from a component's IDE, the AI requests small,
+safe changes to the architecture (**Tier 0**), which the architecture repository applies without an architect, and
+turns everything else into an **escalation**, a structured request a human architect answers. The architecture is
+never changed behind the architect's back.
+
+**The architecture repository is the architect's** (11.2.0). The declaration changes nothing about a session there:
+every edit is confirmed first (before → after) and no request becomes an escalation on its own. That repository is
+where the requests arrive and are answered: Tier 0 requests applied by `architecture-tier0.yml`, escalations imported,
+listed and closed, a release naming the ones it resolves.
 
 | Tier | Who decides | What it covers |
 |---|---|---|
-| **Tier 0** | The AI, under the project's policy | Four writes, when nothing is in doubt and no trigger is crossed |
+| **Tier 0** | The AI in a component's repository, under the architecture's policy | Four writes, requested from the IDE and applied by the architecture repository, when nothing is in doubt and no trigger is crossed |
 | **Tier 1** | SA office hours | An escalation: a question or a change that needs an architect |
 | **Tier 2** | Design authority | An escalation that is CHANGE work: scope, structure, a new direction |
 
@@ -21,7 +27,9 @@ fits Tier 0 and is written, or it crosses a trigger and becomes an escalation th
 3. Check it: `bun <sa_skills_dir>/scripts/shared/support.js <project>` prints whether Tier 0 applies and lists the
    triggers.
 
-`/setup` writes the rules into the project's `CLAUDE.md` (§ RUN teams), so every session follows them.
+`/setup` writes the rules into the project's `CLAUDE.md` (§ RUN teams): that the policy is for the components, that
+an edit in the architecture repository is confirmed first, and how escalations are imported, answered and — only when
+the user asks — opened there. The components get theirs in the build packs' `BUILD.md` (rules 9 and 10).
 
 ## The policy
 
@@ -34,8 +42,9 @@ fits Tier 0 and is written, or it crosses a trigger and becomes an escalation th
 | `adr-proposed` | A project ADR (101+) with status `Proposed`, never `Accepted` |
 | `doc-fix` | A wording, typo or link fix in `docs/` that changes no fact: no value, name, id, integration, technology, decision or status |
 
-They are written without the change-set approval and reported afterwards, file by file. **A doubt is not Tier 0**: a
-request that leaves anything open goes through the normal confirmation.
+A component's IDE agent requests them (`preview_tier0`); the architecture repository writes them without an architect
+(`architecture-tier0.yml`, § Tier 0 from the IDE). **A doubt is not Tier 0**: a request that leaves anything open is
+an escalation. In the architecture repository itself the architect edits, and every write is confirmed.
 
 ### The triggers
 
@@ -71,27 +80,17 @@ The same content becomes an issue on the project's git host. GitHub, GitLab, Git
 and the host is read from `origin`. The issue is titled `[ESC-NNN] <title>` and labelled `architecture-escalation`,
 `tier-1` or `tier-2`, and `trigger:<id>`.
 
-### From a session in the architecture repository
+### Opened in the architecture repository, when asked
 
-```mermaid
-flowchart TB
-  R["Request in a session"] --> S{"support.js: Tier 0?"}
-  S -- no --> C["Normal flow: change shown, approved, written"]
-  S -- yes --> T{"Crosses a trigger?"}
-  T -- no --> W{"One of the four writes,<br/>nothing in doubt?"}
-  W -- yes --> X["Written, reported after"]
-  W -- no --> C
-  T -- yes --> N["escalate.js new: escalations/ESC-NNN"]
-  N --> P["escalate.js issue: the issue shown"]
-  P --> Y{"User says yes?"}
-  Y -- yes --> I["escalate.js issue --create: issue opened,<br/>its URL in the record"]
-  Y -- no --> L["The record stays local"]
-```
+A session in the architecture repository never escalates on its own: the architect is there and decides. When the
+user asks to escalate — to hand a decision to SA office hours or the design authority —:
 
 1. The session writes the request as JSON and runs `escalate.js new <project> --from request.json`.
 2. `escalate.js issue <project> ESC-NNN` prints the issue it would open: title, labels and body.
 3. The session shows it to the user and asks. Only after a yes does it run `--create`.
-4. The session stops. Nothing in `docs/`, `adr/` or `tdr/` changes.
+
+Before 11.2.0 a session here escalated by itself whenever a request crossed a trigger, as if the architecture
+repository were a RUN team's; it wrote records the architect then had to reject.
 
 ### From the IDE (the architecture MCP server)
 
