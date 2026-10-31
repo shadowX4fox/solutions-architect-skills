@@ -8,7 +8,7 @@ import type { EngineInterface } from 'claude-code'
 import type { AliaLine } from '../../types'
 
 import { GLYPH, TONE } from '../ui'
-import { ALIA, FACE, FACE_PX, RING, codecSvg, type Mood } from './palette'
+import { ALIA, BLAZON, FACE, FACE_PX, RING, blazonSvg, codecSvg, type Mood } from './palette'
 
 export const MOOD_TONE: Record<Mood, string | undefined> = {
   calm: undefined, talk: undefined, thinking: TONE.info, pleased: TONE.ok, worried: TONE.high, stern: TONE.critical,
@@ -35,13 +35,24 @@ export async function portrait($: EngineInterface, surface: string, mood: Mood):
   return codecSvg(f, RING[mood])
 }
 
+/** Her blazon for a surface that draws `Svg`, null in the terminal or where the file cannot be read. */
+export async function blazon($: EngineInterface, surface: string): Promise<string | null> {
+  if (surface === 'terminal') return null
+  const f = await face($, BLAZON)
+  return f ? blazonSvg(f) : null
+}
+
 type Els = { Box: any; Text: any; Svg?: any }
 
-/** The mark: her face where a picture can be drawn, else the sparkle in the mood's ring. */
-export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: boolean }) {
+/**
+ * The mark: her face where a picture can be drawn, else the sparkle in the mood's ring — her voice. With `blazon`, her
+ * escudo instead, and in the terminal the bare sparkle: what she offers, so it is never read as her talking.
+ */
+export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: boolean; blazon?: boolean }) {
   const { Box, Svg, Text } = props.els
   if (props.show === false) return null
-  if (props.svg && Svg) return <Svg source={props.svg} alt={`Alia, ${props.mood}`} width={FACE_PX + 8} height={FACE_PX + 8} />
+  if (props.svg && Svg) return <Svg source={props.svg} alt={props.blazon ? 'Alia' : `Alia, ${props.mood}`} width={FACE_PX + 8} height={FACE_PX + 8} />
+  if (props.blazon) return <Text color={ALIA.aquaMark} bold>{GLYPH.brand}</Text>
   return (
     <Box borderStyle="round" borderColor={RING_TONE[props.mood]} paddingX={1}>
       <Text color={ALIA.aquaMark} bold>{GLYPH.brand}</Text>
@@ -50,12 +61,12 @@ export function Mark(props: { els: Els; mood: Mood; svg: string | null; show?: b
 }
 
 /** The codec: her mark, then «Alia · <kicker>» and her line, then whatever the caller puts beneath. */
-export function Codec(props: { els: Els; say: Pick<AliaLine, 'mood' | 'line'> | null; kicker: string; svg: string | null; showMark?: boolean; children?: unknown }) {
+export function Codec(props: { els: Els; say: Pick<AliaLine, 'mood' | 'line'> | null; kicker: string; svg: string | null; showMark?: boolean; blazon?: boolean; children?: unknown }) {
   const { Box, Text } = props.els
   const mood: Mood = props.say ? props.say.mood : 'calm'
   return (
     <Box flexDirection="row" gap={1}>
-      <Mark els={props.els} mood={mood} svg={props.svg} show={props.showMark} />
+      <Mark els={props.els} mood={mood} svg={props.svg} show={props.showMark} blazon={props.blazon} />
       <Box flexDirection="column" flexGrow={1}>
         <Box flexDirection="row" gap={1}>
           <Text color={ALIA.aquaMark} bold>{props.showMark === false ? `${GLYPH.brand} Alia` : 'Alia'}</Text>

@@ -1,5 +1,5 @@
-// sa-ux · next steps — the band above the prompt box, in Alia's codec: her mark (her face where pictures draw, her
-// ringed sparkle in the terminal), her line,
+// sa-ux · next steps — the band above the prompt box, under Alia's blazon (her escudo where pictures draw, the bare
+// sparkle in the terminal — never her face, which is her voice in a codec), her line,
 // then up to three prompts lifecycle.tsx computed from the project's state. A click fills the prompt with the step as a draft (nothing is sent); "hide" hides the set until it changes.
 // No hotkeys: a band Button's digit also answers from an empty composer, so a digit typed to answer the model's own
 // numbered options would take a step instead.
@@ -8,7 +8,7 @@ import type { On } from 'claude-code'
 
 import type { AliaLine, Step } from '../../types'
 
-import { Codec, portrait } from '../alia/codec'
+import { Codec, blazon } from '../alia/codec'
 import { GLYPH, TONE, cut, pad } from '../ui'
 import { fingerprint } from './rules'
 
@@ -33,13 +33,14 @@ export function registerNextSteps(on: On) {
       await hide()
     }
 
-    // her mark takes 6 columns (the ringed sparkle) beside her words: left out where the band is narrow
+    // the band carries her blazon, not her face: a face in a ring is her talking (the codec); the steps are what she
+    // offers. In the terminal the bare sparkle (the codec's is ringed). Left out where the band is narrow.
     const showMark = e.props.bodyColumns >= 60
-    const svg = showMark ? await portrait($, e.surface, say ? say.mood : 'calm') : null
-    const room = Math.max(20, e.props.bodyColumns - 2 - (showMark ? 6 : 0))
+    const svg = showMark ? await blazon($, e.surface) : null
+    const room = Math.max(20, e.props.bodyColumns - 2 - (showMark ? 2 : 0))
     const titleWidth = Math.max(...steps.map((s) => s.title.length))
     return (
-      <Codec els={els} say={say} svg={svg} showMark={showMark}
+      <Codec els={els} say={say} svg={svg} showMark={showMark} blazon
         kicker={es ? `siguientes pasos ${GLYPH.dot} clic para llenar el prompt, no lo envía` : `next steps ${GLYPH.dot} click to fill the prompt, never sends it`}>
         {steps.map((s) => (
           <Box key={`row-${s.id}`} flexDirection="row" gap={1}>

@@ -45,7 +45,7 @@ function engine(on: On) {
   on('clock.now', () => ({ value: NOW }))
   on('env.get', (_$, e) => ({ value: e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
   on('fs.exists', (_$, e) => ({ value: !!FILES[e.path] || dir(e.path) }))
-  on('fs.read', (_$, e) => { if (/\/assets\/alia\/face-[a-z-]+\.webp$/.test(e.path)) return { value: { base64: 'UklGRg==' } } as never
+  on('fs.read', (_$, e) => { if (/\/assets\/alia\/(face-[a-z-]+\.webp|escudo\.png)$/.test(e.path)) return { value: { base64: 'UklGRg==' } } as never
     const f = FILES[e.path]; if (!f) throw new Error(`ENOENT ${e.path}`); return { value: f.text } })
   on('fs.stat', (_$, e) => { const f = FILES[e.path]; if (!f && !dir(e.path)) throw new Error(`ENOENT ${e.path}`); return { value: { kind: f ? 'file' : 'dir', size: f ? f.text.length : 0, mtimeMs: f ? f.mtimeMs : 0, isLink: false } } })
   on('fs.list', (_$, e) => { if (!dir(e.path)) throw new Error(`ENOENT ${e.path}`); const kids = new Map<string, { name: string; kind: 'file' | 'dir'; size: number; mtimeMs: number; isLink: boolean }>()
@@ -84,8 +84,9 @@ describe('sa-ux, end to end on every surface', () => {
       expect((await ui.find({ key: 'step-release' }))?.text).toContain('Liberar la arquitectura')
       expect(await ui.find({ type: 'Text', text: /2 cambio\(s\) en \[Unreleased\] desde v7\.1\.0/ })).toBeDefined()
       expect(await ui.find({ type: 'Text', text: /^Alia$|✦ Alia/ })).toBeDefined()
+      // the band carries her blazon, never her face: the escudo on the desktop, the bare sparkle in the terminal
       if (surface === 'terminal') { expect(await ui.find({ type: 'Text', text: '✦' })).toBeDefined(); expect(await ui.find({ type: 'Svg' })).toBeUndefined() }
-      else expect(await ui.find({ type: 'Svg' })).toBeDefined()   // her face on the desktop; her ringed sparkle in the terminal
+      else { const mark = await ui.find({ type: 'Svg' }); expect(mark).toBeDefined(); expect(JSON.stringify(mark)).toContain('image/png'); expect(JSON.stringify(mark)).not.toContain('image/webp') }
       expect(await ui.find({ type: 'Text', text: /Hay 7 hallazgos críticos — SPOF pesa más/ })).toBeDefined()   // stern: SPOF holds 7 critical
       await ui.press({ key: 'step-release' })
       expect(box.text).toBe('release my architecture')

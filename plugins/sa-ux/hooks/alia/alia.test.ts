@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 
 import type { Radar } from '../../types'
-import { FACE, RING, codecSvg, type Mood } from './palette'
+import { BLAZON, FACE, RING, blazonSvg, codecSvg, type Mood } from './palette'
 import { DONE, SPINNER, aliaSays, archHeader, pick } from './voice'
 
 const MOODS: Mood[] = ['calm', 'pleased', 'thinking', 'worried', 'stern', 'talk']
@@ -20,6 +20,12 @@ describe('Alia codec picture', () => {
     expect(svg).toContain(`stroke="${RING.stern}"`)
     expect(svg).not.toContain('<animate')
     expect(svg.length).toBeLessThan(131072)
+  })
+  test('the blazon: her escudo at the codec\'s size, no ring', () => {
+    const svg = blazonSvg('QUJD')
+    expect(BLAZON).toBe('escudo.png')
+    expect(svg).toContain('href="data:image/png;base64,QUJD"')
+    expect(svg).not.toContain('stroke=')
   })
   test('every mood has a face and a ring', () => {
     for (const m of MOODS) { expect(FACE[m]).toMatch(/^face-.+\.webp$/); expect(RING[m]).toMatch(/^#[0-9a-f]{6}$/) }

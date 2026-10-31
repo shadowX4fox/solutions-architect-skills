@@ -35,3 +35,13 @@ export function codecSvg(face: string, ring: string): string {
     + `<circle cx="${c}" cy="${c}" r="${r}" fill="${ALIA.night2}"/>${img(face)}`
     + `<circle cx="${c}" cy="${c}" r="${r + 2}" fill="none" stroke="${ring}" stroke-width="3"/></svg>`
 }
+
+/** Her escudo (the blazon), under `assets/alia/` — the mark of what she offers, never her voice: the face in a ring is. */
+export const BLAZON = 'escudo.png'
+
+/** The blazon as SVG, at the codec's size, so a band and a codec line up; no ring — the ring is the codec's. */
+export function blazonSvg(png: string): string {
+  const S = FACE_PX + 8
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">`
+    + `<image href="data:image/png;base64,${png}" x="4" y="4" width="${FACE_PX}" height="${FACE_PX}"/></svg>`
+}

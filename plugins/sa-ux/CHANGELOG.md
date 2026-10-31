@@ -2,7 +2,13 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.9.1]
+## [0.10.0]
+
+### Changed
+
+- **The next-steps band carries her blazon, not her face**: her face in a ring is her voice — the codec of `/alia`, the radar, the explorer, a milestone card, a confirmation — so the band, which offers steps rather than speaking, is marked by her escudo on the desktop app (`assets/alia/escudo.png`, at the codec's size, no ring) and by the bare sparkle `✦` in the terminal, where the codec's is ringed. Her line and the steps are unchanged.
+
+
 
 ### Fixed
 
