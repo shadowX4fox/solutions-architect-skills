@@ -30,3 +30,24 @@ export function buildRadar(input: { lang: 'en' | 'es'; findings: FindingsRow[] |
   ].filter(Boolean)
   return { lang: input.lang, lenses, findingsNote: input.findingsNote, tdrs, line: `${es ? 'riesgo' : 'risk'}: ${parts.join(' · ')}` }
 }
+
+/** One reading of a lens: the date of its report and its critical and high findings. */
+export type TrendPoint = { date: string; critical: number; high: number }
+
+/**
+ * A lens's history: what was remembered, plus the readings seen now (the newest report, the archive's newest), one point a
+ * date, oldest first, at most `max`. sa-skills keeps one report per lens in `analysis/` and moves the rest to `archive/`,
+ * so the history is what this plugin remembers as reports appear — seeded by the archive's newest at first sight.
+ */
+export function mergeTrend(stored: Record<string, TrendPoint[]> | null | undefined, seen: { lens: string; date: string; critical: number; high: number }[], max = 12): Record<string, TrendPoint[]> {
+  const out: Record<string, TrendPoint[]> = {}
+  for (const [lens, pts] of Object.entries(stored || {})) if (Array.isArray(pts)) out[lens] = pts.filter((p) => p && typeof p.date === 'string')
+  for (const s of seen) {
+    const pts = (out[s.lens] ||= [])
+    const at = pts.findIndex((p) => p.date === s.date)
+    const p = { date: s.date, critical: s.critical, high: s.high }
+    if (at >= 0) pts[at] = p; else pts.push(p)
+  }
+  for (const lens of Object.keys(out)) out[lens] = out[lens]!.sort((a, b) => a.date.localeCompare(b.date)).slice(-max)
+  return out
+}

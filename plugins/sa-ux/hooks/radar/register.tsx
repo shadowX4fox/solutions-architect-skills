@@ -10,6 +10,7 @@ import { Codec, portrait } from '../alia/codec'
 
 import { RADAR_PANE } from '../state'
 import { GLYPH, TONE, bar, pad, padLeft, rule, type Tone } from '../ui'
+import { SPARK_H, SPARK_W, sparkline } from './trend'
 
 const aliaAtom = atom({ plugin: 'sa-ux', key: 'alia' } as const, null as AliaLine | null)
 const radarAtom = atom({ plugin: 'sa-ux', key: 'radar' } as const, null as Radar | null)
@@ -91,6 +92,11 @@ export function registerRadar(on: On) {
                 {col('c-high', es ? 'altos' : 'high', lenses.map((l) => <Text key={`h-${l.lens}`} color={l.high ? TONE.high : undefined} dimColor={!l.high}>{String(l.high)}</Text>), 'flex-end')}
                 {col('c-total', 'total', lenses.map((l) => <Text key={`t-${l.lens}`} dimColor>{String(l.total)}</Text>), 'flex-end')}
                 {col('c-report', es ? 'reporte' : 'report', lenses.map((l) => <Text key={`r-${l.lens}`} dimColor>{l.date}</Text>))}
+                {r.trend && lenses.some((l) => (r.trend![l.lens] || []).length > 1) && (els as { Svg?: unknown }).Svg ? col('c-trend', es ? 'tendencia' : 'trend', lenses.map((l) => {
+                  const svg = sparkline(r.trend![l.lens] || [], r.lang)
+                  const Svg = (els as { Svg?: any }).Svg
+                  return svg ? <Svg key={`s-${l.lens}`} source={svg} alt={es ? `tendencia de ${l.lens}` : `${l.lens} trend`} width={SPARK_W} height={SPARK_H} isInteractive /> : <Text key={`s-${l.lens}`} dimColor>—</Text>
+                })) : null}
                 {col('c-age', es ? 'edad' : 'age', lenses.map((l) => l.stale
                   ? <Text key={`a-${l.lens}`} color={TONE.high}>{`${GLYPH.stale} ${l.ageDays} d`}</Text>
                   : <Text key={`a-${l.lens}`} dimColor>{`${l.ageDays} d`}</Text>))}

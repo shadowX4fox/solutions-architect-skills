@@ -27,6 +27,8 @@ export type Radar = {
   findingsNote: string | null
   tdrs: Record<string, number>
   line: string
+  /** each lens's readings over time, oldest first — remembered by this plugin per project (`$.store`), empty before two */
+  trend?: Record<string, { date: string; critical: number; high: number }[]>
 }
 
 /** alia: what she says for the project as it stands — the mood her face takes and one line, with the architecture's markers. */

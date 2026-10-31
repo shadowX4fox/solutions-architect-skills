@@ -71,6 +71,16 @@ export function registerAlia(on: On, options: PluginOptions) {
     )
   })
 
+  // `/alia`'s line in the transcript, as her codec; the model reads the text the command answered, unchanged
+  on('ui.render', { component: 'CommandOutput' }, async ($, e, next) => {
+    if (e.props.command !== 'alia' || e.props.isErrored) return next(e)
+    const say = await read($, aliaAtom)
+    if (!say) return next(e)
+    const es = (await read($, langAtom)) === 'es'
+    const els = $.ui.resolve(e)
+    return <Codec els={els} say={say} svg={await portrait($, e.surface, say.mood)} kicker={[say.name, say.version ? `v${say.version}` : '', say.status].filter(Boolean).join(` ${GLYPH.dot} `) || (es ? 'arquitectura' : 'architecture')} />
+  })
+
   // the architecture in the prompt footer, beside the engine's modes: `✦ v1.10.2 Released` — what every turn works on
   on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
     const say = await read($, aliaAtom)

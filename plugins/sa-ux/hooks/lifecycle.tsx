@@ -2,7 +2,7 @@
 // registers the commands and refreshes what each mod draws. The logic is the mods' own (pure modules); what needs `$`
 // lives here, at the top of the file, where the engine follows it.
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, On } from 'claude-code'
+import type { EngineInterface, On, PluginOptions } from 'claude-code'
 
 import type { AliaLine, Milestone, ProjectSnapshot, Radar, Step } from '../types'
 
@@ -12,7 +12,7 @@ import { aliaSays, archHeader } from './alia/voice'
 import { GLYPH } from './ui'
 
 import { fingerprint, newestMd, nextSteps, type Io } from './next-steps/rules'
-import { buildRadar, type FindingsRow } from './radar/model'
+import { buildRadar, mergeTrend, type FindingsRow, type TrendPoint } from './radar/model'
 
 const aliaAtom = atom({ plugin: 'sa-ux', key: 'alia' } as const, null as AliaLine | null)
 const snapshotAtom = atom({ plugin: 'sa-ux', key: 'snapshot' } as const, null as ProjectSnapshot | null)
@@ -83,9 +83,25 @@ async function refreshRadar($: EngineInterface) {
       } catch { findingsNote = 'findings parser failed — findings not counted' }
     }
   }
+  // the trend: what this plugin remembered for the project, the archive's newest per lens at first sight, and today's
+  let trend: Record<string, TrendPoint[]> | undefined
+  if (findings) {
+    const storeKey = `trend:${root}`
+    let stored: Record<string, TrendPoint[]> | undefined
+    try { stored = (await $.store.get(storeKey)) as Record<string, TrendPoint[]> | undefined } catch { stored = undefined }
+    if (!stored) {
+      const sa = await saSkillsDir($)
+      if (sa && (await $.fs.exists(`${analysis}/archive`))) try {
+        const r = await $.process.run(['bun', `${sa}/scripts/shared/findings.js`, `${analysis}/archive`, '--json'], { timeoutMs: 20000 })
+        if (r.exitCode === 0) stored = mergeTrend(null, (JSON.parse(r.stdout) as FindingsRow[]).map((x) => ({ lens: x.lens, date: x.date, critical: x.severity.critical || 0, high: x.severity.high || 0 })))
+      } catch { /* no archive reading: the trend starts today */ }
+    }
+    trend = mergeTrend(stored, findings.map((x) => ({ lens: x.lens, date: x.date, critical: x.severity.critical || 0, high: x.severity.high || 0 })))
+    try { await $.store.set(storeKey, trend) } catch { /* the store is full: the trend is this session's */ }
+  }
   let tdrs: { status: string }[] = []
   try { const f = JSON.parse(await $.fs.read(facts)); tdrs = Array.isArray(f.tdrs) ? f.tdrs.map((d: { status?: unknown }) => ({ status: String(d.status || '') })) : [] } catch { tdrs = [] }
-  const radar = buildRadar({ lang, findings, findingsNote, tdrs, docsNewest: docs, now: await $.clock.now() })
+  const radar = { ...buildRadar({ lang, findings, findingsNote, tdrs, docsNewest: docs, now: await $.clock.now() }), ...(trend ? { trend } : {}) }
   await update($, radarAtom, () => radar)
   await update($, radarKeyAtom, () => key)
   $.ui.status(`${GLYPH.brand} ${radar.line}`)
@@ -102,11 +118,11 @@ async function refreshAlia($: EngineInterface) {
 }
 
 /** milestones: read the project as the skills left it, compare with the last reading, place a card for each move. */
-async function refreshMilestones($: EngineInterface) {
+async function refreshMilestones($: EngineInterface): Promise<Milestone[]> {
   const root = await $.session.root()
   let text = ''
   try { text = await $.fs.read(`${root}/ARCHITECTURE.md`) } catch { text = '' }
-  if (!text) return
+  if (!text) return []
   const { version, status } = archHeader(text)
   let tagged = false
   if (version) try {
@@ -120,21 +136,29 @@ async function refreshMilestones($: EngineInterface) {
   try { kit = kitOf(JSON.parse(await $.fs.read(`${root}/handoffs/.manifest.json`))) } catch { kit = null }
   const next: ProjectSnapshot = { version, status, tagged, lenses, kit }
   const prev = await read($, snapshotAtom)
-  if (JSON.stringify(prev) === JSON.stringify(next)) return
+  if (JSON.stringify(prev) === JSON.stringify(next)) return []
   let changelog = ''
   try { changelog = await $.fs.read(`${root}/docs/CHANGELOG.md`) } catch { changelog = '' }
   const cards = milestones(prev, next, await read($, langAtom), changelog)
   await update($, snapshotAtom, () => next)
-  if (!cards.length) return
+  if (!cards.length) return []
   const placed = await read($, milestonesAtom)
   const fresh = cards.filter((c) => !placed.some((p) => p.id === c.id))
-  if (!fresh.length) return
+  if (!fresh.length) return []
   await update($, milestonesAtom, (xs) => [...xs, ...fresh].slice(-40))
   for (const c of fresh) try { await $.ui.place({ id: c.id }) } catch { /* a build without placed rows: the cards stay unshown */ }
+  return fresh
+}
+
+/** A turn that ran long enough to walk away from: what it moved, else her line — a notification, never for a short turn. */
+export function notice(durationMs: number, afterMinutes: number, fresh: Milestone[], say: AliaLine | null): string | null {
+  if (!afterMinutes || afterMinutes <= 0 || durationMs < afterMinutes * 60000 || !say) return null
+  return fresh.length ? fresh.map((m) => m.title).join(' · ') : say.line
 }
 
 /** The lifecycle hooks of every mod: commands at session start, refreshes at session start and after each turn. */
-export function registerLifecycle(on: On) {
+export function registerLifecycle(on: On, options: PluginOptions = {}) {
+  const after = typeof options.notifyAfterMinutes === 'number' ? options.notifyAfterMinutes : 3
   on('session.start', async ($, e, next) => {
     const r = await next(e)
     await $.command.register({ name: 'arch', description: 'Browse the architecture: containers, integrations, ADRs and TDRs (sa-ux)' })
@@ -152,7 +176,9 @@ export function registerLifecycle(on: On) {
     await refreshNextSteps($)
     await refreshRadar($)
     await refreshAlia($)
-    await refreshMilestones($)
+    const fresh = await refreshMilestones($)
+    const text = notice(e.durationMs, after, fresh, await read($, aliaAtom))
+    if (text) try { await $.ui.notify(text, { title: 'Alia' }) } catch { /* no channel: the cards are in the transcript */ }
     return r
   })
 }

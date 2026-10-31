@@ -13,7 +13,7 @@ import { registerNextSteps } from './next-steps/register'
 import { registerRadar } from './radar/register'
 
 export const register: Register = (on, options) => {
-  registerLifecycle(on)
+  registerLifecycle(on, options)
   registerAlia(on, options)
   registerNextSteps(on)
   registerExplorer(on)

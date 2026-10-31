@@ -83,7 +83,8 @@ plugin of the suite, and pass the same flag when you update or uninstall.
 `sa-ux` is a small UX layer drawn inside Claude Code, in Alia's voice: her codec above the prompt box — one line on where
 the architecture stands and next-step prompts computed from the project's files —, `/alia`, `/radar` and `/arch` panes,
 the suite's script rows shown as their verdict, a card in the transcript when a turn releases the architecture, re-runs
-an analysis or regenerates the handoff kit, the version in the prompt footer, and her words on the spinner. Her face shows where the surface draws pictures (the desktop app); in the terminal her mark is
+an analysis or regenerates the handoff kit, the version in the prompt footer, a notification when a long turn ends (`notifyAfterMinutes`, default 3), a findings
+trend per lens on the desktop radar, and her words on the spinner. Her face shows where the surface draws pictures (the desktop app); in the terminal her mark is
 her sparkle in a ring coloured by her mood. It reads what the skills write and never edits a document. It needs a Claude Code build with
 function-hook mods.
 

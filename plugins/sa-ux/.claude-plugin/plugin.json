@@ -1,6 +1,6 @@
 {
   "name": "sa-ux",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A solution architect's UX layer for sa-skills, in Alia's voice: mods that draw the architecture's state inside Claude Code — Alia's codec above the prompt box (her line on where the architecture stands, next steps computed from the project's files, a click filling the prompt), /alia, /radar and /arch, her words on the spinner. Optional; reads what the skills write and never edits an architecture document.",
   "author": {
     "name": "shadowX4fox",
@@ -23,6 +23,12 @@
       "title": "Alia's words on the spinner",
       "description": "Inside an architecture, the spinner and the turn's closing line say what an architect does (Tracing seams, Weighing trade-offs) instead of the engine's words.",
       "default": true
+    },
+    "notifyAfterMinutes": {
+      "type": "number",
+      "title": "Notify after a long turn (minutes)",
+      "description": "When a turn in an architecture runs at least this many minutes, Alia sends a notification with what it moved (a release, analyses, the handoff kit) or her line. 0 turns it off.",
+      "default": 3
     }
   },
   "icon": "./.claude-plugin/icon.png"

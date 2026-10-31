@@ -2,7 +2,19 @@
 
 The optional UX layer of the suite, released on its own cadence (tags `sa-ux-v<version>`). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.7.0]
+## [0.8.0]
+
+### Added
+
+- **A notification when a long turn ends**: a turn in an architecture that ran at least `notifyAfterMinutes` (a new option, default 3; 0 turns it off) sends one, titled Alia — what the turn moved, from its milestone cards (`Liberada v1.10.2 · tag architecture-v1.10.2`), else her line. A shorter turn never notifies; the cards stay in the transcript either way.
+- **`/alia`'s line in the transcript is her codec** — her mark in her mood, the architecture's name, version and status, her line. What the model reads is the text the command answered, unchanged.
+- **The findings trend on the desktop radar**: a sparkline per lens — critical in red, high in amber, a tooltip per reading — beside each lens's row. sa-skills keeps one report per lens in `analysis/` and moves the rest to `archive/`, so the history is what this plugin remembers per project (`$.store`, at most twelve readings a lens) as new reports appear, seeded by the archive's newest at first sight; a lens with one reading shows a dash. The terminal keeps its meter.
+
+### Fixed
+
+- **A store that cannot answer no longer stops the radar**: the trend's read is guarded, so the radar, her line and the cards are read whatever the store does.
+
+
 
 ### Added
 

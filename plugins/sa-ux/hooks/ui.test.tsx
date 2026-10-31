@@ -33,10 +33,14 @@ const FILES: Record<string, { text: string; mtimeMs: number }> = {
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
 function engine(on: On) {
-  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[] }
+  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[] }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('turn.complete', () => ({ text: '' }) as never)
+  const store = new Map<string, unknown>([['trend:/p', { SPOF: [{ date: '2026-08-01', critical: 9, high: 2 }, { date: '2026-09-01', critical: 8, high: 1 }] }]])
+  on('store.get', (_$, e) => ({ value: store.get(e.key) }))
+  on('store.set', (_$, e) => { store.set(e.key, e.value); return { value: undefined } })
+  on('ui.notify', (_$, e) => { box.notified.push(e.text); return { value: { isSent: true, channel: 'terminal' } } as never })
   on('session.root', () => ({ value: '/p' }))
   on('clock.now', () => ({ value: NOW }))
   on('env.get', (_$, e) => ({ value: e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
@@ -120,6 +124,9 @@ describe('sa-ux, end to end on every surface', () => {
       await ui.press({ key: 'rerun-SPOF' })
       expect(box.text).toBe('run spof analysis')
       expect(await ui.find({ key: 'rerun-STRIDE' })).toBeUndefined()   // four days old: not stale
+      // the trend: the two readings remembered for the project and today's — a sparkline on the desktop, none in the terminal
+      const trend = await ui.find({ type: 'Svg', props: { alt: 'tendencia de SPOF' } } as never)
+      if (surface === 'desktop') expect(trend).toBeDefined(); else expect(trend).toBeUndefined()
       await ui.unmount()
     })
 
@@ -157,6 +164,39 @@ describe('sa-ux, end to end on every surface', () => {
       const other = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'ToolUse', props: { ...row, tool_use_id: 't2', input: { command: 'git status' } } })
       expect(box.drawn.slice(before).some((d) => d.component === 'ToolUse')).toBe(true)   // passed to the engine
       await other.unmount()
+    })
+
+    test(`${surface}: /alia's line in the transcript is her codec`, async ($, on) => {
+      engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-ux', surface, component: 'CommandOutput', props: { command: 'alia', args: '', text: '✦ Alia: …', isErrored: false } })
+      expect(await ui.find({ type: 'Text', text: 'Alia' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /Hay 7 hallazgos críticos/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /Mesa · v7\.1\.0 · Draft/ })).toBeDefined()
+      await ui.unmount()
+    })
+
+    test(`${surface}: a long turn that moved the project notifies what it moved; a short one never`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      await $.turn.complete({ answer: '', durationMs: 10 * 60000, isAborted: false, turnId: 't0', reason: 'answer' } as never)
+      expect(box.notified).toEqual(['Hay 7 hallazgos críticos — SPOF pesa más. Empezaría ahí.'])   // nothing moved: her line
+      const was = { ...FILES['/p/ARCHITECTURE.md']! }
+      FILES['/p/ARCHITECTURE.md'] = { ...was, text: was.text.replace('7.1.0', '7.2.0').replace('-->', '-->\n<!-- ARCHITECTURE_STATUS: Released -->') }
+      try {
+        await $.turn.complete({ answer: '', durationMs: 30000, isAborted: false, turnId: 't1', reason: 'answer' } as never)
+        expect(box.notified.length).toBe(1)   // half a minute: no notification, the card alone
+        FILES['/p/ARCHITECTURE.md'] = { ...was, text: was.text.replace('7.1.0', '7.3.0').replace('-->', '-->\n<!-- ARCHITECTURE_STATUS: Released -->') }
+        await $.turn.complete({ answer: '', durationMs: 4 * 60000, isAborted: false, turnId: 't2', reason: 'answer' } as never)
+        expect(box.notified[1]).toBe('Liberada v7.3.0 · el tag llega tras el merge')
+      } finally { FILES['/p/ARCHITECTURE.md'] = was }
+    })
+
+    test(`${surface}: notifyAfterMinutes 0 never notifies`, { options: { notifyAfterMinutes: 0 } }, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      await $.turn.complete({ answer: '', durationMs: 60 * 60000, isAborted: false, turnId: 't0', reason: 'answer' } as never)
+      expect(box.notified).toEqual([])
     })
 
     test(`${surface}: the footer carries the architecture's version and status`, async ($, on) => {
