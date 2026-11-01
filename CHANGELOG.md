@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.4.1] - 2026-11-01
+
+### Fixed
+
+- **The local architecture index server runs Alia 0.9.0** (`SA_INDEX_SERVER_TAG` default in `architecture-index-export/local/compose.yaml`): one fusion for every engine — dense and sparse candidates fused by weighted RRF (k 60, dense 1, sparse 0.3); the local `file` engine ranks as before apart from ties, the bundle schema and the tools are unchanged (#26).
+
 ## [11.4.0] - 2026-10-31
 
 ### Added
