@@ -515,8 +515,16 @@ Set them with `/plugin configure sa-alia@shadowx4fox-solution-architect-marketpl
 
 The workflows `ci-setup.js` installs speak as Alia: her codec heads each comment and pull request body (64 px, the ring
 in the outcome's mood), the labels use her palette, and with her GitHub App the comments come from her account rather
-than `github-actions[bot]`. Setting it up, the moods and what stays `GITHUB_TOKEN`'s:
-[RUN_TEAMS.md § Alia on GitHub](RUN_TEAMS.md#alia-on-github).
+than `github-actions[bot]`. The codec follows the reader's GitHub theme: her night disc on dark, silver on light.
+
+<p align="center">
+  <img src="images/github/review-dark.webp" alt="Alia's architecture review on a pull request, GitHub dark theme" width="49%">
+  <img src="images/github/review-light.webp" alt="The same review on GitHub's light theme" width="49%">
+</p>
+
+The architecture review holds every pull request of a service to its build pack — people's on an attended service, the
+build agent's on an unattended one, where the automatic merge waits for her verdict (11.4.0). Setting it up, the moods
+and what stays `GITHUB_TOKEN`'s: [RUN_TEAMS.md § Alia on GitHub](RUN_TEAMS.md#alia-on-github).
 
 ---
 

@@ -33,7 +33,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 2. **Which side.** A directory with `ARCHITECTURE.md` is the **architecture** repository. One with `.architecture.json`, or a code repository the user names as a service, is a **service** repository. When a request covers both ("connect the service to the architecture"), do the architecture first. If it is unclear, ask.
 3. **Check.** Run it read-only and show its output verbatim:
    - architecture: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js architecture <root> [--runner <labels>]`
-   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on self-hosted,<label>]`
+   - service: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js service <dir> --architecture <owner/repo> [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--review] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on self-hosted,<label>]`
 
    A service is always checked with `--architecture`: the pair is configured on both sides in one run.
 

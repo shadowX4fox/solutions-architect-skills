@@ -18,7 +18,7 @@
 //
 //   bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //   bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>]
-//                   [--attended [--review]] [--merge --tests "<workflow name>"] [--agent <login>] [--mention]
+//                   [--attended] [--review] [--merge --tests "<workflow name>"] [--agent <login>] [--mention]
 //                   [--runs-on <label,…>] [--write] [--replace <file,…>] [--settings] [--json]
 //
 // --merge is full auto: the build's pull request merges on its tests, so a release reaches it with no person only when the
@@ -227,14 +227,15 @@ function service(dir, opts = {}) {
   else if (next.server && opts.write) { mcp.mcpServers = { ...servers, architecture: { type: 'http', url: next.server } }; fs.writeFileSync(mf, JSON.stringify(mcp, null, 2) + '\n'); row(rows, '✓', `.mcp.json — "architecture" → ${next.server} added`); }
   else row(rows, '✗', `.mcp.json — no server at ${next.server || '(no server)'}: the IDE cannot reach the architecture`, 'run again with --write');
   if (opts.attended && !opts.review && !opts.mention) return { side: 'service', root: dir, repo, rows };
-  // unattended: the build workflow, and the merge workflow when the team opts in; --review: the pull requests' reviewer;
+  // unattended: the build workflow, and the merge workflow when the team opts in; --review, either kind (11.4.0): the pull
+  // requests' reviewer — on an unattended service it holds the build agent's pull requests too, and the merge waits for it;
   // --mention: @alia with the architecture's MCP server and BUILD.md as standing rules
   const tpl = path.join(SKILL, 'architecture-index-export', 'ci', 'service'), list = [];
   if (!opts.attended) {
     list.push({ template: path.join(tpl, 'architecture-build.yml'), file: 'architecture-build.yml' });
     if (opts.merge) {
       if (!opts.tests) row(rows, '✗', 'architecture-build-merge.yml — no test workflow named', '--tests "<the name: of this repository\'s test workflow>"');
-      else list.push({ template: path.join(tpl, 'architecture-build-merge.yml'), file: 'architecture-build-merge.yml', edit: (t) => t.replace('workflows: ["Tests"]', `workflows: [${JSON.stringify(opts.tests)}]`) });
+      else list.push({ template: path.join(tpl, 'architecture-build-merge.yml'), file: 'architecture-build-merge.yml', edit: (t) => t.replace('workflows: ["Tests"]', `workflows: [${[opts.tests, ...(opts.review ? [REVIEW_CHECK] : [])].map((x) => JSON.stringify(x)).join(', ')}]`) });
     }
   }
   if (opts.review) list.push({ template: path.join(tpl, 'architecture-review.yml'), file: 'architecture-review.yml' });
@@ -289,9 +290,9 @@ function service(dir, opts = {}) {
     if (!opts.attended) runnerRows('SA_BUILD_RUNS_ON', 'the build');
     if (opts.mention) {
       runnerRows('SA_MENTION_RUNS_ON', '@alia');
-      // a person merges what @alia writes: on an attended service the review holds it to the pack; an unattended one has
-      // no review, and its merge workflow merges only the build agent's pull requests
-      if (!opts.review) row(rows, '·', `@alia's pull requests — a person merges them, and no review holds them to the pack${opts.attended ? ' (--review adds it)' : ' (the review is an attended service\'s)'}`);
+      // a person merges what @alia writes, held to the pack by the review when the service has one (either kind, 11.4.0);
+      // the merge workflow merges only the build agent's pull requests
+      if (!opts.review) row(rows, '·', `@alia's pull requests — a person merges them, and no review holds them to the pack (--review adds it)`);
     }
     if (opts.review) {
       runnerRows('SA_REVIEW_RUNS_ON', 'the review');
@@ -341,7 +342,7 @@ if (require.main === module) {
     server: opt('--server'), attended: a.includes('--attended'), merge: a.includes('--merge'), tests: opt('--tests'),
     agent: opt('--agent'), runsOn: opt('--runs-on'), settings: a.includes('--settings'), review: a.includes('--review'), mention: a.includes('--mention'),
     replace: String(opt('--replace') || '').split(',').map((x) => x.trim()).filter(Boolean) };
-  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended [--review]] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on <label,…>] [--write] [--replace <file,…>] [--settings] [--json]'); process.exit(2); }
+  if (side !== 'architecture' && side !== 'service') { console.error('Usage: bun ci-setup.js architecture <project> [--runner <label,…>] [--write] [--replace <file,…>] [--settings] [--json]\n       bun ci-setup.js service <dir> [--architecture <owner/repo>] [--project <key>] [--component <slug>] [--server <mcp_url>] [--attended] [--review] [--merge --tests "<name>"] [--agent <login>] [--mention] [--runs-on <label,…>] [--write] [--replace <file,…>] [--settings] [--json]'); process.exit(2); }
   const r = side === 'architecture' ? architecture(target, o) : service(target, o);
   if (a.includes('--json')) { console.log(JSON.stringify(r, null, 1)); process.exit(r.rows.some((x) => x.state === '✗') ? 1 : 0); }
   console.log(`CI SETUP — ${r.side}: ${r.root}${r.repo ? ` (${r.repo})` : ''}`);

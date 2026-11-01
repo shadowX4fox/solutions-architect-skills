@@ -119,6 +119,20 @@ describe("ci-setup.js service", () => {
     expect(existsSync(join(SVC, ".github/workflows/architecture-build.yml"))).toBe(false);   // attended: no build workflow
   });
 
+  test("unattended with --review (11.4.0): the review holds the build agent's pull requests and the merge waits for it", () => {
+    const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", merge: true, review: true, tests: "Unit tests", version: "9.9.9", write: true };
+    w(SVC, ".github/workflows/tests.yml", "name: Unit tests\non: [pull_request]\n");
+    const r = C.service(SVC, { gh: svcGh({ vars: { SA_ARCHITECTURE_REPO: "acme/order-desk" } }), ...opts });
+    expect(existsSync(join(SVC, ".github/workflows/architecture-build.yml"))).toBe(true);
+    expect(readFileSync(join(SVC, ".github/workflows/architecture-review.yml"), "utf8")).toContain("SA_PLUGIN_REF: v9.9.9");
+    const merge = readFileSync(join(SVC, ".github/workflows/architecture-build-merge.yml"), "utf8");
+    expect(merge).toContain('workflows: ["Unit tests", "Architecture review"]');   // whichever finishes last merges
+    expect(merge).toContain("statusCheckRollup");                                 // every check passed, a HELD review pending
+    expect(merge).toContain("pull_request_target");                               // the review's own event
+    expect(r.rows.some((x: any) => x.item.startsWith("branch protection"))).toBe(true);
+    expect(r.rows.some((x: any) => x.item.startsWith("@alia's pull requests"))).toBe(false);
+  });
+
   test("unattended: the build workflow, the merge workflow on the named test workflow, and the secrets and variables they read", () => {
     const opts = { server: "http://localhost:18080/mcp", project: "order-desk", component: "hub-api", architecture: "acme/order-desk", merge: true };
     let r = C.service(SVC, { gh: svcGh(), ...opts, write: true });

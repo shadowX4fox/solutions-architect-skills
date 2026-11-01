@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.4.0] - 2026-10-31
+
+### Added
+- The architecture review on an unattended service: `ci-setup.js service … --review` on either kind writes `architecture-review.yml`, so Alia holds the build agent's pull requests to the pack as she holds people's; with `--merge`, `architecture-build-merge.yml` also starts on the review's completion (`workflows: ["<tests>", "Architecture review"]`) and merges only when every check of the pull request passed — a review HELD on an escalation stays pending and a FAIL fails, so neither merges.
+- Screenshots of Alia on GitHub (her review in the dark and light themes, `docs/images/github/`) in the README, `docs/ALIA.md` Part 4 and `docs/RUN_TEAMS.md` § Alia on GitHub.
+
+### Changed
+- `docs/RUN_TEAMS.md`: "The attended service's reviewer" is "The service's reviewer"; the review comment is read from the identity that writes it (Alia's App or `github-actions[bot]`).
+
+### Upgrade
+- An unattended service that wants the review: `ci-setup.js service <dir> --merge --tests "<name>" --review --write --replace architecture-build-merge.yml`, then `--settings` for the variables and the required check.
+
 ## [11.3.1] - 2026-10-31
 
 ### Added

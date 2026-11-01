@@ -279,10 +279,13 @@ still state but the kit dropped or moved. It then dispatches `architecture-index
 `sa-delivery:architecture-ci-setup` sets up both sides. Escalations never go this way: a crossed trigger is always an
 architect's.
 
-### The attended service's reviewer (10.16.0)
+### The service's reviewer (10.16.0, unattended 11.4.0)
 
-An attended service is built by people in an IDE. `architecture-review.yml` holds each of their pull requests to the
-pack, whoever wrote the code. "Architecture review" is a required status check of the default branch, enforced for
+`architecture-review.yml` holds each pull request of a service to the pack, whoever wrote the code: people in an IDE on
+an attended service, the build agent on an unattended one (`ci-setup.js service … --review`, either kind, 11.4.0). On an
+unattended service with `architecture-build-merge.yml`, the merge waits for it: the merge workflow starts when the tests
+or the review finish, whichever is last, and merges only when every check of the pull request passed — a HELD review is
+`pending` and a FAIL fails, so the build agent's pull request stays for the architect or a person. "Architecture review" is a required status check of the default branch, enforced for
 admins too. It has three steps:
 
 | Step | Who | What |
@@ -319,9 +322,9 @@ are fallbacks: the review's hourly sweep, for a dispatch that never came, and th
 waiting request. `ci-setup.js` reports either one disabled as a required row (`service … --review`, and `architecture`
 on a RUN team); `--settings` runs `gh workflow enable <file> -R <repo>`. A workflow someone disabled by hand is reported,
 never re-enabled. A failed `architecture-escalation-closed` dispatch fails `architecture-escalations.yml`'s run, since
-the sweep is then the only re-check. The review comment is read only from `github-actions[bot]`, the identity the
-review writes as: a comment anyone else starts with the review's marker is neither read nor patched (`--author` names
-another identity to `review-check.js --recheck`).
+the sweep is then the only re-check. The review comment is read only from the identity the review writes as — Alia's
+App (`<slug>[bot]`) when the repository has one, else `github-actions[bot]`: a comment anyone else starts with the
+review's marker is neither read nor patched (`--author` names the identity to `review-check.js --recheck`).
 
 **A pull request never runs its own review** (10.16.2). The review runs on `pull_request_target`, so the file that runs
 is always the default branch's. A pull request that edits the review (the verdict, the prompt, the tools) is reviewed by
@@ -385,6 +388,11 @@ her face in a mood ring, 64 px, beside her name and the message's heading. The m
 | worried | a Tier 0 request refused or not started, a review held on an escalation, a pull request left for a reviewer |
 | thinking | a Tier 0 request waiting for its service pull request |
 | calm | the handoff and Tier 0 pull requests, a kind left to a person |
+
+<p align="center">
+  <img src="images/github/review-dark.webp" alt="Alia's architecture review on a pull request, GitHub dark theme: her App posts it, her pleased codec on the night disc" width="49%">
+  <img src="images/github/review-light.webp" alt="The same review on GitHub's light theme: the codec switches to the silver edition" width="49%">
+</p>
 
 Each codec comes in two editions — her night disc, and silver with a deeper ring for a light theme — and GitHub shows the
 one that matches the reader's theme (`<picture>`, 11.3.1; `bun brand/alia/github/make.js` renders both). The pictures come

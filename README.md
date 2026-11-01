@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.3.1-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.4.0-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
@@ -220,7 +220,13 @@ It draws what the skills leave on disk and edits nothing. [docs/ALIA.md § In Cl
 The architecture's workflows open every comment and pull request body with her codec, its ring in the outcome's mood:
 pleased when the gates pass, stern when one blocks, worried when a review is held on an escalation. The escalation and
 Tier 0 labels use her palette. With her optional GitHub App, the comments and the `@alia` answers are posted by her
-own account. [docs/RUN_TEAMS.md § Alia on GitHub](docs/RUN_TEAMS.md#alia-on-github).
+own account. Her architecture review holds every pull request of a service to its build pack, the unattended build
+agent's included. [docs/RUN_TEAMS.md § Alia on GitHub](docs/RUN_TEAMS.md#alia-on-github).
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/github/review-light.webp">
+  <img src="docs/images/github/review-dark.webp" alt="Alia's architecture review on a pull request — her App posts it, her codec in the outcome's mood" width="640">
+</picture>
 
 <br clear="right">
 
