@@ -280,10 +280,11 @@ describe('sa-alia, end to end on every surface', () => {
       const first = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Ya revisé las ramas.', isFirstOfReply: true } })
       expect(await first.find({ type: 'Text', text: 'Alia' })).toBeDefined()
       expect(await first.find({ type: surface === 'terminal' ? 'Text' : 'Svg', ...(surface === 'terminal' ? { text: '✦' } : {}) })).toBeDefined()
-      expect(JSON.stringify(await first.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","gap":1,"alignItems":"flex-start"/)   // her face at the reply's start, never centred
+      expect(JSON.stringify(await first.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","gap":1,"alignItems":"flex-start","alignSelf":"flex-start"/)   // her face at the reply's start, never centred; the row held to the start
       await first.unmount()
       const later = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Y algo más.', isFirstOfReply: false } })
       expect(await later.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
+      expect(JSON.stringify(await later.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","alignItems":"flex-start","alignSelf":"flex-start"/)   // never shrunk to its narrowest content (1.0.2)
       await later.unmount()
       const n = box.drawn.filter((d) => d.component === 'AssistantMessage').length
       const summary = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'resumen', isFirstOfReply: true, isSummary: true } })

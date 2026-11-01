@@ -2,6 +2,12 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2]
+
+### Fixed
+
+- **A reply's later blocks no longer collapse to one word a line.** In the desktop app (2.1.316) the row that lines a block up under her name shrank to its narrowest content and sat at the right edge (seen live, 2026-10-31). Every reply row is now held to the start (`alignSelf: flex-start`); the engine refuses a `width` above its own drawing. `replyCodec: false` remains the way out.
+
 ## [1.0.1]
 
 ### Fixed

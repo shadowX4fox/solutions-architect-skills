@@ -92,11 +92,13 @@ export function registerAlia(on: On, options: PluginOptions) {
     const { Box, Text } = els
     const terminal = e.surface === 'terminal'
     const gutter = terminal ? 6 : FACE_PX + 8 + 8   // the mark's width and the gap after it, so later blocks line up
-    if (!e.props.isFirstOfReply) return <Box flexDirection="row" alignItems="flex-start"><Box width={gutter} flexShrink={0} /><Box flexDirection="column" flexGrow={1} flexShrink={1}>{engine}</Box></Box>
+    // a later block: the engine's drawing beside the gutter, the row held to the start (alignSelf; the engine refuses a width above its drawing) — without it the row shrank to its narrowest
+    // content in the desktop app (2.1.316) and sat at the right edge, one word a line (1.0.2)
+    if (!e.props.isFirstOfReply) return <Box flexDirection="row" alignItems="flex-start" alignSelf="flex-start"><Box width={gutter} flexShrink={0} /><Box flexDirection="column" flexGrow={1} flexShrink={1}>{engine}</Box></Box>
     const svg = await portrait($, e.surface, 'calm')
     // her face at the start of the reply, beside her name — never centred on a long reply
     return (
-      <Box flexDirection="row" gap={1} alignItems="flex-start">
+      <Box flexDirection="row" gap={1} alignItems="flex-start" alignSelf="flex-start">
         <Mark els={els} mood="calm" svg={svg} />
         <Box flexDirection="column" flexGrow={1} flexShrink={1}>
           <Text color={ALIA.aquaMark} bold>Alia</Text>
