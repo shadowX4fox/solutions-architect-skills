@@ -2,6 +2,12 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.3]
+
+### Fixed
+
+- **A reply's later blocks are drawn as the engine draws them.** 1.0.2's `alignSelf` did not stop the desktop app (2.1.316) shrinking the indented row to one word a line (seen live, 2026-10-31), so only the reply's first block carries her codec — her face and name beside it — and the blocks after it pass untouched, no longer lined up under her name.
+
 ## [1.0.2]
 
 ### Fixed

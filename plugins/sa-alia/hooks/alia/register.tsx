@@ -10,7 +10,7 @@ import type { AliaLine } from '../../types'
 import { ALIA_PANE, RADAR_PANE } from '../state'
 import { GLYPH, TONE } from '../ui'
 import { Codec, Mark, portrait } from './codec'
-import { ALIA, FACE_PX } from './palette'
+import { ALIA } from './palette'
 import { DONE, SPINNER, pick } from './voice'
 
 const aliaAtom = atom({ plugin: 'sa-alia', key: 'alia' } as const, null as AliaLine | null)
@@ -82,19 +82,15 @@ export function registerAlia(on: On, options: PluginOptions) {
     return <Codec els={els} say={say} svg={await portrait($, e.surface, say.mood)} kicker={[say.name, say.version ? `v${say.version}` : '', say.status].filter(Boolean).join(` ${GLYPH.dot} `) || (es ? 'arquitectura' : 'architecture')} />
   })
 
-  // every reply in her codec, inside an architecture: her mark and name beside the reply's first block, the blocks after it
-  // aligned under it; the text is the engine's own drawing, untouched, and the stored message too (ctrl+o shows it).
+  // every reply in her codec, inside an architecture: her mark and name beside the reply's first block; the text is the engine's own drawing, untouched, and the stored message too (ctrl+o shows it).
   // Her calm face: a reply is her voice, not a judgement — the mood ring stays for those. Summaries pass as they are.
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
-    if (!replyCodec || e.props.isSummary || !(await read($, aliaAtom))) return next(e)
+    // only the reply's first block carries her codec; a later block is the engine's own drawing, untouched — wrapped to line up
+    // under her name, the desktop app (2.1.316) shrank it to its narrowest content at the right edge, one word a line (1.0.3)
+    if (!replyCodec || e.props.isSummary || !e.props.isFirstOfReply || !(await read($, aliaAtom))) return next(e)
     const engine = await next(e)
     const els = $.ui.resolve(e)
     const { Box, Text } = els
-    const terminal = e.surface === 'terminal'
-    const gutter = terminal ? 6 : FACE_PX + 8 + 8   // the mark's width and the gap after it, so later blocks line up
-    // a later block: the engine's drawing beside the gutter, the row held to the start (alignSelf; the engine refuses a width above its drawing) — without it the row shrank to its narrowest
-    // content in the desktop app (2.1.316) and sat at the right edge, one word a line (1.0.2)
-    if (!e.props.isFirstOfReply) return <Box flexDirection="row" alignItems="flex-start" alignSelf="flex-start"><Box width={gutter} flexShrink={0} /><Box flexDirection="column" flexGrow={1} flexShrink={1}>{engine}</Box></Box>
     const svg = await portrait($, e.surface, 'calm')
     // her face at the start of the reply, beside her name — never centred on a long reply
     return (

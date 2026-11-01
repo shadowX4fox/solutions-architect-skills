@@ -274,7 +274,7 @@ describe('sa-alia, end to end on every surface', () => {
       await ui.unmount()
     })
 
-    test(`${surface}: every reply in her codec — the mark and name on its first block, the rest aligned, summaries plain`, async ($, on) => {
+    test(`${surface}: every reply in her codec — the mark and name on its first block, the rest and summaries plain`, async ($, on) => {
       const box = engine(on)
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
       const first = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Ya revisé las ramas.', isFirstOfReply: true } })
@@ -282,9 +282,10 @@ describe('sa-alia, end to end on every surface', () => {
       expect(await first.find({ type: surface === 'terminal' ? 'Text' : 'Svg', ...(surface === 'terminal' ? { text: '✦' } : {}) })).toBeDefined()
       expect(JSON.stringify(await first.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","gap":1,"alignItems":"flex-start","alignSelf":"flex-start"/)   // her face at the reply's start, never centred; the row held to the start
       await first.unmount()
+      const n0 = box.drawn.filter((d) => d.component === 'AssistantMessage').length
       const later = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'Y algo más.', isFirstOfReply: false } })
       expect(await later.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
-      expect(JSON.stringify(await later.drawn())).toMatch(/^\{"type":"Box","props":\{"flexDirection":"row","alignItems":"flex-start","alignSelf":"flex-start"/)   // never shrunk to its narrowest content (1.0.2)
+      expect(box.drawn.filter((d) => d.component === 'AssistantMessage').length).toBe(n0 + 1)   // a later block is the engine's own (1.0.3)
       await later.unmount()
       const n = box.drawn.filter((d) => d.component === 'AssistantMessage').length
       const summary = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'AssistantMessage', props: { text: 'resumen', isFirstOfReply: true, isSummary: true } })
