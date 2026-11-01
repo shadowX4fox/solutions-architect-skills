@@ -294,6 +294,24 @@ describe('sa-alia, end to end on every surface', () => {
       expect(box.drawn.filter((d) => d.component === 'AssistantMessage').length).toBe(n + 1)   // passed to the engine
     })
 
+    test(`${surface}: a sub-agent's message under a helper of hers — the role's face and label, the engine's row beneath; the person's prompt untouched`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const judge = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'UserMessage', props: { text: 'La hoja resolve-name está respondida.', origin: { kind: 'unclassified' }, isExpanded: false, from: { name: 'sa-skills:reviewers:worksheet-judge' } } })
+      expect(await judge.find({ type: 'Text', text: 'Alia' })).toBeDefined()
+      expect(JSON.stringify(await judge.drawn())).toMatch(/worksheet-judge/)
+      expect(JSON.stringify(await judge.drawn())).toMatch(surface === 'terminal' ? /✦/ : /Alia, (judge|juez)/)   // her small face, or the sparkle in the terminal
+      await judge.unmount()
+      const writer = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'UserMessage', props: { text: 'Segmento escrito.', origin: { kind: 'unclassified' }, isExpanded: true, from: { name: 'segment-runner' } } })
+      expect(JSON.stringify(await writer.drawn())).toMatch(/writer|redactora/)
+      await writer.unmount()
+      const n = box.drawn.filter((d) => d.component === 'UserMessage').length
+      const prompt = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'UserMessage', props: { text: 'hola', origin: { kind: 'composer' }, isExpanded: false } })
+      expect(await prompt.find({ type: 'Text', text: 'Alia' })).toBeUndefined()
+      expect(box.drawn.filter((d) => d.component === 'UserMessage').length).toBe(n + 1)   // passed to the engine
+      await prompt.unmount()
+    })
+
     test(`${surface}: replyCodec off leaves replies as they are`, { options: { replyCodec: false } }, async ($, on) => {
       engine(on)
       await $.session.start({ cwd: '/p', surface, isInteractive: true })

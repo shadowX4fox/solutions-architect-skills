@@ -27,9 +27,9 @@ export const FACE_PX = 64
  * The codec as SVG: her face clipped to a disc on `night-2`, the mood's ring around it. A still picture: the desktop app
  * draws it as an image in the transcript, the band and a pane alike (an interactive one draws nothing in a pane).
  */
-export function codecSvg(face: string, ring: string): string {
-  const S = FACE_PX + 8, c = S / 2, r = FACE_PX / 2
-  const img = (b64: string, extra = '') => `<image href="data:image/webp;base64,${b64}" x="4" y="4" width="${FACE_PX}" height="${FACE_PX}" clip-path="url(#d)"${extra}/>`
+export function codecSvg(face: string, ring: string, px: number = FACE_PX): string {
+  const S = px + 8, c = S / 2, r = px / 2
+  const img = (b64: string, extra = '') => `<image href="data:image/webp;base64,${b64}" x="4" y="4" width="${px}" height="${px}" clip-path="url(#d)"${extra}/>`
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">`
     + `<defs><clipPath id="d"><circle cx="${c}" cy="${c}" r="${r}"/></clipPath></defs>`
     + `<circle cx="${c}" cy="${c}" r="${r}" fill="${ALIA.night2}"/>${img(face)}`
@@ -44,4 +44,25 @@ export function blazonSvg(png: string): string {
   const S = FACE_PX + 8
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">`
     + `<image href="data:image/png;base64,${png}" x="4" y="4" width="${FACE_PX}" height="${FACE_PX}"/></svg>`
+}
+
+/**
+ * Her helpers (1.1.0): a sub-agent's message row in the transcript, drawn under a smaller face of hers, one per role, so
+ * who speaks reads at a glance and her own replies stay the larger. The role comes from the sub-agent's name or type.
+ */
+export type HelperRole = 'judge' | 'reviewer' | 'writer' | 'helper'
+export const HELPER_PX = 40
+export const HELPER: Record<HelperRole, { face: string; ring: string; en: string; es: string }> = {
+  judge: { face: FACE.thinking, ring: ALIA.nightMuted, en: 'judge', es: 'juez' },
+  reviewer: { face: FACE.stern, ring: ALIA.worried, en: 'reviewer', es: 'revisora' },
+  writer: { face: FACE.talk, ring: ALIA.aquaMark, en: 'writer', es: 'redactora' },
+  helper: { face: FACE.calm, ring: ALIA.nightMuted, en: 'helper', es: 'ayudante' },
+}
+/** The role a sub-agent's name or type names: a judge, a reviewer, a writer (generators, runners), else a helper. */
+export function helperRole(who: string): HelperRole {
+  const w = who.toLowerCase()
+  if (/judge/.test(w)) return 'judge'
+  if (/review|analysis-agent/.test(w)) return 'reviewer'
+  if (/writer|runner|generator/.test(w)) return 'writer'
+  return 'helper'
 }

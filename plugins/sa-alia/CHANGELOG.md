@@ -2,6 +2,12 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0]
+
+### Added
+
+- **Her helpers.** A sub-agent's message row in the transcript ("Message from subagent", and a sub-agent's completion notice) is drawn under a smaller face of hers (40 px), one per role: the judge thinking on silver, a reviewer stern on amber, a writer talking on deep teal, any other a calm helper; the label reads «Alia · juez · worksheet-judge», the engine's row stays beneath it, compact or expanded. Her replies keep the larger codec. In the terminal the role's sparkle in its colour. `replyCodec: false` turns it off with the replies' codec.
+
 ## [1.0.3]
 
 ### Fixed

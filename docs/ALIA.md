@@ -450,6 +450,14 @@ sits at the top of the reply, however long; the text is Claude Code's own and th
 (ctrl+o shows it as it was). The ring takes her mood only where she judges: calm on a reply, red for critical findings,
 amber for drift, green when all is clear. Option `replyCodec` turns it off.
 
+
+**Her helpers** (sa-alia 1.1.0). A sub-agent's message row ("Message from subagent", and a sub-agent's completion notice)
+is drawn under a smaller face of hers, one per role, so who speaks reads at a glance: the judge (`worksheet-judge`)
+thinking on silver, a reviewer (`principle-quality-reviewer`, `architecture-analysis-agent`) stern on amber, a writer
+(`segment-runner`, `adr-writer`, the handoff generators) talking on deep teal, any other a calm helper. The label reads
+«Alia · juez · worksheet-judge»; the engine's row stays beneath it, compact or expanded. The same `replyCodec` option
+turns it off.
+
 ## Above the prompt: the next steps
 
 The band above the prompt box is marked by her **escudo**, not her face: the face in a ring is her voice, the band is

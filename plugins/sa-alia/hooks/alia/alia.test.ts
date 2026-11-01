@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 
 import type { Radar } from '../../types'
-import { BLAZON, FACE, RING, blazonSvg, codecSvg, type Mood } from './palette'
+import { BLAZON, FACE, HELPER, HELPER_PX, RING, blazonSvg, codecSvg, helperRole, type Mood } from './palette'
 import { DONE, SPINNER, aliaSays, archHeader, pick } from './voice'
 
 const MOODS: Mood[] = ['calm', 'pleased', 'thinking', 'worried', 'stern', 'talk']
@@ -58,5 +58,22 @@ describe('Alia voice', () => {
     expect(pick(SPINNER.en, 'Sauteing')).toBe(pick(SPINNER.en, 'Sauteing'))
     expect(SPINNER.en.length).toBe(SPINNER.es.length)
     expect(DONE).toContain(pick(DONE, 'Baked'))
+  })
+})
+
+describe('her helpers (1.1.0)', () => {
+  test('a sub-agent\'s name or type names its role: judge, reviewer, writer, else a helper', () => {
+    expect(helperRole('sa-skills:reviewers:worksheet-judge')).toBe('judge')
+    expect(helperRole('sa-skills:reviewers:principle-quality-reviewer')).toBe('reviewer')
+    expect(helperRole('sa-analysis:reviewers:architecture-analysis-agent')).toBe('reviewer')
+    expect(helperRole('segment-runner')).toBe('writer')
+    expect(helperRole('sa-delivery:generators:cutsheet-generator')).toBe('writer')
+    expect(helperRole('Explore')).toBe('helper')
+  })
+  test('a helper\'s face is smaller than hers, in the role\'s ring', () => {
+    const svg = codecSvg('AAAA', HELPER.reviewer.ring, HELPER_PX)
+    expect(svg).toContain(`width="${HELPER_PX + 8}"`)
+    expect(svg).toContain(HELPER.reviewer.ring)
+    expect(HELPER_PX).toBeLessThan(64)
   })
 })

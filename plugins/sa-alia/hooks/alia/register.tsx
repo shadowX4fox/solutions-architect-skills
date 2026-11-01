@@ -10,6 +10,7 @@ import type { AliaLine } from '../../types'
 import { ALIA_PANE, RADAR_PANE } from '../state'
 import { GLYPH, TONE } from '../ui'
 import { Codec, Mark, portrait } from './codec'
+import { Helper, helperOf } from './helpers'
 import { ALIA } from './palette'
 import { DONE, SPINNER, pick } from './voice'
 
@@ -102,6 +103,16 @@ export function registerAlia(on: On, options: PluginOptions) {
         </Box>
       </Box>
     )
+  })
+
+  // her helpers: a sub-agent's message row under a smaller face of hers, one per role (1.1.0) — inside an architecture,
+  // with the reply codec on; every other user-role row (the person's prompt, a shell's notice) passes as it is
+  on('ui.render', { component: 'UserMessage' }, async ($, e, next) => {
+    if (!replyCodec || !(e.props.from || e.props.task) || !(await read($, aliaAtom))) return next(e)
+    const who = await helperOf($, e.props)
+    if (!who) return next(e)
+    const row = await next(e)
+    return await Helper($, $.ui.resolve(e), e.surface, who, await read($, langAtom), row)
   })
 
   // the architecture in the prompt footer, beside the engine's modes: `✦ v1.10.2 Released` — what every turn works on
