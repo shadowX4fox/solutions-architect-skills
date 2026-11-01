@@ -245,6 +245,8 @@ describe("review-check.js --recheck — a PASS an escalation cleared, held to it
     expect(body).not.toContain(R.ESCALATIONS);
     expect(body).toContain("Alia · Architecture review — ⛔ FAIL");
     expect(body).toContain("codec-stern.png");   // her ring turns red with the verdict
+    expect(body).toContain("codec-stern-light.png");
+    expect(body).not.toContain("codec-worried");
     expect(body).not.toContain("⏸");
     expect(body).not.toContain("Nothing blocks");   // the HELD paragraph goes with the heading (10.19.1)
     expect(calls.filter((c) => c.some((x) => x.includes("/statuses/"))).length).toBe(1);   // pull request 2's only

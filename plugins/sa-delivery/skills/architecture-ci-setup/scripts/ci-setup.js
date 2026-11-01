@@ -65,7 +65,7 @@ const variable = (repo, k, v) => ({ fix: `gh variable set ${k} -R ${repo} --body
 // repository (docs/RUN_TEAMS.md § Alia on GitHub): no script can upload its avatar
 function aliaRows(rows, st, repo) {
   const id = st.vars.SA_ALIA_CLIENT_ID, key = st.secrets.has('SA_ALIA_APP_KEY');
-  if (id && key) row(rows, '✓', `Alia's GitHub App — variable SA_ALIA_CLIENT_ID = ${id}, secret SA_ALIA_APP_KEY: her comments post as her App, installed on ${repo}`);
+  if (id && key) row(rows, '✓', `Alia's GitHub App — variable SA_ALIA_CLIENT_ID = ${id}, secret SA_ALIA_APP_KEY: her comments post as her App once it is installed on ${repo} (not checked: a person's token cannot see an App's installations; a missing one leaves the comments to github-actions[bot])`);
   else if (id || key) row(rows, '✗', `Alia's GitHub App — ${id ? 'secret SA_ALIA_APP_KEY' : 'variable SA_ALIA_CLIENT_ID'} missing: the comments stay github-actions[bot]'s`,
     id ? `gh secret set SA_ALIA_APP_KEY -R ${repo} < <app>.private-key.pem` : `gh variable set SA_ALIA_CLIENT_ID -R ${repo} --body <client-id>`);
   else row(rows, '·', 'Alia\'s GitHub App — none: her codec heads the comments, posted as github-actions[bot]', 'optional — docs/RUN_TEAMS.md § Alia on GitHub: create the App once, install it here, set SA_ALIA_CLIENT_ID and SA_ALIA_APP_KEY');

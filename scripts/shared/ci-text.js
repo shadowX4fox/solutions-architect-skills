@@ -113,7 +113,8 @@ function imagesBase(env = process.env) {
 function codec(mood, kicker, env = process.env) {
   if (!MOODS.includes(mood)) throw new Error(`ci-text: no mood "${mood}" (${MOODS.join(', ')})`);
   const base = imagesBase(env);
-  const mark = base ? `<img src="${base}/codec-${mood}.png" width="64" height="64" align="middle" alt="Alia">` : '✦';
+  // two editions, chosen by the reader's GitHub theme (11.3.1): her night disc by default, silver on a light theme
+  const mark = base ? `<picture><source media="(prefers-color-scheme: light)" srcset="${base}/codec-${mood}-light.png"><img src="${base}/codec-${mood}.png" width="64" height="64" align="middle" alt="Alia"></picture>` : '✦';
   return `### ${mark} Alia${kicker ? ` · ${kicker}` : ''}`;
 }
 

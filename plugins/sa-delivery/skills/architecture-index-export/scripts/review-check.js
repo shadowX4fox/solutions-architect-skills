@@ -294,7 +294,7 @@ async function recheck(repo, opts = {}) {
         : L(`**The escalation this review stood on no longer covers it** — ${what}. The findings it cleared block again: fix the code, cite an open \`[ESC-…]\` issue, or re-run the review.`,
           `**La escalación en la que se apoyaba esta revisión ya no la cubre** — ${what}. Los hallazgos que resolvía vuelven a bloquear: corrija el código, cite un issue \`[ESC-…]\` abierto o vuelva a ejecutar la revisión.`)}`;
       // the record goes with it: the next sweep has nothing to re-check until a review writes one again
-      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(/codec-worried\.png/, 'codec-stern.png').replace(/^(?:Nothing blocks, but|Nada bloquea, pero) .*\n?/m, '').replace(MARKER, `${MARKER}\n${line}\n`);
+      const body = c.body.replace(/\n?<!-- sa-review-escalations: .*? -->/, '').replace(/ — ⏸ (?:HELD|EN ESPERA)$/m, ' — ⛔ FAIL').replace(/codec-worried(-light)?\.png/g, 'codec-stern$1.png').replace(/^(?:Nothing blocks, but|Nada bloquea, pero) .*\n?/m, '').replace(MARKER, `${MARKER}\n${line}\n`);
       ghSay(['api', '-X', 'PATCH', `repos/${repo}/issues/comments/${c.id}`, '-f', `body=${body}`]);
     }
     out.push({ pr: pr.number, state: 'failed', refs: rec.refs, why: what });

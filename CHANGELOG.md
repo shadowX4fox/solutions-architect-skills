@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.3.1] - 2026-10-31
+
+### Added
+- Alia's codec follows the reader's GitHub theme: `ci-text.js --codec` writes a `<picture>` — her night disc by default, a silver disc with a deeper mood ring (`codec-<mood>-light.png`) on a light theme; `review-check.js --recheck` turns both editions red.
+- `brand/alia/github/make.js` renders the ten codecs (five moods × two editions) from the sa-alia faces.
+
+### Changed
+- The App logo (`brand/alia/github/app-avatar.png`) is her head cut from the 1,024 px pose, full frame on deep teal `0C9DA3` — sharp at every size and visible on dark and light themes; the night disc in a ring disappeared on GitHub's dark page.
+- `docs/RUN_TEAMS.md` § Alia on GitHub: the App steps name the empty URL fields, the key pair (not a client secret), the badge colour, and the check that the permissions were saved.
+
+### Fixed
+- `ci-setup.js` no longer reports the App "installed on" a repository it cannot see: a person's token cannot list an App's installations, so the row says the installation is not checked and what a missing one does.
+
 ## [11.3.0]
 
 ### Added

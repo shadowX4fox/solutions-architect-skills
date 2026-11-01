@@ -386,7 +386,9 @@ her face in a mood ring, 64 px, beside her name and the message's heading. The m
 | thinking | a Tier 0 request waiting for its service pull request |
 | calm | the handoff and Tier 0 pull requests, a kind left to a person |
 
-The pictures come from this plugin's public repository at the pinned release (`brand/alia/github/`), because GitHub
+Each codec comes in two editions — her night disc, and silver with a deeper ring for a light theme — and GitHub shows the
+one that matches the reader's theme (`<picture>`, 11.3.1; `bun brand/alia/github/make.js` renders both). The pictures come
+from this plugin's public repository at the pinned release (`brand/alia/github/`), because GitHub
 shows a comment's images through a proxy that only reaches public URLs. A private repository shows them too. A GitHub
 Enterprise Server that cannot reach github.com sets `SA_ALIA_IMAGES` to its own copy; `SA_ALIA_IMAGES=none` writes her
 sparkle (✦) instead. The escalation and Tier 0 labels use her palette, and `escalate.js labels <project> --create`
@@ -396,10 +398,13 @@ repaints the labels a repository already has.
 posts them as Alia:
 
 1. Create the App: *Settings → Developer settings → GitHub Apps → New GitHub App* (an organization's settings for its
-   repositories). Name it, for example `alia-architect` (App names are unique on GitHub). Untick *Webhook*. Repository
-   permissions: *Issues* and *Pull requests* read and write; *Contents* read and write only for `@alia`, which commits.
-2. Upload `brand/alia/github/app-avatar.png` as its logo, and generate a private key.
-3. Install it on the architecture repository and on each service repository.
+   repositories). Name it, for example `alia-architect` (App names are unique on GitHub). Untick *Webhook*. Leave the
+   redirect, setup and webhook URLs empty (untick *Webhook → Active*). Repository permissions: *Issues* and *Pull
+   requests* read and write; *Contents* read and write only for `@alia`, which commits. Check the App's page lists them
+   after saving: an App with *No permissions* installs on *No repositories*, and its token fails with 404.
+2. Upload `brand/alia/github/app-avatar.png` as its logo (badge background `0C9DA3`, a mid-tone that reads on GitHub's
+   dark and light themes), and generate a private key under *Credentials → Key pairs* — not a client secret.
+3. Install it on the architecture repository and on each service repository (*Only select repositories*).
 4. On each repository: `gh variable set SA_ALIA_CLIENT_ID --body <client id>` and
    `gh secret set SA_ALIA_APP_KEY < <app>.private-key.pem`. `ci-setup.js` reports both.
 

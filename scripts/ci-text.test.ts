@@ -60,7 +60,7 @@ describe("Alia's codec on what the CI says (11.3.0)", () => {
     const es = arch("codec-es", "<!-- DOC_LANGUAGE: es -->");
     const r = run(["--codec", "worried", "t0_refused", "--project", es], { SA_PLUGIN_REF: "v11.3.0" });
     expect(r.status).toBe(0);
-    expect(r.stdout).toBe('### <img src="https://raw.githubusercontent.com/shadowx4fox/solutions-architect-skills/v11.3.0/brand/alia/github/codec-worried.png" width="64" height="64" align="middle" alt="Alia"> Alia · Tier 0 rechazado\n');
+    expect(r.stdout).toBe('### <picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/shadowx4fox/solutions-architect-skills/v11.3.0/brand/alia/github/codec-worried-light.png"><img src="https://raw.githubusercontent.com/shadowx4fox/solutions-architect-skills/v11.3.0/brand/alia/github/codec-worried.png" width="64" height="64" align="middle" alt="Alia"></picture> Alia · Tier 0 rechazado\n');
   });
   test("a branch pin falls back to this plugin's version; SA_ALIA_IMAGES moves the pictures or, none, writes her sparkle", () => {
     const v = JSON.parse(readFileSync(join(ROOT, ".claude-plugin/plugin.json"), "utf8")).version;
