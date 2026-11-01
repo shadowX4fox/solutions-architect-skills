@@ -8,6 +8,10 @@ Alia in Claude Code — the suite's optional plugin, released on its own cadence
 
 - **Her helpers.** A sub-agent's message row in the transcript ("Message from subagent", and a sub-agent's completion notice) is drawn under a smaller face of hers (40 px), one per role: the judge thinking on silver, a reviewer stern on amber, a writer talking on deep teal, any other a calm helper; the label reads «Alia · juez · worksheet-judge», the engine's row stays beneath it, compact or expanded. Her replies keep the larger codec. In the terminal the role's sparkle in its colour. `replyCodec: false` turns it off with the replies' codec.
 
+### Known issue
+
+- The desktop app does not draw them yet: it raises `ui.render` for a user-role row but paints its own row whatever a plugin returns ([anthropics/claude-code#102067](https://github.com/anthropics/claude-code/issues/102067), open; seen on 2.1.316). The terminal draws them.
+
 ## [1.0.3]
 
 ### Fixed

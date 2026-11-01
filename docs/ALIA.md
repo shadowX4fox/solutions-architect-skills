@@ -458,6 +458,11 @@ thinking on silver, a reviewer (`principle-quality-reviewer`, `architecture-anal
 «Alia · juez · worksheet-judge»; the engine's row stays beneath it, compact or expanded. The same `replyCodec` option
 turns it off.
 
+> **Desktop app: not shown yet.** The desktop app raises the hook for these rows but draws its own row whatever a plugin
+> returns — a known Claude Code bug, [anthropics/claude-code#102067](https://github.com/anthropics/claude-code/issues/102067)
+> (open; seen on 2.1.295 and 2.1.316). The helpers show in the terminal and will show on the desktop once that is fixed,
+> with no change to the plugin. Her codec on the replies is unaffected (an assistant row is drawn as returned).
+
 ## Above the prompt: the next steps
 
 The band above the prompt box is marked by her **escudo**, not her face: the face in a ring is her voice, the band is
