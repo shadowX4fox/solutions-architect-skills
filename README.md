@@ -116,26 +116,55 @@ and an organization can add its own.
 
 ## Quick start
 
-**Requirements:** [Claude Code](https://claude.com/claude-code) and [Bun](https://bun.sh) ≥ 1.0.
+**Requirements:** [Claude Code](https://claude.com/claude-code), [Bun](https://bun.sh) ≥ 1.0 and
+[ripgrep](https://github.com/BurntSushi/ripgrep).
 
-```bash
-claude plugin marketplace add shadowX4fox/solutions-architect-skills
-claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
+**Paste this into Claude Code.** It installs the suite, or updates it if it is already there, then checks the result.
+The same text upgrades it later:
+
+```text
+Install the Solutions Architect Skills suite for me, from a shell (the `claude` CLI). Ask before anything not listed here.
+1. Run `bun --version` (1.0 or newer) and `rg --version`. If either is missing, tell me the install command for my OS
+   and stop.
+2. If `claude plugin marketplace list` does not show shadowx4fox-solution-architect-marketplace, run
+   `claude plugin marketplace add shadowX4fox/solutions-architect-skills`; otherwise run
+   `claude plugin marketplace update shadowx4fox-solution-architect-marketplace`.
+3. For each of sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery, sa-visualization and sa-alia
+   (sa-alia is optional: skip it if I say so): if `claude plugin list` does not show
+   <name>@shadowx4fox-solution-architect-marketplace, run
+   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; otherwise run
+   `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`.
+   Then run `claude plugin list` and install every "Dependency <name>@… is not installed" the same way.
+4. Run `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet`
+   (on Windows, the same path under %USERPROFILE%) and run `bun install` in the directory it prints. Each version is a
+   new directory, so this repeats after every update.
+5. Run `bun <that directory>/scripts/setup-docgen.ts --no-smoke`. If it reports no browser, offer
+   `bunx puppeteer browsers install chrome` — Mermaid diagrams render as pictures in Word and PDF only with one.
+6. Report every plugin with its version. Then tell me to run /reload-plugins, and /sa-skills:setup once in each project.
 ```
 
-Installing `sa-skills` brings the other five plugins (`sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery`,
-`sa-visualization`). In Claude Code run `/reload-plugins`, then once per project:
+Then `/reload-plugins`, and once in each project:
 
 ```text
 /sa-skills:setup
 ```
 
-It grants the permissions the skills need, sets up the judge and checks the export toolchain. Word / PDF export and the
-handoff kit's contract checks also need the plugin's npm packages, installed once:
+It grants the permissions the skills need, sets up the judge and checks the export toolchain.
+
+<details>
+<summary>Prefer to type the commands</summary>
 
 ```bash
+claude plugin marketplace add shadowX4fox/solutions-architect-skills
+claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user   # brings the other five
+claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user     # optional: Alia in Claude Code
 cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)" && bun install
 ```
+
+`bun install` brings the npm packages the Word / PDF export and the handoff kit's contract checks need; Claude Code's
+plugin install does not run it, and each update is a new directory.
+
+</details>
 
 Then just ask:
 
@@ -149,8 +178,8 @@ Make a video of the architecture                        → architecture-video
 ```
 
 Full guide: [docs/INSTALLATION.md](docs/INSTALLATION.md) · a first architecture, step by step:
-[docs/QUICK_START.md](docs/QUICK_START.md). Optional: `sa-alia`, Alia in Claude Code (her codec over every reply
-and above the prompt box, next-step prompts, an architecture radar, `/alia`) — `claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user`.
+[docs/QUICK_START.md](docs/QUICK_START.md). `sa-alia`, Alia in Claude Code, is optional; the instruction above
+installs it unless you say no.
 
 ## Meet Alia
 
@@ -206,6 +235,7 @@ workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN
 The optional `sa-alia` plugin brings her into the session that works on the architecture, in any project with an
 `ARCHITECTURE.md`:
 
+- **Her hub, open from the start** — docked beside the chat when a session starts in an architecture (`openHub`).
 - **Her codec over every reply** — her face on the desktop app, a ringed `✦` in the terminal; the text is Claude Code's own.
 - **The next steps** above the prompt, under her escudo — one line on where the architecture stands, a click fills the prompt.
 - **`/alia`** — the architecture's state and every view of hers: `/alia status` the release, `/alia radar` the findings by lens, `/alia arch` the containers and their neighbourhood, `/alia center` and `/alia video` the command center and the video.

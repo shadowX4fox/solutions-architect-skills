@@ -20,16 +20,10 @@ by its slash name, such as `/sa-requirements:architecture-readiness`.
 
 ## 0. Install and set up
 
-You need [Claude Code](https://claude.com/claude-code) and [Bun](https://bun.sh) ≥ 1.0. Installation, upgrades and
-per-OS notes are in [INSTALLATION.md](INSTALLATION.md). In short:
-
-```bash
-claude plugin marketplace add shadowX4fox/solutions-architect-skills
-claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
-```
-
-`sa-skills` brings its five companions (`sa-records`, `sa-requirements`, `sa-analysis`, `sa-delivery`,
-`sa-visualization`). In Claude Code run `/reload-plugins`, then `/sa-skills:setup` inside an empty git repository.
+You need [Claude Code](https://claude.com/claude-code), [Bun](https://bun.sh) ≥ 1.0 and ripgrep. Paste the
+install instruction from [INSTALLATION.md § 0](INSTALLATION.md#0-the-short-way--let-claude-code-install-it) into
+Claude Code: it installs the six plugins and Alia (optional), the npm packages, and checks the result. Then run
+`/reload-plugins`, and `/sa-skills:setup` inside an empty git repository.
 
 **What happens:** it merges the permissions the skills need into `.claude/settings.json`, writes a pointer block into
 `CLAUDE.md`, adds `exports/` and `.cache/sa-skills/` to `.gitignore`, checks the Word/PDF export toolchain, ripgrep
