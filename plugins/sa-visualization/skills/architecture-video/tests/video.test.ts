@@ -8,6 +8,7 @@ import { FILES } from "../../architecture-command-center/tests/order-desk.fixtur
 
 const { prepare, request } = require("../scripts/video-prepare.js");
 const { build, checkLines } = require("../scripts/video-build.js");
+const { compose, moodAt, SR, BAR } = require("../scripts/music.js");
 
 const EXTRA: Record<string, string> = {
   "docs/01-system-overview.md": `# System Overview
@@ -166,5 +167,49 @@ describe("video-build", () => {
     expect(ids).toContain("layers");
     expect(r.lines.refused.map((x: any) => x.slot)).toEqual(["chapter.layers"]);
     expect(readFileSync(join(o2, "compositions", "layers.html"), "utf8")).toContain("Cómo se organiza");
+  });
+});
+
+describe("Alia's music", () => {
+  const plan = [{ at: 0, mood: "intro" }, { at: 8, mood: "thinking" }, { at: 16, mood: "worried" }];
+
+  test("the bed is stereo, the video's length, quiet at both ends, peaking under -1 dBFS, and the same bytes every time", () => {
+    const a = compose(24, plan), b = compose(24, plan);
+    expect(a.length).toBe(2 * Math.ceil(24 * SR));
+    expect(Buffer.from(a.buffer).equals(Buffer.from(b.buffer))).toBe(true);
+    let peak = 0; for (const x of a) peak = Math.max(peak, Math.abs(x));
+    expect(peak).toBeLessThanOrEqual(Math.round(0.89 * 32767));
+    expect(peak).toBeGreaterThan(20000);
+    expect(a[0]).toBe(0);
+    expect(Math.abs(a[a.length - 1])).toBeLessThan(50);
+    let diff = 0; for (let i = 0; i < a.length; i += 2) diff += Math.abs(a[i] - a[i + 1]);
+    expect(diff).toBeGreaterThan(0);
+  });
+
+  test("it follows her mood: a scene's mood takes the bar line nearest its start; another plan, another bed", () => {
+    expect(moodAt(plan, 0)).toBe("intro");
+    expect(moodAt(plan, 8 - BAR / 3)).toBe("thinking");
+    expect(moodAt(plan, 8 - BAR)).toBe("intro");
+    expect(moodAt([{ at: 0, mood: "unknown" }], 0)).toBe("calm");
+    const calm = compose(24, [{ at: 0, mood: "calm" }]);
+    expect(Buffer.from(calm.buffer).equals(Buffer.from(compose(24, plan).buffer))).toBe(false);
+  });
+
+  test("the build places it under the whole video with the scenes' moods at the gain asked; --no-music leaves it silent", () => {
+    const o = join(root, "v-music");
+    const r = build(sb, LINES, o, { volume: 0.2 });
+    const index = readFileSync(join(o, "index.html"), "utf8");
+    expect(index).toContain(`<audio id="music" class="clip" src="assets/music/bed.wav" data-start="0" data-duration="${r.total_s}" data-track-index="2" data-volume="0.2">`);
+    expect(r.music.moods[0]).toEqual({ at: 0, mood: "intro" });
+    expect(r.music.moods.at(-1).mood).toBe("outro");
+    expect(r.music.moods.find((m: any) => m.mood === "worried")).toBeTruthy();
+    const wav = readFileSync(join(o, "assets", "music", "bed.wav"));
+    expect(wav.toString("ascii", 0, 4)).toBe("RIFF");
+    expect(wav.readUInt16LE(22)).toBe(2);
+    expect(wav.readUInt32LE(40) / 4).toBe(Math.ceil(r.total_s * SR));
+    const q = build(sb, LINES, o, { music: false });
+    expect(q.music).toBeNull();
+    expect(readFileSync(join(o, "index.html"), "utf8")).not.toContain("<audio");
+    expect(existsSync(join(o, "assets", "music", "bed.wav"))).toBe(false);
   });
 });

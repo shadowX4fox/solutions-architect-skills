@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.6.0] - 2026-11-02
+
+### Added
+- **Alia's music in the architecture video** (`sa-visualization:architecture-video`): under the whole video, a quiet neon-night bed composed by code (`scripts/music.js` — original, no third-party track): a warm pad, a soft arpeggio with a ping-pong echo, a round bass, light drums, rain, and her sparkle when she arrives and leaves, at 84 bpm in stereo. It follows her mood scene by scene, changing on a bar line (intro without drums; calm and thinking moving; pleased lifting; worried and stern darker, fewer drums; an outro on a held chord), and is cut to the video's exact length. Deterministic. `video-build.js --music-volume <0..1>` sets its gain (default 0.3), `--no-music` leaves the video silent.
+
+### Fixed
+- **The architecture video's title and closing card**: the system's name is set at 64 px (was 96 / 88), so a long name no longer runs into the tagline or the closing line, and the closing line sits lower; Alia's stage tag is 28 px, the HyperFrames check's minimum (was 24). Formerly hand fixes in the generated project, lost on every rebuild.
+
 ## [11.5.0] - 2026-11-01
 
 ### Added

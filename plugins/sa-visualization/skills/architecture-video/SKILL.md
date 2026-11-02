@@ -86,6 +86,13 @@ Exit 1 names each refused line (`refused <slot>: <why>`): fix it in `lines.json`
 run the build again. The project is `index.html`, `compositions/<scene>.html` and `assets/` (Alia's poses,
 faces and escudo, copied from the skill).
 
+**Her music**: under the whole video a quiet neon-night bed, `assets/music/bed.wav`, composed by code
+(`scripts/music.js` — original, no third-party track): a warm pad, a soft arpeggio with a ping-pong echo, a round
+bass, light drums, rain behind it and her sparkle when she arrives and leaves, at 84 bpm. It follows her mood
+scene by scene, changing on a bar line — the intro without drums, calm and thinking moving, pleased lifting,
+worried and stern darker with fewer drums — and ends on a held chord at the video's length. It waits with the viewer and never
+leads: `--music-volume <0..1>` sets its gain (default 0.3), `--no-music` leaves the video silent.
+
 ## Step 4 — Check, look, render
 
 ```bash

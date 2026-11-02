@@ -4,11 +4,14 @@
 // written by the session) → <out>/index.html, <out>/compositions/<scene>.html and <out>/assets/. Every figure and name on
 // screen comes from the storyboard; the lines are checked here — a line that breaks a rule is refused, named, and its scene
 // renders without it. The look is the Alia Guide design system: night and light grounds, Nunito and IBM Plex Mono, her poses
-// on the stage, her talking codec (160 px, the video size) on each chapter card, her escudo once, on the title.
+// on the stage, her talking codec (160 px, the video size) on each chapter card, her escudo once, on the title — and under it
+// all her music (music.js: a quiet neon-night bed composed by code, following her mood scene by scene, cut to the video's length; --no-music leaves
+// the video silent, --music-volume sets its gain, default 0.3).
 //
-//   bun video-build.js <storyboard.json> <lines.json> --out <dir> [--json]
+//   bun video-build.js <storyboard.json> <lines.json> --out <dir> [--no-music] [--music-volume <0..1>] [--json]
 const fs = require('fs');
 const path = require('path');
+const { writeBed } = require('./music');
 
 const W = 1920, H = 1080;
 const GSAP = 'https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js';
@@ -69,7 +72,7 @@ const css = (sid, night, inner) => `
     #${sid} .stage .halo { position:absolute; inset:4% 2% 8%; border-radius:50%; background:radial-gradient(closest-side, ${night ? 'rgba(46,230,230,.16)' : '#dcfafa'}, transparent); }
     #${sid} .stage .ring { position:absolute; left:20%; right:20%; bottom:0; height:56px; border-radius:50%; ${night ? `border:3px solid ${AQUA}; box-shadow:0 0 28px rgba(46,230,230,.45);` : `border:3px solid ${AQUA_MARK};`} }
     #${sid} .stage img { position:absolute; left:-35%; bottom:26px; width:170%; height:calc(100% - 40px); object-fit:contain; object-position:bottom; filter:${night ? 'drop-shadow(0 0 40px rgba(46,230,230,.42))' : 'drop-shadow(0 16px 26px rgba(13,20,24,.18))'}; }
-    #${sid} .stage .tag { position:absolute; top:0; right:0; margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; letter-spacing:4px; color:${night ? AQUA : AQUA_INK}; }
+    #${sid} .stage .tag { position:absolute; top:0; right:0; margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:4px; color:${night ? AQUA : AQUA_INK}; }
     ${inner}`;
 
 function card(sid, night, innerCss, innerHtml, js, dur) {
@@ -106,7 +109,7 @@ function titleScene(sb, L, t) {
   return card(sid, true, `#title-k { position:absolute; left:160px; top:270px; display:flex; align-items:center; gap:24px; }
     #title-k img { width:64px; height:64px; }
     #title-bar { position:absolute; left:160px; top:372px; width:14px; height:200px; background:${AQUA}; border-radius:7px; box-shadow:0 0 22px rgba(46,230,230,.55); }
-    #title-h { position:absolute; left:206px; top:360px; font-weight:900; font-size:96px; letter-spacing:-1.5px; line-height:1.05; max-width:1080px; color:#fff; }
+    #title-h { position:absolute; left:206px; top:360px; font-weight:900; font-size:64px; letter-spacing:-1px; line-height:1.05; max-width:1080px; color:#fff; }
     #title-s { position:absolute; left:208px; top:620px; font-weight:700; font-size:38px; color:${SILVER}; margin:0; max-width:1060px; line-height:1.3; }`,
   `    <div id="title-k" class="kicker"><img src="assets/alia/escudo.png" alt="Alia's escudo"><span>${esc(kick)}</span></div>
     <div id="title-bar"></div>
@@ -337,8 +340,8 @@ ${stage(sid, 'warning', t.verb.worried, [1440, 230, 400, 720])}`, js, dur);
 function endScene(sb, L, t) {
   const a = sb.architecture, sid = 'end', c = L['end.closing'], dur = Math.max(8, 3 + need(c));
   return card(sid, true, `#end-k { position:absolute; left:160px; top:300px; }
-    #end-h { position:absolute; left:160px; top:350px; font-weight:900; font-size:88px; letter-spacing:-1.5px; line-height:1.05; max-width:1100px; color:#fff; }
-    #end-c { position:absolute; left:160px; top:500px; margin:0; max-width:1100px; font-weight:700; font-size:40px; line-height:1.35; color:${SILVER}; }
+    #end-h { position:absolute; left:160px; top:350px; font-weight:900; font-size:64px; letter-spacing:-1px; line-height:1.05; max-width:1100px; color:#fff; }
+    #end-c { position:absolute; left:160px; top:600px; margin:0; max-width:1100px; font-weight:700; font-size:40px; line-height:1.35; color:${SILVER}; }
     #end-r { position:absolute; left:160px; top:820px; margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:26px; letter-spacing:2px; color:${MUTED}; }`,
   `    <p id="end-k" class="kicker">${esc([a.version && `v${a.version}`, a.status, a.released].filter(Boolean).join(' · ').toUpperCase())}</p>
     <h1 id="end-h">${esc(a.name)}</h1>
@@ -349,11 +352,12 @@ ${stage(sid, 'happy', a.language === 'es' ? 'hasta pronto' : 'see you', [1340, 1
 }
 
 // ---------------------------------------------------------------- the project
-function build(sb, lines, out) {
+function build(sb, lines, out, { music = true, volume = 0.3 } = {}) {
   const t = T[sb.architecture.language] || T.en, chk = checkLines(sb, lines), L = chk.ok, order = [];
   let n = 0;
   const chapter = (sc, sub) => { const c = chapterScene(sb, L, t, n + 1, sc.chapter, sub, sc.mood); if (c) { n++; order.push(c); } };
   for (const sc of sb.scenes) {
+    const from = order.length;
     if (sc.kind === 'title') order.push(titleScene(sb, L, t));
     else if (sc.kind === 'overview') { const s = overviewScene(sb, L, t); if (s) order.push(s); }
     else if (sc.kind === 'context') { chapter(sc, [t.systems(sc.owned.length + sc.external.length), t.links(sc.links.length)].join(' · ')); order.push(contextScene(sb, sc, t)); }
@@ -362,14 +366,21 @@ function build(sb, lines, out) {
     else if (sc.kind === 'decisions') { chapter(sc, t.decisions_n(sc.total)); order.push(decisionsScene(sb, sc, t)); }
     else if (sc.kind === 'risks') { chapter(sc, t.debt_n(sc.total)); order.push(risksScene(sb, sc, t)); }
     else if (sc.kind === 'end') order.push(endScene(sb, L, t));
+    // the music's mood for what this scene added: hers, the intro's before the first chapter, the outro's at the end
+    for (const s of order.slice(from)) s.mood = sc.kind === 'end' ? 'outro' : sc.kind === 'title' || sc.kind === 'overview' ? 'intro' : sc.mood || 'calm';
   }
   fs.mkdirSync(path.join(out, 'compositions'), { recursive: true });
   for (const f of fs.readdirSync(path.join(out, 'compositions'))) if (f.endsWith('.html')) fs.rmSync(path.join(out, 'compositions', f));
   fs.cpSync(ASSETS, path.join(out, 'assets'), { recursive: true });
   let at = 0;
-  const hosts = order.map((s) => { fs.writeFileSync(path.join(out, 'compositions', `${s.sid}.html`), s.doc);
+  const plan = [];
+  const hosts = order.map((s) => { plan.push({ at, mood: s.mood }); fs.writeFileSync(path.join(out, 'compositions', `${s.sid}.html`), s.doc);
     const h = `      <div id="${s.sid}" data-composition-id="${s.sid}" data-composition-src="compositions/${s.sid}.html" data-start="${r2(at)}" data-duration="${s.dur}" data-track-index="1" data-track-kind="graphics" data-width="${W}" data-height="${H}"></div>`;
     at = r2(at + s.dur); return h; });
+  const bed = path.join(out, 'assets', 'music', 'bed.wav');
+  if (music) { fs.mkdirSync(path.dirname(bed), { recursive: true }); writeBed(bed, at, plan); }
+  else fs.rmSync(bed, { force: true });
+  const vol = r2(Math.min(1, Math.max(0, +volume)));
   fs.writeFileSync(path.join(out, 'index.html'), `<!doctype html>
 <html lang="${sb.architecture.language}" data-resolution="landscape">
   <head>
@@ -386,7 +397,7 @@ function build(sb, lines, out) {
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="${at}" data-width="${W}" data-height="${H}">
 ${hosts.join('\n')}
-    </div>
+${music ? `      <audio id="music" class="clip" src="assets/music/bed.wav" data-start="0" data-duration="${at}" data-track-index="2" data-volume="${vol}"></audio>\n` : ''}    </div>
     <script>
       const tl = gsap.timeline({ paused: true });
       window.__timelines["main"] = tl;
@@ -395,7 +406,7 @@ ${hosts.join('\n')}
 </html>
 `);
   fs.writeFileSync(path.join(out, 'hyperframes.json'), JSON.stringify({ paths: { blocks: 'compositions', components: 'compositions/components', assets: 'assets' } }, null, 2) + '\n');
-  return { out, total_s: at, scenes: order.map((s) => [s.sid, s.dur]), lines: { used: Object.keys(L).length, refused: chk.refused, absent: chk.absent, unknown: chk.unknown } };
+  return { out, total_s: at, music: music ? { file: 'assets/music/bed.wav', volume: vol, moods: plan } : null, scenes: order.map((s) => [s.sid, s.dur]), lines: { used: Object.keys(L).length, refused: chk.refused, absent: chk.absent, unknown: chk.unknown } };
 }
 
 module.exports = { build, checkLines, T };
@@ -403,16 +414,17 @@ module.exports = { build, checkLines, T };
 if (require.main === module) {
   const argv = process.argv.slice(2);
   const opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
-  const [sbPath, linesPath] = argv.filter((x, i) => !x.startsWith('--') && argv[i - 1] !== '--out');
-  if (!sbPath || !linesPath || !opt('--out')) { console.error('usage: bun video-build.js <storyboard.json> <lines.json> --out <dir> [--json]'); process.exit(2); }
+  const [sbPath, linesPath] = argv.filter((x, i) => !x.startsWith('--') && argv[i - 1] !== '--out' && argv[i - 1] !== '--music-volume');
+  if (!sbPath || !linesPath || !opt('--out')) { console.error('usage: bun video-build.js <storyboard.json> <lines.json> --out <dir> [--no-music] [--music-volume <0..1>] [--json]'); process.exit(2); }
   try {
     const sb = JSON.parse(fs.readFileSync(sbPath, 'utf8'));
     const lines = fs.existsSync(linesPath) ? JSON.parse(fs.readFileSync(linesPath, 'utf8')) : {};
-    const r = build(sb, lines, path.resolve(opt('--out')));
+    const r = build(sb, lines, path.resolve(opt('--out')), { music: !argv.includes('--no-music'), volume: opt('--music-volume') ?? 0.3 });
     if (argv.includes('--json')) console.log(JSON.stringify(r, null, 2));
     else {
       console.log(`video project: ${r.out} — ${r.scenes.length} scenes, ${r.total_s} s`);
       console.log(`  ${r.scenes.map(([s, d]) => `${s} ${d}s`).join(' · ')}`);
+      console.log(r.music ? `music: ${r.music.file} at volume ${r.music.volume}` : 'music: none');
       console.log(`lines: ${r.lines.used} used`);
       r.lines.refused.forEach((x) => console.log(`  refused ${x.slot}: ${x.why} — its scene renders without it; fix it in lines.json and build again`));
       r.lines.absent.forEach((k) => console.log(`  absent ${k}`));
