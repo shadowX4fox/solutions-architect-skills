@@ -36,18 +36,28 @@ async function refreshNextSteps($: EngineInterface) {
   if (first && (await read($, dismissedAtom)) !== fingerprint(steps)) void $.prompt.suggest({ text: first.prompt })
 }
 
-/** Where sa-skills is: SA_SKILLS_DIR, the checkout this plugin was loaded from, else the marketplace's own resolver. */
+/** Where sa-skills is: SA_SKILLS_DIR, the checkout this plugin was loaded from, Claude Code's install registry, else the
+ *  marketplace's own resolver. Any OS: the home is HOME or USERPROFILE (Windows), every path read with forward slashes. */
 export async function saSkillsDir($: EngineInterface): Promise<string | null> {
-  const has = async (d: string) => $.fs.exists(`${d}/scripts/shared/findings.js`)
+  const fwd = (p: string) => String(p || '').replace(/\\/g, '/')
+  const has = async (d: string) => !!d && $.fs.exists(`${d}/scripts/shared/findings.js`)
   const env = await $.env.get('SA_SKILLS_DIR')
-  if (env && (await has(env))) return env
+  if (env && (await has(fwd(env)))) return fwd(env)
   try {
-    const real = (await $.fs.stat($.plugin.root, { resolve: true })).realPath
+    const real = fwd((await $.fs.stat($.plugin.root, { resolve: true })).realPath || '')
     const repo = real ? real.replace(/\/plugins\/sa-alia\/?$/, '') : ''
     if (repo && repo !== real && (await has(repo))) return repo
   } catch { /* not a checkout */ }
-  const home = await $.env.get('HOME')
+  const home = fwd((await $.env.get('HOME')) || (await $.env.get('USERPROFILE')) || '')
   if (!home) return null
+  // the install registry: this project's install of sa-skills, else the user's — read, never a process
+  try {
+    const reg = JSON.parse(String(await $.fs.read(`${home}/.claude/plugins/installed_plugins.json`))) as { plugins?: Record<string, { scope?: string; installPath?: string; projectPath?: string }[]> }
+    const all = Object.entries(reg.plugins || {}).filter(([k]) => k.startsWith('sa-skills@')).flatMap(([, v]) => v || [])
+    const root = fwd(await $.session.root())
+    const pick = all.find((e) => e.scope !== 'user' && e.projectPath && root.startsWith(fwd(e.projectPath))) || all.find((e) => e.scope === 'user') || all[0]
+    if (pick && (await has(fwd(pick.installPath || '')))) return fwd(pick.installPath || '')
+  } catch { /* no registry */ }
   try {
     const r = await $.process.run(['bun', `${home}/${MARKETPLACE_ROOT_SCRIPT}`])
     const dir = r.exitCode === 0 ? r.stdout.trim().split('\n').pop() || '' : ''

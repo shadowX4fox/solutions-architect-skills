@@ -41,7 +41,7 @@ const STATUS = { state: 'changed', version: '7.1.0', declared_status: 'Released'
   next: 'release my architecture — 2 change(s) since v7.1.0, recommended minor' }
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
-function engine(on: On) {
+function engine(on: On, opts: { env?: Record<string, string | undefined> } = {}) {
   const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[], launched: [] as string[][] }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
@@ -52,7 +52,7 @@ function engine(on: On) {
   on('ui.notify', (_$, e) => { box.notified.push(e.text); return { value: { isSent: true, channel: 'terminal' } } as never })
   on('session.root', () => ({ value: '/p' }))
   on('clock.now', () => ({ value: NOW }))
-  on('env.get', (_$, e) => ({ value: e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
+  on('env.get', (_$, e) => ({ value: opts.env ? opts.env[e.name] : e.name === 'SA_SKILLS_DIR' ? '/sa' : undefined }))
   on('fs.exists', (_$, e) => ({ value: !!FILES[e.path] || dir(e.path) }))
   on('fs.read', (_$, e) => { if (/\/assets\/alia\/(face-[a-z-]+\.webp|escudo\.png)$/.test(e.path)) return { value: { base64: 'UklGRg==' } } as never
     const f = FILES[e.path]; if (!f) throw new Error(`ENOENT ${e.path}`); return { value: f.text } })
@@ -137,6 +137,16 @@ describe('sa-alia, end to end on every surface', () => {
       expect((await run('arch')).text).toMatch(/Panel de arquitectura abierto/)
       expect((await run('explorar')).text).toMatch(/Panel de arquitectura abierto/)
       expect((await run('nada')).text).toMatch(/\/alia status · radar · arch · center · video/)
+    })
+
+    test(`${surface}: findings the radar could not read show as unknown, never zero`, async ($, on) => {
+      engine(on, { env: {} })   // no SA_SKILLS_DIR, no home: sa-skills is not found
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-radar', props: PANE })
+      expect(await ui.find({ type: 'Text', text: /sa-skills not found/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: '—' })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /todo en orden/ })).toBeUndefined()
+      await ui.unmount()
     })
 
     test(`${surface}: /radar → tiles, a meter per lens, the stale lens offered for a rerun`, async ($, on) => {

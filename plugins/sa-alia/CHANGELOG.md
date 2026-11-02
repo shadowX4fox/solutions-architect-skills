@@ -2,6 +2,16 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.1]
+
+### Fixed
+
+- **sa-skills is found on Windows.** The radar said "sa-skills not found (set SA_SKILLS_DIR)" on a machine installed from the marketplace. The lookup read only `HOME` (Windows has `USERPROFILE`) and matched paths with `/` (Windows writes `\`). Now it:
+  - takes the home from `HOME` or `USERPROFILE`;
+  - reads every path with forward slashes;
+  - reads Claude Code's install registry (`~/.claude/plugins/installed_plugins.json`) directly — this project's install of sa-skills first, else the user's — before falling back to the marketplace's resolver.
+- **She never gives an all clear she did not check.** With the findings unread, her line was "todo en orden — los docs y los análisis coinciden" and the radar showed 0 critical. Now she says she could not read the findings, worried, and the radar's critical and high tiles show "—", not 0.
+
 ## [1.3.0]
 
 ### Added

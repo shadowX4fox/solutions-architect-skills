@@ -41,6 +41,13 @@ describe('Alia voice', () => {
   test('outside an architecture she says nothing', () => {
     expect(aliaSays({ lang: 'en', arch: null, radar: null, steps: [] })).toBeNull()
   })
+  test('findings she could not read: she says so, never an all clear', () => {
+    const r = { ...radar([]), findingsNote: 'sa-skills not found (set SA_SKILLS_DIR) — findings not counted' }
+    const say = aliaSays({ lang: 'es', arch: ARCH, radar: r, steps: [] })
+    expect(say?.mood).toBe('worried')
+    expect(say?.line).toContain('no pude leer los hallazgos')
+    expect(say?.line).not.toContain('todo en orden')
+  })
   test('critical findings make her stern and name the heaviest lens', () => {
     const say = aliaSays({ lang: 'en', arch: ARCH, radar: radar([{ lens: 'STRIDE', critical: 1, high: 9 }, { lens: 'SPOF', critical: 3, high: 0 }]), steps: [] })
     expect(say?.mood).toBe('stern')

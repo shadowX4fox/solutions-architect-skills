@@ -30,6 +30,10 @@ export function aliaSays(input: { lang: Lang; arch: { name: string; version: str
   if (critical && heaviest) return at(t(lang,
     `${critical} critical finding${critical > 1 ? 's' : ''} stand — ${heaviest.lens} weighs most. I'd start there.`,
     `Hay ${critical} hallazgo${critical > 1 ? 's' : ''} crítico${critical > 1 ? 's' : ''} — ${heaviest.lens} pesa más. Empezaría ahí.`), 'stern')
+  // the radar could not read the findings: she says so, and never an all clear she did not check
+  if (radar && radar.findingsNote && !lenses.length) return at(t(lang,
+    `${version ? `${version} · ` : ''}I could not read the analyses' findings — the radar counts nothing yet. Its note says why.`,
+    `${version ? `${version} · ` : ''}no pude leer los hallazgos de los análisis: el radar todavía no cuenta nada. Su aviso dice por qué.`), 'worried')
   if (stale) return at(t(lang,
     `${stale} analys${stale > 1 ? 'es are' : 'is is'} older than the docs — what they say may no longer hold.`,
     `${stale} análisis ${stale > 1 ? 'son' : 'es'} más viejo${stale > 1 ? 's' : ''} que los docs — puede que ya no digan la verdad.`), 'worried')

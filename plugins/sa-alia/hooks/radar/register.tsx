@@ -39,6 +39,8 @@ export function registerRadar(on: On) {
     const es = r.lang === 'es'
     const width = Math.max(30, e.props.bodyColumns - 2)
     const critical = r.lenses.reduce((n, l) => n + l.critical, 0), high = r.lenses.reduce((n, l) => n + l.high, 0)
+    // findings that could not be read are unknown, never zero
+    const unread = !!r.findingsNote && !r.lenses.length
     const debt = (r.tdrs['Open'] || 0) + (r.tdrs['Planned'] || 0) + (r.tdrs['In Progress'] || 0)
     const stale = r.lenses.filter((l) => l.stale)
     // the meter of a lens: critical counts double, scaled to the heaviest lens
@@ -62,8 +64,8 @@ export function registerRadar(on: On) {
           kicker={es ? 'radar de riesgo' : 'risk radar'} />
         <Box flexDirection="column">
           <Box flexDirection="row" gap={1} flexWrap="wrap">
-            {tile('t-crit', String(critical), es ? 'críticos' : 'critical', critical ? TONE.critical : TONE.ok)}
-            {tile('t-high', String(high), es ? 'altos' : 'high', high ? TONE.high : TONE.ok)}
+            {tile('t-crit', unread ? '—' : String(critical), es ? 'críticos' : 'critical', unread ? undefined : critical ? TONE.critical : TONE.ok)}
+            {tile('t-high', unread ? '—' : String(high), es ? 'altos' : 'high', unread ? undefined : high ? TONE.high : TONE.ok)}
             {tile('t-debt', String(debt), es ? 'TDR abiertos' : 'open TDRs', debt ? TONE.high : TONE.ok)}
           </Box>
           {r.findingsNote ? <Text color={TONE.high}>{`${GLYPH.stale} ${r.findingsNote}`}</Text> : null}
