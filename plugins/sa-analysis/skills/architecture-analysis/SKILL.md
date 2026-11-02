@@ -503,7 +503,7 @@ bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analys
   `agent` worksheet). An unconfirmed pair stays apart and holds the merge, and a lens that produced no report also holds
   it. `--md` writes the pull request comment.
 
-**Pictures of the analyses are one script** — `analysis-chart.js`, in the Alia Guide look (her codec in the mood of the
+**Pictures of the analyses are one script** — `analysis-chart.js`, in the Alia Guide look (her blazon — never her face, which the comment or the reply beside it already carries — in the ring of the mood of the
 outcome), from the reports on disk by code. Any request for an image, a chart, a graph or a diagram of the analyses is
 one of its pictures — never one drawn by hand or with another library. Which one, by what is asked:
 

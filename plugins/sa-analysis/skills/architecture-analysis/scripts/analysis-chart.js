@@ -3,7 +3,7 @@
 // The analyses as one picture, in the Alia Guide look — the one form for every request: the pull request comment of
 // architecture-analysis.yml and any "show me the analyses" in a chat draw this same image, never one drawn by hand.
 // With --base: each lens before → after (the base's newest report against the one on disk), the verdict analysis-diff.js
-// reaches, and what rose. Without: the state of every lens this architecture analyses. Her codec heads it in the mood of
+// reaches, and what rose. Without: the state of every lens this architecture analyses. Her blazon heads it, in the ring of the mood of
 // the outcome (kept pleased, moved worried; a state with critical findings worried, else calm). By code, no model.
 //
 //   bun analysis-chart.js <project> [--base <git-ref> --lenses spof,stride,…] [--out <file.png|file.svg>] [--json]
@@ -73,16 +73,22 @@ async function diffModel(root, base, lenses, opts = {}) {
   return { kind: 'diff', verdict: r.verdict, base: String(base).slice(0, 12), lenses: rows, items };
 }
 
-/** Her codec in the outcome's mood: the 144 px picture the CI comments carry, inlined. */
-function codecUri(mood) {
-  try { return `data:image/png;base64,${fs.readFileSync(fromSaSkills('brand', 'alia', 'github', `codec-${mood}.png`)).toString('base64')}`; } catch { return null; }
+/** Her escudo, inlined. The picture carries her blazon, never her face: the comment it opens on (and the reply beside
+ *  it in a chat) already carries her codec, and her face appears once in a piece. */
+function blazonUri() {
+  try { return `data:image/svg+xml;base64,${fs.readFileSync(fromSaSkills('brand', 'alia', 'blazon', 'escudo.svg')).toString('base64')}`; } catch { return null; }
+}
+/** Her mark on a picture: the blazon in the ring of the outcome's mood. */
+function mark(ring, embed) {
+  const b = embed ? blazonUri() : null;
+  return `<circle cx="108" cy="104" r="58" fill="${NIGHT2}" stroke="${ring}" stroke-width="5"/>` + (b ? `<image href="${b}" x="70" y="66" width="76" height="76"/>` : '');
 }
 function fontFaces() {
   const face = (file, weight) => { try { return `@font-face{font-family:'Nunito';font-weight:${weight};src:url(data:font/ttf;base64,${fs.readFileSync(fromSaSkills('tools', 'docgen', 'themes', 'alia', 'fonts', file)).toString('base64')}) format('truetype');}`; } catch { return ''; } };
   return face('Nunito-Regular.ttf', 400) + face('Nunito-ExtraBold.ttf', 800);
 }
 
-/** The picture as SVG — pure over the model; `embed` false leaves out the codec and fonts (tests). */
+/** The picture as SVG — pure over the model; `embed` false leaves out the blazon and fonts (tests). */
 function chartSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
   const t = T[info.lang] || T.en;
   const mood = m.kind === 'diff' ? (m.verdict === 'kept' ? 'pleased' : 'worried') : (m.lenses.some((l) => l.after && l.after.critical) ? 'worried' : 'calm');
@@ -117,7 +123,6 @@ function chartSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
   const legendY = H - 46;
   const legend = SEVS.map((s, k) => `<rect x="${56 + k * 150}" y="${legendY - 13}" width="16" height="16" rx="3" fill="${COLOR[s]}"/><text x="${80 + k * 150}" y="${legendY}" font-family="Nunito, sans-serif" font-size="17" fill="${SILVER}">${esc(t.sev[s])}</text>`).join('')
     + (diff ? `<rect x="${56 + 4 * 150}" y="${legendY - 9}" width="30" height="7" rx="2" fill="${SILVER}" opacity="0.35"/><text x="${94 + 4 * 150}" y="${legendY}" font-family="Nunito, sans-serif" font-size="17" fill="${SILVER}">${esc(t.before)}</text>` : '');
-  const codec = embed ? codecUri(mood) : null;
   const title = diff ? (m.verdict === 'kept' ? t.kept : t.moved) : t.state;
   const sub = diff ? t.vs(m.base, m.lenses.length) : t.of(m.lenses.length);
   const kicker = [t.kicker, info.name.toUpperCase(), info.version && `V${info.version}`].filter(Boolean).join(' · ');
@@ -126,7 +131,7 @@ function chartSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
 <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="rgba(46,230,230,0.06)" stroke-width="1"/></pattern></defs>
 <rect width="${W}" height="${H}" fill="${NIGHT}"/><rect width="${W}" height="${H}" fill="url(#grid)"/>
 <rect x="24" y="24" width="${W - 48}" height="${H - 48}" rx="24" fill="none" stroke="${ring}" stroke-opacity="0.55" stroke-width="2"/>
-${codec ? `<image href="${codec}" x="48" y="44" width="120" height="120"/>` : `<circle cx="108" cy="104" r="56" fill="${NIGHT2}" stroke="${ring}" stroke-width="4"/>`}
+${mark(ring, embed)}
 <text x="196" y="82" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="16" letter-spacing="2" fill="${AQUA}">${esc(cut(kicker, 64))}</text>
 <text x="196" y="128" font-family="Nunito, sans-serif" font-weight="800" font-size="40" fill="#fff">${esc(title)}</text>
 <text x="196" y="164" font-family="Nunito, sans-serif" font-size="20" fill="${SILVER}">${esc(sub)}</text>
@@ -296,16 +301,15 @@ function lensModel(root, lens, focus, view) {
   return { kind, lens, file: rep.file, date: rep.date, flow: pick, flows, focus };
 }
 
-/** The frame every picture shares: night ground, her codec in the mood's ring, kicker, title, subtitle, a footer. */
+/** The frame every picture shares: night ground, her blazon in the mood's ring, kicker, title, subtitle, a footer. */
 function frame({ W: w = W, H, mood, kicker, title, sub, body, footer, embed, fonts }) {
   const ring = { pleased: '#4dffa0', worried: '#ffd23f', calm: AQUA, thinking: AQUA }[mood] || AQUA;
-  const codec = embed ? codecUri(mood) : null;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${H}" viewBox="0 0 ${w} ${H}">
 <defs><style>${fonts ? fontFaces() : ''}</style>
 <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="rgba(46,230,230,0.06)" stroke-width="1"/></pattern></defs>
 <rect width="${w}" height="${H}" fill="${NIGHT}"/><rect width="${w}" height="${H}" fill="url(#grid)"/>
 <rect x="24" y="24" width="${w - 48}" height="${H - 48}" rx="24" fill="none" stroke="${ring}" stroke-opacity="0.55" stroke-width="2"/>
-${codec ? `<image href="${codec}" x="48" y="44" width="120" height="120"/>` : `<circle cx="108" cy="104" r="56" fill="${NIGHT2}" stroke="${ring}" stroke-width="4"/>`}
+${mark(ring, embed)}
 <text x="196" y="82" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="16" letter-spacing="2" fill="${AQUA}">${esc(cut(kicker, 64))}</text>
 <text x="196" y="128" font-family="Nunito, sans-serif" font-weight="800" font-size="40" fill="#fff">${esc(cut(title, 46))}</text>
 <text x="196" y="164" font-family="Nunito, sans-serif" font-size="20" fill="${SILVER}">${esc(cut(sub, 90))}</text>
@@ -513,7 +517,7 @@ async function toPng(svg, out, chromeGiven) {
     await send('Page.enable', {}, s);
     await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 2, mobile: false }, s);
     await send('Page.navigate', { url: `file://${page}` }, s);
-    await Bun.sleep(1200);                                                     // the embedded fonts and the codec decode
+    await Bun.sleep(1200);                                                     // the embedded fonts and the blazon decode
     const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: +w, height: +h, scale: 1 } }, s);
     if (!shot.result || !shot.result.data) return false;
     fs.writeFileSync(out, Buffer.from(shot.result.data, 'base64'));
@@ -545,7 +549,7 @@ if (require.main === module) {
     let out = opt('--out') || path.join(root, '.cache', 'sa-skills', 'analysis', 'analysis-chart.png');
     fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
     // the SVG always, beside the picture: the same drawing a surface that draws vector pictures shows natively (sa-alia, desktop)
-    // lean: her codec inlined, the fonts by name — a surface's vector element takes 128 KB at most (sa-alia's Svg)
+    // lean: her blazon inlined, the fonts by name — a surface's vector element takes 128 KB at most (sa-alia's Svg)
     const svgOut = out.replace(/\.(png|svg)$/i, '') + '.svg';
     fs.writeFileSync(svgOut, draw({ fonts: false, date: today }));
     if (!/\.svg$/i.test(out) && !(await toPng(svg, out, opt('--chrome')))) { console.error('analysis-chart: no Chrome — the SVG only'); out = svgOut; }

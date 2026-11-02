@@ -150,9 +150,10 @@ describe('analysis-chart.js — one picture of the analyses', () => {
     expect(chartSvg(m, info, { embed: false })).toContain('Cómo están los análisis');
   });
 
-  test('her codec inlined and the fonts by name: the lean SVG fits a surface\'s vector element (128 KB)', () => {
+  test('her blazon inlined, never her face, and the fonts by name: the lean SVG fits a surface\'s vector element (128 KB)', () => {
     const lean = chartSvg(diffModel, info, { fonts: false });
-    expect(lean).toContain('data:image/png;base64,');
+    expect(lean).toContain('data:image/svg+xml;base64,');
+    expect(lean).not.toContain('data:image/png;base64,');
     expect(lean).not.toContain('@font-face');
     expect(lean.length).toBeLessThan(131072);
   });

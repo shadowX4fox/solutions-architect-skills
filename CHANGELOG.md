@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.7.3] - 2026-11-02
+
+### Changed
+- **The analyses' pictures carry Alia's blazon, never her face** (`analysis-chart.js`). The pull request comment and the chat reply beside a picture already carry her codec, and her face appears once in a piece. The escudo now sits in the ring of the outcome's mood (green kept, amber moved or critical, aqua calm), in every picture: the verdict, the state and each lens's figure. The lean SVG is lighter too: a 2.6 KB vector blazon instead of the 144 px codec PNG.
+
 ## [11.7.2] - 2026-11-02
 
 ### Fixed
