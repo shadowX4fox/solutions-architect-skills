@@ -4,6 +4,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On } from 'claude-code'
 
 import type { ExplorerFacts, ExplorerScope, ExplorerTab } from '../../types'
+import { ensureLedger } from '../lifecycle'
 import { ARCH_PANE } from '../state'
 import type { Io } from '../next-steps/rules'
 import { GLYPH, TONE, cut, pad, rule } from '../ui'
@@ -25,8 +26,10 @@ const TABS: { tab: ExplorerTab; key: string; en: string; es: string }[] = [
   { tab: 'tdrs', key: 't', en: 'TDRs', es: 'TDR' },
 ]
 
-/** Re-read the ledger: on `/alia arch`, so the pane shows the project as it stands. */
+/** Re-read the ledger: on `/alia arch`, so the pane shows the project as it stands — rebuilt first when it is missing or
+ *  older than the documents (a fresh clone has none). */
 async function reload($: EngineInterface) {
+  await ensureLedger($)
   const io: Io = { exists: (p) => $.fs.exists(p), read: (p) => $.fs.read(p), list: (p) => $.fs.list(p), stat: (p) => $.fs.stat(p) }
   const facts = await loadFacts(io, await $.session.root())
   await update($, factsAtom, () => facts)
@@ -37,7 +40,7 @@ export async function openArch($: EngineInterface): Promise<string> {
   await reload($)
   const f = await read($, factsAtom)
   await $.ui.open({ id: PANE, title: f && f.lang === 'es' ? 'Arquitectura' : 'Architecture' })
-  return f ? (f.lang === 'es' ? 'Panel de arquitectura abierto.' : 'Architecture pane opened.') : 'No facts ledger yet (.cache/sa-skills/facts.json) — run any sa-skills workflow on this architecture first.'
+  return f ? (f.lang === 'es' ? 'Panel de arquitectura abierto.' : 'Architecture pane opened.') : 'No facts ledger (.cache/sa-skills/facts.json), and it could not be built — sa-skills was not found (SA_SKILLS_DIR) or arch-facts.js failed.'
 }
 
 /** Explorer: `/alia arch`, a pane over the architecture's containers, integrations, ADRs and TDRs. */
@@ -51,7 +54,7 @@ export function registerExplorer(on: On) {
     if (!f) return (
       <Box flexDirection="column">
         <Text color={TONE.info} bold>{`${GLYPH.brand} Architecture`}</Text>
-        <Text dimColor>No facts ledger yet (.cache/sa-skills/facts.json). Run any sa-skills workflow on this architecture, then /alia arch again.</Text>
+        <Text dimColor>No facts ledger (.cache/sa-skills/facts.json), and it could not be built: sa-skills was not found or its arch-facts.js failed. Set SA_SKILLS_DIR, or run any sa-skills workflow, then /alia arch again.</Text>
       </Box>
     )
     const es = f.lang === 'es'

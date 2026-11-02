@@ -66,6 +66,25 @@ export async function saSkillsDir($: EngineInterface): Promise<string | null> {
   } catch { return null }
 }
 
+/** The facts ledger, rebuilt when it is missing or older than the documents: a clone has none (`.cache/` is never
+ *  versioned) and a pane that reads it would say so. sa-skills' `arch-facts.js` reads the documents and writes only the
+ *  cache — she never edits a document. 'fresh' · 'built' · 'unavailable' (no architecture, or sa-skills not found). */
+export async function ensureLedger($: EngineInterface): Promise<'fresh' | 'built' | 'unavailable'> {
+  const root = String(await $.session.root()).replace(/\\/g, '/')
+  if (!(await $.fs.exists(`${root}/ARCHITECTURE.md`))) return 'unavailable'
+  const io: Io = { exists: (p) => $.fs.exists(p), read: (p) => $.fs.read(p), list: (p) => $.fs.list(p), stat: (p) => $.fs.stat(p) }
+  const mt = async (p: string) => { try { return (await $.fs.stat(p)).mtimeMs } catch { return 0 } }
+  const have = await mt(`${root}/.cache/sa-skills/facts.json`)
+  const newest = Math.max(await mt(`${root}/ARCHITECTURE.md`), await newestMd(io, `${root}/docs`), await newestMd(io, `${root}/adr`), await newestMd(io, `${root}/tdr`))
+  if (have && have >= newest) return 'fresh'
+  const sa = await saSkillsDir($)
+  if (!sa) return 'unavailable'
+  try {
+    const r = await $.process.run(['bun', `${sa}/scripts/shared/arch-facts.js`, root], { timeoutMs: 60000 })
+    return r.exitCode === 0 ? 'built' : 'unavailable'
+  } catch { return 'unavailable' }
+}
+
 /** radar: re-read the risk when its inputs changed — analysis reports and the ledger. */
 async function refreshRadar($: EngineInterface) {
   const root = await $.session.root()
@@ -175,6 +194,7 @@ export function registerLifecycle(on: On, options: PluginOptions = {}) {
     const r = await next(e)
     // one command: everything of hers is under /alia — each view of her hub a subcommand
     await $.command.register({ name: 'alia', argumentHint: '[status | radar | arch | center | video]', description: 'Alia: where the architecture stands and every view of hers — status, radar, arch, center, video (sa-alia)' })
+    await ensureLedger($)
     await refreshNextSteps($)
     await refreshRadar($)
     await refreshAlia($)

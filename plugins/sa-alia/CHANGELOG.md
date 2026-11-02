@@ -2,6 +2,12 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.1]
+
+### Fixed
+
+- **A fresh clone gets its facts ledger.** `.cache/` is never versioned, so a person who clones an architecture had no `.cache/sa-skills/facts.json`. The explorer then said "No facts ledger yet — run any sa-skills workflow". Now she builds it herself with sa-skills' `arch-facts.js` (which reads the documents and writes only the cache) at session start and when the explorer opens, whenever the ledger is missing or older than `ARCHITECTURE.md`, `docs/`, `adr/` or `tdr/`. A ledger as new as the documents is left alone. The judge's answers stay per machine and are asked again on another one.
+
 ## [1.4.0]
 
 ### Added

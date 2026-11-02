@@ -487,7 +487,7 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
 | `/alia` | her hub |
 | `/alia status` (`release`, `estado`) | where the release stands, read now by `lifecycle.js status` (no model): the state, the tag local and remote, the changes since it with the bump recommended, the unreleased notes, the downstream artifacts a release left stale — a button to release or recover the tag, one per stale command |
 | `/alia radar` (`riesgo`, `risk`) | the findings of each analysis lens, the open debt and the stale reports; on the desktop, a trend per lens |
-| `/alia arch` (`arquitectura`, `explorar`, `explorer`) | containers, integrations, ADRs and TDRs; a container's card draws its neighbourhood on the desktop app |
+| `/alia arch` (`arquitectura`, `explorar`, `explorer`) | containers, integrations, ADRs and TDRs; a container's card draws its neighbourhood on the desktop app. It reads the facts ledger, which she builds herself (sa-skills' `arch-facts.js`) when it is missing — a fresh clone, since `.cache/` is never versioned — or older than the documents |
 | `/alia center` (`centro`, `mando`, `3d`) | `visualizations/architecture-command-center.html` in the browser when it exists; otherwise `command center` in the prompt |
 | `/alia video` | `visualizations/architecture-video.mp4` in the system's player when it exists; otherwise `architecture video` in the prompt |
 

@@ -42,7 +42,7 @@ const STATUS = { state: 'changed', version: '7.1.0', declared_status: 'Released'
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
 function engine(on: On, opts: { env?: Record<string, string | undefined> } = {}) {
-  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[], launched: [] as string[][] }
+  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[], launched: [] as string[][], ledgerBuilt: 0 }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('turn.complete', () => ({ text: '' }) as never)
@@ -64,6 +64,8 @@ function engine(on: On, opts: { env?: Record<string, string | undefined> } = {})
   on('process.run', (_$, e) => {
     const cmd = e.argv[0] ?? ''
     if (['xdg-open', 'open', 'cmd'].includes(cmd)) box.launched.push([...e.argv])
+    // arch-facts.js writes the ledger the way the real one does: into the project's cache
+    if (/arch-facts\.js$/.test(e.argv[1] || '')) { FILES['/p/.cache/sa-skills/facts.json'] = { text: JSON.stringify(LEDGER), mtimeMs: NOW }; box.ledgerBuilt++ }
     const out = cmd === 'git' || ['xdg-open', 'open', 'cmd'].includes(cmd) ? '' : cmd === 'uname' ? 'Linux\n'
       : /lifecycle\.js$/.test(e.argv[1] || '') ? JSON.stringify(STATUS) : JSON.stringify(FINDINGS)
     return { value: { exitCode: 0, stdout: out, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } } })
@@ -274,6 +276,29 @@ describe('sa-alia, end to end on every surface', () => {
         await $.turn.complete({ answer: '', durationMs: 4 * 60000, isAborted: false, turnId: 't2', reason: 'answer' } as never)
         expect(box.notified[1]).toBe('Liberada v7.3.0 · el tag llega tras el merge')
       } finally { FILES['/p/ARCHITECTURE.md'] = was }
+    })
+
+    test(`${surface}: a fresh clone has no ledger — she builds it at session start, and the explorer is full from the first look`, async ($, on) => {
+      const kept = FILES['/p/.cache/sa-skills/facts.json']
+      delete FILES['/p/.cache/sa-skills/facts.json']
+      try {
+        const box = engine(on)
+        await $.session.start({ cwd: '/p', surface, isInteractive: true })
+        expect(box.ledgerBuilt).toBe(1)
+        const r = await $.command.run({ command: 'alia', args: 'arch', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as { text?: string }
+        expect(r.text).toMatch(/Panel de arquitectura abierto/)
+        expect(box.ledgerBuilt).toBe(1)   // fresh now: not rebuilt
+      } finally { FILES['/p/.cache/sa-skills/facts.json'] = kept! }
+    })
+
+    test(`${surface}: a ledger older than the documents is rebuilt; one as new is left alone`, async ($, on) => {
+      const kept = FILES['/p/.cache/sa-skills/facts.json']!
+      FILES['/p/.cache/sa-skills/facts.json'] = { ...kept, mtimeMs: NOW - 5 * H }   // the docs moved after it
+      try {
+        const box = engine(on)
+        await $.session.start({ cwd: '/p', surface, isInteractive: true })
+        expect(box.ledgerBuilt).toBe(1)
+      } finally { FILES['/p/.cache/sa-skills/facts.json'] = kept }
     })
 
     test(`${surface}: inside an architecture her hub opens on its own at session start, docked beside the chat`, async ($, on) => {
