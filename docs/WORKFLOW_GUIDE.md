@@ -9,8 +9,8 @@ Examples use an invented parcel-tracking service, **ParcelPath** (`Tracking API`
 **Contents:** [Lifecycle](#the-lifecycle-at-a-glance) · [Requirements](#phase-1--requirements) ·
 [Capability alignment](#phase-15--capability-alignment) · [Architecture](#phase-2--the-architecture) ·
 [Gates](#the-gates-as-code) · [ADRs and TDRs](#decisions-and-debt--adrs-and-tdrs) ·
-[Release](#versioning-and-release) · [Governance](#governance--analysis-and-traceability) · [Delivery](#delivery) ·
-[Visualization](#visualization) · [Compliance](#phase-3--compliance) · [Language](#documentation-language) ·
+[Release](#versioning-and-release) · [Analysis](#phase-3--analysis-the-ten-lenses) · [Delivery](#delivery) ·
+[Visualization](#visualization) · [Language](#documentation-language) ·
 [Trigger phrases](#trigger-phrases)
 
 ## The lifecycle at a glance
@@ -313,9 +313,10 @@ cumulative, with what is new. Never assign a container by hand: move a use case.
 that records the compromise: `**Delivery Increments:** 1–2 · TDR-104` in a component file, or an `Increments` column
 in `docs/05`. Releasing an increment after the window is blocked (`retire-pending`) until the element is retired.
 
-## Governance — analysis and traceability
+## Phase 3 — Analysis: the ten lenses
 
-Both skills ship in `sa-analysis`.
+The plugin's way to judge an architecture: ten lenses on its risk and design, run again whenever it changes, by the
+architect or, on every pull request, by CI. Both skills here ship in `sa-analysis`.
 
 ### Analysis — `architecture-analysis`
 
@@ -339,11 +340,52 @@ Code computes the dependency graph, latency sums and load model; the model class
 report to the findings contract. Each finding has an id (`C1`, `B1`, `T1-S`, `OB-01` …), a mitigation column and a
 residual severity — the ids the command center lights up.
 
+### In CI — the analyzer
+
+`architecture-analysis.yml` runs on every pull request that changes `ARCHITECTURE.md`, `docs/`, `adr/` or `tdr/`
+(`sa-delivery:architecture-ci-setup` installs it):
+
+1. **Impact, by code.** `analysis-impact.js` compares the facts ledger at the merge base with the branch's and maps
+   each change to the lenses that read it: a container, an integration, a flow's phases, a technology, a section.
+   Only the lenses the architecture already analyses run, and a change of text alone runs none.
+2. **The analyses.** Claude re-runs those lenses. The new reports are committed to the branch and the old ones are
+   archived, so the merge carries them.
+3. **The verdict, by code.** `analysis-diff.js` compares each lens with the base. A critical or high finding that is
+   new or raised moves the state. A reworded finding is paired by the judge, and a pair it does not confirm holds the
+   merge. A lens that was not re-run also holds it.
+4. **The merge.**
+   - State kept: the `architecture-analysis` status passes, and an automatic pull request (Tier 0) merges.
+   - State moved: the pull request waits for the architect's `analysis-accepted`.
+   - A person's pull request is never merged by the workflow.
+
+Alia's comment opens on a picture of the verdict: each lens before → after, and what rose.
+
+### Pictures of the analyses
+
+`analysis-chart.js` draws them all, in the Alia Guide look, from the reports on disk:
+
+| Ask | Picture |
+|---|---|
+| How the analyses stand | Every lens with its findings by severity |
+| Did a change move the state | Each lens before → after, the verdict and what rose |
+| One analysis — "the SPOF", "the capacity headroom" | That lens's figure (`--lens`): a heat map, the blast radius graph, a flow's latency waterfall, capacity headroom, fan-in / fan-out, the cost Pareto, the sensitive data flows, STRIDE's matrix |
+| One element of it — "the blast radius of Tracking API", "the latency of flow 2" | The same figure focused on it (`--focus`) |
+
+On the desktop app sa-alia draws the picture natively under the script's row; elsewhere it is a PNG. A figure the
+documents do not state is drawn as not documented, never invented.
+
 ### Traceability — `architecture-traceability`
 
 `check requirements coverage` compares every PO Spec use case with the architecture and writes
 `TRACEABILITY_REPORT.md`: each requirement `Covered`, `Partial` or `Not Covered`, with its evidence. With delivery
 increments declared, coverage is reported per increment.
+
+### Compliance contracts
+
+The base ships none, since compliance questions belong to each organization. An organization that has them ships them
+in a plugin of its **institution pack**. That plugin reads the architecture like any other skill, and no skill in the
+base reads what it writes ([INSTITUTION_PACKS.md](INSTITUTION_PACKS.md)). The ten lenses above are the base's own
+judgement of an architecture.
 
 ## Delivery
 
@@ -419,12 +461,6 @@ walkthroughs phase by phase; analysis findings on the stage; a load simulation f
 an increment filter when increments are declared; skins `alia` (default), `holo`, `atlas`, `corporate` or your own. **Alia**, the
 navigator, answers from a dossier of the architecture baked into the page. It never edits a document. See
 [ALIA.md](ALIA.md).
-
-## Phase 3 — Compliance
-
-Compliance contracts are organization-specific, so the base ships none. An organization that has its own compliance
-questions ships them as a plugin of its **institution pack**, which reads the architecture like any other skill; no
-skill in the base reads what it writes. See [INSTITUTION_PACKS.md](INSTITUTION_PACKS.md).
 
 ## Documentation language
 

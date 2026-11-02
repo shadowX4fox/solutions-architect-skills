@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.7.4] - 2026-11-02
+
+### Fixed
+- **The lifecycle no longer speaks of compliance** (`lifecycle.js`). Its status ended every downstream list with "compliance contracts are not read — re-run \"generate compliance contracts\"", and its release printed the same advice. Both appeared on every project, including one without an institution pack, and named a skill the base does not ship. That broke *Compliance is isolated*; Alia's gates comment on GitHub carried the line.
+
+### Changed
+- **Phase 3 is the analysis** (`docs/WORKFLOW_GUIDE.md`, `CLAUDE.md`). Phase 3 is now the ten lenses, the plugin's recommended way to judge an architecture, with two new subsections: the analyzer in CI (`architecture-analysis.yml`) and the pictures of the analyses. "Phase 3 — Compliance" is gone. Compliance contracts are a short note under the analysis: an institution pack's, never a phase of the base.
+
 ## [11.7.3] - 2026-11-02
 
 ### Changed

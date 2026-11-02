@@ -614,7 +614,7 @@ function renderStatus(r) {
   if (r.unreleased && r.unreleased.length) o.push(`[Unreleased]: ${r.unreleased.length} line(s)`);
   if (r.note) o.push(`note: ${r.note}`);
   if (r.increments) { o.push(`delivery increments (${r.increments.file}):`); r.increments.list.forEach((x) => o.push(`  ${x.released_in ? `✓ v${x.released_in}` : '·      '} ${x.id}${x.target ? ` · ${x.target}` : ''} — ${x.use_cases.join(', ')} · ${x.containers} containers (${x.new_containers.length} new) · ${x.integrations} integrations (${x.new_integrations} new)${x.gaps.length ? ` · ${x.gaps.length} gap(s): ${x.gaps.map((g) => g.rule).join(', ')}` : ''}`)); if (r.increments.unassigned.use_cases.length) o.push(`  unassigned use cases: ${r.increments.unassigned.use_cases.join(', ')}`); if (r.increments.unassigned.containers.length) o.push(`  containers no increment needs: ${r.increments.unassigned.containers.join(', ')}`); r.increments.temporary.forEach((t) => o.push(`  temporary ${t.kind} ${t.name}: increments ${t.from || '?'}–${t.until || '?'}${t.tdr ? ` · ${t.tdr}` : ''} · ${t.live ? 'live' : 'retired'}`)); r.increments.temporary_gaps.forEach((g) => o.push(`  ✗ ${g.rule}: ${g.text}`)); }
-  if (r.downstream && r.downstream.length) { o.push('downstream:'); r.downstream.forEach((d) => o.push(`  ${d.stale ? '⚠ stale' : '✓      '} ${d.artifact} — ${d.file} ${d.version ? `v${d.version}` : d.built ? `built ${d.built}` : 'no version'}${d.stale ? ` → "${d.command}"` : ''}`)); o.push('  · compliance contracts are not read — re-run "generate compliance contracts" after a release'); }
+  if (r.downstream && r.downstream.length) { o.push('downstream:'); r.downstream.forEach((d) => o.push(`  ${d.stale ? '⚠ stale' : '✓      '} ${d.artifact} — ${d.file} ${d.version ? `v${d.version}` : d.built ? `built ${d.built}` : 'no version'}${d.stale ? ` → "${d.command}"` : ''}`)); }
   if (r.suggestions) { o.push(`PO implementation suggestions open (${r.suggestions.length}) — the architecture answers them; "update the PO spec" writes each answer:`); r.suggestions.forEach((x) => o.push(`  · ${x.id} ${x.suggestion.slice(0, 90)}${x.need ? ` — need: ${x.need.slice(0, 60)}` : ''}`)); }
   o.push(`next: ${r.next}`);
   return o.join('\n');
@@ -647,7 +647,6 @@ function renderApply(r) {
   r.waived.forEach((w) => o.push(`  waived ${w.gate}: ${w.reason}`));
   r.notes.forEach((n) => o.push(`  note: ${n}`));
   if (r.downstream && r.downstream.length) { o.push('  now stale:'); r.downstream.forEach((d) => o.push(`    ${d.artifact} (${d.file}) → "${d.command}"`)); }
-  o.push('  compliance contracts: re-run "generate compliance contracts" against the release');
   return o.join('\n');
 }
 

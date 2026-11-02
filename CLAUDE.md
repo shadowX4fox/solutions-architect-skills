@@ -210,7 +210,7 @@ Detailed per-skill documentation lives in each `skills/<skill-name>/SKILL.md` �
 1. **Business Requirements** (PO) → `architecture-readiness` → PO Spec
    - **1.5 Capability Alignment Gate** (Architecture Governance) → `architecture-capability-alignment` → the declared framework's report (`BIAN_ALIGNMENT.md` for BIAN, `CAPABILITY_ALIGNMENT.md` otherwise) — mandatory before Phase 2 Workflow 1 once a framework is declared
 2. **Technical Architecture** (Architecture Team) → `architecture-docs` → ARCHITECTURE.md
-3. **Compliance Documentation** (Compliance Team) → the compliance plugin an institution pack installs, when the organization has one
+3. **Architecture Analysis** (Architecture Team; CI on every pull request) → `architecture-analysis` → the ten lenses' reports in `analysis/` — the plugin's recommended judgement of an architecture; `architecture-analysis.yml` re-runs the lenses a change impacts and decides its merge. Compliance contracts, when an organization has them, come with its institution pack and are not a phase of the base
 4. **Development Handoff** (Dev Team) → `architecture-dev-handoff` → per-component handoffs + assets
    - **Architecture Index** (CI, after each release) → `architecture-index-export` → the `sa-index/1` bundle an MCP server serves to developers' IDEs: search at the tag, build packs once the regenerated kit is committed
 
