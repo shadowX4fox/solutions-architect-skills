@@ -267,6 +267,26 @@ its pull request. With `SA_HANDOFF_AUTOMERGE=true` the workflow merges it when t
 still state but the kit dropped or moved. It then dispatches `architecture-index.yml`, because a merge made with
 `GITHUB_TOKEN` starts no push workflow. If a gate blocks, the pull request stays open with a comment that says why.
 
+**A Tier 0 write is analysed before it merges** (11.7.0). With `architecture-analysis.yml` in the architecture repository,
+`architecture-tier0.yml` does not merge its pull request itself: it labels it `analysis-automerge` and dispatches the
+analysis workflow. That workflow re-runs the analyses the write impacts (`analysis-impact.js`: only the lenses the
+architecture already analyses) and commits their reports, with the ones they replace moved to `analysis/archive/`, to the
+pull request's branch. Then:
+
+| The analyses | What happens |
+|---|---|
+| Keep the state — no critical or high finding new or raised (`analysis-diff.js`) | Merged there; the issue closed, the draft index dispatched |
+| Move it | The status `architecture-analysis` stays pending, `analysis-held`, Alia names what rose; the architect labels it `analysis-accepted`, then it merges |
+| Did not finish | The status fails; nothing merges |
+
+A person's pull request runs the same analyses and carries the reports, but the architect merges it. Make
+`architecture-analysis` a required status check of the default branch.
+
+Alia's comment opens on a picture of the verdict (`analysis-chart.js`): each re-run lens before → after by severity, the
+verdict, and every finding that is new or rose. It is committed with the reports as `analysis/evidence/pr-<n>.png`, and
+the previous pull request's picture moves to `analysis/archive/evidence/`. The same script answers a chat's request for a
+picture of the analyses (`docs/ALIA.md` § In the transcript).
+
 **The service side** ships with the plugin under `architecture-index-export/ci/service/`:
 
 - `architecture-index.yml` dispatches `architecture-released` to every repository in `SA_SERVICE_REPOS`, using
@@ -427,7 +447,7 @@ pinned to GitHub Actions. If the App's token cannot be made (no App, not install
 | What | Where |
 |---|---|
 | `"support": "run"` and a first release | `.sa-skills/project.json`, `release my architecture` |
-| The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
+| The workflows | `skills/architecture-lifecycle/ci/`: `architecture-gates.yml`, `architecture-release.yml`, `architecture-handoff.yml`, `architecture-analysis.yml` and `architecture-tier0.yml`, copied to `.github/workflows/` |
 | Secret | `CLAUDE_CODE_OAUTH_TOKEN` (`/install-github-app`) |
 | Variables | `SA_TIER0_AUTOMERGE=true` to merge Tier 0 writes without a reviewer; `SA_TIER0_AGENTS`, the automation accounts (comma- or space-separated) that may file a request but never apply `architecture-tier0`; `SA_TIER0_TRUSTED_AGENTS`, `SA_TIER0_AUTO_DAILY` and `SA_TIER0_WAIT_DAYS` for agents whose requests the repository keys, `SA_HANDOFF_AUTOMERGE=true` to merge the regenerated kit without a reviewer, `SA_SERVICE_REPOS` (with the secret `SA_DISPATCH_TOKEN`) for the service builds (§ Fully unattended) |
 | Labels | `architecture-tier0`, `tier0-refused`, `tier0-auto`, `tier0-waiting` and the four `tier0:<kind>` (`tdr-workaround`, `tdr-status`, `adr-proposed`, `doc-fix`) — required: without `architecture-tier0` nobody can apply a request; for escalations `architecture-escalation`, `tier-1`, `tier-2` and `trigger:<id>`. `gh issue create --label` fails outright on a missing label: `escalate.js issue --create` and the IDE agent (`BUILD.md` rules 9 and 10) file the issue again without the labels refused — the `[ESC-…]` / `[T0-?]` title still identifies it, and the Kind row carries a request's kind — and name the missing labels beside the issue. `escalate.js labels <project> --create` creates all eighteen |

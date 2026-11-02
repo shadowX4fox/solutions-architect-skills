@@ -357,6 +357,9 @@ function labelSet() {
     { name: 'tier0-auto', color: LABEL_COLOR.auto, description: 'Keyed for a trusted agent (SA_TIER0_TRUSTED_AGENTS): no person read it before the write' },
     { name: 'tier0-waiting', color: LABEL_COLOR.waiting, description: 'Tier 0 request waiting for its service pull request to merge — re-checked every 30 minutes' },
     ...TIER0.map((k) => ({ name: `tier0:${k}`, color: LABEL_COLOR.kind, description: TIER0_WHAT[k] || `Tier 0 request: ${k}` })),
+    { name: 'analysis-held', color: LABEL_COLOR.trigger, description: 'Architecture analysis: a critical or high finding is new or raised — waits for the architect' },
+    { name: 'analysis-accepted', color: LABEL_COLOR.key, description: 'The architect accepts the new state of the analyses (a person with write access)' },
+    { name: 'analysis-automerge', color: LABEL_COLOR.auto, description: 'An automatic pull request: merged by architecture-analysis.yml when the analyses keep the state' },
   ];
 }
 async function hostLabels(r) {

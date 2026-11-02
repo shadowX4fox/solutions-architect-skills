@@ -93,6 +93,22 @@ const T = {
   t0_not_merged_off: { en: 'Not merged automatically: SA_TIER0_AUTOMERGE is not true. A member of the team merges it, then runs *Architecture index* with draft=true so the IDE sees it before the next release.',
     es: 'No se fusionó automáticamente: SA_TIER0_AUTOMERGE no es true. Un miembro del equipo lo fusiona y luego ejecuta *Architecture index* con draft=true para que el IDE lo vea antes de la próxima release.' },
 
+
+  // architecture-analysis.yml (11.7.0)
+  analysis_commit: { en: 'analysis: {lenses} for #{n}', es: 'analysis: {lenses} para #{n}' },
+  analysis_heading: { en: 'Architecture analysis', es: 'Análisis de la arquitectura' },
+  analysis_none: { en: 'No analysis of this architecture reads what this pull request changes: nothing to run.', es: 'Ningún análisis de esta arquitectura lee lo que cambia este pull request: no hay nada que correr.' },
+  analysis_skipped: { en: 'Impacted, but never analysed here (no report under `analysis/`): {lenses}. Running them is the architect\'s call.', es: 'Impactados, pero nunca analizados aquí (sin reporte en `analysis/`): {lenses}. Correrlos lo decide el arquitecto.' },
+  analysis_ran: { en: 'Re-run for this change: **{lenses}**. The new reports are committed to this branch and the ones they replace moved to `analysis/archive/`; they merge with it.',
+    es: 'Se volvieron a correr para este cambio: **{lenses}**. Los reportes nuevos están commiteados en esta rama y los que reemplazan se movieron a `analysis/archive/`; se fusionan con él.' },
+  analysis_held: { en: 'Waiting for the architect: the status `architecture-analysis` stays pending. Label this pull request `analysis-accepted` to accept the new state{merge}.',
+    es: 'Espera al arquitecto: el estado `architecture-analysis` queda pendiente. Pon la etiqueta `analysis-accepted` a este pull request para aceptar el nuevo estado{merge}.' },
+  analysis_held_merge: { en: ' — it then merges on its own', es: '; después se fusiona solo' },
+  analysis_accepted: { en: 'Accepted by @{who}: the new state of the analyses is the architect\'s.', es: 'Aceptado por @{who}: el nuevo estado de los análisis es decisión del arquitecto.' },
+  analysis_accept_refused: { en: '`analysis-accepted` taken off: @{who} cannot write to this repository.', es: 'Se quitó `analysis-accepted`: @{who} no puede escribir en este repositorio.' },
+  analysis_merged: { en: 'Merged: the state of the analyses was kept.', es: 'Fusionado: los análisis mantuvieron el estado.' },
+  analysis_failed: { en: 'The analyses did not finish — the run\'s log and Claude\'s transcript (an artifact of the run) say why. Nothing merges until they do.',
+    es: 'Los análisis no terminaron; el registro del run y la transcripción de Claude (un artefacto del run) dicen por qué. No se fusiona nada hasta que terminen.' },
 };
 
 // Alia's codec on what the CI says (11.3.0): her face in the mood's ring heading a comment, one size everywhere (64 px). The

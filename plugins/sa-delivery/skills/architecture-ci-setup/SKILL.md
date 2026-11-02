@@ -2,7 +2,7 @@
 name: architecture-ci-setup
 description: >
   Set up CI/CD for an architecture and connect the service (dev) repositories built from it: in
-  the architecture repository the six GitHub Actions workflows (gates, release, handoff, index,
+  the architecture repository the seven GitHub Actions workflows (gates, release, handoff, analysis, index,
   escalations, Tier 0) from the plugin's templates with the plugin's pin, the RUN-team policy, the labels and the
   repository's variables, secrets and settings; in a service repository the binding
   (.architecture.json), the architecture MCP server for the IDE (.mcp.json) and, for an unattended

@@ -30,6 +30,7 @@ const FILES: Record<string, { text: string; mtimeMs: number }> = {
   '/p/.cache/sa-skills/judge/old.worksheet.md': { text: '### id-0\n', mtimeMs: NOW - 30 * 24 * H },   // abandoned: not a step
   '/sa/scripts/shared/findings.js': { text: '', mtimeMs: 0 },
   '/p/visualizations/architecture-command-center.html': { text: '<html>', mtimeMs: NOW - 2 * H },   // the video is not made yet
+  '/p/.cache/sa-skills/analysis/analysis-chart.svg': { text: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>', mtimeMs: NOW },
 }
 const STATUS = { state: 'changed', version: '7.1.0', declared_status: 'Released', released: '2026-10-01', git: true,
   tag: { name: 'architecture-v7.1.0', local: true, remote: false }, recommended: 'minor', unreleased: ['uno', 'dos'],
@@ -206,6 +207,18 @@ describe('sa-alia, end to end on every surface', () => {
       expect((await run('video')).text).toMatch(/Aún no existe visualizations\/architecture-video\.mp4/)
       expect(box.text).toBe('architecture video')
       expect(box.launched.length).toBe(1)
+    })
+
+    test(`${surface}: the analyses' chart is drawn under its row where the surface draws vector pictures — the CI's picture, natively`, async ($, on) => {
+      engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const row = { tool_use_id: 'c1', tool: 'Bash', input: { command: 'bun /x/solutions-architect-skills/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-chart.js /p' },
+        isRunning: false, isErrored: false, isInterrupted: false, output: { stdout: '/p/.cache/sa-skills/analysis/analysis-chart.png\n', stderr: '' } }
+      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'ToolUse', props: row })
+      expect(await ui.find({ type: 'Text', text: 'Gráfica del análisis' })).toBeDefined()
+      const pic = await ui.find({ type: 'Svg', props: { alt: 'Gráfica de los análisis de la arquitectura' } } as never)
+      if (surface === 'terminal') expect(pic).toBeUndefined(); else expect(pic).toBeDefined()
+      await ui.unmount()
     })
 
     test(`${surface}: a suite script's row reads as what it said; its raw result folds; any other command is the engine's`, async ($, on) => {

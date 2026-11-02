@@ -95,7 +95,7 @@ describe("ci-setup.js architecture", () => {
     expect(s["variable SA_TIER0_TRUSTED_AGENTS"]).toBe("✗");
     expect(s["secret SA_DISPATCH_TOKEN"]).toBe("✗");
     expect(s["setting"]).toBe("✗");
-    expect(r.rows.find((x: any) => x.item.startsWith("labels")).item).toMatch(/^labels — 17 of 18 missing: architecture-escalation/);
+    expect(r.rows.find((x: any) => x.item.startsWith("labels")).item).toMatch(/^labels — 20 of 21 missing: architecture-escalation/);
   });
 
   test("no GitHub origin: said, and nothing read from gh", () => {

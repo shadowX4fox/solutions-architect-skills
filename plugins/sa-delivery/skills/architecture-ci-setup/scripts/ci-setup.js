@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // CI/CD for an architecture and the service repositories built from it, by code (10.13.0). Two sides:
 //
-//   architecture  the architecture repository — the six workflows (gates, release, handoff, index, escalations, Tier 0 on a
+//   architecture  the architecture repository — the seven workflows (gates, release, handoff, analysis, index, escalations, Tier 0 on a
 //                 RUN team)
 //                 copied from the plugin's templates with the plugin's pin, the RUN-team policy, the labels, and the
 //                 repository's variables, secrets and settings read with gh
@@ -114,6 +114,8 @@ function architectureWorkflows(root, opts = {}) {
     render(path.join(life, 'architecture-gates.yml'), 'architecture-gates.yml'),
     render(path.join(life, 'architecture-release.yml'), 'architecture-release.yml', (t) => (runner ? t.replace('runs-on: [self-hosted, sa-index]', `runs-on: ${runner}`) : t)),
     render(path.join(life, 'architecture-handoff.yml'), 'architecture-handoff.yml'),
+    // the analyses a change impacts, re-run on its pull request; an automatic one merges only when they keep the state (11.7.0)
+    render(path.join(life, 'architecture-analysis.yml'), 'architecture-analysis.yml'),
     // phase 1 is the release workflow's index job: the index workflow keeps phase 2 and the manual publish, no tag trigger
     render(path.join(idx, 'github-actions.yml'), 'architecture-index.yml', (t) => {
       t = t.replace(/^    tags: \['architecture-v\*'\].*\n/m, '');

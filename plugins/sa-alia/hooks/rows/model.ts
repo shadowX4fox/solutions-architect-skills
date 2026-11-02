@@ -18,7 +18,7 @@ const NAMES: Record<string, [string, string]> = {
   'label-check.js': ['Connection label check', 'Revisión de etiquetas'], 'judge.js': ['Judge', 'Juez'],
   'arch-facts.js': ['Facts ledger', 'Ledger de hechos'], 'docs-stats.js': ['Size budgets', 'Presupuestos de tamaño'],
   'render-analysis.js': ['Analysis report', 'Reporte de análisis'], 'check-report.js': ['Report check', 'Revisión de reporte'],
-  'security-posture.js': ['Security posture', 'Postura de seguridad'], 'findings.js': ['Findings', 'Hallazgos'],
+  'security-posture.js': ['Security posture', 'Postura de seguridad'], 'analysis-chart.js': ['Analysis chart', 'Gráfica del análisis'], 'analysis-impact.js': ['Analysis impact', 'Impacto en los análisis'], 'analysis-diff.js': ['Analysis verdict', 'Veredicto de los análisis'], 'findings.js': ['Findings', 'Hallazgos'],
   'export-index.js': ['Index bundle', 'Bundle del índice'], 'publish-index.js': ['Index publish', 'Publicación del índice'],
   'review-check.js': ['Architecture review', 'Revisión de arquitectura'], 'adr-index.js': ['ADR index', 'Índice de ADR'],
   'adr-link.js': ['ADR links', 'Enlaces de ADR'], 'gates-check.js': ['Creation gates', 'Gates de creación'],
@@ -89,4 +89,12 @@ export function summarize(output: unknown, isErrored: boolean, isRunning: boolea
   const warnings = lines.filter((l) => WARNING.test(l)).length
   const failed = isErrored || /^(?:FAIL|BLOCKED)\b/i.test(verdict.trim()) || /:\s*FAIL\b/.test(verdict)
   return { state: failed ? 'fail' : warnings ? 'warn' : 'ok', line: clean(verdict).slice(0, 160), findings: failed ? findings : [], warnings }
+}
+
+/** The chart analysis-chart.js wrote: the .svg beside the file it printed last (a .png or the .svg itself), null otherwise. */
+export function chartOf(output: unknown): string | null {
+  const o = (output && typeof output === 'object' ? output : {}) as { stdout?: unknown }
+  const text = typeof output === 'string' ? output : String(o.stdout ?? '')
+  const last = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).pop() || ''
+  return /\.(png|svg)$/i.test(last) && !/\s/.test(last) ? last.replace(/\.png$/i, '.svg') : null
 }

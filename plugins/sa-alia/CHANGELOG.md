@@ -2,6 +2,13 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0]
+
+### Added
+
+- **The analyses' chart, natively.** When a session runs sa-analysis' `analysis-chart.js` (sa-skills 11.7.0), its row on a surface that draws vector pictures (the desktop app, the editor) carries the chart under it. It is the `.svg` the script writes beside its PNG: the same picture Alia's pull request comment opens on, drawn by the app. The terminal keeps the row alone; there the PNG is the picture.
+- **Readable rows for the analysis CI scripts:** `analysis-impact.js` («Impacto en los análisis») and `analysis-diff.js` («Veredicto de los análisis»).
+
 ## [1.2.0]
 
 ### Added

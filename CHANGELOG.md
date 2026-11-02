@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.7.0] - 2026-11-02
+
+### Added
+- **The architecture analyzer in CI** — `architecture-analysis.yml`, a new workflow for the architecture repository (`skills/architecture-lifecycle/ci/`), installed by `ci-setup.js architecture`:
+  - **Impact, by code** (`analysis-impact.js`). The facts ledger at the merge base is compared with the branch's, and each typed change (a container, an integration, a flow's phases, a technology, a section of docs/) is mapped to the lenses that read it. Only the lenses the architecture already analyses run.
+  - **The analyses.** Claude re-runs those lenses unattended. The new reports are committed to the pull request's branch and the ones they replace move to `analysis/archive/`, so the merge carries them.
+  - **The verdict, by code** (`analysis-diff.js`). Each lens's newest report is compared with the base's by the findings contract. A critical or high finding that is new or raised moves the state. Findings are paired by what they name; a pair the names leave open goes to the judge (`same-finding`), and an unconfirmed pair holds the merge.
+  - **The merge.** When the state is kept, the status `architecture-analysis` succeeds and an automatic pull request merges. When it moves, the pull request waits for the architect's `analysis-accepted` (`analysis-held`). A person's pull request is never merged by the workflow.
+- **Pictures of the analyses** (`analysis-chart.js`, Alia Guide look, PNG through headless Chrome over CDP and a lean SVG beside it):
+  - the state of every lens;
+  - the verdict against a base, which Alia's pull request comment opens on (`analysis/evidence/pr-<n>.png`, the previous one archived);
+  - one lens's own figure (`--lens`, `--focus`, `--view`): the heat maps, the blast radius graph, a flow's latency waterfall, capacity headroom with load / capacity, fan-in / fan-out, the cost Pareto or its mentions, the sensitive data flows and STRIDE's matrix.
+  
+  A chat's request for an image or chart of the analyses is one of these pictures. A figure the documents do not state is drawn as not documented, never invented.
+- **sa-alia 1.3.0**: the desktop app draws the analyses' picture natively under the script's row, and the analysis CI scripts read as rows.
+
+### Changed
+- **Tier 0 hands its merge to the analyses** (`architecture-tier0.yml`). With `architecture-analysis.yml` in the repository, a Tier 0 pull request is labelled `analysis-automerge` and the analysis workflow is dispatched; that workflow merges it, closes the issue and dispatches the draft index.
+- **Labels.** `escalate.js labels` adds `analysis-held`, `analysis-accepted` and `analysis-automerge`, 21 in all.
+
+### Upgrade
+- Run `/sa-delivery:architecture-ci-setup` in the architecture repository to add `architecture-analysis.yml`, then `escalate.js labels <project> --create`. Make `architecture-analysis` a required status check of the default branch.
+- `claude plugin update sa-alia@shadowx4fox-solution-architect-marketplace` for the native pictures.
+
 ## [11.6.1] - 2026-11-02
 
 ### Fixed

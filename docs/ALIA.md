@@ -500,6 +500,19 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
 - **Script rows read as their verdict.** A row that runs one of the suite's scripts shows what it is and what it said
   (`✦ Gate de principios ✓ LAYER1: PASS — 0 blocking finding(s)`), the warnings counted, a failure's first findings in
   view; ctrl+o shows the raw row.
+- **The analyses' pictures, natively** (sa-alia 1.3.0). Ask for an image or a chart of the analyses and the session runs
+  `analysis-chart.js`; on the desktop app its row carries the picture, drawn by the app from the SVG the script writes —
+  the same one Alia's pull request comment opens on. The terminal keeps the row and the session sends the PNG. Which
+  picture answers what:
+
+  | Ask | Picture |
+  |---|---|
+  | How the analyses stand | Every lens with its findings by severity |
+  | Did a change move the state | Each lens before → after, the verdict and what rose |
+  | One analysis — "the SPOF", "the capacity headroom" | That lens's figure: a heat map, the blast radius graph, a flow's latency waterfall, capacity headroom with load / capacity, fan-in / fan-out, the cost Pareto, the sensitive data flows, STRIDE's matrix |
+  | One element of it — "the blast radius of X", "the latency of flow 2" | The same figure focused on it |
+
+  A figure the documents do not state is drawn as not documented, never invented.
 - **Milestone cards.** When a turn releases the architecture, re-runs an analysis or regenerates the handoff kit, she
   places a card at that point: the version and its changelog entry, each lens's delta, the components whose
   specification moved.

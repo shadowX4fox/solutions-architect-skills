@@ -484,6 +484,48 @@ Next steps:
 
 ---
 
+## In CI — the analyses a pull request impacts (11.7.0)
+
+The architecture repository's `architecture-analysis.yml` (`skills/architecture-lifecycle/ci/`) runs this skill on a pull
+request, only for what the change impacts, and decides the merge by code:
+
+```bash
+bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-impact.js <project> --base <merge-base>
+bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-diff.js <project> --base <merge-base> --lenses spof,stride
+```
+
+- **`analysis-impact.js`** compares the facts ledger at the base with the branch's and maps each typed change to the
+  lenses that read it, using one fixed table (`IMPACT`). It runs only the lenses that already have a report under
+  `analysis/`; the rest are listed as skipped. A change of text alone runs none.
+- **`analysis-diff.js`** checks each lens's newest report against the base's, using the findings contract. A critical or
+  high finding that is new, or one raised to critical or high, means the state moved (exit 3); anything else keeps it
+  (exit 0). Findings are paired by what they name; a pair the names leave open goes to the judge (`same-finding`, the
+  `agent` worksheet). An unconfirmed pair stays apart and holds the merge, and a lens that produced no report also holds
+  it. `--md` writes the pull request comment.
+
+**Pictures of the analyses are one script** — `analysis-chart.js`, in the Alia Guide look (her codec in the mood of the
+outcome), from the reports on disk by code. Any request for an image, a chart, a graph or a diagram of the analyses is
+one of its pictures — never one drawn by hand or with another library. Which one, by what is asked:
+
+| Asked | Run | Draws |
+|---|---|---|
+| how the analyses stand · the risk overall | `analysis-chart.js <project>` | every lens analysed here, its findings by severity |
+| whether a change moved the state · a verdict against before | `analysis-chart.js <project> --base <ref> --lenses …` | each lens before → after, the verdict, what rose — Alia's pull request comment opens on it |
+| one analysis — "the SPOF", "STRIDE's heat map" | `analysis-chart.js <project> --lens <lens>` | that lens's own figure: the heat map (SPOF, STRIDE, Vendor Lock-in, Tech Debt), the blast radius graph, a flow's latency waterfall, capacity headroom (Bottleneck), fan-in / fan-out (Coupling), the Pareto or the cost mentions (Cost Hotspots), the sensitive data flows (Data Sensitivity) |
+| one element of it — "the blast radius of X", "the latency of flow 2", "what touches I-02" | `… --lens <lens> --focus <component · flow · finding id>` | the figure centred on it (the rest dimmed) |
+
+| another figure of the same lens — "STRIDE as a matrix", "data sensitivity's heat map" | `… --view <figure>` | STRIDE: `heatmap` (default) · `matrix`; Data Sensitivity: `flows` (default) · `heatmap` |
+
+A figure whose numbers the documents do not state draws them as not documented (a dashed bar, the cost mentions instead
+of a Pareto) — never an invented value. How it reaches the person:
+
+- run the script; on the desktop app sa-alia draws the `.svg` it writes beside the PNG under the script's row, natively;
+- in the terminal, or when the person follows from another device, send the PNG.
+
+Run here unattended, the skill takes Markdown and asks nothing, and leaves the reports uncommitted; the workflow archives
+the old reports, commits the new ones to the branch and sets the `architecture-analysis` status. Tests:
+`tests/analysis-ci.test.ts`.
+
 ## Design Language Standard (conditional)
 
 The SA Design Language Standard (`[design_language_dir]/`) is organization-specific; this skill tests for it and degrades gracefully when it is absent. Three analysis surfaces consume it when present — the wiring lives in the analysis specs, which the analysis agent reads:
