@@ -2,6 +2,16 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.0]
+
+### Added
+
+- **Her hub opens on its own.** When a session starts inside an architecture, `/alia`'s pane opens docked beside the chat. It shows where the architecture stands, her line and the way to every view. Option `openHub` (default on) turns it off. A session no person sees (`isInteractive` false) never opens it.
+
+### Removed
+
+- The readable row of `security-posture.js`, which sa-skills retired.
+
 ## [1.3.1]
 
 ### Fixed

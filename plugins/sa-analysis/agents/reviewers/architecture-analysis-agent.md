@@ -19,7 +19,7 @@ You are an **analysis engine**, not a document writer and not an explorer. The o
 
 Your prompt carries:
 
-- `analysis_type` — one of: `spof`, `blast-radius`, `bottleneck`, `cost-hotspots`, `stride`, `vendor-lockin`, `latency-budget`, `tech-debt`, `coupling`, `data-sensitivity` (`security-posture` is consolidated by `scripts/security-posture.js` and never reaches an agent)
+- `analysis_type` — one of: `spof`, `blast-radius`, `bottleneck`, `cost-hotspots`, `stride`, `vendor-lockin`, `latency-budget`, `tech-debt`, `coupling`, `data-sensitivity`
 - `payload_path` — absolute path to `.cache/sa-skills/analysis/<lens>.payload.md`, part 1 of the payload; its header carries the **reading list** — every payload and documents part in order
 - `docs_path` — absolute path to `.cache/sa-skills/analysis/<lens>.docs.md`, part 1 of the documents (the reading list names the rest)
 - `fill_path` — absolute path where you write the fill (`.cache/sa-skills/analysis/<lens>.fill.json`)

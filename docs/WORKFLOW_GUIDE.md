@@ -334,7 +334,6 @@ Say `run architecture analysis` (or a lens by name, or `all analyses`). Pick len
 | Tech Debt / EOL | Technology currency, deprecated SDKs | `analysis/TECH-DEBT-<date>.md` |
 | Coupling | Fan-in, fan-out, instability, cycles | `analysis/COUPLING-<date>.md` |
 | Data Sensitivity | Personal-data flows, encryption and retention gaps | `analysis/DATA-SENSITIVITY-<date>.md` |
-| Security Posture | One checklist merging STRIDE and Data Sensitivity | Markdown only |
 
 Code computes the dependency graph, latency sums and load model; the model classifies; `check-report.js` holds every
 report to the findings contract. Each finding has an id (`C1`, `B1`, `T1-S`, `OB-01` …), a mitigation column and a
@@ -494,7 +493,7 @@ Typing one of these starts the matching skill directly. Slash names work too (`/
 | `release my architecture` · `/release-architecture` · `architecture status` · `release readiness` · `recover architecture tag` · `deprecate architecture` | `architecture-lifecycle` | Versioning and release |
 | `create ADR` · `update ADR status` · `supersede ADR` · `list ADRs` · `compact ADRs` · `import institutional ADRs` · `sync institutional ADRs` | `architecture-definition-record` | ADRs |
 | `record technical debt` · `update TDR status` · `list TDRs` · `check TDRs` | `technical-debt-records` | TDRs |
-| `run architecture analysis` · `SPOF analysis` · `STRIDE threat model` · `security posture` · `all analyses` | `architecture-analysis` | Risk analyses |
+| `run architecture analysis` · `SPOF analysis` · `STRIDE threat model` · `all analyses` | `architecture-analysis` | Risk analyses |
 | `check requirements coverage` · `traceability report` · `PO spec coverage` | `architecture-traceability` | `TRACEABILITY_REPORT.md` |
 | `generate dev handoff` · `component handoff for <X>` · `interface contracts` | `architecture-dev-handoff` | The handoff kit |
 | `export architecture to Word` · `export handoff to Word` · `stakeholder briefing` | `architecture-docs-export` | `.docx` files |

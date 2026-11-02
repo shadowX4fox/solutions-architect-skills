@@ -3,10 +3,9 @@ name: architecture-analysis
 description: >
   Run risk and design-characteristics analyses over an existing architecture: "run architecture
   analysis", "SPOF analysis", "blast radius analysis", "STRIDE threat model", "cost hotspot
-  analysis", "tech debt analysis", "security posture", "all analyses". Ten lenses — SPOF, Blast
+  analysis", "tech debt analysis", "all analyses". Ten lenses — SPOF, Blast
   Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL,
-  Coupling, Data Sensitivity — one, a group or all ten, plus a Security Posture checklist that
-  merges STRIDE and Data Sensitivity. Writes dated reports under analysis/ (Markdown or
+  Coupling, Data Sensitivity — one, a group or all ten. Writes dated reports under analysis/ (Markdown or
   interactive HTML). Requires ARCHITECTURE.md. Not for compliance contracts
   (architecture-compliance) or ADRs (architecture-definition-record).
 triggers:
@@ -16,8 +15,6 @@ triggers:
   - STRIDE threat model
   - cost hotspot analysis
   - tech debt analysis
-  - security posture
-  - security posture validation
   - all analyses
 ---
 
@@ -109,18 +106,16 @@ enum values, table column headers, filenames, marker names, `EXPLORER_HEADER` fi
 | `analyses/TECH_DEBT.md` | Classification rules and report spec for Tech Debt / EOL analysis |
 | `analyses/COUPLING.md` | Classification rules and report spec for Coupling / Fan-out analysis |
 | `analyses/DATA_SENSITIVITY.md` | Classification rules and report spec for Data Sensitivity & Flow analysis |
-| `analyses/SECURITY_POSTURE.md` | Consolidation spec — merges the STRIDE + Data Sensitivity reports into a reviewer-fillable Security Posture validation checklist (markdown-only) |
 | `templates/analysis-report-skeleton.md` | Shared section structure for all Markdown analysis reports |
 | `templates/analysis-report-html-skeleton.html` | Shared HTML shell (d3.js v7 + d3-sankey, corporate styling) for the HTML output mode |
 | `templates/viz/<analysis_type>.html` | One self-contained d3 viz snippet per analysis type (10 files); inlined into the HTML shell at render time |
 | `analyses/plans/<lens>.json` | The **shape** of each lens's report — sections in order, anchors, titles in both languages, columns as the spec spells them, id schemes, heat-map axes, charts; `plans/README.md` is the plan and fill contract |
 | `scripts/analysis-prepare.js` | Step 2.5 — cuts one payload per lens (plan, spec, ledger facts, computed graph / latency / deployment / load-model metrics, prior findings, explorer excerpts) plus the documents bundle; the explorer vocabulary lives here |
 | `scripts/render-analysis.js` | The agent's fill × the plan → the report (Markdown or HTML with the d3 viz), the SPOF cross-references joined into Blast Radius, then `check-report.js` on the result |
-| `scripts/security-posture.js` | Step 3.5 — the Security Posture checklist consolidated from the STRIDE and Data Sensitivity reports by code |
 | `scripts/findings.js` | The **findings contract** as code — the one parser of every findings table (Markdown) and `const data` literal (HTML): id grammar, per-lens id schemes, the naming-column rule, the severity registries. The command center's `dossier.js` reads reports through this module, so what the check accepts is what Alia reads |
 | `scripts/check-report.js` | `bun <skill_dir>/scripts/check-report.js analysis/` — verifies every report against the contract (§ Finding IDs); exit 1 on a violation. Run by the agent on its own report (Phase 6.5) and by Step 4 over the run |
 | `tests/findings.test.ts` | The contract's tests — every lens's table shapes accepted, every violation named |
-| `tests/render-analysis.test.ts` · `tests/security-posture.test.ts` | Every plan × a synthetic fill renders and passes the contract (Markdown, HTML, both languages); the consolidation's rows, missing-source rule and language |
+| `tests/render-analysis.test.ts` | Every plan × a synthetic fill renders and passes the contract (Markdown, HTML, both languages); the consolidation's rows, missing-source rule and language |
 
 ---
 
@@ -202,27 +197,16 @@ Architecture Analysis — choose analyses to run:
 
   11. All ten (parallel)                                  10 agents
 
-  Consolidated (security):
-  12. Security Posture (validation checklist)             1 agent
-      Merges STRIDE (5) + Data Sensitivity (10) into one reviewer-fillable
-      checklist of every security control to validate. Markdown-only.
-      Requires the STRIDE and Data Sensitivity reports — runs them first if absent.
-
 ═══════════════════════════════════════════════════════════
-Selection (e.g. "1", "1,3,5", "6-10", "12", or "all"):
+Selection (e.g. "1", "1,3,5", "6-10", or "all"):
 ```
 
 **Parse user selection:**
 - `all` or `11` → run analyses 1–10
 - `1-5` → run only the HIGH-priority group (analyses 1–5)
 - `6-10` → run only the Strategic group (analyses 6–10)
-- `12` → run the **Security Posture** consolidation (see Step 2.6 — it depends on analyses 5 and 10)
 - Comma-separated numbers → run only those analyses
 - Single number → run one analysis
-
-**Security Posture dependency**: whenever `12` is in the selection, analyses **5 (STRIDE)**
-and **10 (Data Sensitivity)** must have produced reports first. See Step 2.6 for how the
-orchestrator satisfies this (consume existing reports, or schedule 5 + 10 ahead of 12).
 
 ---
 
@@ -248,7 +232,7 @@ Selection (1 or 2):
 ```
 
 **One report per lens**: `analysis/` holds the newest report of each lens and nothing else. When a report
-passes its check, `render-analysis.js` (and `security-posture.js` for the checklist) moves every earlier report of that
+passes its check, `render-analysis.js` moves every earlier report of that
 lens — any date on or before it, either format — to `analysis/archive/`, and prints what it moved. Never delete or move
 a report by hand; `bun [sa_skills_dir]/scripts/shared/findings.js analysis --archive` tidies a folder that holds several reports of one lens.
 
@@ -257,36 +241,6 @@ a report by hand; `bun [sa_skills_dir]/scripts/shared/findings.js analysis --arc
 - `2` or `html` → `output_format = "html"`
 
 Store `output_format` for use in Step 3 agent prompts. If anything else is entered, re-prompt.
-
-**Security Posture is markdown-only**: analysis 12 has no HTML/d3 viz mode (it is a
-worksheet, not a visualization). If the user selected `12` *and* chose HTML, run analysis 12
-in markdown regardless and tell the user: "Security Posture is a validation checklist —
-exported as markdown; the HTML format applies to the other selected analyses." Any
-non-consolidation analyses in the same run still honor the chosen format.
-
----
-
-## Step 2.6 — Security Posture dependency resolution (only when analysis 12 is selected)
-
-Security Posture (`security-posture`) is a **consolidation** — it reads the `STRIDE` and
-`Data Sensitivity` reports rather than the architecture docs. Before dispatching it:
-
-1. **Locate the source reports** — glob `analysis/STRIDE-*.md` and
-   `analysis/DATA-SENSITIVITY-*.md`; pick the most recent date for each.
-2. **Satisfy missing sources**:
-   - If the user also selected 5 and/or 10 in this run, let those run first (Step 3 dispatches
-     every non-consolidation analysis, Step 3.5 consolidates after they return); use their fresh
-     outputs.
-   - If a source report is **not** selected and **not** found on disk, **add that analysis to
-     this run** (STRIDE and/or Data Sensitivity, markdown) so it executes ahead of 12, and
-     tell the user: "Security Posture requires the <STRIDE|Data Sensitivity> report — running
-     it first."
-   - If a source report is **not** selected but **already exists** on disk (any prior date),
-     consume the most recent on-disk file as-is (do not re-run it).
-3. **Record the resolved source paths** for the Step 3 dispatch of analysis 12.
-
-Security Posture runs **last and by code** — Step 3.5, after STRIDE and Data Sensitivity have
-written their reports in this run (or after confirming the on-disk files exist).
 
 ---
 
@@ -310,8 +264,7 @@ documents the plan names, whole) and `<lens>.facts.json`; and `_run.json`, the m
 one line per lens — payload and document bytes, the explorer's status — and the inputs it could
 not find (no scene: no deployment inventory and no load model; the analysis still runs).
 
-The lens vocabulary the explorer takes lives in the script (`VOCAB`), not here. **Exclude
-`security-posture`**: it is consolidated by code in Step 3.5 and has no payload.
+The lens vocabulary the explorer takes lives in the script (`VOCAB`), not here.
 
 **Degraded mode**: the script exits non-zero only when `ARCHITECTURE.md` is missing (Step 1 caught
 that). A lens whose explorer call failed still gets its payload with `_explorer FAILED_` in the
@@ -321,7 +274,7 @@ excerpts section; the documents bundle carries what the judgement needs.
 
 ## Step 3 — Spawn Analysis Agents (Parallel)
 
-For each selected lens (never `security-posture`), read its entry in
+For each selected lens, read its entry in
 `.cache/sa-skills/analysis/_run.json` (`payload`, `docs`, `fill`, `output`) and dispatch:
 
 ```
@@ -357,7 +310,6 @@ Set each `description` to `"<Analysis Name> analysis"`.
 | Tech Debt / EOL | `tech-debt` | `TECH-DEBT-<date>.md` |
 | Coupling | `coupling` | `COUPLING-<date>.md` |
 | Data Sensitivity | `data-sensitivity` | `DATA-SENSITIVITY-<date>.md` |
-| Security Posture | — (Step 3.5, code) | `SECURITY-POSTURE-<date>.md` (markdown-only) |
 
 **Model per lens**: the agent's frontmatter pins `opus`; pass `model: sonnet` in the `Task()` call
 for the inventory-heavy lenses — `vendor-lockin`, `tech-debt`, `cost-hotspots`, `coupling`,
@@ -392,24 +344,6 @@ file, so the pass is idempotent — a row already carrying `(SPOF …)` is left 
 prints (`… · <n> SPOF cross-reference(s) from analysis/SPOF-<date>.md`) is the receipt; `0` with
 both reports present is a naming mismatch to report, not a failure. Skip the step when either lens
 was not part of this run — Blast Radius already joined against whatever SPOF report was on disk.
-
----
-
-## Step 3.5 — Security Posture (code, only when analysis 12 is selected)
-
-After every agent has returned (Step 2.6 resolved the sources), run:
-
-```bash
-bun [plugin_dir]/skills/architecture-analysis/scripts/security-posture.js <project_root> --today <YYYY-MM-DD>
-```
-
-It reads the newest `analysis/STRIDE-*.md` and `analysis/DATA-SENSITIVITY-*.md`, turns every
-matrix cell and every required control of the S1 / S2 stores into a checklist row per
-`analyses/SECURITY_POSTURE.md`, reuses the source reports' recommendation prose for the
-priorities, carries their gaps forward, leaves `Status` / `Owner` / `Evidence` empty for the
-reviewer, and writes `analysis/SECURITY-POSTURE-<date>.md` in the architecture's language. One
-source missing: the other is consolidated and the gap recorded; both missing: it aborts with the
-message to run analyses 5 and 10 first. No agent is involved — the spec is a merge.
 
 ---
 
@@ -451,9 +385,6 @@ The script prints one line per report — `✓ analysis/BOTTLENECK-<date>.md: 11
   analysis/TECH-DEBT-2026-04-16.<ext>         <n> EOL-now · <n> EOL-within-6mo · <n> deprecated SDKs
   analysis/COUPLING-2026-04-16.<ext>          <n> critical hubs · <n> god objects · <n> cycles
   analysis/DATA-SENSITIVITY-2026-04-16.<ext>  <n> G1 encryption gaps · <n> G3 retention breaches
-
-  Consolidated (when analysis 12 was selected):
-  analysis/SECURITY-POSTURE-2026-04-16.md     <n> checks · <n> documented · <n> gaps (<n> high)
 
 ═══════════════════════════════════════════════════════════
 Next steps:
@@ -599,7 +530,7 @@ The dossier reads a report with `scripts/findings.js`, and `scripts/check-report
 | An HTML report embeds one `const data = { … };` literal (agent Step 5b.1) whose arrays of objects carry a label — `label`, `name`, `component` or `technology` | That literal is the only findings surface of an HTML report |
 | The filename is `<LENS>-<YYYY-MM-DD>.md|html` with the lens slug of the table above | The lens picks the id scheme and the registry |
 
-Spec table shapes already satisfy every rule; the check catches the report that drifted from its spec. `SECURITY-POSTURE-*` is a consolidation checklist with no findings tables and is skipped by design.
+Spec table shapes already satisfy every rule; the check catches the report that drifted from its spec. A `SECURITY-POSTURE-*` report an earlier version wrote (a consolidation checklist with no findings tables, retired in 11.7.5) is skipped.
 
 ---
 
@@ -618,8 +549,7 @@ analysis/
 ├── LATENCY-BUDGET-2026-04-16.md
 ├── TECH-DEBT-2026-04-16.md
 ├── COUPLING-2026-04-16.md
-├── DATA-SENSITIVITY-2026-04-16.md
-└── SECURITY-POSTURE-2026-04-16.md   (consolidation of STRIDE + Data Sensitivity — markdown-only)
+└── DATA-SENSITIVITY-2026-04-16.md
 ```
 
 ### HTML format notes
@@ -655,6 +585,6 @@ Add to your project's `.claude/settings.json`:
 "WebSearch"
 ```
 
-`Bash(bun *)` runs `analysis-prepare.js` (Step 2.5), `render-analysis.js` (the agent's Phase 3), `security-posture.js` (Step 3.5) and `check-report.js` (Step 4).
+`Bash(bun *)` runs `analysis-prepare.js` (Step 2.5), `render-analysis.js` (the agent's Phase 3) and `check-report.js` (Step 4).
 
 **`WebSearch` is required for the Tech Debt / EOL analysis.** The agent uses it to validate documented EOL dates against vendor product-lifecycle pages (`endoflife.date`, `learn.microsoft.com/lifecycle`, `nodejs.org`, etc.) — see `analyses/TECH_DEBT.md` § "EOL Validation Protocol". Other analyses (SPOF, Blast Radius, Bottleneck, Cost, STRIDE, Vendor Lock-in, Latency Budget, Coupling, Data Sensitivity) do not call WebSearch. If `WebSearch` is omitted, the Tech Debt analysis still completes but produces a `WebSearch unavailable` notice and may report stale EOL data.

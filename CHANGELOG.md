@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.0] - 2026-11-02
+
+### Removed
+- **The Security Posture checklist** (`architecture-analysis` option 12, the phrases `security posture` and `security posture validation`, `scripts/security-posture.js`, `analyses/SECURITY_POSTURE.md`). The ten lenses are the analysis: STRIDE and Data Sensitivity carry the security findings themselves, and the analyzer in CI re-runs them when a change touches them. A `SECURITY-POSTURE-*.md` report an earlier version wrote stays where it is and is skipped by the findings contract, never an error.
+
+### Added
+- **sa-alia 1.4.0**: her hub opens docked beside the chat when a session starts inside an architecture (option `openHub`, default on).
+
 ## [11.7.4] - 2026-11-02
 
 ### Fixed

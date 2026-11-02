@@ -536,6 +536,7 @@ They ask exactly when they ask today and decide exactly what they decide:
 
 | Option | Default | What it does |
 |---|---|---|
+| `openHub` | on | Her hub (`/alia`) opens docked beside the chat when a session starts inside an architecture |
 | `replyCodec` | on | Every reply beside her mark |
 | `voice` | on | Her words on the spinner and the turn's closing line |
 | `notifyAfterMinutes` | 3 | A notification after a turn this long; 0 turns it off |

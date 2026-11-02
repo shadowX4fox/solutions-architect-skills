@@ -154,7 +154,7 @@ SPOF analysis
 ```
 
 **What happens:** `architecture-analysis` offers ten lenses — SPOF, Blast Radius, Bottleneck, Cost Hotspots, STRIDE,
-Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity — plus a Security Posture checklist, and asks
+Vendor Lock-in, Latency Budget, Tech Debt/EOL, Coupling, Data Sensitivity — and asks
 for Markdown or interactive HTML. Graph metrics, latency sums and capacity come from code; the model classifies.
 
 **You get:** `analysis/SPOF-<date>.md` — every finding with an id (`C1`, `D2`…), the component it concerns and its

@@ -18,7 +18,7 @@ const NAMES: Record<string, [string, string]> = {
   'label-check.js': ['Connection label check', 'Revisión de etiquetas'], 'judge.js': ['Judge', 'Juez'],
   'arch-facts.js': ['Facts ledger', 'Ledger de hechos'], 'docs-stats.js': ['Size budgets', 'Presupuestos de tamaño'],
   'render-analysis.js': ['Analysis report', 'Reporte de análisis'], 'check-report.js': ['Report check', 'Revisión de reporte'],
-  'security-posture.js': ['Security posture', 'Postura de seguridad'], 'analysis-chart.js': ['Analysis chart', 'Gráfica del análisis'], 'analysis-impact.js': ['Analysis impact', 'Impacto en los análisis'], 'analysis-diff.js': ['Analysis verdict', 'Veredicto de los análisis'], 'findings.js': ['Findings', 'Hallazgos'],
+ 'analysis-chart.js': ['Analysis chart', 'Gráfica del análisis'], 'analysis-impact.js': ['Analysis impact', 'Impacto en los análisis'], 'analysis-diff.js': ['Analysis verdict', 'Veredicto de los análisis'], 'findings.js': ['Findings', 'Hallazgos'],
   'export-index.js': ['Index bundle', 'Bundle del índice'], 'publish-index.js': ['Index publish', 'Publicación del índice'],
   'review-check.js': ['Architecture review', 'Revisión de arquitectura'], 'adr-index.js': ['ADR index', 'Índice de ADR'],
   'adr-link.js': ['ADR links', 'Enlaces de ADR'], 'gates-check.js': ['Creation gates', 'Gates de creación'],

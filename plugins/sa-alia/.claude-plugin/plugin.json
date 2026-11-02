@@ -1,6 +1,6 @@
 {
   "name": "sa-alia",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Alia in Claude Code, for sa-skills (formerly sa-ux): her codec over every reply and above the prompt box (where the architecture stands, next steps computed from the project's files), /alia with every view of hers under it (status, radar, arch, center, video), the suite's script rows read as their verdict, milestone cards, notifications after long turns, today's write confirmations in her look, her words on the spinner. Her face where the surface draws pictures, her sparkle in the terminal. Optional; reads what the skills write and never edits an architecture document.",
   "author": {
     "name": "shadowX4fox",
@@ -29,6 +29,12 @@
       "title": "Notify after a long turn (minutes)",
       "description": "When a turn in an architecture runs at least this many minutes, Alia sends a notification with what it moved (a release, analyses, the handoff kit) or her line. 0 turns it off.",
       "default": 3
+    },
+    "openHub": {
+      "type": "boolean",
+      "title": "Open Alia's hub at session start",
+      "description": "Inside an architecture, her hub (/alia) opens docked beside the chat when a session starts: where the architecture stands, her line and the way to every view.",
+      "default": true
     },
     "replyCodec": {
       "type": "boolean",

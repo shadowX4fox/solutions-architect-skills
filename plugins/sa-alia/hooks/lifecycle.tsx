@@ -9,6 +9,7 @@ import type { AliaLine, Milestone, ProjectSnapshot, Radar, Step } from '../types
 import { kitOf, milestones } from './milestones/model'
 
 import { aliaSays, archHeader } from './alia/voice'
+import { ALIA_PANE } from './state'
 import { GLYPH } from './ui'
 
 import { fingerprint, newestMd, nextSteps, type Io } from './next-steps/rules'
@@ -169,6 +170,7 @@ export function notice(durationMs: number, afterMinutes: number, fresh: Mileston
 /** The lifecycle hooks of every mod: commands at session start, refreshes at session start and after each turn. */
 export function registerLifecycle(on: On, options: PluginOptions = {}) {
   const after = typeof options.notifyAfterMinutes === 'number' ? options.notifyAfterMinutes : 3
+  const openHub = options.openHub !== false
   on('session.start', async ($, e, next) => {
     const r = await next(e)
     // one command: everything of hers is under /alia — each view of her hub a subcommand
@@ -177,6 +179,10 @@ export function registerLifecycle(on: On, options: PluginOptions = {}) {
     await refreshRadar($)
     await refreshAlia($)
     await refreshMilestones($)
+    // her hub, docked beside the chat from the start — only inside an architecture, only where a person is there to see it
+    if (openHub && e.isInteractive !== false && (await read($, aliaAtom))) {
+      try { await $.ui.open({ id: ALIA_PANE, title: 'Alia' }) } catch { /* a surface without panes */ }
+    }
     return r
   })
 

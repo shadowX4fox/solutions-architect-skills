@@ -276,6 +276,18 @@ describe('sa-alia, end to end on every surface', () => {
       } finally { FILES['/p/ARCHITECTURE.md'] = was }
     })
 
+    test(`${surface}: inside an architecture her hub opens on its own at session start, docked beside the chat`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      expect(box.opened).toContain('sa-alia-alia')
+    })
+
+    test(`${surface}: openHub off leaves the hub closed`, { options: { openHub: false } }, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      expect(box.opened).not.toContain('sa-alia-alia')
+    })
+
     test(`${surface}: notifyAfterMinutes 0 never notifies`, { options: { notifyAfterMinutes: 0 } }, async ($, on) => {
       const box = engine(on)
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
