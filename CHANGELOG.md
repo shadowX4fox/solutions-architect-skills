@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.7.2] - 2026-11-02
+
+### Fixed
+- **`architecture-analysis.yml` checks only the reports that exist.** The skill moves a lens's previous report to `analysis/archive/`, and `git ls-files --modified` still lists the old path. The step checked that path, found no file and failed after a good run: on the first full live run, Claude wrote `STRIDE-2026-11-02.md`, which passed the findings contract, and archived the 2026-10-18 report.
+
 ## [11.7.1] - 2026-11-02
 
 ### Fixed
