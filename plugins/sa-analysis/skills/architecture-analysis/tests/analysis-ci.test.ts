@@ -111,9 +111,15 @@ describe('analysis-diff.js — was the state kept?', () => {
     } finally { restore(); }
   });
 
+  test('a lens asked for but not re-run — its newest report still the base\'s own — holds the merge, never a verdict', async () => {
+    const r = await diff(ROOT, BASE, ['spof', 'stride']);
+    expect(r.missing).toEqual(['spof', 'stride']);
+    expect(r.verdict).toBe('worsened');
+  });
+
   test('a lens that produced no report holds the merge', async () => {
     const r = await diff(ROOT, BASE, ['spof', 'coupling']);
-    expect(r.missing).toEqual(['coupling']);
+    expect(r.missing).toEqual(['spof', 'coupling']);          // spof's newest is still the base's own: not re-run
     expect(r.verdict).toBe('worsened');
   });
 });

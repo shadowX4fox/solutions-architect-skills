@@ -9,6 +9,7 @@
 //
 //   bun analysis-diff.js <project> --base <git-ref> --lenses spof,stride,… [--judge agent|typesafe|clef] [--judge-answers <file>] [--json] [--md]
 //
+// A lens asked for whose newest report is still the base's own (not re-run) holds, as one with no report does.
 // Exit 0 kept · 3 worsened (the architect's) · 2 usage · 1 error.
 const fs = require('fs');
 const path = require('path');
@@ -103,7 +104,13 @@ async function diff(root, ref, lenses, opts = {}) {
   root = path.resolve(root);
   if (!git(root, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]).ok) throw Object.assign(new Error(`no revision ${ref}`), { code: 2 });
   const missing = [], paired = [];
-  for (const l of lenses) { const after = reportOnDisk(root, l); if (!after) missing.push(l); else paired.push(pairLens(l, reportAt(root, ref, l), after)); }
+  for (const l of lenses) {
+    const after = reportOnDisk(root, l), before = reportAt(root, ref, l);
+    // a lens that was asked for and not re-run: its newest report is the base's own, unchanged — never a verdict (an agent
+    // that did not start, a run cut short), so it holds like a lens with no report at all
+    if (!after || (before && before.file === after.file && before.text.replace(/\r\n/g, '\n') === after.text.replace(/\r\n/g, '\n'))) missing.push(l);
+    else paired.push(pairLens(l, before, after));
+  }
   const items = paired.flatMap(candidates);
   let yes = new Map(), pending = null, judgeNote = null, engine = null;
   if (items.length) {

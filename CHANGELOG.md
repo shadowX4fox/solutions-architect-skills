@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.7.1] - 2026-11-02
+
+### Fixed
+- **A lens that was not re-run never passes** (`analysis-diff.js`). Its newest report is still the base's own, so the lens holds, just as one with no report does; before, it was compared with itself and read as "kept". Found on the first live run: `claude-code-action` refuses to run while the pull request adds or changes its own workflow (that workflow file must equal the default branch's), and it exits successfully having done nothing. The analysis must land on the default branch first; its next pull request runs.
+- **The pull request comment** puts a blank line between "re-run for this change" and the verdict.
+
 ## [11.7.0] - 2026-11-02
 
 ### Added

@@ -53,7 +53,7 @@ concurrency:
   cancel-in-progress: ${{ github.event.action != 'labeled' }}
 
 env:
-  SA_PLUGIN_REF: v11.7.0
+  SA_PLUGIN_REF: v11.7.1
   SA_PLUGIN_REPO: https://github.com/shadowx4fox/solutions-architect-skills.git
 
 jobs:
@@ -224,7 +224,7 @@ jobs:
           img=""; [ -n "$chart" ] && img="<img src=\"https://github.com/${GITHUB_REPOSITORY}/blob/$(git rev-parse HEAD)/${chart}?raw=true\" width=\"900\" alt=\"$($T analysis_heading)\">"
           { if [ "$verdict" -eq 0 ]; then $T --codec pleased analysis_heading; else $T --codec worried analysis_heading; fi
             [ -n "$img" ] && { echo; echo "$img"; }
-            echo; $T analysis_ran lenses="$RUN"; echo; cat "$RUNNER_TEMP/diff.md"
+            echo; $T analysis_ran lenses="$RUN"; echo; echo; cat "$RUNNER_TEMP/diff.md"
             [ -n "$SKIPPED" ] && { echo; $T analysis_skipped lenses="$SKIPPED"; }
             if [ "$verdict" -ne 0 ]; then echo; $T analysis_held merge="$([ "$AUTO" = true ] && $T analysis_held_merge)"; fi; } > "$RUNNER_TEMP/c.md"
           say pr comment "$N" --body-file "$RUNNER_TEMP/c.md"
