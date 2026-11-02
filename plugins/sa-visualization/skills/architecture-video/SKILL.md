@@ -42,7 +42,7 @@ the video size (160 px — the Alia Guide's `AliaCodec` rule for video); a `worr
 ## Step 0 — Resolve the directories and check HyperFrames
 
 ```bash
-bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts
+bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts"
 ```
 
 `[plugin_dir]` is its answer; the skill's scripts are under `[plugin_dir]/plugins/sa-visualization/skills/architecture-video/scripts/`

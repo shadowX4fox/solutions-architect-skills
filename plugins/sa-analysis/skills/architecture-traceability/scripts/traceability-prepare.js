@@ -110,7 +110,7 @@ const NAVIGATION = { id: 'traceability-navigation', type: 'noul', hi: 0.75, ques
 async function run(root, opts = {}) {
   root = path.resolve(root);
   const specPath = path.resolve(root, opts.spec || 'PRODUCT_OWNER_SPEC.md');
-  if (!fs.existsSync(specPath)) throw new Error(`no PO Spec at ${path.relative(root, specPath)} — run /sa-requirements:architecture-readiness first`);
+  if (!fs.existsSync(specPath)) throw new Error(`no PO Spec at ${path.relative(root, specPath).split(path.sep).join('/')} — run /sa-requirements:architecture-readiness first`);
   if (!fs.existsSync(path.join(root, 'ARCHITECTURE.md'))) throw new Error('No ARCHITECTURE.md found. Use /skill architecture-docs to create one first.');
   const arch = read(path.join(root, 'ARCHITECTURE.md')), archVersion = (arch.match(/<!--\s*ARCHITECTURE_VERSION:\s*([^>]*?)\s*-->/) || [])[1] || 'unversioned';
   const lang = ((arch.match(/<!--\s*(?:DOC_LANGUAGE|LANGUAGE):\s*(\w+)\s*-->/) || [])[1] || 'en').toLowerCase();
@@ -147,7 +147,7 @@ async function run(root, opts = {}) {
     const best = r.candidates[0];   // the top-ranked candidate: overlap, the route, the project's own documents first
     r.evidence = level > 0 && best ? `${best.section} § ${plain(best.heading)} — "${best.excerpt.slice(0, 100)}"` : '—';
     r.gap = level === 1 ? '[NOT DOCUMENTED: what is missing — judged Partial; state it after reading the evidence]' : null; r.suggested = level === 0 ? SUGGEST[typeOf(r)] : null; });
-  return { root, spec: path.relative(root, specPath), specVersion: spec.version, archVersion, lang, useCases: spec.useCases, requirements: reqs, judge, warnings: spec.warnings, phaseOrder: phaseOf.order, today: opts.today || new Date().toISOString().slice(0, 10) };
+  return { root, spec: path.relative(root, specPath).split(path.sep).join('/'), specVersion: spec.version, archVersion, lang, useCases: spec.useCases, requirements: reqs, judge, warnings: spec.warnings, phaseOrder: phaseOf.order, today: opts.today || new Date().toISOString().slice(0, 10) };
 }
 
 // ── Stage 3: the numbers and the report ──────────────────────────────────────────────────────────
@@ -194,5 +194,5 @@ if (require.main === module) (async () => {
   else { console.log(`Traceability: ${r.spec} → ARCHITECTURE.md v${r.archVersion} · ${r.useCases.length} use case(s) · ${live.length} requirement(s)${r.requirements.length !== live.length ? ` (${r.requirements.length - live.length} navigation step(s) not traced)` : ''}`);
     console.log(`  ✅ ${n('Covered')} covered · ⚠️ ${n('Partial')} partial · ❌ ${n('Not Covered')} gaps${n('Undecided') ? ` · ❔ ${n('Undecided')} undecided` : ''} — classified by ${r.judge.engine}${r.judge.note ? ` · ${r.judge.note}` : ''}`);
     if (r.warnings.length) console.log(`  warnings: ${r.warnings.join('; ')}`);
-    console.log(args.includes('--dry-run') ? `  (dry run — nothing written)` : `  Report: ${path.relative(root, outPath)}`); }
+    console.log(args.includes('--dry-run') ? `  (dry run — nothing written)` : `  Report: ${path.relative(root, outPath).split(path.sep).join('/')}`); }
 })();

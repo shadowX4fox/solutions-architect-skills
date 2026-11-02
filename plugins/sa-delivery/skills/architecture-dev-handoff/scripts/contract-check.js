@@ -81,7 +81,7 @@ const pkg = (name) => SA.requireFromSaSkills(name);
 const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
 const PLACEHOLDER = /\[(?!NOT DOCUMENTED\b)(?!(?:ADR|TDR|UC|I|F|E|B|C|K|T|S|D)-\d)[A-Z][A-Z0-9_]{2,}(?:[ —–-][^\]\n]*)?\]/;   // a bracketed id (`[ADR-005]`, `[I-10]`) is a citation, as kit-check.js reads it   // `[COMPONENT_NAME]`, `[API_VERSION]` — `[NOT DOCUMENTED …]` is the gap marker, legal in a value
 const OUTBOUND = /outbound|saliente|calls?\b|llamad|consum|depend|upstream|invoca|egress/i;
-const INSTALL = 'run `bun install` in sa-skills\' directory (bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts prints it) — sa-delivery\'s contract checks load their validators from there';
+const INSTALL = 'run `bun install` in sa-skills\' directory (bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" prints it) — sa-delivery\'s contract checks load their validators from there';
 
 const normPath = (p) => String(p).replace(/[?#].*$/, '').replace(/[.,;:]+$/, '').replace(/\{[^}]*\}|:[A-Za-z_]\w*/g, '{}').replace(/\/+$/, '') || '/';
 const opKey = (m, p) => `${m.toUpperCase()} ${normPath(p)}`;

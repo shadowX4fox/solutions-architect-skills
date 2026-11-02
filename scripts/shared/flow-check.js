@@ -94,7 +94,7 @@ const isSequence = (fence) => !!fence && /^\s*sequenceDiagram\b/m.test(fence.rep
 
 async function check(root, opts = {}) {
   const file = docFile(root, '04-');
-  const result = { status: 'PASS', file: file ? path.relative(root, file) : null, flows: [], warnings: [] };
+  const result = { status: 'PASS', file: file ? path.relative(root, file).split(path.sep).join('/') : null, flows: [], warnings: [] };
   if (!file) { result.status = 'SKIP'; result.warnings.push({ rule: 'no-file', text: 'no docs/04-*.md in this project — nothing to check' }); return result; }
 
   const src = read(file);

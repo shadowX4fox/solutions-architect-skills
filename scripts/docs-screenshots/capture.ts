@@ -16,7 +16,7 @@ ws!.addEventListener("message", (e) => { const m = JSON.parse(String(e.data)); i
 await send("Page.enable"); await send("Emulation.setDeviceMetricsOverride", { width: 1600, height: 900, deviceScaleFactor: 1, mobile: false });
 for (const spec of pages) {
   const [file, steps] = spec.split("::");   // steps: name=key,key,...;name=...
-  await send("Page.navigate", { url: "file://" + file }); await sleep(4000);
+  await send("Page.navigate", { url: require("url").pathToFileURL(file).href }); await sleep(4000);
   for (const step of steps.split(";")) { const [name, keys] = step.split("="); for (const k of (keys || "").split(",").filter(Boolean)) { if (k.startsWith("wait")) await sleep(Number(k.slice(4))); else { await key(k); await sleep(900); } } await sleep(1800); await shot(name); }
 }
 proc.kill();

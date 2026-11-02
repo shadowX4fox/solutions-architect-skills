@@ -168,7 +168,7 @@ async function assemble(root, opts = {}) {
   const sfx = opts.suffix || '', refFile = `SA-${slug}-reference${sfx}.docx`, briefFile = `SA-${slug}${sfx}.docx`;
   const version = facts.architecture.version || '1.0', status = facts.architecture.status || 'Draft';
   const report = { sources: {}, routed: [], pending: 0 };
-  const load = (key, p) => { const ok = !!p && exists(p); report.sources[key] = ok ? path.relative(root, p) : null; return ok ? parse(read(p)) : null; };
+  const load = (key, p) => { const ok = !!p && exists(p); report.sources[key] = ok ? path.relative(root, p).split(path.sep).join('/') : null; return ok ? parse(read(p)) : null; };
   const routedTo = (what, where) => report.routed.push(`${what} → ${where}`);
   const B = [], Rf = [];   // briefing parts, reference parts — each part = { title, anchor, blocks (already re-levelled or composed text) }
   const part = (list, title, anchor, blocks, level = 2) => { list.push({ title, anchor, level, blocks }); return list[list.length - 1]; };
@@ -260,7 +260,7 @@ async function assemble(root, opts = {}) {
     const rows = Object.entries(byTech).sort((a, b) => a[0].localeCompare(b[0])).map(([tech, names]) => [tech, versions[norm(tech)] || Object.entries(versions).find(([k]) => norm(tech).includes(k) || k.includes(norm(tech)))?.[1] || T.nd, names.join(', ')]);
     if (rows.length) cl.push(...capped(table(T.stackCols, rows), CAP.stack)); else cl.push(txt(d06 ? `*${T.nd}*` : T.fb.d06)); routedTo(`stack table — ${rows.length} technologies from the descriptors${rows.length > CAP.stack ? `, ${CAP.stack} shown` : ''}`, 'briefing CL (docs/06 whole in the reference)'); }
   sub(cl, 'cl.currency', T.cl[2], 'Technology Currency', 'the technologies past end of life or reaching it within a year, and what that exposes');
-  if (!debt) cl.push(txt(T.fb.debt)); else { const k = debt.findIndex((b) => b && b.type === 'table' && /Tier|Nivel/i.test(b.headers.join(' ')) && /Technology|Tecnolog/i.test(b.headers.join(' '))); if (k >= 0) { const t = debt[k]; const ls = t.text.split('\n'); const kept = ls.slice(0, 2).concat(ls.slice(2).filter((l) => /\|\s*\*{0,2}T[12]\b/.test(l) || /^\|\s*\*{0,2}T[12]-/.test(l))); const t1 = kept.slice(2).filter((l) => /\bT1\b/.test(l)).length, t2 = kept.slice(2).filter((l) => /\bT2\b/.test(l)).length; cl.push(txt(T.exposure(t1, t2))); if (kept.length > 2) cl.push(...capped(kept.join('\n'), CAP.currency)); else cl.push(txt(`*${T.nd}*`)); routedTo(`${path.relative(root, debtFile)} T1/T2 rows`, 'briefing CL'); } else cl.push(txt(T.fb.debt)); }
+  if (!debt) cl.push(txt(T.fb.debt)); else { const k = debt.findIndex((b) => b && b.type === 'table' && /Tier|Nivel/i.test(b.headers.join(' ')) && /Technology|Tecnolog/i.test(b.headers.join(' '))); if (k >= 0) { const t = debt[k]; const ls = t.text.split('\n'); const kept = ls.slice(0, 2).concat(ls.slice(2).filter((l) => /\|\s*\*{0,2}T[12]\b/.test(l) || /^\|\s*\*{0,2}T[12]-/.test(l))); const t1 = kept.slice(2).filter((l) => /\bT1\b/.test(l)).length, t2 = kept.slice(2).filter((l) => /\bT2\b/.test(l)).length; cl.push(txt(T.exposure(t1, t2))); if (kept.length > 2) cl.push(...capped(kept.join('\n'), CAP.currency)); else cl.push(txt(`*${T.nd}*`)); routedTo(`${path.relative(root, debtFile).split(path.sep).join('/')} T1/T2 rows`, 'briefing CL'); } else cl.push(txt(T.fb.debt)); }
   part(B, T.cl[0], 'Chapter Lead Briefing', cl);
 
   // ---- For Technical Owners

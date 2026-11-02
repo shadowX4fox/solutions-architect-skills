@@ -111,7 +111,7 @@ const pname = (p) => `Principle ${p.num} (${p.anchor})`;
 // ── the rules ──
 function check(root, opts = {}) {
   const file = path.resolve(root, opts.file || 'docs/02-architecture-principles.md');
-  if (!fs.existsSync(file)) return { file: path.relative(root, file), status: 'FAIL', arch_type: 'unknown', findings: [{ rule: 'FILE', severity: 'BLOCKING', line: 0, message: `${path.relative(root, file)} not found` }], results: [], blocking: 1, warnings: 0 };
+  if (!fs.existsSync(file)) return { file: path.relative(root, file).split(path.sep).join('/'), status: 'FAIL', arch_type: 'unknown', findings: [{ rule: 'FILE', severity: 'BLOCKING', line: 0, message: `${path.relative(root, file).split(path.sep).join('/')} not found` }], results: [], blocking: 1, warnings: 0 };
   const text = fs.readFileSync(file, "utf8").replace(/\r\n?/g, "\n");
   const { lines, principles, header } = parse(text);
   const findings = []; const results = [];
@@ -216,7 +216,7 @@ function check(root, opts = {}) {
   }
 
   const blocking = findings.filter((f) => f.severity === 'BLOCKING').length, warnings = findings.filter((f) => f.severity === 'WARNING').length;
-  return { file: path.relative(root, file), arch_type: archType, type_source: typeSource, type_rows: typeRows, principles: principles.map((p) => ({ num: p.num, anchor: p.anchor, line: p.line })), results, findings, blocking, warnings, status: blocking ? 'FAIL' : 'PASS' };
+  return { file: path.relative(root, file).split(path.sep).join('/'), arch_type: archType, type_source: typeSource, type_rows: typeRows, principles: principles.map((p) => ({ num: p.num, anchor: p.anchor, line: p.line })), results, findings, blocking, warnings, status: blocking ? 'FAIL' : 'PASS' };
 }
 
 function walk(dir) { if (!fs.existsSync(dir)) return []; return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : (e.name.endsWith('.md') ? [path.join(dir, e.name)] : []))); }

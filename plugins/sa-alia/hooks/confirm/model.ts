@@ -8,9 +8,12 @@ const t = (lang: Lang, en: string, es: string) => (lang === 'es' ? es : en)
 
 /** The architecture's own files: what the confirm-first rule governs — ARCHITECTURE.md, docs/, adr/, tdr/. */
 export function architecturePath(root: string, file: string): string | null {
-  const r = root.replace(/\/+$/, '') + '/'
-  if (!file.startsWith(r)) return null
-  const rel = file.slice(r.length)
+  // either separator, and a Windows drive letter in either case: C:\\proj and c:/proj are one folder
+  const fwd = (p: string) => p.replace(/\\/g, '/')
+  const r = fwd(root).replace(/\/+$/, '') + '/', f = fwd(file)
+  const win = /^[a-zA-Z]:\//.test(r)
+  if (!(win ? f.toLowerCase().startsWith(r.toLowerCase()) : f.startsWith(r))) return null
+  const rel = f.slice(r.length)
   return rel === 'ARCHITECTURE.md' || /^(docs|adr|tdr)\//.test(rel) ? rel : null
 }
 

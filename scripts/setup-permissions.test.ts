@@ -54,19 +54,14 @@ describe("setup-permissions", () => {
     expect(r.stdout.toString()).toMatch(/Permissions: {2}added 0 {2}· {2}already present \d+ {2}· {2}retired 0 {2}· {2}rewritten 0/);
     expect(r.stdout.toString()).toMatch(/Hooks: {8}added 0 {2}· {2}already present 0 {2}· {2}retired 0/);
   });
-  test("Windows without Git Bash: the PowerShell wrapper by the marketplace-clone path, written once, and removed where sh runs", () => {
-    const env = { ...process.env, SA_HOOK_SHELL: "powershell", CLAUDE_CONFIG_DIR: join(TMP, "cfg") };
-    const ps1 = (u: any) => (u.hooks?.UserPromptSubmit ?? []).flatMap((e: any) => e.hooks).filter((h: any) => h.shell === "powershell");
-    let r = Bun.spawnSync(["bun", SCRIPT, EXAMPLE, USER], { stdout: "pipe", stderr: "pipe", env });
-    expect(r.stdout.toString()).toMatch(/Hooks: {8}added 1 {2}· {2}already present 0 {2}· {2}retired 0/);
-    let h = ps1(JSON.parse(readFileSync(USER, "utf-8")));
-    expect(h).toEqual([{ type: "command", shell: "powershell", command: `& '${join(TMP, "cfg", "plugins", "marketplaces", "shadowx4fox-solution-architect-marketplace", "hooks", "route-architecture-docs.ps1")}'` }]);
-    r = Bun.spawnSync(["bun", SCRIPT, EXAMPLE, USER], { stdout: "pipe", stderr: "pipe", env });
-    expect(r.stdout.toString()).toMatch(/Hooks: {8}added 0 {2}· {2}already present 1 {2}· {2}retired 0/);
-    expect(ps1(JSON.parse(readFileSync(USER, "utf-8"))).length).toBe(1);
-    r = Bun.spawnSync(["bun", SCRIPT, EXAMPLE, USER], { stdout: "pipe", stderr: "pipe", env: { ...env, SA_HOOK_SHELL: "sh" } });
-    expect(r.stdout.toString()).toMatch(/Hooks: {8}added 0 {2}· {2}already present 0 {2}· {2}retired 1/);
-    expect(ps1(JSON.parse(readFileSync(USER, "utf-8")))).toEqual([]);
+  test("Windows without Git Bash writes nothing either — the plugin's hooks run on Bun — and a PowerShell copy an earlier /setup wrote is retired (11.8.2)", () => {
+    const u = JSON.parse(readFileSync(USER, "utf-8"));
+    const ps1 = join(TMP, "cfg", "plugins", "marketplaces", "shadowx4fox-solution-architect-marketplace", "hooks", "route-architecture-docs.ps1");
+    u.hooks = { UserPromptSubmit: [{ hooks: [{ type: "command", shell: "powershell", command: `& '${ps1}'` }] }] };
+    writeFileSync(USER, JSON.stringify(u, null, 2));
+    const r = Bun.spawnSync(["bun", SCRIPT, EXAMPLE, USER], { stdout: "pipe", stderr: "pipe", env: { ...process.env, SA_HOOK_SHELL: "powershell", CLAUDE_CONFIG_DIR: join(TMP, "cfg") } });
+    expect(r.stdout.toString()).toMatch(/added 0 {2}· {2}already present 0 {2}· {2}retired 1/);
+    expect(JSON.parse(readFileSync(USER, "utf-8")).hooks).toBeUndefined();
   });
   test("when the routing hook was the only one, the whole hooks block goes (8.100.1 reported it retired and kept it)", () => {
     const u = JSON.parse(readFileSync(USER, "utf-8"));

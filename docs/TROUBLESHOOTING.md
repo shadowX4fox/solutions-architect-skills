@@ -6,7 +6,7 @@ command to run. Install steps are in [INSTALLATION.md](INSTALLATION.md).
 In the commands below, `<sa_skills_dir>` is the installed `sa-skills` directory. Print it with:
 
 ```bash
-bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts
+bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts"
 ```
 
 ## Contents

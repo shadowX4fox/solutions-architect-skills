@@ -22,36 +22,15 @@ import { homedir } from "os";
 
 // --- Windows without Git Bash: the PowerShell hook (8.100.1) ----------------------------------------
 //
-// The plugin's hook runs `sh`, which exists on Linux, macOS, WSL and Windows with Git Bash — the shell
-// Claude Code runs hooks through there. Git for Windows is optional, though: without it hooks run in
-// PowerShell, where there is no `sh`. On that machine alone /setup writes the .ps1 wrapper with
-// `"shell": "powershell"`, by the path of the marketplace clone — which `claude plugin marketplace update`
-// refreshes in place, so it never names a version that an update removed. `SA_HOOK_SHELL=powershell|sh`
-// overrides the detection (tests, or a machine the detection gets wrong).
-const MARKETPLACE = "shadowx4fox-solution-architect-marketplace";
-function hasGitBash(): boolean {
-  const env = process.env.CLAUDE_CODE_GIT_BASH_PATH;
-  if (env && existsSync(env)) return true;
-  const git = Bun.which("git");
-  if (git && existsSync(join(dirname(dirname(git)), "bin", "bash.exe"))) return true;
-  const pf = [process.env.ProgramFiles, process.env["ProgramFiles(x86)"], process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Programs")];
-  return pf.some((d) => !!d && existsSync(join(d, "Git", "bin", "bash.exe")));
-}
-const HOOK_SHELL = process.env.SA_HOOK_SHELL === "powershell" || process.env.SA_HOOK_SHELL === "sh"
-  ? process.env.SA_HOOK_SHELL
-  : process.platform === "win32" && !hasGitBash() ? "powershell" : "sh";
-const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
-const PS1_PATH = join(CLAUDE_DIR, "plugins", "marketplaces", MARKETPLACE, "hooks", "route-architecture-docs.ps1");
-const PS1_HOOK = HOOK_SHELL === "powershell"
-  ? { type: "command", shell: "powershell", command: `& '${PS1_PATH.replace(/'/g, "''")}'` }
-  : null;
+// The plugin's hooks run on Bun (11.8.2), the suite's one runtime, on every OS — no `sh`, so Windows without Git Bash
+// runs them as Linux and macOS do. Until 11.8.1 they ran `sh`, and on a Windows machine without Git Bash /setup wrote a
+// PowerShell copy of the routing hook into the user's settings; that entry is now retired like every other wrapper
+// (the removal markers below), so the hook never runs twice.
+const PS1_HOOK = null as { type: string; shell: string; command: string } | null;   // kept as a slot: no hook of its own to write
 
 function describePlatform(): string {
-  if (HOOK_SHELL === "powershell") return `${process.platform === "win32" ? "Windows without Git Bash" : process.platform} (PowerShell wrapper)`;
-  if (process.platform === "win32") return "Windows (sh wrapper via Git Bash)";
-  if (process.platform === "darwin") return "macOS (sh wrapper)";
-  if (process.platform === "linux") return "Linux (sh wrapper)";
-  return `${process.platform} (sh wrapper — POSIX fallback)`;
+  const os = process.platform === "win32" ? "Windows" : process.platform === "darwin" ? "macOS" : process.platform === "linux" ? "Linux" : process.platform;
+  return `${os} (the plugin's hooks run on Bun)`;
 }
 
 const [examplePath, userPath] = process.argv.slice(2);
@@ -508,8 +487,8 @@ console.log(
 console.log("");
 console.log(`Platform:     ${describePlatform()}`);
 console.log(PS1_HOOK
-  ? `Hook:         Windows without Git Bash — the plugin's sh hook cannot run here; settings get the PowerShell wrapper: ${PS1_HOOK.command}`
-  : "Hook:         declared by the plugin — hooks/hooks.json runs ${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.sh; nothing is written to settings");
+  ? `Hook:         ${PS1_HOOK.command}`
+  : "Hook:         declared by the plugin — hooks/hooks.json runs ${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.js on Bun; nothing is written to settings");
 console.log("");
 console.log(
   `Permissions:  added ${permissionsAdded.length}  ·  already present ${permissionsKept.length}  ·  retired ${removedPermissions.length}  ·  rewritten ${migratedPermissions.length}`

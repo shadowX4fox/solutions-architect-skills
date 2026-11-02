@@ -296,7 +296,7 @@ function issuePlan(root, id, opts = {}) {
   root = path.resolve(root);
   const rec = find(root, id), r = remoteOf(root, opts.host), title = issueTitle(rec), labels = labelsOf(rec), body = issueBody(rec);
   const bodyFile = path.join(root, '.cache', 'sa-skills', 'escalations', `${rec.meta.id}.issue.md`);
-  const p = { id: rec.meta.id, host: r.host, remote: r.url, title, labels, body, body_file: path.relative(root, bodyFile), already: rec.meta.issue || null };
+  const p = { id: rec.meta.id, host: r.host, remote: r.url, title, labels, body, body_file: path.relative(root, bodyFile).split(path.sep).join('/'), already: rec.meta.issue || null };
   if (r.host === 'github') p.argv = ['gh', 'issue', 'create', '-R', `${r.server === 'github.com' ? '' : r.server + '/'}${r.path}`, '--title', title, '--body-file', bodyFile, ...labels.flatMap((l) => ['--label', l])];
   if (r.host === 'gitlab') p.argv = ['glab', 'issue', 'create', '-R', r.web, '--title', title, '--description-file', bodyFile, '--label', labels.join(','), '--yes'];
   if (r.host === 'azure') p.argv = ['az', 'boards', 'work-item', 'create', '--org', `https://dev.azure.com/${r.org}`, '--project', r.project, '--type', opts.type || 'Issue', '--title', title,

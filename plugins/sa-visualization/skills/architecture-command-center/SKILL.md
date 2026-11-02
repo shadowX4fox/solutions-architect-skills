@@ -135,7 +135,7 @@ exactly as the docs write them (`LANGUAGE_POLICY.md` §4).
    model and say plainly that the use-case tab will be empty.
 4. Resolve `skill_dir` — the renderer and template are read from there, never copied into the
    project: `skill_dir = $plugin_dir/skills/architecture-command-center`, with `plugin_dir` from
-   `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-visualization`
+   `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-visualization`
    — this skill ships in the **sa-visualization** plugin, which `sa-skills` depends on and installs; its scripts
    read the architecture through sa-skills and find it on their own (`scripts/sa-skills.js`: `--sa-skills`,
    `SA_SKILLS_DIR`, the repo layout, the install registry), stopping with the install command when it is absent

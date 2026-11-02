@@ -95,7 +95,7 @@ function compareWorkflow(target, rendered) {
 function placeWorkflows(root, list, rows, write, replace = []) {
   const dir = path.join(root, '.github', 'workflows');
   for (const w of list) {
-    const target = path.join(dir, w.file), state = compareWorkflow(target, w.text), rel = path.relative(root, target);
+    const target = path.join(dir, w.file), state = compareWorkflow(target, w.text), rel = path.relative(root, target).split(path.sep).join('/');
     if (state === 'current') { row(rows, '✓', `${rel} — current`); continue; }
     if (state === 'modified' && !(write && replace.includes(w.file))) { row(rows, '!', `${rel} — differs from the template (changes of its own, or an older template); not rewritten`, `diff ${rel} ${w.template} — then --write --replace ${w.file}, or carry the change by hand`); continue; }
     if (state === 'modified') { fs.writeFileSync(target, w.text); row(rows, '✓', `${rel} — replaced with the template`); continue; }

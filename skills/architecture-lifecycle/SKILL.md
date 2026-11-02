@@ -40,7 +40,7 @@ facts ledger of the tag's tree against the working tree. Edits write no marker.
 
 ## Resolve `plugin_dir`
 
-`plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)` —
+`plugin_dir=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts")` —
 show its stderr warning when a newer version is on the machine. `L` below is
 `bun [plugin_dir]/skills/architecture-lifecycle/scripts/lifecycle.js`.
 

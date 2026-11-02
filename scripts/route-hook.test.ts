@@ -3,9 +3,9 @@ import { mkdtempSync, writeFileSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import { join, resolve } from "path";
 
-const HOOK = resolve(import.meta.dir, "..", "hooks", "route-architecture-docs.sh");
+const HOOK = resolve(import.meta.dir, "..", "hooks", "route-architecture-docs.js");
 function run(dir: string, stdin: string): string {
-  const p = Bun.spawnSync(["sh", HOOK], { stdin: new TextEncoder().encode(stdin), env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+  const p = Bun.spawnSync([process.execPath, HOOK], { stdin: new TextEncoder().encode(stdin), env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
   return p.stdout.toString();
 }
 
@@ -29,8 +29,11 @@ describe("route-architecture-docs hook (8.91.0)", () => {
 describe("the plugin declares the hook (8.100.1)", () => {
   const cfg = JSON.parse(require("fs").readFileSync(resolve(import.meta.dir, "..", "hooks", "hooks.json"), "utf8"));
   const cmd: string = cfg.hooks.UserPromptSubmit[0].hooks[0].command;
-  test("hooks/hooks.json runs the wrapper through ${CLAUDE_PLUGIN_ROOT}, never an absolute path", () => {
-    expect(cmd).toBe('sh "${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.sh"');
+  test("hooks/hooks.json runs the hook on Bun through ${CLAUDE_PLUGIN_ROOT} — no sh, never an absolute path (11.8.2)", () => {
+    expect(cmd).toBe('bun "${CLAUDE_PLUGIN_ROOT}/hooks/route-architecture-docs.js"');
+    const all = JSON.stringify(cfg.hooks);
+    expect(all).not.toMatch(/"sh |\.sh\\?"/);
+    expect(cfg.hooks.PreToolUse[0].hooks[0].command).toBe('bun "${CLAUDE_PLUGIN_ROOT}/skills/architecture-docs/scripts/prose-hook.js" pre');
   });
   test("the command, expanded as Claude Code does, emits the payload", () => {
     const dir = mkdtempSync(join(tmpdir(), "hook-"));

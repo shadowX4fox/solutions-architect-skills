@@ -95,7 +95,10 @@ function renderCheck(bin, block, tmpDir) {
   const input = path.join(tmpDir, `check-${block.startLine}.mmd`), out = path.join(tmpDir, `check-${block.startLine}.svg`);
   fs.writeFileSync(input, block.source + '\n');
   const args = ['-i', input, '-o', out, '-e', 'svg', '-q']; if (process.env.PUPPETEER_CONFIG) args.push('-p', process.env.PUPPETEER_CONFIG);
-  const r = /\.(cmd|bat)$/i.test(bin) ? spawnSync('cmd.exe', ['/c', bin, ...args], { encoding: 'utf8', timeout: 90000 }) : spawnSync(bin, args, { encoding: 'utf8', timeout: 90000 });
+  // a .cmd / .bat shim goes through the shell, quoted as docgen's runMmdc quotes it (a path with spaces survives cmd.exe);
+  // a real executable never does, so its arguments pass verbatim
+  const shim = /\.(cmd|bat)$/i.test(bin), q = (a) => (/[\s"&|<>^]/.test(a) ? `"${a}"` : a);
+  const r = shim ? spawnSync(`"${bin}"`, args.map(q), { shell: true, windowsHide: true, encoding: 'utf8', timeout: 90000 }) : spawnSync(bin, args, { encoding: 'utf8', timeout: 90000 });
   try { fs.unlinkSync(input); fs.unlinkSync(out); } catch { /* best effort */ }
   if (r.status === 0) return null;
   const useful = String(r.stderr || r.stdout || r.error || '').split(/\r?\n/).map((l) => l.trimEnd()).filter((l) => l.trim() && !/^\s*at\s/.test(l)).slice(0, 6).join('\n').trim();

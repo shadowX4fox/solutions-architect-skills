@@ -10,7 +10,8 @@ export const ARTIFACTS = {
 
 /** The command that opens a file with the system's viewer: macOS `open`, Windows `start`, otherwise `xdg-open`. */
 export async function opener($: EngineInterface): Promise<(file: string) => string[]> {
-  if (/windows/i.test((await $.env.get('OS')) || '')) return (f) => ['cmd', '/c', 'start', '', f]
+  // Windows: OS=Windows_NT, or its command interpreter named (a mod's environment may hold only part of the process's)
+  if (/windows/i.test((await $.env.get('OS')) || '') || /cmd\.exe$/i.test((await $.env.get('ComSpec')) || '')) return (f) => ['cmd', '/c', 'start', '', f]
   try { if ((await $.process.run(['uname'], { timeoutMs: 3000 })).stdout.trim() === 'Darwin') return (f) => ['open', f] } catch { /* no uname */ }
   return (f) => ['xdg-open', f]
 }

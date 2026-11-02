@@ -28,7 +28,7 @@ Writes the bundle an architecture MCP server loads. One script, `scripts/export-
 
 ## Steps
 
-1. **Resolve `plugin_dir`**: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-delivery`.
+1. **Resolve `plugin_dir`**: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-delivery`.
 2. **Export**: `bun [plugin_dir]/skills/architecture-index-export/scripts/export-index.js <project_root>`. Options: `--out <dir>` (default `.cache/sa-skills/index/<version>/`, or `…/index/draft/` for a draft), `--project-key <key>` (default: the architecture's name, slugified — keep it the same across releases, it is part of every chunk id), `--server <mcp_url>` (the server's URL, written into each pack's binding; without it the binding names none), `--previous <bundle>` (the last bundle the server holds — usually the previous release's: writes `changes.json`, what changed for each container since it), `--draft` (the draft channel whatever git says — what a test publish uses), `--no-kit-check` (development only: packs a kit without its gate).
 3. **Report** what the script printed: the channel, the chunk counts by kind, each build pack with its open questions, every skipped component with its reason, every warning. Exit 1 means the bundle failed its own check — report the findings, never hand the bundle on.
 

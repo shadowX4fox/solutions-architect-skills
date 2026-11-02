@@ -482,17 +482,8 @@ function lensSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
   return frame({ H: endY + 150, mood: over ? 'worried' : 'pleased', kicker, title: `${lt} — ${cut(fl.title.replace(/\s*\(.*\)\s*$/, ''), 30)}`, sub: fl.title, body, footer, embed, fonts });
 }
 
-function findChrome(given) {
-  for (const c of [given, process.env.SA_CHROME, process.env.PUPPETEER_EXECUTABLE_PATH, process.env.CHROME_PATH].filter(Boolean)) if (fs.existsSync(c)) return c;
-  const cache = path.join(os.homedir(), '.cache', 'puppeteer', 'chrome');
-  const sub = { linux: 'chrome-linux64/chrome', darwin: 'chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing', win32: 'chrome-win64/chrome.exe' }[process.platform];
-  if (sub && fs.existsSync(cache)) {
-    const hit = fs.readdirSync(cache).sort((x, y) => y.localeCompare(x, undefined, { numeric: true })).map((v) => path.join(cache, v, sub)).find((f) => fs.existsSync(f));
-    if (hit) return hit;
-  }
-  for (const n of ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'chrome']) { const w = Bun.which(n); if (w) return w; }
-  return null;
-}
+// the one Chrome finder of the suite: Puppeteer's download per platform, PATH, then where an installer puts one (any OS)
+const { findChrome } = require(fromSaSkills('scripts', 'shared', 'find-chrome.js'));
 
 /** The SVG as a PNG at twice its size, through headless Chrome over the DevTools protocol (snapshot.js's way: Chrome's own
  *  --screenshot never exits under --headless=new); false when there is no Chrome. */
@@ -516,7 +507,7 @@ async function toPng(svg, out, chromeGiven) {
     const { result: { sessionId: s } } = await send('Target.attachToTarget', { targetId, flatten: true });
     await send('Page.enable', {}, s);
     await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 2, mobile: false }, s);
-    await send('Page.navigate', { url: `file://${page}` }, s);
+    await send('Page.navigate', { url: require('url').pathToFileURL(page).href }, s);   // file:///C:/… on Windows, # and % escaped
     await Bun.sleep(1200);                                                     // the embedded fonts and the blazon decode
     const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: +w, height: +h, scale: 1 } }, s);
     if (!shot.result || !shot.result.data) return false;

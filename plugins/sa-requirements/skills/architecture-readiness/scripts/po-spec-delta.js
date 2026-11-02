@@ -82,7 +82,7 @@ function delta(root, opts = {}) {
   const spec = read(specPath);
   const facts = collect(root);
   const sync = spec.match(/<!--\s*ARCHITECTURE_SYNC:\s*v?([0-9][^\s(]*)\s*(?:\((\d{4}-\d{2}-\d{2})\))?\s*-->/);
-  const state = { spec_file: path.relative(root, specPath), spec_version: field(spec, ['Version', 'Versión', 'Version del documento']), spec_date: field(spec, ['Date', 'Fecha']),
+  const state = { spec_file: path.relative(root, specPath).split(path.sep).join('/'), spec_version: field(spec, ['Version', 'Versión', 'Version del documento']), spec_date: field(spec, ['Date', 'Fecha']),
     synced_version: sync ? sync[1] : null, synced_date: sync ? sync[2] || null : null,
     architecture_version: facts.architecture.version, architecture_status: facts.architecture.status, architecture_released: facts.architecture.released, language: (spec.match(/<!--\s*DOC_LANGUAGE:\s*(\w+)/) || [])[1] || facts.architecture.language };
   const since = state.synced_date || state.spec_date || '0000-00-00';
@@ -157,7 +157,7 @@ function stamp(root, opts = {}) {
   if (old) { const parts = old.split('.'); parts[parts.length - 1] = String((parseInt(parts[parts.length - 1], 10) || 0) + 1); next = parts.join('.'); spec = spec.replace(/^(\*\*(?:Version|Versión)\*\*\s*:?\s*).+$/mi, `$1${next}`); }
   spec = spec.replace(/^(\*\*(?:Date|Fecha)\*\*\s*:?\s*).+$/mi, `$1${today}`);
   fs.writeFileSync(specPath, spec);
-  return { file: path.relative(root, specPath), marker, version: { from: old, to: next }, date: today };
+  return { file: path.relative(root, specPath).split(path.sep).join('/'), marker, version: { from: old, to: next }, date: today };
 }
 
 // The spec is the Product Owner's document: it states what the business needs, never which architecture decision
@@ -185,7 +185,7 @@ function check(root, opts = {}) {
     }
     findings.push(...refs);
   });
-  return { file: path.relative(root, specPath), findings };
+  return { file: path.relative(root, specPath).split(path.sep).join('/'), findings };
 }
 
 module.exports = { delta, render, stamp, check, ARCH_REF, changelog, changelogArchive, headlines, MAPPING };

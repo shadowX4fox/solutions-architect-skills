@@ -22,8 +22,8 @@ Install the Solutions Architect Skills suite for me, from a shell (the `claude` 
    `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; otherwise run
    `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`.
    Then run `claude plugin list` and install every "Dependency <name>@… is not installed" the same way.
-4. Run `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet`
-   (on Windows, the same path under %USERPROFILE%) and run `bun install` in the directory it prints. Each version is a
+4. Run `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet`
+   (`$HOME` works in Git Bash and in PowerShell) and run `bun install` in the directory it prints. Each version is a
    new directory, so this repeats after every update.
 5. Run `bun <that directory>/scripts/setup-docgen.ts --no-smoke`. If it reports no browser, offer
    `bunx puppeteer browsers install chrome` — Mermaid diagrams render as pictures in Word and PDF only with one.
@@ -42,6 +42,29 @@ Then `/reload-plugins`, and `/sa-skills:setup` once in each project ([§ 3](#3-s
 | git | Releasing an architecture (a release is a git tag) and importing an ADR catalog | For those workflows |
 | A Chrome / Chromium browser | Mermaid diagrams rendered as pictures in Word and PDF exports | Optional |
 | Docker and Ollama | Running the architecture MCP server locally | Optional |
+
+### Platform support
+
+| Tier | Platform | What it means |
+|---|---|---|
+| 1 — primary | **Linux** | Developed and tested here: every release passes the full check suite on Linux, and the CI templates run on Linux runners |
+| 2 — secondary | **macOS** | Expected to work; a macOS defect is fixed right after a Linux one |
+| 3 — tertiary | **Windows** | Best effort. The main flows work from Claude Code with Bun; run shell lines in Git Bash or WSL2. A Windows defect is fixed after Linux and macOS ones; the known limits are below |
+
+**Windows — what to know.**
+
+- **Shell lines.** The skills run their commands through Claude Code's Bash tool, which on Windows is Git Bash. Install
+  [Git for Windows](https://git-scm.com/download/win), or use WSL2. The plugin's own hooks run on Bun and need no shell.
+- **`tar`.** Releases read the tagged tree, and the local index publish packs its bundle, with `tar`. Windows 10 and
+  later ship one, and Git Bash brings another; both work.
+- **Line endings.** A checkout with `core.autocrlf=true` changes only the line ends. The ADR catalog sync and the service
+  review read a file with CRLF as the same file.
+- **Chrome.** The analyses' chart, the command center's snapshot and Mermaid pictures in Word / PDF find Chrome under
+  Program Files or LocalAppData, with Edge as the last resort. You can also point `SA_CHROME` at one.
+- **Not verified on Windows:** the explainer video (`bunx hyperframes`, its own Chrome and ffmpeg), and the local index
+  server (`publish-index.js --up`, which needs Docker Desktop). Both are expected to work.
+- **Maintainer scripts** (`scripts/build-chat-skill.ts` needs `zip`, `scripts/sync-design-language.ts` needs `rg`) are
+  for whoever develops the plugin, not for its users.
 
 ### Install Bun
 
@@ -130,7 +153,7 @@ Claude Code's plugin install does not run `bun install`. The Word / PDF export a
 need the plugin's npm packages, so install them once in the plugin directory (and again after each update):
 
 ```bash
-cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)"
+cd "$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet)"
 bun install
 ```
 
@@ -310,7 +333,7 @@ claude plugin list
 All six `sa-*` plugins from `shadowx4fox-solution-architect-marketplace` show as enabled, at the same version.
 
 ```bash
-bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts
+bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts"
 ```
 
 This prints the `sa-skills` directory the skills use, read from Claude Code's install registry (a project-scope

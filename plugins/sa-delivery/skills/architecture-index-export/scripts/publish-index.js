@@ -135,7 +135,8 @@ async function publish(root, opts = {}) {
     const key = m.project.key; const version = m.architecture.version;
     log(`index: ${key} ${version} (draft) — ${m.counts.chunks} chunks, ${m.counts.buildpacks} build packs${m.skipped.length ? `, ${m.skipped.length} components without one` : ''}`);
     const tgz = path.join(work, 'bundle.tgz');
-    const t = spawnSync('tar', ['-czf', tgz, '-C', out, '.'], { encoding: 'utf8' });
+    // relative names from its own folder: GNU tar (Git Bash) reads `C:\\…` given to -f as a remote host
+    const t = spawnSync('tar', ['-czf', 'bundle.tgz', '-C', 'bundle', '.'], { cwd: work, encoding: 'utf8' });
     if (t.status !== 0) throw Object.assign(new Error(`tar failed: ${t.stderr}`), { code: 1 });
     const res = await fetch(`${st.server}/bundles/${encodeURIComponent(key)}/${encodeURIComponent(version)}?channel=draft`,
       { method: 'POST', headers: headers({ 'Content-Type': 'application/gzip' }), body: fs.readFileSync(tgz) });

@@ -541,7 +541,9 @@ export function diffCatalog(editionDir: string, projectRoot: string): CatalogDif
     let local_drift = false;
     if (l && pin) {
       const recorded = pin.files[l.file];
-      if (recorded && recorded !== sha256(readFileSync(join(adrDir, l.file)))) local_drift = true;
+      // a Windows checkout (core.autocrlf) changes only the line ends: the pin matches the bytes, or the bytes with CRLF read as LF
+      const bytes = readFileSync(join(adrDir, l.file)), lf = bytes.toString('latin1').replace(/\r\n/g, '\n')
+      if (recorded && recorded !== sha256(bytes) && recorded !== sha256(Buffer.from(lf, 'latin1'))) local_drift = true;
     }
 
     if (c && !l) {

@@ -2,6 +2,15 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.5.1]
+
+### Fixed
+
+- **Windows.**
+  - Her confirmation dialog recognizes an architecture file under `C:\\…`: either separator, a drive letter in either case.
+  - "Open with the system's viewer" also detects Windows by `ComSpec`.
+  - The release pane knows the state `unreadable`: the release tag could not be read, so the state is unknown — never a draft.
+
 ## [1.5.0]
 
 ### Added

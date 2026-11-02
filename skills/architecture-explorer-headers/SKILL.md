@@ -69,7 +69,7 @@ enum values, table column headers, filenames, marker names, `EXPLORER_HEADER` fi
 
 ### Phase 0 — Resolve Plugin and Project Roots
 
-1. **Resolve `plugin_dir`**: `plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)` — the install registry's answer (project scope, else user scope, else the copy the script runs from), never a Glob over `~/.claude/plugins/cache/`; show its stderr warning when a newer version is on the machine.
+1. **Resolve `plugin_dir`**: `plugin_dir=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts")` — the install registry's answer (project scope, else user scope, else the copy the script runs from), never a Glob over `~/.claude/plugins/cache/`; show its stderr warning when a newer version is on the machine.
 2. **Confirm `project_root`**: the current working directory. Verify `ARCHITECTURE.md` exists at the root — if not, abort with `ARCHITECTURE.md not found at project root. This skill operates on architecture documentation.`
 
 ### Phase 1 — Inventory

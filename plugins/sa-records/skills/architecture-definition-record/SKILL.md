@@ -49,7 +49,7 @@ This skill is the **single owner of all ADR write operations**. It creates, upda
 ## Plugin directories
 
 This skill ships in the **sa-records** plugin (`sa-skills` depends on it and installs it). `[plugin_dir]` is sa-records's install:
-`bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-records`.
+`bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-records`.
 `[sa_skills_dir]` is sa-skills' — the same command without `--plugin` — and serves only the optional steps that run an
 `architecture-docs` script. With sa-records installed alone it answers with the marketplace clone, which carries
 `architecture-docs` too; when nothing resolves, skip those steps and say so.
@@ -291,7 +291,7 @@ Create ADRs as architectural decisions are made using Workflow 2 (Create Individ
 Resolve plugin directory and load the canonical template:
 
 ```bash
-PLUGIN_DIR=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-records)   # this skill ships in sa-records; the install registry's answer, never a find over $HOME
+PLUGIN_DIR=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-records)   # this skill ships in sa-records; the install registry's answer, never a find over $HOME
 Read(file_path="$PLUGIN_DIR/skills/architecture-definition-record/adr/ADR-000-template.md")
 ```
 

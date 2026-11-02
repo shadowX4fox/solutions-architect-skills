@@ -21,17 +21,11 @@ const [html, out] = a.filter((x, i) => !x.startsWith('--') && !(i > 0 && a[i - 1
 if (!html || !out) { console.error('Usage: bun snapshot.js <viewer.html> <out.png> [--plan <component id>] [--width 1600] [--height 1000] [--scale 1|2|3] [--wait <ms>] [--chrome <path>]'); process.exit(2); }
 const PLAN = opt('--plan'), W = +opt('--width', 1600), H = +opt('--height', 1000), SCALE = +opt('--scale', 1), WAIT = +opt('--wait', 6000);
 
+// the one Chrome finder of the suite (sa-skills' scripts/shared/find-chrome.js): Puppeteer's download per platform, PATH,
+// then where an installer puts one on Linux, macOS or Windows
 function findChrome() {
-  const named = [opt('--chrome'), process.env.SA_CHROME, process.env.PUPPETEER_EXECUTABLE_PATH, process.env.CHROME_PATH].filter(Boolean);
-  for (const c of named) if (fs.existsSync(c)) return c;
-  const cache = path.join(os.homedir(), '.cache', 'puppeteer', 'chrome');
-  if (fs.existsSync(cache)) {
-    const sub = { linux: 'chrome-linux64/chrome', darwin: 'chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing', win32: 'chrome-win64/chrome.exe' }[process.platform];
-    const hits = fs.readdirSync(cache).sort((x, y) => y.localeCompare(x, undefined, { numeric: true })).map((v) => path.join(cache, v, sub || '')).filter((f) => sub && fs.existsSync(f));
-    if (hits.length) return hits[0];
-  }
-  for (const n of ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'chrome']) { const w = Bun.which(n); if (w) return w; }
-  return null;
+  const { fromSaSkills } = require('../../../scripts/sa-skills.js');
+  return require(fromSaSkills('scripts', 'shared', 'find-chrome.js')).findChrome(opt('--chrome'));
 }
 
 async function main() {
@@ -53,7 +47,7 @@ async function main() {
   const { result: { sessionId: s } } = await send('Target.attachToTarget', { targetId, flatten: true });
   await send('Page.enable', {}, s); await send('Runtime.enable', {}, s);
   await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: SCALE, mobile: false }, s);
-  await send('Page.navigate', { url: 'file://' + path.resolve(html) + (PLAN ? '#plan=' + encodeURIComponent(PLAN) : '') }, s);
+  await send('Page.navigate', { url: require('url').pathToFileURL(path.resolve(html)).href + (PLAN ? '#plan=' + encodeURIComponent(PLAN) : '') }, s);   // file:///C:/… on Windows; a # in the path escaped, so the fragment stays the plan's
   await Bun.sleep(WAIT);   // the scene builds and the camera settles
   const on = await evaluate(s, "(() => { const b = document.getElementById('b-photo'); if (!b) return false; b.click(); return true; })()");
   if (!on) { console.error('The viewer did not start: no photo button in ' + html); done(1); }

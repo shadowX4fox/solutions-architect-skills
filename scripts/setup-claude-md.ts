@@ -70,7 +70,7 @@ When referencing a documented component by name in any output (analysis reports,
 
 ### Reading the architecture by code (no model tokens)
 
-The plugin reads the architecture surface with scripts, and so should you — open a document only to edit it or to quote its prose. \`[plugin_dir]\` is the installed plugin directory: \`bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts\` prints it — never a glob over \`~/.claude/plugins/cache/\`, which keeps every version ever installed.
+The plugin reads the architecture surface with scripts, and so should you — open a document only to edit it or to quote its prose. \`[plugin_dir]\` is the installed plugin directory: \`bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts"\` prints it — never a glob over \`~/.claude/plugins/cache/\`, which keeps every version ever installed.
 
 - **Where is X discussed?** — \`bun [plugin_dir]/skills/architecture-explorer-headers/utils/explorer-cli.ts findings <project_root> --query "<3–8 terms>"\` prints the files, lines, headings and excerpts where the terms appear (\`manifest <project_root>\` prints every doc and ADR with its header fields). Use it before reading anything for a question; read only the files it names, by heading range.
 - **A name, an id, a status, a catalog** — \`bun [plugin_dir]/skills/architecture-docs/scripts/arch-facts.js <project_root> --section <components|adrs|tdrs|integrations|phases|flows|layers|releases|docs>\` prints that part of the facts ledger (\`.cache/sa-skills/facts.json\`). Never reopen a document to remember a canonical name or an ADR status; the document wins over a stale ledger, so re-run the script after a write.

@@ -121,7 +121,7 @@ function check(root, opts = {}) {
   const hp = hldPath(root, opts.hld);
   let hld = 'none';
   if (hp && fs.existsSync(hp) && /\.(mmd|mermaid|md)$/i.test(hp)) {
-    const g = parseHld(read(hp)), rel = path.relative(root, hp);
+    const g = parseHld(read(hp)), rel = path.relative(root, hp).split(path.sep).join('/');
     hld = `${rel} — ${Object.values(g.nodes).filter((n) => !n.subgraph).length} nodes, ${g.edges.length} edges`;
     const drawn = new Set(Object.values(g.nodes).filter((n) => !n.subgraph).map((n) => norm(n.name)));
     const edgeKeys = new Set(g.edges.flatMap((e) => [norm(e.fromName) + '>' + norm(e.toName)].concat(e.both ? [norm(e.toName) + '>' + norm(e.fromName)] : [])));
@@ -141,10 +141,10 @@ function check(root, opts = {}) {
       if (drawn.has(a) && drawn.has(b) && !edgeKeys.has(a + '>' + b) && !edgeKeys.has(b + '>' + a)) findings.push({ check: 'hld', kind: 'not-in-hld', level: 'INFO', file: d05, line: r.line, id: r.id, message: `${r.id} ${x} → ${y}: both are in the HLD, the edge is not` });
     }));
   } else if (hp && fs.existsSync(hp)) {
-    hld = `${path.relative(root, hp)} — not Mermaid and not transcribed`;
-    findings.push({ check: 'hld', kind: 'untranscribed', level: 'WARNING', file: path.relative(root, hp), line: 0, id: null, message: `the HLD is a picture and ${path.relative(root, transcriptionOf(hp))} does not exist — transcribe it (00-gates.md Step 0.4) so its connections can be checked` });
+    hld = `${path.relative(root, hp).split(path.sep).join('/')} — not Mermaid and not transcribed`;
+    findings.push({ check: 'hld', kind: 'untranscribed', level: 'WARNING', file: path.relative(root, hp).split(path.sep).join('/'), line: 0, id: null, message: `the HLD is a picture and ${path.relative(root, transcriptionOf(hp))} does not exist — transcribe it (00-gates.md Step 0.4) so its connections can be checked` });
   }
-  else if (hp) hld = `${path.relative(root, hp)} — not found`;
+  else if (hp) hld = `${path.relative(root, hp).split(path.sep).join('/')} — not found`;
 
   const blocking = findings.filter((f) => f.level === 'BLOCKING').length;
   return { status: blocking ? 'FAIL' : 'PASS', rows: rows.length, hld, protocol, findings, blocking, warnings: findings.filter((f) => f.level === 'WARNING').length };

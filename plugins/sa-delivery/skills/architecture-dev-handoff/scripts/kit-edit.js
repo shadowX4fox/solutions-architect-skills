@@ -48,9 +48,9 @@ async function editBaselines(root, { prepare, opts, payloadDir, parts }) {
     if (!hasTag(root, tagOf(v))) continue;
     const base = path.join(editDir, `baseline-${v}`), tree = path.join(base, 'tree');
     fs.rmSync(base, { recursive: true, force: true }); fs.mkdirSync(tree, { recursive: true });
-    const tar = path.join(base, 'tree.tar');
-    if (git(root, ['archive', '--format=tar', '-o', tar, tagOf(v)]).status !== 0 || spawnSync('tar', ['-xf', tar, '-C', tree]).status !== 0) continue;
-    fs.rmSync(tar);
+    // git archive straight into tar's stdin (`-f -`): no archive path for GNU tar to read as a host on Windows
+    const ar = spawnSync('git', ['-C', root, 'archive', '--format=tar', tagOf(v)], { maxBuffer: 1024 * 1024 * 1024 });
+    if (ar.status !== 0 || spawnSync('tar', ['-x', '-f', '-', '-C', 'tree'], { cwd: base, input: ar.stdout }).status !== 0) continue;
     const judge = path.join(root, '.cache', 'sa-skills', 'judge');   // the same answers: an endpoint the judge resolved resolves the same way
     if (fs.existsSync(judge)) fs.cpSync(judge, path.join(tree, '.cache', 'sa-skills', 'judge'), { recursive: true });
     // cut at the same place inside the tree: the payload links to the documents relative to its own folder

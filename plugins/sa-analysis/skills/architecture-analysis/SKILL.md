@@ -124,8 +124,8 @@ enum values, table column headers, filenames, marker names, `EXPLORER_HEADER` fi
 This skill ships in the **sa-analysis** plugin (`sa-skills` depends on it and installs it). Resolve both directories — one call each, never a Glob over `~/.claude/plugins/cache/` (it keeps every version ever installed and a glob returns an arbitrary one):
 
 ```bash
-plugin_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-analysis)
-sa_skills_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)
+plugin_dir=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-analysis)
+sa_skills_dir=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts")
 ```
 
 `[plugin_dir]` is sa-analysis' install (this skill's scripts, plans and specs); `[sa_skills_dir]` is sa-skills' — the architecture is read through its facts ledger, explorer, judge and findings contract, which the scripts find on their own (`scripts/sa-skills.js`: `--sa-skills`, `SA_SKILLS_DIR`, the repo layout, the install registry) and stop with the install command when sa-skills is absent. The script answers from Claude Code's install registry — the project-scope install for this directory, else the user-scope one, else the copy it runs from — and warns on stderr when a newer version is on the machine (`claude plugin update … --scope <scope>`, then `/reload-plugins`); show that warning to the user. Without the marketplace clone (a dev clone alone): Glob `**/{sa-skills,solutions-architect-skills}/.claude-plugin/plugin.json` **outside** `~/.claude/plugins/cache/`, strip `/.claude-plugin/plugin.json` for `sa_skills_dir` and append `/plugins/sa-analysis` for `plugin_dir`.

@@ -27,7 +27,7 @@ This skill compares **PO Spec use cases** against **architecture documentation**
 **Output**: `TRACEABILITY_REPORT.md` at the project root — a markdown file designed for tickets, emails, Confluence, GitHub issues, and external platforms.
 
 This skill ships in the **sa-analysis** plugin (`sa-skills` depends on it and installs it). `[plugin_dir]` is sa-analysis'
-install: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-analysis`.
+install: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-analysis`.
 The script reads the architecture through sa-skills' explorer, judge and PO Spec parser and finds sa-skills on its own
 (`--sa-skills <dir>`, `SA_SKILLS_DIR`, the repo layout, the install registry).
 

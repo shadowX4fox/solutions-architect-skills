@@ -29,7 +29,7 @@ One script, `scripts/ci-setup.js`, checks a repository and writes what is missin
 
 ## Steps
 
-1. **Resolve `plugin_dir`**: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-delivery`.
+1. **Resolve `plugin_dir`**: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-delivery`.
 2. **Which side.** A directory with `ARCHITECTURE.md` is the **architecture** repository. One with `.architecture.json`, or a code repository the user names as a service, is a **service** repository. When a request covers both ("connect the service to the architecture"), do the architecture first. If it is unclear, ask.
 3. **Check.** Run it read-only and show its output verbatim:
    - architecture: `bun [plugin_dir]/skills/architecture-ci-setup/scripts/ci-setup.js architecture <root> [--runner <labels>]`

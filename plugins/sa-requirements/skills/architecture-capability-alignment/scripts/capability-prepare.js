@@ -157,7 +157,7 @@ const statusText = (c) => STATUS[c].replace(/^\S+\s/, '');
 async function align(root, opts = {}) {
   root = path.resolve(root);
   const specPath = path.resolve(root, opts.spec || 'PRODUCT_OWNER_SPEC.md');
-  if (!fs.existsSync(specPath)) throw new Error(`no PO Spec at ${path.relative(root, specPath)} — run /sa-requirements:architecture-readiness first`);
+  if (!fs.existsSync(specPath)) throw new Error(`no PO Spec at ${path.relative(root, specPath).split(path.sep).join('/')} — run /sa-requirements:architecture-readiness first`);
   // `--brief <json>`: the Step 3 capability list the session writes — in English, the definitions' language — instead of the
   // brief cut from the spec; shape { problem, objectives, use_cases: [{ id, name, description, actors? }] }. Jev's primary
   // language is English and a Spanish brief against English definitions is where it separates worst.
@@ -171,7 +171,7 @@ async function align(root, opts = {}) {
   const sds = all.filter(({ s }) => s.what), undefinedSds = all.length - sds.length;
   const engine = !JUDGE ? 'none' : opts.engine || JUDGE.engineInForce();
   const common = { engine, root, apiKey: opts.apiKey, fetch: opts.fetch, cache: opts.cache, chunk: opts.chunk || 40 };
-  const judge = { engine, rounds: [], note: SA_SKILLS ? null : NO_JUDGE, unsettled: [], undecided: { pairs: 0, by_use_case: {}, roles: [] }, worksheets: [], brief_language: briefLanguage(brief), brief_source: opts.brief ? path.relative(root, path.resolve(root, opts.brief)) : 'cut from the spec', warnings: SA_SKILLS ? [] : [NO_JUDGE] };
+  const judge = { engine, rounds: [], note: SA_SKILLS ? null : NO_JUDGE, unsettled: [], undecided: { pairs: 0, by_use_case: {}, roles: [] }, worksheets: [], brief_language: briefLanguage(brief), brief_source: opts.brief ? path.relative(root, path.resolve(root, opts.brief)).split(path.sep).join('/') : 'cut from the spec', warnings: SA_SKILLS ? [] : [NO_JUDGE] };
   if (undefinedSds) judge.warnings.push(F.id === 'BIAN' ? `${undefinedSds} of ${all.length} Service Domains carry no definition in the BIAN landscape in force and were not judged — an institution pack's full Service Landscape supplies them (docs/INSTITUTION_PACKS.md)` : `${undefinedSds} of ${all.length} ${plural(F.headings.unit)} carry no definition in ${F.name} and were not judged`);
   if (judge.brief_language !== 'en' && JUDGE) judge.warnings.push(`the brief reads as ${judge.brief_language === 'es' ? 'Spanish' : 'not English'} against ${F.id === 'BIAN' ? 'BIAN\'s' : F.name + '\'s'} English definitions — the judge separates worst on a mixed-language state (precision 0.17 vs 0.42 at the 0.5 cut on the reference); write the Step 3 capability list in English and pass it as --brief`);
   // an unanswered item comes back absent from the answers: the caller marks it undecided, never fills it
@@ -202,7 +202,7 @@ async function align(root, opts = {}) {
   // the levels above a Service Domain are the registry's: derived, never judged — a level with nothing claimed and a pair
   // still unanswered is undecided, not ⚪ (a claimed Service Domain whose role is undecided makes its domain at least 🟡)
   corpus.areas.forEach((a) => { a.domains.forEach((d) => { const v = d.services.map((s) => s.verdict && s.verdict.choice); d.verdict = { choice: v.includes('realizes') ? 'impacted' : v.some(Boolean) ? 'partial' : d.services.some((s) => s.undecided.length) ? 'undecided' : 'not_applicable', by: 'derived', confidence: null, settled: true }; }); const v = a.domains.map((d) => d.verdict.choice); a.verdict = { choice: v.includes('impacted') ? 'impacted' : v.includes('partial') ? 'partial' : v.includes('undecided') ? 'undecided' : 'not_applicable', by: 'derived', confidence: null, settled: true }; });
-  return { root, spec: path.relative(root, specPath), specVersion: parseSpec(text).version, brief, corpus, judge, today: opts.today || new Date().toISOString().slice(0, 10), pluginVersion: (() => { try { return JSON.parse(read(path.join(SKILL, '..', '..', '.claude-plugin', 'plugin.json'))).version; } catch { return 'unknown'; } })() };
+  return { root, spec: path.relative(root, specPath).split(path.sep).join('/'), specVersion: parseSpec(text).version, brief, corpus, judge, today: opts.today || new Date().toISOString().slice(0, 10), pluginVersion: (() => { try { return JSON.parse(read(path.join(SKILL, '..', '..', '.claude-plugin', 'plugin.json'))).version; } catch { return 'unknown'; } })() };
 }
 
 // ── Stage 3: the report, v3.0 ────────────────────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ if (require.main === module) (async () => {
   const root = args.find((a, i) => !a.startsWith('--') && !['--spec', '--judge', '--out', '--today', '--verify', '--brief', '--sa-skills', '--framework'].includes(args[i - 1]));
   if (!root) { console.error('Usage: bun capability-prepare.js <project-root> [--spec PRODUCT_OWNER_SPEC.md] [--brief <capabilities.json, English>] [--judge agent|typesafe|clef] [--framework <BIAN|CROSS-INDUSTRY|a pack id>] [--out <report, default the framework report>] [--today YYYY-MM-DD] [--verify <reviewed BIAN_ALIGNMENT.md>] [--json] [--dry-run] [--sa-skills <dir>]'); process.exit(2); }
   let r; try { r = await align(root, { spec: opt('--spec'), brief: opt('--brief'), engine: opt('--judge'), today: opt('--today'), framework: opt('--framework') }); } catch (e) { console.error('capability-prepare: ' + (e.stack || e.message)); process.exit(2); }
-  if (opt('--verify')) { const v = verifyAgainst(r, path.resolve(root, opt('--verify'))); console.error(`verify against ${path.relative(root, v.gold_file)} — ${v.gold.length} Service Domain(s) claimed there:`); v.cuts.forEach((c) => console.error(`   cut ${c.cut}: ${c.claimed} claimed · reaches ${c.gold_reached}/${c.of} of the gold · precision ${c.precision == null ? '—' : c.precision}${c.missed.length ? ` · missed: ${c.missed.join(', ')}` : ''}`)); console.error(`   top pairs: ${v.best.slice(0, 12).map(([n, p]) => `${n} ${p.toFixed(2)}`).join(' · ')}`); }
+  if (opt('--verify')) { const v = verifyAgainst(r, path.resolve(root, opt('--verify'))); console.error(`verify against ${path.relative(root, v.gold_file).split(path.sep).join('/')} — ${v.gold.length} Service Domain(s) claimed there:`); v.cuts.forEach((c) => console.error(`   cut ${c.cut}: ${c.claimed} claimed · reaches ${c.gold_reached}/${c.of} of the gold · precision ${c.precision == null ? '—' : c.precision}${c.missed.length ? ` · missed: ${c.missed.join(', ')}` : ''}`)); console.error(`   top pairs: ${v.best.slice(0, 12).map(([n, p]) => `${n} ${p.toFixed(2)}`).join(' · ')}`); }
   const md = report(r), outPath = path.resolve(root, opt('--out') || (r.corpus.framework && r.corpus.framework.report) || 'BIAN_ALIGNMENT.md');
   if (!args.includes('--dry-run')) fs.writeFileSync(outPath, md);
   const A = r.corpus.areas, st = (c) => A.filter((a) => a.verdict.choice === c).map((a) => a.name);
@@ -317,5 +317,5 @@ if (require.main === module) (async () => {
     r.judge.warnings.forEach((w) => console.log(`  ⚠️ ${w}`));
     const u = r.judge.undecided; if (u.pairs || u.roles.length) console.log(`  ❔ undecided: ${u.pairs} pair(s), ${u.roles.length} role(s) — not judged, not counted`);
     console.log(`  classified by ${r.judge.engine} — rounds: ${r.judge.rounds.map((x) => `${x.spec} ${x.asked}`).join(' · ') || 'none'}${r.judge.note ? ` · ${r.judge.note}` : ''}`);
-    console.log(args.includes('--dry-run') ? '  (dry run — nothing written)' : `  Report: ${path.relative(root, outPath)}`); }
+    console.log(args.includes('--dry-run') ? '  (dry run — nothing written)' : `  Report: ${path.relative(root, outPath).split(path.sep).join('/')}`); }
 })();

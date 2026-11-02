@@ -48,7 +48,7 @@ Evaluation, the stamp, the PDF and the sync stay in Claude Code.
 ## Plugin directories
 
 This skill ships in the **sa-requirements** plugin (`sa-skills` depends on it and installs it). `[plugin_dir]` is its
-install: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-requirements`.
+install: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-requirements`.
 `[sa_skills_dir]` is sa-skills' (the same command without `--plugin`): the distribution PDF (workflow 5) and the sync
 with the architecture (workflow 6) run its tools, and a missing one is a warning, never a blocked spec.
 
@@ -216,7 +216,7 @@ and `architecture-docs` Workflow 1 Step 0.2d.
 **Step 5.1 — Resolve sa-skills' directory** — the PDF is rendered by sa-skills' `tools/docgen` (this skill ships in the
 sa-requirements plugin, which sa-skills depends on):
 
-- `sa_skills_dir=$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)`
+- `sa_skills_dir=$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts")`
   — the install registry's answer (project scope, else user scope, else the marketplace clone), never a Glob over
   `~/.claude/plugins/cache/`; show its stderr warning when a newer version is on the machine. With sa-requirements
   installed alone the clone answers and docgen may lack its dependencies: Step 5.5 applies, the spec is still written

@@ -8,7 +8,7 @@ Set up the sa-skills plugin for this project by merging the plugin's bundled `se
 
 Try each path in order and use the first one that exists:
 
-1. `$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts)/.claude/settings.json.example` — the install registry's answer (project scope, else user scope, else the marketplace clone itself)
+1. `$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts")/.claude/settings.json.example` — the install registry's answer (project scope, else user scope, else the marketplace clone itself)
 2. `~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/.claude/settings.json.example` (the marketplace clone, when the script is not there)
 3. Glob `**/{sa-skills,solutions-architect-skills}/.claude/settings.json.example` relative to CWD, **outside `~/.claude/plugins/cache/`** (dev-mode clone)
 

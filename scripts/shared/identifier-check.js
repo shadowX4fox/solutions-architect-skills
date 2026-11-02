@@ -85,11 +85,11 @@ async function check(root, opts = {}) {
     catch (e) { if (e.name !== 'JudgeError') throw e;
       if (engine === 'agent') throw e;
       note = `${engine} unavailable (${e.message}) — the agent worksheet stands in`; engine = 'agent'; res = await run('agent'); }
-    if (res.pending) note = `${note ? note + '; ' : ''}agent worksheet at ${path.relative(root, res.pending)} — answer it into ${path.relative(root, res.answersFile)} and re-run with --answers`;
+    if (res.pending) note = `${note ? note + '; ' : ''}agent worksheet at ${path.relative(root, res.pending).split(path.sep).join('/')} — answer it into ${path.relative(root, res.answersFile).split(path.sep).join('/')} and re-run with --answers`;
   }
   const findings = [], dismissed = [], undecided = [];
   tokens.forEach((t, i) => { const a = res.answers[`id-${i}`]; if (!a) { undecided.push(t); return; } const p = JUDGE.value(a); const o = byToken.get(t);
-    if (p >= 0.5) findings.push({ rule: 'identifier-language', severity: 'WARNING', token: t, p: +p.toFixed(2), by: a.by, occurrences: o.map((x) => ({ file: path.relative(root, x.file), line: x.line })) });
+    if (p >= 0.5) findings.push({ rule: 'identifier-language', severity: 'WARNING', token: t, p: +p.toFixed(2), by: a.by, occurrences: o.map((x) => ({ file: path.relative(root, x.file).split(path.sep).join('/'), line: x.line })) });
     else dismissed.push(t); });
   if (undecided.length && !res.pending) note = `${note ? note + '; ' : ''}${undecided.length} token(s) unanswered — answer them in ${path.relative(root, res.answersFile || JUDGE.answersPath(spec, { root }))} and re-run with --answers`;
   const status = res.pending || undecided.length ? 'PENDING' : findings.length ? 'WARN' : 'PASS';

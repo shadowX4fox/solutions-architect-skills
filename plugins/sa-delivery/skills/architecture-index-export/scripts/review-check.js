@@ -57,6 +57,8 @@ const heading = (status, title) => (codec ? codec(MOOD[status], title) : `### ${
 const read = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n?/g, '\n');
 const readJson = (f) => { try { return JSON.parse(read(f)); } catch (e) { return null; } };
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
+// a copy's bytes, and the same bytes with CRLF read as LF: a Windows checkout (core.autocrlf) changes only the line ends
+const shas = (buf) => { const raw = sha256(buf), lf = Buffer.from(buf).toString('latin1').includes('\r\n') ? sha256(Buffer.from(Buffer.from(buf).toString('latin1').replace(/\r\n/g, '\n'), 'latin1')) : raw; return [raw, lf]; };
 const LANGS = ['en', 'es'];
 const langOf = (l) => (LANGS.includes(String(l || '').toLowerCase()) ? String(l).toLowerCase() : 'en');
 // one message in the review's language: { en, es }
@@ -135,7 +137,7 @@ async function check(dir, opts = {}) {
     for (const p of assets) {
       const f = path.join(dir, 'architecture', p.rel);
       if (!fs.existsSync(f)) { add('blocking', 'asset-missing', L(`the pack's ${p.title} is not at architecture/${p.rel} (rule 1: kept byte for byte)`, `el ${p.title} del pack no está en architecture/${p.rel} (regla 1: se conserva byte a byte)`), `architecture/${p.rel}`); continue; }
-      if (sha256(fs.readFileSync(f)) !== p.sha256) add('blocking', 'asset-modified', L(`architecture/${p.rel} differs from the pack's bytes (rule 1: a contract change is the architecture's — escalate it, never edit the copy)`, `architecture/${p.rel} difiere de los bytes del pack (regla 1: un cambio de contrato es de la arquitectura; se escala, nunca se edita la copia)`), `architecture/${p.rel}`);
+      if (!shas(fs.readFileSync(f)).includes(p.sha256)) add('blocking', 'asset-modified', L(`architecture/${p.rel} differs from the pack's bytes (rule 1: a contract change is the architecture's — escalate it, never edit the copy)`, `architecture/${p.rel} difiere de los bytes del pack (regla 1: un cambio de contrato es de la arquitectura; se escala, nunca se edita la copia)`), `architecture/${p.rel}`);
     }
     // a copy kept anywhere else escapes both checks above, so it is not allowed at all: rule 1 keeps the copies in architecture/
     const bySha = new Map(assets.map((p) => [p.sha256, p.rel]));
@@ -147,7 +149,7 @@ async function check(dir, opts = {}) {
       const fp = path.join(dir, f);
       let st; try { st = fs.statSync(fp); } catch (e) { continue; }
       if (!st.isFile() || st.size > 16 * 1024 * 1024) continue;
-      const t = bySha.get(sha256(fs.readFileSync(fp)));
+      const [raw, lf] = shas(fs.readFileSync(fp)), t = bySha.get(raw) || bySha.get(lf);
       if (t) { flagged.add(f); add('blocking', 'asset-outside', L(`${f} is a copy of the pack's ${t} outside architecture/ — keep the one copy at architecture/${t} and generate from it (rule 1)`, `${f} es una copia del ${t} del pack fuera de architecture/: se conserva una sola copia en architecture/${t} y se genera desde ella (regla 1)`), f); }
     }
     // a file that was a byte copy of a contract at the base and that the pull request changes — a copy drifting away

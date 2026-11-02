@@ -8,6 +8,10 @@ describe('confirm · the architecture\'s files', () => {
   test('ARCHITECTURE.md, docs/, adr/, tdr/ — nothing else, nothing outside the project', () => {
     expect(architecturePath('/p', '/p/ARCHITECTURE.md')).toBe('ARCHITECTURE.md')
     expect(architecturePath('/p/', '/p/docs/05-integration-points.md')).toBe('docs/05-integration-points.md')
+    // Windows: backslashes, and a drive letter written either way
+    expect(architecturePath('C:\\proj', 'C:\\proj\\docs\\05-integration-points.md')).toBe('docs/05-integration-points.md')
+    expect(architecturePath('c:\\Proj\\', 'C:/Proj/ARCHITECTURE.md')).toBe('ARCHITECTURE.md')
+    expect(architecturePath('C:\\proj', 'C:\\other\\docs\\x.md')).toBeNull()
     expect(architecturePath('/p', '/p/adr/ADR-120.md')).toBe('adr/ADR-120.md')
     expect(architecturePath('/p', '/p/tdr/TDR-001.md')).toBe('tdr/TDR-001.md')
     expect(architecturePath('/p', '/p/handoffs/x.md')).toBeNull()

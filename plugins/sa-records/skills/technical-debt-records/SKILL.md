@@ -30,7 +30,7 @@ A TDR makes a known technical compromise explicit, tracked and reviewable. ADRs 
 ## Plugin directories
 
 This skill ships in the **sa-records** plugin (`sa-skills` depends on it and installs it). `[plugin_dir]` is sa-records'
-install: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-records`.
+install: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-records`.
 `[sa_skills_dir]` is sa-skills' — the same command without `--plugin` — only for the optional `architecture-docs` steps;
 with sa-records installed alone it answers with the marketplace clone, and when nothing resolves those steps are skipped.
 

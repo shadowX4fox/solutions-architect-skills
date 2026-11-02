@@ -39,7 +39,7 @@ export function stateOf(state: string, es: boolean): { label: string; tone: 'ok'
   const L: Record<string, [string, string, 'ok' | 'high' | 'critical' | 'info']> = {
     released: ['released', 'publicada', 'ok'], changed: ['changed since its release', 'con cambios desde su release', 'high'],
     draft: ['draft — never released', 'borrador — sin release', 'info'], untagged: ['released, tag missing', 'publicada sin tag', 'high'],
-    deprecated: ['deprecated', 'obsoleta', 'critical'], 'no-git': ['not under git', 'fuera de git', 'high'], unversioned: ['no version', 'sin versión', 'high'],
+    deprecated: ['deprecated', 'obsoleta', 'critical'], unreadable: ['unknown — the release tag could not be read', 'desconocido: no se pudo leer el tag del release', 'high'], 'no-git': ['not under git', 'fuera de git', 'high'], unversioned: ['no version', 'sin versión', 'high'],
   }
   const x = L[state]
   return x ? { label: es ? x[1] : x[0], tone: x[2] } : { label: state, tone: 'info' }

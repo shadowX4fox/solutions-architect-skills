@@ -118,7 +118,8 @@ function baseline(root, version) {
     if (present.length) {
       const ar = git(root, ['archive', '--format=tar', tree, '--', ...present], { buffer: true });
       if (!ar.ok) return { kind: 'none', tag, error: ar.err };
-      const x = spawnSync('tar', ['-x', '-C', dir], { input: ar.out });
+      // `-f -`: stdin, said aloud — Windows' own tar (bsdtar) otherwise reads its tape device, GNU tar reads stdin either way
+      const x = spawnSync('tar', ['-x', '-f', '-', '-C', dir], { input: ar.out });
       if (x.status !== 0) return { kind: 'none', tag, error: String(x.stderr || 'tar failed') };
     }
     fs.writeFileSync(path.join(dir, '.done'), tag + '\n');
@@ -296,7 +297,7 @@ function gates(root, facts, opts = {}) {
     { id: 'budgets', cmd: [P('skills', 'architecture-docs', 'scripts', 'docs-stats.js'), root] },
     { id: 'tdrs', when: exists(path.join(root, 'tdr')) && exists(tdrCheck), cmd: [tdrCheck, root] },   // optional: technical-debt-records
     { id: 'adr-index', when: exists(path.join(root, 'adr')) && exists(adrIndex), fn: () => {   // optional: architecture-definition-record
-      const r = spawnSync('bun', [adrIndex, root], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+      const r = spawnSync(process.execPath, [adrIndex, root], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
       const disk = exists(path.join(root, 'adr', 'README.md')) ? read(path.join(root, 'adr', 'README.md')) : '';
       if (r.status !== 0) return { status: 'fail', summary: (r.stderr || '').trim().split('\n').pop() };
       // the index stamps the day it was written: an index synced on another day is still the index of the records
@@ -309,7 +310,7 @@ function gates(root, facts, opts = {}) {
     let r;
     if (g.fn) r = g.fn();
     else {
-      const x = spawnSync('bun', g.cmd, { cwd: root, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 });
+      const x = spawnSync(process.execPath, g.cmd, { cwd: root, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 });
       const out = `${x.stdout || ''}\n${x.stderr || ''}`;
       const tail = out.split('\n').map((l) => l.trim()).filter(Boolean).slice(-3).join(' · ').slice(0, 400);
       const pending = /\.worksheet\.md/.test(out) && /(pending|undecided|answer)/i.test(out);
@@ -318,7 +319,7 @@ function gates(root, facts, opts = {}) {
       const loc = LOCATE[g.id];
       if (r.status === 'fail' && inScope && loc && !pending) {
         let list = null;
-        try { list = loc.json ? loc.list(JSON.parse(spawnSync('bun', [...g.cmd, '--json'], { cwd: root, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 }).stdout)) : loc.list(out); } catch { list = null; }
+        try { list = loc.json ? loc.list(JSON.parse(spawnSync(process.execPath, [...g.cmd, '--json'], { cwd: root, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 }).stdout)) : loc.list(out); } catch { list = null; }
         if (list && list.length) {
           const inn = list.filter(inScope), outside = list.length - inn.length, few = (xs) => xs.slice(0, 3).map((f) => f.text).join(' · ') + (xs.length > 3 ? ` · +${xs.length - 3}` : '');
           if (!inn.length) Object.assign(r, { status: 'warn', summary: `${outside} blocking finding(s), none in increment ${piece.id} — ${few(list)}`, outside });
@@ -381,6 +382,7 @@ function status(root, opts = {}) {
   if (base.kind !== 'none') { r.changes = delta(collect(base.dir), cur, base.dir, root); r.recommended = r.changes.length ? recommend(r.changes) : null; }
   if (/deprecated/i.test(declared || '')) r.state = 'deprecated';
   else if (/released/i.test(declared || '') && !r.tag.local) r.state = 'untagged';
+  else if (base.kind === 'none' && base.error) { r.state = 'unreadable'; r.baseline_error = String(base.error).trim().slice(0, 300); }   // the tag is there, its tree could not be read: never a draft
   else if (base.kind === 'none') r.state = 'draft';
   else r.state = r.changes.length || r.unreleased.length ? 'changed' : 'released';
   r.downstream = r.state === 'draft' ? [] : downstream(root, version, released);
@@ -390,7 +392,7 @@ function status(root, opts = {}) {
   const sl = increments.slices(cur);
   if (sl.increments.length) r.increments = { file: sl.file, list: sl.increments.map((x) => ({ id: x.id, target: x.target, use_cases: x.use_cases, flows: x.flows, containers: x.containers.length, new_containers: x.new.containers, integrations: x.integrations.length, new_integrations: x.new.integrations.length, gaps: x.gaps, released_in: deliveredIn(cl, x.id) })), unassigned: sl.unassigned, duplicates: sl.duplicates, temporary: sl.temporary, temporary_gaps: sl.temporary_gaps };
   r.next = { draft: `release my architecture — first release, v${version}`, changed: `release my architecture — ${r.changes.length} change(s) since v${version}, recommended ${r.recommended || 'patch'}`,
-    untagged: `tag ${TAG(version)} on the commit that released it (lifecycle.js tag) — a release merged through its pull request is tagged after the merge`, released: r.downstream.some((d) => d.stale) ? 'refresh the stale downstream artifacts listed' : 'nothing due', deprecated: 'nothing — the architecture is deprecated' }[r.state];
+    unreadable: `the tree of ${TAG(version)} could not be read (${r.baseline_error || 'unknown error'}) — the state is unknown, not a draft; check git and tar, then run status again`, untagged: `tag ${TAG(version)} on the commit that released it (lifecycle.js tag) — a release merged through its pull request is tagged after the merge`, released: r.downstream.some((d) => d.stale) ? 'refresh the stale downstream artifacts listed' : 'nothing due', deprecated: 'nothing — the architecture is deprecated' }[r.state];
   // the last status on disk, for readers that cannot run git (sa-alia's next steps)
   try { const d = path.join(root, '.cache', 'sa-skills', 'lifecycle'); fs.mkdirSync(d, { recursive: true }); fs.writeFileSync(path.join(d, 'status.json'), JSON.stringify({ state: r.state, version, changes: r.changes.length, recommended: r.recommended, at: new Date().toISOString() }) + '\n'); } catch { /* read-only project */ }
   return r;
@@ -469,8 +471,8 @@ function refreshCommandCenter(root) {   // optional: architecture-command-center
   const dir = P('plugins', 'sa-visualization', 'skills', 'architecture-command-center', 'scripts');
   if (!s || !exists(path.join(dir, 'dossier.js'))) return [];
   const html = s.replace(/\.scene\.json$/, '.html');
-  const a = spawnSync('bun', [path.join(dir, 'dossier.js'), root, s, '--write'], { cwd: root, encoding: 'utf8' });
-  const b = a.status === 0 ? spawnSync('bun', [path.join(dir, 'render.js'), s, html], { cwd: root, encoding: 'utf8' }) : a;
+  const a = spawnSync(process.execPath, [path.join(dir, 'dossier.js'), root, s, '--write'], { cwd: root, encoding: 'utf8' });
+  const b = a.status === 0 ? spawnSync(process.execPath, [path.join(dir, 'render.js'), s, html], { cwd: root, encoding: 'utf8' }) : a;
   return a.status === 0 && b.status === 0 ? [path.relative(root, s), path.relative(root, html)] : [];
 }
 const githubCompare = (url, base, branch) => { const m = String(url).match(/github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?$/); return m ? `https://github.com/${m[1]}/${m[2]}/compare/${base}...${branch}?expand=1` : null; };

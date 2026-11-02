@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.8.1-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.8.2-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
@@ -117,7 +117,8 @@ and an organization can add its own.
 ## Quick start
 
 **Requirements:** [Claude Code](https://claude.com/claude-code), [Bun](https://bun.sh) ≥ 1.0 and
-[ripgrep](https://github.com/BurntSushi/ripgrep).
+[ripgrep](https://github.com/BurntSushi/ripgrep). **Platforms:** Linux first, then macOS, then Windows (best effort) —
+[the support tiers](docs/INSTALLATION.md#platform-support).
 
 **Paste this into Claude Code.** It installs the suite, or updates it if it is already there, then checks the result.
 The same text upgrades it later:
@@ -135,8 +136,8 @@ Install the Solutions Architect Skills suite for me, from a shell (the `claude` 
    `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; otherwise run
    `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`.
    Then run `claude plugin list` and install every "Dependency <name>@… is not installed" the same way.
-4. Run `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet`
-   (on Windows, the same path under %USERPROFILE%) and run `bun install` in the directory it prints. Each version is a
+4. Run `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet`
+   (`$HOME` works in Git Bash and in PowerShell) and run `bun install` in the directory it prints. Each version is a
    new directory, so this repeats after every update.
 5. Run `bun <that directory>/scripts/setup-docgen.ts --no-smoke`. If it reports no browser, offer
    `bunx puppeteer browsers install chrome` — Mermaid diagrams render as pictures in Word and PDF only with one.
@@ -158,7 +159,7 @@ It grants the permissions the skills need, sets up the judge and checks the expo
 claude plugin marketplace add shadowX4fox/solutions-architect-skills
 claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user   # brings the other five
 claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user     # optional: Alia in Claude Code
-cd "$(bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --quiet)" && bun install
+cd "$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet)" && bun install
 ```
 
 `bun install` brings the npm packages the Word / PDF export and the handoff kit's contract checks need; Claude Code's

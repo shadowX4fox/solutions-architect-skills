@@ -55,7 +55,9 @@ function versionOf(dir: string): string | null {
 }
 const semver = (v: string) => v.split(".").map((n) => parseInt(n, 10) || 0);
 const newer = (a: string, b: string) => { const x = semver(a), y = semver(b); for (let i = 0; i < 3; i++) { if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) > (y[i] ?? 0); } return false; };
-const within = (dir: string, root: string) => { const d = resolve(dir), r = resolve(root); return d === r || d.startsWith(r.endsWith(sep) ? r : r + sep); };
+// a path inside another; Windows paths compare without case (C:\\Proj and c:\\proj are one folder)
+const fold = (p: string) => (process.platform === "win32" ? p.toLowerCase() : p);
+const within = (dir: string, root: string) => { const d = fold(resolve(dir)), r = fold(resolve(root)); return d === r || d.startsWith(r.endsWith(sep) ? r : r + sep); };
 
 function fromEnv(): Hit | null {
   const dir = process.env.CLAUDE_PLUGIN_ROOT; if (!dir) return null;

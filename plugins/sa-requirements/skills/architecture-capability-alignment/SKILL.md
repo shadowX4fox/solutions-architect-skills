@@ -74,7 +74,7 @@ What it emits: a third classification level (Service Domain), BIAN's own publish
 ## Plugin directories
 
 This skill ships in the **sa-requirements** plugin, with the PO Spec it reads (`sa-skills` depends on it and installs
-it). `[plugin_dir]` is its install: `bun ~/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts --plugin sa-requirements`.
+it). `[plugin_dir]` is its install: `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --plugin sa-requirements`.
 `[sa_skills_dir]` is sa-skills' (the same command without `--plugin`). `[bian_dir]` is the BIAN Service Landscape in force — `bun [sa_skills_dir]/scripts/shared/frameworks.js --dir BIAN` (an institution pack's BIAN framework, else the open corpus the base carries); without sa-skills, `[plugin_dir]/references/bian-v14`. Another framework's folder: `frameworks.js --dir <id>`. `[design_language_dir]` is the Design Language Standard in force — `bun [sa_skills_dir]/scripts/shared/packs.js --path design-language` prints it (an institution pack's — the base carries none) or prints nothing and exits 1: **fallback mode**. Two pieces of this workflow are sa-skills': the
 judge (`scripts/judge.js`) that decides every claim, and the Design Language Standard's `bian-registry.json` (the
 `DOM` / `CAP` codes). `capability-prepare.js` finds sa-skills itself (`--sa-skills`, `SA_SKILLS_DIR`, the install registry).

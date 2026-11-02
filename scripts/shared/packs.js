@@ -48,7 +48,9 @@ function satisfies(v, range) {
     return op === '>=' ? d >= 0 : op === '<=' ? d <= 0 : op === '>' ? d > 0 : op === '<' ? d < 0 : d === 0;
   });
 }
-const within = (dir, root) => { const d = path.resolve(dir), r = path.resolve(root); return d === r || d.startsWith(r.endsWith(path.sep) ? r : r + path.sep); };
+// a path inside another; Windows paths compare without case (C:\\Proj and c:\\proj are one folder)
+const fold = (p) => (process.platform === 'win32' ? p.toLowerCase() : p);
+const within = (dir, root) => { const d = fold(path.resolve(dir)), r = fold(path.resolve(root)); return d === r || d.startsWith(r.endsWith(path.sep) ? r : r + path.sep); };
 const claudeDir = () => process.env.CLAUDE_CONFIG_DIR ? path.resolve(process.env.CLAUDE_CONFIG_DIR) : path.join(os.homedir(), '.claude');
 
 // the install paths of every plugin that applies to this project, from the registry

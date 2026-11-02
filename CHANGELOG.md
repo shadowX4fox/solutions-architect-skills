@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.2] - 2026-11-02
+
+### Changed
+- **Platform support, in tiers**: Linux primary, macOS secondary, Windows tertiary (best effort). Documented in `docs/INSTALLATION.md` § Platform support with what to know on Windows, and as a rule for code in `CLAUDE.md`.
+- **The plugin's hooks run on Bun** (`hooks/hooks.json`): the routing hook (`hooks/route-architecture-docs.js`) and the prose hook. Before, they ran `sh`, which a Windows machine without Git Bash lacks, so each prompt and each write failed its hook. The `.sh`, `.cmd` and `.ps1` wrappers are retired. `/setup` writes no PowerShell copy any more and retires one an earlier version wrote.
+- **The plugin-locating command reads `$HOME`**, not `~`, everywhere the skills and docs name it: PowerShell does not expand `~` for a native command.
+
+### Fixed (Windows, and Apple-silicon macOS)
+- **Release**:
+  - `lifecycle.js` reads the tagged tree with `tar -x -f -`. Windows' own tar otherwise reads its tape device, and the failure left a released architecture looking like a draft.
+  - A tree that cannot be read is now the state `unreadable`, with the cause.
+  - Bun is spawned by its own path.
+- **Index publish and the handoff kit's edit in place**: `tar` with relative names and stdin. GNU tar (Git Bash) reads `C:\\…` given to `-f` as a remote host.
+- **Paths compare without case on Windows**: the install registry and institution packs (`plugin-root.ts`, `packs.js`).
+- **Forward slashes in every reported path**: flow, principle, integration and identifier checks; escalations; capability alignment; traceability; PO Spec delta; Word export; CI setup. An increment release over-blocked on Windows because `docs\\04-…` never matched its scope.
+- **Chrome is found on any OS** (`scripts/shared/find-chrome.js`, shared by the analyses' chart and the command center's snapshot):
+  - Windows: Program Files and LocalAppData, with Edge as the last resort;
+  - macOS: /Applications and Puppeteer's arm64 download.
+  
+  Pages open by `pathToFileURL`.
+- **CRLF checkouts**: the ADR catalog sync and the service review compare a file's bytes and its CRLF-as-LF bytes. `core.autocrlf` no longer reads as drift.
+- **mermaid-cli's `.cmd` shim** is quoted as docgen quotes it, so a path with spaces survives.
+- **sa-alia 1.5.1**: Windows paths in her confirmation, Windows detection when opening a file, the `unreadable` release state.
+
 ## [11.8.1] - 2026-11-02
 
 ### Changed
