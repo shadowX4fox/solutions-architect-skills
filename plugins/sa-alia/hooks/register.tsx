@@ -7,12 +7,14 @@ import type { Register } from 'claude-code'
 import { registerAlia } from './alia/register'
 import { registerMilestones } from './milestones/register'
 import { registerRows } from './rows/register'
+import { registerCharts } from './rows/chart'
 import { registerConfirm } from './confirm/register'
 import { registerExplorer } from './explorer/register'
 import { registerLifecycle } from './lifecycle'
 import { registerNextSteps } from './next-steps/register'
 import { registerRadar } from './radar/register'
 import { registerStatus } from './status/register'
+import { registerTrend } from './radar/trend-pane'
 
 export const register: Register = (on, options) => {
   registerLifecycle(on, options)
@@ -21,7 +23,9 @@ export const register: Register = (on, options) => {
   registerExplorer(on)
   registerRadar(on)
   registerStatus(on)
+  registerTrend(on)
   registerRows(on)
+  registerCharts(on)
   registerMilestones(on)
   registerConfirm(on)
 }

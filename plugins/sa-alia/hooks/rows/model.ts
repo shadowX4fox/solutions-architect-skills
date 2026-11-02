@@ -44,7 +44,7 @@ const PREPARE = /^([\w-]+)-prepare\.js$/
 
 // a script of the suite: its file under a sa-* plugin, the repository checkout or the marketplace's cache
 const SUITE = /(solutions-architect-skills|shadowx4fox-solution-architect|\/sa-(?:skills|records|requirements|analysis|delivery|visualization|ux)\b|\[plugin_dir\]|\[sa_skills_dir\]|\$\{?(?:PLUGIN_DIR|SA_SKILLS_DIR|SA)\}?)/
-const SCRIPT = /(?:^|[\s/'"])([\w.-]+\.(?:js|ts))['"]?(?=$|\s)((?:\s+[^\s|&;>]+)*)/g
+const SCRIPT = /(?:^|[\s/\\'"])([\w.-]+\.(?:js|ts))['"]?(?=$|\s)((?:\s+[^\s|&;>]+)*)/g   // a path's separator either way: / or Windows' \\
 
 /** The suite's script a Bash command runs, null for any other command. Several in one command: the first, and how many. */
 export function recognize(command: string): (Kind & { more: number }) | null {
@@ -96,5 +96,6 @@ export function chartOf(output: unknown): string | null {
   const o = (output && typeof output === 'object' ? output : {}) as { stdout?: unknown }
   const text = typeof output === 'string' ? output : String(o.stdout ?? '')
   const last = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).pop() || ''
-  return /\.(png|svg)$/i.test(last) && !/\s/.test(last) ? last.replace(/\.png$/i, '.svg') : null
+  // a path, either separator, spaces allowed (a Windows home such as C:\\Users\\Ana María\\…)
+  return /\.(png|svg)$/i.test(last) && /[\\/]/.test(last) ? last.replace(/^["']|["']$/g, '').replace(/\.png$/i, '.svg') : null
 }

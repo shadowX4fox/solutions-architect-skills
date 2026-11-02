@@ -138,7 +138,7 @@ describe('sa-alia, end to end on every surface', () => {
       expect((await run('radar')).text).not.toMatch(/Alia:/)
       expect((await run('arch')).text).toMatch(/Panel de arquitectura abierto/)
       expect((await run('explorar')).text).toMatch(/Panel de arquitectura abierto/)
-      expect((await run('nada')).text).toMatch(/\/alia status · radar · arch · center · video/)
+      expect((await run('nada')).text).toMatch(/\/alia status · radar · trend · arch · center · video/)
     })
 
     test(`${surface}: findings the radar could not read show as unknown, never zero`, async ($, on) => {
@@ -162,9 +162,25 @@ describe('sa-alia, end to end on every surface', () => {
       await ui.press({ key: 'rerun-SPOF' })
       expect(box.text).toBe('run spof analysis')
       expect(await ui.find({ key: 'rerun-STRIDE' })).toBeUndefined()   // four days old: not stale
-      // the trend: the two readings remembered for the project and today's — a sparkline on the desktop, none in the terminal
-      const trend = await ui.find({ type: 'Svg', props: { alt: 'tendencia de SPOF' } } as never)
-      if (surface === 'desktop') expect(trend).toBeDefined(); else expect(trend).toBeUndefined()
+      // the trend is its own pane (1.5.0): here no chart, one line of arrows that opens it
+      expect(await ui.find({ type: 'Text', text: /spof ▼/ })).toBeDefined()   // 9 → 8 → today's 7 critical
+      await ui.press({ key: 'open-trend' })
+      expect(box.opened).toContain('sa-alia-trend')
+      await ui.unmount()
+    })
+
+    test(`${surface}: /alia trend → each lens over its readings, the change since the last; a chart where the surface draws pictures`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const r = await $.command.run({ command: 'alia', args: 'tendencia', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as { text?: string }
+      expect(r.text).toMatch(/Tendencia de riesgo: 1 lente con más de una lectura/)
+      expect(box.opened).toContain('sa-alia-trend')
+      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-trend', props: PANE })
+      expect(await ui.find({ type: 'Text', text: /tendencia de riesgo/ })).toBeDefined()   // her codec heads it
+      expect(await ui.find({ type: 'Text', text: /▼ -1 críticos/ })).toBeDefined()
+      const chart = await ui.find({ type: 'Svg', props: { alt: 'tendencia de SPOF' } } as never)
+      if (surface === 'terminal') { expect(chart).toBeUndefined(); expect(await ui.find({ type: 'Text', text: /08-01 9\/2/ })).toBeDefined() }
+      else expect(chart).toBeDefined()
       await ui.unmount()
     })
 
@@ -221,16 +237,28 @@ describe('sa-alia, end to end on every surface', () => {
       expect(box.launched.length).toBe(1)
     })
 
-    test(`${surface}: the analyses' chart is drawn under its row where the surface draws vector pictures — the CI's picture, natively`, async ($, on) => {
-      engine(on)
+    test(`${surface}: the analyses' chart becomes a card in the transcript — the app's own drawing on the desktop, the file named in the terminal`, async ($, on) => {
+      const box = engine(on)
+      // the engine's Bash beneath the plugin: the script printed where its picture is
+      on('tool.call', { tool: 'Bash' }, () => ({ result: { stdout: '/p/.cache/sa-skills/analysis/analysis-chart.png\n', stderr: '', interrupted: false } }) as never)
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
-      const row = { tool_use_id: 'c1', tool: 'Bash', input: { command: 'bun /x/solutions-architect-skills/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-chart.js /p' },
-        isRunning: false, isErrored: false, isInterrupted: false, output: { stdout: '/p/.cache/sa-skills/analysis/analysis-chart.png\n', stderr: '' } }
-      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'ToolUse', props: row })
+      await $.tool.call({ tool: 'Bash', command: 'bun /x/solutions-architect-skills/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-chart.js /p --lens spof' } as never)
+      const id = box.placed.find((x) => x.startsWith('chart-'))
+      expect(id).toBeDefined()
+      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Placed', props: { plugin: 'sa-alia', id: id! } } as never)
       expect(await ui.find({ type: 'Text', text: 'Gráfica del análisis' })).toBeDefined()
       const pic = await ui.find({ type: 'Svg', props: { alt: 'Gráfica de los análisis de la arquitectura' } } as never)
-      if (surface === 'terminal') expect(pic).toBeUndefined(); else expect(pic).toBeDefined()
+      if (surface === 'terminal') { expect(pic).toBeUndefined(); expect(await ui.find({ type: 'Text', text: /analysis-chart\.png$/ })).toBeDefined() }
+      else expect(pic).toBeDefined()
       await ui.unmount()
+    })
+
+    test(`${surface}: any other command places no chart`, async ($, on) => {
+      const box = engine(on)
+      on('tool.call', { tool: 'Bash' }, () => ({ result: { stdout: 'done\n', stderr: '', interrupted: false } }) as never)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      await $.tool.call({ tool: 'Bash', command: 'ls -la' } as never)
+      expect(box.placed.some((x) => x.startsWith('chart-'))).toBe(false)
     })
 
     test(`${surface}: a suite script's row reads as what it said; its raw result folds; any other command is the engine's`, async ($, on) => {

@@ -2,6 +2,25 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.5.0]
+
+### Added
+
+- **The risk trend, its own pane** (`/alia trend`, also `tendencia`, and a button in her hub). It shows each lens's critical and high findings over the readings the radar keeps:
+  - on the desktop app, a 300 px chart, three times the radar's old sparkline;
+  - in the terminal, a line of numbers per reading;
+  - the change since the previous reading ("▼ -1 críticos · +0 altos desde 2026-09-01").
+
+- **The analyses' picture is a card in the transcript.** When `analysis-chart.js` runs, she places a card with its SVG, drawn natively by the desktop app. It used to sit under the script's row, which the desktop app folds into "Ran a command", so it stayed unseen. The terminal's card names the PNG.
+
+### Fixed
+
+- **Windows paths.** A script behind a backslash (`…\\scripts\\analysis-chart.js`) was not recognized, and a printed path with spaces in the home (`C:\\Users\\Ana María\\…`) was not read. So on Windows no readable row and no native chart appeared.
+
+### Changed
+
+- **The radar fits a laptop.** Its trend column is gone, which was what made every row too wide. In its place, one line of arrows (`spof ▼ · stride =`) with "ver tendencia" opens the new pane. On a narrow pane the meter is shorter (6 cells instead of 10).
+
 ## [1.4.1]
 
 ### Fixed

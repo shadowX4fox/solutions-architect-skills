@@ -84,6 +84,8 @@ declare module 'claude-code' {
       snapshot: ProjectSnapshot | null
       /** milestones: the cards placed this session, by id — what each Placed row draws. */
       milestones: Milestone[]
+      /** charts: the analyses' pictures placed in the transcript this session (the last six), each its SVG. */
+      charts: { id: string; file: string; svg: string }[]
       /** confirm: the session's permission mode as its last prompt reported it, null before one — unknown, Alia never asks. */
       permissionMode: string | null
       /** confirm: the write Alia is asking about now, null when none. */

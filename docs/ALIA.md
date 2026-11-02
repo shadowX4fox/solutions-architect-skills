@@ -486,7 +486,8 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
 |---|---|
 | `/alia` | her hub |
 | `/alia status` (`release`, `estado`) | where the release stands, read now by `lifecycle.js status` (no model): the state, the tag local and remote, the changes since it with the bump recommended, the unreleased notes, the downstream artifacts a release left stale — a button to release or recover the tag, one per stale command |
-| `/alia radar` (`riesgo`, `risk`) | the findings of each analysis lens, the open debt and the stale reports; on the desktop, a trend per lens |
+| `/alia radar` (`riesgo`, `risk`) | the findings of each analysis lens, the open debt and the stale reports, and one line of which way each lens moved |
+| `/alia trend` (`tendencia`) | each lens's critical and high findings over the readings the radar keeps — a chart on the desktop app, a line of numbers in the terminal — and the change since the previous reading (sa-alia 1.5.0: split from the radar, so neither is too wide for a laptop's pane) |
 | `/alia arch` (`arquitectura`, `explorar`, `explorer`) | containers, integrations, ADRs and TDRs; a container's card draws its neighbourhood on the desktop app. It reads the facts ledger, which she builds herself (sa-skills' `arch-facts.js`) when it is missing — a fresh clone, since `.cache/` is never versioned — or older than the documents |
 | `/alia center` (`centro`, `mando`, `3d`) | `visualizations/architecture-command-center.html` in the browser when it exists; otherwise `command center` in the prompt |
 | `/alia video` | `visualizations/architecture-video.mp4` in the system's player when it exists; otherwise `architecture video` in the prompt |
@@ -501,8 +502,10 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
   (`✦ Gate de principios ✓ LAYER1: PASS — 0 blocking finding(s)`), the warnings counted, a failure's first findings in
   view; ctrl+o shows the raw row.
 - **The analyses' pictures, natively** (sa-alia 1.3.0). Ask for an image or a chart of the analyses and the session runs
-  `analysis-chart.js`; on the desktop app its row carries the picture, drawn by the app from the SVG the script writes —
-  the same one Alia's pull request comment opens on. The terminal keeps the row and the session sends the PNG. Which
+  `analysis-chart.js`, and she places the picture as a card in the transcript (1.5.0). On the desktop app the app draws
+  it from the SVG the script writes, the same picture Alia's pull request comment opens on. It is a card, not the
+  script's row, because the desktop folds command rows into "Ran a command". In the terminal the card names the PNG.
+  Which
   picture answers what:
 
   | Ask | Picture |

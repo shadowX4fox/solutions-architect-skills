@@ -2,7 +2,7 @@
 // other command left alone, and each script's verdict read from its own output: the summary line, warnings, findings.
 import { describe, expect, test } from 'claude-code/testing'
 
-import { label, recognize, summarize } from './model'
+import { chartOf, label, recognize, summarize } from './model'
 
 const REPO = '/home/u/solutions-architect-skills'
 const CACHE = '/home/u/.claude/plugins/cache/shadowx4fox-solution-architect-marketplace/sa-skills/11.1.1'
@@ -43,3 +43,17 @@ describe('readable rows · summarize', () => {
     expect(summarize({ stdout: '{"ok":true}', stderr: '' }, false, false)).toMatchObject({ state: 'ok', line: '' })
   })
 })
+
+describe('readable rows · Windows', () => {
+  const WIN = 'C:\\Users\\Ana María\\.claude\\plugins\\cache\\shadowx4fox-solution-architect-marketplace\\sa-skills\\11.8.0'
+  test('a script behind a backslash, quoted or not, is the suite\'s', () => {
+    expect(recognize(`bun "${WIN}\\plugins\\sa-analysis\\skills\\architecture-analysis\\scripts\\analysis-chart.js" . --lens spof`)).toMatchObject({ script: 'analysis-chart.js' })
+    expect(recognize(`bun ${WIN.replace('Ana María', 'ana')}\\scripts\\shared\\findings.js analysis --json`)).toMatchObject({ script: 'findings.js' })
+  })
+  test('the chart a script printed: either separator, spaces in the home, quotes dropped', () => {
+    expect(chartOf({ stdout: 'C:\\Users\\Ana María\\p\\.cache\\sa-skills\\analysis\\analysis-chart.png\n' })).toBe('C:\\Users\\Ana María\\p\\.cache\\sa-skills\\analysis\\analysis-chart.svg')
+    expect(chartOf({ stdout: '/p/a.png\n' })).toBe('/p/a.svg')
+    expect(chartOf({ stdout: 'no chart here\n' })).toBeNull()
+  })
+})
+

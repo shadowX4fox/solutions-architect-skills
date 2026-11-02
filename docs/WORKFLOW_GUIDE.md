@@ -370,7 +370,7 @@ Alia's comment opens on a picture of the verdict: each lens before → after, an
 | One analysis — "the SPOF", "the capacity headroom" | That lens's figure (`--lens`): a heat map, the blast radius graph, a flow's latency waterfall, capacity headroom, fan-in / fan-out, the cost Pareto, the sensitive data flows, STRIDE's matrix |
 | One element of it — "the blast radius of Tracking API", "the latency of flow 2" | The same figure focused on it (`--focus`) |
 
-On the desktop app sa-alia draws the picture natively under the script's row; elsewhere it is a PNG. A figure the
+On the desktop app sa-alia places it as a card in the transcript, drawn natively by the app; elsewhere it is a PNG. A figure the
 documents do not state is drawn as not documented, never invented.
 
 ### Traceability — `architecture-traceability`

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.1] - 2026-11-02
+
+### Changed
+- **A picture of the analyses is shown once** (`architecture-analysis` SKILL). sa-alia's card in the transcript carries it (the app's own drawing on the desktop app), so the session never opens the PNG to show it: an image read into the conversation is a second, flat copy. The PNG is sent only in the terminal, to another device, or when asked for.
+- **sa-alia 1.5.0**:
+  - the analyses' picture becomes a card in the transcript (the desktop folds command rows away);
+  - the risk trend is its own pane (`/alia trend`), so the radar fits a laptop;
+  - Windows paths are recognized.
+
 ## [11.8.0] - 2026-11-02
 
 ### Removed

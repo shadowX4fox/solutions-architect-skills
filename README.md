@@ -3,7 +3,7 @@
 <div align="center">
 
 [![check](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml/badge.svg)](https://github.com/shadowX4fox/solutions-architect-skills/actions/workflows/check.yml)
-[![Version](https://img.shields.io/badge/version-11.8.0-0C9DA3.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-11.8.1-0C9DA3.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0A7177.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-1B1F24.svg)](https://claude.com/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-1B7148.svg)](CONTRIBUTING.md)
@@ -238,7 +238,7 @@ The optional `sa-alia` plugin brings her into the session that works on the arch
 - **Her hub, open from the start** — docked beside the chat when a session starts in an architecture (`openHub`).
 - **Her codec over every reply** — her face on the desktop app, a ringed `✦` in the terminal; the text is Claude Code's own.
 - **The next steps** above the prompt, under her escudo — one line on where the architecture stands, a click fills the prompt.
-- **`/alia`** — the architecture's state and every view of hers: `/alia status` the release, `/alia radar` the findings by lens, `/alia arch` the containers and their neighbourhood, `/alia center` and `/alia video` the command center and the video.
+- **`/alia`** — the architecture's state and every view of hers: `/alia status` the release, `/alia radar` the findings by lens, `/alia trend` how they moved, `/alia arch` the containers and their neighbourhood, `/alia center` and `/alia video` the command center and the video.
 - **Readable script rows** — `✦ Gate de principios ✓ LAYER1: PASS` instead of a raw command.
 - **Milestone cards** — a release, an analysis run, a regenerated handoff kit, placed where the turn made them.
 - **The confirmations in her look** — a write to the architecture Claude Code would ask about, shown with its change.

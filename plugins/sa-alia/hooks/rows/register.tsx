@@ -1,15 +1,13 @@
 // sa-alia · readable rows — a Bash row that runs one of the suite's scripts is drawn as `✦ <what it is> · <verdict>` with the
 // script's own summary line, its raw output folded away (ctrl+o, or `--verbose`, shows the engine's row and result, untouched).
-// A failure keeps its first findings in view. Any other command is the engine's. The analyses' chart (analysis-chart.js) is
-// drawn under its row where the surface draws vector pictures — the same drawing as the PNG the CI comments, natively.
+// A failure keeps its first findings in view. Any other command is the engine's. The analyses' chart is a card of its own
+// (chart.tsx), never inside the row: the desktop app folds command rows away.
 import { atom, read } from 'claude-code'
 import type { On } from 'claude-code'
 
 import { ALIA } from '../alia/palette'
 import { GLYPH, TONE } from '../ui'
-import { chartOf, label, recognize, summarize } from './model'
-
-const SVG_MAX = 131072   // the Svg element's limit
+import { label, recognize, summarize } from './model'
 
 const langAtom = atom({ plugin: 'sa-alia', key: 'lang' } as const, 'en' as 'en' | 'es')
 
@@ -28,11 +26,7 @@ export function registerRows(on: On) {
     mine.add(e.props.tool_use_id)
     const lang = await read($, langAtom)
     const s = summarize(e.props.output, e.props.isErrored, e.props.isRunning)
-    const els = $.ui.resolve(e) as { Box: any; Text: any; Svg?: any }, { Box, Text, Svg } = els
-    // the analyses' chart, natively: the SVG the script wrote beside its picture; the terminal keeps the row alone
-    let chart: string | null = null
-    const file = kind.script === 'analysis-chart.js' && s.state === 'ok' && e.surface !== 'terminal' ? chartOf(e.props.output) : null
-    if (file) { try { const t = await $.fs.read(file); chart = typeof t === 'string' && t.length <= SVG_MAX && t.startsWith('<svg') ? t : null } catch { chart = null } }
+    const { Box, Text } = $.ui.resolve(e)
     const warn = s.warnings ? (lang === 'es' ? `${s.warnings} aviso${s.warnings === 1 ? '' : 's'}` : `${s.warnings} warning${s.warnings === 1 ? '' : 's'}`) : ''
     return (
       <Box flexDirection="column">
@@ -44,7 +38,6 @@ export function registerRows(on: On) {
           {warn && s.state !== 'fail' ? <Text color={TONE.high}>{`${GLYPH.dot} ${warn}`}</Text> : null}
         </Box>
         {s.findings.map((f, i) => <Text key={`f-${i}`} color={TONE.critical} wrap="truncate-end">{`  ${f}`}</Text>)}
-        {chart && Svg ? <Svg source={chart} alt={lang === 'es' ? 'Gráfica de los análisis de la arquitectura' : 'Chart of the architecture analyses'} width={720} /> : null}
       </Box>
     )
   })

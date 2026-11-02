@@ -10,7 +10,8 @@ import { Codec, portrait } from '../alia/codec'
 
 import { RADAR_PANE } from '../state'
 import { GLYPH, TONE, bar, pad, padLeft, rule, type Tone } from '../ui'
-import { SPARK_H, SPARK_W, sparkline } from './trend'
+import { change } from './trend'
+import { openTrend } from './trend-pane'
 
 const aliaAtom = atom({ plugin: 'sa-alia', key: 'alia' } as const, null as AliaLine | null)
 const radarAtom = atom({ plugin: 'sa-alia', key: 'radar' } as const, null as Radar | null)
@@ -46,8 +47,10 @@ export function registerRadar(on: On) {
     // the meter of a lens: critical counts double, scaled to the heaviest lens
     const weight = (l: { critical: number; high: number }) => l.critical * 2 + l.high
     const heaviest = Math.max(1, ...r.lenses.map(weight))
-    const METER = 10
+    const METER = width < 70 ? 6 : 10   // a laptop's pane: a shorter meter, the table still fits
     const lenses = [...r.lenses].sort((a, b) => weight(b) - weight(a))
+    // the trend lives in its own pane (1.5.0): here one line says which way each lens moved, and opens it
+    const trendLine = r.trend ? lenses.map((l) => ({ lens: l.lens, c: change(r.trend![l.lens] || []) })).filter((x) => x.c).slice(0, 5).map((x) => ({ lens: x.lens, arrow: x.c!.arrow })) : []
     const mono = e.surface === 'terminal'
     const col = (key: string, head: string, cells: unknown[], align: 'flex-start' | 'flex-end' = 'flex-start') => (
       <Box key={key} flexDirection="column" alignItems={align}><Text dimColor>{head}</Text>{cells as never}</Box>
@@ -96,17 +99,19 @@ export function registerRadar(on: On) {
                 {col('c-high', es ? 'altos' : 'high', lenses.map((l) => <Text key={`h-${l.lens}`} color={l.high ? TONE.high : undefined} dimColor={!l.high}>{String(l.high)}</Text>), 'flex-end')}
                 {col('c-total', 'total', lenses.map((l) => <Text key={`t-${l.lens}`} dimColor>{String(l.total)}</Text>), 'flex-end')}
                 {col('c-report', es ? 'reporte' : 'report', lenses.map((l) => <Text key={`r-${l.lens}`} dimColor>{l.date}</Text>))}
-                {r.trend && lenses.some((l) => (r.trend![l.lens] || []).length > 1) && (els as { Svg?: unknown }).Svg ? col('c-trend', es ? 'tendencia' : 'trend', lenses.map((l) => {
-                  const svg = sparkline(r.trend![l.lens] || [], r.lang)
-                  const Svg = (els as { Svg?: any }).Svg
-                  return svg ? <Svg key={`s-${l.lens}`} source={svg} alt={es ? `tendencia de ${l.lens}` : `${l.lens} trend`} width={SPARK_W} height={SPARK_H} /> : <Text key={`s-${l.lens}`} dimColor>—</Text>
-                })) : null}
                 {col('c-age', es ? 'edad' : 'age', lenses.map((l) => l.stale
                   ? <Text key={`a-${l.lens}`} color={TONE.high}>{`${GLYPH.stale} ${l.ageDays} d`}</Text>
                   : <Text key={`a-${l.lens}`} dimColor>{`${l.ageDays} d`}</Text>))}
               </Box>
             ) : null
           )}
+          {trendLine.length ? (
+            <Box flexDirection="row" gap={1} flexWrap="wrap">
+              <Text dimColor>{es ? 'tendencia:' : 'trend:'}</Text>
+              {trendLine.map((x) => <Text key={`tl-${x.lens}`} color={x.arrow === '▲' ? TONE.critical : x.arrow === '▼' ? TONE.ok : undefined} dimColor={x.arrow === '='}>{`${x.lens.toLowerCase()} ${x.arrow}`}</Text>)}
+              <Button key="open-trend" plain label={es ? 'ver tendencia' : 'see the trend'} onPress={async () => { await openTrend($) }} />
+            </Box>
+          ) : null}
           <Text dimColor>{rule(width)}</Text>
 
           <Box flexDirection="row" gap={1}>

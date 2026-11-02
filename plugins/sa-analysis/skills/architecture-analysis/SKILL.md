@@ -450,8 +450,10 @@ one of its pictures — never one drawn by hand or with another library. Which o
 A figure whose numbers the documents do not state draws them as not documented (a dashed bar, the cost mentions instead
 of a Pareto) — never an invented value. How it reaches the person:
 
-- run the script; on the desktop app sa-alia draws the `.svg` it writes beside the PNG under the script's row, natively;
-- in the terminal, or when the person follows from another device, send the PNG.
+- run the script. With sa-alia, a card in the transcript carries the picture (sa-alia 1.5.0): on the desktop app the app
+  draws it from the `.svg` the script writes beside the PNG. **Do not open the PNG to show it** — an image read into the
+  conversation is a second, flat copy of what the card already draws;
+- send the PNG only in the terminal, when the person follows from another device, or when they ask for the file.
 
 Run here unattended, the skill takes Markdown and asks nothing, and leaves the reports uncommitted; the workflow archives
 the old reports, commits the new ones to the branch and sets the `architecture-analysis` status. Tests:
