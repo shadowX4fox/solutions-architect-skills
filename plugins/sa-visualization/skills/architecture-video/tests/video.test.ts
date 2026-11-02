@@ -159,6 +159,25 @@ describe("video-build", () => {
     expect(flow).toContain("assets/alia/alia-point-left.webp");
   });
 
+  test("HyperFrames' floors: no text under 28 px, the title on screen at frame 0, something moving while the viewer reads", () => {
+    const docs = readdirSync(join(out, "compositions")).map((f) => [f, readFileSync(join(out, "compositions", f), "utf8")]);
+    for (const [, doc] of docs) for (const m of doc.matchAll(/font-size:\s*(\d+)px/g)) expect(+m[1]).toBeGreaterThanOrEqual(28);
+    const title = readFileSync(join(out, "compositions", "title.html"), "utf8");
+    expect(title).not.toMatch(/"#title-(h|k)", \{ opacity:0/);
+    expect(readFileSync(join(out, "compositions", "decisions.html"), "utf8")).toMatch(/tl\.to\("#decisions-st", \{ y:-10, [^)]*yoyo:true/);
+    expect(readFileSync(join(out, "compositions", "ch-context.html"), "utf8")).toMatch(/tl\.to\("#ch-context-codec", \{ y:-6, [^)]*yoyo:true/);
+    expect(readFileSync(join(out, "compositions", "flow-1.html"), "utf8").match(/borderColor:"#2ee6e6", duration:0\.35/g)!.length).toBeGreaterThan(1);
+  });
+
+  test("a link's label is a pill in front of the boxes, the protocol above its action", () => {
+    const cx = readFileSync(join(out, "compositions", "context.html"), "utf8");
+    expect(cx).toMatch(/\.cxl \{ position:absolute; z-index:3;/);
+    expect(cx).not.toMatch(/<text id="cx-t/);
+    const pill = cx.match(/<div id="cx-t0" class="cxl"[^>]*><p>([^<]*)(<br>)?/);
+    expect(pill).toBeTruthy();
+    expect(cx.indexOf('id="cx-t0"')).toBeGreaterThan(cx.lastIndexOf('class="cxb'));
+  });
+
   test("a refused chapter line drops its card, never the scene it opens; Spanish chrome under DOC_LANGUAGE es", () => {
     const o2 = join(root, "v2");
     const r = build({ ...sb, architecture: { ...sb.architecture, language: "es" } }, { ...LINES, "chapter.layers": "x".repeat(300) }, o2);

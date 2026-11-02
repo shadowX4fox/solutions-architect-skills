@@ -98,8 +98,23 @@ const stage = (sid, pose, tag, [l, t, w, h]) => `    <div id="${sid}-st" class="
       <p class="tag">ALIA · ${esc(tag.toUpperCase())}</p>
     </div>`;
 const stageIn = (sid, at, out) => [`tl.fromTo("#${sid}-st", { opacity:0 }, { opacity:1, duration:0.5, ease:"power2.out" }, ${at});`,
-  `tl.fromTo("#${sid}-alia", { y:60 }, { y:0, duration:0.9, ease:"expo.out" }, ${at});`, `tl.to("#${sid}-st", { opacity:0, duration:0.25, ease:"power3.in" }, ${r2(out)});`];
+  `tl.fromTo("#${sid}-alia", { y:60 }, { y:0, duration:0.9, ease:"expo.out" }, ${at});`, hover(`#${sid}-st`, at + 0.9, out), `tl.to("#${sid}-st", { opacity:0, duration:0.25, ease:"power3.in" }, ${r2(out)});`];
 const fadeIn = (sel, at, y = 24) => `tl.fromTo("${sel}", { opacity:0, y:${y} }, { opacity:1, y:0, duration:0.5, ease:"expo.out" }, ${r2(at)});`;
+// her hover: a slow float, whole half-cycles from `from` until before `to`, landing back where it started — something
+// always moves while the viewer reads, and it reads as a hologram, never as an entrance
+function hover(sel, from, to, amp = 10, half = 1.2) {
+  let n = Math.floor((to - from) / half); if (n % 2) n--;
+  return n >= 2 ? `tl.to("${sel}", { y:-${amp}, duration:${half}, ease:"sine.inOut", yoyo:true, repeat:${n - 1} }, ${r2(from)});` : null;
+}
+// a highlight walking through `sels` in turn, one `step` each, from `from` until before `to`: `on` lit, `off` back
+function walk(sels, from, to, on, off, step = 1.3) {
+  const out = [];
+  for (let k = 0, at = from; at + step <= to && sels.length; k++, at += step) {
+    const sel = sels[k % sels.length];
+    out.push(`tl.to("${sel}", { ${on}, duration:0.35, ease:"power2.out" }, ${r2(at)});`, `tl.to("${sel}", { ${off}, duration:0.5, ease:"power2.in" }, ${r2(at + step - 0.55)});`);
+  }
+  return out;
+}
 const fadeOut = (sid, at) => `tl.to("#${sid} > *", { opacity:0, duration:0.25, ease:"power3.in" }, ${r2(at)});`;
 
 // ---------------------------------------------------------------- scenes
@@ -116,8 +131,8 @@ function titleScene(sb, L, t) {
     <h1 id="title-h">${esc(a.name)}</h1>
 ${L['title.tagline'] ? `    <p id="title-s">${esc(L['title.tagline'])}</p>` : ''}
 ${stage(sid, 'cover', a.language === 'es' ? 'navegadora' : 'navigator', [1340, 110, 500, 860])}`,
-  [fadeIn('#title-k', 0.2, 0), `tl.fromTo("#title-bar", { scaleY:0, transformOrigin:"50% 0" }, { scaleY:1, duration:0.6, ease:"expo.out" }, 0.4);`,
-    `tl.fromTo("#title-h", { opacity:0, filter:"blur(8px)" }, { opacity:1, filter:"blur(0px)", duration:0.5, ease:"power4.out" }, 0.6);`,
+  [`tl.fromTo("#title-k", { y:16 }, { y:0, duration:0.8, ease:"expo.out" }, 0);`, `tl.fromTo("#title-bar", { scaleY:0.2, transformOrigin:"50% 0" }, { scaleY:1, duration:0.8, ease:"expo.out" }, 0);`,
+    `tl.fromTo("#title-h", { x:-24, scale:1.04, transformOrigin:"0 50%" }, { x:0, scale:1, duration:1.0, ease:"power4.out" }, 0);`,
     L['title.tagline'] && fadeIn('#title-s', 1.3), ...stageIn(sid, 0.4, dur - 0.3), fadeOut(sid, dur - 0.3)], dur);
 }
 
@@ -127,11 +142,12 @@ function overviewScene(sb, L, t) {
   const sid = 'what', dur = Math.max(9, 2.5 + need(p) + need(s));
   const box = (id, head, text, at) => text ? [`    <div id="${id}" class="wcard"><p class="wh">${esc(head)}</p><p class="wt">${esc(text)}</p></div>`, fadeIn('#' + id, at)] : ['', null];
   const [hp, jp] = box('what-p', t.problem, p, 1.0), [hs, js] = box('what-s', t.answer, s, 1.0 + (p ? need(p) * 0.6 : 0));
+  const hl = Math.max(1, Math.ceil(String(sb.architecture.name).length / 40));   // ~40 characters a line at 56 px in 1260 px
   return card(sid, false, `#what-k { position:absolute; left:120px; top:110px; }
-    #what-h { position:absolute; left:120px; top:156px; font-weight:800; font-size:72px; letter-spacing:-1px; }
-    #what-row { position:absolute; left:120px; top:330px; width:1260px; display:flex; flex-direction:column; gap:36px; }
+    #what-h { position:absolute; left:120px; top:156px; font-weight:800; font-size:56px; letter-spacing:-1px; line-height:1.1; max-width:1260px; }
+    #what-row { position:absolute; left:120px; top:${Math.max(300, 156 + hl * 62 + 44)}px; width:1260px; display:flex; flex-direction:column; gap:36px; }
     .wcard { background:#fff; border:1.5px solid ${BORDER}; border-radius:24px; padding:32px 40px; box-shadow:0 10px 28px rgba(13,20,24,.08); }
-    .wh { margin:0 0 12px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; letter-spacing:3px; text-transform:uppercase; color:${AQUA_INK}; }
+    .wh { margin:0 0 12px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:3px; text-transform:uppercase; color:${AQUA_INK}; }
     .wt { margin:0; font-weight:700; font-size:36px; line-height:1.4; color:${INK}; }`,
   `    <p id="what-k" class="kicker">${esc(t.kick_what)}</p>
     <h1 id="what-h">${esc(sb.architecture.name)}</h1>
@@ -163,7 +179,7 @@ function chapterScene(sb, L, t, n, key, sub, mood) {
     for (let k = 0, at = tType; at < tType + dType; k++, at += MOUTH) js.push(`tl.set("#${sid}-fc", { opacity:${k % 2 ? 0 : 1} }, ${r2(at)}); tl.set("#${sid}-fo", { opacity:${k % 2 ? 1 : 0} }, ${r2(at)});`);
     js.push(`tl.set(["#${sid}-fc", "#${sid}-fo"], { opacity:0 }, ${r2(tType + dType)}); tl.set("#${sid}-fm", { opacity:1 }, ${r2(tType + dType)});`);
   } else js.push(`tl.to("#${sid}-face", { y:-8, duration:0.3, ease:"sine.inOut", yoyo:true, repeat:${Math.max(1, Math.floor(dType / 0.6) * 2 - 1)} }, ${tType});`);
-  js.push(fadeOut(sid, dur - 0.25));
+  js.push(hover(`#${sid}-codec`, r2(tType + dType + (talks ? 0 : 0.6)), dur - 0.3, 6), fadeOut(sid, dur - 0.25));
   return card(sid, true, `#${sid}-n { position:absolute; left:160px; top:150px; font-weight:900; font-size:260px; line-height:1; color:${AQUA}; margin:0; border-bottom:16px solid ${AQUA}; text-shadow:0 0 40px rgba(46,230,230,.35); }
     #${sid}-col { position:absolute; left:${n >= 10 ? 560 : 400}px; top:192px; width:1360px; display:flex; flex-direction:column; gap:28px; }
     #${sid}-t { font-weight:900; font-size:84px; letter-spacing:-1px; line-height:1.05; color:#fff; }
@@ -171,9 +187,9 @@ function chapterScene(sb, L, t, n, key, sub, mood) {
     #${sid}-codec { position:absolute; left:160px; top:560px; width:1600px; display:flex; align-items:center; gap:36px; padding:28px 44px 28px 28px; box-sizing:border-box;
       background:${NIGHT2}; border:2px solid ${hexm}; border-radius:24px; box-shadow:0 0 30px rgba(${rgb},.28); }
     #${sid}-face { position:relative; flex:none; width:160px; height:160px; border-radius:999px; border:4px solid ${hexm}; background:${NIGHT2}; overflow:hidden; }
-    #${sid}-face img { position:absolute; inset:0; width:160px; height:160px; object-fit:cover; }
+    #${sid}-face img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
     #${sid}-body { margin:0; flex:1; }
-    #${sid}-lab { display:block; margin:0 0 12px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; letter-spacing:3px; color:${SILVER}; }
+    #${sid}-lab { display:block; margin:0 0 12px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:3px; color:${SILVER}; }
     #${sid}-lab b { color:${hexm}; font-weight:600; }
     #${sid}-say { display:block; min-height:150px; font-weight:700; font-size:36px; line-height:1.4; color:#fff; }`,
   `    <p id="${sid}-n">${n}</p>
@@ -187,24 +203,35 @@ function chapterScene(sb, L, t, n, key, sub, mood) {
     </div>`, js, dur);
 }
 
+// a link's label, in front of everything: a pill on the line's midpoint — the protocol, and below it the action (`[…]`) and the count
+const label = (i, x, y, text) => { const m = /^(.*?)\s*(\[.*)$/.exec(text), top = m ? m[1] : text, bot = m ? m[2] : '';
+  return `    <div id="cx-t${i}" class="cxl" style="left:${r2(x - 260)}px; top:${r2(y - 60)}px"><p>${esc(top)}${bot ? `<br>${esc(bot)}` : ''}</p></div>`; };
+
 // the system context: the owned systems in the middle, the others on both sides, a line per pair that talks
 function contextScene(sb, sc, t) {
   const sid = 'context', own = sc.owned.length ? sc.owned : [{ name: sb.architecture.name, containers: 0 }];
   const ext = sc.external.slice(0, 10), left = ext.filter((_, i) => i % 2 === 0), right = ext.filter((_, i) => i % 2 === 1);
   const pos = new Map(), boxes = [];
-  const col = (list, x, w, h, cls) => { const gap = Math.min(40, (640 - list.length * h) / Math.max(1, list.length - 1)); const top = 300 + (640 - (list.length * h + (list.length - 1) * gap)) / 2;
+  const col = (list, x, w, h, cls) => { const gap = Math.max(12, Math.min(40, (640 - list.length * h) / Math.max(1, list.length - 1))); const top = 300 + (640 - (list.length * h + (list.length - 1) * gap)) / 2;
     list.forEach((s, i) => { const y = top + i * (h + gap); pos.set(s.name, { x, y, w, h }); boxes.push({ s, x, y, w, h, cls }); }); };
-  col(own, 720, 480, own.length > 2 ? 160 : 240, 'own'); col(left, 120, 440, 140, 'ext'); col(right, 1360, 440, 140, 'ext');
+  const dx = right.length ? 0 : 320;   // no system on the right: the pair centred
+  col(own, 760 + dx, 400, own.length > 2 ? 160 : 240, 'own'); const eh = (k) => Math.min(190, Math.floor((640 - (k - 1) * 16) / Math.max(1, k)));
+  col(left, 120 + dx, 400, eh(left.length), 'ext'); col(right, 1400, 400, eh(right.length), 'ext');
   const links = sc.links.filter((l) => pos.has(l.from) && pos.has(l.to));
   const anchor = (b, other) => ({ x: other.x + other.w / 2 < b.x ? b.x : other.x > b.x + b.w / 2 ? b.x + b.w : b.x + b.w / 2, y: b.y + b.h / 2 });
   const svg = links.map((l, i) => { const A = pos.get(l.from), B = pos.get(l.to), p = anchor(A, B), q = anchor(B, A), len = Math.hypot(q.x - p.x, q.y - p.y);
     return `<line id="cx-l${i}" x1="${r2(p.x)}" y1="${r2(p.y)}" x2="${r2(q.x)}" y2="${r2(q.y)}" stroke="${AQUA_MARK}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${r2(len)}" stroke-dashoffset="${r2(len)}"/>`
-      + `<text id="cx-t${i}" x="${r2((p.x + q.x) / 2)}" y="${r2((p.y + q.y) / 2 - 12)}" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600" font-size="24" fill="${AQUA_INK}">${esc((l.protocols[0] || '') + (l.count > 1 ? ` ×${l.count}` : ''))}</text>`; }).join('');
+; }).join('');
+  const labels = links.map((l, i) => { const A = pos.get(l.from), B = pos.get(l.to), p = anchor(A, B), q = anchor(B, A);
+    return label(i, (p.x + q.x) / 2, (p.y + q.y) / 2, (l.protocols[0] || '') + (l.count > 1 ? ` ×${l.count}` : '')); }).join('\n');
   const dur = Math.max(10, 3 + boxes.length * 0.5 + links.length * 0.5 + 2);
   const js = [fadeIn('#cx-k', 0.1, 0), fadeIn('#cx-h', 0.25)];
   boxes.forEach((b, i) => js.push(`tl.fromTo("#cx-b${i}", { opacity:0, scale:0.9 }, { opacity:1, scale:1, duration:0.5, ease:"back.out(1.6)" }, ${r2(0.8 + (b.cls === 'own' ? 0 : 0.6 + i * 0.25))});`));
   const l0 = 1.4 + boxes.length * 0.25;
-  links.forEach((_, i) => js.push(`tl.to("#cx-l${i}", { strokeDashoffset:0, duration:0.7, ease:"power2.inOut" }, ${r2(l0 + i * 0.45)});`, `tl.fromTo("#cx-t${i}", { opacity:0 }, { opacity:1, duration:0.3 }, ${r2(l0 + i * 0.45 + 0.5)});`));
+  links.forEach((_, i) => js.push(`tl.to("#cx-l${i}", { strokeDashoffset:0, duration:0.7, ease:"power2.inOut" }, ${r2(l0 + i * 0.45)});`, `tl.fromTo("#cx-t${i} p", { opacity:0, scale:0.8 }, { opacity:1, scale:1, duration:0.35, ease:"back.out(1.8)" }, ${r2(l0 + i * 0.45 + 0.5)});`));
+  const lEnd = l0 + links.length * 0.45 + 0.4;
+  if (links.length) js.push(`tl.set("#cx-svg line", { strokeDasharray:"14 12", strokeDashoffset:0 }, ${r2(lEnd)});`, `tl.to("#cx-svg line", { strokeDashoffset:-26 * ${Math.ceil((dur - 0.3 - lEnd) / 0.8)}, duration:${r2(dur - 0.3 - lEnd)}, ease:"none" }, ${r2(lEnd)});`);
+  js.push(...walk(boxes.map((_, i) => `#cx-b${i}`), r2(Math.max(lEnd, 0.8 + boxes.length * 0.25 + 0.8)), dur - 0.3, 'y:-10', 'y:0', 1.1));
   js.push(fadeOut(sid, dur - 0.3));
   return card(sid, false, `#cx-k { position:absolute; left:120px; top:90px; }
     #cx-h { position:absolute; left:120px; top:136px; font-weight:800; font-size:64px; letter-spacing:-1px; }
@@ -212,13 +239,17 @@ function contextScene(sb, sc, t) {
     .cxb { position:absolute; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; padding:0 28px; border-radius:20px; }
     .cxb.own { background:${NIGHT}; color:#fff; border:3px solid ${AQUA}; box-shadow:0 0 34px rgba(46,230,230,.35); }
     .cxb.ext { background:#fff; color:${INK}; border:2px dashed ${MUTED}; }
-    .cxb b { font-weight:800; font-size:38px; line-height:1.15; }
-    .cxb span { margin-top:6px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; letter-spacing:2px; text-transform:uppercase; }
-    .cxb.own span { color:${AQUA}; } .cxb.ext span { color:${INK2}; }`,
+    .cxb b { font-weight:800; font-size:32px; line-height:1.15; }
+    .cxb span { margin-top:6px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:2px; text-transform:uppercase; }
+    .cxb.own span { color:${AQUA}; } .cxb.ext span { color:${INK2}; }
+    .cxl { position:absolute; z-index:3; width:520px; height:120px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .cxl p { margin:0; padding:10px 20px; background:#fff; border:2.5px solid ${AQUA_MARK}; border-radius:16px; box-shadow:0 8px 22px rgba(13,20,24,.14);
+      font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; line-height:1.3; text-align:center; color:${AQUA_INK}; white-space:nowrap; }`,
   `    <p id="cx-k" class="kicker">${esc([t.systems(sc.owned.length + sc.external.length), t.links(sc.links.length)].join(' · ').toUpperCase())}</p>
     <h1 id="cx-h">${esc(t.chapter.context)}</h1>
     <svg id="cx-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${svg}</svg>
-${boxes.map((b, i) => `    <div id="cx-b${i}" class="cxb ${b.cls}" style="left:${r2(b.x)}px; top:${r2(b.y)}px; width:${b.w}px; height:${b.h}px"><b>${esc(b.s.name)}</b><span>${esc(b.cls === 'own' ? t.owned : t.external)}${b.s.containers ? ' · ' + esc(t.containers(b.s.containers)) : ''}</span></div>`).join('\n')}`, js, dur);
+${boxes.map((b, i) => `    <div id="cx-b${i}" class="cxb ${b.cls}" style="left:${r2(b.x)}px; top:${r2(b.y)}px; width:${b.w}px; height:${b.h}px"><b>${esc(b.s.name)}</b><span>${esc(b.cls === 'own' ? t.owned : t.external)}${b.s.containers ? ' · ' + esc(t.containers(b.s.containers)) : ''}</span></div>`).join('\n')}
+${labels}`, js, dur);
 }
 
 // the layers, top to bottom, each with its containers; a layer outside the boundary is drawn as consumed
@@ -233,15 +264,16 @@ function layersScene(sb, sc, t) {
       <div class="lyc">${l.containers.map((c, j) => `<span id="ly-c${i}-${j}">${esc(c)}</span>`).join('')}</div>
     </div>`;
   });
+  js.push(...walk(sc.layers.map((_, i) => `#ly-b${i}`), r2(1.6 + n * 1.0), dur - 0.3, 'backgroundColor:"#dcfafa"', 'backgroundColor:"#ffffff"', 1.0));
   js.push(fadeOut(sid, dur - 0.3));
-  const chip = Math.max(20, Math.min(26, bandH / 3.4));
+  const chip = 28;
   return card(sid, false, `#ly-k { position:absolute; left:120px; top:90px; }
     #ly-h { position:absolute; left:120px; top:136px; font-weight:800; font-size:64px; letter-spacing:-1px; }
     .lyb { position:absolute; left:120px; width:1680px; box-sizing:border-box; display:flex; align-items:center; gap:32px; padding:0 28px; background:#fff; border:1.5px solid ${BORDER}; border-left:10px solid ${AQUA_MARK}; border-radius:18px; }
     .lyb.cons { background:${CODE_FILL}; border-left-color:${MUTED}; border-style:dashed; }
     .lyn { flex:none; width:380px; margin:0; font-weight:800; font-size:30px; color:${INK}; }
-    .lyn span { display:inline-block; width:64px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; color:${AQUA_INK}; }
-    .lyn i { font-style:normal; font-family:'IBM Plex Mono', monospace; font-size:18px; color:${INK2}; letter-spacing:2px; text-transform:uppercase; }
+    .lyn span { display:inline-block; width:64px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; color:${AQUA_INK}; }
+    .lyn i { font-style:normal; font-family:'IBM Plex Mono', monospace; font-size:28px; color:${INK2}; letter-spacing:2px; text-transform:uppercase; }
     .lyc { display:flex; flex-wrap:wrap; gap:10px 12px; }
     .lyc span { padding:6px 16px; border-radius:999px; background:${NIGHT}; color:#fff; font-weight:700; font-size:${r2(chip)}px; }
     .lyb.cons .lyc span { background:#fff; color:${INK}; border:1.5px solid ${MUTED}; }`,
@@ -268,30 +300,32 @@ function flowScene(sb, sc, L, t) {
   if (tip) {
     const at = r2(tEnd + 0.8);
     tipHtml = `    <div id="fl-tip"><div class="tipalia"><div class="tipring"></div><img id="fl-tipa" src="assets/alia/alia-point-left.webp" alt="Alia"></div><p id="fl-tipb" class="tipbubble"><b>${esc(t.tip)}</b>${esc(tip)}</p></div>`;
-    js.push(`tl.fromTo("#fl-tipa", { opacity:0, y:80 }, { opacity:1, y:0, duration:0.6, ease:"back.out(1.6)" }, ${at});`, `tl.fromTo("#fl-tipb", { opacity:0, x:30 }, { opacity:1, x:0, duration:0.45, ease:"power3.out" }, ${r2(at + 0.3)});`);
+    js.push(`tl.fromTo(".tipring", { opacity:0 }, { opacity:1, duration:0.4, ease:"power2.out" }, ${at});`, `tl.fromTo("#fl-tipa", { opacity:0, y:80 }, { opacity:1, y:0, duration:0.6, ease:"back.out(1.6)" }, ${at});`, `tl.fromTo("#fl-tipb", { opacity:0, x:30 }, { opacity:1, x:0, duration:0.45, ease:"power3.out" }, ${r2(at + 0.3)});`,
+      hover('.tipalia', at + 0.7, dur - 0.3, 8));
   }
+  js.push(...walk(sc.phases.map((_, i) => `#fl-p${i}`), r2(tEnd + 0.6), dur - 0.3, `borderColor:"${AQUA}"`, `borderColor:"${BORDER}"`));
   js.push(fadeOut(sid, dur - 0.3));
   const kick = [`${t.use_case} ${sc.code}`, ...(sc.use_cases || [])].join(' · ');
   return card(sid, false, `#fl-k { position:absolute; left:120px; top:90px; }
     #fl-h { position:absolute; left:120px; top:136px; font-weight:800; font-size:64px; letter-spacing:-1px; max-width:1680px; }
     #fl-tr { position:absolute; left:120px; top:236px; margin:0; font-weight:700; font-size:30px; color:${INK2}; max-width:1680px; }
-    #fl-tr b, #fl-tg b, #fl-gv b { font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:22px; letter-spacing:2px; text-transform:uppercase; color:${AQUA_INK}; margin-right:14px; }
+    #fl-tr b, #fl-tg b, #fl-gv b { font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:2px; text-transform:uppercase; color:${AQUA_INK}; margin-right:14px; }
     #fl-body { position:absolute; left:120px; top:320px; width:1680px; display:flex; flex-direction:column; gap:34px; }
     #fl-row { display:flex; align-items:stretch; }
     .flp { flex:none; min-height:250px; box-sizing:border-box; padding:22px 20px; background:#fff; border:3px solid ${BORDER}; border-radius:20px; box-shadow:0 10px 26px rgba(13,20,24,.08); }
     .fla { flex:none; align-self:center; width:40px; height:4px; background:${AQUA_MARK}; }
-    .fln { margin:0; width:48px; height:48px; border-radius:24px; background:${NIGHT}; color:${AQUA}; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; display:flex; align-items:center; justify-content:center; }
+    .fln { margin:0; width:48px; height:48px; border-radius:24px; background:${NIGHT}; color:${AQUA}; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; display:flex; align-items:center; justify-content:center; }
     .flt { margin:14px 0 0; font-weight:800; font-size:${n > 4 ? 28 : 34}px; line-height:1.2; color:${INK}; }
-    .flo { margin:10px 0 0; font-weight:600; font-size:${n > 4 ? 20 : 24}px; line-height:1.3; color:${INK2}; }
-    .flb { margin:12px 0 0; display:inline-block; padding:4px 12px; border-radius:8px; background:${CODE_FILL}; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; color:${AQUA_INK}; }
+    .flo { margin:10px 0 0; font-weight:600; font-size:28px; line-height:1.3; color:${INK2}; }
+    .flb { margin:12px 0 0; display:inline-block; padding:4px 12px; border-radius:8px; background:${CODE_FILL}; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; color:${AQUA_INK}; }
     #fl-tg { margin:0; font-weight:800; font-size:34px; color:${INK}; }
-    #fl-gv { margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:24px; color:${INK}; }
+    #fl-gv { margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; color:${INK}; }
     #fl-tip { position:absolute; inset:0; pointer-events:none; }
     .tipalia { position:absolute; right:40px; bottom:24px; width:300px; height:330px; }
     .tipalia img { position:absolute; left:-20%; bottom:18px; width:140%; height:100%; object-fit:contain; object-position:bottom; filter:drop-shadow(0 8px 14px rgba(13,20,24,.25)); }
     .tipring { position:absolute; left:18%; right:18%; bottom:4px; height:34px; border-radius:50%; border:3px solid ${AQUA_MARK}; }
     .tipbubble { position:absolute; right:350px; bottom:120px; width:700px; margin:0; padding:22px 28px; background:${NIGHT2}; border:2px solid ${AQUA}; border-radius:22px; color:#fff; font-weight:700; font-size:31px; line-height:1.35; }
-    .tipbubble b { display:block; margin-bottom:6px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:22px; letter-spacing:3px; text-transform:uppercase; color:${AQUA}; }
+    .tipbubble b { display:block; margin-bottom:6px; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:3px; text-transform:uppercase; color:${AQUA}; }
     .tipbubble::after { content:""; position:absolute; right:-36px; bottom:40px; border-top:16px solid transparent; border-bottom:16px solid transparent; border-left:34px solid ${AQUA}; }`,
   `    <p id="fl-k" class="kicker">${esc(kick.toUpperCase())}</p>
     <h1 id="fl-h">${esc(sc.name)}</h1>
@@ -311,7 +345,7 @@ const listCss = (pfx) => `#${pfx}-k { position:absolute; left:120px; top:110px; 
     #${pfx}-grid { position:absolute; left:120px; top:300px; width:1260px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
     .${pfx}c { background:#fff; border:1.5px solid ${BORDER}; border-radius:20px; padding:24px 28px; box-shadow:0 10px 26px rgba(13,20,24,.07); }
     .${pfx}c p { margin:0; }
-    .${pfx}c .id { font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:22px; letter-spacing:2px; color:${AQUA_INK}; }
+    .${pfx}c .id { font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:2px; color:${AQUA_INK}; }
     .${pfx}c .tt { margin-top:8px; font-weight:800; font-size:28px; line-height:1.25; color:${INK}; }`;
 
 function decisionsScene(sb, sc, t) {
@@ -328,7 +362,7 @@ ${stage(sid, 'explaining', t.verb.calm, [1440, 230, 400, 720])}`, js, dur);
 function risksScene(sb, sc, t) {
   const sid = 'risks', dur = Math.max(10, 2.5 + sc.tdrs.length * 1.3 + 2);
   const js = [fadeIn('#rk-k', 0.1, 0), fadeIn('#rk-h', 0.25), ...sc.tdrs.map((_, i) => fadeIn(`#rk-c${i}`, 0.9 + i * 1.0)), ...stageIn(sid, 0.5, dur - 0.3), fadeOut(sid, dur - 0.3)];
-  return card(sid, false, listCss('rk') + `\n    .rkc .st { float:right; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; color:#a04f00; background:#fcf3d6; padding:2px 10px; border-radius:8px; }`,
+  return card(sid, false, listCss('rk') + `\n    .rkc .st { float:right; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; color:#a04f00; background:#fcf3d6; padding:2px 10px; border-radius:8px; }`,
   `    <p id="rk-k" class="kicker">${esc(t.debt_k(sc.total) + ' · ' + Object.entries(sc.by_status).map(([s, n]) => `${s} ${n}`).join(' · ').toUpperCase())}</p>
     <h1 id="rk-h">${esc(t.chapter.risks)}</h1>
     <div id="rk-grid">
@@ -342,7 +376,7 @@ function endScene(sb, L, t) {
   return card(sid, true, `#end-k { position:absolute; left:160px; top:300px; }
     #end-h { position:absolute; left:160px; top:350px; font-weight:900; font-size:64px; letter-spacing:-1px; line-height:1.05; max-width:1100px; color:#fff; }
     #end-c { position:absolute; left:160px; top:600px; margin:0; max-width:1100px; font-weight:700; font-size:40px; line-height:1.35; color:${SILVER}; }
-    #end-r { position:absolute; left:160px; top:820px; margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:26px; letter-spacing:2px; color:${MUTED}; }`,
+    #end-r { position:absolute; left:160px; top:820px; margin:0; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:28px; letter-spacing:2px; color:${MUTED}; }`,
   `    <p id="end-k" class="kicker">${esc([a.version && `v${a.version}`, a.status, a.released].filter(Boolean).join(' · ').toUpperCase())}</p>
     <h1 id="end-h">${esc(a.name)}</h1>
 ${c ? `    <p id="end-c">${esc(c)}</p>` : ''}

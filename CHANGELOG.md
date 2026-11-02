@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.6.1] - 2026-11-02
+
+### Fixed
+- **The architecture video passes `hyperframes check` with no warnings** (27 on a reference project before):
+  - **Text floor.** No text under 28 px.
+  - **First frame.** The title is on screen at frame 0 and settles into place.
+  - **Something moves while the viewer reads:**
+    - Alia hovers like a hologram on her stage and in a tip.
+    - Her codec floats once she has said her line.
+    - A highlight walks through a use case's phases and down the layers.
+    - The context's boxes lift in turn.
+- **A link's label in the context scene is a pill in front of the boxes**, the protocol above its action. It was SVG text drawn behind them.
+- **Layout:**
+  - The context's boxes size to the systems they hold, and a lone pair is centred.
+  - The overview's heading stops before Alia's stage, and its cards start below the lines the name takes.
+  - A tip's ring arrives with Alia.
+  - The codec's faces fit inside its ring.
+
 ## [11.6.0] - 2026-11-02
 
 ### Added
