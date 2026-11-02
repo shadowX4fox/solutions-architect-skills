@@ -193,7 +193,7 @@ export function registerLifecycle(on: On, options: PluginOptions = {}) {
   on('session.start', async ($, e, next) => {
     const r = await next(e)
     // one command: everything of hers is under /alia — each view of her hub a subcommand
-    await $.command.register({ name: 'alia', argumentHint: '[status | radar | trend | arch | center | video]', description: 'Alia: where the architecture stands and every view of hers — status, radar, trend, arch, center, video (sa-alia)' })
+    await $.command.register({ name: 'alia', argumentHint: '[status | radar | trend | coverage | arch | center | video]', description: 'Alia: where the architecture stands and every view of hers — status, radar, trend, coverage, arch, center, video (sa-alia)' })
     await ensureLedger($)
     await refreshNextSteps($)
     await refreshRadar($)

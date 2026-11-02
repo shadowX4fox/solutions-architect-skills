@@ -15,6 +15,7 @@ import { registerNextSteps } from './next-steps/register'
 import { registerRadar } from './radar/register'
 import { registerStatus } from './status/register'
 import { registerTrend } from './radar/trend-pane'
+import { registerCoverage } from './coverage/register'
 
 export const register: Register = (on, options) => {
   registerLifecycle(on, options)
@@ -24,6 +25,7 @@ export const register: Register = (on, options) => {
   registerRadar(on)
   registerStatus(on)
   registerTrend(on)
+  registerCoverage(on)
   registerRows(on)
   registerCharts(on)
   registerMilestones(on)

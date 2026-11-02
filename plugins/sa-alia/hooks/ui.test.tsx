@@ -138,7 +138,7 @@ describe('sa-alia, end to end on every surface', () => {
       expect((await run('radar')).text).not.toMatch(/Alia:/)
       expect((await run('arch')).text).toMatch(/Panel de arquitectura abierto/)
       expect((await run('explorar')).text).toMatch(/Panel de arquitectura abierto/)
-      expect((await run('nada')).text).toMatch(/\/alia status · radar · trend · arch · center · video/)
+      expect((await run('nada')).text).toMatch(/\/alia status · radar · trend · coverage · arch · center · video/)
     })
 
     test(`${surface}: findings the radar could not read show as unknown, never zero`, async ($, on) => {
@@ -167,6 +167,41 @@ describe('sa-alia, end to end on every surface', () => {
       await ui.press({ key: 'open-trend' })
       expect(box.opened).toContain('sa-alia-trend')
       await ui.unmount()
+    })
+
+    test(`${surface}: /alia cobertura → the report read now: its share, its gaps, out of date when the documents moved after it`, async ($, on) => {
+      const report = '# Coverage\n\n**PO Spec**: PRODUCT_OWNER_SPEC.md (v1.4)\n**Architecture Version**: 7.0.0\n**Date**: 2026-10-30\n\n## Summary <!-- SECTION: Summary -->\n\n| Metric | Count | % |\n|---|---|---|\n| Total Requirements | 10 | — |\n| ✅ Covered | 7 | 70% |\n| ⚠️ Partial | 2 | 20% |\n| ❌ Not Covered | 1 | 10% |\n\n## Gap Report <!-- SECTION: Gap Report -->\n\n### ❌ Not Covered\n\n| UC | Requirement | Source | Suggested Section |\n|---|---|---|---|\n| 3 | El cajero imprime el comprobante. | Primary Flow | docs/04 |\n'
+      FILES['/p/PRODUCT_OWNER_SPEC.md'] = { text: '# Spec', mtimeMs: NOW - 20 * H }
+      FILES['/p/TRACEABILITY_REPORT.md'] = { text: report, mtimeMs: NOW - 10 * H }   // older than docs/05 and of 7.0.0 against today's 7.1.0
+      try {
+        const box = engine(on)
+        await $.session.start({ cwd: '/p', surface, isInteractive: true })
+        const r = await $.command.run({ command: 'alia', args: 'cobertura', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as { text?: string }
+        expect(r.text).toBe('70% cubierto · 2 parciales · 1 sin cubrir — desactualizado')
+        expect(box.opened).toContain('sa-alia-coverage')
+        const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-coverage', props: PANE })
+        expect(await ui.find({ type: 'Text', text: /Desactualizado: es de la arquitectura v7\.0\.0, hoy v7\.1\.0 · los docs cambiaron después/ })).toBeDefined()
+        expect(await ui.find({ type: 'Text', text: '70%' })).toBeDefined()
+        expect(await ui.find({ type: 'Text', text: /✗ UC 3 · El cajero imprime el comprobante\./ })).toBeDefined()
+        await ui.press({ key: 'cov-recheck' })
+        expect(box.text).toBe('check requirements coverage')
+        await ui.unmount()
+      } finally { delete FILES['/p/PRODUCT_OWNER_SPEC.md']; delete FILES['/p/TRACEABILITY_REPORT.md'] }
+    })
+
+    test(`${surface}: /alia cobertura without a PO Spec explains; without a report offers to make it`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const run = () => $.command.run({ command: 'alia', args: 'coverage', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as Promise<{ text?: string }>
+      expect((await run()).text).toMatch(/Sin PRODUCT_OWNER_SPEC\.md/)
+      FILES['/p/PRODUCT_OWNER_SPEC.md'] = { text: '# Spec', mtimeMs: NOW - 20 * H }
+      try {
+        expect((await run()).text).toMatch(/Aún no hay TRACEABILITY_REPORT\.md/)
+        const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-coverage', props: PANE })
+        await ui.press({ key: 'cov-recheck' })
+        expect(box.text).toBe('check requirements coverage')
+        await ui.unmount()
+      } finally { delete FILES['/p/PRODUCT_OWNER_SPEC.md'] }
     })
 
     test(`${surface}: /alia trend → each lens over its readings, the change since the last; a chart where the surface draws pictures`, async ($, on) => {

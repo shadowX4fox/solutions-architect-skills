@@ -50,6 +50,14 @@ export type ReleaseStatus = {
   downstream: { artifact: string; file: string; version: string | null; stale: boolean; command: string }[]; next: string | null; error: string | null
 }
 
+/** coverage: TRACEABILITY_REPORT.md as the coverage pane shows it, and why it may no longer hold (`stale`). */
+export type Coverage = {
+  at: number; file: string; specVersion: string | null; archVersion: string | null; date: string | null
+  total: number; covered: number; partial: number; gaps: number; undecided: number
+  phases: { phase: string; total: number; covered: number; partial: number; gaps: number }[]
+  notCovered: { uc: string; req: string }[]; partials: { uc: string; req: string; gap: string }[]; stale: string[]
+}
+
 /** milestones: one card Alia places in the transcript. */
 export type Milestone = { id: string; kind: 'release' | 'analysis' | 'kit'; mood: 'calm' | 'pleased' | 'worried' | 'stern'; title: string; lines: string[] }
 
@@ -76,6 +84,8 @@ declare module 'claude-code' {
       radar: Radar | null
       /** radar: what the last reading was computed from — re-read only when it changes. */
       radarKey: string
+      /** coverage: the last reading of the requirements coverage; 'none' — no report, 'no-spec' — no PO Spec; null before it is read. */
+      coverage: Coverage | 'none' | 'no-spec' | null
       /** status: the last reading of the release's state, null before /alia status. */
       releaseStatus: ReleaseStatus | null
       /** alia: her line for the project, null outside an architecture. */

@@ -2,6 +2,18 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0]
+
+### Added
+
+- **Requirements coverage, a pane of hers** (`/alia coverage`, also `cobertura` and `trazabilidad`; a button in her hub after the risk trend). It reads `TRACEABILITY_REPORT.md` (sa-analysis' traceability) by code:
+  - **Tiles:** the share covered, and the requirements that are partial, not covered or undecided.
+  - **Each phase or increment:** a meter that fits a laptop's pane.
+  - **The gaps:** the requirements not covered first, then the partial ones with what they lack.
+  - **Never an old figure as current:** a report of another architecture version, or older than the PO Spec or the documents, carries an "out of date" line naming why.
+  - **Buttons:** "Check the coverage again" fills the prompt with `check requirements coverage` (the model's work: nothing is sent). "Open the report" opens it in the system's viewer.
+  - **Without data:** with no report, it offers to make one; with no PO Spec, it explains what coverage needs.
+
 ## [1.5.1]
 
 ### Fixed

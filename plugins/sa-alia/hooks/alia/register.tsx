@@ -15,6 +15,7 @@ import { Codec, Mark, portrait } from './codec'
 import { openArch } from '../explorer/register'
 import { openRadar } from '../radar/register'
 import { openTrend } from '../radar/trend-pane'
+import { openCoverage } from '../coverage/register'
 import { openStatus } from '../status/register'
 import { openArtifact } from './open'
 import { Helper, helperOf } from './helpers'
@@ -24,13 +25,14 @@ import { DONE, SPINNER, pick } from './voice'
 const aliaAtom = atom({ plugin: 'sa-alia', key: 'alia' } as const, null as AliaLine | null)
 const langAtom = atom({ plugin: 'sa-alia', key: 'lang' } as const, 'en' as 'en' | 'es')
 
-type View = 'status' | 'radar' | 'trend' | 'arch' | 'center' | 'video'
+type View = 'status' | 'radar' | 'trend' | 'coverage' | 'arch' | 'center' | 'video'
 
 /** What the hub offers, in order: one button per view, and the same view as `/alia <view>`. */
 const VIEWS: { key: View; en: string; es: string }[] = [
   { key: 'status', en: 'Where the release stands', es: 'Cómo va el release' },
   { key: 'radar', en: 'Risk radar', es: 'Radar de riesgo' },
   { key: 'trend', en: 'Risk trend', es: 'Tendencia de riesgo' },
+  { key: 'coverage', en: 'Requirements coverage', es: 'Cobertura de requisitos' },
   { key: 'arch', en: 'Browse the architecture', es: 'Explorar la arquitectura' },
   { key: 'center', en: 'Open the command center', es: 'Abrir el centro de mando' },
   { key: 'video', en: 'Watch the explainer video', es: 'Ver el video explicativo' },
@@ -41,17 +43,19 @@ const SUB: Record<string, View> = {
   status: 'status', release: 'status', estado: 'status',
   radar: 'radar', riesgo: 'radar', risk: 'radar',
   trend: 'trend', tendencia: 'trend',
+  coverage: 'coverage', cobertura: 'coverage', trazabilidad: 'coverage', traceability: 'coverage',
   arch: 'arch', arquitectura: 'arch', architecture: 'arch', explorer: 'arch', explorar: 'arch',
   center: 'center', centro: 'center', mando: 'center', '3d': 'center',
   video: 'video', vídeo: 'video',
 }
-const SUBS = '/alia status · radar · trend · arch · center · video'
+const SUBS = '/alia status · radar · trend · coverage · arch · center · video'
 
 /** One view, opened: a pane read now, or an artifact that exists (else its prompt filled). The command's text. */
 async function openView($: Parameters<typeof openStatus>[0], v: View, es: boolean): Promise<string> {
   if (v === 'status') return openStatus($)
   if (v === 'radar') return openRadar($)
   if (v === 'trend') return openTrend($)
+  if (v === 'coverage') return openCoverage($)
   if (v === 'arch') return openArch($)
   return openArtifact($, v, es)
 }
