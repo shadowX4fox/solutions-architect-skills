@@ -42,6 +42,14 @@ export type ProjectSnapshot = {
   lenses: Record<string, { date: string; critical: number; high: number }>
   kit: { version: string; hashes: Record<string, string>; interfaces: number } | null
 }
+/** status: where the release stands, from sa-skills' `lifecycle.js status --json`; `error` when it could not be read. */
+export type ReleaseStatus = {
+  at: number; state: string; version: string | null; declared: string | null; released: string | null
+  tag: { name: string; local: boolean; remote: boolean | null } | null
+  changes: { section: string; bump: string; text: string }[]; recommended: string | null; unreleased: string[]
+  downstream: { artifact: string; file: string; version: string | null; stale: boolean; command: string }[]; next: string | null; error: string | null
+}
+
 /** milestones: one card Alia places in the transcript. */
 export type Milestone = { id: string; kind: 'release' | 'analysis' | 'kit'; mood: 'calm' | 'pleased' | 'worried' | 'stern'; title: string; lines: string[] }
 
@@ -57,7 +65,7 @@ declare module 'claude-code' {
       nextStepsDismissed: string
       /** The architecture's DOC_LANGUAGE, for the mods' own words. */
       lang: 'en' | 'es'
-      /** explorer: the ledger as last loaded, null before /arch or without one. */
+      /** explorer: the ledger as last loaded, null before /alia arch or without one. */
       explorerFacts: ExplorerFacts | null
       explorerTab: ExplorerTab
       explorerScope: ExplorerScope
@@ -68,6 +76,8 @@ declare module 'claude-code' {
       radar: Radar | null
       /** radar: what the last reading was computed from — re-read only when it changes. */
       radarKey: string
+      /** status: the last reading of the release's state, null before /alia status. */
+      releaseStatus: ReleaseStatus | null
       /** alia: her line for the project, null outside an architecture. */
       alia: AliaLine | null
       /** milestones: the last reading of the project, null before the session's first. */

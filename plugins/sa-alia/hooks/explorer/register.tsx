@@ -1,4 +1,4 @@
-// sa-alia · explorer — `/arch` opens a pane over the facts ledger: containers, integrations, ADRs, TDRs, and a card per
+// sa-alia · explorer — `/alia arch` opens a pane over the facts ledger: containers, integrations, ADRs, TDRs, and a card per
 // element whose actions fill the prompt (a draft — nothing is sent on its own).
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On } from 'claude-code'
@@ -25,21 +25,23 @@ const TABS: { tab: ExplorerTab; key: string; en: string; es: string }[] = [
   { tab: 'tdrs', key: 't', en: 'TDRs', es: 'TDR' },
 ]
 
-/** Re-read the ledger: on /arch, so the pane shows the project as it stands. */
+/** Re-read the ledger: on `/alia arch`, so the pane shows the project as it stands. */
 async function reload($: EngineInterface) {
   const io: Io = { exists: (p) => $.fs.exists(p), read: (p) => $.fs.read(p), list: (p) => $.fs.list(p), stat: (p) => $.fs.stat(p) }
   const facts = await loadFacts(io, await $.session.root())
   await update($, factsAtom, () => facts)
 }
 
-/** Explorer: `/arch`, a pane over the architecture's containers, integrations, ADRs and TDRs. */
+/** `/alia arch` and her hub's button: the ledger re-read, the pane opened; the text the command answers. */
+export async function openArch($: EngineInterface): Promise<string> {
+  await reload($)
+  const f = await read($, factsAtom)
+  await $.ui.open({ id: PANE, title: f && f.lang === 'es' ? 'Arquitectura' : 'Architecture' })
+  return f ? (f.lang === 'es' ? 'Panel de arquitectura abierto.' : 'Architecture pane opened.') : 'No facts ledger yet (.cache/sa-skills/facts.json) — run any sa-skills workflow on this architecture first.'
+}
+
+/** Explorer: `/alia arch`, a pane over the architecture's containers, integrations, ADRs and TDRs. */
 export function registerExplorer(on: On) {
-  on('command.run', { command: 'arch' }, async $ => {
-    await reload($)
-    const f = await read($, factsAtom)
-    await $.ui.open({ id: PANE, title: f && f.lang === 'es' ? 'Arquitectura' : 'Architecture' })
-    return { text: f ? (f.lang === 'es' ? 'Panel de arquitectura abierto.' : 'Architecture pane opened.') : 'No facts ledger yet (.cache/sa-skills/facts.json) — run any sa-skills workflow on this architecture first.' }
-  })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const els = $.ui.resolve(e)
@@ -49,7 +51,7 @@ export function registerExplorer(on: On) {
     if (!f) return (
       <Box flexDirection="column">
         <Text color={TONE.info} bold>{`${GLYPH.brand} Architecture`}</Text>
-        <Text dimColor>No facts ledger yet (.cache/sa-skills/facts.json). Run any sa-skills workflow on this architecture, then /arch again.</Text>
+        <Text dimColor>No facts ledger yet (.cache/sa-skills/facts.json). Run any sa-skills workflow on this architecture, then /alia arch again.</Text>
       </Box>
     )
     const es = f.lang === 'es'

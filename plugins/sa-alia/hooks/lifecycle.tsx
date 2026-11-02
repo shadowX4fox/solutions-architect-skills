@@ -37,7 +37,7 @@ async function refreshNextSteps($: EngineInterface) {
 }
 
 /** Where sa-skills is: SA_SKILLS_DIR, the checkout this plugin was loaded from, else the marketplace's own resolver. */
-async function saSkillsDir($: EngineInterface): Promise<string | null> {
+export async function saSkillsDir($: EngineInterface): Promise<string | null> {
   const has = async (d: string) => $.fs.exists(`${d}/scripts/shared/findings.js`)
   const env = await $.env.get('SA_SKILLS_DIR')
   if (env && (await has(env))) return env
@@ -161,9 +161,8 @@ export function registerLifecycle(on: On, options: PluginOptions = {}) {
   const after = typeof options.notifyAfterMinutes === 'number' ? options.notifyAfterMinutes : 3
   on('session.start', async ($, e, next) => {
     const r = await next(e)
-    await $.command.register({ name: 'arch', description: 'Browse the architecture: containers, integrations, ADRs and TDRs (sa-alia)' })
-    await $.command.register({ name: 'radar', description: "The architecture's risk: findings by lens and open debt (sa-alia)" })
-    await $.command.register({ name: 'alia', description: 'Alia: where the architecture stands, in one line, and the way to every view (sa-alia)' })
+    // one command: everything of hers is under /alia — each view of her hub a subcommand
+    await $.command.register({ name: 'alia', argumentHint: '[status | radar | arch | center | video]', description: 'Alia: where the architecture stands and every view of hers — status, radar, arch, center, video (sa-alia)' })
     await refreshNextSteps($)
     await refreshRadar($)
     await refreshAlia($)

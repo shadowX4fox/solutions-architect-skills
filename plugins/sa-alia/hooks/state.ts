@@ -3,3 +3,4 @@
 export const ARCH_PANE = 'sa-alia-arch'
 export const RADAR_PANE = 'sa-alia-radar'
 export const ALIA_PANE = 'sa-alia-alia'
+export const STATUS_PANE = 'sa-alia-status'

@@ -12,6 +12,7 @@ import { registerExplorer } from './explorer/register'
 import { registerLifecycle } from './lifecycle'
 import { registerNextSteps } from './next-steps/register'
 import { registerRadar } from './radar/register'
+import { registerStatus } from './status/register'
 
 export const register: Register = (on, options) => {
   registerLifecycle(on, options)
@@ -19,6 +20,7 @@ export const register: Register = (on, options) => {
   registerNextSteps(on)
   registerExplorer(on)
   registerRadar(on)
+  registerStatus(on)
   registerRows(on)
   registerMilestones(on)
   registerConfirm(on)

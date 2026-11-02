@@ -1,15 +1,21 @@
 // sa-alia · Alia — the suite's navigator, present in Claude Code: `/alia` opens her codec over the architecture (where it
-// stands, her line, the way to every view, each a draft in the prompt), and while
-// a turn runs in an architecture the spinner says what an architect does. Her line is composed by code (voice.ts); she
+// stands, her line, the way to every view), and everything of hers is under it, each view a subcommand that does what its
+// button in her hub does — `/alia status` the release, `/alia radar` the risk, `/alia arch` the explorer, `/alia center` and
+// `/alia video` the command center and the video when they exist (else the prompt that makes them); while a turn runs in an
+// architecture the spinner says what an architect does. Her line is composed by code (voice.ts); she
 // never sends a prompt and never edits a document.
 import { atom, read } from 'claude-code'
 import type { On, PluginOptions } from 'claude-code'
 
 import type { AliaLine } from '../../types'
 
-import { ALIA_PANE, RADAR_PANE } from '../state'
+import { ALIA_PANE } from '../state'
 import { GLYPH, TONE } from '../ui'
 import { Codec, Mark, portrait } from './codec'
+import { openArch } from '../explorer/register'
+import { openRadar } from '../radar/register'
+import { openStatus } from '../status/register'
+import { openArtifact } from './open'
 import { Helper, helperOf } from './helpers'
 import { ALIA } from './palette'
 import { DONE, SPINNER, pick } from './voice'
@@ -17,24 +23,47 @@ import { DONE, SPINNER, pick } from './voice'
 const aliaAtom = atom({ plugin: 'sa-alia', key: 'alia' } as const, null as AliaLine | null)
 const langAtom = atom({ plugin: 'sa-alia', key: 'lang' } as const, 'en' as 'en' | 'es')
 
-/** What the hub offers: each fills the prompt with the words that route to the skill, or opens a pane of this plugin. */
-const VIEWS: { key: string; en: string; es: string; prompt?: string; pane?: string }[] = [
-  { key: 'v-status', en: 'Where the release stands', es: 'Cómo va el release', prompt: 'architecture status' },
-  { key: 'v-radar', en: 'Risk radar', es: 'Radar de riesgo', pane: RADAR_PANE },
-  { key: 'v-arch', en: 'Browse the architecture', es: 'Explorar la arquitectura', prompt: '/arch' },
-  { key: 'v-center', en: 'Open the command center', es: 'Abrir el centro de mando', prompt: 'command center' },
-  { key: 'v-video', en: 'Make the explainer video', es: 'Hacer el video explicativo', prompt: 'architecture video' },
+type View = 'status' | 'radar' | 'arch' | 'center' | 'video'
+
+/** What the hub offers, in order: one button per view, and the same view as `/alia <view>`. */
+const VIEWS: { key: View; en: string; es: string }[] = [
+  { key: 'status', en: 'Where the release stands', es: 'Cómo va el release' },
+  { key: 'radar', en: 'Risk radar', es: 'Radar de riesgo' },
+  { key: 'arch', en: 'Browse the architecture', es: 'Explorar la arquitectura' },
+  { key: 'center', en: 'Open the command center', es: 'Abrir el centro de mando' },
+  { key: 'video', en: 'Watch the explainer video', es: 'Ver el video explicativo' },
 ]
+
+/** Her subcommands, in either language: the view each is. */
+const SUB: Record<string, View> = {
+  status: 'status', release: 'status', estado: 'status',
+  radar: 'radar', riesgo: 'radar', risk: 'radar',
+  arch: 'arch', arquitectura: 'arch', architecture: 'arch', explorer: 'arch', explorar: 'arch',
+  center: 'center', centro: 'center', mando: 'center', '3d': 'center',
+  video: 'video', vídeo: 'video',
+}
+const SUBS = '/alia status · radar · arch · center · video'
+
+/** One view, opened: a pane read now, or an artifact that exists (else its prompt filled). The command's text. */
+async function openView($: Parameters<typeof openStatus>[0], v: View, es: boolean): Promise<string> {
+  if (v === 'status') return openStatus($)
+  if (v === 'radar') return openRadar($)
+  if (v === 'arch') return openArch($)
+  return openArtifact($, v, es)
+}
 
 export function registerAlia(on: On, options: PluginOptions) {
   const voice = options.voice !== false
   const replyCodec = options.replyCodec !== false
 
-  on('command.run', { command: 'alia' }, async $ => {
-    const say = await read($, aliaAtom)
+  on('command.run', { command: 'alia' }, async ($, e) => {
+    const word = e.args.trim().toLowerCase(), sub = SUB[word]
     const es = (await read($, langAtom)) === 'es'
+    if (sub) return { text: await openView($, sub, es) }
+    const say = await read($, aliaAtom)
     await $.ui.open({ id: ALIA_PANE, title: 'Alia' })
-    return { text: say ? `${GLYPH.brand} Alia: ${say.line}` : es ? 'Aquí no hay arquitectura (sin ARCHITECTURE.md).' : 'No architecture here (no ARCHITECTURE.md).' }
+    const unknown = word ? (es ? ` (no conozco «${e.args.trim()}»: ${SUBS})` : ` (unknown "${e.args.trim()}": ${SUBS})`) : ''
+    return { text: (say ? `${GLYPH.brand} Alia: ${say.line}` : es ? 'Aquí no hay arquitectura (sin ARCHITECTURE.md).' : 'No architecture here (no ARCHITECTURE.md).') + unknown }
   })
 
   on('ui.render', { component: 'Pane', requestId: ALIA_PANE }, async ($, e) => {
@@ -61,21 +90,18 @@ export function registerAlia(on: On, options: PluginOptions) {
           {VIEWS.map((v) => (
             <Box key={`row-${v.key}`} flexDirection="row" gap={1}>
               <Text color={TONE.info}>{GLYPH.step}</Text>
-              <Button key={v.key} plain label={es ? v.es : v.en} onPress={async () => {
-                if (v.pane) await $.ui.open({ id: v.pane, title: es ? v.es : v.en })
-                else if (v.prompt) await $.prompt.fill({ text: v.prompt })
-              }} />
+              <Button key={`v-${v.key}`} plain label={es ? v.es : v.en} onPress={async () => { await openView($, v.key, es) }} />
             </Box>
           ))}
         </Box>
-        <Text dimColor>{es ? 'Cada opción llena el prompt; nada se envía solo.' : 'Each fills the prompt; nothing is sent on its own.'}</Text>
+        <Text dimColor>{es ? `Cada vista abre directo; lo que hay que generar llena el prompt, nada se envía solo. También: ${SUBS}` : `Each view opens directly; what must be made fills the prompt, nothing is sent on its own. Also: ${SUBS}`}</Text>
       </Box>
     )
   })
 
   // `/alia`'s line in the transcript, as her codec; the model reads the text the command answered, unchanged
   on('ui.render', { component: 'CommandOutput' }, async ($, e, next) => {
-    if (e.props.command !== 'alia' || e.props.isErrored) return next(e)
+    if (e.props.command !== 'alia' || e.props.isErrored || e.props.args.trim()) return next(e)
     const say = await read($, aliaAtom)
     if (!say) return next(e)
     const es = (await read($, langAtom)) === 'es'

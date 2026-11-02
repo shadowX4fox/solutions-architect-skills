@@ -1,8 +1,8 @@
-// sa-alia · radar — the status line carries the summary (lifecycle.tsx writes it); `/radar` opens the detail: each lens's
+// sa-alia · radar — the status line carries the summary (lifecycle.tsx writes it); `/alia radar` opens the detail: each lens's
 // newest report with its critical and high findings and age, the TDRs by status, and a button
 // per stale lens that fills the prompt to rerun it (a draft — nothing is sent).
 import { atom, read } from 'claude-code'
-import type { On } from 'claude-code'
+import type { EngineInterface, On } from 'claude-code'
 
 import type { AliaLine, Radar } from '../../types'
 
@@ -15,13 +15,15 @@ import { SPARK_H, SPARK_W, sparkline } from './trend'
 const aliaAtom = atom({ plugin: 'sa-alia', key: 'alia' } as const, null as AliaLine | null)
 const radarAtom = atom({ plugin: 'sa-alia', key: 'radar' } as const, null as Radar | null)
 
-/** Radar: `/radar`, the risk detail behind the status line. */
+/** `/alia radar` and her hub's button: the pane opened; the text the command answers. */
+export async function openRadar($: EngineInterface): Promise<string> {
+  const r = await read($, radarAtom)
+  await $.ui.open({ id: RADAR_PANE, title: r && r.lang === 'es' ? 'Radar de riesgo' : 'Risk radar' })
+  return r ? r.line : 'No architecture here (no ARCHITECTURE.md), or the radar has not been read yet.'
+}
+
+/** Radar: `/alia radar`, the risk detail behind the status line. */
 export function registerRadar(on: On) {
-  on('command.run', { command: 'radar' }, async $ => {
-    const r = await read($, radarAtom)
-    await $.ui.open({ id: RADAR_PANE, title: r && r.lang === 'es' ? 'Radar de riesgo' : 'Risk radar' })
-    return { text: r ? r.line : 'No architecture here (no ARCHITECTURE.md), or the radar has not been read yet.' }
-  })
 
   on('ui.render', { component: 'Pane', requestId: RADAR_PANE }, async ($, e) => {
     const els = $.ui.resolve(e)

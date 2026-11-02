@@ -2,6 +2,28 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0]
+
+### Added
+
+- **Where the release stands, as a pane** (`/alia status`, also `release` and `estado`). sa-skills' own lifecycle reads it as you open it (`lifecycle.js status --json`, read-only, no model). The pane shows:
+  - the state, and the tag, local and remote;
+  - the changes since the tag, with the recommended bump;
+  - the unreleased notes and the downstream artifacts left stale.
+- **Buttons in the status pane.** Each one fills the prompt and sends nothing:
+  - "Release the architecture", or "Recover the tag";
+  - one "Refresh" per stale command (the analyses share one).
+- **`/alia center` and `/alia video`** open the command center's HTML in the browser and the video in the system's player (`xdg-open`, `open`, `start`) when they exist. Otherwise they fill the prompt that makes them.
+
+### Changed
+
+- **Everything of hers is under `/alia`**, one subcommand per view: `status`, `radar` (`riesgo`, `risk`), `arch` (`arquitectura`, `explorar`, `explorer`), `center` (`centro`, `mando`, `3d`), `video`.
+  - A button in her hub does what its subcommand does: a view that only reads opens at once, and what the model must still make fills the prompt.
+  - The hub's last button is now "Watch the explainer video" (was "Make…").
+- **`/radar` and `/arch` are gone**, so `/alia` is the only command sa-alia registers.
+  - The typeahead shows `[status | radar | arch | center | video]` beside it.
+  - An unknown word after `/alia` opens her hub and names the views.
+
 ## [1.1.0]
 
 ### Added

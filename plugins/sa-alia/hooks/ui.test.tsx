@@ -29,11 +29,19 @@ const FILES: Record<string, { text: string; mtimeMs: number }> = {
   '/p/compliance-docs/COMPLIANCE_MANIFEST.md': { text: '- Average Score: 6.6/10\n', mtimeMs: NOW - 9 * 24 * H },   // present on purpose: the radar must not show it
   '/p/.cache/sa-skills/judge/old.worksheet.md': { text: '### id-0\n', mtimeMs: NOW - 30 * 24 * H },   // abandoned: not a step
   '/sa/scripts/shared/findings.js': { text: '', mtimeMs: 0 },
+  '/p/visualizations/architecture-command-center.html': { text: '<html>', mtimeMs: NOW - 2 * H },   // the video is not made yet
 }
+const STATUS = { state: 'changed', version: '7.1.0', declared_status: 'Released', released: '2026-10-01', git: true,
+  tag: { name: 'architecture-v7.1.0', local: true, remote: false }, recommended: 'minor', unreleased: ['uno', 'dos'],
+  changes: [{ section: 'containers', bump: 'minor', text: 'Servicio de Alta added' }, { section: 'text', bump: 'patch', text: 'docs/05 edited' }],
+  downstream: [{ artifact: 'Analysis SPOF', file: 'analysis/SPOF-2026-09-20.md', version: '7.0.0', stale: true, command: 'run architecture analysis' },
+    { artifact: 'Analysis STRIDE', file: 'analysis/STRIDE-2026-09-27.md', version: '7.0.0', stale: true, command: 'run architecture analysis' },
+    { artifact: 'Handoff kit', file: 'handoffs/', version: '7.1.0', stale: false, command: 'generate dev handoff, then commit handoffs/' }],
+  next: 'release my architecture — 2 change(s) since v7.1.0, recommended minor' }
 
 /** The engine beneath the plugin: a project in memory, a clock, the session's state, the prompt box. */
 function engine(on: On) {
-  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[] }
+  const state = new Map<string, { value: unknown; version: number }>(); const box = { text: '', drawn: [] as { component: string; props: Record<string, unknown> }[], opened: [] as string[], placed: [] as string[], notified: [] as string[], launched: [] as string[][] }
   const dir = (p: string) => Object.keys(FILES).some((k) => k.startsWith(p + '/'))
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
   on('turn.complete', () => ({ text: '' }) as never)
@@ -52,7 +60,12 @@ function engine(on: On) {
     for (const [k, f] of Object.entries(FILES)) { if (!k.startsWith(e.path + '/')) continue; const rest = k.slice(e.path.length + 1); const name = rest.split('/')[0] ?? rest
       kids.set(name, rest.includes('/') ? { name, kind: 'dir', size: 0, mtimeMs: 0, isLink: false } : { name, kind: 'file', size: f.text.length, mtimeMs: f.mtimeMs, isLink: false }) }
     return { value: [...kids.values()] } })
-  on('process.run', (_$, e) => ({ value: { exitCode: 0, stdout: e.argv[0] === 'git' ? '' : JSON.stringify(FINDINGS), stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('process.run', (_$, e) => {
+    const cmd = e.argv[0] ?? ''
+    if (['xdg-open', 'open', 'cmd'].includes(cmd)) box.launched.push([...e.argv])
+    const out = cmd === 'git' || ['xdg-open', 'open', 'cmd'].includes(cmd) ? '' : cmd === 'uname' ? 'Linux\n'
+      : /lifecycle\.js$/.test(e.argv[1] || '') ? JSON.stringify(STATUS) : JSON.stringify(FINDINGS)
+    return { value: { exitCode: 0, stdout: out, stderr: '', isStdoutTruncated: false, isStderrTruncated: false } } })
   on('command.register', (_$, e) => ({ value: { command: e.name } }))
   on('state.get', (_$, e) => { const s = state.get(`${e.plugin}/${e.key}`); return { value: (s ? { isSet: true, value: s.value, version: s.version } : { isSet: false, version: 0 }) as never } })   // the store is untyped here: one Map for every key
   on('state.set', (_$, e) => { const k = `${e.plugin}/${e.key}`; const version = (state.get(k)?.version ?? 0) + 1; state.set(k, { value: e.value, version }); return { value: { isSet: true, version } } })
@@ -93,10 +106,10 @@ describe('sa-alia, end to end on every surface', () => {
       await ui.unmount()
     })
 
-    test(`${surface}: /arch → the list with its scope filter, then a card with its badge and lists`, async ($, on) => {
+    test(`${surface}: /alia arch → the list with its scope filter, then a card with its badge and lists`, async ($, on) => {
       const box = engine(on)
       await $.session.start({ cwd: '/p', surface, isInteractive: true })
-      await $.command.run({ command: 'arch', args: '', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } })
+      await $.command.run({ command: 'alia', args: 'arch', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } })
       const arch = { plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-arch', props: PANE } as const
       const list = await $.ui.mount(arch)
       expect(await list.find({ key: 'scope' })).toBeDefined()
@@ -113,6 +126,16 @@ describe('sa-alia, end to end on every surface', () => {
       await card.press({ key: 'act-1' })
       expect(box.text).toBe('genera el handoff del Servicio de Alta')
       await card.unmount()
+    })
+
+    test(`${surface}: everything of hers is under /alia — radar and arch answer as her subcommands, an unknown one names them`, async ($, on) => {
+      engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const run = (args: string) => $.command.run({ command: 'alia', args, origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as Promise<{ text?: string }>
+      expect((await run('radar')).text).not.toMatch(/Alia:/)
+      expect((await run('arch')).text).toMatch(/Panel de arquitectura abierto/)
+      expect((await run('explorar')).text).toMatch(/Panel de arquitectura abierto/)
+      expect((await run('nada')).text).toMatch(/\/alia status · radar · arch · center · video/)
     })
 
     test(`${surface}: /radar → tiles, a meter per lens, the stale lens offered for a rerun`, async ($, on) => {
@@ -143,10 +166,46 @@ describe('sa-alia, end to end on every surface', () => {
       if (surface === 'desktop') expect(await ui.find({ type: 'Svg' })).toBeDefined()   // her face, talking, on the desktop
       else { expect(await ui.find({ type: 'Svg' })).toBeUndefined(); expect(await ui.find({ type: 'Text', text: '✦' })).toBeDefined() }   // the terminal: her ringed sparkle, no picture
       await ui.press({ key: 'v-video' })
-      expect(box.text).toBe('architecture video')
+      expect(box.text).toBe('architecture video')   // not made yet: the prompt that makes it
       await ui.press({ key: 'v-radar' })
       expect(box.opened).toContain('sa-alia-radar')
+      await ui.press({ key: 'v-arch' })
+      expect(box.opened).toContain('sa-alia-arch')
+      await ui.press({ key: 'v-status' })
+      expect(box.opened).toContain('sa-alia-status')
+      await ui.press({ key: 'v-center' })
+      expect(box.launched.at(-1)).toEqual(['xdg-open', '/p/visualizations/architecture-command-center.html'])   // made: opened as it is
       await ui.unmount()
+    })
+
+    test(`${surface}: /alia status → the state, the tag, the changes, the stale artifacts; each button a draft`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const r = await $.command.run({ command: 'alia', args: 'status', origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as { text?: string }
+      expect(r.text).toMatch(/v7\.1\.0 · con cambios desde su release/)
+      expect(box.opened).toContain('sa-alia-status')
+      const ui = await $.ui.mount({ plugin: 'sa-alia', surface, component: 'Pane', requestId: 'sa-alia-status', props: PANE })
+      expect(await ui.find({ type: 'Text', text: /cómo va el release/ })).toBeDefined()   // her codec heads the pane
+      expect(await ui.find({ type: 'Text', text: /2 cambios desde el tag · recomendado minor/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /architecture-v7\.1\.0 ✓ local ✕ remoto/ })).toBeDefined()
+      expect(await ui.find({ type: 'Text', text: /Servicio de Alta added/ })).toBeDefined()
+      await ui.press({ key: 'st-release' })
+      expect(box.text).toBe('release my architecture')
+      await ui.press({ key: 'st-fix-0' })   // the two stale analyses share one command: one button
+      expect(box.text).toBe('run architecture analysis')
+      expect(await ui.find({ key: 'st-fix-1' })).toBeUndefined()
+      await ui.unmount()
+    })
+
+    test(`${surface}: /alia center opens what exists, /alia video fills what is still to make; nothing is sent`, async ($, on) => {
+      const box = engine(on)
+      await $.session.start({ cwd: '/p', surface, isInteractive: true })
+      const run = (args: string) => $.command.run({ command: 'alia', args, origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 160 } }) as Promise<{ text?: string }>
+      expect((await run('center')).text).toMatch(/Abierto: visualizations\/architecture-command-center\.html/)
+      expect(box.launched).toEqual([['xdg-open', '/p/visualizations/architecture-command-center.html']])
+      expect((await run('video')).text).toMatch(/Aún no existe visualizations\/architecture-video\.mp4/)
+      expect(box.text).toBe('architecture video')
+      expect(box.launched.length).toBe(1)
     })
 
     test(`${surface}: a suite script's row reads as what it said; its raw result folds; any other command is the engine's`, async ($, on) => {
