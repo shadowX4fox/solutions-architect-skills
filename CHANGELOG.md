@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.5.0] - 2026-11-01
+
+### Added
+
+- **The local index server on the Qdrant engine, optional** (`architecture-index-export/local/compose.qdrant.yaml`): `SA_INDEX_STORE=qdrant` makes `publish-index.js --up` add the override — the server switched to `ARCHINDEX_STORE=qdrant` with a pinned, health-checked Qdrant beside it (`SA_INDEX_QDRANT_TAG`, default `v1.19.2`, its own volume) — to test what a shared server ranks; the `file` engine stays the default and any other value is a usage error (exit 2).
+
 ## [11.4.1] - 2026-11-01
 
 ### Fixed

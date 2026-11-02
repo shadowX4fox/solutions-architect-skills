@@ -637,3 +637,36 @@ describe("publish-index.js --up — which Ollama the local server embeds through
     expect(await chooseOllama({ env: { SA_INDEX_OLLAMA: "http://ollama:11434" }, reach: answers() })).toMatchObject({ cpu: true });
   });
 });
+
+describe("publish-index.js --up — the local server's engine (SA_INDEX_STORE)", () => {
+  const { composeArgs, COMPOSE, COMPOSE_QDRANT } = require("../scripts/publish-index.js");
+  const files = (args: string[]) => args.flatMap((a, i) => (args[i - 1] === "-f" ? [a] : []));
+
+  test("the file engine by default: compose.yaml alone, no Qdrant", () => {
+    const { args, store } = composeArgs({ env: {} });
+    expect(store).toBe("file");
+    expect(files(args)).toEqual([COMPOSE]);
+    expect(composeArgs({ env: { SA_INDEX_STORE: "file" } }).args).toEqual(args);
+  });
+
+  test("SA_INDEX_STORE=qdrant adds compose.qdrant.yaml, after the source and escalation overrides, before the cpu profile", () => {
+    const { args, store } = composeArgs({ env: { SA_INDEX_STORE: " Qdrant ", SA_INDEX_SERVER_REF: "main", SA_INDEX_ESCALATION_PROJECT: "order-desk" }, cpu: true });
+    expect(store).toBe("qdrant");
+    const f = files(args);
+    expect(f[f.length - 1]).toBe(COMPOSE_QDRANT);
+    expect(f).toHaveLength(4);
+    expect(args.slice(-4)).toEqual(["cpu", "up", "-d", "--build"]);
+  });
+
+  test("an engine the local server has no override for is a usage error, never a silent file engine", () => {
+    expect(() => composeArgs({ env: { SA_INDEX_STORE: "memory" } })).toThrow(expect.objectContaining({ code: 2 }));
+  });
+
+  test("compose.qdrant.yaml switches the server to Qdrant and runs a pinned, health-checked Qdrant", () => {
+    const y = readFileSync(COMPOSE_QDRANT, "utf8");
+    expect(y).toContain("ARCHINDEX_STORE: qdrant");
+    expect(y).toContain("QDRANT_HOST: qdrant");
+    expect(y).toMatch(/image: qdrant\/qdrant:\$\{SA_INDEX_QDRANT_TAG:-v\d+\.\d+\.\d+\}/);
+    expect(y).toContain("condition: service_healthy");
+  });
+});

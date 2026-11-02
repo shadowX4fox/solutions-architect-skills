@@ -6,7 +6,8 @@
 //
 // --up starts the local server first (local/compose.yaml: the MCP server with its file engine, in Docker, embedding
 // through the host's Ollama — the GPU — or, when the host has none a container can reach, an Ollama container on the CPU)
-// when nothing answers at the server URL. A laptop only ever publishes the draft: the released version on a
+// when nothing answers at the server URL; SA_INDEX_STORE=qdrant runs it on the Qdrant engine instead, with Qdrant beside it
+// (local/compose.qdrant.yaml, optional). A laptop only ever publishes the draft: the released version on a
 // server is CI's (ci/publish-index.sh). The server and the project key come from the flags, then SA_INDEX_SERVER /
 // SA_INDEX_PROJECT_KEY, then the project's .sa-skills/index.json — written on the first publish so the key stays the
 // same for every run and for CI — then http://localhost:8080 and the architecture's name. SA_INDEX_TOKEN, when set,
@@ -24,6 +25,9 @@ const COMPOSE = path.join(__dirname, '..', 'local', 'compose.yaml');
 const COMPOSE_SOURCE = path.join(__dirname, '..', 'local', 'compose.source.yaml');
 // where the server files one project's escalations, when SA_INDEX_ESCALATION_PROJECT names it (local/compose.escalation.yaml)
 const COMPOSE_ESCALATION = path.join(__dirname, '..', 'local', 'compose.escalation.yaml');
+// the Qdrant engine instead of the file engine, when SA_INDEX_STORE=qdrant (local/compose.qdrant.yaml) — optional
+const COMPOSE_QDRANT = path.join(__dirname, '..', 'local', 'compose.qdrant.yaml');
+const STORES = ['file', 'qdrant'];
 const CONFIG = path.join('.sa-skills', 'index.json');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -70,6 +74,18 @@ async function chooseOllama({ env = process.env, platform = process.platform, ga
 }
 const cpuRoute = (why) => ({ url: CPU_OLLAMA, cpu: true, note: `embeddings: an Ollama container on the CPU, about one chunk a second (${why})` });
 
+// The compose files and flags for the local server: the base, then the source build (SA_INDEX_SERVER_REF), the
+// escalation project (SA_INDEX_ESCALATION_PROJECT), the Qdrant engine (SA_INDEX_STORE=qdrant; file, the default, adds
+// nothing), the cpu profile. An engine the server has no override for is a usage error, never a silent file engine.
+function composeArgs({ env = process.env, cpu = false } = {}) {
+  const store = (env.SA_INDEX_STORE || 'file').trim().toLowerCase();
+  if (!STORES.includes(store)) throw Object.assign(new Error(`SA_INDEX_STORE=${env.SA_INDEX_STORE}: the local server runs the file engine (the default) or qdrant`), { code: 2 });
+  const source = !!env.SA_INDEX_SERVER_REF;
+  const args = ['compose', '-f', COMPOSE, ...(source ? ['-f', COMPOSE_SOURCE] : []), ...(env.SA_INDEX_ESCALATION_PROJECT ? ['-f', COMPOSE_ESCALATION] : []),
+    ...(store === 'qdrant' ? ['-f', COMPOSE_QDRANT] : []), ...(cpu ? ['--profile', 'cpu'] : []), 'up', '-d', ...(source ? ['--build'] : [])];
+  return { args, source, store };
+}
+
 // docker compose up for the local server, then wait for its health: the first start pulls the image and the model
 async function up(server, log, timeoutS) {
   const port = (new URL(server).port) || '8080';
@@ -77,8 +93,8 @@ async function up(server, log, timeoutS) {
   if (ver.status !== 0) throw Object.assign(new Error('Docker with the compose plugin is needed to start the local server (docker compose version failed)'), { code: 3 });
   const ollama = await chooseOllama();
   log(ollama.note);
-  const source = !!process.env.SA_INDEX_SERVER_REF;
-  const args = ['compose', '-f', COMPOSE, ...(source ? ['-f', COMPOSE_SOURCE] : []), ...(process.env.SA_INDEX_ESCALATION_PROJECT ? ['-f', COMPOSE_ESCALATION] : []), ...(ollama.cpu ? ['--profile', 'cpu'] : []), 'up', '-d', ...(source ? ['--build'] : [])];
+  const { args, source, store } = composeArgs({ cpu: ollama.cpu });
+  log(`engine: ${store}${store === 'qdrant' ? ' (Qdrant beside the server, local/compose.qdrant.yaml)' : ' (vectors on disk, no Qdrant)'}`);
   log(`starting the local server: docker ${args.join(' ')} (${source ? `built from ${process.env.SA_INDEX_SERVER_REF} — minutes` : 'the first start pulls the image and the model'})`);
   const r = spawnSync('docker', args, { stdio: 'inherit', env: { ...process.env, SA_INDEX_PORT: port, SA_INDEX_OLLAMA: ollama.url } });
   if (r.status !== 0) throw Object.assign(new Error('docker compose up failed'), { code: 3 });
@@ -143,7 +159,7 @@ async function publish(root, opts = {}) {
   } finally { fs.rmSync(work, { recursive: true, force: true }); }
 }
 
-module.exports = { publish, settings, chooseOllama, COMPOSE };
+module.exports = { publish, settings, chooseOllama, composeArgs, COMPOSE, COMPOSE_QDRANT };
 
 if (require.main === module) {
   const args = process.argv.slice(2); const val = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : undefined; };

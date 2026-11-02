@@ -6,6 +6,8 @@
 #                                                        CPU: an Ollama container, when the host has none
 #   docker compose -f <this file> down                   stop; add -v to drop the bundles, the vectors and the model
 #
+# The Qdrant engine instead, optional: SA_INDEX_STORE=qdrant for publish-index.js --up, or by hand add -f compose.qdrant.yaml.
+#
 # The server is the image its repository's CI publishes, ghcr.io/shadowx4fox/alia-mcp-server, at a pinned version
 # (SA_INDEX_SERVER_TAG; `edge` is main). To run a branch or a commit instead, build it from source with the override
 # beside this file: docker compose -f <this file> -f compose.source.yaml up -d --build (SA_INDEX_SERVER_REF picks the

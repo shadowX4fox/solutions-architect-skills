@@ -327,6 +327,9 @@ The script exports the bundle as a draft, checks it, posts it to the server's dr
 
 - `local/compose.yaml` runs the Alia server from its published image (`ghcr.io/shadowx4fox/alia-mcp-server`, pinned; `SA_INDEX_SERVER_REF` builds a branch from source) in Docker (Compose 2.20 or later) with the `file`
   engine: no Qdrant, vectors on disk, so a restart re-embeds nothing. The first start takes minutes.
+- `SA_INDEX_STORE=qdrant` (optional, 11.5.0) adds `local/compose.qdrant.yaml`: the server on the **Qdrant engine** with
+  Qdrant beside it (pinned, `SA_INDEX_QDRANT_TAG`), to test what a shared server ranks. Its collection is made for one
+  embedding model: with another `SA_INDEX_MODEL`, `down -v` first.
 - It embeds through **the host's Ollama** — the GPU when there is one, about twenty chunks a second; on Linux Ollama must
   listen beyond localhost (`OLLAMA_HOST=0.0.0.0`). Otherwise it says so and starts the **`cpu` profile**'s Ollama
   container (about one chunk a second). `SA_INDEX_OLLAMA` overrides the choice.
