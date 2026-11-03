@@ -275,6 +275,11 @@ describe('analysis-chart.js --lens — one lens\'s own figure', () => {
       expect(lensSvg(m, info, { embed: false })).toContain('No high-blast component');
     }));
 
+  test('a blast radius report without its section is named, never drawn as empty (11.9.1)', () => at('analysis/BLAST-RADIUS-2026-03-01.md',
+    '# B\n### 2.1 High-Blast Components\n| # | Component | Tier |\n|---|---|---|\n| B1 | `Desk Store` | S1 |\n', () => {
+      expect(() => lensModel(ROOT, 'blast-radius')).toThrow(/has no High-Blast Components section/);
+    }));
+
   test('a lens without its report, or a view it does not have, is named', () => {
     expect(() => lensModel(ROOT, 'tech-debt')).toThrow(/no Markdown report of tech-debt/);
     expect(() => lensModel(ROOT, 'spof', null, 'matrix')).toThrow(/spof has no matrix view/);

@@ -1,0 +1,33 @@
+<html><head><meta charset=utf-8><style>
+body{margin:0;background:#16191d;color:#d6dbe0;font:15px/1.45 "DejaVu Sans Mono","Liberation Mono",monospace;width:800px}
+.t{padding:14px 16px}.l{white-space:pre}.a{color:#2ee6e6;font-weight:bold}.d{color:#8b949e}.g{color:#4dd88a}.y{color:#e3b341}.r{color:#ff6b6b}.w{color:#fff;font-weight:bold}
+.box{border:1px solid #2ee6e6;border-radius:6px;display:inline-block;padding:0 6px;margin:0 4px 0 0;vertical-align:top}
+.card{border:1px solid #3d444d;border-radius:8px;padding:2px 8px;margin:6px 0}
+.row{display:flex}.sp{height:10px}.foot{border-top:1px solid #3d444d;margin-top:6px;padding-top:4px;display:flex;justify-content:space-between}
+</style></head><body><div class=t>
+<div class=l>&gt; What systems do we have?</div><div class=sp></div>
+<div class=row><div><span class="box a">✦</span></div><div><div class=a>Alia</div><div class=l>● There are three systems: Order Desk is ours; Payments Hub and Fraud Screen
+  are external.
+  Inside Order Desk, Order Service pays through Hub API (I-03), and Web App
+  reaches Fraud Screen through API Gateway (I-06).</div></div></div><div class=sp></div>
+<div class=l><span class=a>✦</span> <span class=w>Principle gate</span> <span class=g>✓</span> <span class=d>LAYER1: PASS — 0 blocking finding(s), 0 warning(s)</span></div>
+<div class=l><span class=a>✦</span> <span class=w>Integration check</span> <span class=y>⚠ PASS · 2 warnings</span></div>
+<div class=l><span class=a>✦</span> <span class=w>TDR check</span> <span class=r>✗</span> <span class=d>tdr-check: 2 record(s) — 1 blocking, 0 warning(s)</span></div>
+<div class="l r">  ✗ TDR-002: missing from tdr/README.md</div>
+<div class=card><div class=row><div><span class="box a">✦</span></div><div><div class=l><span class=a>Alia</span> <span class=d>· release</span></div><div class="l g">Released v1.2.0 · the tag comes after the merge</div><div class="l d">▸ Order Service: retries to Hub API with exponential backoff.
+▸ Outbox Relay: a dead-letter queue for failed settlements.</div></div></div></div>
+<div class=l><span class=a>✦ Alia</span> <span class=d>· confirm ·</span> docs/05-integration-points.md</div>
+<div class="l d">+2 −1 lines</div>
+<div class="l r">- | I-03 | Order Service | Hub API (Payments Hub) | HTTPS/JSON …</div>
+<div class="l g">+ | I-03 | Order Service | Hub API (Payments Hub) | HTTPS/JSON …</div>
+<div class="l g">+ | I-08 | Outbox Relay | Hub API (Payments Hub) | HTTPS/JSON …</div><div class=sp></div>
+<div class="l w">Apply this change to docs/05-integration-points.md?</div>
+<div class=l><span class=a>❯ 1. Apply</span>
+  2. Don't apply</div><div class=sp></div>
+<div class=l><span class=a>✦ Alia</span> <span class=d>· next steps · click to fill the prompt, never sends it</span></div>
+<div class="l r">  4 critical findings stand — SPOF weighs most. I'd start there.</div>
+<div class=l>  <span class=a>▸</span> <span class=w>Release the architecture</span> <span class=d>2 change(s) in [Unreleased] since v1.2.0</span></div>
+<div class="l d">  hide until they change</div><div class=sp></div>
+<div class=l>&gt; …</div>
+<div class=foot><span class=l><span class=a>sa-alia ✦</span> <span class=d>risk: 4 critical · 2 high · TDR 1 open</span></span><span class="l d">auto mode &amp; <span class=a>✦</span> v1.2.0 Released</span></div>
+</div></body></html>

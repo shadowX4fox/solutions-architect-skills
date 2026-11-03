@@ -286,8 +286,10 @@ function lensModel(root, lens, focus, view) {
     return { kind, lens, file: rep.file, date: rep.date, groups: f ? groups.filter((x) => normName(x.id) === f || normName(x.title).includes(f)).concat([]).filter(Boolean) : groups, focus };
   }
   if (kind === 'graph') {
+    // a report without the section (no anchor — a hand-written or pre-renderer report) cannot be read: named, never drawn as
+    // "no high-blast component"; the section present with no rows is a result, not a failure — the figure says so (11.8.6)
+    if (!/<!--\s*SECTION:\s*High-Blast Components\s*-->/.test(rep.md)) throw Object.assign(new Error(`${rep.file} has no High-Blast Components section`), { code: 1 });
     const tbl = tableOf(section(rep.md, 'High-Blast Components'));
-    // no high-blast component is a result, not a failure: the figure says so (11.8.6)
     if (!tbl || !tbl.rows.length) return { kind, lens, file: rep.file, date: rep.date, row: null, rows: [], links: [], focus, found: !f, empty: true };
     const c = (r, re) => strip(r[col(tbl, re)] || ''), list = (x) => x.split(/\s*[,;·]\s*/).map(strip).filter((n) => n && !/^(none|ninguno|—|-|not documented)$/i.test(n));
     const rows = tbl.rows.map((r) => ({ id: c(r, /^#$/), name: c(r, /^Component/i), tier: c(r, /^Tier/i), direct: list(c(r, /Direct/i)), indirect: list(c(r, /Indirect/i)),

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.9.1] - 2026-11-03
+
+### Fixed
+- `analysis-chart.js --lens blast-radius`: a report without its *High-Blast Components* section (no `SECTION` anchor — hand-written, or written before the renderer) is named as unreadable instead of drawn as "No high-blast component in this run"; the empty figure is kept for a section present with no rows.
+
+### Changed
+- Every screenshot in the docs comes from the synthetic Order Desk showcase: the terminal (`docs/images/claude-code/cli.webp`) and Alia's review on GitHub (`docs/images/github/`) are drawn from the plugin's own output — the pages kept in `scripts/docs-screenshots/drawn/`; the showcase's analysis reports carry their section anchors; `capture-page.ts` takes a pixel scale.
+
 ## [11.9.0] - 2026-11-03
 
 ### Changed

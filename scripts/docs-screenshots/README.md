@@ -65,3 +65,19 @@ done
 ```
 
 `state.webp` and `verdict.webp` are both taken after the raised fill; the heat map and the waterfall before it.
+
+## The drawn shots
+
+`docs/images/claude-code/cli.webp` and `docs/images/github/review-{dark,light}.webp` are pages drawn from the plugin's own
+output over the same showcase, kept in `drawn/`: the terminal with sa-alia's rows, cards and band in their English wording
+(`plugins/sa-alia/hooks/`), and Alia's architecture review as `review-check.js`'s `render()` writes it, through GitHub's
+Markdown and its stylesheet, in both themes:
+
+```bash
+bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/drawn/terminal.html docs/images/claude-code/cli.webp 800
+# the review at twice the pixels (the last argument), light the same way
+bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/drawn/review-dark.html docs/images/github/review-dark.webp 868 2
+```
+
+The desktop app's shots (`reply-codec`, `alia-pane`, `arch-card`, `question-codec`) are screenshots of the app with the
+showcase open: build it as above, open the folder in the desktop app with sa-alia installed, and take them there.
