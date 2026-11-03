@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.9.0] - 2026-11-03
+
+### Changed
+- **The analysis gate holds only what the change caused** (`analysis-diff.js`). A critical or high finding, new or raised, holds the pull request when it names an element the change touches, or names no element the architecture knows (it cannot be placed). One that names only elements the change left alone is listed in Alia's comment as *not caused by this change*, with the advice to record a real one as a TDR, and does not hold. Before, every re-run lens re-judged the whole architecture, and the variation of a new agent held pull requests that changed nothing it named.
+- **`analysis-impact.js` names what each lens has to look at again** (`touched`). Containers and flows count with their phase hops. For an integration whose ends moved, only the end that moved counts, with the integration's id. A section's edit counts by the elements its changed lines name, and an edit naming none touches every element, as do the demand and a TDR.
+
+### Added
+- **Carried findings** (`analysis-prepare.js --base`, or `SA_ANALYSIS_BASE`, which `architecture-analysis.yml` sets to the merge base). Each lens's payload lists the findings of its own report that name only elements the change leaves alone, and the agent keeps them as they were.
+- **What the architect accepted is kept** (`analysis/accepted.json`). On `analysis-accepted`, the workflow runs `analysis-diff.js … --record-accepted <who> --pr <n>` and commits the findings that held to the branch. They pair like base findings afterwards, so at that severity or below they do not hold again.
+
+### Upgrade
+- Move `SA_PLUGIN_REF` to `v11.9.0` and replace `architecture-analysis.yml` from the template (`upgrade the architecture workflows`): the workflow sets `SA_ANALYSIS_BASE` and records acceptances.
+
 ## [11.8.8] - 2026-11-03
 
 ### Fixed

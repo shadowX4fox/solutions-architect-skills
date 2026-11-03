@@ -56,6 +56,8 @@ const today = opt('--today') || new Date().toISOString().slice(0, 10);
 const format = (opt('--format') || 'md').toLowerCase() === 'html' ? 'html' : 'md';
 const outDir = path.resolve(opt('--out') || path.join(root, '.cache', 'sa-skills', 'analysis'));
 const jsonOut = args.includes('--json');
+// a run against a base revision (CI: SA_ANALYSIS_BASE, the merge base) carries what the change left alone (11.9.0)
+const baseRef = opt('--base') || process.env.SA_ANALYSIS_BASE || null;
 
 // The vocabulary each lens hands the explorer (moved here from SKILL.md Step 2.5 — this is the copy in force)
 const VOCAB = {
@@ -234,6 +236,28 @@ if (sceneFile) {
 
 // what the other lenses already registered on each component (latest report per lens on disk)
 const aDir = path.join(root, 'analysis');
+// What the change leaves alone, per lens: the findings of the lens's own newest report that name only elements the change does
+// not touch (analysis-impact.js). The agent keeps them as they were — a new agent does not judge an untouched element the same
+// way twice, and that variation is not the change's. Empty without a base, or when a change names no element.
+let carriedImpact = null;
+if (baseRef) { try { carriedImpact = require('./analysis-impact.js').impact(root, baseRef); } catch (e) { console.error(`analysis-prepare: no impact against ${baseRef} (${e.message}) — nothing carried`); } }
+function carriedOf(lens) {
+  if (!carriedImpact) return [];
+  const { attributed } = require('./analysis-diff.js');
+  const slug = SEV_LENSES[lens], dir = path.join(root, 'analysis');
+  let f = null; try { f = fs.readdirSync(dir).filter((n) => new RegExp(`^${slug}-\\d{4}-\\d{2}-\\d{2}\\.md$`, 'i').test(n)).sort().pop(); } catch { return []; }
+  if (!f) return [];
+  try { return F.extractMarkdown(read(path.join(dir, f)), slug).items.filter((it) => !attributed(lens, it, carriedImpact)).map((it) => ({ id: it.id, label: it.label, severity: it.severity || null, file: `analysis/${f}` })); }
+  catch { return []; }
+}
+const carriedMd = (lens) => {
+  const c = carriedOf(lens);
+  if (!c.length) return '';
+  const t = carriedImpact.touched[lens];
+  return ['### Carried — what this change leaves alone', '',
+    `This run is against \`${baseRef}\`; the change touches ${Array.isArray(t) && t.length ? t.map((n) => `\`${n}\``).join(', ') : 'no named element'}. These findings of \`${c[0].file}\` name only elements it does not touch. **Keep each one as it is**: the same element, the same severity, in the same section — a new id only where the plan's numbering requires it. Change one only where the facts or documents of this payload say something new about its element; then say what in its row.`, '',
+    table(['Id', 'Finding', 'Severity'], c.map((x) => [x.id, `\`${x.label}\``, x.severity || '—'])), ''].join('\n');
+};
 const priorFindings = {};
 if (exists(aDir)) Object.values(SEV_LENSES).forEach((slug) => { const f = fs.readdirSync(aDir).filter((n) => new RegExp(`^${slug}-\\d{4}-\\d{2}-\\d{2}\\.md$`, 'i').test(n)).sort().pop(); if (!f) return; try { const r = F.extractMarkdown(read(path.join(aDir, f)), slug); priorFindings[slug] = { file: `analysis/${f}`, items: r.items.map((it) => ({ id: it.id, label: it.label, severity: it.severity || null })) }; } catch (e) { /* unreadable report: not a finding source */ } });
 
@@ -378,6 +402,7 @@ lenses.forEach((lens) => {
     designLanguageMd(spec, lang),
     '## Facts and derived metrics', '',
     ...PARTS[lens].flatMap((part) => [`### ${PART_TITLES[part]}`, '', part === 'prior' ? factsMd.prior(lens) : factsMd[part](), '']),
+    carriedMd(lens),
     missing.length ? `### Inputs not available\n\n${missing.map((m) => `- ${m}`).join('\n')}\n` : '',
     '## Explorer excerpts — where the lens\'s vocabulary appears in the documents', '', `Query terms: \`${VOCAB[lens]}\``, '', excerpts, '',
     '## Next: the documents parts of the reading list', '',

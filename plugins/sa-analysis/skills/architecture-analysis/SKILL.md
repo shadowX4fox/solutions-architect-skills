@@ -427,12 +427,23 @@ bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analys
 
 - **`analysis-impact.js`** compares the facts ledger at the base with the branch's and maps each typed change to the
   lenses that read it, using one fixed table (`IMPACT`). It runs only the lenses that already have a report under
-  `analysis/`; the rest are listed as skipped. A change of text alone runs none.
+  `analysis/`; the rest are listed as skipped. A change of text alone runs none. It also names what each lens has to look
+  at again (`touched`): the elements its changes name, or every element when one names none (a section's edit that names
+  no element, the demand, a TDR).
+- **Run against the base** (11.9.0): with `SA_ANALYSIS_BASE` (the workflow sets the merge base) or `--base`,
+  `analysis-prepare.js` adds **Carried** to each lens's payload: the findings of the lens's own report that name only
+  elements the change leaves alone. The agent keeps each one as it was: the same element, severity and section. A new
+  agent does not judge an untouched element the same way twice, and that variation is not the change's.
 - **`analysis-diff.js`** checks each lens's newest report against the base's, using the findings contract. A critical or
-  high finding that is new, or one raised to critical or high, means the state moved (exit 3); anything else keeps it
-  (exit 0). Findings are paired by what they name; a pair the names leave open goes to the judge (`same-finding`, the
-  `agent` worksheet). An unconfirmed pair stays apart and holds the merge, and a lens that produced no report also holds
-  it. `--md` writes the pull request comment.
+  high finding that is new, or one raised to critical or high, **on an element the change touches**, means the state
+  moved (exit 3); anything else keeps it (exit 0). One that names only elements the change left alone is listed as *not
+  caused by this change* and never holds; one that names no element the architecture knows cannot be placed, so it holds.
+  Findings are paired by what they name; a pair the names leave open goes to the judge (`same-finding`, the `agent`
+  worksheet). An unconfirmed pair stays apart and holds the merge, and a lens that produced no report also holds it.
+  `--md` writes the pull request comment.
+- **What the architect accepted is kept** (11.9.0): when `analysis-accepted` lands, the workflow runs
+  `analysis-diff.js … --record-accepted <who> --pr <n>`, which adds the findings that held to `analysis/accepted.json`
+  and commits it to the branch. They pair like base findings afterwards: at that severity or below they never hold again.
 
 **Pictures of the analyses are one script** — `analysis-chart.js`, in the Alia Guide look (her blazon — never her face, which the comment or the reply beside it already carries — in the ring of the mood of the
 outcome), from the reports on disk by code. Any request for an image, a chart, a graph or a diagram of the analyses is

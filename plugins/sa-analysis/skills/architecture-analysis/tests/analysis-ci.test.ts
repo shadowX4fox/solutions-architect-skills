@@ -10,7 +10,7 @@ import { FILES } from '../../../../sa-visualization/skills/architecture-command-
 
 const SCRIPTS = join(import.meta.dir, '..', 'scripts');
 const { impact, IMPACT, LENSES } = require(join(SCRIPTS, 'analysis-impact.js'));
-const { diff, markdown } = require(join(SCRIPTS, 'analysis-diff.js'));
+const { diff, markdown, recordAccepted } = require(join(SCRIPTS, 'analysis-diff.js'));
 
 const TMP = mkdtempSync(join(tmpdir(), 'sa-analysis-ci-'));
 const ROOT = join(TMP, 'order-desk');
@@ -71,8 +71,17 @@ describe('analysis-impact.js — the lenses a change impacts', () => {
       expect(r.changes.map((x: any) => x.kind)).toContain('integration-added');
       expect(r.run).toEqual(['spof']);
       expect(r.changes.every((x: any) => x.kind !== 'container-technology')).toBe(true);
+      expect([...r.touched.spof].sort()).toEqual(['I-09', 'Order DB', 'Outbox Relay']);   // what the change touches, by name (11.9.0)
     } finally { put(f, was); put(c, cwas); }
   });
+});
+
+test('an integration whose target moved touches the moved end and the integration, not the end that stayed (11.9.0)', () => {
+  const { changesOf } = require(join(SCRIPTS, 'analysis-impact.js'));
+  const comp = (name: string) => ({ name, slug: name.toLowerCase().replace(/ /g, '-'), level: 'L2' });
+  const led = (to: string) => ({ components: [comp('Web App'), comp('Old Vault'), comp('New Vault')], integrations: [{ id: 'I-07', from: 'Web App', to, protocol: 'HTTPS', pattern: 'rr', boundary: 'internal' }], flows: [], phases: [], tdrs: [], demand: null });
+  const ch = changesOf(led('Old Vault'), led('New Vault'), join(TMP, 'none'), join(TMP, 'none'));
+  expect(ch).toEqual([expect.objectContaining({ kind: 'integration-ends', names: ['I-07', 'Old Vault', 'New Vault'] })]);
 });
 
 describe('analysis-diff.js — was the state kept?', () => {
@@ -128,6 +137,35 @@ describe('analysis-diff.js — was the state kept?', () => {
       expect(r.lenses[0].totals).toMatchObject({ before: { critical: 1 }, after: { critical: 2 } });
       expect(r.verdict).toBe('worsened');
     } finally { git('reset', '-q', '--hard', BASE); rmSync(join(ROOT, 'analysis', 'DATA-SENSITIVITY-2026-02-01.md'), { force: true }); }
+  });
+
+  test('attribution: a new critical on an element the change left alone does not hold; on a touched one it does; on no known element it does (11.9.0)', async () => {
+    write('| C1 | `Order DB` | Primary lost | All orders | None |\n| C2 | `API Gateway` | Gateway down | All traffic | None |\n| C3 | Shared secret store | Lost | All | None |\n| D1 | `Outbox Relay` | Lag | Late events | Retry |');
+    try {
+      const known = ['Order DB', 'API Gateway', 'Outbox Relay', 'Order Service'];
+      const left = await diff(ROOT, BASE, ['spof'], { engine: 'agent', impact: { touched: { spof: ['Order Service'] }, known } });
+      expect(left.preexisting.map((h: any) => h.id)).toEqual(['C2']);          // API Gateway: untouched, known — reported, not held
+      expect(left.held.map((h: any) => h.id)).toEqual(['C3']);                  // names no known element: cannot be placed, holds
+      expect(markdown(left, true)).toMatch(/No los causó este cambio[\s\S]*API Gateway/);
+      const touched = await diff(ROOT, BASE, ['spof'], { engine: 'agent', impact: { touched: { spof: ['API Gateway'] }, known } });
+      expect(touched.held.map((h: any) => h.id).sort()).toEqual(['C2', 'C3']);
+      const all = await diff(ROOT, BASE, ['spof'], { engine: 'agent', impact: { touched: { spof: '*' }, known } });
+      expect(all.held.map((h: any) => h.id).sort()).toEqual(['C2', 'C3']);    // a change that names no element touches them all
+    } finally { restore(); }
+  });
+
+  test('a finding the architect accepted never holds again at that severity; recorded by --record-accepted (11.9.0)', async () => {
+    write('| C1 | `Order DB` | Primary lost | All orders | None |\n| C2 | `API Gateway` | Gateway down | All traffic | None |\n| D1 | `Outbox Relay` | Lag | Late events | Retry |');
+    try {
+      const first = await diff(ROOT, BASE, ['spof'], { engine: 'agent', accepted: [] });
+      expect(first.verdict).toBe('worsened');
+      expect(recordAccepted(ROOT, first, 'architect', 7)).toBe(1);
+      const kept = await diff(ROOT, BASE, ['spof'], { engine: 'agent' });
+      expect(kept.verdict).toBe('kept');
+      expect(kept.resolved).toEqual([]);                                        // an accepted finding is never 'resolved'
+      expect(JSON.parse(readFileSync(join(ROOT, 'analysis', 'accepted.json'), 'utf8')).findings[0]).toMatchObject({ lens: 'spof', name: 'API Gateway', severity: 'critical', by: 'architect', pr: 7 });
+      expect(recordAccepted(ROOT, first, 'architect', 7)).toBe(0);             // recorded once
+    } finally { rmSync(join(ROOT, 'analysis', 'accepted.json'), { force: true }); restore(); }
   });
 
   test('a lens that produced no report holds the merge', async () => {

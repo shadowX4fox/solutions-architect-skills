@@ -275,8 +275,8 @@ pull request's branch. Then:
 
 | The analyses | What happens |
 |---|---|
-| Keep the state — no critical or high finding new or raised (`analysis-diff.js`) | Merged there; the issue closed, the draft index dispatched |
-| Move it | The status `architecture-analysis` stays pending, `analysis-held`, Alia names what rose; the architect labels it `analysis-accepted`, then it merges |
+| Keep the state — no critical or high finding new or raised on an element the write touches (`analysis-diff.js`) | Merged there; the issue closed, the draft index dispatched. A finding that names only elements the write left alone is listed in the comment and never holds (11.9.0) |
+| Move it | The status `architecture-analysis` stays pending, `analysis-held`, Alia names what rose; the architect labels it `analysis-accepted`, then it merges. What was accepted goes into `analysis/accepted.json` and does not hold again |
 | Did not finish | The status fails; nothing merges |
 
 A person's pull request runs the same analyses and carries the reports, but the architect merges it. Make

@@ -7,7 +7,15 @@
 // is raised. Either one and the state was not kept: the pull request waits for the architect. Medium and low findings,
 // and resolved ones, are reported and never hold.
 //
+// A finding is held only when this change caused it (11.9.0): it names an element the change touches (analysis-impact.js's
+// `touched`, per lens), or no element the architecture knows — then it cannot be placed and holds. One that names only
+// elements the change left alone is reported as found before the change, re-rated or newly seen, and never holds: a lens
+// re-run by a new agent does not judge an untouched element the same way twice, and that variation is not this change's.
+// A finding the architect accepted (analysis-accepted, recorded in analysis/accepted.json) is paired like a base finding:
+// at the severity accepted or below it never holds again.
+//
 //   bun analysis-diff.js <project> --base <git-ref> --lenses spof,stride,… [--judge agent|typesafe|clef] [--judge-answers <file>] [--json] [--md]
+//   bun analysis-diff.js <project> --base <git-ref> --lenses … --record-accepted <who> [--pr <n>]   (writes analysis/accepted.json)
 //
 // A lens asked for whose newest report is still the base's own (not re-run) holds, as one with no report does.
 // Exit 0 kept · 3 worsened (the architect's) · 2 usage · 1 error.
@@ -47,6 +55,21 @@ const itemsOf = (rep) => {
 };
 const keyOf = (i) => F.norm(F.plain(i.label || i.id || ''));
 
+// ---- what the change touched (analysis-impact.js) and what the architect accepted (analysis/accepted.json)
+const IM = require('./analysis-impact.js');
+function impactOf(root, ref) { try { return IM.impact(root, ref); } catch { return null; } }
+const ACCEPTED = (root) => path.join(root, 'analysis', 'accepted.json');
+function readAccepted(root) { try { const j = JSON.parse(fs.readFileSync(ACCEPTED(root), 'utf8')); return Array.isArray(j.findings) ? j.findings : []; } catch { return []; } }
+/** Whether a finding is this change's: it names a touched element, or no known element at all (it cannot be placed). */
+function attributed(lens, item, imp) {
+  if (!imp || !imp.touched) return true;
+  const t = imp.touched[lens];
+  if (t === undefined || t === '*') return true;
+  const text = [item.label, item.id, ...Object.values(item.fields || {})].map((x) => F.plain(String(x || ''))).join(' · ');
+  if (IM.namesIn(text, t).length) return true;
+  return !IM.namesIn(text, imp.known || []).length;
+}
+
 // Two findings with different words may be one finding — a threat reworded by a new run, a component renamed. Whether they
 // are is a judgement: one question per pair the names left unpaired, through scripts/judge.js. A pair it does not confirm
 // stays apart: the new finding holds the merge (never guessed).
@@ -60,14 +83,17 @@ const brief = (lens, i) => ({ lens, id: i.id, name: F.plain(i.label || ''), seve
   detail: Object.entries(i.fields || {}).map(([k, v]) => `${k}: ${F.plain(v)}`).join(' · ').slice(0, 400) });
 
 /** One lens, by code: findings paired by name; what stays unpaired is new (critical, high) or gone. */
-function pairLens(lens, before, after) {
+function pairLens(lens, before, after, accepted = []) {
   const A = itemsOf(before), B = itemsOf(after);
+  // the findings the architect accepted pair like the base's — after them, so a base finding is preferred
+  const acc = accepted.filter((x) => x.lens === lens && RANK[x.severity]).map((x) => ({ id: x.id, label: x.name, severity: x.severity, fields: x.detail ? { Detail: x.detail } : {}, accepted: true }));
+  const pool = A.concat(acc);
   const usedA = new Set(), pairs = [];
   for (const b of B) {
-    const a = A.find((x) => !usedA.has(x) && keyOf(x) === keyOf(b) && x.severity === b.severity) || A.find((x) => !usedA.has(x) && keyOf(x) === keyOf(b));
+    const a = pool.find((x) => !usedA.has(x) && keyOf(x) === keyOf(b) && x.severity === b.severity) || pool.find((x) => !usedA.has(x) && keyOf(x) === keyOf(b));
     if (a) { usedA.add(a); pairs.push([a, b]); } else pairs.push([null, b]);
   }
-  return { lens, before: before ? before.file : null, after: after ? after.file : null, A, B, pairs, loose: A.filter((x) => !usedA.has(x)), totals: { before: tally(A), after: tally(B) } };
+  return { lens, before: before ? before.file : null, after: after ? after.file : null, A, B, pairs, loose: pool.filter((x) => !usedA.has(x)), totals: { before: tally(A), after: tally(B) } };
 }
 
 /** The candidates the judge reads: each unpaired critical or high of the new report against each unpaired finding of the base. */
@@ -78,7 +104,7 @@ function candidates(p) {
 }
 
 /** The lens's verdict once the judge's confirmations are in: what holds, what rose, what was resolved. */
-function settle(p, yes) {
+function settle(p, yes, imp) {
   const taken = new Set();
   for (const [key, conf] of [...yes].sort((x, y) => y[1] - x[1])) {
     const [, k, m] = key.split(':').map(Number), x = p.loose[m];
@@ -86,14 +112,23 @@ function settle(p, yes) {
     p.pairs[k][0] = x; taken.add(m);
   }
   const loose = p.loose.filter((_, m) => !taken.has(m));
-  const held = [], raised = [];
+  const held = [], raised = [], preexisting = [];
   for (const [a, b] of p.pairs) {
-    if (!a) { if (HOLDS(b.severity)) held.push({ lens: p.lens, id: b.id, name: b.label, severity: b.severity, what: whatOf(p.lens, b) }); continue; }
-    if (RANK[b.severity] > RANK[a.severity] && HOLDS(b.severity)) raised.push({ lens: p.lens, id: b.id, name: b.label, from: a.severity, to: b.severity });
+    const mine = attributed(p.lens, b, imp);
+    if (!a) {
+      if (!HOLDS(b.severity)) continue;
+      const f = { lens: p.lens, id: b.id, name: b.label, severity: b.severity, what: whatOf(p.lens, b), detail: brief(p.lens, b).detail };
+      (mine ? held : preexisting).push(mine ? f : Object.assign(f, { kind: 'new' }));
+      continue;
+    }
+    if (RANK[b.severity] > RANK[a.severity] && HOLDS(b.severity)) {
+      const f = { lens: p.lens, id: b.id, name: b.label, from: a.severity, to: b.severity, severity: b.severity, detail: brief(p.lens, b).detail };
+      (mine ? raised : preexisting).push(mine ? f : Object.assign(f, { kind: 'raised' }));
+    }
   }
-  const resolved = loose.filter((x) => HOLDS(x.severity)).map((x) => ({ lens: p.lens, name: x.label, severity: x.severity }));
+  const resolved = loose.filter((x) => HOLDS(x.severity) && !x.accepted).map((x) => ({ lens: p.lens, name: x.label, severity: x.severity }));
   const minor = ['medium', 'low'].reduce((n, s) => n + p.totals.after[s], 0) - ['medium', 'low'].reduce((n, s) => n + p.totals.before[s], 0);
-  return { lens: p.lens, before: p.before, after: p.after, totals: p.totals, held, raised, resolved, minor: Math.max(0, minor) };
+  return { lens: p.lens, before: p.before, after: p.after, totals: p.totals, held, raised, preexisting, resolved, minor: Math.max(0, minor) };
 }
 const sevName = (r) => Object.keys(RANK).find((k) => RANK[k] === r) || 'none';
 const tally = (xs) => Object.fromEntries(Object.keys(RANK).map((s) => [s, xs.filter((i) => i.severity === s).length]));
@@ -104,12 +139,14 @@ async function diff(root, ref, lenses, opts = {}) {
   root = path.resolve(root);
   if (!git(root, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]).ok) throw Object.assign(new Error(`no revision ${ref}`), { code: 2 });
   const missing = [], paired = [];
+  const imp = opts.impact !== undefined ? opts.impact : impactOf(root, ref);
+  const accepted = opts.accepted !== undefined ? opts.accepted : readAccepted(root);
   for (const l of lenses) {
     const after = reportOnDisk(root, l), before = reportAt(root, ref, l);
     // a lens that was asked for and not re-run: its newest report is the base's own, unchanged — never a verdict (an agent
     // that did not start, a run cut short), so it holds like a lens with no report at all
     if (!after || (before && before.file === after.file && before.text.replace(/\r\n/g, '\n') === after.text.replace(/\r\n/g, '\n'))) missing.push(l);
-    else paired.push(pairLens(l, before, after));
+    else paired.push(pairLens(l, before, after, accepted));
   }
   const items = paired.flatMap(candidates);
   let yes = new Map(), pending = null, judgeNote = null, engine = null;
@@ -122,9 +159,10 @@ async function diff(root, ref, lenses, opts = {}) {
       for (const [id, a] of Object.entries(r.answers || {})) { const v = JUDGE.value(a); if (v != null && v >= SAME_FINDING.hi) yes.set(id, v); }
     } catch (e) { if (!(e instanceof JUDGE.JudgeError)) throw e; judgeNote = e.message; }
   }
-  const per = paired.map((p) => settle(p, [...yes].filter(([id]) => id.startsWith(`${p.lens}:`))));
+  const per = paired.map((p) => settle(p, [...yes].filter(([id]) => id.startsWith(`${p.lens}:`)), imp));
   const held = per.flatMap((p) => p.held), raised = per.flatMap((p) => p.raised);
   return { base: ref, verdict: held.length || raised.length || missing.length ? 'worsened' : 'kept', lenses: per, held, raised, missing,
+    preexisting: per.flatMap((p) => p.preexisting), touched: imp ? imp.touched : null,
     resolved: per.flatMap((p) => p.resolved), judge: { engine, pairs: items.length, confirmed: yes.size, pending, note: judgeNote } };
 }
 
@@ -141,6 +179,12 @@ function markdown(r, es) {
   for (const l of r.missing) L.push(`| ${l} | — | — | ${t('not produced', 'no se generó')} |`);
   if (r.held.length) { L.push('', t('**New**', '**Nuevos**')); r.held.forEach((h) => L.push(`- ${h.severity === 'critical' ? '🔴' : '🟠'} ${h.lens} \`${h.id}\` — ${h.name}${h.what ? `: ${h.what}` : ''}`)); }
   if (r.raised.length) { L.push('', t('**Raised**', '**Subieron**')); r.raised.forEach((h) => L.push(`- ${h.lens} — ${h.name}: ${h.from} → ${h.to}`)); }
+  if ((r.preexisting || []).length) {
+    L.push('', t('**Not caused by this change** — they name only elements it left alone, so they do not hold (found before, re-rated, or newly seen):',
+      '**No los causó este cambio**: nombran solo elementos que no tocó, así que no frenan (ya estaban, cambiaron de nivel o se vieron ahora):'));
+    r.preexisting.forEach((h) => L.push(`- ${h.lens} \`${h.id}\` — ${h.name}${h.kind === 'raised' ? ` (${h.from} → ${h.to})` : ` (${h.severity})`}`));
+    L.push('', t('If one is a real risk, record it as a TDR.', 'Si alguno es un riesgo real, regístralo como TDR.'));
+  }
   if (r.missing.length) L.push('', t(`**Not produced**: ${r.missing.join(', ')} — the run's log says why.`, `**No se generaron**: ${r.missing.join(', ')}; el registro del run dice por qué.`));
   if (r.resolved.length) { L.push('', t('**Resolved**', '**Resueltos**')); r.resolved.forEach((h) => L.push(`- ${h.lens} — ${h.name} (${h.severity})`)); }
   const minor = r.lenses.filter((p) => p.minor > 0);
@@ -150,15 +194,28 @@ function markdown(r, es) {
   return L.join('\n');
 }
 
-module.exports = { diff, pairLens, candidates, settle, markdown, SAME_FINDING };
+/** The architect's acceptance, kept: what held this pull request goes into analysis/accepted.json, so it never holds again at
+ *  that severity or below. */
+function recordAccepted(root, r, who, pr) {
+  const at = new Date().toISOString().slice(0, 10), now = readAccepted(root);
+  const add = [...r.held, ...r.raised].map((h) => ({ lens: h.lens, id: h.id, name: h.name, severity: h.severity, detail: h.detail || '', by: who || null, pr: pr ? Number(pr) : null, at }));
+  const key = (x) => `${x.lens}|${F.norm(F.plain(x.name || ''))}|${x.severity}`;
+  const seen = new Set(now.map(key)), out = now.concat(add.filter((x) => !seen.has(key(x))));
+  fs.mkdirSync(path.dirname(ACCEPTED(root)), { recursive: true });
+  fs.writeFileSync(ACCEPTED(root), JSON.stringify({ about: 'Findings the architect accepted (analysis-accepted). analysis-diff.js pairs each like a base finding: at this severity or below it does not hold a pull request again.', findings: out }, null, 2) + '\n');
+  return out.length - now.length;
+}
+
+module.exports = { diff, pairLens, candidates, settle, markdown, recordAccepted, attributed, readAccepted, SAME_FINDING };
 
 if (require.main === module) {
   const argv = process.argv.slice(2), opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
-  const root = argv.find((a, i) => !a.startsWith('--') && !['--base', '--lenses', '--judge', '--judge-answers'].includes(argv[i - 1])), ref = opt('--base');
+  const root = argv.find((a, i) => !a.startsWith('--') && !['--base', '--lenses', '--judge', '--judge-answers', '--record-accepted', '--pr'].includes(argv[i - 1])), ref = opt('--base');
   const lenses = (opt('--lenses') || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
   if (!root || !ref || !lenses.length) { console.error('usage: bun analysis-diff.js <project> --base <git-ref> --lenses spof,stride,… [--json] [--md]'); process.exit(2); }
   (async () => {
     const r = await diff(root, ref, lenses, { engine: opt('--judge'), answers: opt('--judge-answers') });
+    if (opt('--record-accepted')) { const n = recordAccepted(root, r, opt('--record-accepted'), opt('--pr')); console.log(`analysis/accepted.json: ${n} finding(s) recorded as accepted`); process.exit(0); }
     const es = /<!--\s*(?:DOC_)?LANGUAGE:\s*es\b/i.test((() => { try { return fs.readFileSync(path.join(root, 'ARCHITECTURE.md'), 'utf8'); } catch { return ''; } })());
     if (argv.includes('--json')) console.log(JSON.stringify(r, null, 2));
     else if (argv.includes('--md')) console.log(markdown(r, es));
@@ -168,6 +225,7 @@ if (require.main === module) {
       r.missing.forEach((l) => console.log(`  ${l}: no report produced`));
       r.held.forEach((h) => console.log(`  new ${h.severity}: ${h.lens} ${h.id} — ${h.name}`));
       r.raised.forEach((h) => console.log(`  raised: ${h.lens} — ${h.name} ${h.from} → ${h.to}`));
+      (r.preexisting || []).forEach((h) => console.log(`  not this change's (does not hold): ${h.lens} ${h.id} — ${h.name}`));
       if (r.judge.pairs) console.log(`  judge (${r.judge.engine}): ${r.judge.pairs} pair(s), ${r.judge.confirmed} the same finding${r.judge.pending ? ` — worksheet pending at ${r.judge.pending}: judge it and run again` : ''}${r.judge.note ? ` — ${r.judge.note}` : ''}`);
     }
     process.exit(r.verdict === 'kept' ? 0 : 3);

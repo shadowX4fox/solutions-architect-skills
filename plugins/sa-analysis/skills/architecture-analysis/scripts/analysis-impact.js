@@ -64,22 +64,41 @@ const sectionOf = (text) => ((text || '').match(/<!--\s*SECTION:\s*([^>]*?)\s*--
 const by = (arr, k) => new Map((arr || []).map((x) => [x[k], x]));
 const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
-/** Every typed change between two ledgers (and the docs files of two trees): [{ kind, what }]. */
+/** Every name the two ledgers know an element by: systems and containers, and the integrations' ids. */
+function knownNames(base, cur) {
+  const n = new Set();
+  for (const l of [base, cur]) {
+    for (const c of l.components || []) { if (c.name) n.add(c.name); if (c.internal_name) n.add(c.internal_name); }
+    for (const i of l.integrations || []) if (i.id) n.add(i.id);
+  }
+  return [...n];
+}
+const fold = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[`*_]/g, '').replace(/\s+/g, ' ');
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** The known names a text mentions — a name as a whole phrase, an integration id as a whole token. */
+function namesIn(text, known) {
+  const t = fold(text);
+  return known.filter((n) => new RegExp(`(^|[^a-z0-9])${esc(fold(n))}($|[^a-z0-9])`).test(t));
+}
+
+/** Every typed change between two ledgers (and the docs files of two trees): [{ kind, what, names }] — `names` the elements it
+ *  touches, `null` when it cannot be placed on any (a section's text that names none, the demand, a TDR): then it touches them all. */
 function changesOf(base, cur, baseDir, root) {
-  const out = [], add = (kind, what) => out.push({ kind, what });
+  const known = knownNames(base, cur);
+  const out = [], add = (kind, what, names) => out.push({ kind, what, names: names === null ? null : [...new Set(names || namesIn(what, known))] });
   for (const lvl of ['L1', 'L2']) {
     const B = by(base.components.filter((c) => c.level === lvl), 'slug'), C = by(cur.components.filter((c) => c.level === lvl), 'slug');
     const noun = lvl === 'L1' ? 'system' : 'container';
     for (const [s, c] of C) {
       const b = B.get(s);
-      if (!b) { add(`${noun}-added`, c.name); continue; }
+      if (!b) { add(`${noun}-added`, c.name, [c.name]); continue; }
       if (lvl === 'L2') {
-        if (!same(b.type, c.type)) add('container-type', `${c.name}: ${b.type} → ${c.type}`);
-        if (!same(b.technology, c.technology)) add('container-technology', `${c.name}: ${[].concat(b.technology || []).join(', ')} → ${[].concat(c.technology || []).join(', ')}`);
-        if (!same(b.capacity, c.capacity)) add('container-capacity', c.name);
+        if (!same(b.type, c.type)) add('container-type', `${c.name}: ${b.type} → ${c.type}`, [c.name]);
+        if (!same(b.technology, c.technology)) add('container-technology', `${c.name}: ${[].concat(b.technology || []).join(', ')} → ${[].concat(c.technology || []).join(', ')}`, [c.name]);
+        if (!same(b.capacity, c.capacity)) add('container-capacity', c.name, [c.name]);
       }
     }
-    for (const [s, b] of B) if (!C.has(s)) add(`${noun}-removed`, b.name);
+    for (const [s, b] of B) if (!C.has(s)) add(`${noun}-removed`, b.name, [b.name]);
   }
   const live = (l) => (l || []).filter((i) => !i.retired);
   const BI = by(live(base.integrations), 'id'), CI = by(live(cur.integrations), 'id');
@@ -88,33 +107,37 @@ function changesOf(base, cur, baseDir, root) {
     const b = BI.get(id), label = `${id} ${c.from} → ${c.to}`;
     if (!b) { add('integration-added', label); if (outside(c)) add('integration-boundary', label); continue; }
     let moved = false;
-    if (b.from !== c.from || b.to !== c.to) { add('integration-ends', `${id}: ${b.from} → ${b.to} ⇒ ${c.from} → ${c.to}`); moved = true; }
+    // the end that moved, both its names, and the integration — the end that stayed is not what changed
+    if (b.from !== c.from || b.to !== c.to) { add('integration-ends', `${id}: ${b.from} → ${b.to} ⇒ ${c.from} → ${c.to}`, [id].concat(b.from !== c.from ? namesIn(`${b.from} · ${c.from}`, known) : [], b.to !== c.to ? namesIn(`${b.to} · ${c.to}`, known) : [])); moved = true; }
     if (b.protocol !== c.protocol || b.pattern !== c.pattern) { add('integration-protocol', `${label}: ${b.protocol} → ${c.protocol}`); moved = true; }
     if (outside(b) !== outside(c)) moved = true;
     if (moved && (outside(b) || outside(c))) add('integration-boundary', label);
   }
   for (const [id, b] of BI) if (!CI.has(id)) { add('integration-removed', `${id} ${b.from} → ${b.to}`); if (outside(b)) add('integration-boundary', `${id} ${b.from} → ${b.to}`); }
 
+  const phaseText = (l, ns) => (l.phases || []).filter((p) => (ns || []).map(String).includes(String(p.n))).map((p) => `${p.hops || ''} ${p.owner_chain || ''}`).join(' ');
+  const flowNames = (f, l) => [f.name, `${f.code}`].concat(namesIn(phaseText(l, f.phases), known)).filter(Boolean);
   const BF = by(base.flows, 'code'), CF = by(cur.flows, 'code');
   for (const [k, c] of CF) {
     const b = BF.get(k);
-    if (!b) { add('flow-added', `${k} ${c.name}`); continue; }
-    if (!same(b.phases, c.phases)) add('flow-phases', `${k} ${c.name}`);
-    if (!same(b.latency_target, c.latency_target)) add('flow-target', `${k} ${c.name}: ${b.latency_target} → ${c.latency_target}`);
+    if (!b) { add('flow-added', `${k} ${c.name}`, flowNames(c, cur)); continue; }
+    if (!same(b.phases, c.phases)) add('flow-phases', `${k} ${c.name}`, flowNames(c, cur).concat(flowNames(b, base)));
+    if (!same(b.latency_target, c.latency_target)) add('flow-target', `${k} ${c.name}: ${b.latency_target} → ${c.latency_target}`, flowNames(c, cur));
   }
-  for (const [k, b] of BF) if (!CF.has(k)) add('flow-removed', `${k} ${b.name}`);
+  for (const [k, b] of BF) if (!CF.has(k)) add('flow-removed', `${k} ${b.name}`, flowNames(b, base));
   const BP = by(base.phases, 'n'), CP = by(cur.phases, 'n');
   for (const [k, c] of CP) {
     const b = BP.get(k);
     if (!b) continue;                                                           // a new phase moves a flow's phases
-    if (!same(b.hops, c.hops) || !same(b.owner_chain, c.owner_chain)) add('phase-hops', `${k} ${c.name}`);
-    if (!same(b.latency_budget, c.latency_budget)) add('phase-budget', `${k} ${c.name}: ${b.latency_budget} → ${c.latency_budget}`);
-    if (!same(b.failure_mode, c.failure_mode)) add('phase-failure', `${k} ${c.name}`);
+    const hopNames = namesIn(`${b.hops || ''} ${b.owner_chain || ''} ${c.hops || ''} ${c.owner_chain || ''}`, known);
+    if (!same(b.hops, c.hops) || !same(b.owner_chain, c.owner_chain)) add('phase-hops', `${k} ${c.name}`, hopNames);
+    if (!same(b.latency_budget, c.latency_budget)) add('phase-budget', `${k} ${c.name}: ${b.latency_budget} → ${c.latency_budget}`, hopNames);
+    if (!same(b.failure_mode, c.failure_mode)) add('phase-failure', `${k} ${c.name}`, hopNames);
   }
-  if (!same(base.demand, cur.demand)) add('demand', 'docs/08 demand by use case');
+  if (!same(base.demand, cur.demand)) add('demand', 'docs/08 demand by use case', null);
   const BT = by(base.tdrs, 'id'), CT = by(cur.tdrs, 'id');
-  for (const [id, c] of CT) { const b = BT.get(id); if (!b || b.status !== c.status) add('tdr', `${id}${b ? `: ${b.status} → ${c.status}` : ' added'}`); }
-  for (const [id] of BT) if (!CT.has(id)) add('tdr', `${id} removed`);
+  for (const [id, c] of CT) { const b = BT.get(id); if (!b || b.status !== c.status) add('tdr', `${id}${b ? `: ${b.status} → ${c.status}` : ' added'}`, null); }
+  for (const [id] of BT) if (!CT.has(id)) add('tdr', `${id} removed`, null);
 
   // a section file whose text moved: its section anchor names the lenses that read it
   const docs = (dir) => { try { return fs.readdirSync(path.join(dir, 'docs')).filter((f) => /^\d\d-.*\.md$/.test(f)); } catch { return []; } };
@@ -122,7 +145,12 @@ function changesOf(base, cur, baseDir, root) {
     const a = read(path.join(baseDir, 'docs', f)), b = read(path.join(root, 'docs', f));
     if (a === b) continue;
     const s = sectionOf(b) || sectionOf(a);
-    if (s && IMPACT[`section:${s}`]) add(`section:${s}`, `docs/${f}`);
+    if (!s || !IMPACT[`section:${s}`]) continue;
+    // the lines that moved, either way: the elements they name are what the edit touches; naming none, it touches them all
+    const A = new Set((a || '').split('\n')), Bs = new Set((b || '').split('\n'));
+    const moved = [...Bs].filter((l) => !A.has(l)).concat([...A].filter((l) => !Bs.has(l))).join('\n');
+    const ns = namesIn(moved, known);
+    add(`section:${s}`, `docs/${f}`, ns.length ? ns : null);
   }
   return out;
 }
@@ -144,14 +172,19 @@ function impact(root, ref) {
     const cur = collect(root);
     const base = baseDir ? collect(baseDir) : { components: [], integrations: [], flows: [], phases: [], tdrs: [], demand: null };
     const changes = baseDir ? changesOf(base, cur, baseDir, root) : [{ kind: 'container-added', what: 'the whole architecture (no ARCHITECTURE.md at the base)' }];
-    const reasons = {};
-    for (const c of changes) for (const l of IMPACT[c.kind] || []) (reasons[l] = reasons[l] || []).push(`${c.kind}: ${c.what}`);
+    const reasons = {}, touched = {};
+    for (const c of changes) for (const l of IMPACT[c.kind] || []) {
+      (reasons[l] = reasons[l] || []).push(`${c.kind}: ${c.what}`);
+      // what each lens has to look at again: the elements its changes name; '*' when one of them names none
+      if (touched[l] === '*') continue;
+      touched[l] = c.names === null ? '*' : [...new Set([...(touched[l] || []), ...c.names])];
+    }
     const impacted = LENSES.filter((l) => reasons[l]), have = analysed(root);
-    return { base: ref, changes, impacted, run: impacted.filter((l) => have.includes(l)), skipped: impacted.filter((l) => !have.includes(l)), reasons };
+    return { base: ref, changes, impacted, run: impacted.filter((l) => have.includes(l)), skipped: impacted.filter((l) => !have.includes(l)), reasons, touched, known: knownNames(base, cur) };
   } finally { if (baseDir) fs.rmSync(baseDir, { recursive: true, force: true }); }
 }
 
-module.exports = { impact, changesOf, analysed, sectionOf, IMPACT, LENSES };
+module.exports = { impact, changesOf, analysed, sectionOf, namesIn, fold, IMPACT, LENSES };
 
 if (require.main === module) {
   const argv = process.argv.slice(2), opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
@@ -164,6 +197,7 @@ if (require.main === module) {
     r.changes.forEach((c) => console.log(`  ${c.kind} — ${c.what}`));
     console.log(r.run.length ? `run: ${r.run.join(', ')}` : 'run: none — no analysis of this architecture reads what changed');
     for (const l of r.run) console.log(`  ${l}: ${r.reasons[l].slice(0, 3).join(' · ')}${r.reasons[l].length > 3 ? ` · +${r.reasons[l].length - 3}` : ''}`);
+    for (const l of r.run) console.log(`  ${l} looks again at: ${r.touched[l] === '*' ? 'every element (a change names none)' : r.touched[l].join(', ') || 'none'}`);
     if (r.skipped.length) console.log(`impacted, not analysed here (no report under analysis/): ${r.skipped.join(', ')}`);
   } catch (e) { console.error(`analysis-impact: ${e.message}`); process.exit(e.code || 1); }
 }
