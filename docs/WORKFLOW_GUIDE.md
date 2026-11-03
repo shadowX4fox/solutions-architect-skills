@@ -361,6 +361,8 @@ residual severity — the ids the command center lights up.
 
 Alia's comment opens on a picture of the verdict: each lens before → after, and what rose.
 
+![The verdict picture: latency budget before and after, one finding raised to critical on Order DB](images/analysis/verdict.webp)
+
 ### Pictures of the analyses
 
 `analysis-chart.js` draws them all, in the Alia Guide look, from the reports on disk:
@@ -374,6 +376,12 @@ Alia's comment opens on a picture of the verdict: each lens before → after, an
 
 On the desktop app sa-alia places it as a card in the transcript, drawn natively by the app; elsewhere it is a PNG. A figure the
 documents do not state is drawn as not documented, never invented.
+
+![Where the analyses stand: each lens by severity](images/analysis/state.webp)
+
+![The SPOF heat map: findings by likelihood and impact](images/analysis/spof-heatmap.webp)
+
+![A flow's latency waterfall: each hop's p95 against the flow's target](images/analysis/latency-waterfall.webp)
 
 ### Traceability — `architecture-traceability`
 

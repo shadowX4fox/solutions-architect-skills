@@ -36,16 +36,36 @@ script with tests, so a document either passes or names the line to fix.
   <br><em>The command center — every layer a floor, every container a block, a use case walked phase by phase with its latency budget.</em>
 </p>
 
-<table>
-  <tr>
-    <td width="50%" valign="top"><img src="docs/images/command-center/physical.webp" alt="Physical view: regions, the cluster, the managed database and the partner service"><br><b>Physical view</b> — where each container runs.</td>
-    <td width="50%" valign="top"><img src="docs/images/command-center/analysis.webp" alt="Analysis mode: each component in the colour of its worst finding"><br><b>Analysis</b> — SPOFs, blast radius and coupling on the blocks they concern.</td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top"><img src="docs/images/command-center/simulation.webp" alt="Simulation: documented demand against documented capacity, Order DB breaks first at x1.25"><br><b>Simulation</b> — documented load against documented capacity: what breaks first.</td>
-    <td width="50%" valign="top"><img src="docs/images/command-center/mcp-console.webp" alt="Claude Code asking Alia over MCP about the Order Service"><br><b>Alia over MCP</b> — Claude Code asking the architecture from a console.</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/images/analysis/state.webp" alt="Where the analyses stand: each lens with its findings by severity — SPOF, blast radius, latency budget, coupling" width="100%">
+  <br><em>The analyses in one picture — every lens by severity, drawn by code from the reports.</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/analysis/verdict.webp" alt="The state moved: latency budget before and after, one finding raised to critical on Order DB" width="100%">
+  <br><em>On a pull request — what the change moved, before → after. It holds only what the change caused.</em>
+</p>
+
+<details>
+<summary><b>More views</b> — physical, analysis on the stage, simulation, Alia over MCP, a lens's own figure</summary>
+<br>
+
+<img src="docs/images/command-center/physical.webp" alt="Physical view: regions, the cluster, the managed database and the partner service" width="100%">
+<br><b>Physical view</b> — where each container runs.<br><br>
+
+<img src="docs/images/command-center/analysis.webp" alt="Analysis mode: each component in the colour of its worst finding" width="100%">
+<br><b>Analysis on the stage</b> — SPOFs, blast radius and coupling on the blocks they concern.<br><br>
+
+<img src="docs/images/command-center/simulation.webp" alt="Simulation: documented demand against documented capacity, Order DB breaks first at x1.25" width="100%">
+<br><b>Simulation</b> — documented load against documented capacity: what breaks first.<br><br>
+
+<img src="docs/images/analysis/latency-waterfall.webp" alt="Latency budget of Place an order: each hop's p95 against the 400 ms target, Order Service over" width="100%">
+<br><b>A lens's own figure</b> — a flow's latency waterfall against its target.<br><br>
+
+<img src="docs/images/command-center/mcp-console.webp" alt="Claude Code asking Alia over MCP about the Order Service" width="100%">
+<br><b>Alia over MCP</b> — Claude Code asking the architecture from a console.
+
+</details>
 
 All screenshots come from the synthetic *Order Desk* example — see [docs/ALIA.md](docs/ALIA.md).
 
@@ -68,7 +88,7 @@ reach developers as a PDF nobody can query. This project treats the architecture
 ## What you get
 
 ```mermaid
-flowchart LR
+flowchart TB
   PO["Product Owner<br/>PO Spec"] --> CAP["Capability alignment<br/>BIAN · cross-industry · yours"]
   CAP --> ARCH["ARCHITECTURE.md + docs/<br/>ADRs · TDRs"]
   ARCH --> ANA["Risk analyses<br/>SPOF · STRIDE · latency"]
@@ -124,24 +144,34 @@ and an organization can add its own.
 The same text upgrades it later:
 
 ```text
-Install the Solutions Architect Skills suite for me, from a shell (the `claude` CLI). Ask before anything not listed here.
-1. Run `bun --version` (1.0 or newer) and `rg --version`. If either is missing, tell me the install command for my OS
-   and stop.
-2. If `claude plugin marketplace list` does not show shadowx4fox-solution-architect-marketplace, run
-   `claude plugin marketplace add shadowX4fox/solutions-architect-skills`; otherwise run
-   `claude plugin marketplace update shadowx4fox-solution-architect-marketplace`.
-3. For each of sa-skills, sa-records, sa-requirements, sa-analysis, sa-delivery, sa-visualization and sa-alia
-   (sa-alia is optional: skip it if I say so): if `claude plugin list` does not show
+Install the Solutions Architect Skills suite for me, from a shell
+(the `claude` CLI). Ask before anything not listed here.
+1. Run `bun --version` (1.0 or newer) and `rg --version`. If either
+   is missing, tell me the install command for my OS and stop.
+2. If `claude plugin marketplace list` does not show
+   shadowx4fox-solution-architect-marketplace, run
+   `claude plugin marketplace add shadowX4fox/solutions-architect-skills`;
+   otherwise run `claude plugin marketplace update
+   shadowx4fox-solution-architect-marketplace`.
+3. For each of sa-skills, sa-records, sa-requirements, sa-analysis,
+   sa-delivery, sa-visualization and sa-alia (sa-alia is optional:
+   skip it if I say so): if `claude plugin list` does not show
    <name>@shadowx4fox-solution-architect-marketplace, run
-   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace --scope user`; otherwise run
-   `claude plugin update <name>@shadowx4fox-solution-architect-marketplace --scope user`.
-   Then run `claude plugin list` and install every "Dependency <name>@… is not installed" the same way.
+   `claude plugin install <name>@shadowx4fox-solution-architect-marketplace
+   --scope user`; otherwise run `claude plugin update
+   <name>@shadowx4fox-solution-architect-marketplace --scope user`.
+   Then run `claude plugin list` and install every
+   "Dependency <name>@… is not installed" the same way.
 4. Run `bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet`
-   (`$HOME` works in Git Bash and in PowerShell) and run `bun install` in the directory it prints. Each version is a
-   new directory, so this repeats after every update.
-5. Run `bun <that directory>/scripts/setup-docgen.ts --no-smoke`. If it reports no browser, offer
-   `bunx puppeteer browsers install chrome` — Mermaid diagrams render as pictures in Word and PDF only with one.
-6. Report every plugin with its version. Then tell me to run /reload-plugins, and /sa-skills:setup once in each project.
+   (`$HOME` works in Git Bash and in PowerShell) and run
+   `bun install` in the directory it prints. Each version is a new
+   directory, so this repeats after every update.
+5. Run `bun <that directory>/scripts/setup-docgen.ts --no-smoke`.
+   If it reports no browser, offer
+   `bunx puppeteer browsers install chrome` — Mermaid diagrams
+   render as pictures in Word and PDF only with one.
+6. Report every plugin with its version. Then tell me to run
+   /reload-plugins, and /sa-skills:setup once in each project.
 ```
 
 Then `/reload-plugins`, and once in each project:
@@ -157,8 +187,10 @@ It grants the permissions the skills need, sets up the judge and checks the expo
 
 ```bash
 claude plugin marketplace add shadowX4fox/solutions-architect-skills
-claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user   # brings the other five
-claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user     # optional: Alia in Claude Code
+# the suite (sa-skills brings the other five)
+claude plugin install sa-skills@shadowx4fox-solution-architect-marketplace --scope user
+# optional: Alia in Claude Code
+claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user
 cd "$(bun "$HOME/.claude/plugins/marketplaces/shadowx4fox-solution-architect-marketplace/scripts/plugin-root.ts" --quiet)" && bun install
 ```
 
@@ -169,14 +201,14 @@ plugin install does not run it, and each update is a new directory.
 
 Then just ask:
 
-```text
-Elicit the requirements for a parcel-tracking service   → architecture-readiness
-Create the architecture                                 → architecture-docs
-Run all analyses                                        → architecture-analysis
-Generate the dev handoff                                → architecture-dev-handoff
-Open the command center                                 → architecture-command-center
-Make a video of the architecture                        → architecture-video
-```
+| Ask | Runs |
+|---|---|
+| *Elicit the requirements for a parcel-tracking service* | `architecture-readiness` |
+| *Create the architecture* | `architecture-docs` |
+| *Run all analyses* | `architecture-analysis` |
+| *Generate the dev handoff* | `architecture-dev-handoff` |
+| *Open the command center* | `architecture-command-center` |
+| *Make a video of the architecture* | `architecture-video` |
 
 Full guide: [docs/INSTALLATION.md](docs/INSTALLATION.md) · a first architecture, step by step:
 [docs/QUICK_START.md](docs/QUICK_START.md). `sa-alia`, Alia in Claude Code, is optional; the instruction above
@@ -184,12 +216,11 @@ installs it unless you say no.
 
 ## Meet Alia
 
-<img src="docs/images/brand/alia-explaining.webp" alt="Alia, the architecture's navigator, explaining beside a hologram panel" width="220" align="right">
+<p align="center"><img src="docs/images/brand/alia-explaining.webp" alt="Alia, the architecture's navigator, explaining beside a hologram panel" width="200"></p>
 
 **Alia** is the architecture's navigator. She lives in four places.
 
 ### In the command center — a 3D model of your architecture
-
 
 `/sa-visualization:architecture-command-center` renders the documented architecture as one self-contained HTML file: a
 floor per layer, every C4 container a block, every integration a route. Alia walks you through it.
@@ -223,15 +254,13 @@ Qdrant, Qwen3-Embedding on Ollama) serves those bundles to any MCP client: VS Co
 | "Record this shortcut as technical debt." | `preview_tier0`, `record_tier0` |
 | "This blocks me: ask the architect." | `preview_escalation`, `record_escalation` |
 
-
 CI publishes each release (`ci/publish-index.sh`, with GitHub Actions, Gitea and Azure Pipelines examples). On GitHub,
 `architecture-lifecycle`'s `ci/` adds the rest of the pipeline: release gates on every pull request, and on the merge of a
 release PR the tag, the index and the handoff kit edited by Claude into a pull request; on a RUN-team project, a Tier 0
-workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN_TEAMS.md)). While you write, `publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
+workflow writes the requests that arrive as issues ([docs/RUN_TEAMS.md](docs/RUN_TEAMS.md)). While you write,
+`publish-index.js --up` runs a local server in Docker so you can try the draft from your IDE.
 
 ### In Claude Code — her presence in the session
-
-<img src="docs/images/claude-code/reply-codec.webp" alt="Claude Code's desktop app: a reply in Alia's codec under a diagram, and the next-steps band under her escudo" width="420" align="right">
 
 The optional `sa-alia` plugin brings her into the session that works on the architecture, in any project with an
 `ARCHITECTURE.md`:
@@ -242,7 +271,11 @@ The optional `sa-alia` plugin brings her into the session that works on the arch
 - **`/alia`** — the architecture's state and every view of hers: `/alia status` the release, `/alia radar` the findings by lens, `/alia trend` how they moved, `/alia coverage` what the PO Spec's requirements have, `/alia arch` the containers and their neighbourhood, `/alia center` and `/alia video` the command center and the video.
 - **Readable script rows** — `✦ Gate de principios ✓ LAYER1: PASS` instead of a raw command.
 - **Milestone cards** — a release, an analysis run, a regenerated handoff kit, placed where the turn made them.
+- **The analyses as pictures** — ask for a chart of them and you get one of `analysis-chart.js`'s figures: a card in the
+  transcript on the desktop app, a PNG elsewhere; a chat that draws its own visuals draws it natively from `--json`.
 - **The confirmations in her look** — a write to the architecture Claude Code would ask about, shown with its change.
+
+<p align="center"><img src="docs/images/claude-code/reply-codec.webp" alt="Claude Code's desktop app: a reply in Alia's codec under a diagram, and the next-steps band under her escudo" width="560"></p>
 
 It draws what the skills leave on disk and edits nothing. [docs/ALIA.md § In Claude Code](docs/ALIA.md#part-3--in-claude-code).
 
@@ -254,12 +287,16 @@ Tier 0 labels use her palette. With her optional GitHub App, the comments and th
 own account. Her architecture review holds every pull request of a service to its build pack, the unattended build
 agent's included. [docs/RUN_TEAMS.md § Alia on GitHub](docs/RUN_TEAMS.md#alia-on-github).
 
-<picture>
+<p align="center"><picture>
   <source media="(prefers-color-scheme: light)" srcset="docs/images/github/review-light.webp">
   <img src="docs/images/github/review-dark.webp" alt="Alia's architecture review on a pull request — her App posts it, her codec in the outcome's mood" width="640">
-</picture>
+</picture></p>
 
-<br clear="right">
+**The analyses on every pull request.** `architecture-analysis.yml` maps what a change touches, re-runs only the lenses
+that read it, and commits the new reports to the branch. Her comment opens on the verdict picture. A critical or high
+finding new or raised **on an element the change touches** holds the merge until the architect labels it
+`analysis-accepted`; a finding on what the change left alone is reported and never held, and an accepted one is kept in
+`analysis/accepted.json` so it does not hold again. [docs/WORKFLOW_GUIDE.md § Analysis](docs/WORKFLOW_GUIDE.md#analysis--architecture-analysis).
 
 ### Her look
 
@@ -285,27 +322,33 @@ The base is **generic by construction**: it never assumes one industry or one co
 
 ## Skill Categories
 
-Fifteen skills in six categories. **Standalone** means the skill starts without an `ARCHITECTURE.md`. The catalog is
-`scripts/skill-catalog.json`; `bun run check:catalog` holds it to the code.
+Sixteen skills in six categories. **Standalone** means the skill starts without an `ARCHITECTURE.md`; **internal** ones
+run inside other skills. The catalog is `scripts/skill-catalog.json`; `bun run check:catalog` holds it to the code.
 
-| Category | Skill | Plugin | Standalone | Needs to start |
-|---|---|---|---|---|
-| **Intake** — business input | `architecture-readiness` | sa-requirements | Yes | Nothing |
-| | `architecture-capability-alignment` | sa-requirements | Yes | `PRODUCT_OWNER_SPEC.md` |
-| **Records** — decisions and debt | `architecture-definition-record` | sa-records | Yes | Nothing (catalog mode maintains an institutional ADR catalog) |
-| | `technical-debt-records` | sa-records | Yes | Nothing |
-| **Authoring** — the architecture | `architecture-docs` | sa-skills | Yes | PO Spec, the alignment report (when a framework is declared) and an HLD to create |
-| | `architecture-lifecycle` | sa-skills | No | `ARCHITECTURE.md` in a git repository |
-| | `architecture-component-guardian` | sa-skills | Internal | `docs/components/` |
-| | `architecture-explorer-headers` | sa-skills | Internal | `docs/` |
-| **Governance** — checks over it | `architecture-analysis` | sa-analysis | No | `ARCHITECTURE.md` |
-| | `architecture-traceability` | sa-analysis | No | PO Spec + `ARCHITECTURE.md` |
-| **Delivery** — for other teams | `architecture-dev-handoff` | sa-delivery | No | `ARCHITECTURE.md` + `docs/05-integration-points.md` |
-| | `architecture-index-export` | sa-delivery | No | `ARCHITECTURE.md` (a handoff kit for build packs) |
-| | `architecture-ci-setup` | sa-delivery | Yes | An architecture repository, or a service repository bound to one |
-| | `architecture-docs-export` | sa-delivery | No | `ARCHITECTURE.md` |
-| **Visualization** | `architecture-command-center` | sa-visualization | No | `ARCHITECTURE.md` |
-| | `architecture-video` | sa-visualization | No | `ARCHITECTURE.md` (HyperFrames to render) |
+| Skill | Plugin | Needs to start |
+|---|---|---|
+| **Intake** — business input | | |
+| `architecture-readiness` | sa-requirements | Nothing · *standalone* |
+| `architecture-capability-alignment` | sa-requirements | `PRODUCT_OWNER_SPEC.md` · *standalone* |
+| **Records** — decisions and debt | | |
+| `architecture-definition-record` | sa-records | Nothing (catalog mode maintains an institutional ADR catalog) · *standalone* |
+| `technical-debt-records` | sa-records | Nothing · *standalone* |
+| **Authoring** — the architecture | | |
+| `architecture-docs` | sa-skills | PO Spec, the alignment report (when a framework is declared) and an HLD to create · *standalone* |
+| `architecture-lifecycle` | sa-skills | `ARCHITECTURE.md` in a git repository |
+| `architecture-component-guardian` | sa-skills | `docs/components/` · *internal* |
+| `architecture-explorer-headers` | sa-skills | `docs/` · *internal* |
+| **Governance** — checks over it | | |
+| `architecture-analysis` | sa-analysis | `ARCHITECTURE.md` |
+| `architecture-traceability` | sa-analysis | PO Spec + `ARCHITECTURE.md` |
+| **Delivery** — for other teams | | |
+| `architecture-dev-handoff` | sa-delivery | `ARCHITECTURE.md` + `docs/05-integration-points.md` |
+| `architecture-index-export` | sa-delivery | `ARCHITECTURE.md` (a handoff kit for build packs) |
+| `architecture-ci-setup` | sa-delivery | An architecture repository, or a service repository bound to one · *standalone* |
+| `architecture-docs-export` | sa-delivery | `ARCHITECTURE.md` |
+| **Visualization** | | |
+| `architecture-command-center` | sa-visualization | `ARCHITECTURE.md` |
+| `architecture-video` | sa-visualization | `ARCHITECTURE.md` (HyperFrames to render) |
 
 ## Documentation
 

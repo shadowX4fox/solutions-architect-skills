@@ -518,6 +518,8 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
   | One element of it — "the blast radius of X", "the latency of flow 2" | The same figure focused on it |
 
   A figure the documents do not state is drawn as not documented, never invented.
+
+  ![The SPOF heat map of the Order Desk example: five findings by likelihood and impact](images/analysis/spof-heatmap.webp)
 - **Milestone cards.** When a turn releases the architecture, re-runs an analysis or regenerates the handoff kit, she
   places a card at that point: the version and its changelog entry, each lens's delta, the components whose
   specification moved.

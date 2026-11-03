@@ -39,3 +39,29 @@ bun scripts/docs-screenshots/console-html.ts run.jsonl "<question>" console.html
 bun scripts/docs-screenshots/capture-page.ts <chrome> console.html docs/images/command-center/mcp-console.webp 1200
 docker compose -p sa-demo -f plugins/sa-delivery/skills/architecture-index-export/local/compose.yaml down -v
 ```
+
+## The analysis pictures
+
+`docs/images/analysis/` holds `analysis-chart.js`'s pictures of the same showcase. `analysis-fills.js` writes a SPOF and a
+latency fill in Order Desk's names; the renderer turns them into reports, and a second latency fill with one hop raised
+gives the verdict picture against a commit of the first:
+
+```bash
+A=plugins/sa-analysis/skills/architecture-analysis/scripts
+bun scripts/docs-screenshots/analysis-fills.js $OUT
+bun $A/render-analysis.js $OUT/spof.fill.json --project $OUT/proj
+bun $A/render-analysis.js $OUT/latency.fill.json --project $OUT/proj
+bun $A/analysis-chart.js $OUT/proj --lens spof --out $OUT/spof-heatmap.png
+bun $A/analysis-chart.js $OUT/proj --lens latency-budget --focus 1 --out $OUT/latency-waterfall.png
+(cd $OUT/proj && git init -q && git add -A && git commit -qm base)
+bun $A/render-analysis.js $OUT/latency-raised.fill.json --project $OUT/proj
+bun $A/analysis-chart.js $OUT/proj --base HEAD --lenses latency-budget --out $OUT/verdict.png
+bun $A/analysis-chart.js $OUT/proj --out $OUT/state.png
+# each PNG to a 1200 px WebP: a page holding it at full width, then capture-page.ts
+for n in state spof-heatmap latency-waterfall verdict; do
+  echo "<body style='margin:0'><img src='$n.png' style='width:100%;display:block'></body>" > $OUT/$n.html
+  bun scripts/docs-screenshots/capture-page.ts <chrome> $OUT/$n.html docs/images/analysis/$n.webp 1200
+done
+```
+
+`state.webp` and `verdict.webp` are both taken after the raised fill; the heat map and the waterfall before it.

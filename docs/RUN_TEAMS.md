@@ -287,6 +287,8 @@ verdict, and every finding that is new or rose. It is committed with the reports
 the previous pull request's picture moves to `analysis/archive/evidence/`. The same script answers a chat's request for a
 picture of the analyses (`docs/ALIA.md` § In the transcript).
 
+![The verdict picture on a pull request: latency budget before and after, one finding raised to critical](images/analysis/verdict.webp)
+
 **The service side** ships with the plugin under `architecture-index-export/ci/service/`:
 
 - `architecture-index.yml` dispatches `architecture-released` to every repository in `SA_SERVICE_REPOS`, using
