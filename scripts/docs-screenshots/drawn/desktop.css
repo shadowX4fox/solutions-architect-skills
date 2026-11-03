@@ -1,0 +1,7 @@
+body{margin:0;background:#1f1f1f;color:#e6e6e6;font:15px/1.55 "Noto Sans","DejaVu Sans",sans-serif;width:768px}
+.w{padding:16px 18px}.d{color:#9a9a9a}.a{color:#3cc9c9}.y{color:#e8a33d}.g{color:#5fbf7f}.r{color:#ff6b6b}
+a{color:#8fb4ff;text-decoration:underline}.b{font-weight:600}
+.codec{display:flex;gap:14px;align-items:flex-start}.codec img{width:74px;height:74px;flex:none}
+.codec .t{padding-top:2px;flex:1}.name{color:#3cc9c9;font-weight:600}
+ul{margin:6px 0 10px;padding-left:34px}li{margin:2px 0}p{margin:6px 0 10px}
+.mono{font-family:"DejaVu Sans Mono",monospace;font-size:13px}

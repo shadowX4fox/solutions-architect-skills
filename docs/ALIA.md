@@ -441,12 +441,13 @@ skills: it draws what they leave on disk and edits nothing. Install it once, at 
 claude plugin install sa-alia@shadowx4fox-solution-architect-marketplace --scope user
 ```
 
-She appears only in a project with an `ARCHITECTURE.md`; anywhere else the session is untouched. The screenshots come
-from the desktop app on the Northwind Reservas demo; the terminal image is drawn from the plugin's own output.
+She appears only in a project with an `ARCHITECTURE.md`; anywhere else the session is untouched. The images are
+drawn, not captured: pages in the desktop app's and the terminal's look, written from the plugin's own output on the
+synthetic Order Desk example (`scripts/docs-screenshots/drawn/`).
 
 ## Her codec over every reply
 
-![A reply in her codec under a diagram, and the next-steps band under her escudo — desktop app](images/claude-code/reply-codec.webp)
+![A reply in her codec under a STRIDE boundary drawn natively in the chat, and the next-steps band under her escudo — desktop app](images/claude-code/reply-codec.webp)
 
 Every reply opens beside her mark and her name: her face on the desktop app, a ringed `✦` in the terminal. The face
 sits at the top of the reply, however long; the text is Claude Code's own and the stored message is unchanged

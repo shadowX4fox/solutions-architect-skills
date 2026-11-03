@@ -86,5 +86,15 @@ bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/d
 bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/drawn/review-dark.html docs/images/github/review-dark.webp 868 2
 ```
 
-The desktop app's shots (`reply-codec`, `alia-pane`, `arch-card`, `question-codec`) are screenshots of the app with the
-showcase open: build it as above, open the folder in the desktop app with sa-alia installed, and take them there.
+The desktop app's shots (`reply-codec`, `alia-pane`, `arch-card`, `question-codec`) are drawn the same way, in the app's
+dark look (`drawn/desktop.css`), with sa-alia's English wording and the showcase's facts: the reply under a STRIDE
+boundary the chat draws natively from `analysis-chart.js --json` (the chat's look, not Alia's), the `/alia` hub, the
+explorer card of Order Service with its neighbourhood, and a question under her codec. Alia's face and escudo come from
+`brand/alia/`:
+
+```bash
+for n in reply-codec alia-pane arch-card; do
+  bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/drawn/$n.html docs/images/claude-code/$n.webp 768 2
+done
+bun scripts/docs-screenshots/capture-page.ts <chrome> scripts/docs-screenshots/drawn/question-codec.html docs/images/claude-code/question-codec.webp 500 2
+```

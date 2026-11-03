@@ -1,0 +1,23 @@
+<html><head><meta charset=utf-8><link rel=stylesheet href=desktop.css><style>
+.tabs{display:flex;gap:22px;margin:12px 0 0;align-items:center}.tabs .on{background:#e6e6e6;color:#111;padding:0 4px;font-weight:600}.key{border:1px solid #666;border-radius:3px;font-size:11px;padding:0 4px;margin-right:6px;color:#bbb}
+hr{border:0;border-top:1px solid #555;margin:6px 0 10px}.card{border:1px solid #333;border-radius:6px;padding:10px 12px;background:#1b1b1b}
+.kv{display:grid;grid-template-columns:96px 1fr;row-gap:1px}.kv div:nth-child(odd){color:#9a9a9a}
+.acts{display:flex;gap:26px;margin-top:10px}
+</style></head><body><div class=w>
+<div class=codec><img src="../../../brand/alia/github/codec-calm.png"><div class=t><div><span class=name>Alia</span> <span class=d>· explorer</span></div><div>1 in, 2 out — governed by ADR-101.</div></div></div>
+<div class=tabs><span class=on>Containers 7</span><span><span class=key>I</span>Integrations 7</span><span><span class=key>A</span>ADR 0</span><span><span class=key>T</span>TDR 0</span></div><hr>
+<div class=card><div class=b>Order Service</div><div class=g>● in scope</div>
+<div class=kv><div>System</div><div>Order Desk</div><div>Type</div><div>API Service</div><div>Technology</div><div>Spring Boot</div><div>Version</div><div>1.0.0</div><div>ADR</div><div>ADR-101</div><div>File</div><div>docs/components/order-desk/03-order-service.md</div></div>
+<svg width="700" height="150" style="display:block;margin:10px 0;background:#141a1c;border-radius:10px" font-family="DejaVu Sans" font-size="13">
+<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#3cc9c9"/></marker></defs>
+<rect x="30" y="58" width="150" height="34" rx="8" fill="#1d2b2e" stroke="#3cc9c9"/><text x="105" y="80" fill="#fff" text-anchor="middle">API Gateway</text>
+<rect x="270" y="56" width="160" height="38" rx="8" fill="#0f1416" stroke="#3cc9c9" stroke-width="2.5"/><text x="350" y="80" fill="#fff" text-anchor="middle" font-weight="bold">Order Service</text>
+<rect x="520" y="22" width="150" height="34" rx="8" fill="#1d2b2e" stroke="#3cc9c9"/><text x="595" y="44" fill="#fff" text-anchor="middle">Hub API</text>
+<rect x="520" y="94" width="150" height="34" rx="8" fill="#1d2b2e" stroke="#3cc9c9"/><text x="595" y="116" fill="#fff" text-anchor="middle">Order DB</text>
+<path d="M180,75 L268,75" stroke="#3cc9c9" fill="none" marker-end="url(#m)"/><text x="190" y="68" fill="#9a9a9a" font-size="11" font-family="DejaVu Sans Mono">I-02 HTTPS/…</text>
+<path d="M430,70 C470,70 480,39 518,39" stroke="#3cc9c9" fill="none" marker-end="url(#m)"/><text x="474" y="36" fill="#9a9a9a" font-size="11" font-family="DejaVu Sans Mono">I-03</text>
+<path d="M430,80 C470,80 480,111 518,111" stroke="#3cc9c9" fill="none" marker-end="url(#m)"/><text x="440" y="122" fill="#9a9a9a" font-size="11" font-family="DejaVu Sans Mono">I-04 JDBC</text></svg>
+<div class=d>Incoming · 1</div><div><span class=a>←</span> I-02 &nbsp;API Gateway &nbsp;<span class=d>· HTTPS/JSON</span></div>
+<div class=d style="margin-top:4px">Outgoing · 2</div><div><span class=a>→</span> I-03 &nbsp;Hub API (Payments Hub) &nbsp;<span class=d>· HTTPS/JSON</span></div><div><span class=a>→</span> I-04 &nbsp;Order DB &nbsp;<span class=d>· JDBC</span></div></div>
+<div class=acts><span><span class=key>1</span>Ask about it</span><span><span class=key>2</span>Handoff</span><span><span class=key>B</span>back</span></div>
+<div class=d>actions fill the prompt, never send it</div></div></body></html>

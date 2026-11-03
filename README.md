@@ -275,7 +275,7 @@ The optional `sa-alia` plugin brings her into the session that works on the arch
   transcript on the desktop app, a PNG elsewhere; a chat that draws its own visuals draws it natively from `--json`.
 - **The confirmations in her look** — a write to the architecture Claude Code would ask about, shown with its change.
 
-<p align="center"><img src="docs/images/claude-code/reply-codec.webp" alt="Claude Code's desktop app: a reply in Alia's codec under a diagram, and the next-steps band under her escudo" width="560"></p>
+<p align="center"><img src="docs/images/claude-code/reply-codec.webp" alt="Claude Code's desktop app: a reply in Alia's codec under a STRIDE boundary drawn natively in the chat, and the next-steps band under her escudo" width="560"></p>
 
 It draws what the skills leave on disk and edits nothing. [docs/ALIA.md § In Claude Code](docs/ALIA.md#part-3--in-claude-code).
 

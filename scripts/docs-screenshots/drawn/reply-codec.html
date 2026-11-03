@@ -1,0 +1,38 @@
+<html><head><meta charset=utf-8><link rel=stylesheet href=desktop.css><style>
+.vis{border:1px solid #333;border-radius:10px;padding:22px 20px 16px;margin:8px 0 20px;background:#1b1b1b}
+.zone{border:1px solid #555;background:#2c2c2c;border-radius:8px;padding:10px 14px;width:250px}
+.zone.own{border-color:#2f9d7f;background:#173b33}.k{font-size:11px;letter-spacing:.06em;color:#9a9a9a;text-transform:uppercase}
+.row{display:flex;align-items:center;justify-content:space-between}
+.mid{flex:1;position:relative;height:60px}.mid .ln{position:absolute;top:30px;left:6px;right:6px;border-top:1.5px solid #888}
+.mid .bd{position:absolute;left:50%;top:-10px;bottom:-10px;border-left:2px dashed #e0605b}
+.mid .tag{position:absolute;left:50%;top:-14px;transform:translateX(-50%);background:#e0605b;color:#fff;font-size:12px;padding:1px 8px;border-radius:9px}
+table{border-collapse:collapse;width:100%;margin-top:16px;font-size:13.5px}td{padding:6px 8px;border-top:1px solid #333;vertical-align:top}
+.p{display:inline-block;border-radius:9px;padding:0 8px;font-size:12px}.pass{border:1px solid #5fbf7f;color:#5fbf7f}.lo{background:#666;color:#111}.me{background:#3cc9c9;color:#111}.hi{background:#e8b84d;color:#111}
+.band{margin:18px -18px -16px;background:#2a2a2a;border-top:1px solid #3a3a3a;padding:12px 18px;display:flex;gap:14px}.band img{width:58px;height:58px}
+</style></head><body><div class=w>
+<div class=d>Ran a command, read the STRIDE report ▸</div>
+<div class=d style="margin-top:10px">Made a visual &nbsp;⤢ ▾</div>
+<div class=vis>
+ <div class=row><div class=zone><div class=k>From zone</div>Internet (the customer's browser)</div>
+ <div class=mid><div class=ln></div><div class=bd></div><div class=tag>TB-01</div></div>
+ <div class="zone own"><div class=k>To zone</div>Order Desk edge (API Gateway)</div></div>
+ <table>
+ <tr><td class=b>Spoofing</td><td><span class="p pass">pass</span></td><td>Tokens signed and validated at the gateway (ADR-102)</td></tr>
+ <tr><td class=b>Tampering</td><td><span class="p pass">pass</span></td><td>TLS 1.3 on I-01</td></tr>
+ <tr><td class=b>Repudiation</td><td><span class="p lo">T1-R · Low</span></td><td>Order audit trail: not documented</td></tr>
+ <tr><td class=b>Information disclosure</td><td><span class="p me">T2-I · Medium</span></td><td>Object-level authorization: not documented</td></tr>
+ <tr><td class=b>Denial of service</td><td><span class="p hi">T3-D · High</span></td><td>Per-route limits only; no per-client quota</td></tr>
+ <tr><td class=b>Elevation of privilege</td><td><span class="p pass">pass</span></td><td>Scopes checked per route at the gateway</td></tr>
+ </table>
+</div>
+<div class=codec><img src="../../../brand/alia/github/codec-thinking.png"><div class=t><div class=name>Alia</div>
+<p>This is trust boundary TB-01, from the STRIDE report in <a>analysis/STRIDE-2026-11-03.md</a>. It is where the customer's browser reaches API Gateway (I-01).</p>
+<p>Three categories pass. Three findings stay open:</p>
+<ul><li>T3-D, High: a burst of anonymous orders can exhaust Order Service. The report recommends a per-client quota at API Gateway.</li>
+<li>T2-I, Medium: object-level authorization is not documented.</li>
+<li>T1-R, Low: the order audit trail is not documented.</li></ul>
+<p>For slides, I can write the same figure as an image in my own look.</p></div></div>
+<div class=band><img src="../../../brand/alia/blazon/escudo.svg"><div><div><span class=name>Alia</span> <span class=d>· next steps · click to fill the prompt, never sends it</span></div>
+<div class=r>8 critical findings stand — SPOF weighs most. I'd start there.</div>
+<div><span class=a>▸</span>&nbsp; Record T3-D as technical debt &nbsp;<span class=d>TB-01 · High</span></div><div class=d>hide until they change</div></div></div>
+</div></body></html>
