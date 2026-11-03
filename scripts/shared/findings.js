@@ -77,6 +77,8 @@ const LENS_ID = {
   'COUPLING': { re: /^K[1-4]-\d{2,3}$/, forms: 'K1-01, K2-01, K3-01, K4-01' },
   'DATA-SENSITIVITY': { re: /^G[1-5]-\d{2,3}$/, forms: 'G1-01 … G5-01' },
 };
+// the line render-analysis.js writes under a findings section with no rows, in either language
+const CLEAN_RUN = /^_(No findings in this run|Sin hallazgos en esta corrida)\._\s*$/m;
 const LENSES = Object.keys(LENS_ID);
 const SEV = (txt) => { const t = norm(txt); return /critical|critic|blocking|bloquea/.test(t) ? 'critical' : /high|alto|alta|severe|sever|chokepoint|cuello/.test(t) ? 'high' : /degradation|degradaci|medium|medio|media|moderate|convergence|convergen/.test(t) ? 'medium' : /operational|operacion|operativ|low|bajo|baja|isolated|aislad|minor|menor/.test(t) ? 'low' : /info|pass|ok|current|vigente/.test(t) ? 'info' : null; };
 const idPrefix = (id) => { const m = String(id).match(/^([A-Z]{1,3})(\d?)/); return m ? m[1] + m[2] : ''; };
@@ -183,7 +185,7 @@ function checkReport(file, src) {
   if (!LENSES.includes(lens)) errors.push({ message: `filename \`${base}\` does not open with a lens slug (${LENSES.join(', ')})` });
   if (!date) errors.push({ message: `filename \`${base}\` carries no YYYY-MM-DD date` });
   const scheme = LENS_ID[lens];
-  let items = [];
+  let items = [], cleanRun = false;
   if (html) {
     const r = extractHtml(src, lens); items = r.items;
     if (r.error) errors.push({ message: `HTML report: ${r.error}` });
@@ -192,8 +194,11 @@ function checkReport(file, src) {
   } else {
     const r = extractMarkdown(src, lens); items = r.items;
     const findingTables = r.tables.filter(t => t.findings);
-    if (!r.tables.length) errors.push({ message: 'no table opens with a `#` (or `ID`) column — the report has no findings table' });
-    else if (!findingTables.length) errors.push({ message: 'every `#` table is an inventory (rows numbered 1, 2, 3 …) — no row opens with a finding id' });
+    // a clean run is a result (11.8.7, #27): no finding row, and the renderer's own no-findings line in a section — a small
+    // architecture has no high-blast component, no K1–K4, no hop over a documented budget; the agent invents none
+    cleanRun = !findingTables.length && CLEAN_RUN.test(src);
+    if (!cleanRun && !r.tables.length) errors.push({ message: 'no table opens with a `#` (or `ID`) column — the report has no findings table' });
+    else if (!cleanRun && !findingTables.length) errors.push({ message: 'every `#` table is an inventory (rows numbered 1, 2, 3 …) — no row opens with a finding id' });
     r.tables.forEach(t => {
       t.localizedHeaders.forEach(hd => errors.push({ line: t.line, message: `header \`${hd}\` is localized — headers are spelled as the spec spells them (English) under every DOC_LANGUAGE; only cells localize` }));
       t.unrecognized.forEach(u => errors.push({ line: u.line, message: `first cell \`${u.cell}\` is neither a finding id nor a row number — the id is the first token of the cell, a marker (⚡) follows it` }));
@@ -207,7 +212,7 @@ function checkReport(file, src) {
     if (!it.label) warnings.push({ line, message: `${it.id}: empty label cell` });
     if (it.otherLabels) warnings.push({ line, message: `${it.id}: named \`${it.label}\` in one table and \`${it.otherLabels.join('`, `')}\` in another — one finding, one subject` });
   });
-  return { file, lens, date, errors, warnings, items };
+  return { file, lens, date, errors, warnings, items, clean: cleanRun };
 }
 
 // ---- Mitigation, residual severity and the "what" (8.63.0). Per lens, the column that states what is in place against the

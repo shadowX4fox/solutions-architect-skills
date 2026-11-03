@@ -178,18 +178,23 @@ function renderMarkdown(plan, fill) {
     });
     return tableMd(cols, body);
   };
+  // a clean run (no finding in any findings table or matrix) keeps its first findings table, with the no-findings line, even
+  // where the plan omits an empty one: the report then says it is clean, and check-report reads that line (11.8.7, #27)
+  const findingSecs = plan.sections.filter((s) => (s.kind === 'table' && s.id) || s.kind === 'matrix');
+  const clean = findingSecs.every((s) => !((S[s.key] || {}).rows || (S[s.key] || {}).groups || []).length);
+  const keepClean = clean ? findingSecs[0] : null;
   plan.sections.forEach((s) => {
     const sec = S[s.key] || {};
     switch (s.kind) {
       case 'summary': h2(t(s.title) || (lang === 'es' ? 'Resumen Ejecutivo' : 'Executive Summary'), 'Executive Summary'); out.push(...(fill.summary || []).map((p) => p + '\n')); out.push('---', ''); break;
       case 'table': case 'inventory': {
         const rows = sec.rows || [];
-        if (!rows.length && (s.omitWhenEmpty || sec.omit)) return;
+        if (!rows.length && (s.omitWhenEmpty || sec.omit) && s !== keepClean) return;
         heading(s); if (sec.text) out.push(sec.text, '');
         out.push(rows.length ? rowsMd(s, rows, s.kind === 'inventory') : W.none, ''); break; }
       case 'matrix': {
         const groups = sec.groups || [];
-        if (!groups.length && (s.omitWhenEmpty || sec.omit)) return;
+        if (!groups.length && (s.omitWhenEmpty || sec.omit) && s !== keepClean) return;
         heading(s); if (sec.text) out.push(sec.text, '');
         const gh = s.level === 3 ? '####' : '###';
         groups.forEach((g) => {

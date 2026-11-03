@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.7] - 2026-11-03
+
+### Fixed
+- **A clean analysis report passes the findings contract** (#27). A report with no finding rows that carries the renderer's no-findings line ("_No findings in this run._" / "_Sin hallazgos en esta corrida._") now passes `check-report.js` as `clean`. Before, it was rejected, and `architecture-analysis.yml` failed before its verdict, leaving the pull request blocked. A small architecture legitimately has no high-blast component, no K1–K4 and no hop over a documented budget.
+- **A run with no finding keeps its first findings section** (`render-analysis.js`), with the no-findings line, even where the plan omits an empty section (Coupling). The report then says it is clean.
+
+### Upgrade
+- In an architecture repository, move `SA_PLUGIN_REF` to `v11.8.7` (`upgrade the architecture workflows`) and re-render a Coupling report written before this release.
+
 ## [11.8.6] - 2026-11-03
 
 ### Fixed

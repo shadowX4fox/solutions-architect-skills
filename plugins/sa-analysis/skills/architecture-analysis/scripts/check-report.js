@@ -37,7 +37,7 @@ if (json) {
     const name = rel(r.file);
     if (r.skipped) { console.log(`– ${name}: skipped (${r.skipped})`); return; }
     const sev = {}; r.items.forEach(i => { const s = i.severity || 'unresolved'; sev[s] = (sev[s] || 0) + 1; });
-    const tally = Object.entries(sev).map(([k, v]) => `${v} ${k}`).join(' · ') || 'no findings';
+    const tally = Object.entries(sev).map(([k, v]) => `${v} ${k}`).join(' · ') || (r.clean ? 'clean' : 'no findings');
     console.log(`${r.errors.length ? '✗' : '✓'} ${name}: ${r.items.length} finding(s) — ${tally}` + (r.errors.length ? ` — ${r.errors.length} error(s)` : '') + (r.warnings.length ? `, ${r.warnings.length} warning(s)` : ''));
     r.errors.forEach(e => console.log(`    ✗ ${name}${e.line ? ':' + e.line : ''}: ${e.message}`));
     r.warnings.forEach(w => console.log(`    ⚠ ${name}${w.line ? ':' + w.line : ''}: ${w.message}`));

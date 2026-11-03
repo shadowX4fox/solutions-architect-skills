@@ -78,6 +78,26 @@ describe("render-analysis — one report per lens (8.117.0)", () => {
   });
 });
 
+describe("render-analysis — a clean run passes the contract (11.8.7, #27)", () => {
+  for (const lens of ["blast-radius", "coupling", "latency-budget"]) {
+    test(`${lens}: no finding in any section renders, and check-report passes it as clean`, () => {
+      for (const language of ["en", "es"] as const) {
+        const fill = syntheticFill(lens, language);
+        const p = plan(lens);
+        p.sections.forEach((s: any) => { if (s.kind === "table" || s.kind === "matrix") fill.sections[s.key] = s.kind === "table" ? { rows: [] } : { groups: [] }; if (s.kind === "blocks") fill.sections[s.key] = { blocks: [] }; });
+        fill.heatmap = []; fill.recommendations = []; fill.viz = undefined;
+        const r = run(fill, ["--today", "2026-09-30"]);
+        expect(r.err).toBe("");
+        expect(r.code).toBe(0);
+        const md = readFileSync(resolve(r.json.file), "utf8");
+        const c = F.checkReport(r.json.file, md);
+        expect(c.errors).toEqual([]);
+        expect(c.clean).toBe(true);
+      }
+    });
+  }
+});
+
 describe("render-analysis", () => {
   for (const lens of lenses) {
     test(`${lens}: the synthetic fill renders a Markdown report that passes the contract, in both languages`, () => {
