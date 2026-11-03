@@ -544,6 +544,8 @@ if (require.main === module) {
     const svgOut = out.replace(/\.(png|svg)$/i, '') + '.svg';
     fs.writeFileSync(svgOut, draw({ fonts: false, date: today }));
     if (!/\.svg$/i.test(out) && !(await toPng(svg, out, opt('--chrome')))) { console.error('analysis-chart: no Chrome — the SVG only'); out = svgOut; }
+    // a session that kept an older reading of the skill hears the rule from the script itself (11.8.4)
+    if (!process.env.CI) console.error('analysis-chart: in a chat that draws its own visuals, draw the figure natively from the same command with --json instead of showing this picture');
     console.log(out);
   })().catch((e) => { console.error(`analysis-chart: ${e.message}`); process.exit(e.code || 1); });
 }

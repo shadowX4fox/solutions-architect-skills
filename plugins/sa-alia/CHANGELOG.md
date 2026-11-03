@@ -2,6 +2,12 @@
 
 Alia in Claude Code — the suite's optional plugin, released on its own cadence (tags `sa-alia-v<version>`; `sa-ux-v<version>` up to 0.11.0, when it was named sa-ux). Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.1]
+
+### Fixed
+
+- **The chart card says why it is missing.** When a run of `analysis-chart.js` leaves no card, a dim transcript line, which the model does not read, names the cause: no picture path printed, the SVG unreadable, not an SVG, over the 128 KB limit, the engine's reason for not drawing the row, or the error. Before, every failure was silent. A `--json` run is the data for a chat's native visual and places no card.
+
 ## [1.6.0]
 
 ### Added

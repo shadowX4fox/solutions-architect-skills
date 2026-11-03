@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.4] - 2026-11-02
+
+### Fixed
+- **The native-visual rule reaches a session that kept an older reading of the skill**: `analysis-chart.js` writing a picture outside CI says on stderr that a chat which draws its own visuals draws the figure from the same command with `--json`. A reload does not change a skill a session already read, so a session drew the PNG where the chat could draw natively.
+- **sa-alia 1.6.1**: the analyses' chart card says why it is missing, in a dim line the model does not read: no picture path, a file it cannot read, not an SVG, over the size limit, or the engine's reason for not drawing the row. Before, it failed in silence. A `--json` run places no card.
+
 ## [11.8.3] - 2026-11-02
 
 ### Changed

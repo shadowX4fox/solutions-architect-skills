@@ -18,19 +18,26 @@ const SVG_MAX = 131072   // the Svg element's limit
 export function registerCharts(on: On) {
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const r = await next(e)
+    const k = recognize(String(e.command ?? ''))
+    if (!k || k.script !== 'analysis-chart.js') return r
+    // every step that leaves no card says why, as a dim line (never sent to the model): a card that silently never appeared
+    // could not be told apart from a surface that does not draw placed rows (1.6.1)
+    const why = (reason: string) => { try { $.ui.log(`sa-alia · ${reason}`) } catch { /* a build without log lines */ } }
     try {
-      const k = recognize(String(e.command ?? ''))
       const out = (r as { result?: unknown; isError?: boolean })
-      if (!k || k.script !== 'analysis-chart.js' || out.isError || !out.result) return r
+      if (out.isError || !out.result) return r
+      if (String(e.command).includes('--json')) return r   // the figure's data, for a chat's native visual: no picture to place
       const file = chartOf(out.result)
-      if (!file) return r
+      if (!file) { why('chart card: the script printed no picture path'); return r }
       let svg = ''
-      try { svg = String(await $.fs.read(file)) } catch { svg = '' }
-      if (!svg.startsWith('<svg') || svg.length > SVG_MAX) return r
+      try { svg = String(await $.fs.read(file)) } catch (err) { why(`chart card: cannot read ${file} (${(err as Error)?.message ?? err})`); return r }
+      if (!svg.startsWith('<svg')) { why(`chart card: ${file} is not an SVG`); return r }
+      if (svg.length > SVG_MAX) { why(`chart card: ${file} is over ${SVG_MAX} characters`); return r }
       const id = `chart-${(await $.clock.now()).toString(36)}`   // place ids: 1–64 of [A-Za-z0-9_-]
       await update($, chartsAtom, (xs) => [...xs, { id, file, svg }].slice(-6))
-      try { await $.ui.place({ id }) } catch { /* a build without placed rows */ }
-    } catch { /* her picture never stands in the tool's way */ }
+      const placed = await $.ui.place({ id })
+      if (!placed.isPlaced) why(`chart card not drawn: ${placed.reason}`)
+    } catch (err) { why(`chart card failed: ${(err as Error)?.message ?? err}`) }
     return r
   })
 
