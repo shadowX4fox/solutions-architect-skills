@@ -198,6 +198,14 @@ describe('analysis-chart.js --lens — one lens\'s own figure', () => {
     } finally { rmSync(join(ROOT, 'analysis', 'LATENCY-BUDGET-2026-03-01.md')); }
   });
 
+  test('latency: the TOTAL footer and the ASCII bar under the table are not hops', () => at('analysis/LATENCY-BUDGET-2026-03-02.md',
+    '# L\n### 2.1 Desglose <!-- SECTION: Per-Flow Budget Breakdown -->\n\n#### Flujo 1 — Reservar sala (≤ 500 ms p95)\n\n| Salto # | Componente | Rol | p95 (ms) | % del SLO | Estado |\n|---|---|---|---|---|---|\n| 1 | `Web App` | client | Not documented | — | Untracked |\n| 2 | `Order Service` | service | Not documented | — | Untracked |\n| **TOTAL** | — | — | — | — | — |\n\n|──────────────────────────| 500ms\nWeb App   [░░░░]  —\n\n```\n|──────| 500ms\n```\n', () => {
+      const f = lensModel(ROOT, 'latency-budget').flow;
+      expect(f.hops.map((h: any) => h.name)).toEqual(['Web App', 'Order Service']);
+      expect(f.hops.every((h: any) => h.status === 'untracked')).toBe(true);
+      expect(f.target).toBe(500);
+    }));
+
   test('a lens without its report, or a view it does not have, is named', () => {
     expect(() => lensModel(ROOT, 'tech-debt')).toThrow(/no Markdown report of tech-debt/);
     expect(() => lensModel(ROOT, 'spof', null, 'matrix')).toThrow(/spof has no matrix view/);

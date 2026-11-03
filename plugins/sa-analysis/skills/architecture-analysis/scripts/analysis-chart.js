@@ -185,8 +185,15 @@ function section(md, key) {
   for (let k = at + 1; k < lines.length; k++) { const m = lines[k].match(/^(#+)\s/); if (m && (m[1].length < lvl || (m[1].length === lvl && /<!--\s*SECTION:/.test(lines[k])))) break; out.push(lines[k]); }
   return out;
 }
+// the first Markdown table of the lines: contiguous `|` rows under a header and its `---` separator, outside code fences —
+// a block may carry a second table, or an ASCII bar whose line opens on `|──…──|` (the latency budget's), which are not rows
 const tableOf = (lines) => {
-  const t = lines.filter((l) => /^\s*\|/.test(l)); if (t.length < 2) return null;
+  let fence = false, t = [];
+  for (const l of lines) {
+    if (/^\s*(```|~~~)/.test(l)) { fence = !fence; if (t.length) break; continue; }
+    if (!fence && /^\s*\|/.test(l)) t.push(l); else if (t.length) break;
+  }
+  if (t.length < 2 || !/^[\s|:-]+$/.test(t[1]) || !t[1].includes('-')) return null;
   const split = (l) => l.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
   return { columns: split(t[0]), rows: t.slice(2).map(split) };
 };
@@ -290,7 +297,7 @@ function lensModel(root, lens, focus, view) {
   const flows = blocks.map((b) => {
     const tbl = tableOf(b.lines), text = [b.title, ...b.lines.filter((l) => !/^\s*\|/.test(l))].join(' ');
     const ms = (x) => { const m = String(x).match(/([\d.,]+)\s*(ms|s)\b/i); return m ? parseFloat(m[1].replace(',', '.')) * (/^s$/i.test(m[2]) ? 1000 : 1) : null; };
-    const hops = tbl ? tbl.rows.map((r) => { const g = (re) => strip(r[col(tbl, re)] || ''), v = parseFloat(g(/p95|budget|ms/i)); const st = F.norm(g(/status|estado/i));
+    const hops = tbl ? tbl.rows.filter((r) => !/^\**\s*total\b/i.test(strip(r[0])) && r.some((c) => strip(c))).map((r) => { const g = (re) => strip(r[col(tbl, re)] || ''), v = parseFloat(g(/p95|budget|ms/i)); const st = F.norm(g(/status|estado/i));
       return { n: g(/^Hop|^#|Salto/i), name: g(/Component|Componente/i), ms: Number.isFinite(v) ? v : null,
         status: /over|exced|fuera/.test(st) ? 'over' : /tight|justo|ajust/.test(st) ? 'tight' : /untracked|sin medir|not documented|sin documentar/.test(st) || !Number.isFinite(v) ? 'untracked' : 'within' }; }) : [];
     return { title: b.title, target: ms((text.match(/[≤<]=?\s*[\d.,]+\s*(?:ms|s)\b/) || [''])[0]) || ms(text), hops };

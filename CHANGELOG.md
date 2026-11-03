@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.5] - 2026-11-02
+
+### Fixed
+- **`/setup` no longer enables a plugin twice.** It skips a plugin already enabled at user scope (the user settings or the install registry), so `claude plugin list` stops showing it twice. A duplicate `true` entry is removed from the project settings, and a project `false` is kept. A copy also installed for the project is reported with its `claude plugin uninstall … --scope project` line.
+- **The latency waterfall reads only the flow's table** (`analysis-chart.js --lens latency-budget`). Before, the `TOTAL` footer and the ASCII budget bar under the table (`|──…──|`) were read as two extra hops with no name. The table reader now takes the first table of a block, ignores code fences and stops at its last row; the waterfall drops the `TOTAL` row.
+- **A chat's native visual labels in the reply's language**, "not documented" included (`architecture-analysis` SKILL).
+
 ## [11.8.4] - 2026-11-02
 
 ### Fixed

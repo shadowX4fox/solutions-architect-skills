@@ -71,4 +71,26 @@ describe("setup-permissions", () => {
     expect(r.stdout.toString()).toMatch(/retired 1/);
     expect(JSON.parse(readFileSync(USER, "utf-8")).hooks).toBeUndefined();
   });
+  test("a plugin enabled at user scope is not enabled again for the project; a duplicate entry goes, a false stays (11.8.5)", () => {
+    const cfg = join(TMP, "cfg-user");
+    mkdirSync(join(cfg, "plugins"), { recursive: true });
+    const M = "@shadowx4fox-solution-architect-marketplace";
+    writeFileSync(join(cfg, "settings.json"), JSON.stringify({ enabledPlugins: { [`sa-skills${M}`]: true } }));
+    writeFileSync(join(cfg, "plugins", "installed_plugins.json"), JSON.stringify({ plugins: {
+      [`sa-analysis${M}`]: [{ scope: "user" }, { scope: "project", projectPath: TMP }],
+      [`sa-records${M}`]: [{ scope: "user" }] } }));
+    const u = JSON.parse(readFileSync(USER, "utf-8"));
+    u.enabledPlugins = { [`sa-analysis${M}`]: true, [`sa-records${M}`]: false };
+    writeFileSync(USER, JSON.stringify(u, null, 2));
+    const r = Bun.spawnSync(["bun", SCRIPT, EXAMPLE, USER], { stdout: "pipe", stderr: "pipe", env: { ...process.env, CLAUDE_CONFIG_DIR: cfg } });
+    expect(r.exitCode).toBe(0);
+    const out = r.stdout.toString();
+    expect(out).toMatch(/at user scope 2/);
+    expect(out).toContain(`claude plugin uninstall sa-analysis${M} --scope project`);
+    const p = JSON.parse(readFileSync(USER, "utf-8")).enabledPlugins;
+    expect(p[`sa-skills${M}`]).toBeUndefined();          // at user scope: not added
+    expect(p[`sa-analysis${M}`]).toBeUndefined();        // a duplicate true: dropped
+    expect(p[`sa-records${M}`]).toBe(false);             // the project's own off switch: kept
+    expect(p[`sa-delivery${M}`]).toBe(true);             // not at user scope: enabled for the project
+  });
 });

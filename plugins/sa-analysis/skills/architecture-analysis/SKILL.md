@@ -458,7 +458,7 @@ of a Pareto) — never an invented value. How it reaches the person:
   prints. The JSON is the figure: its `kind` (`state`, `diff`, `heatmap`, `graph`, `waterfall`, `headroom`, `coupling`,
   `pareto`, `flows`, `matrix`) is the figure to draw, and its rows, cells and `items` (each finding with its report's
   fields) are the only values — no finding, axis, number or label outside it; a `null` or empty value is drawn as not
-  documented; severity keeps its order and its reds, ambers and greys; `focus` is the element highlighted, the rest
+  documented, in the reply's language (`sin documentar`), like every label of the figure; severity keeps its order and its reds, ambers and greys; `focus` is the element highlighted, the rest
   dimmed. The chat's own look replaces Alia's (its colours, light and dark); her line goes in the reply beside it;
 - send the PNG only in the terminal, when the person follows from another device, or when they ask for the file.
 

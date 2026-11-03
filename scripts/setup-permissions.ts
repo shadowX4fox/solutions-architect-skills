@@ -17,7 +17,7 @@
 // example carries no hooks. Users may keep unrelated hooks; those are preserved verbatim.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { dirname, join } from "path";
+import { dirname, join, resolve } from "path";
 import { homedir } from "os";
 
 // --- Windows without Git Bash: the PowerShell hook (8.100.1) ----------------------------------------
@@ -310,12 +310,35 @@ for (const [k, v] of Object.entries(userPlugins)) {
   }
 }
 
+// A plugin the user already has at user scope is not enabled again for the project (11.8.5): the same plugin in both
+// scopes is listed twice by `claude plugin list`, and a project entry adds nothing. Read from Claude Code's own record — the
+// user settings' `enabledPlugins` and the install registry's user-scope entries, under CLAUDE_CONFIG_DIR or ~/.claude — never
+// when the file being merged is the user settings itself. A project entry the example would have written that duplicates a
+// user-scope one (`true` both) is dropped; a `false`, the project's own choice to turn it off, stays.
+const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
+const userScope = new Set<string>();
+if (resolve(userPath) !== resolve(join(configDir, "settings.json"))) {
+  try {
+    const g = JSON.parse(readFileSync(join(configDir, "settings.json"), "utf8")) as Settings;
+    for (const [k, v] of Object.entries(g.enabledPlugins ?? {})) if (v === true) userScope.add(k);
+  } catch { /* no user settings */ }
+  try {
+    const reg = JSON.parse(readFileSync(join(configDir, "plugins", "installed_plugins.json"), "utf8")) as { plugins?: Record<string, Array<{ scope?: string }>> };
+    for (const [k, xs] of Object.entries(reg.plugins ?? {})) if ((xs ?? []).some((x) => x.scope === "user")) userScope.add(k);
+  } catch { /* no install registry */ }
+}
+
 const examplePlugins = example.enabledPlugins ?? {};
 const mergedPlugins: Record<string, unknown> = { ...migratedPlugins };
 let pluginsAdded = 0;
 let pluginsKept = 0;
+const pluginsAtUser: string[] = [];
 for (const [k, v] of Object.entries(examplePlugins)) {
-  if (k in mergedPlugins) {
+  if (userScope.has(k)) {
+    if (mergedPlugins[k] === true) delete mergedPlugins[k];
+    if (!(k in mergedPlugins)) pluginsAtUser.push(k);
+    else pluginsKept++;
+  } else if (k in mergedPlugins) {
     pluginsKept++;
   } else {
     mergedPlugins[k] = v;
@@ -461,6 +484,8 @@ if (Object.keys(mergedMarketplaces).length > 0) {
 }
 if (Object.keys(mergedPlugins).length > 0) {
   merged.enabledPlugins = mergedPlugins;
+} else {
+  delete merged.enabledPlugins;
 }
 // The sweep can empty the block (the sa-skills routing hook was the only one): drop the key then — keeping
 // `...user` alone would write the swept hooks back (8.100.1 reported them retired and left them in place).
@@ -497,11 +522,27 @@ console.log(
   `Marketplaces: added ${marketplacesAdded}  ·  already present ${marketplacesKept}`
 );
 console.log(
-  `Plugins:      added ${pluginsAdded}  ·  already present ${pluginsKept}`
+  `Plugins:      added ${pluginsAdded}  ·  already present ${pluginsKept}  ·  at user scope ${pluginsAtUser.length}`
 );
 console.log(
   `Hooks:        added ${hooksAdded}  ·  already present ${hooksKept}  ·  retired ${removedHooks.length}`
 );
+
+// the same plugin installed for this project too: `claude plugin list` shows it twice until the project copy goes
+const projectRoot = resolve(dirname(dirname(userPath)));
+const projectCopies: string[] = [];
+try {
+  const reg = JSON.parse(readFileSync(join(configDir, "plugins", "installed_plugins.json"), "utf8")) as { plugins?: Record<string, Array<{ scope?: string; projectPath?: string }>> };
+  for (const k of pluginsAtUser) if ((reg.plugins?.[k] ?? []).some((x) => x.scope === "project" && x.projectPath && resolve(x.projectPath) === projectRoot)) projectCopies.push(k);
+} catch { /* no install registry */ }
+if (pluginsAtUser.length > 0) {
+  console.log("");
+  console.log(`ℹ️   ${pluginsAtUser.length} plugin${pluginsAtUser.length === 1 ? " is" : "s are"} enabled at user scope — not enabled again for this project.`);
+}
+if (projectCopies.length > 0) {
+  console.log(`    Also installed for this project (listed twice); to keep the user-scope copy only:`);
+  for (const k of projectCopies) console.log(`      claude plugin uninstall ${k} --scope project`);
+}
 
 if (removedHooks.length > 0) {
   console.log("");
