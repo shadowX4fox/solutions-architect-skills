@@ -326,4 +326,56 @@ describe('analysis-chart.js --lens — one lens\'s own figure', () => {
       expect(m.groups[0].rows.map((r: any) => [r.cat, r.sev, r.pass])).toEqual([['S', null, true], ['D', 'high', false]]);
       expect(lensSvg(m, info, { embed: false })).toContain('1 trust boundary');
     }));
+  // 11.10.0 — every lens asked for one element: a finding by its id on any lens, a STRIDE boundary by its TB-nn
+  const STRIDE_FULL = '# S\n## 2. Trust Boundary Inventory <!-- SECTION: Trust Boundary Inventory -->\n\n| # | Name | From Zone | To Zone | Auth Mechanism | Data Classification | Source |\n|---|---|---|---|---|---|---|\n| TB-01 | Web App → API Gateway (I-01) | Internet | DMZ | OAuth2 JWT, mTLS | Order PII | docs/07 § 9 |\n\n'
+    + '## 3. STRIDE Matrix <!-- SECTION: STRIDE Matrix -->\n\n### TB-01 — TB-01 — Web App → API Gateway (I-01)\n\n| # | Threat | Category | Severity | Status | Control / Gap |\n|---|---|---|---|---|---|\n| — | Token forgery | Spoofing | — | ✅ Pass | JWT signed |\n| — | Payload altered | Tampering | — | ✅ Pass | TLS |\n| T1-D | Flood of orders | DoS | High | ⚠️ Finding | No rate limit |\n| — | Role escalation | Elevation of Privilege | — | ✅ Pass | Scopes |\n\n'
+    + '## 4. High-Priority Threats <!-- SECTION: High-Priority Threats -->\n\n| # | Trust Boundary | STRIDE Category | Threat Description | Recommended Mitigation | ADR Reference |\n|---|---|---|---|---|---|\n| T1-D | TB-01 | DoS | Flood | Rate limit per client | ADR-101 |\n';
+
+  test('STRIDE as a matrix reads the category as the renderer writes it — the word, English or Spanish (11.10.0)', () => at('analysis/STRIDE-2026-03-02.md',
+    STRIDE_FULL.replace('| Elevation of Privilege |', '| Elevación de privilegios |'), () => {
+      const g = lensModel(ROOT, 'stride', null, 'matrix').groups[0];
+      expect(g.rows.map((r: any) => [r.cat, r.pass])).toEqual([['S', true], ['T', true], ['D', false], ['E', true]]);
+    }));
+
+  test('a STRIDE boundary: its zones, what guards it, what crosses it, its categories and the mitigation the report recommends (11.10.0)', () => at('analysis/STRIDE-2026-03-02.md', STRIDE_FULL, () => {
+    const m = lensModel(ROOT, 'stride', 'TB-01');
+    expect(m).toMatchObject({ kind: 'boundary', id: 'TB-01', from: 'Internet', to: 'DMZ', auth: 'OAuth2 JWT, mTLS', data: 'Order PII', fix: { 'T1-D': 'Rate limit per client' } });
+    expect(m.rows).toHaveLength(4);
+    const svg = lensSvg(m, info, { embed: false });
+    for (const s of ['STRIDE threats — TB-01', 'Internet', 'DMZ', 'OAuth2 JWT, mTLS', 'Order PII', 'T1-D · High', '→ Rate limit per client', 'Repudiation', '1 open finding']) expect(svg).toContain(s);
+    expect(() => lensModel(ROOT, 'stride', 'TB-09')).toThrow(/TB-09 is not in .* boundaries: TB-01/);
+  }));
+
+  test('one finding on any lens: its row, severity, residual and where it sits — a heat-map cell or a boundary (11.10.0)', () => {
+    put('analysis/SPOF-2026-03-02.md', '# SPOF\n### 2.1 Critical SPOFs — Full Outage <!-- SECTION: Critical SPOFs -->\n| # | Component | Failure Scenario | Impact | Current Mitigation |\n|---|---|---|---|---|\n| C1 | `Order DB` | Primary lost | All orders | Nightly backup |\n| C2 | `Hub API` | Down | Payments | None |\n\n' + HEAT);
+    put('analysis/STRIDE-2026-03-02.md', STRIDE_FULL);
+    try {
+      const c = lensModel(ROOT, 'spof', 'c1');
+      expect(c).toMatchObject({ kind: 'finding', id: 'C1', severity: 'critical', label: 'Order DB', at: { y: 'HIGH', x: 'MID', ylabel: 'IMPACT', xlabel: 'LIKELIHOOD' } });
+      expect(c.fields).toContainEqual(['Failure Scenario', 'Primary lost']);
+      const svg = lensSvg(c, info, { embed: false });
+      for (const s of ['Single points of failure — C1', 'C1 · Critical', 'heat map cell: IMPACT HIGH · LIKELIHOOD MID', 'Primary lost']) expect(svg).toContain(s);
+      const t = lensModel(ROOT, 'stride', 'T1-D');
+      expect(t).toMatchObject({ kind: 'finding', id: 'T1-D', severity: 'high', at: { boundary: 'TB-01 — Web App → API Gateway (I-01)' } });
+      expect(lensModel(ROOT, 'spof', 'Order DB').kind).toBe('heatmap');    // a component keeps the lens's figure, centred on it
+    } finally { rmSync(join(ROOT, 'analysis', 'SPOF-2026-03-02.md')); rmSync(join(ROOT, 'analysis', 'STRIDE-2026-03-02.md')); }
+  });
+
+  test('a focus the report does not name is an error listing what it does, never a dimmed figure (11.10.0)', () => at('analysis/BOTTLENECK-2026-03-02.md',
+    '# B\n### 2.3 Capacity Headroom Summary <!-- SECTION: Capacity Headroom Summary -->\n\n| # | Component | Current Load (est.) | Max Capacity | Headroom % | Risk Level |\n|---|---|---|---|---|---|\n| 1 | `Order Service` | 300 rps | 400 rps | 25% | B2 |\n', () => {
+      expect(() => lensModel(ROOT, 'bottleneck', 'Ledger')).toThrow(/Ledger is not in analysis\/BOTTLENECK-2026-03-02.md — findings: .* components: Order Service/);
+    }));
+
+  test('a blast radius focus by id reads the id as the cell\'s first token — the ⚡ marker follows it (11.10.0)', () => at('analysis/BLAST-RADIUS-2026-03-02.md', BLAST.replace('| B2 |', '| B2 ⚡ SPOF+Blast |'), () => {
+    expect(lensModel(ROOT, 'blast-radius', 'B2')).toMatchObject({ found: true, row: { id: 'B2', name: 'Order Service' } });
+  }));
+
+  test('a blast radius focus outside the high-blast components says so (11.10.0)', () => at('analysis/BLAST-RADIUS-2026-03-02.md', BLAST, () => {
+    expect(lensSvg(lensModel(ROOT, 'blast-radius', 'Web App'), info, { embed: false })).toContain('Web App is not a high-blast component in this run');
+  }));
+
+  test('the rule reaches every session: the CLAUDE.md block /setup writes names the script, the focus, the export scale — and keeps the chat\'s native drawing apart from the Alia export (11.10.0)', () => {
+    const block = readFileSync(join(SCRIPTS, '..', '..', '..', '..', '..', 'scripts', 'setup-claude-md.ts'), 'utf8');
+    for (const s of ['analysis-chart.js', '--focus', 'TB-nn', '--scale', 'never improvised', '--json', "chat's own look", 'Alia Guide look']) expect(block).toContain(s);
+  });
 });

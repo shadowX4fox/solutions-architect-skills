@@ -6,7 +6,9 @@ description: >
   analysis", "tech debt analysis", "all analyses". Ten lenses — SPOF, Blast
   Radius, Bottleneck, Cost Hotspots, STRIDE, Vendor Lock-in, Latency Budget, Tech Debt/EOL,
   Coupling, Data Sensitivity — one, a group or all ten. Writes dated reports under analysis/ (Markdown or
-  interactive HTML). Requires ARCHITECTURE.md. Not for compliance contracts
+  interactive HTML). Also every image, chart or export picture of the analyses — "imagen del análisis",
+  "image of the STRIDE", "picture of finding C1", "export image of TB-01" — drawn by its script in the
+  Alia Guide look, never by hand. Requires ARCHITECTURE.md. Not for compliance contracts
   (architecture-compliance) or ADRs (architecture-definition-record).
 triggers:
   - run architecture analysis
@@ -454,9 +456,16 @@ one of its pictures — never one drawn by hand or with another library (a chat'
 | how the analyses stand · the risk overall | `analysis-chart.js <project>` | every lens analysed here, its findings by severity |
 | whether a change moved the state · a verdict against before | `analysis-chart.js <project> --base <ref> --lenses …` | each lens before → after, the verdict, what rose — Alia's pull request comment opens on it |
 | one analysis — "the SPOF", "STRIDE's heat map" | `analysis-chart.js <project> --lens <lens>` | that lens's own figure: the heat map (SPOF, STRIDE, Vendor Lock-in, Tech Debt), the blast radius graph, a flow's latency waterfall, capacity headroom (Bottleneck), fan-in / fan-out (Coupling), the Pareto or the cost mentions (Cost Hotspots), the sensitive data flows (Data Sensitivity) |
-| one element of it — "the blast radius of X", "the latency of flow 2", "what touches I-02" | `… --lens <lens> --focus <component · flow · finding id>` | the figure centred on it (the rest dimmed) |
-
+| one element of it — "the blast radius of X", "the latency of flow 2", "the SPOF of the order DB" | `… --lens <lens> --focus <component · flow>` | the figure centred on it (the rest dimmed) |
+| one finding, any of the ten lenses — "C1", "T3-D", "B2-01", "G2-01", "L2-01", "T1-01", "Q-01" | `… --lens <lens> --focus <finding id>` | that finding: its row as the report writes it, severity, mitigation and residual, its heat-map cell or its boundary |
+| one STRIDE trust boundary — "TB-01", "the login boundary" | `… --lens stride --focus TB-nn` | the boundary: its two zones, what guards it, what crosses it, its six categories with each threat, control and mitigation |
 | another figure of the same lens — "STRIDE as a matrix", "data sensitivity's heat map" | `… --view <figure>` | STRIDE: `heatmap` (default) · `matrix`; Data Sensitivity: `flows` (default) · `heatmap` |
+
+A focus the report does not name is an error that lists the findings and components it does — never a figure drawn without
+it. **Two outputs, never mixed**: shown in a chat that draws its own visuals, the figure is drawn natively from `--json` in
+the chat's look (below); **a file** — an export for slides, a document or print — is the script's PNG in the Alia Guide
+look, with `--scale 4` (four pixels per point, 4800 px wide) and `--out <file.png>` where the person wants it, the `.svg`
+beside it the vector copy. Never redraw the export in HTML, a slide tool or another library to change its size or look.
 
 A figure whose numbers the documents do not state draws them as not documented (a dashed bar, the cost mentions instead
 of a Pareto) — never an invented value. How it reaches the person:
@@ -467,7 +476,7 @@ of a Pareto) — never an invented value. How it reaches the person:
 - **in a chat that draws its own visuals** (a native visual tool — the desktop app's *Made a visual*), draw the figure
   natively instead: run the same command with `--json` (it writes no picture and places no card) and draw what it
   prints. The JSON is the figure: its `kind` (`state`, `diff`, `heatmap`, `graph`, `waterfall`, `headroom`, `coupling`,
-  `pareto`, `flows`, `matrix`) is the figure to draw, and its rows, cells and `items` (each finding with its report's
+  `pareto`, `flows`, `matrix`, `finding`, `boundary`) is the figure to draw, and its rows, cells and `items` (each finding with its report's
   fields) are the only values — no finding, axis, number or label outside it; a `null` or empty value is drawn as not
   documented, in the reply's language (`sin documentar`), like every label of the figure; severity keeps its order and its reds, ambers and greys; `focus` is the element highlighted, the rest
   dimmed. The chat's own look replaces Alia's (its colours, light and dark); her line goes in the reply beside it;

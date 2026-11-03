@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.10.0] - 2026-11-03
+
+### Added
+- **One finding, on any of the ten lenses, has its picture** (`analysis-chart.js --lens <lens> --focus <finding id>`): `C1`, `B3`, `B1-01`, `P-01`, `K3-01`, `G2-01`, `T3-D`, `T1-01`, `L1-01`. It shows the finding's row as the report writes it, its severity, whether a mitigation is in place and the residual severity, and where it sits: its heat-map cell, or its STRIDE boundary.
+- **One STRIDE trust boundary has its picture** (`--lens stride --focus TB-01`): its two zones, what guards it, what crosses it, and the six categories, each with its threat, its control and the mitigation the report recommends.
+- **`--scale 1–4`** sets the PNG's pixels per point (2 by default). `--scale 4` is the export size for slides, documents or print: 4800 px wide, with the `.svg` beside it.
+- **The rule reaches every session.** The CLAUDE.md block `/setup` writes now says that any image, chart or export picture of the analyses comes from `analysis-chart.js`, never from an HTML page, slide or library drawn for the occasion. It keeps the two outputs from 11.8.3 apart: shown in a chat with a native visual tool, the figure is drawn from `--json` in the chat's look; a file or export is the script's PNG in the Alia Guide look. The analysis skill's description carries the image phrasings, so a request for an image routes there even when the skill was not invoked.
+- **The synthetic showcase covers all ten lenses.** `scripts/docs-screenshots/analysis-fills.js` writes a fill per lens in Order Desk's names, and the renderer holds each one to the findings contract. Every figure and every focus case can be tried on it. `docs/images/analysis/stride-boundary.webp` is new, and `state.webp` shows the ten lenses.
+
+### Fixed
+- **The STRIDE matrix drew empty rows** when the report wrote a category as a word (`Spoofing`, `DoS`, `Elevación de privilegios`), which is how the renderer writes it. The category is now read as a letter, an English word or a Spanish word.
+- **A blast-radius focus by id** (`B3`) missed when the id cell carried the `⚡ SPOF+Blast` marker. The id is now read as the cell's first token.
+- **A focus the report does not name is an error that lists the findings and components it does name.** Before, every element was dimmed and the figure was drawn anyway. A blast-radius focus outside the high-blast components says so.
+
 ## [11.9.1] - 2026-11-03
 
 ### Fixed

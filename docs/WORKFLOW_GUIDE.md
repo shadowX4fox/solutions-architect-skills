@@ -373,15 +373,19 @@ Alia's comment opens on a picture of the verdict: each lens before → after, an
 | Did a change move the state | Each lens before → after, the verdict and what rose |
 | One analysis — "the SPOF", "the capacity headroom" | That lens's figure (`--lens`): a heat map, the blast radius graph, a flow's latency waterfall, capacity headroom, fan-in / fan-out, the cost Pareto, the sensitive data flows, STRIDE's matrix |
 | One element of it — "the blast radius of Tracking API", "the latency of flow 2" | The same figure focused on it (`--focus`) |
+| One finding, on any of the ten lenses — "C1", "T3-D", "G2-01" | Its card (`--focus <id>`): the row as the report writes it, severity, mitigation and residual, its heat-map cell or boundary |
+| One STRIDE trust boundary — "TB-01" | Its two zones, what guards it, what crosses it, the six categories with each threat and control (`--focus TB-01`) |
 
 On the desktop app sa-alia places it as a card in the transcript, drawn natively by the app; elsewhere it is a PNG. A figure the
-documents do not state is drawn as not documented, never invented.
+documents do not state is drawn as not documented, never invented. An image for slides or a document is the same picture at four times the pixels (`--scale 4`), never one redrawn by hand; a focus the reports do not name is answered with what they do name.
 
 ![Where the analyses stand: each lens by severity](images/analysis/state.webp)
 
 ![The SPOF heat map: findings by likelihood and impact](images/analysis/spof-heatmap.webp)
 
 ![A flow's latency waterfall: each hop's p95 against the flow's target](images/analysis/latency-waterfall.webp)
+
+![One STRIDE trust boundary: its two zones, what guards it, what crosses it, and the six categories](images/analysis/stride-boundary.webp)
 
 ### Traceability — `architecture-traceability`
 

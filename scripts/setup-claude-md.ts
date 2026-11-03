@@ -77,6 +77,15 @@ The plugin reads the architecture surface with scripts, and so should you — op
 - **The headers** — \`bun [plugin_dir]/skills/architecture-explorer-headers/utils/explorer-cli.ts check <project_root>\` holds every \`EXPLORER_HEADER\` to its contract; run it after any header you write.
 - **The PO Spec follows the architecture, never silently** — "update the PO spec" runs \`sa-requirements:architecture-readiness\` Workflow 6: the delta is collected by \`po-spec-delta.js\`, proposals are placed by a fixed section mapping, and the Product Owner approves item by item.
 
+### Pictures of the analyses — one script, two outputs
+
+Any image, chart, graph or export picture of what \`analysis/\` reports — the state, one lens, one component, one flow, one finding (\`C1\`, \`T3-D\`), one STRIDE boundary (\`TB-01\`) — comes from \`bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analysis-chart.js <project_root> [--lens <lens>] [--focus <component · flow · finding id · TB-nn>] [--view <figure>] [--scale 1–4] [--out <file.png>]\`, from the reports by code. Which output depends on where it goes:
+
+- **Shown in the chat, on a surface with a native visual tool** (the desktop app): the same command with \`--json\`, drawn natively in the chat's own look (its colours, light and dark) — the figure's \`kind\` and values only, nothing added.
+- **A file — an export, an image for slides, a document or print, or the terminal**: the PNG the script writes, in the Alia Guide look; \`--scale 4\` is the export size (4800 px wide, the \`.svg\` beside it).
+
+Either way, never an HTML page, a slide, a Mermaid block or another library drawn for the occasion to stand in for the script's figure. A focus the reports do not name is an error listing what they do; a figure the script does not have is said, never improvised. \`sa-analysis:architecture-analysis\` § Pictures says which figure answers what.
+
 **EXPLORER_HEADER blocks** — each \`docs/NN-*.md\` and \`docs/components/**/*.md\` file should carry a 5–10 line \`<!-- EXPLORER_HEADER ... -->\` block right after the H1 listing key concepts, technologies, components, scope, and related ADRs. These are the metadata the explorer surfaces in the manifest. If a doc is missing its header or the header looks stale, run \`/regenerate-explorer-headers\` (or \`--dry-run\` first) to backfill it. \`ARCHITECTURE.md\` is exempt — it's a navigation index, no header needed.
 
 To bootstrap or update these documents, invoke the appropriate sa-skills skill (see the plugin's \`docs/WORKFLOW_GUIDE.md\`).`;

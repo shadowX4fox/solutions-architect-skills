@@ -516,8 +516,10 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
   | Did a change move the state | Each lens before → after, the verdict and what rose |
   | One analysis — "the SPOF", "the capacity headroom" | That lens's figure: a heat map, the blast radius graph, a flow's latency waterfall, capacity headroom with load / capacity, fan-in / fan-out, the cost Pareto, the sensitive data flows, STRIDE's matrix |
   | One element of it — "the blast radius of X", "the latency of flow 2" | The same figure focused on it |
+  | One finding, on any of the ten lenses — "C1", "T3-D", "G2-01" | Its card: the row as the report writes it, severity, mitigation and residual, its heat-map cell or boundary |
+  | One STRIDE trust boundary — "TB-01" | Its two zones, what guards it, what crosses it, the six categories with each threat and control |
 
-  A figure the documents do not state is drawn as not documented, never invented.
+  A figure the documents do not state is drawn as not documented, never invented. An image for slides or a document is the same picture at four times the pixels (`--scale 4`), never one redrawn by hand; a focus the reports do not name is answered with what they do name.
 
   ![The SPOF heat map of the Order Desk example: five findings by likelihood and impact](images/analysis/spof-heatmap.webp)
 - **Milestone cards.** When a turn releases the architecture, re-runs an analysis or regenerates the handoff kit, she

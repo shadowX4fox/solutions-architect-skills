@@ -9,6 +9,9 @@
 //   bun analysis-chart.js <project> [--base <git-ref> --lenses spof,stride,…] [--out <file.png|file.svg>] [--json]
 //   bun analysis-chart.js <project> --lens <lens> [--focus <component | flow | finding id>] [--view <figure>] [--out …]   one lens's own figure
 //   (stride: heatmap | matrix; data-sensitivity: flows | heatmap)
+//   --focus <finding id> on any lens draws that finding (its row, severity, residual, where it sits); on STRIDE a TB-nn draws the
+//   boundary (its zones, what guards it, what crosses it, its six categories); a focus the report does not name is an error listing what it does
+//   --scale 1–4: the PNG's pixels per SVG pixel (2 by default; 4 for print or slides)
 //
 // PNG through headless Chrome (--chrome, SA_CHROME, PUPPETEER_EXECUTABLE_PATH, CHROME_PATH, Puppeteer's download, PATH);
 // the .svg is always written beside it — the same drawing, for a surface that draws vector pictures (sa-alia on the desktop
@@ -157,14 +160,16 @@ const LENS_TITLE = { bottleneck: ['Capacity headroom', 'Holgura de capacidad'], 
 const FT = {
   en: { heat: 'heat map', findings: (n) => `${n} finding${n === 1 ? '' : 's'} placed`, report: 'report', focus: 'focus', direct: 'direct consumers', indirect: 'indirect consumers',
     fanout: 'fan-out', cascade: 'cascade', bulkhead: 'bulkhead', target: 'target', documented: 'documented', untracked: (n) => `${n} hop${n === 1 ? '' : 's'} without a figure`, over: 'over', tight: 'tight', within: 'within', none: 'not documented', noFlow: 'no flow',
-    headroom: 'headroom', noBlast: 'No high-blast component in this run', undocumented: (n, k) => `${n} of ${k} without a capacity figure`, components: (n) => `${n} component${n === 1 ? '' : 's'}`, fanin: 'fan-in', fanoutC: 'fan-out', instab: 'I',
+    headroom: 'headroom', noBlast: 'No high-blast component in this run', notHigh: (n) => `${n} is not a high-blast component in this run`, undocumented: (n, k) => `${n} of ${k} without a capacity figure`, components: (n) => `${n} component${n === 1 ? '' : 's'}`, fanin: 'fan-in', fanoutC: 'fan-out', instab: 'I',
     monthly: 'monthly cost', cumulative: 'cumulative', noCost: 'No monthly cost is documented — what the documents say of cost:', mentions: (n) => `${n} cost mention${n === 1 ? '' : 's'}`,
-    flows: 'sensitive data flows', steps: (n) => `${n} step${n === 1 ? '' : 's'}`, gap: 'gap', gaps: (n) => `${n} gap${n === 1 ? '' : 's'}`, enc: 'encrypted in transit', encNo: 'encryption not documented', matrix: 'STRIDE matrix', boundaries: (n) => `${n} trust boundar${n === 1 ? 'y' : 'ies'}`, pass: 'pass' },
+    flows: 'sensitive data flows', steps: (n) => `${n} step${n === 1 ? '' : 's'}`, gap: 'gap', gaps: (n) => `${n} gap${n === 1 ? '' : 's'}`, enc: 'encrypted in transit', encNo: 'encryption not documented', matrix: 'STRIDE matrix', boundaries: (n) => `${n} trust boundar${n === 1 ? 'y' : 'ies'}`, pass: 'pass',
+    residual: 'residual', mitigated: 'mitigation in place', unmitigated: 'no mitigation in place', cell: 'heat map cell', boundary: 'boundary', fromZone: 'from zone', toZone: 'to zone', controls: 'what guards it', data: 'what crosses it', open: (n) => `${n} open finding${n === 1 ? '' : 's'}` },
   es: { heat: 'mapa de calor', findings: (n) => `${n} hallazgo${n === 1 ? '' : 's'} ubicado${n === 1 ? '' : 's'}`, report: 'reporte', focus: 'foco', direct: 'consumidores directos', indirect: 'consumidores indirectos',
     fanout: 'alcance', cascade: 'cascada', bulkhead: 'aislamiento', target: 'objetivo', documented: 'documentado', untracked: (n) => `${n} salto${n === 1 ? '' : 's'} sin cifra`, over: 'excede', tight: 'justo', within: 'dentro', none: 'sin documentar', noFlow: 'sin flujo',
-    headroom: 'holgura', noBlast: 'Ningún componente de alto impacto en esta corrida', undocumented: (n, k) => `${n} de ${k} sin cifra de capacidad`, components: (n) => `${n} componente${n === 1 ? '' : 's'}`, fanin: 'entrantes', fanoutC: 'salientes', instab: 'I',
+    headroom: 'holgura', noBlast: 'Ningún componente de alto impacto en esta corrida', notHigh: (n) => `${n} no es un componente de alto impacto en esta corrida`, undocumented: (n, k) => `${n} de ${k} sin cifra de capacidad`, components: (n) => `${n} componente${n === 1 ? '' : 's'}`, fanin: 'entrantes', fanoutC: 'salientes', instab: 'I',
     monthly: 'costo mensual', cumulative: 'acumulado', noCost: 'No hay costo mensual documentado. Lo que dicen los documentos del costo:', mentions: (n) => `${n} ${n === 1 ? 'mención' : 'menciones'} de costo`,
-    flows: 'flujos de datos sensibles', steps: (n) => `${n} paso${n === 1 ? '' : 's'}`, gap: 'brecha', gaps: (n) => `${n} brecha${n === 1 ? '' : 's'}`, enc: 'cifrado en tránsito', encNo: 'cifrado sin documentar', matrix: 'matriz STRIDE', boundaries: (n) => `${n} frontera${n === 1 ? '' : 's'} de confianza`, pass: 'pasa' },
+    flows: 'flujos de datos sensibles', steps: (n) => `${n} paso${n === 1 ? '' : 's'}`, gap: 'brecha', gaps: (n) => `${n} brecha${n === 1 ? '' : 's'}`, enc: 'cifrado en tránsito', encNo: 'cifrado sin documentar', matrix: 'matriz STRIDE', boundaries: (n) => `${n} frontera${n === 1 ? '' : 's'} de confianza`, pass: 'pasa',
+    residual: 'residual', mitigated: 'con mitigación', unmitigated: 'sin mitigación', cell: 'celda del mapa de calor', boundary: 'frontera', fromZone: 'zona de origen', toZone: 'zona de destino', controls: 'qué la protege', data: 'qué la cruza', open: (n) => `${n} hallazgo${n === 1 ? '' : 's'} abierto${n === 1 ? '' : 's'}` },
 };
 const strip = (s) => String(s || '').replace(/`/g, '').replace(/\*\*/g, '').trim();
 const normName = (s) => F.norm(strip(s));
@@ -201,6 +206,23 @@ const tableOf = (lines) => {
   return { columns: split(t[0]), rows: t.slice(2).map(split) };
 };
 const col = (tbl, re) => tbl.columns.findIndex((c) => re.test(c));
+// a STRIDE category as the matrix writes it — the letter, the English word or the Spanish one — to its letter
+const CAT_WORD = [[/^s$|spoof|suplant/i, 'S'], [/^t$|tamper|manipul|alterac/i, 'T'], [/^r$|repudia/i, 'R'], [/^i$|information|disclos|divulg|revelac/i, 'I'],
+  [/^d$|^dos\b|denial|denegac/i, 'D'], [/^e$|elevat|elevac/i, 'E']];
+const catLetter = (c) => { const v = strip(c); return (CAT_WORD.find(([re]) => re.test(v)) || [])[1] || null; };
+const CAT_NAME = { S: ['Spoofing', 'Suplantación'], T: ['Tampering', 'Manipulación'], R: ['Repudiation', 'Repudio'], I: ['Information disclosure', 'Divulgación'],
+  D: ['Denial of service', 'Denegación de servicio'], E: ['Elevation of privilege', 'Elevación de privilegios'] };
+/** The STRIDE matrix: one group per boundary (`### TB-nn — …`), its rows with the category's letter. */
+function strideGroups(md) {
+  const groups = [];
+  let g = null;
+  for (const l of section(md, 'STRIDE Matrix')) {
+    const h = l.match(/^#{2,5}\s+(TB-\d+)\s*—\s*(.*)$/);
+    if (h) { g = { id: h[1], title: strip(h[2].replace(/^TB-\d+\s*—\s*/, '')), rows: [] }; groups.push(g); continue; }
+    if (g && /^\s*\|/.test(l)) { const c = l.trim().replace(/^\||\|$/g, '').split('|').map((x) => strip(x)); const cat = catLetter(c[2]); if (c.length >= 5 && cat) g.rows.push({ id: c[0], threat: c[1], cat, sev: F.SEV(c[3]) || null, pass: /pass|pasa/i.test(c[4]), control: c[5] || '' }); }
+  }
+  return groups;
+}
 
 /** The heat map: the plan's grid as the report draws it, every [id] in its cell. */
 function heatKey(lens) {
@@ -224,6 +246,30 @@ function parseHeat(md, key = 'Heat Map') {
   return rows.length ? { ylabel, xlabel, xlabels, rows } : null;
 }
 
+/** One finding, whatever the lens: its row as the report writes it, its severity and residual, where it sits. */
+function findingModel(rep, lens, it) {
+  const id = String(it.id).replace(/\s*⚡$/, ''), at = {};
+  if (FIGURE[lens] === 'heatmap') {
+    const heat = parseHeat(rep.md, heatKey(lens));
+    (heat ? heat.rows : []).forEach((r) => r.cells.forEach((c, x) => { if (c.includes(id)) Object.assign(at, { y: r.label, x: (heat.xlabels || [])[x] || '', ylabel: heat.ylabel, xlabel: heat.xlabel }); }));
+  }
+  if (lens === 'stride') { const g = strideGroups(rep.md).find((x) => x.rows.some((r) => r.id === id)); if (g) at.boundary = `${g.id} — ${g.title}`; }
+  const fields = Object.entries(it.fields || {}).map(([k, v]) => [k, strip(v)]).filter(([k, v]) => k !== '#' && v && !/^[—-]$/.test(v));
+  return { kind: 'finding', lens, file: rep.file, date: rep.date, id, severity: it.severity || null, residual: it.residual || null, label: strip(it.label || ''),
+    mitigation: it.mitigation ? it.mitigation.state : null, fields, at };
+}
+/** One STRIDE trust boundary: its two zones, what guards it and what crosses it (the inventory), its six categories (the matrix). */
+function boundaryModel(rep, items, fid) {
+  const inv = items.find((i) => String(i.id).toLowerCase() === fid), g = strideGroups(rep.md).find((x) => x.id.toLowerCase() === fid);
+  if (!inv && !g) throw Object.assign(new Error(`${fid.toUpperCase()} is not in ${rep.file} — boundaries: ${strideGroups(rep.md).map((x) => x.id).join(', ') || 'none'}`), { code: 1 });
+  const fl = (inv && inv.fields) || {}, get = (re) => strip((Object.entries(fl).find(([k]) => re.test(k)) || [])[1] || '');
+  const hp = tableOf(section(rep.md, 'High-Priority Threats')), fix = {};
+  if (hp) { const m = col(hp, /Mitigation|Mitigaci/i); hp.rows.forEach((r) => { if (m >= 0) fix[strip(r[0])] = strip(r[m]); }); }
+  return { kind: 'boundary', lens: 'stride', file: rep.file, date: rep.date, id: (g || inv).id, name: get(/^Name|Nombre/i) || (g && g.title) || '',
+    from: get(/From Zone|Zona de origen/i), to: get(/To Zone|Zona de destino/i), auth: get(/Auth/i), data: get(/Data Class|Datos/i), source: get(/^Source|Fuente/i),
+    rows: g ? g.rows : [], fix };
+}
+
 /** The lens's figure model. */
 function lensModel(root, lens, focus, view) {
   if (view && !(VIEWS[lens] || [FIGURE[lens]]).includes(view)) throw Object.assign(new Error(`${lens} has no ${view} view — views: ${(VIEWS[lens] || [FIGURE[lens]]).join(', ')}`), { code: 2 });
@@ -234,10 +280,17 @@ function lensModel(root, lens, focus, view) {
   const items = (F.extractMarkdown(rep.md, F.lensOf(rep.file)).items || []);
   const byId = new Map(items.map((i) => [String(i.id).replace(/\s*⚡$/, ''), i]));
   const f = focus ? normName(focus) : null;
+  // a focus that names one finding draws that finding; on STRIDE, a TB-nn draws the boundary — the same figure for every lens
+  const fid = focus ? String(focus).trim().toLowerCase() : null, idOf = (i) => String(i.id).replace(/\s*⚡$/, '').toLowerCase();
+  if (fid && !view && lens === 'stride' && /^tb-\d+$/.test(fid)) return boundaryModel(rep, items, fid);
+  const one = fid && !view && !['blast-radius', 'latency-budget'].includes(lens) && items.find((i) => idOf(i) === fid);
+  if (one) return findingModel(rep, lens, one);
+  const notIn = (names) => Object.assign(new Error(`${focus} is not in ${rep.file} — findings: ${items.map((i) => String(i.id).replace(/\s*⚡$/, '')).join(', ') || 'none'}${names.length ? ` · components: ${[...new Set(names)].join(', ')}` : ''}`), { code: 1 });
   if (kind === 'heatmap') {
     const heat = parseHeat(rep.md, heatKey(lens));
     if (!heat) throw Object.assign(new Error(`${rep.file} has no heat map`), { code: 1 });
     const hit = (id) => !f || normName(id) === f || normName((byId.get(id) || {}).label) === f || normName((byId.get(id) || {}).label).includes(f);
+    if (f && !heat.rows.flatMap((r) => r.cells.flat()).some(hit)) throw notIn(items.map((i) => strip(i.label)).filter(Boolean));
     return { kind, lens, file: rep.file, date: rep.date, heat, items: byId, focus, hit };
   }
   const num = (x) => { const m = String(x).replace(/,/g, '').match(/-?\d+(?:\.\d+)?/); return m && !/not documented|sin documentar|n\/a/i.test(x) ? parseFloat(m[0]) : null; };
@@ -249,6 +302,7 @@ function lensModel(root, lens, focus, view) {
     const cell = (r, re) => { const v = strip(r[col(tbl, re)] || ''); return !v || /not documented|sin documentar/i.test(v) ? '' : v; };
     const rows = tbl.rows.map((r) => ({ name: strip(r[col(tbl, /^Component/i)]), pct: num(r[col(tbl, /Headroom/i)] || ''), risk: strip(r[col(tbl, /Risk/i)] || ''),
       load: cell(r, /Current Load|Carga/i), max: cell(r, /Max Capacity|Capacidad/i) }));
+    if (f && !rows.some((r) => hitName(r.name))) throw notIn(rows.map((r) => r.name));
     return { kind, lens, file: rep.file, date: rep.date, rows, focus, hit: hitName };
   }
   if (kind === 'coupling') {
@@ -256,12 +310,14 @@ function lensModel(root, lens, focus, view) {
     if (!tbl) throw Object.assign(new Error(`${rep.file} has no Coupling Metrics`), { code: 1 });
     const rows = tbl.rows.map((r) => ({ name: strip(r[col(tbl, /^Component/i)]), fanin: num(r[col(tbl, /Fan-in/i)] || '') || 0, fanout: num(r[col(tbl, /Fan-out/i)] || '') || 0,
       inst: num(r[col(tbl, /Instability/i)] || ''), klass: (strip(r[col(tbl, /Classification/i)] || '').match(/K[1-4]/g) || []) }));
+    if (f && !rows.some((r) => hitName(r.name))) throw notIn(rows.map((r) => r.name));
     return { kind, lens, file: rep.file, date: rep.date, rows, focus, hit: hitName };
   }
   if (kind === 'pareto') {
     const tbl = tableOf(section(rep.md, 'Pareto Cost Table')), q = tableOf(section(rep.md, 'Qualitative Cost Mentions'));
     const rows = tbl ? tbl.rows.map((r) => ({ id: strip(r[0]), name: strip(r[col(tbl, /Component/i)]), cost: num(r[col(tbl, /Monthly Cost/i)] || ''), vendor: strip(r[col(tbl, /Vendor/i)] || '') })).filter((r) => r.cost != null).sort((a, b) => b.cost - a.cost) : [];
     const mentions = q ? q.rows.map((r) => ({ id: strip(r[0]), name: strip(r[col(q, /^Component/i)]), text: strip(r[col(q, /Cost Mention/i)] || '') })) : [];
+    if (f && ![...rows, ...mentions].some((r) => hitName(r.name))) throw notIn([...rows, ...mentions].map((r) => r.name));
     return { kind, lens, file: rep.file, date: rep.date, rows, mentions, focus, hit: hitName };
   }
   if (kind === 'flows') {
@@ -275,15 +331,9 @@ function lensModel(root, lens, focus, view) {
     return { kind, lens, file: rep.file, date: rep.date, steps, tierOf, focus };
   }
   if (kind === 'matrix') {
-    const sec = section(rep.md, 'STRIDE Matrix'), groups = [];
-    let g = null;
-    for (const l of sec) {
-      const h = l.match(/^#{2,5}\s+(TB-\d+)\s*—\s*(.*)$/);
-      if (h) { g = { id: h[1], title: strip(h[2].replace(/^TB-\d+\s*—\s*/, '')), rows: [] }; groups.push(g); continue; }
-      if (g && /^\s*\|/.test(l)) { const c = l.trim().replace(/^\||\|$/g, '').split('|').map((x) => strip(x)); if (c.length >= 5 && /^[STRIDE]$/.test(c[2])) g.rows.push({ id: c[0], threat: c[1], cat: c[2], sev: F.SEV(c[3]) || null, pass: /pass/i.test(c[4]) }); }
-    }
+    const groups = strideGroups(rep.md);
     if (!groups.length) throw Object.assign(new Error(`${rep.file} has no STRIDE matrix`), { code: 1 });
-    return { kind, lens, file: rep.file, date: rep.date, groups: f ? groups.filter((x) => normName(x.id) === f || normName(x.title).includes(f)).concat([]).filter(Boolean) : groups, focus };
+    return { kind, lens, file: rep.file, date: rep.date, groups: f ? groups.filter((x) => normName(x.id) === f || normName(x.title).includes(f)) : groups, focus };
   }
   if (kind === 'graph') {
     // a report without the section (no anchor — a hand-written or pre-renderer report) cannot be read: named, never drawn as
@@ -292,7 +342,8 @@ function lensModel(root, lens, focus, view) {
     const tbl = tableOf(section(rep.md, 'High-Blast Components'));
     if (!tbl || !tbl.rows.length) return { kind, lens, file: rep.file, date: rep.date, row: null, rows: [], links: [], focus, found: !f, empty: true };
     const c = (r, re) => strip(r[col(tbl, re)] || ''), list = (x) => x.split(/\s*[,;·]\s*/).map(strip).filter((n) => n && !/^(none|ninguno|—|-|not documented)$/i.test(n));
-    const rows = tbl.rows.map((r) => ({ id: c(r, /^#$/), name: c(r, /^Component/i), tier: c(r, /^Tier/i), direct: list(c(r, /Direct/i)), indirect: list(c(r, /Indirect/i)),
+    const rows = tbl.rows.map((r) => ({ id: c(r, /^#$/).split(/\s+/)[0], name: c(r, /^Component/i),   // the id is the cell's first token; a ⚡ marker follows it
+    tier: c(r, /^Tier/i), direct: list(c(r, /Direct/i)), indirect: list(c(r, /Indirect/i)),
       fanout: c(r, /Fan-out/i), cascade: c(r, /Cascade/i), bulkhead: c(r, /Bulkhead/i) }));
     const pick = (f && rows.find((r) => normName(r.name) === f || normName(r.id) === f)) || (f && rows.find((r) => normName(r.name).includes(f)))
       || rows.slice().sort((x, y) => (parseInt(y.fanout, 10) || 0) - (parseInt(x.fanout, 10) || 0))[0];
@@ -338,11 +389,62 @@ ${body}
 const txt = (x, y, s, { size = 18, fill = SILVER, weight = 400, anchor = 'start', mono = false } = {}) =>
   `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${mono ? 'IBM Plex Mono, monospace' : 'Nunito, sans-serif'}" font-weight="${weight}" font-size="${size}" fill="${fill}">${esc(s)}</text>`;
 
+// greedy word wrap to at most `n` characters a line, `max` lines (the last one cut with …)
+const wrap = (s, n, max = 6) => { const out = []; let line = ''; for (const w of String(s || '').split(/\s+/).filter(Boolean)) { if (line && `${line} ${w}`.length > n) { out.push(line); line = w; } else line = line ? `${line} ${w}` : w; } if (line) out.push(line);
+  return out.length > max ? [...out.slice(0, max - 1), cut(out.slice(max - 1).join(' '), n)] : out; };
+const lines = (x, y, ls, o, lh = 24) => ls.map((l, k) => txt(x, y + k * lh, l, o)).join('');
+const chip = (x, y, label, fill, { w = null, color = NIGHT, outline = false } = {}) => { const cw = w || Math.max(48, label.length * 9 + 24);
+  return `<rect x="${x}" y="${y}" width="${cw}" height="28" rx="14" fill="${outline ? 'none' : fill}" ${outline ? `stroke="${fill}" stroke-width="2"` : ''}/>` + txt(x + cw / 2, y + 19, label, { size: 14, mono: true, weight: 600, anchor: 'middle', fill: outline ? fill : color }); };
+
 /** One lens's figure as SVG. */
 function lensSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
   const es = info.lang === 'es', t = { ...FT[es ? 'es' : 'en'], sev: T[es ? 'es' : 'en'].sev }, lt = (LENS_TITLE[m.lens] || [m.lens, m.lens])[es ? 1 : 0];
   const kicker = [es ? 'ANÁLISIS DE LA ARQUITECTURA' : 'ARCHITECTURE ANALYSIS', info.name.toUpperCase(), info.version && `V${info.version}`].filter(Boolean).join(' · ');
   const footer = ['Alia', `${t.report} ${m.date || ''}`.trim(), date].filter(Boolean).join(' · ');
+  if (m.kind === 'finding') {
+    const top = 222, sev = m.severity, sc = COLOR[sev] || MUTED, sevName = (t.sev && t.sev[sev]) || sev || '—';
+    let body = chip(56, top, `${m.id} · ${sevName}`, sc), y = top + 19, x = 56 + Math.max(48, `${m.id} · ${sevName}`.length * 9 + 24) + 16;
+    if (m.mitigation) body += txt(x, y, m.mitigation === 'present' ? t.mitigated : t.unmitigated, { size: 16, fill: m.mitigation === 'present' ? '#4dffa0' : COLOR.high }), x += (m.mitigation === 'present' ? t.mitigated : t.unmitigated).length * 8.6 + 22;
+    if (m.residual && m.residual !== sev) body += txt(x, y, `${t.residual}: ${(t.sev && t.sev[m.residual]) || m.residual}`, { size: 16, mono: true, fill: COLOR[m.residual] || MUTED });
+    const where = m.at.boundary ? `${t.boundary}: ${m.at.boundary}` : m.at.y ? `${t.cell}: ${m.at.ylabel ? `${m.at.ylabel} ` : ''}${m.at.y} · ${m.at.xlabel ? `${m.at.xlabel} ` : ''}${m.at.x}` : '';
+    let at = top + 64;
+    if (where) { body += txt(56, at, cut(where, 110), { size: 16, mono: true, fill: AQUA }); at += 30; }
+    m.fields.forEach(([k, v]) => {
+      const ls = wrap(v, 92);
+      body += txt(56, at + 20, cut(k.toUpperCase(), 24), { size: 13, mono: true, fill: MUTED }) + lines(330, at + 20, ls, { size: 17, fill: '#fff' });
+      at += Math.max(1, ls.length) * 24 + 18;
+      body += `<line x1="56" y1="${at - 6}" x2="${W - 56}" y2="${at - 6}" stroke="${LINE}"/>`;
+    });
+    return frame({ H: at + 90, mood: sev === 'critical' || sev === 'high' ? 'worried' : 'thinking', kicker, title: `${lt} — ${m.id}`, sub: m.label, body, footer: [footer, m.file].join(' · '), embed, fonts });
+  }
+  if (m.kind === 'boundary') {
+    const top = 222, bw = 430, zl = (s) => wrap(s, 44, 4), fz = zl(m.from || t.none), tz = zl(m.to || t.none), bh = Math.max(fz.length, tz.length) * 24 + 70;
+    const lx = 56, rx = W - 56 - bw, mid = W / 2, open = m.rows.filter((r) => !r.pass), worst = open.map((r) => r.sev).sort((a, b) => (RANK_[b] || 0) - (RANK_[a] || 0))[0];
+    const zone = (x, label, ls, stroke) => `<rect x="${x}" y="${top}" width="${bw}" height="${bh}" rx="16" fill="${NIGHT2}" stroke="${stroke}" stroke-width="2"/>`
+      + txt(x + 22, top + 34, label.toUpperCase(), { size: 13, mono: true, weight: 600, fill: stroke }) + lines(x + 22, top + 64, ls, { size: 18, fill: '#fff', weight: 800 });
+    let body = zone(lx, t.fromZone, fz, MUTED) + zone(rx, t.toZone, tz, AQUA);
+    body += `<line x1="${lx + bw}" y1="${top + bh / 2}" x2="${rx - 10}" y2="${top + bh / 2}" stroke="${SILVER}" stroke-width="2"/><path d="M${rx - 12},${top + bh / 2 - 7} L${rx},${top + bh / 2} L${rx - 12},${top + bh / 2 + 7} Z" fill="${SILVER}"/>`
+      + `<line x1="${mid}" y1="${top - 12}" x2="${mid}" y2="${top + bh + 12}" stroke="${COLOR.critical}" stroke-width="3" stroke-dasharray="8 6"/>` + chip(mid - 40, top + bh / 2 - 44, m.id, COLOR.critical, { w: 80, color: '#fff' });
+    let y = top + bh + 44;
+    const pw = (W - 112 - 24) / 2, al = wrap(m.auth || t.none, 54, 5), dl = wrap(m.data || t.none, 54, 5), ph = Math.max(al.length, dl.length) * 24 + 58;
+    [[56, t.controls, al, '#4dffa0'], [56 + pw + 24, t.data, dl, COLOR.high]].forEach(([x, label, ls, c]) => {
+      body += `<rect x="${x}" y="${y}" width="${pw}" height="${ph}" rx="14" fill="none" stroke="${LINE}" stroke-width="1.5"/>` + txt(x + 20, y + 28, label.toUpperCase(), { size: 13, mono: true, weight: 600, fill: c }) + lines(x + 20, y + 54, ls, { size: 16, fill: SILVER });
+    });
+    y += ph + 40;
+    ['S', 'T', 'R', 'I', 'D', 'E'].forEach((c) => {
+      const rs = m.rows.filter((r) => r.cat === c), r = rs.find((x) => !x.pass) || rs[0];
+      const name = CAT_NAME[c][info.lang === 'es' ? 1 : 0];
+      body += `<circle cx="${70}" cy="${y + 14}" r="14" fill="none" stroke="${AQUA}" stroke-width="2"/>` + txt(70, y + 20, c, { size: 16, mono: true, weight: 800, anchor: 'middle', fill: AQUA }) + txt(98, y + 20, name, { size: 17, fill: '#fff', weight: 800 });
+      if (!r) { body += txt(330, y + 20, '—', { size: 17, fill: MUTED }); y += 50; return; }
+      body += r.pass ? chip(330, y, `✓ ${t.pass}`, '#4dffa0', { w: 130, outline: true }) : chip(330, y, `${r.id} · ${(t.sev && t.sev[r.sev]) || r.sev || '—'}`, COLOR[r.sev] || MUTED, { w: 130 + 0 });
+      const th = wrap(r.threat, 70, 2), ct = wrap(r.control, 78, 2), fx = !r.pass && m.fix[r.id] ? wrap(`→ ${m.fix[r.id]}`, 78, 2) : [];
+      body += lines(480, y + 20, th, { size: 16, fill: '#fff' }) + lines(480, y + 20 + th.length * 22, ct, { size: 14, fill: MUTED }, 20) + lines(480, y + 20 + th.length * 22 + ct.length * 20, fx, { size: 14, fill: AQUA }, 20);
+      y += Math.max(36, th.length * 22 + ct.length * 20 + fx.length * 20) + 18;
+      body += `<line x1="56" y1="${y - 8}" x2="${W - 56}" y2="${y - 8}" stroke="${LINE}"/>`;
+    });
+    return frame({ H: y + 90, mood: worst === 'critical' || worst === 'high' ? 'worried' : open.length ? 'thinking' : 'pleased', kicker, title: `${lt} — ${m.id}`,
+      sub: [m.name, t.open(open.length)].filter(Boolean).join(' · '), body, footer: [footer, m.file].join(' · '), embed, fonts });
+  }
   if (m.kind === 'heatmap') {
     const h = m.heat, ny = h.rows.length, nx = Math.max(...h.rows.map((r) => r.cells.length)), gx = 230, gy = 236, cw = Math.min(170, Math.floor(620 / nx)), ch = 96;
     const placed = h.rows.flatMap((r) => r.cells.flat());
@@ -462,7 +564,8 @@ function lensSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
     return frame({ H: ly + 90, mood: crit ? 'worried' : 'thinking', kicker, title: `${lt} — ${t.matrix}`, sub: t.boundaries(m.groups.length), body, footer, embed, fonts });
   }
   if (m.kind === 'graph') {
-    if (!m.row) return frame({ H: 420, mood: 'calm', kicker, title: lt, sub: t.noBlast, body: txt(56, 280, t.noBlast, { size: 22, fill: SILVER, weight: 800 }), footer, embed, fonts });
+    if (!m.row) return frame({ H: 420, mood: 'calm', kicker, title: lt, sub: m.focus ? t.notHigh(m.focus) : t.noBlast, body: txt(56, 280, t.noBlast, { size: 22, fill: SILVER, weight: 800 }), footer, embed, fonts });
+    if (m.focus && !m.found) return frame({ H: 420, mood: 'calm', kicker, title: lt, sub: t.notHigh(m.focus), body: txt(56, 280, t.notHigh(m.focus), { size: 22, fill: SILVER, weight: 800 }) + txt(56, 320, `${m.rows.map((r) => r.name).join(' · ')}`, { size: 17, fill: MUTED }), footer, embed, fonts });
     const r = m.row, cx = 520, cy = 480, r1 = 165, r2 = 290;
     const tone = /cascad/i.test(r.cascade) ? COLOR.critical : /partial|parcial/i.test(r.cascade) ? COLOR.high : COLOR.medium;
     const pos = (list, rad, off) => list.map((n, k) => { const a = -Math.PI / 2 + off + (2 * Math.PI * k) / Math.max(1, list.length); return { n, x: cx + rad * Math.cos(a), y: cy + rad * Math.sin(a) }; });
@@ -503,9 +606,9 @@ function lensSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
 // the one Chrome finder of the suite: Puppeteer's download per platform, PATH, then where an installer puts one (any OS)
 const { findChrome } = require(fromSaSkills('scripts', 'shared', 'find-chrome.js'));
 
-/** The SVG as a PNG at twice its size, through headless Chrome over the DevTools protocol (snapshot.js's way: Chrome's own
+/** The SVG as a PNG at `scale` times its size (twice by default; --scale 1–4, 4 for print or slides), through headless Chrome over the DevTools protocol (snapshot.js's way: Chrome's own
  *  --screenshot never exits under --headless=new); false when there is no Chrome. */
-async function toPng(svg, out, chromeGiven) {
+async function toPng(svg, out, chromeGiven, scale = 2) {
   const chrome = findChrome(chromeGiven);
   if (!chrome) return false;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sa-chart-'));
@@ -524,7 +627,7 @@ async function toPng(svg, out, chromeGiven) {
     const { result: { targetId } } = await send('Target.createTarget', { url: 'about:blank' });
     const { result: { sessionId: s } } = await send('Target.attachToTarget', { targetId, flatten: true });
     await send('Page.enable', {}, s);
-    await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 2, mobile: false }, s);
+    await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: scale, mobile: false }, s);
     await send('Page.navigate', { url: require('url').pathToFileURL(page).href }, s);   // file:///C:/… on Windows, # and % escaped
     await Bun.sleep(1200);                                                     // the embedded fonts and the blazon decode
     const shot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: +w, height: +h, scale: 1 } }, s);
@@ -539,7 +642,7 @@ module.exports = { chartSvg, stateModel, diffModel, about, toPng, lensModel, len
 
 if (require.main === module) {
   const argv = process.argv.slice(2), opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
-  const root = argv.find((a, i) => !a.startsWith('--') && !['--base', '--lenses', '--out', '--chrome', '--judge-answers', '--lens', '--focus', '--view'].includes(argv[i - 1]));
+  const root = argv.find((a, i) => !a.startsWith('--') && !['--base', '--lenses', '--out', '--chrome', '--judge-answers', '--lens', '--focus', '--view', '--scale'].includes(argv[i - 1]));
   if (!root) { console.error('usage: bun analysis-chart.js <project> [--base <git-ref> --lenses spof,stride,…] [--out <file.png|file.svg>] [--json]'); process.exit(2); }
   (async () => {
     const info = about(root), base = opt('--base');
@@ -561,7 +664,9 @@ if (require.main === module) {
     // lean: her blazon inlined, the fonts by name — a surface's vector element takes 128 KB at most (sa-alia's Svg)
     const svgOut = out.replace(/\.(png|svg)$/i, '') + '.svg';
     fs.writeFileSync(svgOut, draw({ fonts: false, date: today }));
-    if (!/\.svg$/i.test(out) && !(await toPng(svg, out, opt('--chrome')))) { console.error('analysis-chart: no Chrome — the SVG only'); out = svgOut; }
+    const scale = opt('--scale') == null ? 2 : Number(opt('--scale'));
+    if (!(scale >= 1 && scale <= 4)) { console.error('analysis-chart: --scale is 1 to 4'); process.exit(2); }
+    if (!/\.svg$/i.test(out) && !(await toPng(svg, out, opt('--chrome'), scale))) { console.error('analysis-chart: no Chrome — the SVG only'); out = svgOut; }
     // a session that kept an older reading of the skill hears the rule from the script itself (11.8.4)
     if (!process.env.CI) console.error('analysis-chart: in a chat that draws its own visuals, draw the figure natively from the same command with --json instead of showing this picture');
     console.log(out);

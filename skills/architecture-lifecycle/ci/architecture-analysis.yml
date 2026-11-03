@@ -56,7 +56,7 @@ concurrency:
   cancel-in-progress: ${{ github.event.action != 'labeled' }}
 
 env:
-  SA_PLUGIN_REF: v11.9.1
+  SA_PLUGIN_REF: v11.10.0
   SA_PLUGIN_REPO: https://github.com/shadowx4fox/solutions-architect-skills.git
 
 jobs:

@@ -1,12 +1,17 @@
 # Screenshots for the docs
 
 The images in `docs/images/command-center/` are captured from a synthetic showcase: the Order Desk test fixture, plus
-Capacity tables, a demand row and three small analysis reports so that Analysis and Simulation have something to show.
+Capacity tables, a demand row and all ten analysis reports (rendered from `analysis-fills.js`) so that Analysis and Simulation
+have something to show.
 
 ```bash
 SKILL=plugins/sa-visualization/skills/architecture-command-center
 OUT=$(mktemp -d)
 bun scripts/docs-screenshots/build-showcase.ts $PWD/$SKILL $OUT/proj
+bun scripts/docs-screenshots/analysis-fills.js $OUT
+for f in spof latency blast bottleneck cost coupling data stride techdebt vendor; do
+  bun plugins/sa-analysis/skills/architecture-analysis/scripts/render-analysis.js $OUT/$f.fill.json --project $OUT/proj
+done
 bun scripts/shared/packs.js --declare none --project $OUT/proj   # the plugin's own skins, whatever packs this machine has
 SCENE=$OUT/proj/visualizations/architecture-command-center.scene.json
 bun $SKILL/scripts/scene-from-docs.js $OUT/proj --base $SCENE --out $SCENE
@@ -42,23 +47,25 @@ docker compose -p sa-demo -f plugins/sa-delivery/skills/architecture-index-expor
 
 ## The analysis pictures
 
-`docs/images/analysis/` holds `analysis-chart.js`'s pictures of the same showcase. `analysis-fills.js` writes a SPOF and a
-latency fill in Order Desk's names; the renderer turns them into reports, and a second latency fill with one hop raised
-gives the verdict picture against a commit of the first:
+`docs/images/analysis/` holds `analysis-chart.js`'s pictures of the same showcase. `analysis-fills.js` writes a fill for
+each of the ten lenses in Order Desk's names; the renderer turns them into reports held to the findings contract, so the
+showcase answers every figure: each lens's own, one finding by its id (`C1`, `B3`, `B1-01`, `P-01`, `K3-01`, `G2-01`,
+`T3-D`, `T1-01`, `L1-01`), one STRIDE boundary (`TB-01` … `TB-03`). A second latency fill with one hop raised gives the
+verdict picture against a commit of the first. For the desktop shots, copy `$OUT/proj` (with the raised report) to a folder of its own
+and open Claude Code there:
 
 ```bash
 A=plugins/sa-analysis/skills/architecture-analysis/scripts
-bun scripts/docs-screenshots/analysis-fills.js $OUT
-bun $A/render-analysis.js $OUT/spof.fill.json --project $OUT/proj
-bun $A/render-analysis.js $OUT/latency.fill.json --project $OUT/proj
+# the ten reports are already in $OUT/proj (first block)
 bun $A/analysis-chart.js $OUT/proj --lens spof --out $OUT/spof-heatmap.png
 bun $A/analysis-chart.js $OUT/proj --lens latency-budget --focus 1 --out $OUT/latency-waterfall.png
 (cd $OUT/proj && git init -q && git add -A && git commit -qm base)
 bun $A/render-analysis.js $OUT/latency-raised.fill.json --project $OUT/proj
 bun $A/analysis-chart.js $OUT/proj --base HEAD --lenses latency-budget --out $OUT/verdict.png
 bun $A/analysis-chart.js $OUT/proj --out $OUT/state.png
+bun $A/analysis-chart.js $OUT/proj --lens stride --focus TB-01 --out $OUT/stride-boundary.png
 # each PNG to a 1200 px WebP: a page holding it at full width, then capture-page.ts
-for n in state spof-heatmap latency-waterfall verdict; do
+for n in state spof-heatmap latency-waterfall verdict stride-boundary; do
   echo "<body style='margin:0'><img src='$n.png' style='width:100%;display:block'></body>" > $OUT/$n.html
   bun scripts/docs-screenshots/capture-page.ts <chrome> $OUT/$n.html docs/images/analysis/$n.webp 1200
 done
