@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.8] - 2026-11-03
+
+### Fixed
+- **`analysis-diff.js` reads a finding's severity from its lens's prefix registry** (#28). It passed the report's file path where the findings parser takes the lens, so a table with no Severity, Risk or Tier column gave its findings no severity, and they were left out of the count. A new critical Data Sensitivity gap (G1) passed as "the state kept" and its pull request merged without the architect. `analysis-chart.js` had the same call in two places; both are fixed.
+
+### Upgrade
+- Move `SA_PLUGIN_REF` to `v11.8.8` in an architecture repository's workflows (`upgrade the architecture workflows`), and re-run the analysis of any pull request merged as kept since 11.7.0 whose reports state severity only by id prefix.
+
 ## [11.8.7] - 2026-11-03
 
 ### Fixed

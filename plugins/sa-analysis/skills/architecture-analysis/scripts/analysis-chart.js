@@ -56,7 +56,7 @@ function stateModel(root) {
   for (const f of files) { const l = F.lensOf(f); if (!F.LENSES.includes(l)) continue; const d = F.dateOf(f) || ''; if (!newest.has(l) || d > (F.dateOf(newest.get(l)) || '')) newest.set(l, f); }
   const lenses = [...newest].sort((a, b) => F.LENSES.indexOf(a[0]) - F.LENSES.indexOf(b[0])).map(([l, f]) => {
     const text = fs.readFileSync(path.join(root, 'analysis', f), 'utf8');
-    const r = /\.html$/i.test(f) ? F.extractHtml(text, f) : F.extractMarkdown(text.replace(/\r\n/g, '\n'), f);
+    const r = /\.html$/i.test(f) ? F.extractHtml(text, F.lensOf(f)) : F.extractMarkdown(text.replace(/\r\n/g, '\n'), F.lensOf(f));
     return { lens: l.toLowerCase(), before: null, after: tally(r.items || []), file: `analysis/${f}`, held: 0, raised: 0 };
   });
   return { kind: 'state', verdict: null, lenses, items: [] };
@@ -231,7 +231,7 @@ function lensModel(root, lens, focus, view) {
   if (!kind) throw Object.assign(new Error(`no figure for ${lens} yet — figures: ${Object.keys(FIGURE).join(', ')}`), { code: 2 });
   const rep = lensReport(root, lens);
   if (!rep) throw Object.assign(new Error(`no Markdown report of ${lens} under analysis/`), { code: 1 });
-  const items = (F.extractMarkdown(rep.md, rep.file).items || []);
+  const items = (F.extractMarkdown(rep.md, F.lensOf(rep.file)).items || []);
   const byId = new Map(items.map((i) => [String(i.id).replace(/\s*⚡$/, ''), i]));
   const f = focus ? normName(focus) : null;
   if (kind === 'heatmap') {

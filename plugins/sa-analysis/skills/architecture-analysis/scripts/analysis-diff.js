@@ -42,7 +42,7 @@ function reportAt(root, ref, lens) {
 
 const itemsOf = (rep) => {
   if (!rep) return [];
-  const r = /\.html$/i.test(rep.file) ? F.extractHtml(rep.text, rep.file) : F.extractMarkdown(rep.text.replace(/\r\n/g, '\n'), rep.file);
+  const r = /\.html$/i.test(rep.file) ? F.extractHtml(rep.text, F.lensOf(rep.file)) : F.extractMarkdown(rep.text.replace(/\r\n/g, '\n'), F.lensOf(rep.file));
   return (r.items || []).filter((i) => RANK[i.severity]);
 };
 const keyOf = (i) => F.norm(F.plain(i.label || i.id || ''));

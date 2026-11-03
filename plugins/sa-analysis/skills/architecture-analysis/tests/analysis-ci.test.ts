@@ -117,6 +117,19 @@ describe('analysis-diff.js — was the state kept?', () => {
     expect(r.verdict).toBe('worsened');
   });
 
+  test('severity by the lens\'s prefix registry when no column states it: a new G1 data-sensitivity gap holds (#28)', async () => {
+    const HEAD = '| # | Gap | Data Store / Flow | Sensitivity | Protocol / Storage | Missing Control | Source |\n|---|---|---|---|---|---|---|\n';
+    const ds = (rows: string) => `# DS\n### 2.3 Gaps <!-- SECTION: Gaps -->\n${HEAD}${rows}\n`;
+    put('analysis/DATA-SENSITIVITY-2026-01-01.md', ds('| G2-01 | G2 | `Order DB` | S1 | JDBC | Encryption at rest | docs/07 |'));
+    git('add', '-A'); git('commit', '-q', '-m', 'ds base'); const ref = git('rev-parse', 'HEAD');
+    put('analysis/DATA-SENSITIVITY-2026-02-01.md', ds('| G1-01 | G1 | `API Gateway` → `Order Service` | S1 | HTTP | TLS | docs/05 |\n| G2-01 | G2 | `Order DB` | S1 | JDBC | Encryption at rest | docs/07 |'));
+    try {
+      const r = await diff(ROOT, ref, ['data-sensitivity'], { engine: 'agent' });
+      expect(r.lenses[0].totals).toMatchObject({ before: { critical: 1 }, after: { critical: 2 } });
+      expect(r.verdict).toBe('worsened');
+    } finally { git('reset', '-q', '--hard', BASE); rmSync(join(ROOT, 'analysis', 'DATA-SENSITIVITY-2026-02-01.md'), { force: true }); }
+  });
+
   test('a lens that produced no report holds the merge', async () => {
     const r = await diff(ROOT, BASE, ['spof', 'coupling']);
     expect(r.missing).toEqual(['spof', 'coupling']);          // spof's newest is still the base's own: not re-run
