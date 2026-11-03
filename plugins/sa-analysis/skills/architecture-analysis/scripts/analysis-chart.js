@@ -157,12 +157,12 @@ const LENS_TITLE = { bottleneck: ['Capacity headroom', 'Holgura de capacidad'], 
 const FT = {
   en: { heat: 'heat map', findings: (n) => `${n} finding${n === 1 ? '' : 's'} placed`, report: 'report', focus: 'focus', direct: 'direct consumers', indirect: 'indirect consumers',
     fanout: 'fan-out', cascade: 'cascade', bulkhead: 'bulkhead', target: 'target', documented: 'documented', untracked: (n) => `${n} hop${n === 1 ? '' : 's'} without a figure`, over: 'over', tight: 'tight', within: 'within', none: 'not documented', noFlow: 'no flow',
-    headroom: 'headroom', undocumented: (n, k) => `${n} of ${k} without a capacity figure`, components: (n) => `${n} component${n === 1 ? '' : 's'}`, fanin: 'fan-in', fanoutC: 'fan-out', instab: 'I',
+    headroom: 'headroom', noBlast: 'No high-blast component in this run', undocumented: (n, k) => `${n} of ${k} without a capacity figure`, components: (n) => `${n} component${n === 1 ? '' : 's'}`, fanin: 'fan-in', fanoutC: 'fan-out', instab: 'I',
     monthly: 'monthly cost', cumulative: 'cumulative', noCost: 'No monthly cost is documented — what the documents say of cost:', mentions: (n) => `${n} cost mention${n === 1 ? '' : 's'}`,
     flows: 'sensitive data flows', steps: (n) => `${n} step${n === 1 ? '' : 's'}`, gap: 'gap', gaps: (n) => `${n} gap${n === 1 ? '' : 's'}`, enc: 'encrypted in transit', encNo: 'encryption not documented', matrix: 'STRIDE matrix', boundaries: (n) => `${n} trust boundar${n === 1 ? 'y' : 'ies'}`, pass: 'pass' },
   es: { heat: 'mapa de calor', findings: (n) => `${n} hallazgo${n === 1 ? '' : 's'} ubicado${n === 1 ? '' : 's'}`, report: 'reporte', focus: 'foco', direct: 'consumidores directos', indirect: 'consumidores indirectos',
     fanout: 'alcance', cascade: 'cascada', bulkhead: 'aislamiento', target: 'objetivo', documented: 'documentado', untracked: (n) => `${n} salto${n === 1 ? '' : 's'} sin cifra`, over: 'excede', tight: 'justo', within: 'dentro', none: 'sin documentar', noFlow: 'sin flujo',
-    headroom: 'holgura', undocumented: (n, k) => `${n} de ${k} sin cifra de capacidad`, components: (n) => `${n} componente${n === 1 ? '' : 's'}`, fanin: 'entrantes', fanoutC: 'salientes', instab: 'I',
+    headroom: 'holgura', noBlast: 'Ningún componente de alto impacto en esta corrida', undocumented: (n, k) => `${n} de ${k} sin cifra de capacidad`, components: (n) => `${n} componente${n === 1 ? '' : 's'}`, fanin: 'entrantes', fanoutC: 'salientes', instab: 'I',
     monthly: 'costo mensual', cumulative: 'acumulado', noCost: 'No hay costo mensual documentado. Lo que dicen los documentos del costo:', mentions: (n) => `${n} ${n === 1 ? 'mención' : 'menciones'} de costo`,
     flows: 'flujos de datos sensibles', steps: (n) => `${n} paso${n === 1 ? '' : 's'}`, gap: 'brecha', gaps: (n) => `${n} brecha${n === 1 ? '' : 's'}`, enc: 'cifrado en tránsito', encNo: 'cifrado sin documentar', matrix: 'matriz STRIDE', boundaries: (n) => `${n} frontera${n === 1 ? '' : 's'} de confianza`, pass: 'pasa' },
 };
@@ -188,20 +188,27 @@ function section(md, key) {
 // the first Markdown table of the lines: contiguous `|` rows under a header and its `---` separator, outside code fences —
 // a block may carry a second table, or an ASCII bar whose line opens on `|──…──|` (the latency budget's), which are not rows
 const tableOf = (lines) => {
-  let fence = false, t = [];
-  for (const l of lines) {
-    if (/^\s*(```|~~~)/.test(l)) { fence = !fence; if (t.length) break; continue; }
-    if (!fence && /^\s*\|/.test(l)) t.push(l); else if (t.length) break;
+  const isTable = (run) => run.length >= 2 && /^[\s|:-]+$/.test(run[1]) && run[1].includes('-');
+  let fence = false, run = [], t = null;
+  for (const l of [...lines, '']) {
+    if (/^\s*(```|~~~)/.test(l)) { fence = !fence; if (isTable(run)) { t = run; break; } run = []; continue; }
+    if (!fence && /^\s*\|/.test(l)) { run.push(l); continue; }
+    if (isTable(run)) { t = run; break; }
+    run = [];   // a run that is no table — the ASCII bar the renderer writes above the flow's table — is passed over
   }
-  if (t.length < 2 || !/^[\s|:-]+$/.test(t[1]) || !t[1].includes('-')) return null;
+  if (!t) return null;
   const split = (l) => l.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
   return { columns: split(t[0]), rows: t.slice(2).map(split) };
 };
 const col = (tbl, re) => tbl.columns.findIndex((c) => re.test(c));
 
 /** The heat map: the plan's grid as the report draws it, every [id] in its cell. */
-function parseHeat(md) {
-  const sec = section(md, 'Heat Map'), a = sec.indexOf(sec.find((l) => /^```/.test(l))), b = sec.findIndex((l, k) => k > a && /^```/.test(l));
+function heatKey(lens) {
+  try { const p = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'analyses', 'plans', `${lens}.json`), 'utf8')); return (p.sections.find((s) => s.kind === 'heatmap') || {}).key || 'Heat Map'; }
+  catch { return 'Heat Map'; }
+}
+function parseHeat(md, key = 'Heat Map') {
+  const sec = section(md, key), a = sec.indexOf(sec.find((l) => /^```/.test(l))), b = sec.findIndex((l, k) => k > a && /^```/.test(l));
   if (a < 0 || b < 0) return null;
   const g = sec.slice(a + 1, b), rows = [];
   let ylabel = '', xlabels = [], xlabel = '', bottom = false;
@@ -228,7 +235,7 @@ function lensModel(root, lens, focus, view) {
   const byId = new Map(items.map((i) => [String(i.id).replace(/\s*⚡$/, ''), i]));
   const f = focus ? normName(focus) : null;
   if (kind === 'heatmap') {
-    const heat = parseHeat(rep.md);
+    const heat = parseHeat(rep.md, heatKey(lens));
     if (!heat) throw Object.assign(new Error(`${rep.file} has no heat map`), { code: 1 });
     const hit = (id) => !f || normName(id) === f || normName((byId.get(id) || {}).label) === f || normName((byId.get(id) || {}).label).includes(f);
     return { kind, lens, file: rep.file, date: rep.date, heat, items: byId, focus, hit };
@@ -280,7 +287,8 @@ function lensModel(root, lens, focus, view) {
   }
   if (kind === 'graph') {
     const tbl = tableOf(section(rep.md, 'High-Blast Components'));
-    if (!tbl || !tbl.rows.length) throw Object.assign(new Error(`${rep.file} has no High-Blast Components table`), { code: 1 });
+    // no high-blast component is a result, not a failure: the figure says so (11.8.6)
+    if (!tbl || !tbl.rows.length) return { kind, lens, file: rep.file, date: rep.date, row: null, rows: [], links: [], focus, found: !f, empty: true };
     const c = (r, re) => strip(r[col(tbl, re)] || ''), list = (x) => x.split(/\s*[,;·]\s*/).map(strip).filter((n) => n && !/^(none|ninguno|—|-|not documented)$/i.test(n));
     const rows = tbl.rows.map((r) => ({ id: c(r, /^#$/), name: c(r, /^Component/i), tier: c(r, /^Tier/i), direct: list(c(r, /Direct/i)), indirect: list(c(r, /Indirect/i)),
       fanout: c(r, /Fan-out/i), cascade: c(r, /Cascade/i), bulkhead: c(r, /Bulkhead/i) }));
@@ -452,6 +460,7 @@ function lensSvg(m, info, { embed = true, fonts = embed, date = '' } = {}) {
     return frame({ H: ly + 90, mood: crit ? 'worried' : 'thinking', kicker, title: `${lt} — ${t.matrix}`, sub: t.boundaries(m.groups.length), body, footer, embed, fonts });
   }
   if (m.kind === 'graph') {
+    if (!m.row) return frame({ H: 420, mood: 'calm', kicker, title: lt, sub: t.noBlast, body: txt(56, 280, t.noBlast, { size: 22, fill: SILVER, weight: 800 }), footer, embed, fonts });
     const r = m.row, cx = 520, cy = 480, r1 = 165, r2 = 290;
     const tone = /cascad/i.test(r.cascade) ? COLOR.critical : /partial|parcial/i.test(r.cascade) ? COLOR.high : COLOR.medium;
     const pos = (list, rad, off) => list.map((n, k) => { const a = -Math.PI / 2 + off + (2 * Math.PI * k) / Math.max(1, list.length); return { n, x: cx + rad * Math.cos(a), y: cy + rad * Math.sin(a) }; });

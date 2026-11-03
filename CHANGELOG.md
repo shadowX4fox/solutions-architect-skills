@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.6] - 2026-11-03
+
+### Fixed
+- **Vendor Lock-in's and Tech Debt's heat maps draw** (`analysis-chart.js --lens`). The heat map is read under the section its lens's plan names ("Vendor Lock-in Heat Map", "Debt Heat Map"), not only under "Heat Map".
+- **The latency waterfall finds its table below the ASCII bar.** The renderer writes the bar above the flow's table, and 11.8.5's reader stopped at the bar. A run of `|` lines that is not a table (no `---` separator) is now passed over.
+- **Blast radius with no high-blast component draws an empty figure** that says so, instead of ending in an error.
+
 ## [11.8.5] - 2026-11-02
 
 ### Fixed

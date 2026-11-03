@@ -206,6 +206,24 @@ describe('analysis-chart.js --lens — one lens\'s own figure', () => {
       expect(f.target).toBe(500);
     }));
 
+  test('latency: the bar the renderer writes above the table is passed over (11.8.6)', () => at('analysis/LATENCY-BUDGET-2026-03-03.md',
+    '# L\n### 2.1 Desglose <!-- SECTION: Per-Flow Budget Breakdown -->\n\n#### Flujo 1 — Reservar sala (≤ 500 ms p95)\n\n|──────────────| 500ms\nWeb App [░░] —\n\n| Salto # | Componente | Rol | p95 (ms) | Estado |\n|---|---|---|---|---|\n| 1 | `Web App` | client | Not documented | Untracked |\n| TOTAL | — | — | — | — |\n', () => {
+      expect(lensModel(ROOT, 'latency-budget').flow.hops.map((h: any) => h.name)).toEqual(['Web App']);
+    }));
+
+  test('a heat map is read under its plan\'s own section — Tech Debt\'s "Debt Heat Map" (11.8.6)', () => at('analysis/TECH-DEBT-2026-03-01.md',
+    '# T\n## 4. Debt Heat Map <!-- SECTION: Debt Heat Map -->\n\n```\nSEVERITY   │\nT1         │            │ [T1-01]    │            │\n           ├────────────┼────────────┼────────────┤\nT3         │            │            │            │\n           └────────────┴────────────┴────────────┘\n                LOW          MID          HIGH\n                  EFFORT →\n```\n', () => {
+      const m = lensModel(ROOT, 'tech-debt');
+      expect(m.heat.rows[0].cells[1]).toEqual(['T1-01']);
+    }));
+
+  test('blast radius with no high-blast component is an empty figure, not an error (11.8.6)', () => at('analysis/BLAST-RADIUS-2026-03-01.md',
+    '# B\n### 2.1 High-Blast Components <!-- SECTION: High-Blast Components -->\n\n_Sin hallazgos en esta corrida._\n', () => {
+      const m = lensModel(ROOT, 'blast-radius');
+      expect(m).toMatchObject({ kind: 'graph', row: null, empty: true });
+      expect(lensSvg(m, info, { embed: false })).toContain('No high-blast component');
+    }));
+
   test('a lens without its report, or a view it does not have, is named', () => {
     expect(() => lensModel(ROOT, 'tech-debt')).toThrow(/no Markdown report of tech-debt/);
     expect(() => lensModel(ROOT, 'spof', null, 'matrix')).toThrow(/spof has no matrix view/);
