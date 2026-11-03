@@ -1,6 +1,6 @@
 {
   "name": "sa-skills",
-  "version": "11.8.2",
+  "version": "11.8.3",
   "description": "Claude Code plugin for architecture documentation",
   "license": "MIT",
   "type": "module",

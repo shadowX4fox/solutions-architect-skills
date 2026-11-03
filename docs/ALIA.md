@@ -506,8 +506,9 @@ the prompt, and nothing is sent on its own (sa-alia 1.2.0; `/radar` and `/arch` 
   `analysis-chart.js`, and she places the picture as a card in the transcript (1.5.0). On the desktop app the app draws
   it from the SVG the script writes, the same picture Alia's pull request comment opens on. It is a card, not the
   script's row, because the desktop folds command rows into "Ran a command". In the terminal the card names the PNG.
-  Which
-  picture answers what:
+  In a chat that draws its own visuals (the desktop app's *Made a visual*), the session draws the figure natively from
+  `analysis-chart.js … --json` instead: the same figure and values, in the chat's colours, light and dark (11.8.3).
+  Which picture answers what:
 
   | Ask | Picture |
   |---|---|

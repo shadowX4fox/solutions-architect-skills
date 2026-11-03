@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 10.1.0 is the first public release. Earlier versions were developed privately and their history is not published.
 
+## [11.8.3] - 2026-11-02
+
+### Changed
+- **The analyses' figures are drawn natively in a chat that draws its own visuals** (the desktop app's *Made a visual*). The session runs `analysis-chart.js … --json` with the same flags and draws what it prints: the `kind` is the figure, and its rows, cells and finding fields are the only values. An empty value is drawn as not documented, and the chat's colours replace Alia's. `--json` writes no picture, so no card repeats it. The terminal, CI and pull-request comments keep the PNG and SVG.
+
 ## [11.8.2] - 2026-11-02
 
 ### Changed

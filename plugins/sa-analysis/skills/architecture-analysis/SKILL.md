@@ -436,7 +436,7 @@ bun [plugin_dir]/plugins/sa-analysis/skills/architecture-analysis/scripts/analys
 
 **Pictures of the analyses are one script** — `analysis-chart.js`, in the Alia Guide look (her blazon — never her face, which the comment or the reply beside it already carries — in the ring of the mood of the
 outcome), from the reports on disk by code. Any request for an image, a chart, a graph or a diagram of the analyses is
-one of its pictures — never one drawn by hand or with another library. Which one, by what is asked:
+one of its pictures — never one drawn by hand or with another library (a chat's native visual draws its `--json`, below). Which one, by what is asked:
 
 | Asked | Run | Draws |
 |---|---|---|
@@ -453,6 +453,13 @@ of a Pareto) — never an invented value. How it reaches the person:
 - run the script. With sa-alia, a card in the transcript carries the picture (sa-alia 1.5.0): on the desktop app the app
   draws it from the `.svg` the script writes beside the PNG. **Do not open the PNG to show it** — an image read into the
   conversation is a second, flat copy of what the card already draws;
+- **in a chat that draws its own visuals** (a native visual tool — the desktop app's *Made a visual*), draw the figure
+  natively instead: run the same command with `--json` (it writes no picture and places no card) and draw what it
+  prints. The JSON is the figure: its `kind` (`state`, `diff`, `heatmap`, `graph`, `waterfall`, `headroom`, `coupling`,
+  `pareto`, `flows`, `matrix`) is the figure to draw, and its rows, cells and `items` (each finding with its report's
+  fields) are the only values — no finding, axis, number or label outside it; a `null` or empty value is drawn as not
+  documented; severity keeps its order and its reds, ambers and greys; `focus` is the element highlighted, the rest
+  dimmed. The chat's own look replaces Alia's (its colours, light and dark); her line goes in the reply beside it;
 - send the PNG only in the terminal, when the person follows from another device, or when they ask for the file.
 
 Run here unattended, the skill takes Markdown and asks nothing, and leaves the reports uncommitted; the workflow archives
