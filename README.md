@@ -303,7 +303,7 @@ finding new or raised **on an element the change touches** holds the merge until
 Alia has an identity of her own: the night she glows against, her silver hair, her aqua eyes and holograms. It is the
 default look of what the plugin delivers — the command center's `alia` skin, and the Word and PDF exports, with her figure
 on the cover and her escudo on the cover and every page header. An organization's institution pack replaces it with its
-own (`docTheme`, a project skin) and never borrows hers. Her poses, faces, escudo and the workflows that drew them live in
+own (`docTheme`, a project skin) and never borrows hers. Her poses, faces and escudo live in
 [`brand/alia/`](brand/alia/README.md).
 
 ## Any industry, any organization

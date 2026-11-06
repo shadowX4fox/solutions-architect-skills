@@ -1,4 +1,4 @@
-// sa-alia · Alia's palette and faces — the Alia Guide's colours (brand/alia/design-system), the moods of AliaCodec, and
+// sa-alia · Alia's palette and faces — the Alia Guide's colours, the moods of AliaCodec, and
 // the face each mood shows where a surface draws pictures. Pure.
 
 export type Mood = 'calm' | 'pleased' | 'thinking' | 'worried' | 'stern' | 'talk'
